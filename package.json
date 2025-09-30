@@ -3,6 +3,7 @@
   "version": "0.0.1",
   "description": "⚡🚀Blazing-fast geolocation for React Native powered by Nitro Modules",
   "main": "src/index",
+  "source": "src/index",
   "codegenConfig": {
     "name": "NitroGeolocationSpec",
     "type": "modules",

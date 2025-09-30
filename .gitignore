@@ -40,6 +40,10 @@ local.properties
 node_modules/
 npm-debug.log
 
+# Ruby / CocoaPods
+**/Pods/
+**/vendor/bundle/
+
 # BUCK
 buck-out/
 \.buckd/
