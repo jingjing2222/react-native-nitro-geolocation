@@ -2,6 +2,7 @@
   "name": "react-native-nitro-geolocation-example",
   "version": "0.0.1",
   "private": true,
+  "source": "src/index",
   "scripts": {
     "android": "react-native run-android",
     "ios": "react-native run-ios",
