@@ -13,7 +13,13 @@
   "homepage": "#readme",
   "repository": "https://github.com/jingjing2222/react-native-nitro-geolocation",
   "files": [
-    "./**/*"
+    "src",
+    "android",
+    "ios",
+    "nitro.json",
+    "NitroGeolocation.podspec",
+    "turbo.json",
+    "LICENSE"
   ],
   "devDependencies": {
     "@react-native/babel-preset": "0.81.1",
