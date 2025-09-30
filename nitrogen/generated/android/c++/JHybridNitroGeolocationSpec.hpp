@@ -53,7 +53,10 @@ namespace margelo::nitro::nitrogeolocation {
 
   public:
     // Methods
+    double addtion(double a, double b) override;
+    double subtraction(double a, double b) override;
     double multiply(double a, double b) override;
+    double division(double a, double b) override;
 
   private:
     friend HybridBase;

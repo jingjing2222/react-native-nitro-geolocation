@@ -57,8 +57,32 @@ namespace margelo::nitro::nitrogeolocation {
 
   public:
     // Methods
+    inline double addtion(double a, double b) override {
+      auto __result = _swiftPart.addtion(std::forward<decltype(a)>(a), std::forward<decltype(b)>(b));
+      if (__result.hasError()) [[unlikely]] {
+        std::rethrow_exception(__result.error());
+      }
+      auto __value = std::move(__result.value());
+      return __value;
+    }
+    inline double subtraction(double a, double b) override {
+      auto __result = _swiftPart.subtraction(std::forward<decltype(a)>(a), std::forward<decltype(b)>(b));
+      if (__result.hasError()) [[unlikely]] {
+        std::rethrow_exception(__result.error());
+      }
+      auto __value = std::move(__result.value());
+      return __value;
+    }
     inline double multiply(double a, double b) override {
       auto __result = _swiftPart.multiply(std::forward<decltype(a)>(a), std::forward<decltype(b)>(b));
+      if (__result.hasError()) [[unlikely]] {
+        std::rethrow_exception(__result.error());
+      }
+      auto __value = std::move(__result.value());
+      return __value;
+    }
+    inline double division(double a, double b) override {
+      auto __result = _swiftPart.division(std::forward<decltype(a)>(a), std::forward<decltype(b)>(b));
       if (__result.hasError()) [[unlikely]] {
         std::rethrow_exception(__result.error());
       }
