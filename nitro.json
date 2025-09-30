@@ -1,0 +1,17 @@
+{
+  "cxxNamespace": ["nitrogeolocation"],
+  "ios": {
+    "iosModuleName": "NitroGeolocation"
+  },
+  "android": {
+    "androidNamespace": ["nitrogeolocation"],
+    "androidCxxLibName": "nitrogeolocation"
+  },
+  "autolinking": {
+    "NitroGeolocation": {
+      "swift": "NitroGeolocation",
+      "kotlin": "NitroGeolocation"
+    }
+  },
+  "ignorePaths": ["node_modules"]
+}
