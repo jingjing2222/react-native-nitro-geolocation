@@ -14,7 +14,10 @@ namespace margelo::nitro::nitrogeolocation {
     HybridObject::loadHybridMethods();
     // load custom methods/properties
     registerHybrids(this, [](Prototype& prototype) {
+      prototype.registerHybridMethod("addtion", &HybridNitroGeolocationSpec::addtion);
+      prototype.registerHybridMethod("subtraction", &HybridNitroGeolocationSpec::subtraction);
       prototype.registerHybridMethod("multiply", &HybridNitroGeolocationSpec::multiply);
+      prototype.registerHybridMethod("division", &HybridNitroGeolocationSpec::division);
     });
   }
 

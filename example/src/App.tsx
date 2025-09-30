@@ -8,7 +8,12 @@ import {
   View,
   Button,
 } from "react-native";
-import { multiply } from "react-native-nitro-geolocation";
+import {
+  addtion,
+  division,
+  multiply,
+  subtraction,
+} from "react-native-nitro-geolocation";
 
 export default function App() {
   return (
@@ -22,7 +27,16 @@ export default function App() {
           <View style={styles.sectionContainer}>
             <Text style={styles.sectionTitle}>Nitro Geolocation Example</Text>
             <Text style={styles.sectionDescription}>
-              multiply 4*5: {multiply(4, 5)}
+              addtion 4 + 5: {addtion(4, 5)}
+            </Text>
+            <Text style={styles.sectionDescription}>
+              subtraction 4 - 5: {subtraction(4, 5)}
+            </Text>
+            <Text style={styles.sectionDescription}>
+              multiply 4 * 5: {multiply(4, 5)}
+            </Text>
+            <Text style={styles.sectionDescription}>
+              division 4 / 5: {division(4, 5)}
             </Text>
           </View>
         </View>
