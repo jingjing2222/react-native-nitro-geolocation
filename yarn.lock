@@ -2314,6 +2314,11 @@ react-is@^18.0.0:
   resolved "https://registry.yarnpkg.com/react-is/-/react-is-18.3.1.tgz#e83557dc12eae63a99e003a46388b1dcbb44db7e"
   integrity sha512-/LLMVyas0ljjAtoYiPqYiL8VWXzUUdThrmU5+n20DZv+a+ClRoevUzw5JxU+Ieh5/c87ytoTBV9G1FiKfNJdmg==
 
+react-native-nitro-modules@^0.29.7:
+  version "0.29.7"
+  resolved "https://registry.yarnpkg.com/react-native-nitro-modules/-/react-native-nitro-modules-0.29.7.tgz#b6835a3a9d46696754385cd6797296b41a54934d"
+  integrity sha512-2234oE0KyxAQXF7qlJmeP0zJ7E9DcClBPQFzMXNVTvTjp4cFrVtYhJvAy+dofK+dbip27audmOyyAx9agsKf/A==
+
 react-native@0.81.1:
   version "0.81.1"
   resolved "https://registry.yarnpkg.com/react-native/-/react-native-0.81.1.tgz#0825cde0cc00d569cbec7d2fa1abd38a66885250"

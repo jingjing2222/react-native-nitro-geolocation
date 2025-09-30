@@ -14,18 +14,30 @@
   "repository": "https://github.com/jingjing2222/react-native-nitro-geolocation",
   "files": [
     "src",
-    "android",
-    "ios",
-    "nitro.json",
-    "NitroGeolocation.podspec",
-    "turbo.json",
-    "LICENSE"
+    "react-native.config.js",
+    "lib",
+    "nitrogen",
+    "cpp",
+    "android/build.gradle",
+    "android/fix-prefab.gradle",
+    "android/gradle.properties",
+    "android/CMakeLists.txt",
+    "android/src",
+    "ios/**/*.h",
+    "ios/**/*.m",
+    "ios/**/*.mm",
+    "ios/**/*.cpp",
+    "ios/**/*.swift",
+    "app.plugin.js",
+    "*.podspec",
+    "README.md"
   ],
   "devDependencies": {
     "@react-native/babel-preset": "0.81.1",
     "@types/react": "^19.1.0",
     "react": "19.1.0",
-    "react-native": "0.81.1"
+    "react-native": "0.81.1",
+    "react-native-nitro-modules": "^0.29.7"
   },
   "create-react-native-library": {
     "languages": "kotlin-swift",
