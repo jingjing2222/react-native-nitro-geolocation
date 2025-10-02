@@ -33,7 +33,7 @@ jobs:
 
       - name: Run Biome format check
         run: |
-          mise exec -- biome format --check .
+          mise exec -- biome format
 
       - name: Run Biome lint
         run: |
