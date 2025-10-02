@@ -37,8 +37,23 @@ namespace margelo::nitro::nitrogeolocation {
   
 
   // Methods
+  double JHybridNitroGeolocationSpec::addtion(double a, double b) {
+    static const auto method = javaClassStatic()->getMethod<double(double /* a */, double /* b */)>("addtion");
+    auto __result = method(_javaPart, a, b);
+    return __result;
+  }
+  double JHybridNitroGeolocationSpec::subtraction(double a, double b) {
+    static const auto method = javaClassStatic()->getMethod<double(double /* a */, double /* b */)>("subtraction");
+    auto __result = method(_javaPart, a, b);
+    return __result;
+  }
   double JHybridNitroGeolocationSpec::multiply(double a, double b) {
     static const auto method = javaClassStatic()->getMethod<double(double /* a */, double /* b */)>("multiply");
+    auto __result = method(_javaPart, a, b);
+    return __result;
+  }
+  double JHybridNitroGeolocationSpec::division(double a, double b) {
+    static const auto method = javaClassStatic()->getMethod<double(double /* a */, double /* b */)>("division");
     auto __result = method(_javaPart, a, b);
     return __result;
   }

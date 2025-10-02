@@ -7,3 +7,7 @@ const NitroGeolocationHybridObject =
 export function multiply(a: number, b: number): number {
   return NitroGeolocationHybridObject.multiply(a, b);
 }
+
+export function division(a: number, b: number): number {
+  return NitroGeolocationHybridObject.division(a, b);
+}
