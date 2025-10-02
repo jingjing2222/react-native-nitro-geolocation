@@ -8,7 +8,7 @@ on:
 
 jobs:
   setup:
-    name: Setup Dependencies
+    name: Setup Dependencies and Tools
     runs-on: ubuntu-latest
 
     steps:
@@ -31,6 +31,13 @@ jobs:
         run: |
           mise exec -- yarn install
 
+      - name: Upload mise tools
+        uses: actions/upload-artifact@v4
+        with:
+          name: mise-tools
+          path: ~/.local/share/mise/
+          retention-days: 1
+
       - name: Upload node_modules
         uses: actions/upload-artifact@v4
         with:
@@ -50,20 +57,21 @@ jobs:
       - name: Setup mise
         uses: jdx/mise-action@v3
 
-      - name: Install tools via mise
-        run: |
-          mise install node
-          mise install biome
-
-      - name: Enable Corepack
-        run: |
-          mise exec -- corepack enable
+      - name: Download mise tools
+        uses: actions/download-artifact@v4
+        with:
+          name: mise-tools
+          path: ~/.local/share/mise/
 
       - name: Download node_modules
         uses: actions/download-artifact@v4
         with:
           name: node_modules
           path: node_modules/
+
+      - name: Enable Corepack
+        run: |
+          mise exec -- corepack enable
 
       - name: Run Biome format check
         run: |
@@ -81,20 +89,21 @@ jobs:
       - name: Setup mise
         uses: jdx/mise-action@v3
 
-      - name: Install tools via mise
-        run: |
-          mise install node
-          mise install biome
-
-      - name: Enable Corepack
-        run: |
-          mise exec -- corepack enable
+      - name: Download mise tools
+        uses: actions/download-artifact@v4
+        with:
+          name: mise-tools
+          path: ~/.local/share/mise/
 
       - name: Download node_modules
         uses: actions/download-artifact@v4
         with:
           name: node_modules
           path: node_modules/
+
+      - name: Enable Corepack
+        run: |
+          mise exec -- corepack enable
 
       - name: Run Biome lint
         run: |
@@ -112,20 +121,21 @@ jobs:
       - name: Setup mise
         uses: jdx/mise-action@v3
 
-      - name: Install tools via mise
-        run: |
-          mise install node
-          mise install biome
-
-      - name: Enable Corepack
-        run: |
-          mise exec -- corepack enable
+      - name: Download mise tools
+        uses: actions/download-artifact@v4
+        with:
+          name: mise-tools
+          path: ~/.local/share/mise/
 
       - name: Download node_modules
         uses: actions/download-artifact@v4
         with:
           name: node_modules
           path: node_modules/
+
+      - name: Enable Corepack
+        run: |
+          mise exec -- corepack enable
 
       - name: Run TypeScript check
         run: |
