@@ -1,0 +1,44 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+
+jobs:
+  lint-and-typecheck:
+    name: Lint and TypeCheck
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup mise
+        uses: jdx/mise-action@v3
+
+      - name: Install tools via mise
+        run: |
+          mise install node
+          mise install biome
+
+      - name: Enable Corepack
+        run: |
+          mise exec -- corepack enable
+
+      - name: Install dependencies
+        run: |
+          mise exec -- yarn install
+
+      - name: Run Biome format check
+        run: |
+          mise exec -- biome format --check .
+
+      - name: Run Biome lint
+        run: |
+          mise exec -- biome lint .
+
+      - name: Run TypeScript check
+        run: |
+          mise exec -- yarn typecheck

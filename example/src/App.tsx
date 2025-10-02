@@ -6,7 +6,6 @@ import {
   StyleSheet,
   Text,
   View,
-  Button,
 } from "react-native";
 import { multiply } from "react-native-nitro-geolocation";
 
