@@ -1,1 +1,0 @@
-const test = "double quotes"

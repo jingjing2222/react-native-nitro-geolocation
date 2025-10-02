@@ -3,8 +3,18 @@
   "compilerOptions": {
     "skipLibCheck": true,
     "declaration": true,
-    "outDir": "lib"
+    "outDir": "lib",
+    "types": []
   },
   "include": ["src/**/*"],
-  "exclude": ["node_modules", "lib", "android", "ios", "cpp", "example"]
+  "exclude": [
+    "node_modules",
+    "lib",
+    "android",
+    "ios",
+    "cpp",
+    "example",
+    "**/*.test.ts",
+    "**/*.test.tsx"
+  ]
 }

@@ -43,7 +43,9 @@
     "react-native": "0.81.1",
     "react-native-nitro-modules": "^0.29.7",
     "typescript": "^5.9.3",
-    "@tsconfig/react-native": "^3.0.7"
+    "@tsconfig/react-native": "^3.0.7",
+    "@types/jest": "^29.0.0",
+    "@types/react-test-renderer": "^18.0.0"
   },
   "create-react-native-library": {
     "languages": "kotlin-swift",
