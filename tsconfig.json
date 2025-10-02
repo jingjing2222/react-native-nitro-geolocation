@@ -1,0 +1,20 @@
+{
+  "extends": "@tsconfig/react-native/tsconfig.json",
+  "compilerOptions": {
+    "skipLibCheck": true,
+    "declaration": true,
+    "outDir": "lib",
+    "types": []
+  },
+  "include": ["src/**/*"],
+  "exclude": [
+    "node_modules",
+    "lib",
+    "android",
+    "ios",
+    "cpp",
+    "example",
+    "**/*.test.ts",
+    "**/*.test.tsx"
+  ]
+}

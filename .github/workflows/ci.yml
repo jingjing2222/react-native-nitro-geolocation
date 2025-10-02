@@ -1,0 +1,121 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+
+jobs:
+  setup:
+    name: Setup Dependencies
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup mise
+        uses: jdx/mise-action@v3
+
+      - name: Install tools via mise
+        run: |
+          mise install node
+          mise install biome
+
+      - name: Enable Corepack
+        run: |
+          mise exec -- corepack enable
+
+      - name: Install dependencies
+        run: |
+          mise exec -- yarn install
+
+      - name: Upload node_modules
+        uses: actions/upload-artifact@v4
+        with:
+          name: node_modules
+          path: node_modules/
+          retention-days: 1
+
+  format-check:
+    name: Format Check
+    runs-on: ubuntu-latest
+    needs: setup
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup mise
+        uses: jdx/mise-action@v3
+
+      - name: Install tools via mise
+        run: |
+          mise install biome
+
+      - name: Download node_modules
+        uses: actions/download-artifact@v4
+        with:
+          name: node_modules
+          path: node_modules/
+
+      - name: Run Biome format check
+        run: |
+          mise exec -- biome ci --formatter-enabled=true --linter-enabled=false .
+
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+    needs: setup
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup mise
+        uses: jdx/mise-action@v3
+
+      - name: Install tools via mise
+        run: |
+          mise install biome
+
+      - name: Download node_modules
+        uses: actions/download-artifact@v4
+        with:
+          name: node_modules
+          path: node_modules/
+
+      - name: Run Biome lint
+        run: |
+          mise exec -- biome ci --formatter-enabled=false --linter-enabled=true .
+
+  typecheck:
+    name: TypeScript Check
+    runs-on: ubuntu-latest
+    needs: setup
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup mise
+        uses: jdx/mise-action@v3
+
+      - name: Install tools via mise
+        run: |
+          mise install node
+
+      - name: Enable Corepack
+        run: |
+          mise exec -- corepack enable
+
+      - name: Download node_modules
+        uses: actions/download-artifact@v4
+        with:
+          name: node_modules
+          path: node_modules/
+
+      - name: Run TypeScript check
+        run: |
+          mise exec -- yarn typecheck

@@ -4,14 +4,6 @@ import type { NitroGeolocation } from "./NitroGeolocation.nitro";
 const NitroGeolocationHybridObject =
   NitroModules.createHybridObject<NitroGeolocation>("NitroGeolocation");
 
-export function addtion(a: number, b: number): number {
-  return NitroGeolocationHybridObject.addtion(a, b);
-}
-
-export function subtraction(a: number, b: number): number {
-  return NitroGeolocationHybridObject.subtraction(a, b);
-}
-
 export function multiply(a: number, b: number): number {
   return NitroGeolocationHybridObject.multiply(a, b);
 }
