@@ -1,1 +1,0 @@
-/Users/kimhyeongjeong/Desktop/code/react-native-nitro-geolocation/android/build/intermediates/cxx/Debug/g6f715b5/obj/arm64-v8a

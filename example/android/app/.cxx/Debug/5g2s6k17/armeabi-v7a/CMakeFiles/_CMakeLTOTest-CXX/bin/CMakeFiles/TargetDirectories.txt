@@ -1,4 +1,0 @@
-/Users/kimhyeongjeong/Desktop/code/react-native-nitro-geolocation/example/android/app/.cxx/Debug/5g2s6k17/armeabi-v7a/CMakeFiles/_CMakeLTOTest-CXX/bin/CMakeFiles/foo.dir
-/Users/kimhyeongjeong/Desktop/code/react-native-nitro-geolocation/example/android/app/.cxx/Debug/5g2s6k17/armeabi-v7a/CMakeFiles/_CMakeLTOTest-CXX/bin/CMakeFiles/boo.dir
-/Users/kimhyeongjeong/Desktop/code/react-native-nitro-geolocation/example/android/app/.cxx/Debug/5g2s6k17/armeabi-v7a/CMakeFiles/_CMakeLTOTest-CXX/bin/CMakeFiles/edit_cache.dir
-/Users/kimhyeongjeong/Desktop/code/react-native-nitro-geolocation/example/android/app/.cxx/Debug/5g2s6k17/armeabi-v7a/CMakeFiles/_CMakeLTOTest-CXX/bin/CMakeFiles/rebuild_cache.dir

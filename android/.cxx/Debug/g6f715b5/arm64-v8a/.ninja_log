@@ -1,6 +1,0 @@
-# ninja log v5
-0	39	1759500503883212891	CMakeFiles/nitrogeolocation.dir/src/main/cpp/cpp-adapter.cpp.o	92c4f881e2a895fd
-0	1018	1759500504857259543	CMakeFiles/nitrogeolocation.dir/Users/kimhyeongjeong/Desktop/code/react-native-nitro-geolocation/nitrogen/generated/android/c++/JHybridNitroGeolocationSpec.cpp.o	1baa39831ff5d70c
-0	1049	1759500504889520089	CMakeFiles/nitrogeolocation.dir/Users/kimhyeongjeong/Desktop/code/react-native-nitro-geolocation/nitrogen/generated/android/nitrogeolocationOnLoad.cpp.o	687f9138947538c7
-0	1095	1759500504935391990	CMakeFiles/nitrogeolocation.dir/Users/kimhyeongjeong/Desktop/code/react-native-nitro-geolocation/nitrogen/generated/shared/c++/HybridNitroGeolocationSpec.cpp.o	f1bf56d23a383e53
-1095	1140	1759500504981324098	../../../../build/intermediates/cxx/Debug/g6f715b5/obj/arm64-v8a/libnitrogeolocation.so	9fb4d6929b040715
