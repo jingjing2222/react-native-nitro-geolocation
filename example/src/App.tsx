@@ -8,7 +8,7 @@ import {
   View,
 } from "react-native";
 import {
-  addtion,
+  addition,
   division,
   multiply,
   subtraction,
@@ -26,7 +26,7 @@ export default function App() {
           <View style={styles.sectionContainer}>
             <Text style={styles.sectionTitle}>Nitro Geolocation Example</Text>
             <Text style={styles.sectionDescription}>
-              addtion 4 + 5: {addtion(4, 5)}
+              addition 4 + 5: {addition(4, 5)}
             </Text>
             <Text style={styles.sectionDescription}>
               subtraction 4 - 5: {subtraction(4, 5)}
