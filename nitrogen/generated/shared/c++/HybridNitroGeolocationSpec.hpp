@@ -48,7 +48,7 @@ namespace margelo::nitro::nitrogeolocation {
 
     public:
       // Methods
-      virtual double addtion(double a, double b) = 0;
+      virtual double addition(double a, double b) = 0;
       virtual double subtraction(double a, double b) = 0;
       virtual double multiply(double a, double b) = 0;
       virtual double division(double a, double b) = 0;

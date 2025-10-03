@@ -14,7 +14,7 @@ public protocol HybridNitroGeolocationSpec_protocol: HybridObject {
   
 
   // Methods
-  func addtion(a: Double, b: Double) throws -> Double
+  func addition(a: Double, b: Double) throws -> Double
   func subtraction(a: Double, b: Double) throws -> Double
   func multiply(a: Double, b: Double) throws -> Double
   func division(a: Double, b: Double) throws -> Double

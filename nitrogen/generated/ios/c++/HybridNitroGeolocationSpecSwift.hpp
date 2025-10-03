@@ -57,8 +57,8 @@ namespace margelo::nitro::nitrogeolocation {
 
   public:
     // Methods
-    inline double addtion(double a, double b) override {
-      auto __result = _swiftPart.addtion(std::forward<decltype(a)>(a), std::forward<decltype(b)>(b));
+    inline double addition(double a, double b) override {
+      auto __result = _swiftPart.addition(std::forward<decltype(a)>(a), std::forward<decltype(b)>(b));
       if (__result.hasError()) [[unlikely]] {
         std::rethrow_exception(__result.error());
       }
