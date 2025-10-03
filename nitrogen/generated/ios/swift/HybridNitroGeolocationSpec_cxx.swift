@@ -110,9 +110,9 @@ open class HybridNitroGeolocationSpec_cxx {
 
   // Methods
   @inline(__always)
-  public final func addtion(a: Double, b: Double) -> bridge.Result_double_ {
+  public final func addition(a: Double, b: Double) -> bridge.Result_double_ {
     do {
-      let __result = try self.__implementation.addtion(a: a, b: b)
+      let __result = try self.__implementation.addition(a: a, b: b)
       let __resultCpp = __result
       return bridge.create_Result_double_(__resultCpp)
     } catch (let __error) {

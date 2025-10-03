@@ -14,7 +14,7 @@ class NitroGeolocationPackage : TurboReactPackage() {
         return ReactModuleInfoProvider { HashMap() }
     }
 
-    companion objct {
+    companion object {
         init {
             System.loadLibrary("nitrogeolocation")
         }
