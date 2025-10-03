@@ -1,0 +1,6 @@
+/Users/kimhyeongjeong/Desktop/code/react-native-nitro-geolocation/android/.cxx/Debug/g6f715b5/prefab/armeabi-v7a/prefab/lib/arm-linux-androideabi/cmake/ReactAndroid/ReactAndroidConfig.cmake
+/Users/kimhyeongjeong/Desktop/code/react-native-nitro-geolocation/android/.cxx/Debug/g6f715b5/prefab/armeabi-v7a/prefab/lib/arm-linux-androideabi/cmake/ReactAndroid/ReactAndroidConfigVersion.cmake
+/Users/kimhyeongjeong/Desktop/code/react-native-nitro-geolocation/android/.cxx/Debug/g6f715b5/prefab/armeabi-v7a/prefab/lib/arm-linux-androideabi/cmake/fbjni/fbjniConfig.cmake
+/Users/kimhyeongjeong/Desktop/code/react-native-nitro-geolocation/android/.cxx/Debug/g6f715b5/prefab/armeabi-v7a/prefab/lib/arm-linux-androideabi/cmake/fbjni/fbjniConfigVersion.cmake
+/Users/kimhyeongjeong/Desktop/code/react-native-nitro-geolocation/android/.cxx/Debug/g6f715b5/prefab/armeabi-v7a/prefab/lib/arm-linux-androideabi/cmake/react-native-nitro-modules/react-native-nitro-modulesConfig.cmake
+/Users/kimhyeongjeong/Desktop/code/react-native-nitro-geolocation/android/CMakeLists.txt

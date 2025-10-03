@@ -1,0 +1,12 @@
+/Users/kimhyeongjeong/Desktop/code/react-native-nitro-geolocation/example/android/app/.cxx/Debug/5g2s6k17/x86/CMakeFiles/appmodules.dir
+/Users/kimhyeongjeong/Desktop/code/react-native-nitro-geolocation/example/android/app/.cxx/Debug/5g2s6k17/x86/CMakeFiles/edit_cache.dir
+/Users/kimhyeongjeong/Desktop/code/react-native-nitro-geolocation/example/android/app/.cxx/Debug/5g2s6k17/x86/CMakeFiles/rebuild_cache.dir
+/Users/kimhyeongjeong/Desktop/code/react-native-nitro-geolocation/example/android/app/.cxx/Debug/5g2s6k17/x86/NitroGeolocationSpec_autolinked_build/CMakeFiles/react_codegen_NitroGeolocationSpec.dir
+/Users/kimhyeongjeong/Desktop/code/react-native-nitro-geolocation/example/android/app/.cxx/Debug/5g2s6k17/x86/NitroGeolocationSpec_autolinked_build/CMakeFiles/edit_cache.dir
+/Users/kimhyeongjeong/Desktop/code/react-native-nitro-geolocation/example/android/app/.cxx/Debug/5g2s6k17/x86/NitroGeolocationSpec_autolinked_build/CMakeFiles/rebuild_cache.dir
+/Users/kimhyeongjeong/Desktop/code/react-native-nitro-geolocation/example/android/app/.cxx/Debug/5g2s6k17/x86/NitroModulesSpec_autolinked_build/CMakeFiles/react_codegen_NitroModulesSpec.dir
+/Users/kimhyeongjeong/Desktop/code/react-native-nitro-geolocation/example/android/app/.cxx/Debug/5g2s6k17/x86/NitroModulesSpec_autolinked_build/CMakeFiles/edit_cache.dir
+/Users/kimhyeongjeong/Desktop/code/react-native-nitro-geolocation/example/android/app/.cxx/Debug/5g2s6k17/x86/NitroModulesSpec_autolinked_build/CMakeFiles/rebuild_cache.dir
+/Users/kimhyeongjeong/Desktop/code/react-native-nitro-geolocation/example/android/app/.cxx/Debug/5g2s6k17/x86/safeareacontext_autolinked_build/CMakeFiles/react_codegen_safeareacontext.dir
+/Users/kimhyeongjeong/Desktop/code/react-native-nitro-geolocation/example/android/app/.cxx/Debug/5g2s6k17/x86/safeareacontext_autolinked_build/CMakeFiles/edit_cache.dir
+/Users/kimhyeongjeong/Desktop/code/react-native-nitro-geolocation/example/android/app/.cxx/Debug/5g2s6k17/x86/safeareacontext_autolinked_build/CMakeFiles/rebuild_cache.dir

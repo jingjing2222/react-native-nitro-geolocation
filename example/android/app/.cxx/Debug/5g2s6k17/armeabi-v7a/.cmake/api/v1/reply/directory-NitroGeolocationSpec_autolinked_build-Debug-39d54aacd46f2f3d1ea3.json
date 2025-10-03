@@ -1,0 +1,14 @@
+{
+	"backtraceGraph" : 
+	{
+		"commands" : [],
+		"files" : [],
+		"nodes" : []
+	},
+	"installers" : [],
+	"paths" : 
+	{
+		"build" : "NitroGeolocationSpec_autolinked_build",
+		"source" : "/Users/kimhyeongjeong/Desktop/code/react-native-nitro-geolocation/android/build/generated/source/codegen/jni"
+	}
+}

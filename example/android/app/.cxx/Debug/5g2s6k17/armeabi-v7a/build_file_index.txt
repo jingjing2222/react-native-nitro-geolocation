@@ -1,0 +1,4 @@
+/Users/kimhyeongjeong/Desktop/code/react-native-nitro-geolocation/android/build/generated/source/codegen/jni/CMakeLists.txt
+/Users/kimhyeongjeong/Desktop/code/react-native-nitro-geolocation/example/node_modules/react-native-nitro-modules/android/build/generated/source/codegen/jni/CMakeLists.txt
+/Users/kimhyeongjeong/Desktop/code/react-native-nitro-geolocation/example/node_modules/react-native-safe-area-context/android/src/main/jni/CMakeLists.txt
+/Users/kimhyeongjeong/Desktop/code/react-native-nitro-geolocation/example/node_modules/react-native/ReactAndroid/cmake-utils/default-app-setup/CMakeLists.txt

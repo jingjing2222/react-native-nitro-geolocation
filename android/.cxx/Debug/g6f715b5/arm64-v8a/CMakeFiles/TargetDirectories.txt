@@ -1,0 +1,3 @@
+/Users/kimhyeongjeong/Desktop/code/react-native-nitro-geolocation/android/.cxx/Debug/g6f715b5/arm64-v8a/CMakeFiles/nitrogeolocation.dir
+/Users/kimhyeongjeong/Desktop/code/react-native-nitro-geolocation/android/.cxx/Debug/g6f715b5/arm64-v8a/CMakeFiles/edit_cache.dir
+/Users/kimhyeongjeong/Desktop/code/react-native-nitro-geolocation/android/.cxx/Debug/g6f715b5/arm64-v8a/CMakeFiles/rebuild_cache.dir
