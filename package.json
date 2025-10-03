@@ -1,56 +1,16 @@
 {
-  "name": "react-native-nitro-geolocation",
-  "version": "0.0.1",
-  "description": "⚡🚀Blazing-fast geolocation for React Native powered by Nitro Modules",
-  "main": "src/index",
-  "source": "src/index",
-  "codegenConfig": {
-    "name": "NitroGeolocationSpec",
-    "type": "modules",
-    "jsSrcsDir": "src"
-  },
-  "scripts": {
-    "typecheck": "tsc --noEmit"
-  },
-  "author": "jingjing2222",
-  "license": "MIT",
-  "homepage": "https://github.com/jingjing2222/react-native-nitro-geolocation",
-  "repository": "https://github.com/jingjing2222/react-native-nitro-geolocation",
-  "files": [
-    "src",
-    "react-native.config.js",
-    "lib",
-    "nitrogen",
-    "cpp",
-    "android/build.gradle",
-    "android/fix-prefab.gradle",
-    "android/gradle.properties",
-    "android/CMakeLists.txt",
-    "android/src",
-    "ios/**/*.h",
-    "ios/**/*.m",
-    "ios/**/*.mm",
-    "ios/**/*.cpp",
-    "ios/**/*.swift",
-    "app.plugin.js",
-    "*.podspec",
-    "README.md"
+  "name": "react-native-nitro-geolocation-monorepo",
+  "version": "0.0.0",
+  "private": true,
+  "workspaces": [
+    "packages/*",
+    "examples/*"
   ],
-  "devDependencies": {
-    "@react-native/babel-preset": "0.81.1",
-    "@types/react": "^19.1.0",
-    "react": "19.1.0",
-    "react-native": "0.81.1",
-    "react-native-nitro-modules": "^0.29.7",
-    "typescript": "^5.9.3",
-    "@tsconfig/react-native": "^3.0.7",
-    "@types/jest": "^29.0.0",
-    "@types/react-test-renderer": "^18.0.0"
+  "scripts": {
+    "typecheck": "yarn workspaces foreach -A run typecheck",
+    "format": "biome format --write .",
+    "format:check": "biome ci --formatter-enabled=true --linter-enabled=false .",
+    "lint": "biome ci --formatter-enabled=false --linter-enabled=true ."
   },
-  "create-react-native-library": {
-    "languages": "kotlin-swift",
-    "type": "nitro-module",
-    "version": "0.54.3"
-  },
-  "packageManager": "yarn@1.22.22+sha512.a6b2f7906b721bba3d67d4aff083df04dad64c399707841b7acf00f6b133b7ac24255f2652fa22ae3534329dc6180534e98d17432037ff6fd140556e2bb3137e"
+  "packageManager": "yarn@4.9.4"
 }
