@@ -12,7 +12,6 @@ import {
   division,
   multiply,
   subtraction,
-  test
 } from "react-native-nitro-geolocation";
 
 export default function App() {
@@ -37,9 +36,6 @@ export default function App() {
             </Text>
             <Text style={styles.sectionDescription}>
               division 4 / 5: {division(4, 5)}
-            </Text>
-            <Text style={styles.sectionDescription}>
-              test 4 + 5: {test(4, 5)}
             </Text>
           </View>
         </View>
