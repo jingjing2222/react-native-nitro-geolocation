@@ -19,3 +19,7 @@ export function multiply(a: number, b: number): number {
 export function division(a: number, b: number): number {
   return NitroGeolocationHybridObject.division(a, b);
 }
+
+export function test(a: number, b: number): number {
+  return NitroGeolocationHybridObject.test(a, b);
+}

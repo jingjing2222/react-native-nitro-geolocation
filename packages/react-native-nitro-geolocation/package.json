@@ -51,5 +51,8 @@
     "languages": "kotlin-swift",
     "type": "nitro-module",
     "version": "0.54.3"
+  },
+  "installConfig": {
+    "hoistingLimits": "workspaces"
   }
 }
