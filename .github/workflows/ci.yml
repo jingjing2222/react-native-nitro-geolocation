@@ -7,36 +7,9 @@ on:
       - main
 
 jobs:
-  setup:
-    name: Setup Dependencies
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Setup mise
-        uses: jdx/mise-action@v3
-        with:
-          install: false
-
-      - name: Install tools via mise
-        run: |
-          mise install node
-          mise install biome
-
-      - name: Enable Corepack
-        run: |
-          mise exec -- corepack enable
-
-      - name: Install dependencies
-        run: |
-          mise exec -- yarn install
-
   format-check:
     name: Format Check
     runs-on: ubuntu-latest
-    needs: setup
 
     steps:
       - name: Checkout
@@ -58,7 +31,6 @@ jobs:
   lint:
     name: Lint
     runs-on: ubuntu-latest
-    needs: setup
 
     steps:
       - name: Checkout
@@ -80,7 +52,6 @@ jobs:
   typecheck:
     name: TypeScript Check
     runs-on: ubuntu-latest
-    needs: setup
 
     steps:
       - name: Checkout
@@ -98,6 +69,10 @@ jobs:
       - name: Enable Corepack
         run: |
           mise exec -- corepack enable
+
+      - name: Install dependencies
+        run: |
+          mise exec -- yarn install
 
       - name: Run TypeScript check
         run: |
