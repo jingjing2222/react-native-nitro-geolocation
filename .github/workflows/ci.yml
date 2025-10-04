@@ -33,13 +33,6 @@ jobs:
         run: |
           mise exec -- yarn install
 
-      - name: Upload node_modules
-        uses: actions/upload-artifact@v4
-        with:
-          name: node_modules
-          path: node_modules/
-          retention-days: 1
-
   format-check:
     name: Format Check
     runs-on: ubuntu-latest
@@ -57,12 +50,6 @@ jobs:
       - name: Install tools via mise
         run: |
           mise install biome
-
-      - name: Download node_modules
-        uses: actions/download-artifact@v4
-        with:
-          name: node_modules
-          path: node_modules/
 
       - name: Run Biome format check
         run: |
@@ -85,12 +72,6 @@ jobs:
       - name: Install tools via mise
         run: |
           mise install biome
-
-      - name: Download node_modules
-        uses: actions/download-artifact@v4
-        with:
-          name: node_modules
-          path: node_modules/
 
       - name: Run Biome lint
         run: |
@@ -117,12 +98,6 @@ jobs:
       - name: Enable Corepack
         run: |
           mise exec -- corepack enable
-
-      - name: Download node_modules
-        uses: actions/download-artifact@v4
-        with:
-          name: node_modules
-          path: node_modules/
 
       - name: Run TypeScript check
         run: |
