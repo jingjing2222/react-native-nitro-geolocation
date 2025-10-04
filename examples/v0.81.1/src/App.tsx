@@ -5,7 +5,7 @@ import {
   StatusBar,
   StyleSheet,
   Text,
-  View,
+  View
 } from "react-native";
 import {
   addition,
@@ -50,27 +50,27 @@ export default function App() {
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
+    flex: 1
   },
   scrollView: {
-    backgroundColor: "#fff",
+    backgroundColor: "#fff"
   },
   body: {
-    backgroundColor: "#fff",
+    backgroundColor: "#fff"
   },
   sectionContainer: {
     marginTop: 32,
-    paddingHorizontal: 24,
+    paddingHorizontal: 24
   },
   sectionTitle: {
     fontSize: 24,
     fontWeight: "600",
-    color: "#000",
+    color: "#000"
   },
   sectionDescription: {
     marginTop: 8,
     fontSize: 18,
     fontWeight: "400",
-    color: "#666",
-  },
+    color: "#666"
+  }
 });
