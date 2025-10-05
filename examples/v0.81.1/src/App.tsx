@@ -9,7 +9,10 @@ import {
   Text,
   View
 } from "react-native";
-import { setRNConfiguration, requestAuthorization } from "react-native-nitro-geolocation";
+import {
+  requestAuthorization,
+  setRNConfiguration
+} from "react-native-nitro-geolocation";
 
 export default function App() {
   const [permissionStatus, setPermissionStatus] = useState<string>("Unknown");
@@ -116,17 +119,16 @@ export default function App() {
             </View>
 
             <View style={styles.buttonContainer}>
-              <Button
-                title="Config 3: Auto"
-                onPress={handleTestConfig3}
-              />
+              <Button title="Config 3: Auto" onPress={handleTestConfig3} />
             </View>
 
             <View style={styles.infoContainer}>
               <Text style={styles.infoTitle}>Implementation Status:</Text>
               <Text style={styles.infoText}>✅ setRNConfiguration</Text>
               <Text style={styles.infoText}>✅ requestAuthorization</Text>
-              <Text style={styles.infoText}>⏳ getCurrentPosition (not yet)</Text>
+              <Text style={styles.infoText}>
+                ⏳ getCurrentPosition (not yet)
+              </Text>
               <Text style={styles.infoText}>⏳ watchPosition (not yet)</Text>
               <Text style={styles.infoText}>⏳ clearWatch (not yet)</Text>
               <Text style={styles.infoText}>⏳ stopObserving (not yet)</Text>
