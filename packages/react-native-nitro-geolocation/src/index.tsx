@@ -9,15 +9,13 @@ export type {
   GeolocationOptions
 } from "./types";
 
-// Export methods
 export { setRNConfiguration } from "./setRNConfiguration";
-export { requestAuthorization } from "./requestAuthorization";
 export { getCurrentPosition } from "./getCurrentPosition";
+export { requestAuthorization } from "./requestAuthorization";
 
-// Default export for compatibility
+import { getCurrentPosition } from "./getCurrentPosition";
 import { requestAuthorization } from "./requestAuthorization";
 import { setRNConfiguration } from "./setRNConfiguration";
-import { getCurrentPosition } from "./getCurrentPosition";
 
 const Geolocation = {
   setRNConfiguration,

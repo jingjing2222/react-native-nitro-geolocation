@@ -1,9 +1,9 @@
-import type {
-  GeolocationPosition,
-  GeolocationError,
-  GeolocationOptions
-} from "./types";
 import { NitroGeolocationHybridObject } from "./NitroGeolocationModule";
+import type {
+  GeolocationError,
+  GeolocationOptions,
+  GeolocationPosition
+} from "./types";
 
 export function getCurrentPosition(
   success: (position: GeolocationPosition) => void,

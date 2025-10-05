@@ -10,15 +10,16 @@ import {
   View
 } from "react-native";
 import {
-  requestAuthorization,
-  setRNConfiguration,
+  type GeolocationPosition,
   getCurrentPosition,
-  type GeolocationPosition
+  requestAuthorization,
+  setRNConfiguration
 } from "react-native-nitro-geolocation";
 
 export default function App() {
   const [permissionStatus, setPermissionStatus] = useState<string>("Unknown");
-  const [currentPosition, setCurrentPosition] = useState<GeolocationPosition | null>(null);
+  const [currentPosition, setCurrentPosition] =
+    useState<GeolocationPosition | null>(null);
   const [isLoadingPosition, setIsLoadingPosition] = useState(false);
 
   useEffect(() => {
@@ -154,7 +155,9 @@ export default function App() {
 
             <View style={styles.buttonContainer}>
               <Button
-                title={isLoadingPosition ? "Loading..." : "Get Current Position"}
+                title={
+                  isLoadingPosition ? "Loading..." : "Get Current Position"
+                }
                 onPress={handleGetCurrentPosition}
                 disabled={isLoadingPosition}
                 color="#4CAF50"
@@ -189,7 +192,8 @@ export default function App() {
                   </Text>
                 )}
                 <Text style={styles.positionText}>
-                  Timestamp: {new Date(currentPosition.timestamp).toLocaleString()}
+                  Timestamp:{" "}
+                  {new Date(currentPosition.timestamp).toLocaleString()}
                 </Text>
               </View>
             )}
