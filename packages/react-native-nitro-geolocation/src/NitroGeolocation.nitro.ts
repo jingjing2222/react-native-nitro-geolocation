@@ -14,7 +14,20 @@ export interface RNConfigurationInternal {
   locationProvider?: LocationProviderInternal;
 }
 
+// Error
+export interface GeolocationError {
+  code: number;
+  message: string;
+  PERMISSION_DENIED: number;
+  POSITION_UNAVAILABLE: number;
+  TIMEOUT: number;
+}
+
 export interface NitroGeolocation
   extends HybridObject<{ ios: "swift"; android: "kotlin" }> {
   setRNConfiguration(config: RNConfigurationInternal): void;
+  requestAuthorization(
+    success?: () => void,
+    error?: (error: GeolocationError) => void
+  ): void;
 }
