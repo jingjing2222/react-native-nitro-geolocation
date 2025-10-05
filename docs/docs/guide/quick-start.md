@@ -77,8 +77,8 @@ const watchId = Geolocation.watchPosition(
 
 ## 5. Migrating from `@react-native-community/geolocation`
 
-Nitro Geolocation is API-compatible with the legacy package.
-You can migrate by replacing imports:
+Nitro Geolocation is 100% API-compatible with `@react-native-community/geolocation`.
+You can migrate by simply replacing imports:
 
 ~~~diff
 - import Geolocation from '@react-native-community/geolocation';
