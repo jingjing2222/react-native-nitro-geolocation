@@ -12,7 +12,8 @@
       "node_modules/**",
       "**/*.js",
       "**/ios/**",
-      "**/android/**"
+      "**/android/**",
+      "doc_build/**"
     ]
   },
   "formatter": {
