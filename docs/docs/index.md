@@ -18,7 +18,7 @@ hero:
 
 features:
   - title: Fully native implementation
-    details: Access device geolocation data through JSI and TurboModules for maximum performance.
+    details: Access device geolocation data through JSI and Nitro Modules for maximum performance.
     icon: 📡
   - title: Drop-in replacement
     details: Provides the same API surface as @react-native-community/geolocation for easy migration.
@@ -26,8 +26,8 @@ features:
   - title: Consistent Android & iOS behavior
     details: Unified permission handling, background location consistency, and improved accuracy tuning.
     icon: 📱
-  - title: Low-latency bridge
-    details: Built on top of the Nitro/Turbo bridge, reducing async overhead and JS thread blocking.
+  - title: Direct JSI communication
+    details: Built with Nitro Modules, enabling direct JS-to-native calls without bridge serialization overhead.
     icon: ⚙️
   - title: TypeScript ready
     details: Full type definitions for getCurrentPosition, watchPosition, and clearWatch APIs.
