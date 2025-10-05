@@ -7,6 +7,7 @@
     "examples/*",
     "docs"
   ],
+  "homepage": "react-native-nitro-geolocation.pages.dev",
   "scripts": {
     "typecheck": "yarn workspaces foreach -A run typecheck",
     "format": "biome format --write .",
