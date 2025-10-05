@@ -33,4 +33,4 @@ jobs:
       - name: Build
         working-directory: docs
         run: |
-          mise exec yarn build
+          mise exec -- yarn build
