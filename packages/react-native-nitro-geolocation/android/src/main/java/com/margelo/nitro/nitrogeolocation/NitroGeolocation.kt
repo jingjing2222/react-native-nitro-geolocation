@@ -1,10 +1,13 @@
 package com.margelo.nitro.nitrogeolocation
 
 import com.facebook.proguard.annotations.DoNotStrip
+import com.facebook.react.bridge.ReactApplicationContext
 import com.margelo.nitro.NitroModules
 
 @DoNotStrip
-class NitroGeolocation : HybridNitroGeolocationSpec() {
+class NitroGeolocation(
+        private val reactContext: ReactApplicationContext = NitroModules.applicationContext!!
+) : HybridNitroGeolocationSpec() {
     private var configuration: RNConfigurationInternal =
             RNConfigurationInternal(
                     skipPermissionRequests = false,
@@ -15,7 +18,7 @@ class NitroGeolocation : HybridNitroGeolocationSpec() {
 
     private val requestAuthorizationHandler by lazy {
         RequestAuthorization(
-                reactContext = NitroModules.applicationContext!!,
+                reactContext = reactContext,
                 onPermissionResult = { result, success, error ->
                     when (result) {
                         is PermissionResult.Granted -> success?.invoke()
