@@ -1,22 +1,20 @@
 {
-  "name": "react-native-nitro-geolocation-example",
+  "name": "benchmark",
   "version": "0.0.1",
   "private": true,
-  "source": "src/index",
   "scripts": {
     "android": "react-native run-android",
     "ios": "react-native run-ios",
     "start": "react-native start",
-    "build:android": "react-native build-android --extra-params \"--no-daemon --console=plain -PreactNativeArchitectures=arm64-v8a\"",
-    "build:ios": "react-native build-ios --mode Debug",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@react-native/new-app-screen": "0.81.1",
+    "@react-native-community/geolocation": "^3.4.0",
+    "@react-native/new-app-screen": "0.81.4",
     "react": "19.1.0",
-    "react-native": "0.81.1",
+    "react-native": "0.81.4",
     "react-native-nitro-geolocation": "workspace:*",
-    "react-native-nitro-modules": "^0.29.7",
+    "react-native-nitro-modules": "^0.29.8",
     "react-native-safe-area-context": "^5.5.2"
   },
   "devDependencies": {
@@ -26,12 +24,14 @@
     "@react-native-community/cli": "20.0.0",
     "@react-native-community/cli-platform-android": "20.0.0",
     "@react-native-community/cli-platform-ios": "20.0.0",
-    "@react-native/babel-preset": "0.81.1",
-    "@react-native/metro-config": "0.81.1",
-    "@react-native/typescript-config": "0.81.1",
+    "@react-native/babel-preset": "0.81.4",
+    "@react-native/metro-config": "0.81.4",
+    "@react-native/typescript-config": "0.81.4",
     "@types/react": "^19.1.0",
-    "react-native-builder-bob": "^0.40.13",
-    "react-native-monorepo-config": "^0.1.9"
+    "@types/react-test-renderer": "^19.1.0",
+    "prettier": "2.8.8",
+    "react-test-renderer": "19.1.0",
+    "typescript": "^5.9.3"
   },
   "engines": {
     "node": ">=20"

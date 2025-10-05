@@ -39,7 +39,6 @@
   "devDependencies": {
     "@react-native/babel-preset": "0.81.1",
     "@tsconfig/react-native": "^3.0.7",
-    "@types/jest": "^29.0.0",
     "@types/react": "^19.1.0",
     "@types/react-test-renderer": "^18.0.0",
     "react": "19.1.0",
