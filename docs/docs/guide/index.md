@@ -31,14 +31,19 @@ As React Native officially embraces **JSI** and **TurboModules**, we saw an oppo
 
 ## Why Nitro Module?
 
-The **Nitro Module** system provides the next generation of native modules for React Native.
-Instead of using the bridge-based approach (JSON serialization between JS and native), Nitro Modules communicate directly through **JSI (JavaScript Interface)**.
+The **Nitro Module** system is a third-party JSI-based native module framework created by Marc Rousavy.
+While React Native's official New Architecture (TurboModules) also uses JSI, Nitro offers a different approach with:
 
-This enables:
+- 🛠️ **Simpler code generation** — less boilerplate than TurboModules
+- 📘 **Enhanced type safety** — stronger TypeScript and C++ type guarantees
+- ⚡ **Direct C++ bindings** — streamlined JSI interface without additional layers
+- 🎯 **Focused DX** — developer-friendly API for building JSI modules
 
-- ⚡ **Direct native calls** — reduced overhead
-- 🧠 **Synchronous APIs** for critical paths
-- 🔧 **Better integration** with the new Fabric renderer
-- 🧩 **Cross-platform consistency** and simpler maintenance
+For this Geolocation implementation, Nitro provided a cleaner path to achieve:
 
-In short, Nitro Geolocation builds on the proven API design of `@react-native-community/geolocation` while leveraging the new React Native architecture, providing a **forward-compatible foundation** with **100% API compatibility**.
+- Direct native calls with reduced overhead
+- Synchronous APIs when needed
+- Better integration with modern React Native
+- Cross-platform consistency
+
+In short, Nitro Geolocation builds on the proven API design of `@react-native-community/geolocation` while leveraging Nitro's JSI capabilities, providing a **forward-compatible foundation** with **100% API compatibility**.

@@ -5,7 +5,7 @@ This guide walks you through installing and setting up **Nitro Geolocation** in 
 
 ## 1. Installation
 
-Before installing the module, make sure you have the latest React Native environment with **TurboModules** enabled.
+Before installing the module, make sure you have a React Native environment (0.75+).
 
 ~~~bash
 # Install Nitro core and Geolocation module
@@ -52,7 +52,7 @@ Optional (for background access):
 ## 4. Usage Example
 
 ~~~tsx
-import Geolocation from '@react-native-community/geolocation';
+import Geolocation from 'react-native-nitro-geolocation';
 
 Geolocation.getCurrentPosition(
   (position) => {
@@ -92,8 +92,8 @@ or
 + import { getCurrentPosition, watchPosition } from 'react-native-nitro-geolocation';
 ~~~
 
-Most existing code will work as-is — but you’ll now get:
+Most existing code will work as-is — but you'll now get:
 - Better performance via JSI
-- No async bridge overhead
+- Reduced bridge serialization overhead
 - Improved permission consistency
 - TypeScript definitions out of the box
