@@ -2,36 +2,37 @@
 pageType: home
 
 hero:
-  name: My Site
-  text: A cool website!
-  tagline: This is the tagline
+  name: Nitro Geolocation
+  text: Universal Geolocation for Nitro
+  tagline: A modern, type-safe port of @react-native-community/geolocation for Nitro runtime.
   actions:
     - theme: brand
-      text: Quick Start
+      text: Get Started
       link: /guide/
     - theme: alt
       text: GitHub
-      link: https://github.com/web-infra-dev/rspress
+      link: https://github.com/jingjing2222/react-native-nitro-geolocation
   image:
-    src: logo.png
-    alt: Logo
+    src: /logo.png
+    alt: Nitro Geolocation Logo
+
 features:
-  - title: Blazing fast build speed
-    details: The core compilation module is based on the Rust front-end toolchain, providing a more ultimate development experience.
-    icon: 🏃🏻‍♀️
-  - title: Support for MDX content writing
-    details: MDX is a powerful way to write content, allowing you to use React components in Markdown.
-    icon: 📦
-  - title: Built-in full-text search
-    details: Automatically generates a full-text search index for you during construction, providing out-of-the-box full-text search capabilities.
-    icon: 🎨
-  - title: Simpler I18n solution
-    details: With the built-in I18n solution, you can easily provide multi-language support for documents or components.
+  - title: Cross-Platform Geolocation
+    details: Works seamlessly across Nitro, web, and native environments using a unified API layer.
     icon: 🌍
-  - title: Static site generation
-    details: In production, it automatically builds into static HTML files, which can be easily deployed anywhere.
-    icon: 🌈
-  - title: Providing multiple custom capabilities
-    details: Through its extension mechanism, you can easily extend theme UI and build process.
-    icon: 🔥
+  - title: TypeScript Support
+    details: Fully typed API for safer integration and better developer experience.
+    icon: 📘
+  - title: Nitro Optimized
+    details: Designed specifically for Nitro runtime with SSR and Edge support.
+    icon: ⚡
+  - title: Permission Handling
+    details: Automatically manages browser and native geolocation permissions.
+    icon: 🔐
+  - title: Graceful Fallbacks
+    details: Provides configurable fallback behavior when geolocation is unavailable (e.g., IP-based).
+    icon: 🧭
+  - title: Easy Migration
+    details: Drop-in replacement for @react-native-community/geolocation with minimal changes.
+    icon: 🔁
 ---
