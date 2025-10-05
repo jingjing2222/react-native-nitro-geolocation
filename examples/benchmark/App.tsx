@@ -14,6 +14,12 @@ import {
   setRNConfiguration,
   watchPosition,
 } from 'react-native-nitro-geolocation';
+import Geolocation from '@react-native-community/geolocation';
+
+// Polyfill for performance.now() type
+declare const performance: {
+  now: () => number;
+};
 
 interface BenchmarkStats {
   min: number;
@@ -26,10 +32,15 @@ interface BenchmarkStats {
   samples: number;
 }
 
+interface LibraryBenchmarkStats {
+  nitro?: BenchmarkStats;
+  community?: BenchmarkStats;
+}
+
 interface BenchmarkResults {
-  setRNConfiguration?: BenchmarkStats;
-  getCurrentPosition?: BenchmarkStats;
-  watchPosition?: BenchmarkStats;
+  setRNConfiguration?: LibraryBenchmarkStats;
+  getCurrentPosition?: LibraryBenchmarkStats;
+  watchPosition?: LibraryBenchmarkStats;
 }
 
 export default function BenchmarkScreen() {
@@ -74,9 +85,11 @@ export default function BenchmarkScreen() {
   const benchmarkSetRNConfiguration = async () => {
     setRunning('setRNConfiguration');
     const iterations = 1000;
-    const measurements: number[] = [];
 
     try {
+      // Benchmark Nitro
+      const nitroMeasurements: number[] = [];
+
       // Warmup
       for (let i = 0; i < 10; i++) {
         setRNConfiguration({ skipPermissionRequests: false });
@@ -91,16 +104,42 @@ export default function BenchmarkScreen() {
           locationProvider: 'auto',
         });
         const end = performance.now();
-        measurements.push(end - start);
+        nitroMeasurements.push(end - start);
       }
 
-      const stats = calculateStats(measurements);
-      setResults(prev => ({ ...prev, setRNConfiguration: stats }));
+      const nitroStats = calculateStats(nitroMeasurements);
+
+      // Benchmark Community
+      const communityMeasurements: number[] = [];
+
+      // Warmup
+      for (let i = 0; i < 10; i++) {
+        Geolocation.setRNConfiguration({ skipPermissionRequests: false });
+      }
+
+      // Actual benchmark
+      for (let i = 0; i < iterations; i++) {
+        const start = performance.now();
+        Geolocation.setRNConfiguration({
+          skipPermissionRequests: false,
+          authorizationLevel: 'whenInUse',
+          locationProvider: 'auto',
+        });
+        const end = performance.now();
+        communityMeasurements.push(end - start);
+      }
+
+      const communityStats = calculateStats(communityMeasurements);
+
+      setResults(prev => ({
+        ...prev,
+        setRNConfiguration: { nitro: nitroStats, community: communityStats },
+      }));
       Alert.alert(
         'Success',
-        `setRNConfiguration benchmark completed\nAvg: ${stats.avg.toFixed(
+        `setRNConfiguration completed\nNitro: ${nitroStats.avg.toFixed(
           3,
-        )}ms`,
+        )}ms\nCommunity: ${communityStats.avg.toFixed(3)}ms`,
       );
     } catch (error) {
       Alert.alert('Error', String(error));
@@ -112,9 +151,11 @@ export default function BenchmarkScreen() {
   const benchmarkGetCurrentPosition = async () => {
     setRunning('getCurrentPosition');
     const iterations = 10;
-    const measurements: number[] = [];
 
     try {
+      // Benchmark Nitro
+      const nitroMeasurements: number[] = [];
+
       // Warmup (1 call)
       await new Promise((resolve, reject) => {
         getCurrentPosition(resolve, reject, {
@@ -132,12 +173,12 @@ export default function BenchmarkScreen() {
           getCurrentPosition(
             () => {
               const end = performance.now();
-              measurements.push(end - start);
+              nitroMeasurements.push(end - start);
               resolve(null);
             },
             error => {
               const end = performance.now();
-              measurements.push(end - start);
+              nitroMeasurements.push(end - start);
               reject(error);
             },
             {
@@ -149,16 +190,65 @@ export default function BenchmarkScreen() {
         });
 
         // Wait 500ms between calls
-        await new Promise(resolve => setTimeout(resolve, 500));
+        await new Promise<void>(resolve => setTimeout(resolve, 500));
       }
 
-      const stats = calculateStats(measurements);
-      setResults(prev => ({ ...prev, getCurrentPosition: stats }));
+      const nitroStats = calculateStats(nitroMeasurements);
+
+      // Wait before switching to Community
+      await new Promise<void>(resolve => setTimeout(resolve, 1000));
+
+      // Benchmark Community
+      const communityMeasurements: number[] = [];
+
+      // Warmup (1 call)
+      await new Promise((resolve, reject) => {
+        Geolocation.getCurrentPosition(resolve, reject, {
+          timeout: 5000,
+          maximumAge: 0,
+          enableHighAccuracy: true,
+        });
+      });
+
+      // Actual benchmark
+      for (let i = 0; i < iterations; i++) {
+        const start = performance.now();
+
+        await new Promise((resolve, reject) => {
+          Geolocation.getCurrentPosition(
+            () => {
+              const end = performance.now();
+              communityMeasurements.push(end - start);
+              resolve(null);
+            },
+            error => {
+              const end = performance.now();
+              communityMeasurements.push(end - start);
+              reject(error);
+            },
+            {
+              timeout: 5000,
+              maximumAge: 60000, // Accept cached location
+              enableHighAccuracy: true,
+            },
+          );
+        });
+
+        // Wait 500ms between calls
+        await new Promise<void>(resolve => setTimeout(resolve, 500));
+      }
+
+      const communityStats = calculateStats(communityMeasurements);
+
+      setResults(prev => ({
+        ...prev,
+        getCurrentPosition: { nitro: nitroStats, community: communityStats },
+      }));
       Alert.alert(
         'Success',
-        `getCurrentPosition benchmark completed\nAvg: ${stats.avg.toFixed(
+        `getCurrentPosition completed\nNitro: ${nitroStats.avg.toFixed(
           1,
-        )}ms`,
+        )}ms\nCommunity: ${communityStats.avg.toFixed(1)}ms`,
       );
     } catch (error) {
       Alert.alert('Error', String(error));
@@ -170,42 +260,34 @@ export default function BenchmarkScreen() {
   const benchmarkWatchPosition = async () => {
     setRunning('watchPosition');
     const targetSamples = 20;
-    const measurements: number[] = [];
-    let lastUpdate = performance.now();
-    let sampleCount = 0;
 
-    return new Promise<void>(resolve => {
+    // Benchmark Nitro
+    const nitroMeasurements: number[] = [];
+    let nitroLastUpdate = performance.now();
+    let nitroSampleCount = 0;
+
+    await new Promise<void>(resolve => {
       const watchId = watchPosition(
         position => {
           const now = performance.now();
-          const latency = now - lastUpdate;
+          const latency = now - nitroLastUpdate;
 
           // Skip first sample (cold start)
-          if (sampleCount > 0) {
-            measurements.push(latency);
+          if (nitroSampleCount > 0) {
+            nitroMeasurements.push(latency);
           }
 
-          sampleCount++;
-          lastUpdate = now;
+          nitroSampleCount++;
+          nitroLastUpdate = now;
 
           console.log(
-            `watchPosition sample ${sampleCount}: ${latency.toFixed(3)}ms`,
+            `Nitro watchPosition sample ${nitroSampleCount}: ${latency.toFixed(
+              3,
+            )}ms`,
           );
 
-          if (sampleCount >= targetSamples) {
+          if (nitroSampleCount >= targetSamples) {
             clearWatch(watchId);
-
-            const stats = calculateStats(measurements);
-            setResults(prev => ({ ...prev, watchPosition: stats }));
-            setRunning(null);
-
-            Alert.alert(
-              'Success',
-              `watchPosition benchmark completed\nAvg callback interval: ${stats.avg.toFixed(
-                0,
-              )}ms`,
-            );
-
             resolve();
           }
         },
@@ -222,47 +304,225 @@ export default function BenchmarkScreen() {
         },
       );
     });
+
+    const nitroStats = calculateStats(nitroMeasurements);
+
+    // Wait before switching to Community
+    await new Promise<void>(resolve => setTimeout(resolve, 2000));
+
+    // Benchmark Community
+    const communityMeasurements: number[] = [];
+    let communityLastUpdate = performance.now();
+    let communitySampleCount = 0;
+
+    await new Promise<void>(resolve => {
+      const watchId = Geolocation.watchPosition(
+        () => {
+          const now = performance.now();
+          const latency = now - communityLastUpdate;
+
+          // Skip first sample (cold start)
+          if (communitySampleCount > 0) {
+            communityMeasurements.push(latency);
+          }
+
+          communitySampleCount++;
+          communityLastUpdate = now;
+
+          console.log(
+            `Community watchPosition sample ${communitySampleCount}: ${latency.toFixed(
+              3,
+            )}ms`,
+          );
+
+          if (communitySampleCount >= targetSamples) {
+            Geolocation.clearWatch(watchId);
+            resolve();
+          }
+        },
+        error => {
+          Geolocation.clearWatch(watchId);
+          Alert.alert('Error', error.message);
+          setRunning(null);
+          resolve();
+        },
+        {
+          enableHighAccuracy: true,
+          interval: 1000, // 1 second
+          distanceFilter: 0, // Accept any movement
+        },
+      );
+    });
+
+    const communityStats = calculateStats(communityMeasurements);
+
+    setResults(prev => ({
+      ...prev,
+      watchPosition: { nitro: nitroStats, community: communityStats },
+    }));
+    setRunning(null);
+
+    Alert.alert(
+      'Success',
+      `watchPosition completed\nNitro: ${nitroStats.avg.toFixed(
+        0,
+      )}ms\nCommunity: ${communityStats.avg.toFixed(0)}ms`,
+    );
   };
 
-  const renderStats = (name: string, stats: BenchmarkStats) => (
+  const renderComparisonStats = (
+    name: string,
+    libStats: LibraryBenchmarkStats,
+  ) => (
     <View key={name} style={styles.resultContainer}>
       <Text style={styles.resultTitle}>{name}</Text>
-      <View style={styles.statsGrid}>
-        <View style={styles.statRow}>
-          <Text style={styles.statLabel}>Samples:</Text>
-          <Text style={styles.statValue}>{stats.samples}</Text>
+
+      {/* Nitro Results */}
+      {libStats.nitro && (
+        <View style={styles.librarySection}>
+          <Text style={styles.libraryTitle}>Nitro Geolocation</Text>
+          <View style={styles.statsGrid}>
+            <View style={styles.statRow}>
+              <Text style={styles.statLabel}>Samples:</Text>
+              <Text style={styles.statValue}>{libStats.nitro.samples}</Text>
+            </View>
+            <View style={styles.statRow}>
+              <Text style={styles.statLabel}>Min:</Text>
+              <Text style={styles.statValue}>
+                {libStats.nitro.min.toFixed(3)}ms
+              </Text>
+            </View>
+            <View style={styles.statRow}>
+              <Text style={styles.statLabel}>Max:</Text>
+              <Text style={styles.statValue}>
+                {libStats.nitro.max.toFixed(3)}ms
+              </Text>
+            </View>
+            <View style={styles.statRow}>
+              <Text style={styles.statLabel}>Avg:</Text>
+              <Text style={styles.statValueHighlight}>
+                {libStats.nitro.avg.toFixed(3)}ms
+              </Text>
+            </View>
+            <View style={styles.statRow}>
+              <Text style={styles.statLabel}>Median:</Text>
+              <Text style={styles.statValue}>
+                {libStats.nitro.median.toFixed(3)}ms
+              </Text>
+            </View>
+            <View style={styles.statRow}>
+              <Text style={styles.statLabel}>P95:</Text>
+              <Text style={styles.statValue}>
+                {libStats.nitro.p95.toFixed(3)}ms
+              </Text>
+            </View>
+            <View style={styles.statRow}>
+              <Text style={styles.statLabel}>P99:</Text>
+              <Text style={styles.statValue}>
+                {libStats.nitro.p99.toFixed(3)}ms
+              </Text>
+            </View>
+            <View style={styles.statRow}>
+              <Text style={styles.statLabel}>StdDev:</Text>
+              <Text style={styles.statValue}>
+                {libStats.nitro.stdDev.toFixed(3)}ms
+              </Text>
+            </View>
+          </View>
         </View>
-        <View style={styles.statRow}>
-          <Text style={styles.statLabel}>Min:</Text>
-          <Text style={styles.statValue}>{stats.min.toFixed(3)}ms</Text>
+      )}
+
+      {/* Community Results */}
+      {libStats.community && (
+        <View
+          style={[
+            styles.librarySection,
+            { borderBottomWidth: 0, paddingBottom: 8 },
+          ]}
+        >
+          <Text style={styles.libraryTitle}>
+            @react-native-community/geolocation
+          </Text>
+          <View style={styles.statsGrid}>
+            <View style={styles.statRow}>
+              <Text style={styles.statLabel}>Samples:</Text>
+              <Text style={styles.statValue}>{libStats.community.samples}</Text>
+            </View>
+            <View style={styles.statRow}>
+              <Text style={styles.statLabel}>Min:</Text>
+              <Text style={styles.statValue}>
+                {libStats.community.min.toFixed(3)}ms
+              </Text>
+            </View>
+            <View style={styles.statRow}>
+              <Text style={styles.statLabel}>Max:</Text>
+              <Text style={styles.statValue}>
+                {libStats.community.max.toFixed(3)}ms
+              </Text>
+            </View>
+            <View style={styles.statRow}>
+              <Text style={styles.statLabel}>Avg:</Text>
+              <Text style={styles.statValueHighlight}>
+                {libStats.community.avg.toFixed(3)}ms
+              </Text>
+            </View>
+            <View style={styles.statRow}>
+              <Text style={styles.statLabel}>Median:</Text>
+              <Text style={styles.statValue}>
+                {libStats.community.median.toFixed(3)}ms
+              </Text>
+            </View>
+            <View style={styles.statRow}>
+              <Text style={styles.statLabel}>P95:</Text>
+              <Text style={styles.statValue}>
+                {libStats.community.p95.toFixed(3)}ms
+              </Text>
+            </View>
+            <View style={styles.statRow}>
+              <Text style={styles.statLabel}>P99:</Text>
+              <Text style={styles.statValue}>
+                {libStats.community.p99.toFixed(3)}ms
+              </Text>
+            </View>
+            <View style={styles.statRow}>
+              <Text style={styles.statLabel}>StdDev:</Text>
+              <Text style={styles.statValue}>
+                {libStats.community.stdDev.toFixed(3)}ms
+              </Text>
+            </View>
+          </View>
         </View>
-        <View style={styles.statRow}>
-          <Text style={styles.statLabel}>Max:</Text>
-          <Text style={styles.statValue}>{stats.max.toFixed(3)}ms</Text>
-        </View>
-        <View style={styles.statRow}>
-          <Text style={styles.statLabel}>Avg:</Text>
-          <Text style={styles.statValueHighlight}>
-            {stats.avg.toFixed(3)}ms
+      )}
+
+      {/* Comparison Summary */}
+      {libStats.nitro && libStats.community && (
+        <View style={styles.comparisonBox}>
+          <Text style={styles.comparisonTitle}>📊 Comparison</Text>
+          <Text style={styles.comparisonText}>
+            Nitro is{' '}
+            {libStats.nitro.avg < libStats.community.avg ? (
+              <Text style={styles.faster}>
+                {(
+                  ((libStats.community.avg - libStats.nitro.avg) /
+                    libStats.community.avg) *
+                  100
+                ).toFixed(1)}
+                % faster
+              </Text>
+            ) : (
+              <Text style={styles.slower}>
+                {(
+                  ((libStats.nitro.avg - libStats.community.avg) /
+                    libStats.community.avg) *
+                  100
+                ).toFixed(1)}
+                % slower
+              </Text>
+            )}{' '}
+            (avg)
           </Text>
         </View>
-        <View style={styles.statRow}>
-          <Text style={styles.statLabel}>Median:</Text>
-          <Text style={styles.statValue}>{stats.median.toFixed(3)}ms</Text>
-        </View>
-        <View style={styles.statRow}>
-          <Text style={styles.statLabel}>P95:</Text>
-          <Text style={styles.statValue}>{stats.p95.toFixed(3)}ms</Text>
-        </View>
-        <View style={styles.statRow}>
-          <Text style={styles.statLabel}>P99:</Text>
-          <Text style={styles.statValue}>{stats.p99.toFixed(3)}ms</Text>
-        </View>
-        <View style={styles.statRow}>
-          <Text style={styles.statLabel}>StdDev:</Text>
-          <Text style={styles.statValue}>{stats.stdDev.toFixed(3)}ms</Text>
-        </View>
-      </View>
+      )}
     </View>
   );
 
@@ -270,15 +530,15 @@ export default function BenchmarkScreen() {
     <SafeAreaView style={styles.container}>
       <ScrollView style={styles.scrollView}>
         <View style={styles.content}>
-          <Text style={styles.title}>Nitro Geolocation Benchmarks</Text>
+          <Text style={styles.title}>Geolocation Library Comparison</Text>
           <Text style={styles.subtitle}>
-            Measure real-world performance using performance.now()
+            Nitro vs @react-native-community/geolocation
           </Text>
 
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>Method Call Overhead</Text>
             <Text style={styles.sectionDescription}>
-              Measures JSI method invocation speed (1000 iterations)
+              Compare both libraries - method invocation (1000 iterations each)
             </Text>
             <Button
               title={
@@ -295,7 +555,7 @@ export default function BenchmarkScreen() {
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>Async Callback Latency</Text>
             <Text style={styles.sectionDescription}>
-              End-to-end latency including GPS (10 iterations)
+              Compare both libraries - end-to-end latency (10 iterations each)
             </Text>
             <Button
               title={
@@ -312,7 +572,7 @@ export default function BenchmarkScreen() {
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>Continuous Updates</Text>
             <Text style={styles.sectionDescription}>
-              Callback interval measurement (20 samples)
+              Compare both libraries - callback interval (20 samples each)
             </Text>
             <Button
               title={
@@ -336,29 +596,35 @@ export default function BenchmarkScreen() {
           )}
 
           {results.setRNConfiguration &&
-            renderStats('setRNConfiguration', results.setRNConfiguration)}
+            renderComparisonStats(
+              'setRNConfiguration',
+              results.setRNConfiguration,
+            )}
           {results.getCurrentPosition &&
-            renderStats('getCurrentPosition', results.getCurrentPosition)}
+            renderComparisonStats(
+              'getCurrentPosition',
+              results.getCurrentPosition,
+            )}
           {results.watchPosition &&
-            renderStats('watchPosition', results.watchPosition)}
+            renderComparisonStats('watchPosition', results.watchPosition)}
 
           {Object.keys(results).length > 0 && (
             <View style={styles.infoBox}>
               <Text style={styles.infoTitle}>💡 Interpretation</Text>
               <Text style={styles.infoText}>
-                • setRNConfiguration: Should be &lt;0.1ms (JSI direct call)
+                • setRNConfiguration: Pure method call overhead (&lt;0.1ms)
               </Text>
               <Text style={styles.infoText}>
-                • getCurrentPosition: Includes GPS fix time (~50-5000ms)
+                • getCurrentPosition: Callback latency (includes GPS fix)
               </Text>
               <Text style={styles.infoText}>
-                • watchPosition: Interval between updates (~1000ms)
+                • watchPosition: Update intervals (~1000ms)
               </Text>
               <Text style={styles.infoText}>
                 • P95/P99: 95th/99th percentile (tail latency)
               </Text>
               <Text style={styles.infoText}>
-                • Lower is better for all metrics
+                • Lower latency = better performance
               </Text>
             </View>
           )}
@@ -434,6 +700,18 @@ const styles = StyleSheet.create({
     color: '#000',
     marginBottom: 12,
   },
+  librarySection: {
+    marginBottom: 16,
+    paddingBottom: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: '#e0e0e0',
+  },
+  libraryTitle: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#2196F3',
+    marginBottom: 8,
+  },
   statsGrid: {
     gap: 8,
   },
@@ -475,5 +753,30 @@ const styles = StyleSheet.create({
     color: '#1565c0',
     marginVertical: 3,
     fontFamily: 'monospace',
+  },
+  comparisonBox: {
+    backgroundColor: '#fff3e0',
+    borderRadius: 8,
+    padding: 12,
+    marginTop: 8,
+  },
+  comparisonTitle: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#e65100',
+    marginBottom: 4,
+  },
+  comparisonText: {
+    fontSize: 14,
+    color: '#000',
+    fontWeight: '500',
+  },
+  faster: {
+    color: '#4CAF50',
+    fontWeight: '700',
+  },
+  slower: {
+    color: '#F44336',
+    fontWeight: '700',
   },
 });
