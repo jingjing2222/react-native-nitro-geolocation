@@ -5,7 +5,6 @@ export default defineConfig({
   root: path.join(__dirname, 'docs'),
   title: 'react-native-nitro-geolocation',
   description: 'A React Native Geolocation module Using Nitro',
-  lang: 'en-US',
   icon: '/logo.png',
   logo: '/logo.png',
   logoText: 'react-native-nitro-geolocation',
