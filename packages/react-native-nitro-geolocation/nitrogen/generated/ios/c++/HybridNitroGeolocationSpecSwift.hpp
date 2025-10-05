@@ -12,9 +12,17 @@
 // Forward declaration of `HybridNitroGeolocationSpec_cxx` to properly resolve imports.
 namespace NitroGeolocation { class HybridNitroGeolocationSpec_cxx; }
 
+// Forward declaration of `RNConfiguration` to properly resolve imports.
+namespace margelo::nitro::nitrogeolocation { struct RNConfiguration; }
+// Forward declaration of `AuthorizationLevel` to properly resolve imports.
+namespace margelo::nitro::nitrogeolocation { enum class AuthorizationLevel; }
+// Forward declaration of `LocationProvider` to properly resolve imports.
+namespace margelo::nitro::nitrogeolocation { enum class LocationProvider; }
 
-
-
+#include "RNConfiguration.hpp"
+#include "AuthorizationLevel.hpp"
+#include <optional>
+#include "LocationProvider.hpp"
 
 #include "NitroGeolocation-Swift-Cxx-Umbrella.hpp"
 
@@ -57,45 +65,11 @@ namespace margelo::nitro::nitrogeolocation {
 
   public:
     // Methods
-    inline double addition(double a, double b) override {
-      auto __result = _swiftPart.addition(std::forward<decltype(a)>(a), std::forward<decltype(b)>(b));
+    inline void setRNConfiguration(const RNConfiguration& config) override {
+      auto __result = _swiftPart.setRNConfiguration(std::forward<decltype(config)>(config));
       if (__result.hasError()) [[unlikely]] {
         std::rethrow_exception(__result.error());
       }
-      auto __value = std::move(__result.value());
-      return __value;
-    }
-    inline double subtraction(double a, double b) override {
-      auto __result = _swiftPart.subtraction(std::forward<decltype(a)>(a), std::forward<decltype(b)>(b));
-      if (__result.hasError()) [[unlikely]] {
-        std::rethrow_exception(__result.error());
-      }
-      auto __value = std::move(__result.value());
-      return __value;
-    }
-    inline double multiply(double a, double b) override {
-      auto __result = _swiftPart.multiply(std::forward<decltype(a)>(a), std::forward<decltype(b)>(b));
-      if (__result.hasError()) [[unlikely]] {
-        std::rethrow_exception(__result.error());
-      }
-      auto __value = std::move(__result.value());
-      return __value;
-    }
-    inline double division(double a, double b) override {
-      auto __result = _swiftPart.division(std::forward<decltype(a)>(a), std::forward<decltype(b)>(b));
-      if (__result.hasError()) [[unlikely]] {
-        std::rethrow_exception(__result.error());
-      }
-      auto __value = std::move(__result.value());
-      return __value;
-    }
-    inline double test(double a, double b) override {
-      auto __result = _swiftPart.test(std::forward<decltype(a)>(a), std::forward<decltype(b)>(b));
-      if (__result.hasError()) [[unlikely]] {
-        std::rethrow_exception(__result.error());
-      }
-      auto __value = std::move(__result.value());
-      return __value;
     }
 
   private:

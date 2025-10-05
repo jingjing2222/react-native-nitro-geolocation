@@ -1,11 +1,14 @@
 import type { HybridObject } from "react-native-nitro-modules";
 
 // Configuration
+export type AuthorizationLevel = "always" | "whenInUse" | "auto";
+export type LocationProvider = "playServices" | "android" | "auto";
+
 export interface RNConfiguration {
   skipPermissionRequests: boolean;
-  authorizationLevel?: "always" | "whenInUse" | "auto";
+  authorizationLevel?: AuthorizationLevel;
   enableBackgroundLocationUpdates?: boolean;
-  locationProvider?: "playServices" | "android" | "auto";
+  locationProvider?: LocationProvider;
 }
 
 export interface NitroGeolocation

@@ -42,23 +42,7 @@ abstract class HybridNitroGeolocationSpec: HybridObject() {
   // Methods
   @DoNotStrip
   @Keep
-  abstract fun addition(a: Double, b: Double): Double
-  
-  @DoNotStrip
-  @Keep
-  abstract fun subtraction(a: Double, b: Double): Double
-  
-  @DoNotStrip
-  @Keep
-  abstract fun multiply(a: Double, b: Double): Double
-  
-  @DoNotStrip
-  @Keep
-  abstract fun division(a: Double, b: Double): Double
-  
-  @DoNotStrip
-  @Keep
-  abstract fun test(a: Double, b: Double): Double
+  abstract fun setRNConfiguration(config: RNConfiguration): Unit
 
   private external fun initHybrid(): HybridData
 
