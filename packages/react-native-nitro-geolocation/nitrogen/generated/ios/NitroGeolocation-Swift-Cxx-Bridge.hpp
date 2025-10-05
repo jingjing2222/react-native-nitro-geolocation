@@ -10,6 +10,8 @@
 // Forward declarations of C++ defined types
 // Forward declaration of `AuthorizationLevelInternal` to properly resolve imports.
 namespace margelo::nitro::nitrogeolocation { enum class AuthorizationLevelInternal; }
+// Forward declaration of `GeolocationError` to properly resolve imports.
+namespace margelo::nitro::nitrogeolocation { struct GeolocationError; }
 // Forward declaration of `HybridNitroGeolocationSpec` to properly resolve imports.
 namespace margelo::nitro::nitrogeolocation { class HybridNitroGeolocationSpec; }
 // Forward declaration of `LocationProviderInternal` to properly resolve imports.
@@ -21,12 +23,15 @@ namespace NitroGeolocation { class HybridNitroGeolocationSpec_cxx; }
 
 // Include C++ defined types
 #include "AuthorizationLevelInternal.hpp"
+#include "GeolocationError.hpp"
 #include "HybridNitroGeolocationSpec.hpp"
 #include "LocationProviderInternal.hpp"
 #include <NitroModules/Result.hpp>
 #include <exception>
+#include <functional>
 #include <memory>
 #include <optional>
+#include <string>
 
 /**
  * Contains specialized versions of C++ templated types so they can be accessed from Swift,
@@ -76,6 +81,80 @@ namespace margelo::nitro::nitrogeolocation::bridge::swift {
     return optional.has_value();
   }
   inline LocationProviderInternal get_std__optional_LocationProviderInternal_(const std::optional<LocationProviderInternal>& optional) noexcept {
+    return *optional;
+  }
+  
+  // pragma MARK: std::function<void()>
+  /**
+   * Specialized version of `std::function<void()>`.
+   */
+  using Func_void = std::function<void()>;
+  /**
+   * Wrapper class for a `std::function<void()>`, this can be used from Swift.
+   */
+  class Func_void_Wrapper final {
+  public:
+    explicit Func_void_Wrapper(std::function<void()>&& func): _function(std::make_unique<std::function<void()>>(std::move(func))) {}
+    inline void call() const noexcept {
+      _function->operator()();
+    }
+  private:
+    std::unique_ptr<std::function<void()>> _function;
+  } SWIFT_NONCOPYABLE;
+  Func_void create_Func_void(void* NON_NULL swiftClosureWrapper) noexcept;
+  inline Func_void_Wrapper wrap_Func_void(Func_void value) noexcept {
+    return Func_void_Wrapper(std::move(value));
+  }
+  
+  // pragma MARK: std::optional<std::function<void()>>
+  /**
+   * Specialized version of `std::optional<std::function<void()>>`.
+   */
+  using std__optional_std__function_void____ = std::optional<std::function<void()>>;
+  inline std::optional<std::function<void()>> create_std__optional_std__function_void____(const std::function<void()>& value) noexcept {
+    return std::optional<std::function<void()>>(value);
+  }
+  inline bool has_value_std__optional_std__function_void____(const std::optional<std::function<void()>>& optional) noexcept {
+    return optional.has_value();
+  }
+  inline std::function<void()> get_std__optional_std__function_void____(const std::optional<std::function<void()>>& optional) noexcept {
+    return *optional;
+  }
+  
+  // pragma MARK: std::function<void(const GeolocationError& /* error */)>
+  /**
+   * Specialized version of `std::function<void(const GeolocationError&)>`.
+   */
+  using Func_void_GeolocationError = std::function<void(const GeolocationError& /* error */)>;
+  /**
+   * Wrapper class for a `std::function<void(const GeolocationError& / * error * /)>`, this can be used from Swift.
+   */
+  class Func_void_GeolocationError_Wrapper final {
+  public:
+    explicit Func_void_GeolocationError_Wrapper(std::function<void(const GeolocationError& /* error */)>&& func): _function(std::make_unique<std::function<void(const GeolocationError& /* error */)>>(std::move(func))) {}
+    inline void call(GeolocationError error) const noexcept {
+      _function->operator()(error);
+    }
+  private:
+    std::unique_ptr<std::function<void(const GeolocationError& /* error */)>> _function;
+  } SWIFT_NONCOPYABLE;
+  Func_void_GeolocationError create_Func_void_GeolocationError(void* NON_NULL swiftClosureWrapper) noexcept;
+  inline Func_void_GeolocationError_Wrapper wrap_Func_void_GeolocationError(Func_void_GeolocationError value) noexcept {
+    return Func_void_GeolocationError_Wrapper(std::move(value));
+  }
+  
+  // pragma MARK: std::optional<std::function<void(const GeolocationError& /* error */)>>
+  /**
+   * Specialized version of `std::optional<std::function<void(const GeolocationError& / * error * /)>>`.
+   */
+  using std__optional_std__function_void_const_GeolocationError_____error______ = std::optional<std::function<void(const GeolocationError& /* error */)>>;
+  inline std::optional<std::function<void(const GeolocationError& /* error */)>> create_std__optional_std__function_void_const_GeolocationError_____error______(const std::function<void(const GeolocationError& /* error */)>& value) noexcept {
+    return std::optional<std::function<void(const GeolocationError& /* error */)>>(value);
+  }
+  inline bool has_value_std__optional_std__function_void_const_GeolocationError_____error______(const std::optional<std::function<void(const GeolocationError& /* error */)>>& optional) noexcept {
+    return optional.has_value();
+  }
+  inline std::function<void(const GeolocationError& /* error */)> get_std__optional_std__function_void_const_GeolocationError_____error______(const std::optional<std::function<void(const GeolocationError& /* error */)>>& optional) noexcept {
     return *optional;
   }
   

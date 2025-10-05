@@ -15,8 +15,13 @@
 
 // Forward declaration of `RNConfigurationInternal` to properly resolve imports.
 namespace margelo::nitro::nitrogeolocation { struct RNConfigurationInternal; }
+// Forward declaration of `GeolocationError` to properly resolve imports.
+namespace margelo::nitro::nitrogeolocation { struct GeolocationError; }
 
 #include "RNConfigurationInternal.hpp"
+#include <functional>
+#include <optional>
+#include "GeolocationError.hpp"
 
 namespace margelo::nitro::nitrogeolocation {
 
@@ -50,6 +55,7 @@ namespace margelo::nitro::nitrogeolocation {
     public:
       // Methods
       virtual void setRNConfiguration(const RNConfigurationInternal& config) = 0;
+      virtual void requestAuthorization(const std::optional<std::function<void()>>& success, const std::optional<std::function<void(const GeolocationError& /* error */)>>& error) = 0;
 
     protected:
       // Hybrid Setup
