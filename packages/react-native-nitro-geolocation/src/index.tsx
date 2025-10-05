@@ -1,5 +1,8 @@
 import { NitroModules } from "react-native-nitro-modules";
-import type { NitroGeolocation, RNConfigurationInternal } from "./NitroGeolocation.nitro";
+import type {
+  NitroGeolocation,
+  RNConfigurationInternal
+} from "./NitroGeolocation.nitro";
 
 const NitroGeolocationHybridObject =
   NitroModules.createHybridObject<NitroGeolocation>("NitroGeolocation");
@@ -20,7 +23,10 @@ function mapConfigToInternal(config: RNConfiguration): RNConfigurationInternal {
     skipPermissionRequests: config.skipPermissionRequests,
     authorizationLevel: config.authorizationLevel,
     enableBackgroundLocationUpdates: config.enableBackgroundLocationUpdates,
-    locationProvider: config.locationProvider === "android" ? "android_platform" : config.locationProvider
+    locationProvider:
+      config.locationProvider === "android"
+        ? "android_platform"
+        : config.locationProvider
   };
 }
 

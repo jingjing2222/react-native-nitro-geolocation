@@ -2,7 +2,10 @@ import type { HybridObject } from "react-native-nitro-modules";
 
 // Configuration - Internal (for C++ codegen, avoiding ANDROID macro conflict)
 export type AuthorizationLevelInternal = "always" | "whenInUse" | "auto";
-export type LocationProviderInternal = "playServices" | "android_platform" | "auto";
+export type LocationProviderInternal =
+  | "playServices"
+  | "android_platform"
+  | "auto";
 
 export interface RNConfigurationInternal {
   skipPermissionRequests: boolean;

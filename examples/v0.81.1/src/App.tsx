@@ -1,13 +1,13 @@
 import React, { useEffect } from "react";
 import {
+  Alert,
+  Button,
   SafeAreaView,
   ScrollView,
   StatusBar,
   StyleSheet,
   Text,
-  View,
-  Button,
-  Alert
+  View
 } from "react-native";
 import { setRNConfiguration } from "react-native-nitro-geolocation";
 
@@ -28,7 +28,10 @@ export default function App() {
       enableBackgroundLocationUpdates: true,
       locationProvider: "playServices"
     });
-    Alert.alert("Success", "Configuration 1 set: skipPermissionRequests=true, always, playServices");
+    Alert.alert(
+      "Success",
+      "Configuration 1 set: skipPermissionRequests=true, always, playServices"
+    );
   };
 
   const handleTestConfig2 = () => {
@@ -37,7 +40,10 @@ export default function App() {
       authorizationLevel: "whenInUse",
       locationProvider: "android"
     });
-    Alert.alert("Success", "Configuration 2 set: skipPermissionRequests=false, whenInUse, android");
+    Alert.alert(
+      "Success",
+      "Configuration 2 set: skipPermissionRequests=false, whenInUse, android"
+    );
   };
 
   const handleTestConfig3 = () => {
@@ -45,7 +51,10 @@ export default function App() {
       skipPermissionRequests: false,
       locationProvider: "auto"
     });
-    Alert.alert("Success", "Configuration 3 set: skipPermissionRequests=false, auto");
+    Alert.alert(
+      "Success",
+      "Configuration 3 set: skipPermissionRequests=false, auto"
+    );
   };
 
   return (
@@ -63,22 +72,35 @@ export default function App() {
             </Text>
 
             <View style={styles.buttonContainer}>
-              <Button title="Test Config 1 (Play Services)" onPress={handleTestConfig1} />
+              <Button
+                title="Test Config 1 (Play Services)"
+                onPress={handleTestConfig1}
+              />
             </View>
 
             <View style={styles.buttonContainer}>
-              <Button title="Test Config 2 (Android)" onPress={handleTestConfig2} />
+              <Button
+                title="Test Config 2 (Android)"
+                onPress={handleTestConfig2}
+              />
             </View>
 
             <View style={styles.buttonContainer}>
-              <Button title="Test Config 3 (Auto)" onPress={handleTestConfig3} />
+              <Button
+                title="Test Config 3 (Auto)"
+                onPress={handleTestConfig3}
+              />
             </View>
 
             <View style={styles.infoContainer}>
               <Text style={styles.infoTitle}>Current Implementation:</Text>
               <Text style={styles.infoText}>✅ setRNConfiguration</Text>
-              <Text style={styles.infoText}>⏳ requestAuthorization (not yet)</Text>
-              <Text style={styles.infoText}>⏳ getCurrentPosition (not yet)</Text>
+              <Text style={styles.infoText}>
+                ⏳ requestAuthorization (not yet)
+              </Text>
+              <Text style={styles.infoText}>
+                ⏳ getCurrentPosition (not yet)
+              </Text>
               <Text style={styles.infoText}>⏳ watchPosition (not yet)</Text>
               <Text style={styles.infoText}>⏳ clearWatch (not yet)</Text>
               <Text style={styles.infoText}>⏳ stopObserving (not yet)</Text>
