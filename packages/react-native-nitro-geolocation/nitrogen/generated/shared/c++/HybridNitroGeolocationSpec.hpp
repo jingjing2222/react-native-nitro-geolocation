@@ -13,10 +13,10 @@
 #error NitroModules cannot be found! Are you sure you installed NitroModules properly?
 #endif
 
-// Forward declaration of `RNConfiguration` to properly resolve imports.
-namespace margelo::nitro::nitrogeolocation { struct RNConfiguration; }
+// Forward declaration of `RNConfigurationInternal` to properly resolve imports.
+namespace margelo::nitro::nitrogeolocation { struct RNConfigurationInternal; }
 
-#include "RNConfiguration.hpp"
+#include "RNConfigurationInternal.hpp"
 
 namespace margelo::nitro::nitrogeolocation {
 
@@ -49,7 +49,7 @@ namespace margelo::nitro::nitrogeolocation {
 
     public:
       // Methods
-      virtual void setRNConfiguration(const RNConfiguration& config) = 0;
+      virtual void setRNConfiguration(const RNConfigurationInternal& config) = 0;
 
     protected:
       // Hybrid Setup

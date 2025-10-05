@@ -8,21 +8,21 @@
 #pragma once
 
 // Forward declarations of C++ defined types
-// Forward declaration of `AuthorizationLevel` to properly resolve imports.
-namespace margelo::nitro::nitrogeolocation { enum class AuthorizationLevel; }
+// Forward declaration of `AuthorizationLevelInternal` to properly resolve imports.
+namespace margelo::nitro::nitrogeolocation { enum class AuthorizationLevelInternal; }
 // Forward declaration of `HybridNitroGeolocationSpec` to properly resolve imports.
 namespace margelo::nitro::nitrogeolocation { class HybridNitroGeolocationSpec; }
-// Forward declaration of `LocationProvider` to properly resolve imports.
-namespace margelo::nitro::nitrogeolocation { enum class LocationProvider; }
+// Forward declaration of `LocationProviderInternal` to properly resolve imports.
+namespace margelo::nitro::nitrogeolocation { enum class LocationProviderInternal; }
 
 // Forward declarations of Swift defined types
 // Forward declaration of `HybridNitroGeolocationSpec_cxx` to properly resolve imports.
 namespace NitroGeolocation { class HybridNitroGeolocationSpec_cxx; }
 
 // Include C++ defined types
-#include "AuthorizationLevel.hpp"
+#include "AuthorizationLevelInternal.hpp"
 #include "HybridNitroGeolocationSpec.hpp"
-#include "LocationProvider.hpp"
+#include "LocationProviderInternal.hpp"
 #include <NitroModules/Result.hpp>
 #include <exception>
 #include <memory>
@@ -34,18 +34,18 @@ namespace NitroGeolocation { class HybridNitroGeolocationSpec_cxx; }
  */
 namespace margelo::nitro::nitrogeolocation::bridge::swift {
 
-  // pragma MARK: std::optional<AuthorizationLevel>
+  // pragma MARK: std::optional<AuthorizationLevelInternal>
   /**
-   * Specialized version of `std::optional<AuthorizationLevel>`.
+   * Specialized version of `std::optional<AuthorizationLevelInternal>`.
    */
-  using std__optional_AuthorizationLevel_ = std::optional<AuthorizationLevel>;
-  inline std::optional<AuthorizationLevel> create_std__optional_AuthorizationLevel_(const AuthorizationLevel& value) noexcept {
-    return std::optional<AuthorizationLevel>(value);
+  using std__optional_AuthorizationLevelInternal_ = std::optional<AuthorizationLevelInternal>;
+  inline std::optional<AuthorizationLevelInternal> create_std__optional_AuthorizationLevelInternal_(const AuthorizationLevelInternal& value) noexcept {
+    return std::optional<AuthorizationLevelInternal>(value);
   }
-  inline bool has_value_std__optional_AuthorizationLevel_(const std::optional<AuthorizationLevel>& optional) noexcept {
+  inline bool has_value_std__optional_AuthorizationLevelInternal_(const std::optional<AuthorizationLevelInternal>& optional) noexcept {
     return optional.has_value();
   }
-  inline AuthorizationLevel get_std__optional_AuthorizationLevel_(const std::optional<AuthorizationLevel>& optional) noexcept {
+  inline AuthorizationLevelInternal get_std__optional_AuthorizationLevelInternal_(const std::optional<AuthorizationLevelInternal>& optional) noexcept {
     return *optional;
   }
   
@@ -64,18 +64,18 @@ namespace margelo::nitro::nitrogeolocation::bridge::swift {
     return *optional;
   }
   
-  // pragma MARK: std::optional<LocationProvider>
+  // pragma MARK: std::optional<LocationProviderInternal>
   /**
-   * Specialized version of `std::optional<LocationProvider>`.
+   * Specialized version of `std::optional<LocationProviderInternal>`.
    */
-  using std__optional_LocationProvider_ = std::optional<LocationProvider>;
-  inline std::optional<LocationProvider> create_std__optional_LocationProvider_(const LocationProvider& value) noexcept {
-    return std::optional<LocationProvider>(value);
+  using std__optional_LocationProviderInternal_ = std::optional<LocationProviderInternal>;
+  inline std::optional<LocationProviderInternal> create_std__optional_LocationProviderInternal_(const LocationProviderInternal& value) noexcept {
+    return std::optional<LocationProviderInternal>(value);
   }
-  inline bool has_value_std__optional_LocationProvider_(const std::optional<LocationProvider>& optional) noexcept {
+  inline bool has_value_std__optional_LocationProviderInternal_(const std::optional<LocationProviderInternal>& optional) noexcept {
     return optional.has_value();
   }
-  inline LocationProvider get_std__optional_LocationProvider_(const std::optional<LocationProvider>& optional) noexcept {
+  inline LocationProviderInternal get_std__optional_LocationProviderInternal_(const std::optional<LocationProviderInternal>& optional) noexcept {
     return *optional;
   }
   

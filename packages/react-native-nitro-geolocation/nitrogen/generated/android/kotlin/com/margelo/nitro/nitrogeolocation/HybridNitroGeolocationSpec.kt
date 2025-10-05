@@ -42,7 +42,7 @@ abstract class HybridNitroGeolocationSpec: HybridObject() {
   // Methods
   @DoNotStrip
   @Keep
-  abstract fun setRNConfiguration(config: RNConfiguration): Unit
+  abstract fun setRNConfiguration(config: RNConfigurationInternal): Unit
 
   private external fun initHybrid(): HybridData
 

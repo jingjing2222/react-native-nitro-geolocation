@@ -53,7 +53,7 @@ namespace margelo::nitro::nitrogeolocation {
 
   public:
     // Methods
-    void setRNConfiguration(const RNConfiguration& config) override;
+    void setRNConfiguration(const RNConfigurationInternal& config) override;
 
   private:
     friend HybridBase;

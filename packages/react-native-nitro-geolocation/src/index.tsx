@@ -1,15 +1,32 @@
 import { NitroModules } from "react-native-nitro-modules";
-import type { NitroGeolocation } from "./NitroGeolocation.nitro";
-import type { RNConfiguration } from "./NitroGeolocation.nitro";
+import type { NitroGeolocation, RNConfigurationInternal } from "./NitroGeolocation.nitro";
 
 const NitroGeolocationHybridObject =
   NitroModules.createHybridObject<NitroGeolocation>("NitroGeolocation");
 
-export function setRNConfiguration(config: RNConfiguration): void {
-  NitroGeolocationHybridObject.setRNConfiguration(config);
+// Public API types (compatible with @react-native-community/geolocation)
+export type AuthorizationLevel = "always" | "whenInUse" | "auto";
+export type LocationProvider = "playServices" | "android" | "auto";
+
+export interface RNConfiguration {
+  skipPermissionRequests: boolean;
+  authorizationLevel?: AuthorizationLevel;
+  enableBackgroundLocationUpdates?: boolean;
+  locationProvider?: LocationProvider;
 }
 
-export type { RNConfiguration } from "./NitroGeolocation.nitro";
+function mapConfigToInternal(config: RNConfiguration): RNConfigurationInternal {
+  return {
+    skipPermissionRequests: config.skipPermissionRequests,
+    authorizationLevel: config.authorizationLevel,
+    enableBackgroundLocationUpdates: config.enableBackgroundLocationUpdates,
+    locationProvider: config.locationProvider === "android" ? "android_platform" : config.locationProvider
+  };
+}
+
+export function setRNConfiguration(config: RNConfiguration): void {
+  NitroGeolocationHybridObject.setRNConfiguration(mapConfigToInternal(config));
+}
 
 // Default export for compatibility
 const Geolocation = {

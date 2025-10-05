@@ -4,14 +4,14 @@ import com.facebook.proguard.annotations.DoNotStrip
 
 @DoNotStrip
 class NitroGeolocation : HybridNitroGeolocationSpec() {
-    private var configuration: RNConfiguration = RNConfiguration(
+    private var configuration: RNConfigurationInternal = RNConfigurationInternal(
         skipPermissionRequests = false,
         authorizationLevel = null,
         enableBackgroundLocationUpdates = null,
         locationProvider = null
     )
 
-    override fun setRNConfiguration(config: RNConfiguration) {
+    override fun setRNConfiguration(config: RNConfigurationInternal) {
         configuration = config
     }
 }

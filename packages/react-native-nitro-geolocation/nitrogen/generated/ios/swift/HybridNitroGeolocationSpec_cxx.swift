@@ -110,7 +110,7 @@ open class HybridNitroGeolocationSpec_cxx {
 
   // Methods
   @inline(__always)
-  public final func setRNConfiguration(config: RNConfiguration) -> bridge.Result_void_ {
+  public final func setRNConfiguration(config: RNConfigurationInternal) -> bridge.Result_void_ {
     do {
       try self.__implementation.setRNConfiguration(config: config)
       return bridge.create_Result_void_()

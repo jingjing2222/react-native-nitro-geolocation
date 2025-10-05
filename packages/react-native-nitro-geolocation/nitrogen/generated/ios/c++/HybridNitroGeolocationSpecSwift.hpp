@@ -12,17 +12,17 @@
 // Forward declaration of `HybridNitroGeolocationSpec_cxx` to properly resolve imports.
 namespace NitroGeolocation { class HybridNitroGeolocationSpec_cxx; }
 
-// Forward declaration of `RNConfiguration` to properly resolve imports.
-namespace margelo::nitro::nitrogeolocation { struct RNConfiguration; }
-// Forward declaration of `AuthorizationLevel` to properly resolve imports.
-namespace margelo::nitro::nitrogeolocation { enum class AuthorizationLevel; }
-// Forward declaration of `LocationProvider` to properly resolve imports.
-namespace margelo::nitro::nitrogeolocation { enum class LocationProvider; }
+// Forward declaration of `RNConfigurationInternal` to properly resolve imports.
+namespace margelo::nitro::nitrogeolocation { struct RNConfigurationInternal; }
+// Forward declaration of `AuthorizationLevelInternal` to properly resolve imports.
+namespace margelo::nitro::nitrogeolocation { enum class AuthorizationLevelInternal; }
+// Forward declaration of `LocationProviderInternal` to properly resolve imports.
+namespace margelo::nitro::nitrogeolocation { enum class LocationProviderInternal; }
 
-#include "RNConfiguration.hpp"
-#include "AuthorizationLevel.hpp"
+#include "RNConfigurationInternal.hpp"
+#include "AuthorizationLevelInternal.hpp"
 #include <optional>
-#include "LocationProvider.hpp"
+#include "LocationProviderInternal.hpp"
 
 #include "NitroGeolocation-Swift-Cxx-Umbrella.hpp"
 
@@ -65,7 +65,7 @@ namespace margelo::nitro::nitrogeolocation {
 
   public:
     // Methods
-    inline void setRNConfiguration(const RNConfiguration& config) override {
+    inline void setRNConfiguration(const RNConfigurationInternal& config) override {
       auto __result = _swiftPart.setRNConfiguration(std::forward<decltype(config)>(config));
       if (__result.hasError()) [[unlikely]] {
         std::rethrow_exception(__result.error());

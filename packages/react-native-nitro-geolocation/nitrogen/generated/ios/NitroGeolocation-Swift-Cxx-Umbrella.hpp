@@ -8,20 +8,20 @@
 #pragma once
 
 // Forward declarations of C++ defined types
-// Forward declaration of `AuthorizationLevel` to properly resolve imports.
-namespace margelo::nitro::nitrogeolocation { enum class AuthorizationLevel; }
+// Forward declaration of `AuthorizationLevelInternal` to properly resolve imports.
+namespace margelo::nitro::nitrogeolocation { enum class AuthorizationLevelInternal; }
 // Forward declaration of `HybridNitroGeolocationSpec` to properly resolve imports.
 namespace margelo::nitro::nitrogeolocation { class HybridNitroGeolocationSpec; }
-// Forward declaration of `LocationProvider` to properly resolve imports.
-namespace margelo::nitro::nitrogeolocation { enum class LocationProvider; }
-// Forward declaration of `RNConfiguration` to properly resolve imports.
-namespace margelo::nitro::nitrogeolocation { struct RNConfiguration; }
+// Forward declaration of `LocationProviderInternal` to properly resolve imports.
+namespace margelo::nitro::nitrogeolocation { enum class LocationProviderInternal; }
+// Forward declaration of `RNConfigurationInternal` to properly resolve imports.
+namespace margelo::nitro::nitrogeolocation { struct RNConfigurationInternal; }
 
 // Include C++ defined types
-#include "AuthorizationLevel.hpp"
+#include "AuthorizationLevelInternal.hpp"
 #include "HybridNitroGeolocationSpec.hpp"
-#include "LocationProvider.hpp"
-#include "RNConfiguration.hpp"
+#include "LocationProviderInternal.hpp"
+#include "RNConfigurationInternal.hpp"
 #include <NitroModules/Result.hpp>
 #include <exception>
 #include <memory>

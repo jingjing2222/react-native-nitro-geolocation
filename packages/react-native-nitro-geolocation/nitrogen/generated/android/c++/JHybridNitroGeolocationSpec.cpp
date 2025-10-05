@@ -7,20 +7,20 @@
 
 #include "JHybridNitroGeolocationSpec.hpp"
 
-// Forward declaration of `RNConfiguration` to properly resolve imports.
-namespace margelo::nitro::nitrogeolocation { struct RNConfiguration; }
-// Forward declaration of `AuthorizationLevel` to properly resolve imports.
-namespace margelo::nitro::nitrogeolocation { enum class AuthorizationLevel; }
-// Forward declaration of `LocationProvider` to properly resolve imports.
-namespace margelo::nitro::nitrogeolocation { enum class LocationProvider; }
+// Forward declaration of `RNConfigurationInternal` to properly resolve imports.
+namespace margelo::nitro::nitrogeolocation { struct RNConfigurationInternal; }
+// Forward declaration of `AuthorizationLevelInternal` to properly resolve imports.
+namespace margelo::nitro::nitrogeolocation { enum class AuthorizationLevelInternal; }
+// Forward declaration of `LocationProviderInternal` to properly resolve imports.
+namespace margelo::nitro::nitrogeolocation { enum class LocationProviderInternal; }
 
-#include "RNConfiguration.hpp"
-#include "JRNConfiguration.hpp"
-#include "AuthorizationLevel.hpp"
+#include "RNConfigurationInternal.hpp"
+#include "JRNConfigurationInternal.hpp"
+#include "AuthorizationLevelInternal.hpp"
 #include <optional>
-#include "JAuthorizationLevel.hpp"
-#include "LocationProvider.hpp"
-#include "JLocationProvider.hpp"
+#include "JAuthorizationLevelInternal.hpp"
+#include "LocationProviderInternal.hpp"
+#include "JLocationProviderInternal.hpp"
 
 namespace margelo::nitro::nitrogeolocation {
 
@@ -48,9 +48,9 @@ namespace margelo::nitro::nitrogeolocation {
   
 
   // Methods
-  void JHybridNitroGeolocationSpec::setRNConfiguration(const RNConfiguration& config) {
-    static const auto method = javaClassStatic()->getMethod<void(jni::alias_ref<JRNConfiguration> /* config */)>("setRNConfiguration");
-    method(_javaPart, JRNConfiguration::fromCpp(config));
+  void JHybridNitroGeolocationSpec::setRNConfiguration(const RNConfigurationInternal& config) {
+    static const auto method = javaClassStatic()->getMethod<void(jni::alias_ref<JRNConfigurationInternal> /* config */)>("setRNConfiguration");
+    method(_javaPart, JRNConfigurationInternal::fromCpp(config));
   }
 
 } // namespace margelo::nitro::nitrogeolocation

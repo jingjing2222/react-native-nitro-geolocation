@@ -14,7 +14,7 @@ public protocol HybridNitroGeolocationSpec_protocol: HybridObject {
   
 
   // Methods
-  func setRNConfiguration(config: RNConfiguration) throws -> Void
+  func setRNConfiguration(config: RNConfigurationInternal) throws -> Void
 }
 
 /// See ``HybridNitroGeolocationSpec``
