@@ -63,6 +63,9 @@ namespace margelo::nitro::nitrogeolocation {
       virtual void setRNConfiguration(const RNConfigurationInternal& config) = 0;
       virtual void requestAuthorization(const std::optional<std::function<void()>>& success, const std::optional<std::function<void(const GeolocationError& /* error */)>>& error) = 0;
       virtual void getCurrentPosition(const std::function<void(const GeolocationPosition& /* position */)>& success, const std::optional<std::function<void(const GeolocationError& /* error */)>>& error, const std::optional<GeolocationOptions>& options) = 0;
+      virtual double watchPosition(const std::function<void(const GeolocationPosition& /* position */)>& success, const std::optional<std::function<void(const GeolocationError& /* error */)>>& error, const std::optional<GeolocationOptions>& options) = 0;
+      virtual void clearWatch(double watchId) = 0;
+      virtual void stopObserving() = 0;
 
     protected:
       // Hybrid Setup

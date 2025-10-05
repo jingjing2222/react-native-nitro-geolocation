@@ -1,0 +1,26 @@
+import { NitroModules } from "react-native-nitro-modules";
+import type { NitroGeolocation } from "./NitroGeolocation.nitro";
+import type {
+  GeolocationError,
+  GeolocationOptions,
+  GeolocationPosition
+} from "./types";
+
+/**
+ * Invokes the success callback whenever the location changes.
+ * Returns a watchId (number) that can be used with clearWatch().
+ *
+ * @param success - Called whenever the location changes
+ * @param error - Called if an error occurs
+ * @param options - Configuration options for watching position
+ * @returns watchId - A number that identifies this watch session
+ */
+export function watchPosition(
+  success: (position: GeolocationPosition) => void,
+  error?: (error: GeolocationError) => void,
+  options?: GeolocationOptions
+): number {
+  const nitroGeolocation =
+    NitroModules.createHybridObject<NitroGeolocation>("NitroGeolocation");
+  return nitroGeolocation.watchPosition(success, error, options);
+}

@@ -37,10 +37,22 @@ namespace margelo::nitro::nitrogeolocation {
       jni::local_ref<jni::JDouble> maximumAge = this->getFieldValue(fieldMaximumAge);
       static const auto fieldEnableHighAccuracy = clazz->getField<jni::JBoolean>("enableHighAccuracy");
       jni::local_ref<jni::JBoolean> enableHighAccuracy = this->getFieldValue(fieldEnableHighAccuracy);
+      static const auto fieldInterval = clazz->getField<jni::JDouble>("interval");
+      jni::local_ref<jni::JDouble> interval = this->getFieldValue(fieldInterval);
+      static const auto fieldFastestInterval = clazz->getField<jni::JDouble>("fastestInterval");
+      jni::local_ref<jni::JDouble> fastestInterval = this->getFieldValue(fieldFastestInterval);
+      static const auto fieldDistanceFilter = clazz->getField<jni::JDouble>("distanceFilter");
+      jni::local_ref<jni::JDouble> distanceFilter = this->getFieldValue(fieldDistanceFilter);
+      static const auto fieldUseSignificantChanges = clazz->getField<jni::JBoolean>("useSignificantChanges");
+      jni::local_ref<jni::JBoolean> useSignificantChanges = this->getFieldValue(fieldUseSignificantChanges);
       return GeolocationOptions(
         timeout != nullptr ? std::make_optional(timeout->value()) : std::nullopt,
         maximumAge != nullptr ? std::make_optional(maximumAge->value()) : std::nullopt,
-        enableHighAccuracy != nullptr ? std::make_optional(static_cast<bool>(enableHighAccuracy->value())) : std::nullopt
+        enableHighAccuracy != nullptr ? std::make_optional(static_cast<bool>(enableHighAccuracy->value())) : std::nullopt,
+        interval != nullptr ? std::make_optional(interval->value()) : std::nullopt,
+        fastestInterval != nullptr ? std::make_optional(fastestInterval->value()) : std::nullopt,
+        distanceFilter != nullptr ? std::make_optional(distanceFilter->value()) : std::nullopt,
+        useSignificantChanges != nullptr ? std::make_optional(static_cast<bool>(useSignificantChanges->value())) : std::nullopt
       );
     }
 
@@ -53,7 +65,11 @@ namespace margelo::nitro::nitrogeolocation {
       return newInstance(
         value.timeout.has_value() ? jni::JDouble::valueOf(value.timeout.value()) : nullptr,
         value.maximumAge.has_value() ? jni::JDouble::valueOf(value.maximumAge.value()) : nullptr,
-        value.enableHighAccuracy.has_value() ? jni::JBoolean::valueOf(value.enableHighAccuracy.value()) : nullptr
+        value.enableHighAccuracy.has_value() ? jni::JBoolean::valueOf(value.enableHighAccuracy.value()) : nullptr,
+        value.interval.has_value() ? jni::JDouble::valueOf(value.interval.value()) : nullptr,
+        value.fastestInterval.has_value() ? jni::JDouble::valueOf(value.fastestInterval.value()) : nullptr,
+        value.distanceFilter.has_value() ? jni::JDouble::valueOf(value.distanceFilter.value()) : nullptr,
+        value.useSignificantChanges.has_value() ? jni::JBoolean::valueOf(value.useSignificantChanges.value()) : nullptr
       );
     }
   };

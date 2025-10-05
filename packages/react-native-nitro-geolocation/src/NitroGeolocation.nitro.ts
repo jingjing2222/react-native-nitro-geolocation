@@ -44,6 +44,10 @@ export interface GeolocationOptions {
   timeout?: number;
   maximumAge?: number;
   enableHighAccuracy?: boolean;
+  interval?: number;
+  fastestInterval?: number;
+  distanceFilter?: number;
+  useSignificantChanges?: boolean;
 }
 
 export interface NitroGeolocation
@@ -58,4 +62,11 @@ export interface NitroGeolocation
     error?: (error: GeolocationError) => void,
     options?: GeolocationOptions
   ): void;
+  watchPosition(
+    success: (position: GeolocationPosition) => void,
+    error?: (error: GeolocationError) => void,
+    options?: GeolocationOptions
+  ): number;
+  clearWatch(watchId: number): void;
+  stopObserving(): void;
 }

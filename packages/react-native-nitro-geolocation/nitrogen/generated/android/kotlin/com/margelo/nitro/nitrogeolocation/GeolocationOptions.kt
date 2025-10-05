@@ -29,7 +29,19 @@ data class GeolocationOptions
     val maximumAge: Double?,
     @DoNotStrip
     @Keep
-    val enableHighAccuracy: Boolean?
+    val enableHighAccuracy: Boolean?,
+    @DoNotStrip
+    @Keep
+    val interval: Double?,
+    @DoNotStrip
+    @Keep
+    val fastestInterval: Double?,
+    @DoNotStrip
+    @Keep
+    val distanceFilter: Double?,
+    @DoNotStrip
+    @Keep
+    val useSignificantChanges: Boolean?
   ) {
   /* main constructor */
 }
