@@ -313,7 +313,7 @@ export default function App() {
               <Text style={styles.infoText}>✅ getCurrentPosition</Text>
               <Text style={styles.infoText}>✅ watchPosition</Text>
               <Text style={styles.infoText}>✅ clearWatch</Text>
-              <Text style={styles.infoText}>⏳ stopObserving (not yet)</Text>
+              <Text style={styles.infoText}>✅ stopObserving</Text>
             </View>
           </View>
         </View>
