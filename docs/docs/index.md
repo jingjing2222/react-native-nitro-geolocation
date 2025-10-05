@@ -7,11 +7,11 @@ hero:
   tagline: Native geolocation, now Nitro-powered.
   actions:
     - theme: brand
-      text: Quick Start
+      text: Introduction
       link: /guide/
     - theme: alt
-      text: GitHub
-      link: https://github.com/jingjing2222/react-native-nitro-geolocation
+      text: Quick Start
+      link: /guide/quick-start/
   image:
     src: /logo.png
     alt: Nitro Geolocation Logo

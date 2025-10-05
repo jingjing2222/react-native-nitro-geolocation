@@ -1,210 +1,46 @@
 # Introduction
 
-Rspress supports not only Markdown but also [MDX](https://mdxjs.com/), a powerful way to develop content.
+The original [`@react-native-community/geolocation`](https://github.com/michalchudziak/react-native-geolocation) package was once the standard way to access device location in React Native apps.
+However, its last update was in **2024**.
 
-## Markdown
+With the React Native ecosystem moving toward **TurboModules**, **Fabric**, and **JSI-based architecture**, the classic bridge implementation of `@react-native-community/geolocation` no longer provides the best performance or developer experience.
 
-MDX is a superset of Markdown, which means you can write Markdown files as usual. For example:
+This project — **Nitro Geolocation** — is a modern reimplementation of that library, designed for the **Nitro Module** system.
+It aims to provide the same familiar API surface while delivering:
 
-```md
-# Hello world
-```
+- 🚀 **Faster performance** through direct JSI bindings
+- 📱 **Improved native consistency** across Android and iOS
+- 🔁 **Seamless migration** from `@react-native-community/geolocation`
+- 🧩 **TypeScript-first** developer experience
+- 🔄 **100% API compatibility** — Nitro Geolocation can be used as a **drop-in replacement**, fully substituting `@react-native-community/geolocation` without any code changes
 
-## Use component
+Whether you're upgrading an existing app or building a new one using the latest React Native architecture, **Nitro Geolocation** gives you the same simplicity — now with modern internals.
 
-When you want to use React components in Markdown files, you should name your files with `.mdx` extension. For example:
+## Motivation
 
-```mdx
-// docs/index.mdx
-import { CustomComponent } from './custom';
+The motivation behind Nitro Geolocation is simple:
+React Native has evolved, but some of its core community modules haven’t kept up.
 
-# Hello world
+`@react-native-community/geolocation` was originally based on the **legacy bridge**, which introduces several issues:
 
-<CustomComponent />
-```
+- Extra serialization overhead between JS and native layers
+- Delayed responses when retrieving high-frequency location updates
+- Difficulties integrating with concurrent React or Fabric
+- Limited TypeScript support and inconsistent permission handling
 
-## Front matter
+As React Native officially embraces **JSI** and **TurboModules**, maintaining legacy modules becomes increasingly inefficient.
+That’s why this project started — to **modernize the Geolocation API** using the current runtime architecture.
 
-You can add Front Matter at the beginning of your Markdown file, which is a YAML-formatted object that defines some metadata. For example:
+## Why Nitro Module?
 
-```yaml
----
-title: Hello world
----
-```
+The **Nitro Module** system provides the next generation of native modules for React Native.
+Instead of relying on the old bridge (JSON serialization between JS and native), Nitro Modules communicate directly through **JSI (JavaScript Interface)**.
 
-> Note: By default, Rspress uses h1 headings as html headings.
+This enables:
 
-You can also access properties defined in Front Matter in the body, for example:
+- ⚡ **Zero-copy native calls** — no bridge overhead
+- 🧠 **Synchronous APIs** for critical paths
+- 🔧 **Better integration** with the new Fabric renderer
+- 🧩 **Cross-platform consistency** and simpler maintenance
 
-```markdown
----
-title: Hello world
----
-
-# {frontmatter.title}
-```
-
-The previously defined properties will be passed to the component as `frontmatter` properties. So the final output will be:
-
-```html
-<h1>Hello world</h1>
-```
-
-## Custom container
-
-You can use the `:::` syntax to create custom containers and support custom titles. For example:
-
-**Input:**
-
-```markdown
-:::tip
-This is a `block` of type `tip`
-:::
-
-:::info
-This is a `block` of type `info`
-:::
-
-:::warning
-This is a `block` of type `warning`
-:::
-
-:::danger
-This is a `block` of type `danger`
-:::
-
-::: details
-This is a `block` of type `details`
-:::
-
-:::tip Custom Title
-This is a `block` of `Custom Title`
-:::
-
-:::tip{title="Custom Title"}
-This is a `block` of `Custom Title`
-:::
-```
-
-**Output:**
-
-:::tip
-This is a `block` of type `tip`
-:::
-
-:::info
-This is a `block` of type `info`
-:::
-
-:::warning
-This is a `block` of type `warning`
-:::
-
-:::danger
-This is a `block` of type `danger`
-:::
-
-::: details
-This is a `block` of type `details`
-:::
-
-:::tip Custom Title
-This is a `block` of `Custom Title`
-:::
-
-:::tip{title="Custom Title"}
-This is a `block` of `Custom Title`
-:::
-
-## Code block
-
-### Basic usage
-
-You can use the \`\`\` syntax to create code blocks and support custom titles. For example:
-
-**Input:**
-
-````md
-```js
-console.log('Hello World');
-```
-
-```js title="hello.js"
-console.log('Hello World');
-```
-````
-
-**Output:**
-
-```js
-console.log('Hello World');
-```
-
-```js title="hello.js"
-console.log('Hello World');
-```
-
-### Show line numbers
-
-If you want to display line numbers, you can enable the `showLineNumbers` option in the config file:
-
-```ts title="rspress.config.ts"
-export default {
-  // ...
-  markdown: {
-    showLineNumbers: true,
-  },
-};
-```
-
-### Wrap code
-
-If you want to wrap long code line by default, you can enable the `defaultWrapCode` option in the config file:
-
-```ts title="rspress.config.ts"
-export default {
-  // ...
-  markdown: {
-    defaultWrapCode: true,
-  },
-};
-```
-
-### Line highlighting
-
-You can also apply line highlighting and code block title at the same time, for example:
-
-**Input:**
-
-````md
-```js title="hello.js" {1,3-5}
-console.log('Hello World');
-
-const a = 1;
-
-console.log(a);
-
-const b = 2;
-
-console.log(b);
-```
-````
-
-**Output:**
-
-```js title="hello.js" {1,3-5}
-console.log('Hello World');
-
-const a = 1;
-
-console.log(a);
-
-const b = 2;
-
-console.log(b);
-```
-
-## Rustify MDX compiler
-
-You can enable Rustify MDX compiler by following config:
+In short, Nitro Geolocation isn’t just a rewrite — it’s a **forward-compatible foundation** for future React Native development, **fully compatible with existing `@react-native-community/geolocation` usage**.
