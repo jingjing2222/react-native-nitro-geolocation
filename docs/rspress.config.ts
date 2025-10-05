@@ -3,7 +3,7 @@ import { defineConfig } from 'rspress/config';
 
 export default defineConfig({
   root: path.join(__dirname, 'docs'),
-  title: 'My Site',
+  title: 'react-native-nitro-geolocation',
   icon: '/logo.png',
   logo: '/logo.png',
   logoText: "react-native-nitro-geolocation",

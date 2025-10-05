@@ -3,11 +3,11 @@ pageType: home
 
 hero:
   name: Nitro Geolocation
-  text: Universal Geolocation for Nitro
-  tagline: A modern, type-safe port of @react-native-community/geolocation for Nitro runtime.
+  text: A React Native Geolocation module by Nitro.
+  tagline: Native geolocation, now Nitro-powered.
   actions:
     - theme: brand
-      text: Get Started
+      text: Quick Start
       link: /guide/
     - theme: alt
       text: GitHub
@@ -17,22 +17,22 @@ hero:
     alt: Nitro Geolocation Logo
 
 features:
-  - title: Cross-Platform Geolocation
-    details: Works seamlessly across Nitro, web, and native environments using a unified API layer.
-    icon: 🌍
-  - title: TypeScript Support
-    details: Fully typed API for safer integration and better developer experience.
-    icon: 📘
-  - title: Nitro Optimized
-    details: Designed specifically for Nitro runtime with SSR and Edge support.
-    icon: ⚡
-  - title: Permission Handling
-    details: Automatically manages browser and native geolocation permissions.
-    icon: 🔐
-  - title: Graceful Fallbacks
-    details: Provides configurable fallback behavior when geolocation is unavailable (e.g., IP-based).
-    icon: 🧭
-  - title: Easy Migration
-    details: Drop-in replacement for @react-native-community/geolocation with minimal changes.
+  - title: Fully native implementation
+    details: Access device geolocation data through JSI and TurboModules for maximum performance.
+    icon: 📡
+  - title: Drop-in replacement
+    details: Provides the same API surface as @react-native-community/geolocation for easy migration.
     icon: 🔁
+  - title: Consistent Android & iOS behavior
+    details: Unified permission handling, background location consistency, and improved accuracy tuning.
+    icon: 📱
+  - title: Low-latency bridge
+    details: Built on top of the Nitro/Turbo bridge, reducing async overhead and JS thread blocking.
+    icon: ⚙️
+  - title: TypeScript ready
+    details: Full type definitions for getCurrentPosition, watchPosition, and clearWatch APIs.
+    icon: 📘
+  - title: Easy integration
+    details: Compatible with Expo modules, RN CLI, and custom native builds out of the box.
+    icon: 🧩
 ---
