@@ -1,10 +1,14 @@
 import type { HybridObject } from "react-native-nitro-modules";
 
+// Configuration
+export interface RNConfiguration {
+  skipPermissionRequests: boolean;
+  authorizationLevel?: "always" | "whenInUse" | "auto";
+  enableBackgroundLocationUpdates?: boolean;
+  locationProvider?: "playServices" | "android" | "auto";
+}
+
 export interface NitroGeolocation
   extends HybridObject<{ ios: "swift"; android: "kotlin" }> {
-  addition(a: number, b: number): number;
-  subtraction(a: number, b: number): number;
-  multiply(a: number, b: number): number;
-  division(a: number, b: number): number;
-  test(a: number, b: number): number;
+  setRNConfiguration(config: RNConfiguration): void;
 }

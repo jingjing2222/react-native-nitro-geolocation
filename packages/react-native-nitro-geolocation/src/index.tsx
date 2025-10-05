@@ -1,25 +1,19 @@
 import { NitroModules } from "react-native-nitro-modules";
 import type { NitroGeolocation } from "./NitroGeolocation.nitro";
+import type { RNConfiguration } from "./NitroGeolocation.nitro";
 
 const NitroGeolocationHybridObject =
   NitroModules.createHybridObject<NitroGeolocation>("NitroGeolocation");
 
-export function addition(a: number, b: number): number {
-  return NitroGeolocationHybridObject.addition(a, b);
+export function setRNConfiguration(config: RNConfiguration): void {
+  NitroGeolocationHybridObject.setRNConfiguration(config);
 }
 
-export function subtraction(a: number, b: number): number {
-  return NitroGeolocationHybridObject.subtraction(a, b);
-}
+export type { RNConfiguration } from "./NitroGeolocation.nitro";
 
-export function multiply(a: number, b: number): number {
-  return NitroGeolocationHybridObject.multiply(a, b);
-}
+// Default export for compatibility
+const Geolocation = {
+  setRNConfiguration
+};
 
-export function division(a: number, b: number): number {
-  return NitroGeolocationHybridObject.division(a, b);
-}
-
-export function test(a: number, b: number): number {
-  return NitroGeolocationHybridObject.test(a, b);
-}
+export default Geolocation;
