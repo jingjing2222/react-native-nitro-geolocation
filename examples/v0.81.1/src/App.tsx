@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Alert,
   Button,
@@ -9,9 +9,11 @@ import {
   Text,
   View
 } from "react-native";
-import { setRNConfiguration } from "react-native-nitro-geolocation";
+import { setRNConfiguration, requestAuthorization } from "react-native-nitro-geolocation";
 
 export default function App() {
+  const [permissionStatus, setPermissionStatus] = useState<string>("Unknown");
+
   useEffect(() => {
     // Configure geolocation
     setRNConfiguration({
@@ -20,6 +22,20 @@ export default function App() {
       locationProvider: "auto"
     });
   }, []);
+
+  const handleRequestAuthorization = () => {
+    setPermissionStatus("Requesting...");
+    requestAuthorization(
+      () => {
+        setPermissionStatus("Granted ✅");
+        Alert.alert("Success", "Location permission granted!");
+      },
+      (error) => {
+        setPermissionStatus(`Denied ❌ (Code: ${error.code})`);
+        Alert.alert("Error", error.message);
+      }
+    );
+  };
 
   const handleTestConfig1 = () => {
     setRNConfiguration({
@@ -67,40 +83,50 @@ export default function App() {
         <View style={styles.body}>
           <View style={styles.sectionContainer}>
             <Text style={styles.sectionTitle}>Nitro Geolocation Example</Text>
-            <Text style={styles.sectionDescription}>
-              Testing setRNConfiguration method
-            </Text>
+
+            <View style={styles.statusContainer}>
+              <Text style={styles.statusLabel}>Permission Status:</Text>
+              <Text style={styles.statusValue}>{permissionStatus}</Text>
+            </View>
 
             <View style={styles.buttonContainer}>
               <Button
-                title="Test Config 1 (Play Services)"
+                title="Request Authorization"
+                onPress={handleRequestAuthorization}
+                color="#2196F3"
+              />
+            </View>
+
+            <View style={styles.divider} />
+
+            <Text style={styles.sectionSubtitle}>Configuration Tests:</Text>
+
+            <View style={styles.buttonContainer}>
+              <Button
+                title="Config 1: Play Services"
                 onPress={handleTestConfig1}
               />
             </View>
 
             <View style={styles.buttonContainer}>
               <Button
-                title="Test Config 2 (Android)"
+                title="Config 2: Android Native"
                 onPress={handleTestConfig2}
               />
             </View>
 
             <View style={styles.buttonContainer}>
               <Button
-                title="Test Config 3 (Auto)"
+                title="Config 3: Auto"
                 onPress={handleTestConfig3}
               />
             </View>
 
             <View style={styles.infoContainer}>
-              <Text style={styles.infoTitle}>Current Implementation:</Text>
+              <Text style={styles.infoTitle}>Implementation Status:</Text>
               <Text style={styles.infoText}>✅ setRNConfiguration</Text>
-              <Text style={styles.infoText}>
-                ⏳ requestAuthorization (not yet)
-              </Text>
-              <Text style={styles.infoText}>
-                ⏳ getCurrentPosition (not yet)
-              </Text>
+              <Text style={styles.infoText}>✅ requestAuthorization</Text>
+              <Text style={styles.infoText}>⏳ getCurrentPosition (not yet)</Text>
               <Text style={styles.infoText}>⏳ watchPosition (not yet)</Text>
               <Text style={styles.infoText}>⏳ clearWatch (not yet)</Text>
               <Text style={styles.infoText}>⏳ stopObserving (not yet)</Text>
@@ -124,21 +150,46 @@ const styles = StyleSheet.create({
   },
   sectionContainer: {
     marginTop: 32,
-    paddingHorizontal: 24
+    paddingHorizontal: 24,
+    paddingBottom: 32
   },
   sectionTitle: {
     fontSize: 24,
     fontWeight: "600",
     color: "#000",
-    marginBottom: 8
-  },
-  sectionDescription: {
-    fontSize: 16,
-    color: "#666",
     marginBottom: 16
   },
+  sectionSubtitle: {
+    fontSize: 18,
+    fontWeight: "600",
+    color: "#000",
+    marginBottom: 12,
+    marginTop: 8
+  },
+  statusContainer: {
+    backgroundColor: "#e3f2fd",
+    padding: 16,
+    borderRadius: 8,
+    marginBottom: 16
+  },
+  statusLabel: {
+    fontSize: 14,
+    color: "#1976d2",
+    fontWeight: "600",
+    marginBottom: 4
+  },
+  statusValue: {
+    fontSize: 18,
+    color: "#000",
+    fontWeight: "700"
+  },
   buttonContainer: {
-    marginVertical: 8
+    marginVertical: 6
+  },
+  divider: {
+    height: 1,
+    backgroundColor: "#e0e0e0",
+    marginVertical: 16
   },
   infoContainer: {
     marginTop: 24,
@@ -147,7 +198,7 @@ const styles = StyleSheet.create({
     borderRadius: 8
   },
   infoTitle: {
-    fontSize: 18,
+    fontSize: 16,
     fontWeight: "600",
     color: "#000",
     marginBottom: 8
@@ -155,6 +206,6 @@ const styles = StyleSheet.create({
   infoText: {
     fontSize: 14,
     color: "#333",
-    marginVertical: 2
+    marginVertical: 3
   }
 });
