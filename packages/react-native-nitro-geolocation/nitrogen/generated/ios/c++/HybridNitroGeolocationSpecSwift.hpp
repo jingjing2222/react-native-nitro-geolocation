@@ -97,6 +97,26 @@ namespace margelo::nitro::nitrogeolocation {
         std::rethrow_exception(__result.error());
       }
     }
+    inline double watchPosition(const std::function<void(const GeolocationPosition& /* position */)>& success, const std::optional<std::function<void(const GeolocationError& /* error */)>>& error, const std::optional<GeolocationOptions>& options) override {
+      auto __result = _swiftPart.watchPosition(success, error, options);
+      if (__result.hasError()) [[unlikely]] {
+        std::rethrow_exception(__result.error());
+      }
+      auto __value = std::move(__result.value());
+      return __value;
+    }
+    inline void clearWatch(double watchId) override {
+      auto __result = _swiftPart.clearWatch(std::forward<decltype(watchId)>(watchId));
+      if (__result.hasError()) [[unlikely]] {
+        std::rethrow_exception(__result.error());
+      }
+    }
+    inline void stopObserving() override {
+      auto __result = _swiftPart.stopObserving();
+      if (__result.hasError()) [[unlikely]] {
+        std::rethrow_exception(__result.error());
+      }
+    }
 
   private:
     NitroGeolocation::HybridNitroGeolocationSpec_cxx _swiftPart;

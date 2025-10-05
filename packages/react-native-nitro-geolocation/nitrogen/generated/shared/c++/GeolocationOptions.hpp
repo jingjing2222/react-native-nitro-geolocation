@@ -32,10 +32,14 @@ namespace margelo::nitro::nitrogeolocation {
     std::optional<double> timeout     SWIFT_PRIVATE;
     std::optional<double> maximumAge     SWIFT_PRIVATE;
     std::optional<bool> enableHighAccuracy     SWIFT_PRIVATE;
+    std::optional<double> interval     SWIFT_PRIVATE;
+    std::optional<double> fastestInterval     SWIFT_PRIVATE;
+    std::optional<double> distanceFilter     SWIFT_PRIVATE;
+    std::optional<bool> useSignificantChanges     SWIFT_PRIVATE;
 
   public:
     GeolocationOptions() = default;
-    explicit GeolocationOptions(std::optional<double> timeout, std::optional<double> maximumAge, std::optional<bool> enableHighAccuracy): timeout(timeout), maximumAge(maximumAge), enableHighAccuracy(enableHighAccuracy) {}
+    explicit GeolocationOptions(std::optional<double> timeout, std::optional<double> maximumAge, std::optional<bool> enableHighAccuracy, std::optional<double> interval, std::optional<double> fastestInterval, std::optional<double> distanceFilter, std::optional<bool> useSignificantChanges): timeout(timeout), maximumAge(maximumAge), enableHighAccuracy(enableHighAccuracy), interval(interval), fastestInterval(fastestInterval), distanceFilter(distanceFilter), useSignificantChanges(useSignificantChanges) {}
   };
 
 } // namespace margelo::nitro::nitrogeolocation
@@ -50,7 +54,11 @@ namespace margelo::nitro {
       return margelo::nitro::nitrogeolocation::GeolocationOptions(
         JSIConverter<std::optional<double>>::fromJSI(runtime, obj.getProperty(runtime, "timeout")),
         JSIConverter<std::optional<double>>::fromJSI(runtime, obj.getProperty(runtime, "maximumAge")),
-        JSIConverter<std::optional<bool>>::fromJSI(runtime, obj.getProperty(runtime, "enableHighAccuracy"))
+        JSIConverter<std::optional<bool>>::fromJSI(runtime, obj.getProperty(runtime, "enableHighAccuracy")),
+        JSIConverter<std::optional<double>>::fromJSI(runtime, obj.getProperty(runtime, "interval")),
+        JSIConverter<std::optional<double>>::fromJSI(runtime, obj.getProperty(runtime, "fastestInterval")),
+        JSIConverter<std::optional<double>>::fromJSI(runtime, obj.getProperty(runtime, "distanceFilter")),
+        JSIConverter<std::optional<bool>>::fromJSI(runtime, obj.getProperty(runtime, "useSignificantChanges"))
       );
     }
     static inline jsi::Value toJSI(jsi::Runtime& runtime, const margelo::nitro::nitrogeolocation::GeolocationOptions& arg) {
@@ -58,6 +66,10 @@ namespace margelo::nitro {
       obj.setProperty(runtime, "timeout", JSIConverter<std::optional<double>>::toJSI(runtime, arg.timeout));
       obj.setProperty(runtime, "maximumAge", JSIConverter<std::optional<double>>::toJSI(runtime, arg.maximumAge));
       obj.setProperty(runtime, "enableHighAccuracy", JSIConverter<std::optional<bool>>::toJSI(runtime, arg.enableHighAccuracy));
+      obj.setProperty(runtime, "interval", JSIConverter<std::optional<double>>::toJSI(runtime, arg.interval));
+      obj.setProperty(runtime, "fastestInterval", JSIConverter<std::optional<double>>::toJSI(runtime, arg.fastestInterval));
+      obj.setProperty(runtime, "distanceFilter", JSIConverter<std::optional<double>>::toJSI(runtime, arg.distanceFilter));
+      obj.setProperty(runtime, "useSignificantChanges", JSIConverter<std::optional<bool>>::toJSI(runtime, arg.useSignificantChanges));
       return obj;
     }
     static inline bool canConvert(jsi::Runtime& runtime, const jsi::Value& value) {
@@ -68,6 +80,10 @@ namespace margelo::nitro {
       if (!JSIConverter<std::optional<double>>::canConvert(runtime, obj.getProperty(runtime, "timeout"))) return false;
       if (!JSIConverter<std::optional<double>>::canConvert(runtime, obj.getProperty(runtime, "maximumAge"))) return false;
       if (!JSIConverter<std::optional<bool>>::canConvert(runtime, obj.getProperty(runtime, "enableHighAccuracy"))) return false;
+      if (!JSIConverter<std::optional<double>>::canConvert(runtime, obj.getProperty(runtime, "interval"))) return false;
+      if (!JSIConverter<std::optional<double>>::canConvert(runtime, obj.getProperty(runtime, "fastestInterval"))) return false;
+      if (!JSIConverter<std::optional<double>>::canConvert(runtime, obj.getProperty(runtime, "distanceFilter"))) return false;
+      if (!JSIConverter<std::optional<bool>>::canConvert(runtime, obj.getProperty(runtime, "useSignificantChanges"))) return false;
       return true;
     }
   };

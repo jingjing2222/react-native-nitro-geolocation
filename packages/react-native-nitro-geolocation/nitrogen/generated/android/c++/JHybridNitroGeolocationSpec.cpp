@@ -81,5 +81,18 @@ namespace margelo::nitro::nitrogeolocation {
     static const auto method = javaClassStatic()->getMethod<void(jni::alias_ref<JFunc_void_GeolocationPosition::javaobject> /* success */, jni::alias_ref<JFunc_void_GeolocationError::javaobject> /* error */, jni::alias_ref<JGeolocationOptions> /* options */)>("getCurrentPosition_cxx");
     method(_javaPart, JFunc_void_GeolocationPosition_cxx::fromCpp(success), error.has_value() ? JFunc_void_GeolocationError_cxx::fromCpp(error.value()) : nullptr, options.has_value() ? JGeolocationOptions::fromCpp(options.value()) : nullptr);
   }
+  double JHybridNitroGeolocationSpec::watchPosition(const std::function<void(const GeolocationPosition& /* position */)>& success, const std::optional<std::function<void(const GeolocationError& /* error */)>>& error, const std::optional<GeolocationOptions>& options) {
+    static const auto method = javaClassStatic()->getMethod<double(jni::alias_ref<JFunc_void_GeolocationPosition::javaobject> /* success */, jni::alias_ref<JFunc_void_GeolocationError::javaobject> /* error */, jni::alias_ref<JGeolocationOptions> /* options */)>("watchPosition_cxx");
+    auto __result = method(_javaPart, JFunc_void_GeolocationPosition_cxx::fromCpp(success), error.has_value() ? JFunc_void_GeolocationError_cxx::fromCpp(error.value()) : nullptr, options.has_value() ? JGeolocationOptions::fromCpp(options.value()) : nullptr);
+    return __result;
+  }
+  void JHybridNitroGeolocationSpec::clearWatch(double watchId) {
+    static const auto method = javaClassStatic()->getMethod<void(double /* watchId */)>("clearWatch");
+    method(_javaPart, watchId);
+  }
+  void JHybridNitroGeolocationSpec::stopObserving() {
+    static const auto method = javaClassStatic()->getMethod<void()>("stopObserving");
+    method(_javaPart);
+  }
 
 } // namespace margelo::nitro::nitrogeolocation

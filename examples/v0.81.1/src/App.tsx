@@ -10,10 +10,12 @@ import {
   View
 } from "react-native";
 import {
+  clearWatch,
   type GeolocationPosition,
   getCurrentPosition,
   requestAuthorization,
-  setRNConfiguration
+  setRNConfiguration,
+  watchPosition
 } from "react-native-nitro-geolocation";
 
 export default function App() {
@@ -21,6 +23,11 @@ export default function App() {
   const [currentPosition, setCurrentPosition] =
     useState<GeolocationPosition | null>(null);
   const [isLoadingPosition, setIsLoadingPosition] = useState(false);
+
+  const [watchId, setWatchId] = useState<number | null>(null);
+  const [watchedPosition, setWatchedPosition] =
+    useState<GeolocationPosition | null>(null);
+  const [watchUpdateCount, setWatchUpdateCount] = useState(0);
 
   useEffect(() => {
     // Configure geolocation
@@ -101,6 +108,45 @@ export default function App() {
         maximumAge: 10000
       }
     );
+  };
+
+  const handleStartWatching = () => {
+    if (watchId !== null) {
+      Alert.alert("Info", "Already watching position");
+      return;
+    }
+
+    setWatchUpdateCount(0);
+    setWatchedPosition(null);
+
+    const id = watchPosition(
+      (position) => {
+        setWatchedPosition(position);
+        setWatchUpdateCount((count) => count + 1);
+      },
+      (error) => {
+        Alert.alert("Watch Error", `Code ${error.code}: ${error.message}`);
+      },
+      {
+        enableHighAccuracy: true,
+        distanceFilter: 10,
+        interval: 5000
+      }
+    );
+
+    setWatchId(id);
+    Alert.alert("Success", `Started watching (ID: ${id})`);
+  };
+
+  const handleStopWatching = () => {
+    if (watchId === null) {
+      Alert.alert("Info", "Not watching position");
+      return;
+    }
+
+    clearWatch(watchId);
+    setWatchId(null);
+    Alert.alert("Success", "Stopped watching position");
   };
 
   return (
@@ -198,13 +244,73 @@ export default function App() {
               </View>
             )}
 
+            <View style={styles.divider} />
+
+            <Text style={styles.sectionSubtitle}>Watch Position:</Text>
+
+            <View style={styles.statusContainer}>
+              <Text style={styles.statusLabel}>Watch Status:</Text>
+              <Text style={styles.statusValue}>
+                {watchId !== null ? `Watching 🟢 (ID: ${watchId})` : "Not Watching 🔴"}
+              </Text>
+              {watchId !== null && (
+                <Text style={styles.statusLabel}>
+                  Updates: {watchUpdateCount}
+                </Text>
+              )}
+            </View>
+
+            <View style={styles.buttonContainer}>
+              <Button
+                title="Start Watching"
+                onPress={handleStartWatching}
+                disabled={watchId !== null}
+                color="#FF9800"
+              />
+            </View>
+
+            <View style={styles.buttonContainer}>
+              <Button
+                title="Stop Watching"
+                onPress={handleStopWatching}
+                disabled={watchId === null}
+                color="#F44336"
+              />
+            </View>
+
+            {watchedPosition && (
+              <View style={styles.watchedPositionContainer}>
+                <Text style={styles.watchedPositionTitle}>
+                  Watched Position (Live):
+                </Text>
+                <Text style={styles.positionText}>
+                  Latitude: {watchedPosition.coords.latitude.toFixed(6)}
+                </Text>
+                <Text style={styles.positionText}>
+                  Longitude: {watchedPosition.coords.longitude.toFixed(6)}
+                </Text>
+                <Text style={styles.positionText}>
+                  Accuracy: {watchedPosition.coords.accuracy.toFixed(2)}m
+                </Text>
+                {watchedPosition.coords.speed !== null && (
+                  <Text style={styles.positionText}>
+                    Speed: {watchedPosition.coords.speed.toFixed(2)}m/s
+                  </Text>
+                )}
+                <Text style={styles.positionText}>
+                  Updated:{" "}
+                  {new Date(watchedPosition.timestamp).toLocaleTimeString()}
+                </Text>
+              </View>
+            )}
+
             <View style={styles.infoContainer}>
               <Text style={styles.infoTitle}>Implementation Status:</Text>
               <Text style={styles.infoText}>✅ setRNConfiguration</Text>
               <Text style={styles.infoText}>✅ requestAuthorization</Text>
               <Text style={styles.infoText}>✅ getCurrentPosition</Text>
-              <Text style={styles.infoText}>⏳ watchPosition (not yet)</Text>
-              <Text style={styles.infoText}>⏳ clearWatch (not yet)</Text>
+              <Text style={styles.infoText}>✅ watchPosition</Text>
+              <Text style={styles.infoText}>✅ clearWatch</Text>
               <Text style={styles.infoText}>⏳ stopObserving (not yet)</Text>
             </View>
           </View>
@@ -300,5 +406,19 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: "#1b5e20",
     marginVertical: 2
+  },
+  watchedPositionContainer: {
+    marginTop: 16,
+    padding: 16,
+    backgroundColor: "#fff3e0",
+    borderRadius: 8,
+    borderWidth: 2,
+    borderColor: "#FF9800"
+  },
+  watchedPositionTitle: {
+    fontSize: 16,
+    fontWeight: "600",
+    color: "#e65100",
+    marginBottom: 8
   }
 });

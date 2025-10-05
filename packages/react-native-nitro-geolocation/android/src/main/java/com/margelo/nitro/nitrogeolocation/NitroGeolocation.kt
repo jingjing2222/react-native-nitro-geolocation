@@ -33,6 +33,8 @@ class NitroGeolocation(
         )
     }
 
+    private val watchPositionHandler by lazy { WatchPosition(reactContext) }
+
     override fun setRNConfiguration(config: RNConfigurationInternal) {
         configuration = config
     }
@@ -50,6 +52,22 @@ class NitroGeolocation(
             options: GeolocationOptions?
     ) {
         GetCurrentPosition(reactContext).execute(success, error, options)
+    }
+
+    override fun watchPosition(
+            success: (position: GeolocationPosition) -> Unit,
+            error: ((error: GeolocationError) -> Unit)?,
+            options: GeolocationOptions?
+    ): Double {
+        return watchPositionHandler.watch(success, error, options).toDouble()
+    }
+
+    override fun clearWatch(watchId: Double) {
+        watchPositionHandler.clearWatch(watchId.toInt())
+    }
+
+    override fun stopObserving() {
+        watchPositionHandler.stopObserving()
     }
 
     private fun createPermissionError(message: String) =
