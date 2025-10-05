@@ -10,8 +10,8 @@ import {
   View
 } from "react-native";
 import {
-  clearWatch,
   type GeolocationPosition,
+  clearWatch,
   getCurrentPosition,
   requestAuthorization,
   setRNConfiguration,
@@ -251,7 +251,9 @@ export default function App() {
             <View style={styles.statusContainer}>
               <Text style={styles.statusLabel}>Watch Status:</Text>
               <Text style={styles.statusValue}>
-                {watchId !== null ? `Watching 🟢 (ID: ${watchId})` : "Not Watching 🔴"}
+                {watchId !== null
+                  ? `Watching 🟢 (ID: ${watchId})`
+                  : "Not Watching 🔴"}
               </Text>
               {watchId !== null && (
                 <Text style={styles.statusLabel}>
