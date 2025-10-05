@@ -10,12 +10,17 @@ import {
   View
 } from "react-native";
 import {
+  type GeolocationPosition,
+  getCurrentPosition,
   requestAuthorization,
   setRNConfiguration
 } from "react-native-nitro-geolocation";
 
 export default function App() {
   const [permissionStatus, setPermissionStatus] = useState<string>("Unknown");
+  const [currentPosition, setCurrentPosition] =
+    useState<GeolocationPosition | null>(null);
+  const [isLoadingPosition, setIsLoadingPosition] = useState(false);
 
   useEffect(() => {
     // Configure geolocation
@@ -76,6 +81,28 @@ export default function App() {
     );
   };
 
+  const handleGetCurrentPosition = () => {
+    setIsLoadingPosition(true);
+    setCurrentPosition(null);
+
+    getCurrentPosition(
+      (position) => {
+        setIsLoadingPosition(false);
+        setCurrentPosition(position);
+        Alert.alert("Success", "Position retrieved!");
+      },
+      (error) => {
+        setIsLoadingPosition(false);
+        Alert.alert("Error", `Code ${error.code}: ${error.message}`);
+      },
+      {
+        enableHighAccuracy: true,
+        timeout: 15000,
+        maximumAge: 10000
+      }
+    );
+  };
+
   return (
     <SafeAreaView style={styles.container}>
       <StatusBar barStyle="dark-content" />
@@ -122,13 +149,60 @@ export default function App() {
               <Button title="Config 3: Auto" onPress={handleTestConfig3} />
             </View>
 
+            <View style={styles.divider} />
+
+            <Text style={styles.sectionSubtitle}>Get Current Position:</Text>
+
+            <View style={styles.buttonContainer}>
+              <Button
+                title={
+                  isLoadingPosition ? "Loading..." : "Get Current Position"
+                }
+                onPress={handleGetCurrentPosition}
+                disabled={isLoadingPosition}
+                color="#4CAF50"
+              />
+            </View>
+
+            {currentPosition && (
+              <View style={styles.positionContainer}>
+                <Text style={styles.positionTitle}>Current Position:</Text>
+                <Text style={styles.positionText}>
+                  Latitude: {currentPosition.coords.latitude.toFixed(6)}
+                </Text>
+                <Text style={styles.positionText}>
+                  Longitude: {currentPosition.coords.longitude.toFixed(6)}
+                </Text>
+                <Text style={styles.positionText}>
+                  Accuracy: {currentPosition.coords.accuracy.toFixed(2)}m
+                </Text>
+                {currentPosition.coords.altitude !== null && (
+                  <Text style={styles.positionText}>
+                    Altitude: {currentPosition.coords.altitude.toFixed(2)}m
+                  </Text>
+                )}
+                {currentPosition.coords.speed !== null && (
+                  <Text style={styles.positionText}>
+                    Speed: {currentPosition.coords.speed.toFixed(2)}m/s
+                  </Text>
+                )}
+                {currentPosition.coords.heading !== null && (
+                  <Text style={styles.positionText}>
+                    Heading: {currentPosition.coords.heading.toFixed(2)}°
+                  </Text>
+                )}
+                <Text style={styles.positionText}>
+                  Timestamp:{" "}
+                  {new Date(currentPosition.timestamp).toLocaleString()}
+                </Text>
+              </View>
+            )}
+
             <View style={styles.infoContainer}>
               <Text style={styles.infoTitle}>Implementation Status:</Text>
               <Text style={styles.infoText}>✅ setRNConfiguration</Text>
               <Text style={styles.infoText}>✅ requestAuthorization</Text>
-              <Text style={styles.infoText}>
-                ⏳ getCurrentPosition (not yet)
-              </Text>
+              <Text style={styles.infoText}>✅ getCurrentPosition</Text>
               <Text style={styles.infoText}>⏳ watchPosition (not yet)</Text>
               <Text style={styles.infoText}>⏳ clearWatch (not yet)</Text>
               <Text style={styles.infoText}>⏳ stopObserving (not yet)</Text>
@@ -209,5 +283,22 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: "#333",
     marginVertical: 3
+  },
+  positionContainer: {
+    marginTop: 16,
+    padding: 16,
+    backgroundColor: "#e8f5e9",
+    borderRadius: 8
+  },
+  positionTitle: {
+    fontSize: 16,
+    fontWeight: "600",
+    color: "#2e7d32",
+    marginBottom: 8
+  },
+  positionText: {
+    fontSize: 14,
+    color: "#1b5e20",
+    marginVertical: 2
   }
 });

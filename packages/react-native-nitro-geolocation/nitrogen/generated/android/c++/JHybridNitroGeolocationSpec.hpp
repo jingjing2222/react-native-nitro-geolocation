@@ -55,6 +55,7 @@ namespace margelo::nitro::nitrogeolocation {
     // Methods
     void setRNConfiguration(const RNConfigurationInternal& config) override;
     void requestAuthorization(const std::optional<std::function<void()>>& success, const std::optional<std::function<void(const GeolocationError& /* error */)>>& error) override;
+    void getCurrentPosition(const std::function<void(const GeolocationPosition& /* position */)>& success, const std::optional<std::function<void(const GeolocationError& /* error */)>>& error, const std::optional<GeolocationOptions>& options) override;
 
   private:
     friend HybridBase;

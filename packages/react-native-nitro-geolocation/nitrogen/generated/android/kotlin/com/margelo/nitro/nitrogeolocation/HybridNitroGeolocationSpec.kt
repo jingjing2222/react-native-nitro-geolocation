@@ -52,6 +52,15 @@ abstract class HybridNitroGeolocationSpec: HybridObject() {
     val __result = requestAuthorization(success?.let { it }, error?.let { it })
     return __result
   }
+  
+  abstract fun getCurrentPosition(success: (position: GeolocationPosition) -> Unit, error: ((error: GeolocationError) -> Unit)?, options: GeolocationOptions?): Unit
+  
+  @DoNotStrip
+  @Keep
+  private fun getCurrentPosition_cxx(success: Func_void_GeolocationPosition, error: Func_void_GeolocationError?, options: GeolocationOptions?): Unit {
+    val __result = getCurrentPosition(success, error?.let { it }, options)
+    return __result
+  }
 
   private external fun initHybrid(): HybridData
 
