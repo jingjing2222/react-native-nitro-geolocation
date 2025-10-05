@@ -1,25 +1,42 @@
 import { NitroModules } from "react-native-nitro-modules";
-import type { NitroGeolocation } from "./NitroGeolocation.nitro";
+import type {
+  NitroGeolocation,
+  RNConfigurationInternal
+} from "./NitroGeolocation.nitro";
 
 const NitroGeolocationHybridObject =
   NitroModules.createHybridObject<NitroGeolocation>("NitroGeolocation");
 
-export function addition(a: number, b: number): number {
-  return NitroGeolocationHybridObject.addition(a, b);
+// Public API types (compatible with @react-native-community/geolocation)
+export type AuthorizationLevel = "always" | "whenInUse" | "auto";
+export type LocationProvider = "playServices" | "android" | "auto";
+
+export interface RNConfiguration {
+  skipPermissionRequests: boolean;
+  authorizationLevel?: AuthorizationLevel;
+  enableBackgroundLocationUpdates?: boolean;
+  locationProvider?: LocationProvider;
 }
 
-export function subtraction(a: number, b: number): number {
-  return NitroGeolocationHybridObject.subtraction(a, b);
+function mapConfigToInternal(config: RNConfiguration): RNConfigurationInternal {
+  return {
+    skipPermissionRequests: config.skipPermissionRequests,
+    authorizationLevel: config.authorizationLevel,
+    enableBackgroundLocationUpdates: config.enableBackgroundLocationUpdates,
+    locationProvider:
+      config.locationProvider === "android"
+        ? "android_platform"
+        : config.locationProvider
+  };
 }
 
-export function multiply(a: number, b: number): number {
-  return NitroGeolocationHybridObject.multiply(a, b);
+export function setRNConfiguration(config: RNConfiguration): void {
+  NitroGeolocationHybridObject.setRNConfiguration(mapConfigToInternal(config));
 }
 
-export function division(a: number, b: number): number {
-  return NitroGeolocationHybridObject.division(a, b);
-}
+// Default export for compatibility
+const Geolocation = {
+  setRNConfiguration
+};
 
-export function test(a: number, b: number): number {
-  return NitroGeolocationHybridObject.test(a, b);
-}
+export default Geolocation;

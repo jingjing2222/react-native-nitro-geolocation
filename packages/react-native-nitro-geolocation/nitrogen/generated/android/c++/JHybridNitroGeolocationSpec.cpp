@@ -7,9 +7,20 @@
 
 #include "JHybridNitroGeolocationSpec.hpp"
 
+// Forward declaration of `RNConfigurationInternal` to properly resolve imports.
+namespace margelo::nitro::nitrogeolocation { struct RNConfigurationInternal; }
+// Forward declaration of `AuthorizationLevelInternal` to properly resolve imports.
+namespace margelo::nitro::nitrogeolocation { enum class AuthorizationLevelInternal; }
+// Forward declaration of `LocationProviderInternal` to properly resolve imports.
+namespace margelo::nitro::nitrogeolocation { enum class LocationProviderInternal; }
 
-
-
+#include "RNConfigurationInternal.hpp"
+#include "JRNConfigurationInternal.hpp"
+#include "AuthorizationLevelInternal.hpp"
+#include <optional>
+#include "JAuthorizationLevelInternal.hpp"
+#include "LocationProviderInternal.hpp"
+#include "JLocationProviderInternal.hpp"
 
 namespace margelo::nitro::nitrogeolocation {
 
@@ -37,30 +48,9 @@ namespace margelo::nitro::nitrogeolocation {
   
 
   // Methods
-  double JHybridNitroGeolocationSpec::addition(double a, double b) {
-    static const auto method = javaClassStatic()->getMethod<double(double /* a */, double /* b */)>("addition");
-    auto __result = method(_javaPart, a, b);
-    return __result;
-  }
-  double JHybridNitroGeolocationSpec::subtraction(double a, double b) {
-    static const auto method = javaClassStatic()->getMethod<double(double /* a */, double /* b */)>("subtraction");
-    auto __result = method(_javaPart, a, b);
-    return __result;
-  }
-  double JHybridNitroGeolocationSpec::multiply(double a, double b) {
-    static const auto method = javaClassStatic()->getMethod<double(double /* a */, double /* b */)>("multiply");
-    auto __result = method(_javaPart, a, b);
-    return __result;
-  }
-  double JHybridNitroGeolocationSpec::division(double a, double b) {
-    static const auto method = javaClassStatic()->getMethod<double(double /* a */, double /* b */)>("division");
-    auto __result = method(_javaPart, a, b);
-    return __result;
-  }
-  double JHybridNitroGeolocationSpec::test(double a, double b) {
-    static const auto method = javaClassStatic()->getMethod<double(double /* a */, double /* b */)>("test");
-    auto __result = method(_javaPart, a, b);
-    return __result;
+  void JHybridNitroGeolocationSpec::setRNConfiguration(const RNConfigurationInternal& config) {
+    static const auto method = javaClassStatic()->getMethod<void(jni::alias_ref<JRNConfigurationInternal> /* config */)>("setRNConfiguration");
+    method(_javaPart, JRNConfigurationInternal::fromCpp(config));
   }
 
 } // namespace margelo::nitro::nitrogeolocation

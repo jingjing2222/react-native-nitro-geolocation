@@ -8,18 +8,25 @@
 #pragma once
 
 // Forward declarations of C++ defined types
+// Forward declaration of `AuthorizationLevelInternal` to properly resolve imports.
+namespace margelo::nitro::nitrogeolocation { enum class AuthorizationLevelInternal; }
 // Forward declaration of `HybridNitroGeolocationSpec` to properly resolve imports.
 namespace margelo::nitro::nitrogeolocation { class HybridNitroGeolocationSpec; }
+// Forward declaration of `LocationProviderInternal` to properly resolve imports.
+namespace margelo::nitro::nitrogeolocation { enum class LocationProviderInternal; }
 
 // Forward declarations of Swift defined types
 // Forward declaration of `HybridNitroGeolocationSpec_cxx` to properly resolve imports.
 namespace NitroGeolocation { class HybridNitroGeolocationSpec_cxx; }
 
 // Include C++ defined types
+#include "AuthorizationLevelInternal.hpp"
 #include "HybridNitroGeolocationSpec.hpp"
+#include "LocationProviderInternal.hpp"
 #include <NitroModules/Result.hpp>
 #include <exception>
 #include <memory>
+#include <optional>
 
 /**
  * Contains specialized versions of C++ templated types so they can be accessed from Swift,
@@ -27,6 +34,51 @@ namespace NitroGeolocation { class HybridNitroGeolocationSpec_cxx; }
  */
 namespace margelo::nitro::nitrogeolocation::bridge::swift {
 
+  // pragma MARK: std::optional<AuthorizationLevelInternal>
+  /**
+   * Specialized version of `std::optional<AuthorizationLevelInternal>`.
+   */
+  using std__optional_AuthorizationLevelInternal_ = std::optional<AuthorizationLevelInternal>;
+  inline std::optional<AuthorizationLevelInternal> create_std__optional_AuthorizationLevelInternal_(const AuthorizationLevelInternal& value) noexcept {
+    return std::optional<AuthorizationLevelInternal>(value);
+  }
+  inline bool has_value_std__optional_AuthorizationLevelInternal_(const std::optional<AuthorizationLevelInternal>& optional) noexcept {
+    return optional.has_value();
+  }
+  inline AuthorizationLevelInternal get_std__optional_AuthorizationLevelInternal_(const std::optional<AuthorizationLevelInternal>& optional) noexcept {
+    return *optional;
+  }
+  
+  // pragma MARK: std::optional<bool>
+  /**
+   * Specialized version of `std::optional<bool>`.
+   */
+  using std__optional_bool_ = std::optional<bool>;
+  inline std::optional<bool> create_std__optional_bool_(const bool& value) noexcept {
+    return std::optional<bool>(value);
+  }
+  inline bool has_value_std__optional_bool_(const std::optional<bool>& optional) noexcept {
+    return optional.has_value();
+  }
+  inline bool get_std__optional_bool_(const std::optional<bool>& optional) noexcept {
+    return *optional;
+  }
+  
+  // pragma MARK: std::optional<LocationProviderInternal>
+  /**
+   * Specialized version of `std::optional<LocationProviderInternal>`.
+   */
+  using std__optional_LocationProviderInternal_ = std::optional<LocationProviderInternal>;
+  inline std::optional<LocationProviderInternal> create_std__optional_LocationProviderInternal_(const LocationProviderInternal& value) noexcept {
+    return std::optional<LocationProviderInternal>(value);
+  }
+  inline bool has_value_std__optional_LocationProviderInternal_(const std::optional<LocationProviderInternal>& optional) noexcept {
+    return optional.has_value();
+  }
+  inline LocationProviderInternal get_std__optional_LocationProviderInternal_(const std::optional<LocationProviderInternal>& optional) noexcept {
+    return *optional;
+  }
+  
   // pragma MARK: std::shared_ptr<HybridNitroGeolocationSpec>
   /**
    * Specialized version of `std::shared_ptr<HybridNitroGeolocationSpec>`.
@@ -39,13 +91,13 @@ namespace margelo::nitro::nitrogeolocation::bridge::swift {
   using std__weak_ptr_HybridNitroGeolocationSpec_ = std::weak_ptr<HybridNitroGeolocationSpec>;
   inline std__weak_ptr_HybridNitroGeolocationSpec_ weakify_std__shared_ptr_HybridNitroGeolocationSpec_(const std::shared_ptr<HybridNitroGeolocationSpec>& strong) noexcept { return strong; }
   
-  // pragma MARK: Result<double>
-  using Result_double_ = Result<double>;
-  inline Result_double_ create_Result_double_(double value) noexcept {
-    return Result<double>::withValue(std::move(value));
+  // pragma MARK: Result<void>
+  using Result_void_ = Result<void>;
+  inline Result_void_ create_Result_void_() noexcept {
+    return Result<void>::withValue();
   }
-  inline Result_double_ create_Result_double_(const std::exception_ptr& error) noexcept {
-    return Result<double>::withError(error);
+  inline Result_void_ create_Result_void_(const std::exception_ptr& error) noexcept {
+    return Result<void>::withError(error);
   }
 
 } // namespace margelo::nitro::nitrogeolocation::bridge::swift
