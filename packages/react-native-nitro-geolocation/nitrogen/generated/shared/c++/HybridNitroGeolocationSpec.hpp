@@ -17,11 +17,17 @@
 namespace margelo::nitro::nitrogeolocation { struct RNConfigurationInternal; }
 // Forward declaration of `GeolocationError` to properly resolve imports.
 namespace margelo::nitro::nitrogeolocation { struct GeolocationError; }
+// Forward declaration of `GeolocationPosition` to properly resolve imports.
+namespace margelo::nitro::nitrogeolocation { struct GeolocationPosition; }
+// Forward declaration of `GeolocationOptions` to properly resolve imports.
+namespace margelo::nitro::nitrogeolocation { struct GeolocationOptions; }
 
 #include "RNConfigurationInternal.hpp"
 #include <functional>
 #include <optional>
 #include "GeolocationError.hpp"
+#include "GeolocationPosition.hpp"
+#include "GeolocationOptions.hpp"
 
 namespace margelo::nitro::nitrogeolocation {
 
@@ -56,6 +62,7 @@ namespace margelo::nitro::nitrogeolocation {
       // Methods
       virtual void setRNConfiguration(const RNConfigurationInternal& config) = 0;
       virtual void requestAuthorization(const std::optional<std::function<void()>>& success, const std::optional<std::function<void(const GeolocationError& /* error */)>>& error) = 0;
+      virtual void getCurrentPosition(const std::function<void(const GeolocationPosition& /* position */)>& success, const std::optional<std::function<void(const GeolocationError& /* error */)>>& error, const std::optional<GeolocationOptions>& options) = 0;
 
     protected:
       // Hybrid Setup

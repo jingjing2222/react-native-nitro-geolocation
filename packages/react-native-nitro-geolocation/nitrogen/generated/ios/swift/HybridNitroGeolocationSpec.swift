@@ -16,6 +16,7 @@ public protocol HybridNitroGeolocationSpec_protocol: HybridObject {
   // Methods
   func setRNConfiguration(config: RNConfigurationInternal) throws -> Void
   func requestAuthorization(success: (() -> Void)?, error: ((_ error: GeolocationError) -> Void)?) throws -> Void
+  func getCurrentPosition(success: @escaping (_ position: GeolocationPosition) -> Void, error: ((_ error: GeolocationError) -> Void)?, options: GeolocationOptions?) throws -> Void
 }
 
 /// See ``HybridNitroGeolocationSpec``

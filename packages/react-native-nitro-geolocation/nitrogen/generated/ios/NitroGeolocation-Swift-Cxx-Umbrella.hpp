@@ -10,8 +10,14 @@
 // Forward declarations of C++ defined types
 // Forward declaration of `AuthorizationLevelInternal` to properly resolve imports.
 namespace margelo::nitro::nitrogeolocation { enum class AuthorizationLevelInternal; }
+// Forward declaration of `GeolocationCoordinates` to properly resolve imports.
+namespace margelo::nitro::nitrogeolocation { struct GeolocationCoordinates; }
 // Forward declaration of `GeolocationError` to properly resolve imports.
 namespace margelo::nitro::nitrogeolocation { struct GeolocationError; }
+// Forward declaration of `GeolocationOptions` to properly resolve imports.
+namespace margelo::nitro::nitrogeolocation { struct GeolocationOptions; }
+// Forward declaration of `GeolocationPosition` to properly resolve imports.
+namespace margelo::nitro::nitrogeolocation { struct GeolocationPosition; }
 // Forward declaration of `HybridNitroGeolocationSpec` to properly resolve imports.
 namespace margelo::nitro::nitrogeolocation { class HybridNitroGeolocationSpec; }
 // Forward declaration of `LocationProviderInternal` to properly resolve imports.
@@ -21,7 +27,10 @@ namespace margelo::nitro::nitrogeolocation { struct RNConfigurationInternal; }
 
 // Include C++ defined types
 #include "AuthorizationLevelInternal.hpp"
+#include "GeolocationCoordinates.hpp"
 #include "GeolocationError.hpp"
+#include "GeolocationOptions.hpp"
+#include "GeolocationPosition.hpp"
 #include "HybridNitroGeolocationSpec.hpp"
 #include "LocationProviderInternal.hpp"
 #include "RNConfigurationInternal.hpp"

@@ -10,8 +10,14 @@
 // Forward declarations of C++ defined types
 // Forward declaration of `AuthorizationLevelInternal` to properly resolve imports.
 namespace margelo::nitro::nitrogeolocation { enum class AuthorizationLevelInternal; }
+// Forward declaration of `GeolocationCoordinates` to properly resolve imports.
+namespace margelo::nitro::nitrogeolocation { struct GeolocationCoordinates; }
 // Forward declaration of `GeolocationError` to properly resolve imports.
 namespace margelo::nitro::nitrogeolocation { struct GeolocationError; }
+// Forward declaration of `GeolocationOptions` to properly resolve imports.
+namespace margelo::nitro::nitrogeolocation { struct GeolocationOptions; }
+// Forward declaration of `GeolocationPosition` to properly resolve imports.
+namespace margelo::nitro::nitrogeolocation { struct GeolocationPosition; }
 // Forward declaration of `HybridNitroGeolocationSpec` to properly resolve imports.
 namespace margelo::nitro::nitrogeolocation { class HybridNitroGeolocationSpec; }
 // Forward declaration of `LocationProviderInternal` to properly resolve imports.
@@ -23,7 +29,10 @@ namespace NitroGeolocation { class HybridNitroGeolocationSpec_cxx; }
 
 // Include C++ defined types
 #include "AuthorizationLevelInternal.hpp"
+#include "GeolocationCoordinates.hpp"
 #include "GeolocationError.hpp"
+#include "GeolocationOptions.hpp"
+#include "GeolocationPosition.hpp"
 #include "HybridNitroGeolocationSpec.hpp"
 #include "LocationProviderInternal.hpp"
 #include <NitroModules/Result.hpp>
@@ -155,6 +164,58 @@ namespace margelo::nitro::nitrogeolocation::bridge::swift {
     return optional.has_value();
   }
   inline std::function<void(const GeolocationError& /* error */)> get_std__optional_std__function_void_const_GeolocationError_____error______(const std::optional<std::function<void(const GeolocationError& /* error */)>>& optional) noexcept {
+    return *optional;
+  }
+  
+  // pragma MARK: std::optional<double>
+  /**
+   * Specialized version of `std::optional<double>`.
+   */
+  using std__optional_double_ = std::optional<double>;
+  inline std::optional<double> create_std__optional_double_(const double& value) noexcept {
+    return std::optional<double>(value);
+  }
+  inline bool has_value_std__optional_double_(const std::optional<double>& optional) noexcept {
+    return optional.has_value();
+  }
+  inline double get_std__optional_double_(const std::optional<double>& optional) noexcept {
+    return *optional;
+  }
+  
+  // pragma MARK: std::function<void(const GeolocationPosition& /* position */)>
+  /**
+   * Specialized version of `std::function<void(const GeolocationPosition&)>`.
+   */
+  using Func_void_GeolocationPosition = std::function<void(const GeolocationPosition& /* position */)>;
+  /**
+   * Wrapper class for a `std::function<void(const GeolocationPosition& / * position * /)>`, this can be used from Swift.
+   */
+  class Func_void_GeolocationPosition_Wrapper final {
+  public:
+    explicit Func_void_GeolocationPosition_Wrapper(std::function<void(const GeolocationPosition& /* position */)>&& func): _function(std::make_unique<std::function<void(const GeolocationPosition& /* position */)>>(std::move(func))) {}
+    inline void call(GeolocationPosition position) const noexcept {
+      _function->operator()(position);
+    }
+  private:
+    std::unique_ptr<std::function<void(const GeolocationPosition& /* position */)>> _function;
+  } SWIFT_NONCOPYABLE;
+  Func_void_GeolocationPosition create_Func_void_GeolocationPosition(void* NON_NULL swiftClosureWrapper) noexcept;
+  inline Func_void_GeolocationPosition_Wrapper wrap_Func_void_GeolocationPosition(Func_void_GeolocationPosition value) noexcept {
+    return Func_void_GeolocationPosition_Wrapper(std::move(value));
+  }
+  
+  // pragma MARK: std::optional<GeolocationOptions>
+  /**
+   * Specialized version of `std::optional<GeolocationOptions>`.
+   */
+  using std__optional_GeolocationOptions_ = std::optional<GeolocationOptions>;
+  inline std::optional<GeolocationOptions> create_std__optional_GeolocationOptions_(const GeolocationOptions& value) noexcept {
+    return std::optional<GeolocationOptions>(value);
+  }
+  inline bool has_value_std__optional_GeolocationOptions_(const std::optional<GeolocationOptions>& optional) noexcept {
+    return optional.has_value();
+  }
+  inline GeolocationOptions get_std__optional_GeolocationOptions_(const std::optional<GeolocationOptions>& optional) noexcept {
     return *optional;
   }
   

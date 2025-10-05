@@ -44,6 +44,14 @@ class NitroGeolocation(
         requestAuthorizationHandler.execute(success, error)
     }
 
+    override fun getCurrentPosition(
+            success: (position: GeolocationPosition) -> Unit,
+            error: ((error: GeolocationError) -> Unit)?,
+            options: GeolocationOptions?
+    ) {
+        GetCurrentPosition(reactContext).execute(success, error, options)
+    }
+
     private fun createPermissionError(message: String) =
             GeolocationError(
                     code = RequestAuthorization.PERMISSION_DENIED.toDouble(),

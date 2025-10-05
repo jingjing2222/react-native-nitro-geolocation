@@ -20,6 +20,12 @@ namespace margelo::nitro::nitrogeolocation { enum class AuthorizationLevelIntern
 namespace margelo::nitro::nitrogeolocation { enum class LocationProviderInternal; }
 // Forward declaration of `GeolocationError` to properly resolve imports.
 namespace margelo::nitro::nitrogeolocation { struct GeolocationError; }
+// Forward declaration of `GeolocationPosition` to properly resolve imports.
+namespace margelo::nitro::nitrogeolocation { struct GeolocationPosition; }
+// Forward declaration of `GeolocationCoordinates` to properly resolve imports.
+namespace margelo::nitro::nitrogeolocation { struct GeolocationCoordinates; }
+// Forward declaration of `GeolocationOptions` to properly resolve imports.
+namespace margelo::nitro::nitrogeolocation { struct GeolocationOptions; }
 
 #include "RNConfigurationInternal.hpp"
 #include "AuthorizationLevelInternal.hpp"
@@ -28,6 +34,9 @@ namespace margelo::nitro::nitrogeolocation { struct GeolocationError; }
 #include <functional>
 #include "GeolocationError.hpp"
 #include <string>
+#include "GeolocationPosition.hpp"
+#include "GeolocationCoordinates.hpp"
+#include "GeolocationOptions.hpp"
 
 #include "NitroGeolocation-Swift-Cxx-Umbrella.hpp"
 
@@ -78,6 +87,12 @@ namespace margelo::nitro::nitrogeolocation {
     }
     inline void requestAuthorization(const std::optional<std::function<void()>>& success, const std::optional<std::function<void(const GeolocationError& /* error */)>>& error) override {
       auto __result = _swiftPart.requestAuthorization(success, error);
+      if (__result.hasError()) [[unlikely]] {
+        std::rethrow_exception(__result.error());
+      }
+    }
+    inline void getCurrentPosition(const std::function<void(const GeolocationPosition& /* position */)>& success, const std::optional<std::function<void(const GeolocationError& /* error */)>>& error, const std::optional<GeolocationOptions>& options) override {
+      auto __result = _swiftPart.getCurrentPosition(success, error, options);
       if (__result.hasError()) [[unlikely]] {
         std::rethrow_exception(__result.error());
       }
