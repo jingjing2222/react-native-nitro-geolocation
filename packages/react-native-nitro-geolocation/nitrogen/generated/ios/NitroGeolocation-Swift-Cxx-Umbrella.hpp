@@ -10,6 +10,8 @@
 // Forward declarations of C++ defined types
 // Forward declaration of `AuthorizationLevelInternal` to properly resolve imports.
 namespace margelo::nitro::nitrogeolocation { enum class AuthorizationLevelInternal; }
+// Forward declaration of `GeolocationError` to properly resolve imports.
+namespace margelo::nitro::nitrogeolocation { struct GeolocationError; }
 // Forward declaration of `HybridNitroGeolocationSpec` to properly resolve imports.
 namespace margelo::nitro::nitrogeolocation { class HybridNitroGeolocationSpec; }
 // Forward declaration of `LocationProviderInternal` to properly resolve imports.
@@ -19,13 +21,16 @@ namespace margelo::nitro::nitrogeolocation { struct RNConfigurationInternal; }
 
 // Include C++ defined types
 #include "AuthorizationLevelInternal.hpp"
+#include "GeolocationError.hpp"
 #include "HybridNitroGeolocationSpec.hpp"
 #include "LocationProviderInternal.hpp"
 #include "RNConfigurationInternal.hpp"
 #include <NitroModules/Result.hpp>
 #include <exception>
+#include <functional>
 #include <memory>
 #include <optional>
+#include <string>
 
 // C++ helpers for Swift
 #include "NitroGeolocation-Swift-Cxx-Bridge.hpp"

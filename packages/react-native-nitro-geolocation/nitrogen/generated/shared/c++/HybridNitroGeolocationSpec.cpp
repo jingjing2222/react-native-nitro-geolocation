@@ -15,6 +15,7 @@ namespace margelo::nitro::nitrogeolocation {
     // load custom methods/properties
     registerHybrids(this, [](Prototype& prototype) {
       prototype.registerHybridMethod("setRNConfiguration", &HybridNitroGeolocationSpec::setRNConfiguration);
+      prototype.registerHybridMethod("requestAuthorization", &HybridNitroGeolocationSpec::requestAuthorization);
     });
   }
 

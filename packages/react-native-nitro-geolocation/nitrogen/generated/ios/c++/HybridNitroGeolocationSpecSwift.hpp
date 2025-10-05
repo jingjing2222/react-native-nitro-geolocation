@@ -18,11 +18,16 @@ namespace margelo::nitro::nitrogeolocation { struct RNConfigurationInternal; }
 namespace margelo::nitro::nitrogeolocation { enum class AuthorizationLevelInternal; }
 // Forward declaration of `LocationProviderInternal` to properly resolve imports.
 namespace margelo::nitro::nitrogeolocation { enum class LocationProviderInternal; }
+// Forward declaration of `GeolocationError` to properly resolve imports.
+namespace margelo::nitro::nitrogeolocation { struct GeolocationError; }
 
 #include "RNConfigurationInternal.hpp"
 #include "AuthorizationLevelInternal.hpp"
 #include <optional>
 #include "LocationProviderInternal.hpp"
+#include <functional>
+#include "GeolocationError.hpp"
+#include <string>
 
 #include "NitroGeolocation-Swift-Cxx-Umbrella.hpp"
 
@@ -67,6 +72,12 @@ namespace margelo::nitro::nitrogeolocation {
     // Methods
     inline void setRNConfiguration(const RNConfigurationInternal& config) override {
       auto __result = _swiftPart.setRNConfiguration(std::forward<decltype(config)>(config));
+      if (__result.hasError()) [[unlikely]] {
+        std::rethrow_exception(__result.error());
+      }
+    }
+    inline void requestAuthorization(const std::optional<std::function<void()>>& success, const std::optional<std::function<void(const GeolocationError& /* error */)>>& error) override {
+      auto __result = _swiftPart.requestAuthorization(success, error);
       if (__result.hasError()) [[unlikely]] {
         std::rethrow_exception(__result.error());
       }

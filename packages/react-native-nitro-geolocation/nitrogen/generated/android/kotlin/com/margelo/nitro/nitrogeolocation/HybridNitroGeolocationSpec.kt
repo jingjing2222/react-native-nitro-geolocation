@@ -43,6 +43,15 @@ abstract class HybridNitroGeolocationSpec: HybridObject() {
   @DoNotStrip
   @Keep
   abstract fun setRNConfiguration(config: RNConfigurationInternal): Unit
+  
+  abstract fun requestAuthorization(success: (() -> Unit)?, error: ((error: GeolocationError) -> Unit)?): Unit
+  
+  @DoNotStrip
+  @Keep
+  private fun requestAuthorization_cxx(success: Func_void?, error: Func_void_GeolocationError?): Unit {
+    val __result = requestAuthorization(success?.let { it }, error?.let { it })
+    return __result
+  }
 
   private external fun initHybrid(): HybridData
 

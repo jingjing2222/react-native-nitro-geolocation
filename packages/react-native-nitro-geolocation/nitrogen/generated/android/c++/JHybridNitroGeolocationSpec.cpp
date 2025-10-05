@@ -13,6 +13,8 @@ namespace margelo::nitro::nitrogeolocation { struct RNConfigurationInternal; }
 namespace margelo::nitro::nitrogeolocation { enum class AuthorizationLevelInternal; }
 // Forward declaration of `LocationProviderInternal` to properly resolve imports.
 namespace margelo::nitro::nitrogeolocation { enum class LocationProviderInternal; }
+// Forward declaration of `GeolocationError` to properly resolve imports.
+namespace margelo::nitro::nitrogeolocation { struct GeolocationError; }
 
 #include "RNConfigurationInternal.hpp"
 #include "JRNConfigurationInternal.hpp"
@@ -21,6 +23,12 @@ namespace margelo::nitro::nitrogeolocation { enum class LocationProviderInternal
 #include "JAuthorizationLevelInternal.hpp"
 #include "LocationProviderInternal.hpp"
 #include "JLocationProviderInternal.hpp"
+#include <functional>
+#include "JFunc_void.hpp"
+#include "GeolocationError.hpp"
+#include "JFunc_void_GeolocationError.hpp"
+#include "JGeolocationError.hpp"
+#include <string>
 
 namespace margelo::nitro::nitrogeolocation {
 
@@ -51,6 +59,10 @@ namespace margelo::nitro::nitrogeolocation {
   void JHybridNitroGeolocationSpec::setRNConfiguration(const RNConfigurationInternal& config) {
     static const auto method = javaClassStatic()->getMethod<void(jni::alias_ref<JRNConfigurationInternal> /* config */)>("setRNConfiguration");
     method(_javaPart, JRNConfigurationInternal::fromCpp(config));
+  }
+  void JHybridNitroGeolocationSpec::requestAuthorization(const std::optional<std::function<void()>>& success, const std::optional<std::function<void(const GeolocationError& /* error */)>>& error) {
+    static const auto method = javaClassStatic()->getMethod<void(jni::alias_ref<JFunc_void::javaobject> /* success */, jni::alias_ref<JFunc_void_GeolocationError::javaobject> /* error */)>("requestAuthorization_cxx");
+    method(_javaPart, success.has_value() ? JFunc_void_cxx::fromCpp(success.value()) : nullptr, error.has_value() ? JFunc_void_GeolocationError_cxx::fromCpp(error.value()) : nullptr);
   }
 
 } // namespace margelo::nitro::nitrogeolocation

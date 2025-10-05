@@ -16,6 +16,8 @@
 #include <NitroModules/HybridObjectRegistry.hpp>
 
 #include "JHybridNitroGeolocationSpec.hpp"
+#include "JFunc_void.hpp"
+#include "JFunc_void_GeolocationError.hpp"
 #include <NitroModules/DefaultConstructableObject.hpp>
 
 namespace margelo::nitro::nitrogeolocation {
@@ -28,6 +30,8 @@ int initialize(JavaVM* vm) {
   return facebook::jni::initialize(vm, [] {
     // Register native JNI methods
     margelo::nitro::nitrogeolocation::JHybridNitroGeolocationSpec::registerNatives();
+    margelo::nitro::nitrogeolocation::JFunc_void_cxx::registerNatives();
+    margelo::nitro::nitrogeolocation::JFunc_void_GeolocationError_cxx::registerNatives();
 
     // Register Nitro Hybrid Objects
     HybridObjectRegistry::registerHybridObjectConstructor(
