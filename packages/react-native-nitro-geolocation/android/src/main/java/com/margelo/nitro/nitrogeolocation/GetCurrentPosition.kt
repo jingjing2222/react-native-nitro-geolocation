@@ -245,7 +245,7 @@ class GetCurrentPosition(private val reactContext: ReactApplicationContext) {
      * Determines whether one Location reading is better than the current Location fix Taken from
      * Android Examples: https://developer.android.com/guide/topics/location/strategies.html
      */
-    private fun isBetterLocation(location: Location, currentBestLocation: Location?): Boolean {
+    private fun(location: Location, currentBestLocation: Location?): Boolean {
         if (currentBestLocation == null) {
             return true
         }
