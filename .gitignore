@@ -54,3 +54,12 @@ android/keystores/debug.keystore
 
 # ETC
 .vscode/mcp.json
+
+
+.pnp.*
+.yarn/*
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/sdks
+!.yarn/versions

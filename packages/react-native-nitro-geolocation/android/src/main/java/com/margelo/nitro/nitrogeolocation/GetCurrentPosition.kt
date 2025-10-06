@@ -112,10 +112,24 @@ class GetCurrentPosition(private val reactContext: ReactApplicationContext) {
     ) {
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.R) {
             // Android 11+ supports getCurrentLocation
-            requestCurrentLocationModern(locationManager, provider, options, success, error, fallbackLocation)
+            requestCurrentLocationModern(
+                    locationManager,
+                    provider,
+                    options,
+                    success,
+                    error,
+                    fallbackLocation
+            )
         } else {
             // Fallback to requestLocationUpdates
-            requestCurrentLocationLegacy(locationManager, provider, options, success, error, fallbackLocation)
+            requestCurrentLocationLegacy(
+                    locationManager,
+                    provider,
+                    options,
+                    success,
+                    error,
+                    fallbackLocation
+            )
         }
     }
 
@@ -143,10 +157,13 @@ class GetCurrentPosition(private val reactContext: ReactApplicationContext) {
                     { runnable -> handler.post(runnable) }
             ) { location ->
                 handler.removeCallbacks(timeoutRunnable)
-                if (location != null) {
-                    success(locationToPosition(location))
+
+                val bestLocation = selectBestLocation(location, fallbackLocation)
+
+                if (bestLocation != null) {
+                    success(locationToPosition(bestLocation))
                 } else {
-                    Log.e(TAG, "getCurrentLocation returned null")
+                    Log.e(TAG, "No location available")
                     error?.invoke(createError(POSITION_UNAVAILABLE, "Unable to get location"))
                 }
             }
@@ -154,6 +171,15 @@ class GetCurrentPosition(private val reactContext: ReactApplicationContext) {
         } catch (e: SecurityException) {
             Log.e(TAG, "SecurityException: ${e.message}")
             error?.invoke(createError(PERMISSION_DENIED, "Permission denied: ${e.message}"))
+        }
+    }
+
+    private fun selectBestLocation(newLocation: Location?, fallbackLocation: Location?): Location? {
+        return when {
+            newLocation == null -> fallbackLocation
+            fallbackLocation == null -> newLocation
+            isBetterLocation(newLocation, fallbackLocation) -> newLocation
+            else -> fallbackLocation
         }
     }
 
@@ -178,23 +204,27 @@ class GetCurrentPosition(private val reactContext: ReactApplicationContext) {
             }
         }
 
-        listener = object : LocationListener {
-            override fun onLocationChanged(location: Location) {
-                synchronized(this) {
-                    if (!isResolved && isBetterLocation(location, oldLocation)) {
-                        isResolved = true
-                        handler.removeCallbacks(timeoutRunnable)
-                        locationManager.removeUpdates(this)
-                        success(locationToPosition(location))
+        listener =
+                object : LocationListener {
+                    override fun onLocationChanged(location: Location) {
+                        synchronized(this) {
+                            if (!isResolved) {
+                                val bestLocation = selectBestLocation(location, oldLocation)
+                                if (bestLocation == location) {
+                                    isResolved = true
+                                    handler.removeCallbacks(timeoutRunnable)
+                                    locationManager.removeUpdates(this)
+                                    success(locationToPosition(location))
+                                }
+                                oldLocation = location
+                            }
+                        }
                     }
-                    oldLocation = location
-                }
-            }
 
-            override fun onStatusChanged(provider: String?, status: Int, extras: Bundle?) {}
-            override fun onProviderEnabled(provider: String) {}
-            override fun onProviderDisabled(provider: String) {}
-        }
+                    override fun onStatusChanged(provider: String?, status: Int, extras: Bundle?) {}
+                    override fun onProviderEnabled(provider: String) {}
+                    override fun onProviderDisabled(provider: String) {}
+                }
 
         try {
             locationManager.requestLocationUpdates(
@@ -212,8 +242,8 @@ class GetCurrentPosition(private val reactContext: ReactApplicationContext) {
     }
 
     /**
-     * Determines whether one Location reading is better than the current Location fix
-     * Taken from Android Examples: https://developer.android.com/guide/topics/location/strategies.html
+     * Determines whether one Location reading is better than the current Location fix Taken from
+     * Android Examples: https://developer.android.com/guide/topics/location/strategies.html
      */
     private fun isBetterLocation(location: Location, currentBestLocation: Location?): Boolean {
         if (currentBestLocation == null) {
