@@ -2,8 +2,8 @@
 pageType: home
 
 hero:
-  name: Nitro Geolocation
-  text: A React Native Geolocation module Using Nitro.
+  name: React Native Nitro Geolocation
+  text: A React Native Geolocation module
   tagline: Native geolocation, now Nitro-powered.
   actions:
     - theme: brand

@@ -37,7 +37,7 @@ User callback executed
 - Multiple listeners share one event stream
 - Requires JSON serialization on every update
 
-### Modern: Direct Callback Architecture (`react-native-nitro-geolocation`)
+### Modern: Direct Callback Architecture (`React Native Nitro Geolocation`)
 
 ```
 JavaScript Layer
@@ -84,4 +84,4 @@ Nitro Modules use **Nitrogen** code generation to create JSI bindings:
 
 ## Summary
 
-`react-native-nitro-geolocation` transforms the geolocation API from a **Bridge-mediated event system** to a **JSI-powered direct callback system**, delivering native-level performance while maintaining 100% API compatibility with the original library.
+`React Native Nitro Geolocation` transforms the geolocation API from a **Bridge-mediated event system** to a **JSI-powered direct callback system**, delivering native-level performance while maintaining 100% API compatibility with the original library.

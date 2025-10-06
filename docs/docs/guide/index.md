@@ -4,20 +4,20 @@ The [`@react-native-community/geolocation`](https://github.com/michalchudziak/re
 
 With the React Native ecosystem moving toward **TurboModules**, **Fabric**, and **JSI-based architecture**, we saw an opportunity to bring the same familiar API to the new architecture.
 
-This project — **Nitro Geolocation** — is a reimplementation of that library, designed for the **Nitro Module** system.
+This project — **React Native Nitro Geolocation** — is a reimplementation of that library, designed for the **Nitro Module** system.
 It provides the same familiar API surface while delivering:
 
 - 🚀 **Faster performance** through direct JSI bindings
 - 📱 **Improved native consistency** across Android and iOS
 - 🔁 **Seamless migration** from `@react-native-community/geolocation`
 - 🧩 **TypeScript-first** developer experience
-- 🔄 **100% API compatibility** — Nitro Geolocation can be used as a **drop-in replacement**, fully substituting `@react-native-community/geolocation` without any code changes
+- 🔄 **100% API compatibility** — React Native Nitro Geolocation can be used as a **drop-in replacement**, fully substituting `@react-native-community/geolocation` without any code changes
 
-Whether you're upgrading an existing app or building a new one using the latest React Native architecture, **Nitro Geolocation** gives you the same simplicity — now with modern internals.
+Whether you're upgrading an existing app or building a new one using the latest React Native architecture, **React Native Nitro Geolocation** gives you the same simplicity — now with modern internals.
 
 ## Motivation
 
-The motivation behind Nitro Geolocation is simple:
+The motivation behind React Native Nitro Geolocation is simple:
 React Native has evolved with new architectural capabilities, and we wanted to bring these benefits to the Geolocation API.
 
 `@react-native-community/geolocation` was built on the **bridge-based architecture**, which was the standard at the time. The new JSI-based architecture offers different characteristics:

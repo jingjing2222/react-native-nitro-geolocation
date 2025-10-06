@@ -1,6 +1,6 @@
 # Quick Start
 
-This guide walks you through installing and setting up **Nitro Geolocation** in your React Native project.
+This guide walks you through installing and setting up **React Native Nitro Geolocation** in your React Native project.
 
 
 ## 1. Installation
@@ -9,10 +9,10 @@ Before installing the module, make sure you have a React Native environment (0.7
 
 ~~~bash
 # Install Nitro core and Geolocation module
-yarn add react-native-nitro-modules nitro-geolocation
+yarn add react-native-nitro-modules react-native-nitro-geolocation
 
 # or using npm
-npm install react-native-nitro-modules nitro-geolocation
+npm install react-native-nitro-modules react-native-nitro-geolocation
 ~~~
 
 After installation, rebuild your native app to ensure the new module is linked.
