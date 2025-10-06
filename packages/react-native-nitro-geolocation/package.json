@@ -14,7 +14,7 @@
   },
   "author": "jingjing2222",
   "license": "MIT",
-  "homepage": "react-native-nitro-geolocation.pages.dev",
+  "homepage": "https://react-native-nitro-geolocation.pages.dev",
   "repository": "https://github.com/jingjing2222/react-native-nitro-geolocation",
   "files": [
     "src",
@@ -45,6 +45,9 @@
     "react-native": "0.81.1",
     "react-native-nitro-modules": "^0.29.7",
     "typescript": "^5.9.3"
+  },
+  "peerDependencies": {
+    "react-native-nitro-modules": "*"
   },
   "create-react-native-library": {
     "languages": "kotlin-swift",

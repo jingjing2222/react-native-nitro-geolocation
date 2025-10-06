@@ -8665,6 +8665,8 @@ __metadata:
     react-native: "npm:0.81.1"
     react-native-nitro-modules: "npm:^0.29.7"
     typescript: "npm:^5.9.3"
+  peerDependencies:
+    react-native-nitro-modules: "*"
   languageName: unknown
   linkType: soft
 
