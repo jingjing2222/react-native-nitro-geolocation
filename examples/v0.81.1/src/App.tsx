@@ -96,7 +96,7 @@ export default function App() {
       (position) => {
         setIsLoadingPosition(false);
         setCurrentPosition(position);
-        Alert.alert("Success", `Position retrieved! ${JSON.stringify(position)}`);
+        Alert.alert("Success", `Position retrieved!`);
       },
       (error) => {
         setIsLoadingPosition(false);
