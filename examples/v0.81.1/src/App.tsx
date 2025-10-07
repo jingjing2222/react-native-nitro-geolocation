@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Alert,
   Button,
@@ -13,13 +13,13 @@ import {
   // type GeolocationPosition,
   // clearWatch,
   // getCurrentPosition,
-  // requestAuthorization,
+  requestAuthorization,
   setRNConfiguration
   // watchPosition
 } from "react-native-nitro-geolocation";
 
 export default function App() {
-  // const [permissionStatus, setPermissionStatus] = useState<string>("Unknown");
+  const [permissionStatus, setPermissionStatus] = useState<string>("Unknown");
   // const [currentPosition, setCurrentPosition] =
   //   useState<GeolocationPosition | null>(null);
   // const [isLoadingPosition, setIsLoadingPosition] = useState(false);
@@ -38,19 +38,19 @@ export default function App() {
     });
   }, []);
 
-  // const handleRequestAuthorization = () => {
-  //   setPermissionStatus("Requesting...");
-  //   requestAuthorization(
-  //     () => {
-  //       setPermissionStatus("Granted ✅");
-  //       Alert.alert("Success", "Location permission granted!");
-  //     },
-  //     (error) => {
-  //       setPermissionStatus(`Denied ❌ (Code: ${error.code})`);
-  //       Alert.alert("Error", error.message);
-  //     }
-  //   );
-  // };
+  const handleRequestAuthorization = () => {
+    setPermissionStatus("Requesting...");
+    requestAuthorization(
+      () => {
+        setPermissionStatus("Granted ✅");
+        Alert.alert("Success", "Location permission granted!");
+      },
+      (error) => {
+        setPermissionStatus(`Denied ❌ (Code: ${error.code})`);
+        Alert.alert("Error", error.message);
+      }
+    );
+  };
 
   const handleTestConfig1 = () => {
     setRNConfiguration({
@@ -160,7 +160,7 @@ export default function App() {
           <View style={styles.sectionContainer}>
             <Text style={styles.sectionTitle}>Nitro Geolocation Example</Text>
 
-            {/* <View style={styles.statusContainer}>
+            <View style={styles.statusContainer}>
               <Text style={styles.statusLabel}>Permission Status:</Text>
               <Text style={styles.statusValue}>{permissionStatus}</Text>
             </View>
@@ -173,7 +173,7 @@ export default function App() {
               />
             </View>
 
-            <View style={styles.divider} /> */}
+            <View style={styles.divider} />
 
             <Text style={styles.sectionSubtitle}>Configuration Tests:</Text>
 
