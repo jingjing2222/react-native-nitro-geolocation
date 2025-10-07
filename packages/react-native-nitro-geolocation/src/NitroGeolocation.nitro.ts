@@ -1,5 +1,9 @@
 import type { HybridObject } from "react-native-nitro-modules";
-import { GeolocationError, GeolocationOptions, GeolocationResponse } from "./types";
+import type {
+  GeolocationError,
+  GeolocationOptions,
+  GeolocationResponse
+} from "./types";
 
 // Configuration - Internal (for C++ codegen, avoiding ANDROID macro conflict)
 export type AuthorizationLevelInternal = "always" | "whenInUse" | "auto";
