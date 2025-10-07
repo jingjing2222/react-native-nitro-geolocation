@@ -496,7 +496,7 @@ class LocationManager: NSObject, CLLocationManagerDelegate {
     private func locationToPosition(_ location: CLLocation) -> GeolocationResponse {
         let altitude = location.verticalAccuracy < 0 ? 0.0 : location.altitude
         let altitudeAccuracy = location.verticalAccuracy < 0 ? 0.0 : location.verticalAccuracy
-        let heading = location.course >= 0 ? location.course : 0.0
+        let heading = location.course >= 0 ? location.course : -1.0
         let speed = location.speed >= 0 ? location.speed : 0.0
 
         let coordsObj = GeolocationCoordinates(
@@ -511,7 +511,7 @@ class LocationManager: NSObject, CLLocationManagerDelegate {
 
         let position = GeolocationResponse(
             coords: coordsObj,
-            timestamp: location.timestamp.timeIntervalSince1970 * 100
+            timestamp: location.timestamp.timeIntervalSince1970 * 1000
         )
 
         return position
