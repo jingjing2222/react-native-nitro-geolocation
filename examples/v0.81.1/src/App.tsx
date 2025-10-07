@@ -9,13 +9,8 @@ import {
   Text,
   View
 } from "react-native";
-import {
+import Geolocation, {
   type GeolocationResponse,
-  clearWatch,
-  getCurrentPosition,
-  requestAuthorization,
-  setRNConfiguration,
-  watchPosition
 } from "react-native-nitro-geolocation";
 
 export default function App() {
@@ -31,7 +26,7 @@ export default function App() {
 
   useEffect(() => {
     // Configure geolocation
-    setRNConfiguration({
+    Geolocation.setRNConfiguration({
       skipPermissionRequests: false,
       authorizationLevel: "whenInUse",
       locationProvider: "auto"
@@ -40,7 +35,7 @@ export default function App() {
 
   const handleRequestAuthorization = () => {
     setPermissionStatus("Requesting...");
-    requestAuthorization(
+    Geolocation.requestAuthorization(
       () => {
         setPermissionStatus("Granted ✅");
         Alert.alert("Success", "Location permission granted!");
@@ -53,7 +48,7 @@ export default function App() {
   };
 
   const handleTestConfig1 = () => {
-    setRNConfiguration({
+    Geolocation.setRNConfiguration({
       skipPermissionRequests: true,
       authorizationLevel: "always",
       enableBackgroundLocationUpdates: true,
@@ -66,7 +61,7 @@ export default function App() {
   };
 
   const handleTestConfig2 = () => {
-    setRNConfiguration({
+    Geolocation.setRNConfiguration({
       skipPermissionRequests: false,
       authorizationLevel: "whenInUse",
       locationProvider: "android"
@@ -78,7 +73,7 @@ export default function App() {
   };
 
   const handleTestConfig3 = () => {
-    setRNConfiguration({
+    Geolocation.setRNConfiguration({
       skipPermissionRequests: false,
       locationProvider: "auto"
     });
@@ -92,7 +87,7 @@ export default function App() {
     setIsLoadingPosition(true);
     setCurrentPosition(null);
 
-    getCurrentPosition(
+    Geolocation.getCurrentPosition(
       (position) => {
         setIsLoadingPosition(false);
         setCurrentPosition(position);
@@ -119,7 +114,7 @@ export default function App() {
     setWatchUpdateCount(0);
     setWatchedPosition(null);
 
-    const id = watchPosition(
+    const id = Geolocation.watchPosition(
       (position) => {
         setWatchedPosition(position);
         setWatchUpdateCount((count) => count + 1);
@@ -144,7 +139,7 @@ export default function App() {
       return;
     }
 
-    clearWatch(watchId);
+    Geolocation.clearWatch(watchId);
     setWatchId(null);
     Alert.alert("Success", "Stopped watching position");
   };
