@@ -9,8 +9,8 @@ import {
   Text,
   View
 } from "react-native";
-import Geolocation ,{
-  type GeolocationResponse,
+import Geolocation, {
+  type GeolocationResponse
 } from "react-native-nitro-geolocation";
 
 export default function App() {
