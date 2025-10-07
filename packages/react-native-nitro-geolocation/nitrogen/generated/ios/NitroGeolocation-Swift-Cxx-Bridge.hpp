@@ -16,8 +16,8 @@ namespace margelo::nitro::nitrogeolocation { struct GeolocationCoordinates; }
 namespace margelo::nitro::nitrogeolocation { struct GeolocationError; }
 // Forward declaration of `GeolocationOptions` to properly resolve imports.
 namespace margelo::nitro::nitrogeolocation { struct GeolocationOptions; }
-// Forward declaration of `GeolocationPosition` to properly resolve imports.
-namespace margelo::nitro::nitrogeolocation { struct GeolocationPosition; }
+// Forward declaration of `GeolocationResponse` to properly resolve imports.
+namespace margelo::nitro::nitrogeolocation { struct GeolocationResponse; }
 // Forward declaration of `HybridNitroGeolocationSpec` to properly resolve imports.
 namespace margelo::nitro::nitrogeolocation { class HybridNitroGeolocationSpec; }
 // Forward declaration of `LocationProviderInternal` to properly resolve imports.
@@ -32,7 +32,7 @@ namespace NitroGeolocation { class HybridNitroGeolocationSpec_cxx; }
 #include "GeolocationCoordinates.hpp"
 #include "GeolocationError.hpp"
 #include "GeolocationOptions.hpp"
-#include "GeolocationPosition.hpp"
+#include "GeolocationResponse.hpp"
 #include "HybridNitroGeolocationSpec.hpp"
 #include "LocationProviderInternal.hpp"
 #include <NitroModules/Result.hpp>
@@ -182,26 +182,26 @@ namespace margelo::nitro::nitrogeolocation::bridge::swift {
     return *optional;
   }
   
-  // pragma MARK: std::function<void(const GeolocationPosition& /* position */)>
+  // pragma MARK: std::function<void(const GeolocationResponse& /* position */)>
   /**
-   * Specialized version of `std::function<void(const GeolocationPosition&)>`.
+   * Specialized version of `std::function<void(const GeolocationResponse&)>`.
    */
-  using Func_void_GeolocationPosition = std::function<void(const GeolocationPosition& /* position */)>;
+  using Func_void_GeolocationResponse = std::function<void(const GeolocationResponse& /* position */)>;
   /**
-   * Wrapper class for a `std::function<void(const GeolocationPosition& / * position * /)>`, this can be used from Swift.
+   * Wrapper class for a `std::function<void(const GeolocationResponse& / * position * /)>`, this can be used from Swift.
    */
-  class Func_void_GeolocationPosition_Wrapper final {
+  class Func_void_GeolocationResponse_Wrapper final {
   public:
-    explicit Func_void_GeolocationPosition_Wrapper(std::function<void(const GeolocationPosition& /* position */)>&& func): _function(std::make_unique<std::function<void(const GeolocationPosition& /* position */)>>(std::move(func))) {}
-    inline void call(GeolocationPosition position) const noexcept {
+    explicit Func_void_GeolocationResponse_Wrapper(std::function<void(const GeolocationResponse& /* position */)>&& func): _function(std::make_unique<std::function<void(const GeolocationResponse& /* position */)>>(std::move(func))) {}
+    inline void call(GeolocationResponse position) const noexcept {
       _function->operator()(position);
     }
   private:
-    std::unique_ptr<std::function<void(const GeolocationPosition& /* position */)>> _function;
+    std::unique_ptr<std::function<void(const GeolocationResponse& /* position */)>> _function;
   } SWIFT_NONCOPYABLE;
-  Func_void_GeolocationPosition create_Func_void_GeolocationPosition(void* NON_NULL swiftClosureWrapper) noexcept;
-  inline Func_void_GeolocationPosition_Wrapper wrap_Func_void_GeolocationPosition(Func_void_GeolocationPosition value) noexcept {
-    return Func_void_GeolocationPosition_Wrapper(std::move(value));
+  Func_void_GeolocationResponse create_Func_void_GeolocationResponse(void* NON_NULL swiftClosureWrapper) noexcept;
+  inline Func_void_GeolocationResponse_Wrapper wrap_Func_void_GeolocationResponse(Func_void_GeolocationResponse value) noexcept {
+    return Func_void_GeolocationResponse_Wrapper(std::move(value));
   }
   
   // pragma MARK: std::optional<GeolocationOptions>

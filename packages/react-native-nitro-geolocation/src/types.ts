@@ -2,7 +2,7 @@
 export type AuthorizationLevel = "always" | "whenInUse" | "auto";
 export type LocationProvider = "playServices" | "android" | "auto";
 
-export interface RNConfiguration {
+export interface GeolocationConfiguration {
   skipPermissionRequests: boolean;
   authorizationLevel?: AuthorizationLevel;
   enableBackgroundLocationUpdates?: boolean;
@@ -19,7 +19,7 @@ export interface GeolocationCoordinates {
   speed: number | null;
 }
 
-export interface GeolocationPosition {
+export interface GeolocationResponse {
   coords: GeolocationCoordinates;
   timestamp: number;
 }

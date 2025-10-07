@@ -3,7 +3,7 @@ import type { NitroGeolocation } from "./NitroGeolocation.nitro";
 import type {
   GeolocationError,
   GeolocationOptions,
-  GeolocationPosition
+  GeolocationResponse
 } from "./types";
 
 /**
@@ -16,7 +16,7 @@ import type {
  * @returns watchId - A number that identifies this watch session
  */
 export function watchPosition(
-  success: (position: GeolocationPosition) => void,
+  success: (position: GeolocationResponse) => void,
   error?: (error: GeolocationError) => void,
   options?: GeolocationOptions
 ): number {

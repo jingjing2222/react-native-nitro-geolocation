@@ -18,7 +18,7 @@
 #include "JHybridNitroGeolocationSpec.hpp"
 #include "JFunc_void.hpp"
 #include "JFunc_void_GeolocationError.hpp"
-#include "JFunc_void_GeolocationPosition.hpp"
+#include "JFunc_void_GeolocationResponse.hpp"
 #include <NitroModules/DefaultConstructableObject.hpp>
 
 namespace margelo::nitro::nitrogeolocation {
@@ -33,7 +33,7 @@ int initialize(JavaVM* vm) {
     margelo::nitro::nitrogeolocation::JHybridNitroGeolocationSpec::registerNatives();
     margelo::nitro::nitrogeolocation::JFunc_void_cxx::registerNatives();
     margelo::nitro::nitrogeolocation::JFunc_void_GeolocationError_cxx::registerNatives();
-    margelo::nitro::nitrogeolocation::JFunc_void_GeolocationPosition_cxx::registerNatives();
+    margelo::nitro::nitrogeolocation::JFunc_void_GeolocationResponse_cxx::registerNatives();
 
     // Register Nitro Hybrid Objects
     HybridObjectRegistry::registerHybridObjectConstructor(

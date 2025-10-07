@@ -35,14 +35,14 @@ class NitroGeolocation: HybridNitroGeolocationSpec {
     }
 
     public func getCurrentPosition(
-        success: @escaping (GeolocationPosition) -> Void, error: ((GeolocationError) -> Void)?,
+        success: @escaping (GeolocationResponse) -> Void, error: ((GeolocationError) -> Void)?,
         options: GeolocationOptions?
     ) throws {
         locationManager.getCurrentPosition(success: success, error: error, options: options)
     }
 
     public func watchPosition(
-        success: @escaping (GeolocationPosition) -> Void, error: ((GeolocationError) -> Void)?,
+        success: @escaping (GeolocationResponse) -> Void, error: ((GeolocationError) -> Void)?,
         options: GeolocationOptions?
     ) throws -> Double {
         return locationManager.watchPosition(success: success, error: error, options: options)
@@ -85,10 +85,13 @@ class NitroGeolocation: HybridNitroGeolocationSpec {
     private func hasInfoPlistKey(for type: LocationManager.AuthorizationType) -> Bool {
         switch type {
         case .always:
-            return Bundle.main.object(forInfoDictionaryKey: "NSLocationAlwaysUsageDescription") != nil ||
-                   Bundle.main.object(forInfoDictionaryKey: "NSLocationAlwaysAndWhenInUseUsageDescription") != nil
+            return Bundle.main.object(forInfoDictionaryKey: "NSLocationAlwaysUsageDescription")
+                != nil
+                || Bundle.main.object(
+                    forInfoDictionaryKey: "NSLocationAlwaysAndWhenInUseUsageDescription") != nil
         case .whenInUse:
-            return Bundle.main.object(forInfoDictionaryKey: "NSLocationWhenInUseUsageDescription") != nil
+            return Bundle.main.object(forInfoDictionaryKey: "NSLocationWhenInUseUsageDescription")
+                != nil
         case .none:
             return false
         }
