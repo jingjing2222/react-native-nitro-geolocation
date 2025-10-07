@@ -1,17 +1,41 @@
 class NitroGeolocation: HybridNitroGeolocationSpec {
-    public func addition(a: Double, b: Double) throws -> Double {
-        return a + b
+    private var configuration: RNConfigurationInternal = RNConfigurationInternal(
+        skipPermissionRequests: false,
+        authorizationLevel: nil,
+        enableBackgroundLocationUpdates: nil,
+        locationProvider: nil
+    )
+
+    public func setRNConfiguration(config: RNConfigurationInternal) throws {
+        configuration = config
     }
-    public func subtraction(a: Double, b: Double) throws -> Double {
-        return a - b
+
+    public func requestAuthorization(success: (() -> Void)?, error: ((GeolocationError) -> Void)?)
+        throws
+    {
+        // TODO: Implement
     }
-    public func multiply(a: Double, b: Double) throws -> Double {
-        return a * b
+
+    public func getCurrentPosition(
+        success: @escaping (GeolocationPosition) -> Void, error: ((GeolocationError) -> Void)?,
+        options: GeolocationOptions?
+    ) throws {
+        // TODO: Implement
     }
-    public func division(a: Double, b: Double) throws -> Double {
-        return a / b
+
+    public func watchPosition(
+        success: @escaping (GeolocationPosition) -> Void, error: ((GeolocationError) -> Void)?,
+        options: GeolocationOptions?
+    ) throws -> Double {
+        // TODO: Implement
+        return 0
     }
-    public func test(a: Double, b: Double) throws -> Double {
-        return a + b
+
+    public func clearWatch(watchId: Double) throws {
+        // TODO: Implement
+    }
+
+    public func stopObserving() throws {
+        // TODO: Implement
     }
 }
