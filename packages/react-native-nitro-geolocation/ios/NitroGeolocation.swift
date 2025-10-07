@@ -10,7 +10,7 @@ class NitroGeolocation: HybridNitroGeolocationSpec {
         locationProvider: nil
     )
 
-    private let authManager = LocationAuthorizationManager()
+    private let locationManager = LocationManager()
 
     // MARK: - Public API
 
@@ -22,12 +22,43 @@ class NitroGeolocation: HybridNitroGeolocationSpec {
         throws
     {
         let authType = determineAuthorizationType()
-        authManager.requestAuthorization(authType: authType, success: success, error: error)
+        let skipPermissionRequests = configuration.skipPermissionRequests
+        let enableBackgroundLocationUpdates = configuration.enableBackgroundLocationUpdates ?? false
+
+        locationManager.requestAuthorization(
+            authType: authType,
+            skipPermissionRequests: skipPermissionRequests,
+            enableBackgroundLocationUpdates: enableBackgroundLocationUpdates,
+            success: success,
+            error: error
+        )
+    }
+
+    public func getCurrentPosition(
+        success: @escaping (GeolocationPosition) -> Void, error: ((GeolocationError) -> Void)?,
+        options: GeolocationOptions?
+    ) throws {
+        locationManager.getCurrentPosition(success: success, error: error, options: options)
+    }
+
+    public func watchPosition(
+        success: @escaping (GeolocationPosition) -> Void, error: ((GeolocationError) -> Void)?,
+        options: GeolocationOptions?
+    ) throws -> Double {
+        return locationManager.watchPosition(success: success, error: error, options: options)
+    }
+
+    public func clearWatch(watchId: Double) throws {
+        locationManager.clearWatch(watchId: watchId)
+    }
+
+    public func stopObserving() throws {
+        locationManager.stopObserving()
     }
 
     // MARK: - Authorization Helpers
 
-    private func determineAuthorizationType() -> LocationAuthorizationManager.AuthorizationType {
+    private func determineAuthorizationType() -> LocationManager.AuthorizationType {
         guard let authLevel = configuration.authorizationLevel else {
             return determineAuthorizationTypeFromInfoPlist()
         }
@@ -42,7 +73,7 @@ class NitroGeolocation: HybridNitroGeolocationSpec {
         }
     }
 
-    private func determineAuthorizationTypeFromInfoPlist() -> LocationAuthorizationManager.AuthorizationType {
+    private func determineAuthorizationTypeFromInfoPlist() -> LocationManager.AuthorizationType {
         if hasInfoPlistKey(for: .always) {
             return .always
         } else if hasInfoPlistKey(for: .whenInUse) {
@@ -51,7 +82,7 @@ class NitroGeolocation: HybridNitroGeolocationSpec {
         return .none
     }
 
-    private func hasInfoPlistKey(for type: LocationAuthorizationManager.AuthorizationType) -> Bool {
+    private func hasInfoPlistKey(for type: LocationManager.AuthorizationType) -> Bool {
         switch type {
         case .always:
             return Bundle.main.object(forInfoDictionaryKey: "NSLocationAlwaysUsageDescription") != nil ||
@@ -61,28 +92,5 @@ class NitroGeolocation: HybridNitroGeolocationSpec {
         case .none:
             return false
         }
-    }
-
-    public func getCurrentPosition(
-        success: @escaping (GeolocationPosition) -> Void, error: ((GeolocationError) -> Void)?,
-        options: GeolocationOptions?
-    ) throws {
-        // TODO: Implement
-    }
-
-    public func watchPosition(
-        success: @escaping (GeolocationPosition) -> Void, error: ((GeolocationError) -> Void)?,
-        options: GeolocationOptions?
-    ) throws -> Double {
-        // TODO: Implement
-        return 0
-    }
-
-    public func clearWatch(watchId: Double) throws {
-        // TODO: Implement
-    }
-
-    public func stopObserving() throws {
-        // TODO: Implement
     }
 }
