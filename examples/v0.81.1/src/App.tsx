@@ -10,7 +10,7 @@ import {
   View
 } from "react-native";
 import Geolocation, {
-  type GeolocationResponse,
+  type GeolocationResponse
 } from "react-native-nitro-geolocation";
 
 export default function App() {
