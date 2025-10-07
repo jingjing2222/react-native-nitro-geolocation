@@ -29,10 +29,10 @@ namespace margelo::nitro::nitrogeolocation::bridge::swift {
     };
   }
   
-  // pragma MARK: std::function<void(const GeolocationPosition& /* position */)>
-  Func_void_GeolocationPosition create_Func_void_GeolocationPosition(void* NON_NULL swiftClosureWrapper) noexcept {
-    auto swiftClosure = NitroGeolocation::Func_void_GeolocationPosition::fromUnsafe(swiftClosureWrapper);
-    return [swiftClosure = std::move(swiftClosure)](const GeolocationPosition& position) mutable -> void {
+  // pragma MARK: std::function<void(const GeolocationResponse& /* position */)>
+  Func_void_GeolocationResponse create_Func_void_GeolocationResponse(void* NON_NULL swiftClosureWrapper) noexcept {
+    auto swiftClosure = NitroGeolocation::Func_void_GeolocationResponse::fromUnsafe(swiftClosureWrapper);
+    return [swiftClosure = std::move(swiftClosure)](const GeolocationResponse& position) mutable -> void {
       swiftClosure.call(position);
     };
   }

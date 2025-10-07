@@ -10,7 +10,7 @@ import {
   View
 } from "react-native";
 import {
-  type GeolocationPosition,
+  type GeolocationResponse,
   clearWatch,
   getCurrentPosition,
   requestAuthorization,
@@ -21,12 +21,12 @@ import {
 export default function App() {
   const [permissionStatus, setPermissionStatus] = useState<string>("Unknown");
   const [currentPosition, setCurrentPosition] =
-    useState<GeolocationPosition | null>(null);
+    useState<GeolocationResponse | null>(null);
   const [isLoadingPosition, setIsLoadingPosition] = useState(false);
 
   const [watchId, setWatchId] = useState<number | null>(null);
   const [watchedPosition, setWatchedPosition] =
-    useState<GeolocationPosition | null>(null);
+    useState<GeolocationResponse | null>(null);
   const [watchUpdateCount, setWatchUpdateCount] = useState(0);
 
   useEffect(() => {

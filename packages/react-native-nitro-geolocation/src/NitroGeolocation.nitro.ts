@@ -1,4 +1,9 @@
 import type { HybridObject } from "react-native-nitro-modules";
+import type {
+  GeolocationError,
+  GeolocationOptions,
+  GeolocationResponse
+} from "./types";
 
 // Configuration - Internal (for C++ codegen, avoiding ANDROID macro conflict)
 export type AuthorizationLevelInternal = "always" | "whenInUse" | "auto";
@@ -14,42 +19,6 @@ export interface RNConfigurationInternal {
   locationProvider?: LocationProviderInternal;
 }
 
-// Error
-export interface GeolocationError {
-  code: number;
-  message: string;
-  PERMISSION_DENIED: number;
-  POSITION_UNAVAILABLE: number;
-  TIMEOUT: number;
-}
-
-// Position
-export interface GeolocationCoordinates {
-  latitude: number;
-  longitude: number;
-  altitude: number | null;
-  accuracy: number;
-  altitudeAccuracy: number | null;
-  heading: number | null;
-  speed: number | null;
-}
-
-export interface GeolocationPosition {
-  coords: GeolocationCoordinates;
-  timestamp: number;
-}
-
-// Options
-export interface GeolocationOptions {
-  timeout?: number;
-  maximumAge?: number;
-  enableHighAccuracy?: boolean;
-  interval?: number;
-  fastestInterval?: number;
-  distanceFilter?: number;
-  useSignificantChanges?: boolean;
-}
-
 export interface NitroGeolocation
   extends HybridObject<{ ios: "swift"; android: "kotlin" }> {
   setRNConfiguration(config: RNConfigurationInternal): void;
@@ -58,12 +27,12 @@ export interface NitroGeolocation
     error?: (error: GeolocationError) => void
   ): void;
   getCurrentPosition(
-    success: (position: GeolocationPosition) => void,
+    success: (position: GeolocationResponse) => void,
     error?: (error: GeolocationError) => void,
     options?: GeolocationOptions
   ): void;
   watchPosition(
-    success: (position: GeolocationPosition) => void,
+    success: (position: GeolocationResponse) => void,
     error?: (error: GeolocationError) => void,
     options?: GeolocationOptions
   ): number;

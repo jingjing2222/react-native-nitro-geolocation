@@ -1,14 +1,3 @@
-// Export types
-export type {
-  AuthorizationLevel,
-  LocationProvider,
-  RNConfiguration,
-  GeolocationCoordinates,
-  GeolocationPosition,
-  GeolocationError,
-  GeolocationOptions
-} from "./types";
-
 // Export methods
 export { clearWatch } from "./clearWatch";
 export { getCurrentPosition } from "./getCurrentPosition";
@@ -33,5 +22,13 @@ const Geolocation = {
   clearWatch,
   stopObserving
 };
+
+// Export types
+export type {
+  GeolocationConfiguration,
+  GeolocationResponse,
+  GeolocationError,
+  GeolocationOptions
+} from "./types";
 
 export default Geolocation;

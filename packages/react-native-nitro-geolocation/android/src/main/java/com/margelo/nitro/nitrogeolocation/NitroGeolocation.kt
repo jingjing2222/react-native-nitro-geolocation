@@ -47,7 +47,7 @@ class NitroGeolocation(
     }
 
     override fun getCurrentPosition(
-            success: (position: GeolocationPosition) -> Unit,
+            success: (position: GeolocationResponse) -> Unit,
             error: ((error: GeolocationError) -> Unit)?,
             options: GeolocationOptions?
     ) {
@@ -55,7 +55,7 @@ class NitroGeolocation(
     }
 
     override fun watchPosition(
-            success: (position: GeolocationPosition) -> Unit,
+            success: (position: GeolocationResponse) -> Unit,
             error: ((error: GeolocationError) -> Unit)?,
             options: GeolocationOptions?
     ): Double {

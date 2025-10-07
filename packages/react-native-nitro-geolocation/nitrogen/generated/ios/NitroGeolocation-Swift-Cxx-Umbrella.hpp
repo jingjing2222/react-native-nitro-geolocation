@@ -16,8 +16,8 @@ namespace margelo::nitro::nitrogeolocation { struct GeolocationCoordinates; }
 namespace margelo::nitro::nitrogeolocation { struct GeolocationError; }
 // Forward declaration of `GeolocationOptions` to properly resolve imports.
 namespace margelo::nitro::nitrogeolocation { struct GeolocationOptions; }
-// Forward declaration of `GeolocationPosition` to properly resolve imports.
-namespace margelo::nitro::nitrogeolocation { struct GeolocationPosition; }
+// Forward declaration of `GeolocationResponse` to properly resolve imports.
+namespace margelo::nitro::nitrogeolocation { struct GeolocationResponse; }
 // Forward declaration of `HybridNitroGeolocationSpec` to properly resolve imports.
 namespace margelo::nitro::nitrogeolocation { class HybridNitroGeolocationSpec; }
 // Forward declaration of `LocationProviderInternal` to properly resolve imports.
@@ -30,7 +30,7 @@ namespace margelo::nitro::nitrogeolocation { struct RNConfigurationInternal; }
 #include "GeolocationCoordinates.hpp"
 #include "GeolocationError.hpp"
 #include "GeolocationOptions.hpp"
-#include "GeolocationPosition.hpp"
+#include "GeolocationResponse.hpp"
 #include "HybridNitroGeolocationSpec.hpp"
 #include "LocationProviderInternal.hpp"
 #include "RNConfigurationInternal.hpp"

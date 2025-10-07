@@ -10,14 +10,14 @@ class LocationManager: NSObject, CLLocationManagerDelegate {
     }
 
     private struct LocationRequest {
-        let success: (GeolocationPosition) -> Void
+        let success: (GeolocationResponse) -> Void
         let error: ((GeolocationError) -> Void)?
         let options: ParsedOptions
         var timer: Timer?
     }
 
     private struct WatchSubscription {
-        let success: (GeolocationPosition) -> Void
+        let success: (GeolocationResponse) -> Void
         let error: ((GeolocationError) -> Void)?
         let options: ParsedOptions
     }
@@ -149,7 +149,7 @@ class LocationManager: NSObject, CLLocationManagerDelegate {
     // MARK: - Get Current Position
 
     func getCurrentPosition(
-        success: @escaping (GeolocationPosition) -> Void,
+        success: @escaping (GeolocationResponse) -> Void,
         error: ((GeolocationError) -> Void)?,
         options: GeolocationOptions?
     ) {
@@ -215,7 +215,7 @@ class LocationManager: NSObject, CLLocationManagerDelegate {
     // MARK: - Watch Position
 
     func watchPosition(
-        success: @escaping (GeolocationPosition) -> Void,
+        success: @escaping (GeolocationResponse) -> Void,
         error: ((GeolocationError) -> Void)?,
         options: GeolocationOptions?
     ) -> Double {
@@ -493,7 +493,7 @@ class LocationManager: NSObject, CLLocationManagerDelegate {
         queuedAuthorizationCallbacks.removeAll()
     }
 
-    private func locationToPosition(_ location: CLLocation) -> GeolocationPosition {
+    private func locationToPosition(_ location: CLLocation) -> GeolocationResponse {
         let altitude = location.verticalAccuracy < 0 ? 0.0 : location.altitude
         let altitudeAccuracy = location.verticalAccuracy < 0 ? 0.0 : location.verticalAccuracy
         let heading = location.course >= 0 ? location.course : 0.0
@@ -509,7 +509,7 @@ class LocationManager: NSObject, CLLocationManagerDelegate {
             speed: speed
         )
 
-        let position = GeolocationPosition(
+        let position = GeolocationResponse(
             coords: coordsObj,
             timestamp: location.timestamp.timeIntervalSince1970 * 100
         )

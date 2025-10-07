@@ -20,8 +20,8 @@ namespace margelo::nitro::nitrogeolocation { enum class AuthorizationLevelIntern
 namespace margelo::nitro::nitrogeolocation { enum class LocationProviderInternal; }
 // Forward declaration of `GeolocationError` to properly resolve imports.
 namespace margelo::nitro::nitrogeolocation { struct GeolocationError; }
-// Forward declaration of `GeolocationPosition` to properly resolve imports.
-namespace margelo::nitro::nitrogeolocation { struct GeolocationPosition; }
+// Forward declaration of `GeolocationResponse` to properly resolve imports.
+namespace margelo::nitro::nitrogeolocation { struct GeolocationResponse; }
 // Forward declaration of `GeolocationCoordinates` to properly resolve imports.
 namespace margelo::nitro::nitrogeolocation { struct GeolocationCoordinates; }
 // Forward declaration of `GeolocationOptions` to properly resolve imports.
@@ -34,7 +34,7 @@ namespace margelo::nitro::nitrogeolocation { struct GeolocationOptions; }
 #include <functional>
 #include "GeolocationError.hpp"
 #include <string>
-#include "GeolocationPosition.hpp"
+#include "GeolocationResponse.hpp"
 #include "GeolocationCoordinates.hpp"
 #include "GeolocationOptions.hpp"
 
@@ -91,13 +91,13 @@ namespace margelo::nitro::nitrogeolocation {
         std::rethrow_exception(__result.error());
       }
     }
-    inline void getCurrentPosition(const std::function<void(const GeolocationPosition& /* position */)>& success, const std::optional<std::function<void(const GeolocationError& /* error */)>>& error, const std::optional<GeolocationOptions>& options) override {
+    inline void getCurrentPosition(const std::function<void(const GeolocationResponse& /* position */)>& success, const std::optional<std::function<void(const GeolocationError& /* error */)>>& error, const std::optional<GeolocationOptions>& options) override {
       auto __result = _swiftPart.getCurrentPosition(success, error, options);
       if (__result.hasError()) [[unlikely]] {
         std::rethrow_exception(__result.error());
       }
     }
-    inline double watchPosition(const std::function<void(const GeolocationPosition& /* position */)>& success, const std::optional<std::function<void(const GeolocationError& /* error */)>>& error, const std::optional<GeolocationOptions>& options) override {
+    inline double watchPosition(const std::function<void(const GeolocationResponse& /* position */)>& success, const std::optional<std::function<void(const GeolocationError& /* error */)>>& error, const std::optional<GeolocationOptions>& options) override {
       auto __result = _swiftPart.watchPosition(success, error, options);
       if (__result.hasError()) [[unlikely]] {
         std::rethrow_exception(__result.error());

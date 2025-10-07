@@ -16,7 +16,7 @@ import com.facebook.react.bridge.ReactApplicationContext
 class GetCurrentPosition(private val reactContext: ReactApplicationContext) {
 
     fun execute(
-            success: (position: GeolocationPosition) -> Unit,
+            success: (position: GeolocationResponse) -> Unit,
             error: ((error: GeolocationError) -> Unit)?,
             options: GeolocationOptions?
     ) {
@@ -106,7 +106,7 @@ class GetCurrentPosition(private val reactContext: ReactApplicationContext) {
             locationManager: LocationManager,
             provider: String,
             options: ParsedOptions,
-            success: (GeolocationPosition) -> Unit,
+            success: (GeolocationResponse) -> Unit,
             error: ((GeolocationError) -> Unit)?,
             fallbackLocation: Location?
     ) {
@@ -138,7 +138,7 @@ class GetCurrentPosition(private val reactContext: ReactApplicationContext) {
             locationManager: LocationManager,
             provider: String,
             options: ParsedOptions,
-            success: (GeolocationPosition) -> Unit,
+            success: (GeolocationResponse) -> Unit,
             error: ((GeolocationError) -> Unit)?,
             fallbackLocation: Location?
     ) {
@@ -187,7 +187,7 @@ class GetCurrentPosition(private val reactContext: ReactApplicationContext) {
             locationManager: LocationManager,
             provider: String,
             options: ParsedOptions,
-            success: (GeolocationPosition) -> Unit,
+            success: (GeolocationResponse) -> Unit,
             error: ((GeolocationError) -> Unit)?,
             fallbackLocation: Location?
     ) {
@@ -285,8 +285,8 @@ class GetCurrentPosition(private val reactContext: ReactApplicationContext) {
 
     // ===== Data Conversion =====
 
-    private fun locationToPosition(location: Location): GeolocationPosition {
-        return GeolocationPosition(
+    private fun locationToPosition(location: Location): GeolocationResponse {
+        return GeolocationResponse(
                 coords =
                         GeolocationCoordinates(
                                 latitude = location.latitude,
