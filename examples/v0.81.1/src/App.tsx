@@ -96,7 +96,7 @@ export default function App() {
       (position) => {
         setIsLoadingPosition(false);
         setCurrentPosition(position);
-        Alert.alert("Success", `Position retrieved!`);
+        Alert.alert("Success", "Position retrieved!");
       },
       (error) => {
         setIsLoadingPosition(false);
@@ -195,7 +195,7 @@ export default function App() {
               <Button title="Config 3: Auto" onPress={handleTestConfig3} />
             </View>
 
-             <View style={styles.divider} />
+            <View style={styles.divider} />
 
             <Text style={styles.sectionSubtitle}>Get Current Position:</Text>
 
