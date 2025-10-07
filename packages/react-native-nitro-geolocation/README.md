@@ -193,7 +193,19 @@ You can migrate simply by replacing imports:
 Sets configuration options used for all location requests.
 
 ~~~tsx
+import Geolocation from 'react-native-nitro-geolocation';
+
 Geolocation.setRNConfiguration({
+  skipPermissionRequests: false,
+  authorizationLevel: 'auto',
+  enableBackgroundLocationUpdates: true,
+  locationProvider: 'auto',
+});
+
+//recommended
+import { setRNConfiguration } from 'react-native-nitro-geolocation';
+
+setRNConfiguration({
   skipPermissionRequests: false,
   authorizationLevel: 'auto',
   enableBackgroundLocationUpdates: true,
@@ -214,7 +226,17 @@ Geolocation.setRNConfiguration({
 Requests location permission from the system.
 
 ~~~tsx
+import Geolocation from 'react-native-nitro-geolocation';
+
 Geolocation.requestAuthorization(
+  () => console.log('Permission granted'),
+  (error) => console.error('Permission error:', error),
+);
+
+// recommended
+import { requestAuthorization } from 'react-native-nitro-geolocation';
+
+requestAuthorization(
   () => console.log('Permission granted'),
   (error) => console.error('Permission error:', error),
 );
@@ -227,7 +249,18 @@ Geolocation.requestAuthorization(
 Retrieves the current device location once.
 
 ~~~tsx
+import Geolocation from 'react-native-nitro-geolocation';
+
 Geolocation.getCurrentPosition(
+  (position) => console.log(position),
+  (error) => console.error(error),
+  { enableHighAccuracy: true, timeout: 15000, maximumAge: 10000 },
+);
+
+//recommended
+import { getCurrentPosition } from 'react-native-nitro-geolocation';
+
+getCurrentPosition(
   (position) => console.log(position),
   (error) => console.error(error),
   { enableHighAccuracy: true, timeout: 15000, maximumAge: 10000 },
@@ -241,11 +274,23 @@ Geolocation.getCurrentPosition(
 Watches location changes and calls the success callback each time.
 
 ~~~tsx
+import Geolocation from 'react-native-nitro-geolocation';
+
 const id = Geolocation.watchPosition(
   (position) => console.log('Position:', position),
   (error) => console.error(error),
   { interval: 5000, distanceFilter: 10 },
 );
+
+// recommended
+import { watchPosition } from 'react-native-nitro-geolocation';
+
+const id = watchPosition(
+  (position) => console.log('Position:', position),
+  (error) => console.error(error),
+  { interval: 5000, distanceFilter: 10 },
+);
+
 ~~~
 
 ---
@@ -255,7 +300,12 @@ const id = Geolocation.watchPosition(
 Stops watching location updates for a given watch ID.
 
 ~~~tsx
+import Geolocation from 'react-native-nitro-geolocation';
 Geolocation.clearWatch(id);
+
+// recommended
+import { clearWatch } from 'react-native-nitro-geolocation';
+clearWatch(id);
 ~~~
 
 ---
