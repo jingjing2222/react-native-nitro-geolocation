@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect } from "react";
 import {
   Alert,
   Button,
@@ -14,7 +14,7 @@ import {
   // clearWatch,
   // getCurrentPosition,
   // requestAuthorization,
-  setRNConfiguration,
+  setRNConfiguration
   // watchPosition
 } from "react-native-nitro-geolocation";
 
