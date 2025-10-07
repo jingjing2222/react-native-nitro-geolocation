@@ -33,7 +33,8 @@ class LocationManager: NSObject, CLLocationManagerDelegate {
             let timeout = options?.timeout ?? DEFAULT_TIMEOUT
             let maximumAge = options?.maximumAge ?? DEFAULT_MAXIMUM_AGE
             let enableHighAccuracy = options?.enableHighAccuracy ?? false
-            let accuracy = enableHighAccuracy ? kCLLocationAccuracyBest : kCLLocationAccuracyHundredMeters
+            let accuracy =
+                enableHighAccuracy ? kCLLocationAccuracyBest : kCLLocationAccuracyHundredMeters
             let distanceFilter = options?.distanceFilter ?? kCLDistanceFilterNone
             let useSignificantChanges = options?.useSignificantChanges ?? false
 
@@ -54,7 +55,8 @@ class LocationManager: NSObject, CLLocationManagerDelegate {
     private var usingSignificantChanges: Bool = false
 
     // Authorization
-    private var queuedAuthorizationCallbacks: [(success: (() -> Void)?, error: ((GeolocationError) -> Void)?)] = []
+    private var queuedAuthorizationCallbacks:
+        [(success: (() -> Void)?, error: ((GeolocationError) -> Void)?)] = []
 
     // getCurrentPosition
     private var pendingRequests: [LocationRequest] = []
@@ -70,7 +72,7 @@ class LocationManager: NSObject, CLLocationManagerDelegate {
 
     // MARK: - Constants
 
-    private static let DEFAULT_TIMEOUT: Double = 10 * 60 * 1000 // 10 minutes in ms
+    private static let DEFAULT_TIMEOUT: Double = 10 * 60 * 1000  // 10 minutes in ms
     private static let DEFAULT_MAXIMUM_AGE: Double = Double.infinity
 
     // MARK: - Authorization
@@ -82,35 +84,41 @@ class LocationManager: NSObject, CLLocationManagerDelegate {
         success: (() -> Void)?,
         error: ((GeolocationError) -> Void)?
     ) {
-        initializeLocationManagerIfNeeded()
-        enqueueAuthorizationCallbacks(success: success, error: error)
+        DispatchQueue.main.async { [weak self] in
+            guard let self = self else { return }
 
-        // Skip permission requests if configured
-        if skipPermissionRequests {
-            if enableBackgroundLocationUpdates {
-                self.enableBackgroundLocationUpdatesIfNeeded()
+            self.initializeLocationManagerIfNeeded()
+            self.enqueueAuthorizationCallbacks(success: success, error: error)
+
+            // Skip permission requests if configured
+            if skipPermissionRequests {
+                if enableBackgroundLocationUpdates {
+                    self.enableBackgroundLocationUpdatesIfNeeded()
+                }
+                self.handleAuthorizationSuccess()
+                return
             }
-            handleAuthorizationSuccess()
-            return
-        }
 
-        // Check if already authorized
-        let currentStatus = CLLocationManager.authorizationStatus()
-        if currentStatus == .authorizedAlways || currentStatus == .authorizedWhenInUse {
-            handleAuthorizationSuccess()
-            return
-        }
+            // Check if already authorized
+            let currentStatus = CLLocationManager.authorizationStatus()
+            if currentStatus == .authorizedAlways || currentStatus == .authorizedWhenInUse {
+                self.handleAuthorizationSuccess()
+                return
+            }
 
-        if currentStatus == .denied || currentStatus == .restricted {
-            handleAuthorizationError(for: currentStatus)
-            return
-        }
+            if currentStatus == .denied || currentStatus == .restricted {
+                self.handleAuthorizationError(for: currentStatus)
+                return
+            }
 
-        // Not determined yet, request permission
-        requestPermission(for: authType)
+            // Not determined yet, request permission
+            self.requestPermission(for: authType)
+        }
     }
 
-    private func enqueueAuthorizationCallbacks(success: (() -> Void)?, error: ((GeolocationError) -> Void)?) {
+    private func enqueueAuthorizationCallbacks(
+        success: (() -> Void)?, error: ((GeolocationError) -> Void)?
+    ) {
         guard success != nil || error != nil else { return }
         queuedAuthorizationCallbacks.append((success: success, error: error))
     }
@@ -128,8 +136,11 @@ class LocationManager: NSObject, CLLocationManagerDelegate {
     }
 
     private func enableBackgroundLocationUpdatesIfNeeded() {
-        guard let backgroundModes = Bundle.main.object(forInfoDictionaryKey: "UIBackgroundModes") as? [String],
-              backgroundModes.contains("location") else {
+        guard
+            let backgroundModes = Bundle.main.object(forInfoDictionaryKey: "UIBackgroundModes")
+                as? [String],
+            backgroundModes.contains("location")
+        else {
             return
         }
         locationManager?.allowsBackgroundLocationUpdates = true
@@ -142,52 +153,63 @@ class LocationManager: NSObject, CLLocationManagerDelegate {
         error: ((GeolocationError) -> Void)?,
         options: GeolocationOptions?
     ) {
-        let parsedOptions = ParsedOptions.parse(from: options)
+        DispatchQueue.main.async { [weak self] in
+            guard let self = self else { return }
 
-        // Check authorization
-        let status = CLLocationManager.authorizationStatus()
-        if status == .denied || status == .restricted {
-            let message = status == .restricted
-                ? "This application is not authorized to use location services"
-                : "User denied access to location services."
-            error?(createError(code: PERMISSION_DENIED, message: message))
-            return
+            let parsedOptions = ParsedOptions.parse(from: options)
+
+            // Check authorization
+            let status = CLLocationManager.authorizationStatus()
+            if status == .denied || status == .restricted {
+                let message =
+                    status == .restricted
+                    ? "This application is not authorized to use location services"
+                    : "User denied access to location services."
+                error?(self.createError(code: self.PERMISSION_DENIED, message: message))
+                return
+            }
+
+            if !CLLocationManager.locationServicesEnabled() {
+                error?(
+                    self.createError(
+                        code: self.POSITION_UNAVAILABLE, message: "Location services disabled."))
+                return
+            }
+
+            // Check cached location
+            if let cached = self.lastLocation,
+                self.isCachedLocationValid(cached, options: parsedOptions)
+            {
+                success(self.locationToPosition(cached))
+                return
+            }
+
+            self.initializeLocationManagerIfNeeded()
+
+            // Configure location manager (use best accuracy from all pending requests)
+            self.updateLocationManagerConfiguration()
+
+            // Create request
+            var request = LocationRequest(
+                success: success,
+                error: error,
+                options: parsedOptions,
+                timer: nil
+            )
+
+            // Setup timeout
+            let timer = Timer.scheduledTimer(
+                withTimeInterval: parsedOptions.timeout / 1000.0, repeats: false
+            ) { [weak self] timer in
+                self?.handleTimeout(for: timer)
+            }
+            request.timer = timer
+
+            self.pendingRequests.append(request)
+
+            // Start location updates
+            self.startMonitoring()
         }
-
-        if !CLLocationManager.locationServicesEnabled() {
-            error?(createError(code: POSITION_UNAVAILABLE, message: "Location services disabled."))
-            return
-        }
-
-        // Check cached location
-        if let cached = lastLocation, isCachedLocationValid(cached, options: parsedOptions) {
-            success(locationToPosition(cached))
-            return
-        }
-
-        initializeLocationManagerIfNeeded()
-
-        // Configure location manager (use best accuracy from all pending requests)
-        updateLocationManagerConfiguration()
-
-        // Create request
-        var request = LocationRequest(
-            success: success,
-            error: error,
-            options: parsedOptions,
-            timer: nil
-        )
-
-        // Setup timeout
-        let timer = Timer.scheduledTimer(withTimeInterval: parsedOptions.timeout / 1000.0, repeats: false) { [weak self] timer in
-            self?.handleTimeout(for: timer)
-        }
-        request.timer = timer
-
-        pendingRequests.append(request)
-
-        // Start location updates
-        startMonitoring()
     }
 
     // MARK: - Watch Position
@@ -197,40 +219,56 @@ class LocationManager: NSObject, CLLocationManagerDelegate {
         error: ((GeolocationError) -> Void)?,
         options: GeolocationOptions?
     ) -> Double {
-        let parsedOptions = ParsedOptions.parse(from: options)
-        let watchId = nextWatchId
-        nextWatchId += 1
+        var resultWatchId: Double = 0
 
-        let subscription = WatchSubscription(
-            success: success,
-            error: error,
-            options: parsedOptions
-        )
+        DispatchQueue.main.sync { [weak self] in
+            guard let self = self else { return }
 
-        activeWatches[watchId] = subscription
+            let parsedOptions = ParsedOptions.parse(from: options)
+            let watchId = self.nextWatchId
+            self.nextWatchId += 1
 
-        initializeLocationManagerIfNeeded()
-        updateLocationManagerConfiguration()
-        startMonitoring()
+            let subscription = WatchSubscription(
+                success: success,
+                error: error,
+                options: parsedOptions
+            )
 
-        return watchId
+            self.activeWatches[watchId] = subscription
+
+            self.initializeLocationManagerIfNeeded()
+            self.updateLocationManagerConfiguration()
+            self.startMonitoring()
+
+            resultWatchId = watchId
+        }
+
+        return resultWatchId
     }
 
     func clearWatch(watchId: Double) {
-        activeWatches.removeValue(forKey: watchId)
+        DispatchQueue.main.async { [weak self] in
+            guard let self = self else { return }
 
-        // Stop monitoring if no more watches or pending requests
-        if activeWatches.isEmpty && pendingRequests.isEmpty {
-            stopMonitoring()
+            self.activeWatches.removeValue(forKey: watchId)
+
+            // Stop monitoring if no more watches or pending requests
+            if self.activeWatches.isEmpty && self.pendingRequests.isEmpty {
+                self.stopMonitoring()
+            }
         }
     }
 
     func stopObserving() {
-        activeWatches.removeAll()
+        DispatchQueue.main.async { [weak self] in
+            guard let self = self else { return }
 
-        // Stop monitoring if no pending requests
-        if pendingRequests.isEmpty {
-            stopMonitoring()
+            self.activeWatches.removeAll()
+
+            // Stop monitoring if no pending requests
+            if self.pendingRequests.isEmpty {
+                self.stopMonitoring()
+            }
         }
     }
 
@@ -282,15 +320,20 @@ class LocationManager: NSObject, CLLocationManagerDelegate {
         if let clError = error as? CLError {
             switch clError.code {
             case .denied:
-                geoError = createError(code: PERMISSION_DENIED, message: "User denied access to location services.")
+                geoError = createError(
+                    code: PERMISSION_DENIED, message: "User denied access to location services.")
             case .locationUnknown:
                 // Location is temporarily unavailable, keep trying
                 return
             default:
-                geoError = createError(code: POSITION_UNAVAILABLE, message: "Unable to retrieve location: \(error.localizedDescription)")
+                geoError = createError(
+                    code: POSITION_UNAVAILABLE,
+                    message: "Unable to retrieve location: \(error.localizedDescription)")
             }
         } else {
-            geoError = createError(code: POSITION_UNAVAILABLE, message: "Unable to retrieve location: \(error.localizedDescription)")
+            geoError = createError(
+                code: POSITION_UNAVAILABLE,
+                message: "Unable to retrieve location: \(error.localizedDescription)")
         }
 
         // Fire all pending requests with error
@@ -327,13 +370,15 @@ class LocationManager: NSObject, CLLocationManagerDelegate {
         for request in pendingRequests {
             bestAccuracy = min(bestAccuracy, request.options.accuracy)
             smallestDistanceFilter = min(smallestDistanceFilter, request.options.distanceFilter)
-            shouldUseSignificantChanges = shouldUseSignificantChanges || request.options.useSignificantChanges
+            shouldUseSignificantChanges =
+                shouldUseSignificantChanges || request.options.useSignificantChanges
         }
 
         for (_, watch) in activeWatches {
             bestAccuracy = min(bestAccuracy, watch.options.accuracy)
             smallestDistanceFilter = min(smallestDistanceFilter, watch.options.distanceFilter)
-            shouldUseSignificantChanges = shouldUseSignificantChanges || watch.options.useSignificantChanges
+            shouldUseSignificantChanges =
+                shouldUseSignificantChanges || watch.options.useSignificantChanges
         }
 
         manager.desiredAccuracy = bestAccuracy
@@ -370,7 +415,7 @@ class LocationManager: NSObject, CLLocationManagerDelegate {
         }
 
         // Check age
-        let age = Date().timeIntervalSince(location.timestamp) * 1000 // convert to ms
+        let age = Date().timeIntervalSince(location.timestamp) * 1000  // convert to ms
         guard age < options.maximumAge else {
             return false
         }
@@ -401,7 +446,9 @@ class LocationManager: NSObject, CLLocationManagerDelegate {
         }
     }
 
-    private func getCurrentAuthorizationStatus(from manager: CLLocationManager) -> CLAuthorizationStatus {
+    private func getCurrentAuthorizationStatus(from manager: CLLocationManager)
+        -> CLAuthorizationStatus
+    {
         if #available(iOS 14.0, *) {
             return manager.authorizationStatus
         } else {
@@ -419,7 +466,8 @@ class LocationManager: NSObject, CLLocationManagerDelegate {
     }
 
     private func createGeolocationError(for status: CLAuthorizationStatus) -> GeolocationError {
-        let message = status == .restricted
+        let message =
+            status == .restricted
             ? "This application is not authorized to use location services"
             : "User denied access to location services."
 
@@ -432,7 +480,9 @@ class LocationManager: NSObject, CLLocationManagerDelegate {
         )
     }
 
-    private func invokeQueuedAuthorizationCallbacks(success: Bool = false, error: GeolocationError? = nil) {
+    private func invokeQueuedAuthorizationCallbacks(
+        success: Bool = false, error: GeolocationError? = nil
+    ) {
         for callback in queuedAuthorizationCallbacks {
             if success {
                 callback.success?()
@@ -444,20 +494,27 @@ class LocationManager: NSObject, CLLocationManagerDelegate {
     }
 
     private func locationToPosition(_ location: CLLocation) -> GeolocationPosition {
-        let coords = GeolocationCoordinates(
+        let altitude = location.verticalAccuracy < 0 ? 0.0 : location.altitude
+        let altitudeAccuracy = location.verticalAccuracy < 0 ? 0.0 : location.verticalAccuracy
+        let heading = location.course >= 0 ? location.course : 0.0
+        let speed = location.speed >= 0 ? location.speed : 0.0
+
+        let coordsObj = GeolocationCoordinates(
             latitude: location.coordinate.latitude,
             longitude: location.coordinate.longitude,
-            altitude: location.altitude,
+            altitude: altitude,
             accuracy: location.horizontalAccuracy,
-            altitudeAccuracy: location.verticalAccuracy,
-            heading: location.course >= 0 ? location.course : nil,
-            speed: location.speed >= 0 ? location.speed : nil
+            altitudeAccuracy: altitudeAccuracy,
+            heading: heading,
+            speed: speed
         )
 
-        return GeolocationPosition(
-            coords: coords,
-            timestamp: location.timestamp.timeIntervalSince1970 * 1000 // convert to ms
+        let position = GeolocationPosition(
+            coords: coordsObj,
+            timestamp: location.timestamp.timeIntervalSince1970 * 100
         )
+
+        return position
     }
 
     private func createError(code: Int, message: String) -> GeolocationError {
