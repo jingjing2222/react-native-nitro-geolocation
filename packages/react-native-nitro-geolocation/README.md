@@ -2,9 +2,10 @@
 
 [![NPM](https://img.shields.io/npm/v/react-native-nitro-geolocation)](https://www.npmjs.com/package/react-native-nitro-geolocation)
 
-A **Nitro-powered, JSI-based reimplementation** of
 [`@react-native-community/geolocation`](https://github.com/michalchudziak/react-native-geolocation)
 for the **React Native New Architecture** — with 100% API compatibility.
+
+![react-native-nigro-geolocation](https://raw.githubusercontent.com/jingjing2222/react-native-nigro-geolocation/main/demo.gif)
 
 ---
 
@@ -202,7 +203,7 @@ Geolocation.setRNConfiguration({
   locationProvider: 'auto',
 });
 
-//recommended
+// recommended
 import { setRNConfiguration } from 'react-native-nitro-geolocation';
 
 setRNConfiguration({
@@ -257,7 +258,7 @@ Geolocation.getCurrentPosition(
   { enableHighAccuracy: true, timeout: 15000, maximumAge: 10000 },
 );
 
-//recommended
+// recommended
 import { getCurrentPosition } from 'react-native-nitro-geolocation';
 
 getCurrentPosition(

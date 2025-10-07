@@ -1,12 +1,12 @@
 # react-native-nitro-geolocation
 
 [![NPM](https://img.shields.io/npm/v/react-native-nitro-geolocation)](https://www.npmjs.com/package/react-native-nitro-geolocation)
-
-![Image](https://github.com/user-attachments/assets/0fc966e3-f5d5-4360-a998-ac4ba7cc5cb1)
-
 A **Nitro-powered, JSI-based reimplementation** of
 [`@react-native-community/geolocation`](https://github.com/michalchudziak/react-native-geolocation)
 for the **React Native New Architecture** — with 100% API compatibility.
+
+![react-native-nigro-geolocation](https://raw.githubusercontent.com/jingjing2222/react-native-nigro-geolocation/main/demo.gif)
+
 
 ---
 
