@@ -10,24 +10,24 @@ import {
   View
 } from "react-native";
 import {
-  type GeolocationPosition,
-  clearWatch,
-  getCurrentPosition,
-  requestAuthorization,
+  // type GeolocationPosition,
+  // clearWatch,
+  // getCurrentPosition,
+  // requestAuthorization,
   setRNConfiguration,
-  watchPosition
+  // watchPosition
 } from "react-native-nitro-geolocation";
 
 export default function App() {
-  const [permissionStatus, setPermissionStatus] = useState<string>("Unknown");
-  const [currentPosition, setCurrentPosition] =
-    useState<GeolocationPosition | null>(null);
-  const [isLoadingPosition, setIsLoadingPosition] = useState(false);
+  // const [permissionStatus, setPermissionStatus] = useState<string>("Unknown");
+  // const [currentPosition, setCurrentPosition] =
+  //   useState<GeolocationPosition | null>(null);
+  // const [isLoadingPosition, setIsLoadingPosition] = useState(false);
 
-  const [watchId, setWatchId] = useState<number | null>(null);
-  const [watchedPosition, setWatchedPosition] =
-    useState<GeolocationPosition | null>(null);
-  const [watchUpdateCount, setWatchUpdateCount] = useState(0);
+  // const [watchId, setWatchId] = useState<number | null>(null);
+  // const [watchedPosition, setWatchedPosition] =
+  //   useState<GeolocationPosition | null>(null);
+  // const [watchUpdateCount, setWatchUpdateCount] = useState(0);
 
   useEffect(() => {
     // Configure geolocation
@@ -38,19 +38,19 @@ export default function App() {
     });
   }, []);
 
-  const handleRequestAuthorization = () => {
-    setPermissionStatus("Requesting...");
-    requestAuthorization(
-      () => {
-        setPermissionStatus("Granted ✅");
-        Alert.alert("Success", "Location permission granted!");
-      },
-      (error) => {
-        setPermissionStatus(`Denied ❌ (Code: ${error.code})`);
-        Alert.alert("Error", error.message);
-      }
-    );
-  };
+  // const handleRequestAuthorization = () => {
+  //   setPermissionStatus("Requesting...");
+  //   requestAuthorization(
+  //     () => {
+  //       setPermissionStatus("Granted ✅");
+  //       Alert.alert("Success", "Location permission granted!");
+  //     },
+  //     (error) => {
+  //       setPermissionStatus(`Denied ❌ (Code: ${error.code})`);
+  //       Alert.alert("Error", error.message);
+  //     }
+  //   );
+  // };
 
   const handleTestConfig1 = () => {
     setRNConfiguration({
@@ -88,66 +88,66 @@ export default function App() {
     );
   };
 
-  const handleGetCurrentPosition = () => {
-    setIsLoadingPosition(true);
-    setCurrentPosition(null);
+  // const handleGetCurrentPosition = () => {
+  //   setIsLoadingPosition(true);
+  //   setCurrentPosition(null);
 
-    getCurrentPosition(
-      (position) => {
-        setIsLoadingPosition(false);
-        setCurrentPosition(position);
-        Alert.alert("Success", "Position retrieved!");
-      },
-      (error) => {
-        setIsLoadingPosition(false);
-        Alert.alert("Error", `Code ${error.code}: ${error.message}`);
-      },
-      {
-        enableHighAccuracy: true,
-        timeout: 15000,
-        maximumAge: 10000
-      }
-    );
-  };
+  //   getCurrentPosition(
+  //     (position) => {
+  //       setIsLoadingPosition(false);
+  //       setCurrentPosition(position);
+  //       Alert.alert("Success", "Position retrieved!");
+  //     },
+  //     (error) => {
+  //       setIsLoadingPosition(false);
+  //       Alert.alert("Error", `Code ${error.code}: ${error.message}`);
+  //     },
+  //     {
+  //       enableHighAccuracy: true,
+  //       timeout: 15000,
+  //       maximumAge: 10000
+  //     }
+  //   );
+  // };
 
-  const handleStartWatching = () => {
-    if (watchId !== null) {
-      Alert.alert("Info", "Already watching position");
-      return;
-    }
+  // const handleStartWatching = () => {
+  //   if (watchId !== null) {
+  //     Alert.alert("Info", "Already watching position");
+  //     return;
+  //   }
 
-    setWatchUpdateCount(0);
-    setWatchedPosition(null);
+  //   setWatchUpdateCount(0);
+  //   setWatchedPosition(null);
 
-    const id = watchPosition(
-      (position) => {
-        setWatchedPosition(position);
-        setWatchUpdateCount((count) => count + 1);
-      },
-      (error) => {
-        Alert.alert("Watch Error", `Code ${error.code}: ${error.message}`);
-      },
-      {
-        enableHighAccuracy: true,
-        distanceFilter: 10,
-        interval: 5000
-      }
-    );
+  //   const id = watchPosition(
+  //     (position) => {
+  //       setWatchedPosition(position);
+  //       setWatchUpdateCount((count) => count + 1);
+  //     },
+  //     (error) => {
+  //       Alert.alert("Watch Error", `Code ${error.code}: ${error.message}`);
+  //     },
+  //     {
+  //       enableHighAccuracy: true,
+  //       distanceFilter: 10,
+  //       interval: 5000
+  //     }
+  //   );
 
-    setWatchId(id);
-    Alert.alert("Success", `Started watching (ID: ${id})`);
-  };
+  //   setWatchId(id);
+  //   Alert.alert("Success", `Started watching (ID: ${id})`);
+  // };
 
-  const handleStopWatching = () => {
-    if (watchId === null) {
-      Alert.alert("Info", "Not watching position");
-      return;
-    }
+  // const handleStopWatching = () => {
+  //   if (watchId === null) {
+  //     Alert.alert("Info", "Not watching position");
+  //     return;
+  //   }
 
-    clearWatch(watchId);
-    setWatchId(null);
-    Alert.alert("Success", "Stopped watching position");
-  };
+  //   clearWatch(watchId);
+  //   setWatchId(null);
+  //   Alert.alert("Success", "Stopped watching position");
+  // };
 
   return (
     <SafeAreaView style={styles.container}>
@@ -160,7 +160,7 @@ export default function App() {
           <View style={styles.sectionContainer}>
             <Text style={styles.sectionTitle}>Nitro Geolocation Example</Text>
 
-            <View style={styles.statusContainer}>
+            {/* <View style={styles.statusContainer}>
               <Text style={styles.statusLabel}>Permission Status:</Text>
               <Text style={styles.statusValue}>{permissionStatus}</Text>
             </View>
@@ -173,7 +173,7 @@ export default function App() {
               />
             </View>
 
-            <View style={styles.divider} />
+            <View style={styles.divider} /> */}
 
             <Text style={styles.sectionSubtitle}>Configuration Tests:</Text>
 
@@ -195,7 +195,7 @@ export default function App() {
               <Button title="Config 3: Auto" onPress={handleTestConfig3} />
             </View>
 
-            <View style={styles.divider} />
+            {/* <View style={styles.divider} />
 
             <Text style={styles.sectionSubtitle}>Get Current Position:</Text>
 
@@ -314,7 +314,7 @@ export default function App() {
               <Text style={styles.infoText}>✅ watchPosition</Text>
               <Text style={styles.infoText}>✅ clearWatch</Text>
               <Text style={styles.infoText}>✅ stopObserving</Text>
-            </View>
+            </View> */}
           </View>
         </View>
       </ScrollView>
