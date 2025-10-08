@@ -12,6 +12,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Setup mise
         uses: jdx/mise-action@v3
@@ -31,4 +33,4 @@ jobs:
           mise exec -- yarn install
 
       - name: Check for changeset
-        run: mise exec -- yarn changeset status
+        run: mise exec -- yarn changeset status --since=origin/main
