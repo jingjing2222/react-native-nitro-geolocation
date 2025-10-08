@@ -145,11 +145,18 @@ export default function BenchmarkScreen() {
       const stats = calculateStats(latencies);
       setResults(prev => ({ ...prev, nitro: stats }));
 
-      addLog(
-        `📊 Nitro Results: Avg=${stats.avg.toFixed(
-          3,
-        )}ms, P95=${stats.p95.toFixed(3)}ms`,
-      );
+      console.log('='.repeat(60));
+      console.log('📊 NITRO GEOLOCATION RESULTS');
+      console.log('='.repeat(60));
+      console.log(`Samples: ${stats.samples}`);
+      console.log(`Min: ${stats.min.toFixed(3)}ms`);
+      console.log(`Max: ${stats.max.toFixed(3)}ms`);
+      console.log(`Average: ${stats.avg.toFixed(3)}ms`);
+      console.log(`Median: ${stats.median.toFixed(3)}ms`);
+      console.log(`P95: ${stats.p95.toFixed(3)}ms`);
+      console.log(`P99: ${stats.p99.toFixed(3)}ms`);
+      console.log(`Std Dev: ${stats.stdDev.toFixed(3)}ms`);
+      console.log('='.repeat(60));
       Alert.alert(
         '✅ Nitro Benchmark Complete',
         `Avg: ${stats.avg.toFixed(3)}ms\nMedian: ${stats.median.toFixed(
@@ -228,11 +235,18 @@ export default function BenchmarkScreen() {
       const stats = calculateStats(latencies);
       setResults(prev => ({ ...prev, community: stats }));
 
-      addLog(
-        `📊 Community Results: Avg=${stats.avg.toFixed(
-          3,
-        )}ms, P95=${stats.p95.toFixed(3)}ms`,
-      );
+      console.log('='.repeat(60));
+      console.log('📊 @REACT-NATIVE-COMMUNITY/GEOLOCATION RESULTS');
+      console.log('='.repeat(60));
+      console.log(`Samples: ${stats.samples}`);
+      console.log(`Min: ${stats.min.toFixed(3)}ms`);
+      console.log(`Max: ${stats.max.toFixed(3)}ms`);
+      console.log(`Average: ${stats.avg.toFixed(3)}ms`);
+      console.log(`Median: ${stats.median.toFixed(3)}ms`);
+      console.log(`P95: ${stats.p95.toFixed(3)}ms`);
+      console.log(`P99: ${stats.p99.toFixed(3)}ms`);
+      console.log(`Std Dev: ${stats.stdDev.toFixed(3)}ms`);
+      console.log('='.repeat(60));
       Alert.alert(
         '✅ Community Benchmark Complete',
         `Avg: ${stats.avg.toFixed(3)}ms\nMedian: ${stats.median.toFixed(
