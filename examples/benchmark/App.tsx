@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import Geolocation from "@react-native-community/geolocation";
+import React, { useState } from "react";
 import {
   Alert,
   Button,
@@ -6,10 +7,9 @@ import {
   ScrollView,
   StyleSheet,
   Text,
-  View,
-} from 'react-native';
-import NitroGeolocationHybridObject from 'react-native-nitro-geolocation';
-import Geolocation from '@react-native-community/geolocation';
+  View
+} from "react-native";
+import NitroGeolocationHybridObject from "react-native-nitro-geolocation";
 
 // Polyfill for performance.now() type
 declare const performance: {
@@ -38,9 +38,9 @@ export default function BenchmarkScreen() {
   const [logs, setLogs] = useState<string[]>([]);
 
   const addLog = (message: string) => {
-    setLogs(prev => [
+    setLogs((prev) => [
       ...prev,
-      `[${new Date().toLocaleTimeString()}] ${message}`,
+      `[${new Date().toLocaleTimeString()}] ${message}`
     ]);
     console.log(message);
   };
@@ -55,7 +55,7 @@ export default function BenchmarkScreen() {
         p95: 0,
         p99: 0,
         stdDev: 0,
-        samples: 0,
+        samples: 0
       };
     }
 
@@ -64,7 +64,7 @@ export default function BenchmarkScreen() {
     const avg = sum / sorted.length;
 
     // Standard deviation
-    const squaredDiffs = sorted.map(x => (x - avg) ** 2);
+    const squaredDiffs = sorted.map((x) => (x - avg) ** 2);
     const variance = squaredDiffs.reduce((a, b) => a + b, 0) / sorted.length;
     const stdDev = Math.sqrt(variance);
 
@@ -76,28 +76,28 @@ export default function BenchmarkScreen() {
       p95: sorted[Math.floor(sorted.length * 0.95)],
       p99: sorted[Math.floor(sorted.length * 0.99)],
       stdDev,
-      samples: sorted.length,
+      samples: sorted.length
     };
   };
 
   const runNitroBenchmark = async () => {
-    setRunning('nitro');
-    addLog('🚀 Starting Nitro Geolocation benchmark...');
+    setRunning("nitro");
+    addLog("🚀 Starting Nitro Geolocation benchmark...");
 
     try {
       // First, warm up and get cached location
-      addLog('Warming up - getting initial location...');
+      addLog("Warming up - getting initial location...");
       await new Promise<void>((resolve, reject) => {
         NitroGeolocationHybridObject.getCurrentPosition(
           () => {
-            addLog('✓ Initial location cached');
+            addLog("✓ Initial location cached");
             resolve();
           },
-          error => {
+          (error) => {
             addLog(`✗ Failed to get initial location: ${error.message}`);
             reject(error);
           },
-          { maximumAge: 60000, timeout: 10000 },
+          { maximumAge: 60000, timeout: 10000 }
         );
       });
 
@@ -107,7 +107,7 @@ export default function BenchmarkScreen() {
       const latencies: number[] = [];
 
       addLog(
-        `Running ${totalIterations} getCurrentPosition calls (${warmupCount} warmup)...`,
+        `Running ${totalIterations} getCurrentPosition calls (${warmupCount} warmup)...`
       );
 
       for (let i = 0; i < totalIterations; i++) {
@@ -125,11 +125,11 @@ export default function BenchmarkScreen() {
               }
               resolve();
             },
-            error => {
+            (error) => {
               addLog(`✗ Call ${i + 1} failed: ${error.message}`);
               reject(error);
             },
-            { maximumAge: Infinity, timeout: 5000 }, // Use cached location
+            { maximumAge: Number.POSITIVE_INFINITY, timeout: 5000 } // Use cached location
           );
         });
 
@@ -139,15 +139,15 @@ export default function BenchmarkScreen() {
       }
 
       addLog(
-        `✓ Completed ${totalIterations} iterations (${latencies.length} measured)`,
+        `✓ Completed ${totalIterations} iterations (${latencies.length} measured)`
       );
 
       const stats = calculateStats(latencies);
-      setResults(prev => ({ ...prev, nitro: stats }));
+      setResults((prev) => ({ ...prev, nitro: stats }));
 
-      console.log('='.repeat(60));
-      console.log('📊 NITRO GEOLOCATION RESULTS');
-      console.log('='.repeat(60));
+      console.log("=".repeat(60));
+      console.log("📊 NITRO GEOLOCATION RESULTS");
+      console.log("=".repeat(60));
       console.log(`Samples: ${stats.samples}`);
       console.log(`Min: ${stats.min.toFixed(3)}ms`);
       console.log(`Max: ${stats.max.toFixed(3)}ms`);
@@ -156,38 +156,38 @@ export default function BenchmarkScreen() {
       console.log(`P95: ${stats.p95.toFixed(3)}ms`);
       console.log(`P99: ${stats.p99.toFixed(3)}ms`);
       console.log(`Std Dev: ${stats.stdDev.toFixed(3)}ms`);
-      console.log('='.repeat(60));
+      console.log("=".repeat(60));
       Alert.alert(
-        '✅ Nitro Benchmark Complete',
+        "✅ Nitro Benchmark Complete",
         `Avg: ${stats.avg.toFixed(3)}ms\nMedian: ${stats.median.toFixed(
-          3,
-        )}ms\nP95: ${stats.p95.toFixed(3)}ms\nP99: ${stats.p99.toFixed(3)}ms`,
+          3
+        )}ms\nP95: ${stats.p95.toFixed(3)}ms\nP99: ${stats.p99.toFixed(3)}ms`
       );
     } catch (error: any) {
-      Alert.alert('❌ Nitro Benchmark Failed', error.message);
+      Alert.alert("❌ Nitro Benchmark Failed", error.message);
     } finally {
       setRunning(null);
     }
   };
 
   const runCommunityBenchmark = async () => {
-    setRunning('community');
-    addLog('🚀 Starting @react-native-community/geolocation benchmark...');
+    setRunning("community");
+    addLog("🚀 Starting @react-native-community/geolocation benchmark...");
 
     try {
       // First, warm up and get cached location
-      addLog('Warming up - getting initial location...');
+      addLog("Warming up - getting initial location...");
       await new Promise<void>((resolve, reject) => {
         Geolocation.getCurrentPosition(
           () => {
-            addLog('✓ Initial location cached');
+            addLog("✓ Initial location cached");
             resolve();
           },
-          error => {
+          (error) => {
             addLog(`✗ Failed to get initial location: ${error.message}`);
             reject(error);
           },
-          { maximumAge: 60000, timeout: 10000 },
+          { maximumAge: 60000, timeout: 10000 }
         );
       });
 
@@ -197,7 +197,7 @@ export default function BenchmarkScreen() {
       const latencies: number[] = [];
 
       addLog(
-        `Running ${totalIterations} getCurrentPosition calls (${warmupCount} warmup)...`,
+        `Running ${totalIterations} getCurrentPosition calls (${warmupCount} warmup)...`
       );
 
       for (let i = 0; i < totalIterations; i++) {
@@ -215,11 +215,11 @@ export default function BenchmarkScreen() {
               }
               resolve();
             },
-            error => {
+            (error) => {
               addLog(`✗ Call ${i + 1} failed: ${error.message}`);
               reject(error);
             },
-            { maximumAge: Infinity, timeout: 5000 }, // Use cached location
+            { maximumAge: Number.POSITIVE_INFINITY, timeout: 5000 } // Use cached location
           );
         });
 
@@ -229,15 +229,15 @@ export default function BenchmarkScreen() {
       }
 
       addLog(
-        `✓ Completed ${totalIterations} iterations (${latencies.length} measured)`,
+        `✓ Completed ${totalIterations} iterations (${latencies.length} measured)`
       );
 
       const stats = calculateStats(latencies);
-      setResults(prev => ({ ...prev, community: stats }));
+      setResults((prev) => ({ ...prev, community: stats }));
 
-      console.log('='.repeat(60));
-      console.log('📊 @REACT-NATIVE-COMMUNITY/GEOLOCATION RESULTS');
-      console.log('='.repeat(60));
+      console.log("=".repeat(60));
+      console.log("📊 @REACT-NATIVE-COMMUNITY/GEOLOCATION RESULTS");
+      console.log("=".repeat(60));
       console.log(`Samples: ${stats.samples}`);
       console.log(`Min: ${stats.min.toFixed(3)}ms`);
       console.log(`Max: ${stats.max.toFixed(3)}ms`);
@@ -246,15 +246,15 @@ export default function BenchmarkScreen() {
       console.log(`P95: ${stats.p95.toFixed(3)}ms`);
       console.log(`P99: ${stats.p99.toFixed(3)}ms`);
       console.log(`Std Dev: ${stats.stdDev.toFixed(3)}ms`);
-      console.log('='.repeat(60));
+      console.log("=".repeat(60));
       Alert.alert(
-        '✅ Community Benchmark Complete',
+        "✅ Community Benchmark Complete",
         `Avg: ${stats.avg.toFixed(3)}ms\nMedian: ${stats.median.toFixed(
-          3,
-        )}ms\nP95: ${stats.p95.toFixed(3)}ms\nP99: ${stats.p99.toFixed(3)}ms`,
+          3
+        )}ms\nP95: ${stats.p95.toFixed(3)}ms\nP99: ${stats.p99.toFixed(3)}ms`
       );
     } catch (error: any) {
-      Alert.alert('❌ Community Benchmark Failed', error.message);
+      Alert.alert("❌ Community Benchmark Failed", error.message);
     } finally {
       setRunning(null);
     }
@@ -318,7 +318,7 @@ export default function BenchmarkScreen() {
           <Text style={styles.comparisonLabel}>Average Latency</Text>
           <Text style={styles.comparisonText}>
             Nitro: {results.nitro.avg.toFixed(3)}ms
-            {'\n'}
+            {"\n"}
             Community: {results.community.avg.toFixed(3)}ms
           </Text>
         </View>
@@ -336,7 +336,7 @@ export default function BenchmarkScreen() {
           <Text style={styles.comparisonLabel}>P95 Latency</Text>
           <Text style={styles.comparisonText}>
             Nitro: {results.nitro.p95.toFixed(3)}ms
-            {'\n'}
+            {"\n"}
             Community: {results.community.p95.toFixed(3)}ms
           </Text>
         </View>
@@ -359,8 +359,8 @@ export default function BenchmarkScreen() {
           <View style={styles.infoBox}>
             <Text style={styles.infoTitle}>📌 What This Measures</Text>
             <Text style={styles.infoText}>
-              • Pure native → JS bridge latency{'\n'}• Uses cached location (no
-              GPS delay){'\n'}• 1000 iterations for statistical accuracy{'\n'}•
+              • Pure native → JS bridge latency{"\n"}• Uses cached location (no
+              GPS delay){"\n"}• 1000 iterations for statistical accuracy{"\n"}•
               Timestamps captured in native code
             </Text>
           </View>
@@ -371,9 +371,9 @@ export default function BenchmarkScreen() {
             <View style={styles.buttonContainer}>
               <Button
                 title={
-                  running === 'nitro'
-                    ? 'Running...'
-                    : '🚀 Benchmark Nitro Geolocation'
+                  running === "nitro"
+                    ? "Running..."
+                    : "🚀 Benchmark Nitro Geolocation"
                 }
                 onPress={runNitroBenchmark}
                 disabled={running !== null}
@@ -384,9 +384,9 @@ export default function BenchmarkScreen() {
             <View style={styles.buttonContainer}>
               <Button
                 title={
-                  running === 'community'
-                    ? 'Running...'
-                    : '📦 Benchmark Community Geolocation'
+                  running === "community"
+                    ? "Running..."
+                    : "📦 Benchmark Community Geolocation"
                 }
                 onPress={runCommunityBenchmark}
                 disabled={running !== null}
@@ -408,15 +408,15 @@ export default function BenchmarkScreen() {
 
           {results.nitro && (
             <View style={styles.resultBox}>
-              {renderStats('🚀 Nitro Geolocation', results.nitro)}
+              {renderStats("🚀 Nitro Geolocation", results.nitro)}
             </View>
           )}
 
           {results.community && (
             <View style={styles.resultBox}>
               {renderStats(
-                '📦 @react-native-community/geolocation',
-                results.community,
+                "📦 @react-native-community/geolocation",
+                results.community
               )}
             </View>
           )}
@@ -448,180 +448,180 @@ export default function BenchmarkScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: "#fff"
   },
   scrollView: {
-    flex: 1,
+    flex: 1
   },
   scrollContent: {
-    paddingBottom: 40,
+    paddingBottom: 40
   },
   content: {
-    padding: 20,
+    padding: 20
   },
   title: {
     fontSize: 26,
-    fontWeight: '700',
-    color: '#000',
-    marginBottom: 6,
+    fontWeight: "700",
+    color: "#000",
+    marginBottom: 6
   },
   subtitle: {
     fontSize: 15,
-    color: '#666',
-    marginBottom: 20,
+    color: "#666",
+    marginBottom: 20
   },
   infoBox: {
-    backgroundColor: '#e3f2fd',
+    backgroundColor: "#e3f2fd",
     borderRadius: 12,
     padding: 16,
-    marginBottom: 24,
+    marginBottom: 24
   },
   infoTitle: {
     fontSize: 16,
-    fontWeight: '600',
-    color: '#1976d2',
-    marginBottom: 8,
+    fontWeight: "600",
+    color: "#1976d2",
+    marginBottom: 8
   },
   infoText: {
     fontSize: 14,
-    color: '#1565c0',
-    lineHeight: 22,
+    color: "#1565c0",
+    lineHeight: 22
   },
   buttonSection: {
-    marginBottom: 24,
+    marginBottom: 24
   },
   sectionTitle: {
     fontSize: 20,
-    fontWeight: '600',
-    color: '#000',
-    marginBottom: 16,
+    fontWeight: "600",
+    color: "#000",
+    marginBottom: 16
   },
   buttonContainer: {
-    marginBottom: 12,
+    marginBottom: 12
   },
   divider: {
     height: 1,
-    backgroundColor: '#e0e0e0',
-    marginVertical: 24,
+    backgroundColor: "#e0e0e0",
+    marginVertical: 24
   },
   noResults: {
     fontSize: 15,
-    color: '#999',
-    fontStyle: 'italic',
-    textAlign: 'center',
-    marginVertical: 40,
+    color: "#999",
+    fontStyle: "italic",
+    textAlign: "center",
+    marginVertical: 40
   },
   resultBox: {
-    backgroundColor: '#f8f9fa',
+    backgroundColor: "#f8f9fa",
     borderRadius: 12,
     padding: 16,
-    marginBottom: 16,
+    marginBottom: 16
   },
   statsContainer: {
-    width: '100%',
+    width: "100%"
   },
   statsTitle: {
     fontSize: 18,
-    fontWeight: '700',
-    color: '#000',
-    marginBottom: 16,
+    fontWeight: "700",
+    color: "#000",
+    marginBottom: 16
   },
   statsGrid: {
-    gap: 10,
+    gap: 10
   },
   statRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingVertical: 4,
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    paddingVertical: 4
   },
   statLabel: {
     fontSize: 15,
-    color: '#666',
-    fontWeight: '500',
+    color: "#666",
+    fontWeight: "500"
   },
   statValue: {
     fontSize: 15,
-    color: '#000',
-    fontFamily: 'monospace',
-    fontWeight: '500',
+    color: "#000",
+    fontFamily: "monospace",
+    fontWeight: "500"
   },
   statValueHighlight: {
     fontSize: 16,
-    color: '#2196F3',
-    fontWeight: '700',
-    fontFamily: 'monospace',
+    color: "#2196F3",
+    fontWeight: "700",
+    fontFamily: "monospace"
   },
   comparisonContainer: {
-    backgroundColor: '#fff3e0',
+    backgroundColor: "#fff3e0",
     borderRadius: 12,
     padding: 16,
     marginTop: 8,
-    marginBottom: 16,
+    marginBottom: 16
   },
   comparisonTitle: {
     fontSize: 20,
-    fontWeight: '700',
-    color: '#000',
-    marginBottom: 16,
+    fontWeight: "700",
+    color: "#000",
+    marginBottom: 16
   },
   comparisonBox: {
-    backgroundColor: '#fff',
+    backgroundColor: "#fff",
     borderRadius: 8,
     padding: 12,
-    marginBottom: 12,
+    marginBottom: 12
   },
   highlightBox: {
-    backgroundColor: '#e8f5e9',
+    backgroundColor: "#e8f5e9",
     borderWidth: 2,
-    borderColor: '#4CAF50',
+    borderColor: "#4CAF50"
   },
   comparisonLabel: {
     fontSize: 14,
-    fontWeight: '600',
-    color: '#666',
-    marginBottom: 6,
+    fontWeight: "600",
+    color: "#666",
+    marginBottom: 6
   },
   comparisonText: {
     fontSize: 15,
-    color: '#000',
+    color: "#000",
     lineHeight: 22,
-    fontFamily: 'monospace',
+    fontFamily: "monospace"
   },
   speedupText: {
     fontSize: 18,
-    fontWeight: '700',
-    color: '#2e7d32',
-    textAlign: 'center',
-    marginBottom: 4,
+    fontWeight: "700",
+    color: "#2e7d32",
+    textAlign: "center",
+    marginBottom: 4
   },
   improvementText: {
     fontSize: 14,
-    color: '#388e3c',
-    textAlign: 'center',
-    fontWeight: '600',
+    color: "#388e3c",
+    textAlign: "center",
+    fontWeight: "600"
   },
   logsContainer: {
-    backgroundColor: '#263238',
+    backgroundColor: "#263238",
     borderRadius: 12,
     padding: 16,
     marginTop: 24,
-    maxHeight: 300,
+    maxHeight: 300
   },
   logsTitle: {
     fontSize: 16,
-    fontWeight: '600',
-    color: '#fff',
-    marginBottom: 12,
+    fontWeight: "600",
+    color: "#fff",
+    marginBottom: 12
   },
   logsScroll: {
-    maxHeight: 200,
+    maxHeight: 200
   },
   logText: {
     fontSize: 12,
-    color: '#b0bec5',
-    fontFamily: 'monospace',
+    color: "#b0bec5",
+    fontFamily: "monospace",
     marginBottom: 4,
-    lineHeight: 18,
-  },
+    lineHeight: 18
+  }
 });
