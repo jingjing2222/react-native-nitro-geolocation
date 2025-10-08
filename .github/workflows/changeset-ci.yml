@@ -15,22 +15,17 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Setup mise
-        uses: jdx/mise-action@v3
+      - uses: actions/setup-node@v4
         with:
-          install: false
-
-      - name: Install tools via mise
-        run: |
-          mise install node
+          node-version: 20
 
       - name: Enable Corepack
         run: |
-          mise exec -- corepack enable
+          corepack enable
 
       - name: Install dependencies
         run: |
-          mise exec -- yarn install
+          yarn install
 
       - name: Check for changeset
-        run: mise exec -- yarn changeset status --since=origin/main
+        run: yarn changeset status --since=origin/main

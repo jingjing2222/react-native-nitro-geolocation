@@ -21,29 +21,24 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Setup mise
-        uses: jdx/mise-action@v3
+      - uses: actions/setup-node@v4
         with:
-          install: false
-
-      - name: Install tools via mise
-        run: |
-          mise install node
+          node-version: 20
 
       - name: Enable Corepack
         run: |
-          mise exec -- corepack enable
+          corepack enable
 
       - name: Install dependencies
         run: |
-          mise exec -- yarn install
+          yarn install
 
       - name: Create Release Pull Request or Publish
         id: changesets
         uses: changesets/action@v1
         with:
-          version: mise exec -- yarn changeset version
-          publish: mise exec -- yarn changeset publish
+          version: yarn changeset version
+          publish: yarn changeset publish
           commit: "chore: version packages"
           title: "chore: version packages"
         env:

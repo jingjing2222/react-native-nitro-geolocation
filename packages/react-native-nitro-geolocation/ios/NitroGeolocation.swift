@@ -38,6 +38,16 @@ class NitroGeolocation: HybridNitroGeolocationSpec {
         success: @escaping (GeolocationResponse) -> Void, error: ((GeolocationError) -> Void)?,
         options: GeolocationOptions?
     ) throws {
+        // Fast path: check cached location immediately (no dispatch overhead!)
+        let parsedOptions = LocationManager.ParsedOptions.parse(from: options)
+
+        if let cached = locationManager.lastLocation,
+           locationManager.isCachedLocationValid(cached, options: parsedOptions) {
+            success(locationManager.locationToPosition(cached))
+            return
+        }
+
+        // Slow path: need GPS
         locationManager.getCurrentPosition(success: success, error: error, options: options)
     }
 
