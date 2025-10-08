@@ -50,6 +50,12 @@ class LocationManager: NSObject, CLLocationManagerDelegate {
 
     // MARK: - Properties
 
+    // Dedicated serial queue for location operations (replaces main queue)
+    private let locationQueue = DispatchQueue(
+        label: "com.nitro.geolocation",
+        qos: .userInitiated
+    )
+
     private var locationManager: CLLocationManager?
     private var lastLocation: CLLocation?
     private var usingSignificantChanges: Bool = false
@@ -84,7 +90,7 @@ class LocationManager: NSObject, CLLocationManagerDelegate {
         success: (() -> Void)?,
         error: ((GeolocationError) -> Void)?
     ) {
-        DispatchQueue.main.async { [weak self] in
+        locationQueue.async { [weak self] in
             guard let self = self else { return }
 
             self.initializeLocationManagerIfNeeded()
@@ -153,7 +159,7 @@ class LocationManager: NSObject, CLLocationManagerDelegate {
         error: ((GeolocationError) -> Void)?,
         options: GeolocationOptions?
     ) {
-        DispatchQueue.main.async { [weak self] in
+        locationQueue.async { [weak self] in
             guard let self = self else { return }
 
             let parsedOptions = ParsedOptions.parse(from: options)
@@ -186,8 +192,9 @@ class LocationManager: NSObject, CLLocationManagerDelegate {
 
             self.initializeLocationManagerIfNeeded()
 
-            // Configure location manager (use best accuracy from all pending requests)
-            self.updateLocationManagerConfiguration()
+            // Configure location manager directly
+            self.locationManager?.desiredAccuracy = parsedOptions.accuracy
+            self.locationManager?.distanceFilter = parsedOptions.distanceFilter
 
             // Create request
             var request = LocationRequest(
@@ -197,12 +204,13 @@ class LocationManager: NSObject, CLLocationManagerDelegate {
                 timer: nil
             )
 
-            // Setup timeout
-            let timer = Timer.scheduledTimer(
-                withTimeInterval: parsedOptions.timeout / 1000.0, repeats: false
-            ) { [weak self] timer in
-                self?.handleTimeout(for: timer)
+            // Setup timeout (Timer needs main run loop)
+            let timer = Timer(timeInterval: parsedOptions.timeout / 1000.0, repeats: false) { [weak self] timer in
+                self?.locationQueue.async {
+                    self?.handleTimeout(for: timer)
+                }
             }
+            RunLoop.main.add(timer, forMode: .common)
             request.timer = timer
 
             self.pendingRequests.append(request)
@@ -219,10 +227,9 @@ class LocationManager: NSObject, CLLocationManagerDelegate {
         error: ((GeolocationError) -> Void)?,
         options: GeolocationOptions?
     ) -> Double {
-        var resultWatchId: Double = 0
-
-        DispatchQueue.main.sync { [weak self] in
-            guard let self = self else { return }
+        // Safe to use sync with dedicated queue (no main thread blocking)
+        return locationQueue.sync { [weak self] in
+            guard let self = self else { return 0 }
 
             let parsedOptions = ParsedOptions.parse(from: options)
             let watchId = self.nextWatchId
@@ -237,17 +244,19 @@ class LocationManager: NSObject, CLLocationManagerDelegate {
             self.activeWatches[watchId] = subscription
 
             self.initializeLocationManagerIfNeeded()
-            self.updateLocationManagerConfiguration()
+
+            // Configure location manager directly
+            self.locationManager?.desiredAccuracy = parsedOptions.accuracy
+            self.locationManager?.distanceFilter = parsedOptions.distanceFilter
+
             self.startMonitoring()
 
-            resultWatchId = watchId
+            return watchId
         }
-
-        return resultWatchId
     }
 
     func clearWatch(watchId: Double) {
-        DispatchQueue.main.async { [weak self] in
+        locationQueue.async { [weak self] in
             guard let self = self else { return }
 
             self.activeWatches.removeValue(forKey: watchId)
@@ -260,7 +269,7 @@ class LocationManager: NSObject, CLLocationManagerDelegate {
     }
 
     func stopObserving() {
-        DispatchQueue.main.async { [weak self] in
+        locationQueue.async { [weak self] in
             guard let self = self else { return }
 
             self.activeWatches.removeAll()
@@ -275,88 +284,111 @@ class LocationManager: NSObject, CLLocationManagerDelegate {
     // MARK: - CLLocationManagerDelegate
 
     func locationManagerDidChangeAuthorization(_ manager: CLLocationManager) {
-        let status = getCurrentAuthorizationStatus(from: manager)
+        // Delegate called on main thread, dispatch to locationQueue
+        locationQueue.async { [weak self] in
+            guard let self = self else { return }
 
-        switch status {
-        case .authorizedAlways, .authorizedWhenInUse:
-            handleAuthorizationSuccess()
-            startMonitoring()
-        case .denied, .restricted:
-            handleAuthorizationError(for: status)
-        case .notDetermined:
-            break
-        @unknown default:
-            break
+            let status = self.getCurrentAuthorizationStatus(from: manager)
+
+            switch status {
+            case .authorizedAlways, .authorizedWhenInUse:
+                self.handleAuthorizationSuccess()
+                self.startMonitoring()
+            case .denied, .restricted:
+                self.handleAuthorizationError(for: status)
+            case .notDetermined:
+                break
+            @unknown default:
+                break
+            }
         }
     }
 
     func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
-        guard let location = locations.last else { return }
+        // Delegate called on main thread, dispatch to locationQueue
+        locationQueue.async { [weak self] in
+            guard let self = self else { return }
+            guard let location = locations.last else { return }
 
-        lastLocation = location
-        let position = locationToPosition(location)
+            self.lastLocation = location
+            let position = self.locationToPosition(location)
 
-        // 1. Fire all pending getCurrentPosition requests
-        for request in pendingRequests {
-            request.timer?.invalidate()
-            request.success(position)
-        }
-        pendingRequests.removeAll()
+            // 1. Fire all pending getCurrentPosition requests
+            for request in self.pendingRequests {
+                request.timer?.invalidate()
+                request.success(position)
+            }
+            self.pendingRequests.removeAll()
 
-        // 2. Fire all active watchPosition subscriptions
-        for (_, watch) in activeWatches {
-            watch.success(position)
-        }
+            // 2. Fire all active watchPosition subscriptions
+            for (_, watch) in self.activeWatches {
+                watch.success(position)
+            }
 
-        // 3. Stop monitoring if no more watches or pending requests
-        if activeWatches.isEmpty && pendingRequests.isEmpty {
-            stopMonitoring()
+            // 3. Stop monitoring if no more watches or pending requests
+            if self.activeWatches.isEmpty && self.pendingRequests.isEmpty {
+                self.stopMonitoring()
+            }
         }
     }
 
     func locationManager(_ manager: CLLocationManager, didFailWithError error: Error) {
-        let geoError: GeolocationError
+        // Delegate called on main thread, dispatch to locationQueue
+        locationQueue.async { [weak self] in
+            guard let self = self else { return }
 
-        if let clError = error as? CLError {
-            switch clError.code {
-            case .denied:
-                geoError = createError(
-                    code: PERMISSION_DENIED, message: "User denied access to location services.")
-            case .locationUnknown:
-                // Location is temporarily unavailable, keep trying
-                return
-            default:
-                geoError = createError(
-                    code: POSITION_UNAVAILABLE,
+            let geoError: GeolocationError
+
+            if let clError = error as? CLError {
+                switch clError.code {
+                case .denied:
+                    geoError = self.createError(
+                        code: self.PERMISSION_DENIED, message: "User denied access to location services.")
+                case .locationUnknown:
+                    // Location is temporarily unavailable, keep trying
+                    return
+                default:
+                    geoError = self.createError(
+                        code: self.POSITION_UNAVAILABLE,
+                        message: "Unable to retrieve location: \(error.localizedDescription)")
+                }
+            } else {
+                geoError = self.createError(
+                    code: self.POSITION_UNAVAILABLE,
                     message: "Unable to retrieve location: \(error.localizedDescription)")
             }
-        } else {
-            geoError = createError(
-                code: POSITION_UNAVAILABLE,
-                message: "Unable to retrieve location: \(error.localizedDescription)")
-        }
 
-        // Fire all pending requests with error
-        for request in pendingRequests {
-            request.timer?.invalidate()
-            request.error?(geoError)
-        }
-        pendingRequests.removeAll()
+            // Fire all pending requests with error
+            for request in self.pendingRequests {
+                request.timer?.invalidate()
+                request.error?(geoError)
+            }
+            self.pendingRequests.removeAll()
 
-        // Fire all active watches with error
-        for (_, watch) in activeWatches {
-            watch.error?(geoError)
-        }
+            // Fire all active watches with error
+            for (_, watch) in self.activeWatches {
+                watch.error?(geoError)
+            }
 
-        stopMonitoring()
+            self.stopMonitoring()
+        }
     }
 
     // MARK: - Helper Functions
 
     private func initializeLocationManagerIfNeeded() {
         guard locationManager == nil else { return }
-        locationManager = CLLocationManager()
-        locationManager?.delegate = self
+
+        // CLLocationManager must be created on main thread for delegate callbacks
+        if Thread.isMainThread {
+            locationManager = CLLocationManager()
+            locationManager?.delegate = self
+        } else {
+            DispatchQueue.main.sync {
+                locationManager = CLLocationManager()
+                locationManager?.delegate = self
+            }
+        }
     }
 
     private func updateLocationManagerConfiguration() {
