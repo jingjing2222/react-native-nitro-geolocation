@@ -14,5 +14,8 @@
     "format:check": "biome ci --formatter-enabled=true --linter-enabled=false .",
     "lint": "biome ci --formatter-enabled=false --linter-enabled=true ."
   },
-  "packageManager": "yarn@4.9.4"
+  "packageManager": "yarn@4.9.4",
+  "devDependencies": {
+    "@changesets/cli": "^2.29.7"
+  }
 }
