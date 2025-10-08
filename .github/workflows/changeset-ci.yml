@@ -31,4 +31,4 @@ jobs:
           mise exec -- yarn install
 
       - name: Check for changeset
-        run: mise exec -- yarn changeset status --since=origin/main
+        run: mise exec -- yarn changeset status
