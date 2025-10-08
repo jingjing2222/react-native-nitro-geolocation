@@ -1,0 +1,34 @@
+name: Changeset CI
+
+on:
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  verify:
+    name: Verify Changeset
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup mise
+        uses: jdx/mise-action@v3
+        with:
+          install: false
+
+      - name: Install tools via mise
+        run: |
+          mise install node
+
+      - name: Enable Corepack
+        run: |
+          mise exec -- corepack enable
+
+      - name: Install dependencies
+        run: |
+          mise exec -- yarn install
+
+      - name: Check for changeset
+        run: yarn changeset status --since=origin/main
