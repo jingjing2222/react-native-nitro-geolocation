@@ -2,16 +2,10 @@
   "$schema": "https://unpkg.com/@changesets/config@3.1.1/schema.json",
   "changelog": "@changesets/cli/changelog",
   "commit": false,
-  "fixed": [
-    [
-      "react-native-nitro-geolocation-monorepo",
-      "react-native-nitro-geolocation"
-    ]
-  ],
+  "fixed": [],
   "linked": [],
   "access": "public",
   "baseBranch": "main",
   "updateInternalDependencies": "patch",
-  "ignore": ["benchmark", "react-native-nitro-geolocation-example"],
-  "bumpVersionsWithWorkspaceProtocolOnly": true
+  "ignore": ["benchmark", "react-native-nitro-geolocation-example"]
 }
