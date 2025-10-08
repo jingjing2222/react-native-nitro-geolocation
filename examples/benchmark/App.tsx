@@ -102,7 +102,7 @@ export default function BenchmarkScreen() {
       });
 
       // Run benchmark using getCurrentPosition
-      const totalIterations = 110; // 10 warmup + 100 actual
+      const totalIterations = 1010; // 10 warmup + 100 actual
       const warmupCount = 10;
       const latencies: number[] = [];
 
@@ -185,7 +185,7 @@ export default function BenchmarkScreen() {
       });
 
       // Run benchmark using getCurrentPosition
-      const totalIterations = 110; // 10 warmup + 100 actual
+      const totalIterations = 1010; // 10 warmup + 100 actual
       const warmupCount = 10;
       const latencies: number[] = [];
 
