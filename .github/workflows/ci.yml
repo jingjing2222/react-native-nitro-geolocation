@@ -26,7 +26,7 @@ jobs:
 
       - name: Run Biome format check
         run: |
-          mise exec -- biome ci --formatter-enabled=true --linter-enabled=false .
+          biome ci --formatter-enabled=true --linter-enabled=false .
 
   lint:
     name: Lint
@@ -47,7 +47,7 @@ jobs:
 
       - name: Run Biome lint
         run: |
-          mise exec -- biome ci --formatter-enabled=false --linter-enabled=true .
+          biome ci --formatter-enabled=false --linter-enabled=true .
 
   typecheck:
     name: TypeScript Check
