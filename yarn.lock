@@ -9063,7 +9063,7 @@ __metadata:
     react-native-builder-bob: "npm:^0.40.13"
     react-native-monorepo-config: "npm:^0.1.9"
     react-native-nitro-geolocation: "workspace:*"
-    react-native-nitro-modules: "npm:^0.29.7"
+    react-native-nitro-modules: "npm:^0.29.8"
     react-native-safe-area-context: "npm:^5.5.2"
   languageName: unknown
   linkType: soft
@@ -9086,24 +9086,14 @@ __metadata:
     "@types/react-test-renderer": "npm:^18.0.0"
     react: "npm:19.1.0"
     react-native: "npm:0.81.1"
-    react-native-nitro-modules: "npm:^0.29.7"
+    react-native-nitro-modules: "npm:^0.29.6"
     typescript: "npm:^5.9.3"
   peerDependencies:
     react-native-nitro-modules: "*"
   languageName: unknown
   linkType: soft
 
-"react-native-nitro-modules@npm:^0.29.7":
-  version: 0.29.7
-  resolution: "react-native-nitro-modules@npm:0.29.7"
-  peerDependencies:
-    react: "*"
-    react-native: "*"
-  checksum: 10c0/f8bbb9cde33c89090f7d0813e9c5af54d2a322ad29ec6538758da037a1e69fddfe5bcd049a9c6ffa94a4b82d794ffd82a4bd043ed420e9d6ae57a2ec9037bbba
-  languageName: node
-  linkType: hard
-
-"react-native-nitro-modules@npm:^0.29.8":
+"react-native-nitro-modules@npm:^0.29.6, react-native-nitro-modules@npm:^0.29.8":
   version: 0.29.8
   resolution: "react-native-nitro-modules@npm:0.29.8"
   peerDependencies:
