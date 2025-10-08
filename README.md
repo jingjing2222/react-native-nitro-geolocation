@@ -37,6 +37,8 @@ Whether upgrading an existing app or building a new one,
 
 ## 🏗 Architecture Comparison
 
+- See [Benchmark Results](examples/benchmark/README.md#-benchmark-results) for detailed performance comparison
+
 ### 🧩 Origin: Event-based Architecture (`@react-native-community/geolocation`)
 
 ~~~

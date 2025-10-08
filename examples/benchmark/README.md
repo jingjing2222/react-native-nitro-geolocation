@@ -2,11 +2,13 @@
 
 This app benchmarks the performance difference between `react-native-nitro-geolocation` and `@react-native-community/geolocation`.
 
+![react-native-nitro-geolocation](https://raw.githubusercontent.com/jingjing2222/react-native-nitro-geolocation/main/benchmark.gif)
+
 ## 📊 Benchmark Results
 
 **Test Environment:**
 - Device: iPhone (iOS Simulator)
-- React Native: 0.76.x
+- React Native: 0.81.4
 - Test: 1000 iterations × 5 runs of `getCurrentPosition` with cached location (measuring pure bridge/JSI latency)
 
 ### Results
