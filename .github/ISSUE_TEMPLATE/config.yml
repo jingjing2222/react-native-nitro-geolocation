@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: 💬 Discussions
+    url: https://github.com/mynorg/react-native-nitro-geolocation/discussions
+    about: Ask questions and discuss ideas with the community
+  - name: 📖 Documentation
+    url: https://github.com/mynorg/react-native-nitro-geolocation#readme
+    about: Read the documentation
