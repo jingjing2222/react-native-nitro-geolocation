@@ -9,7 +9,7 @@ import {
   Text,
   View
 } from "react-native";
-import NitroGeolocationHybridObject from "react-native-nitro-geolocation";
+import NitroGeolocation from "react-native-nitro-geolocation/compat";
 
 // Polyfill for performance.now() type
 declare const performance: {
@@ -88,7 +88,7 @@ export default function BenchmarkScreen() {
       // First, warm up and get cached location
       addLog("Warming up - getting initial location...");
       await new Promise<void>((resolve, reject) => {
-        NitroGeolocationHybridObject.getCurrentPosition(
+        NitroGeolocation.getCurrentPosition(
           () => {
             addLog("✓ Initial location cached");
             resolve();
@@ -114,7 +114,7 @@ export default function BenchmarkScreen() {
         const startTime = performance.now();
 
         await new Promise<void>((resolve, reject) => {
-          NitroGeolocationHybridObject.getCurrentPosition(
+          NitroGeolocation.getCurrentPosition(
             () => {
               const endTime = performance.now();
               const latency = endTime - startTime;

@@ -11,7 +11,7 @@ import {
 } from "react-native";
 import Geolocation, {
   type GeolocationResponse
-} from "react-native-nitro-geolocation";
+} from "react-native-nitro-geolocation/compat";
 
 export default function App() {
   const [permissionStatus, setPermissionStatus] = useState<string>("Unknown");

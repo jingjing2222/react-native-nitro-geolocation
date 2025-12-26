@@ -5,8 +5,14 @@
   "main": "src/index",
   "source": "src/index",
   "exports": {
-    ".": "./src/index",
-    "./compat": "./src/compat/index"
+    ".": {
+      "types": "./src/index.tsx",
+      "default": "./src/index.tsx"
+    },
+    "./compat": {
+      "types": "./src/compat/index.tsx",
+      "default": "./src/compat/index.tsx"
+    }
   },
   "codegenConfig": {
     "name": "NitroGeolocationSpec",
@@ -57,8 +63,5 @@
     "languages": "kotlin-swift",
     "type": "nitro-module",
     "version": "0.54.3"
-  },
-  "installConfig": {
-    "hoistingLimits": "workspaces"
   }
 }
