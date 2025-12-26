@@ -7,6 +7,8 @@ import type { NitroGeolocationCompat } from "../NitroGeolocationCompat.nitro";
  */
 export function stopObserving(): void {
   const nitroGeolocation =
-    NitroModules.createHybridObject<NitroGeolocationCompat>("NitroGeolocationCompat");
+    NitroModules.createHybridObject<NitroGeolocationCompat>(
+      "NitroGeolocationCompat"
+    );
   nitroGeolocation.stopObserving();
 }

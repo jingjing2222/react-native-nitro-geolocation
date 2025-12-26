@@ -8,6 +8,8 @@ import type { NitroGeolocationCompat } from "../NitroGeolocationCompat.nitro";
  */
 export function clearWatch(watchId: number): void {
   const nitroGeolocation =
-    NitroModules.createHybridObject<NitroGeolocationCompat>("NitroGeolocationCompat");
+    NitroModules.createHybridObject<NitroGeolocationCompat>(
+      "NitroGeolocationCompat"
+    );
   nitroGeolocation.clearWatch(watchId);
 }

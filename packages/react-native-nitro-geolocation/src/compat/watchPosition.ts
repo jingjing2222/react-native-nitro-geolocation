@@ -21,6 +21,8 @@ export function watchPosition(
   options?: GeolocationOptions
 ): number {
   const nitroGeolocation =
-    NitroModules.createHybridObject<NitroGeolocationCompat>("NitroGeolocationCompat");
+    NitroModules.createHybridObject<NitroGeolocationCompat>(
+      "NitroGeolocationCompat"
+    );
   return nitroGeolocation.watchPosition(success, error, options);
 }
