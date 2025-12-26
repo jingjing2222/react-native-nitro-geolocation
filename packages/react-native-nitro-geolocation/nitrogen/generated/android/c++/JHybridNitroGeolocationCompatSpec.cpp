@@ -31,7 +31,6 @@ namespace margelo::nitro::nitrogeolocation { struct GeolocationOptions; }
 #include "JLocationProviderInternal.hpp"
 #include <functional>
 #include "JFunc_void.hpp"
-#include <NitroModules/JNICallable.hpp>
 #include "GeolocationError.hpp"
 #include "JFunc_void_GeolocationError.hpp"
 #include "JGeolocationError.hpp"
@@ -41,10 +40,6 @@ namespace margelo::nitro::nitrogeolocation { struct GeolocationOptions; }
 #include "JGeolocationResponse.hpp"
 #include "GeolocationCoordinates.hpp"
 #include "JGeolocationCoordinates.hpp"
-#include <NitroModules/Null.hpp>
-#include <variant>
-#include "JVariant_NullType_Double.hpp"
-#include <NitroModules/JNull.hpp>
 #include "GeolocationOptions.hpp"
 #include "JGeolocationOptions.hpp"
 
@@ -68,12 +63,6 @@ namespace margelo::nitro::nitrogeolocation {
   void JHybridNitroGeolocationCompatSpec::dispose() noexcept {
     static const auto method = javaClassStatic()->getMethod<void()>("dispose");
     method(_javaPart);
-  }
-
-  std::string JHybridNitroGeolocationCompatSpec::toString() {
-    static const auto method = javaClassStatic()->getMethod<jni::JString()>("toString");
-    auto javaString = method(_javaPart);
-    return javaString->toStdString();
   }
 
   // Properties

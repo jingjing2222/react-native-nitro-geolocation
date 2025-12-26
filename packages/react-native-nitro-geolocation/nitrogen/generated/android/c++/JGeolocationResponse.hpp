@@ -12,11 +12,7 @@
 
 #include "GeolocationCoordinates.hpp"
 #include "JGeolocationCoordinates.hpp"
-#include "JVariant_NullType_Double.hpp"
-#include <NitroModules/JNull.hpp>
-#include <NitroModules/Null.hpp>
 #include <optional>
-#include <variant>
 
 namespace margelo::nitro::nitrogeolocation {
 
@@ -53,11 +49,7 @@ namespace margelo::nitro::nitrogeolocation {
      */
     [[maybe_unused]]
     static jni::local_ref<JGeolocationResponse::javaobject> fromCpp(const GeolocationResponse& value) {
-      using JSignature = JGeolocationResponse(jni::alias_ref<JGeolocationCoordinates>, double);
-      static const auto clazz = javaClassStatic();
-      static const auto create = clazz->getStaticMethod<JSignature>("fromCpp");
-      return create(
-        clazz,
+      return newInstance(
         JGeolocationCoordinates::fromCpp(value.coords),
         value.timestamp
       );

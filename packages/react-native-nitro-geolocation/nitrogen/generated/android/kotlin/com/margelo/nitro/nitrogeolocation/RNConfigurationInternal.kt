@@ -9,6 +9,7 @@ package com.margelo.nitro.nitrogeolocation
 
 import androidx.annotation.Keep
 import com.facebook.proguard.annotations.DoNotStrip
+import com.margelo.nitro.core.*
 
 
 /**
@@ -16,32 +17,22 @@ import com.facebook.proguard.annotations.DoNotStrip
  */
 @DoNotStrip
 @Keep
-data class RNConfigurationInternal(
+data class RNConfigurationInternal
   @DoNotStrip
   @Keep
-  val skipPermissionRequests: Boolean,
-  @DoNotStrip
-  @Keep
-  val authorizationLevel: AuthorizationLevelInternal?,
-  @DoNotStrip
-  @Keep
-  val enableBackgroundLocationUpdates: Boolean?,
-  @DoNotStrip
-  @Keep
-  val locationProvider: LocationProviderInternal?
-) {
-  /* primary constructor */
-
-  companion object {
-    /**
-     * Constructor called from C++
-     */
+  constructor(
     @DoNotStrip
     @Keep
-    @Suppress("unused")
-    @JvmStatic
-    private fun fromCpp(skipPermissionRequests: Boolean, authorizationLevel: AuthorizationLevelInternal?, enableBackgroundLocationUpdates: Boolean?, locationProvider: LocationProviderInternal?): RNConfigurationInternal {
-      return RNConfigurationInternal(skipPermissionRequests, authorizationLevel, enableBackgroundLocationUpdates, locationProvider)
-    }
-  }
+    val skipPermissionRequests: Boolean,
+    @DoNotStrip
+    @Keep
+    val authorizationLevel: AuthorizationLevelInternal?,
+    @DoNotStrip
+    @Keep
+    val enableBackgroundLocationUpdates: Boolean?,
+    @DoNotStrip
+    @Keep
+    val locationProvider: LocationProviderInternal?
+  ) {
+  /* main constructor */
 }

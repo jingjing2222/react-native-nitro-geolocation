@@ -11,7 +11,6 @@
 #include <functional>
 
 #include <functional>
-#include <NitroModules/JNICallable.hpp>
 
 namespace margelo::nitro::nitrogeolocation {
 
@@ -38,7 +37,7 @@ namespace margelo::nitro::nitrogeolocation {
   /**
    * An implementation of Func_void that is backed by a C++ implementation (using `std::function<...>`)
    */
-  class JFunc_void_cxx final: public jni::HybridClass<JFunc_void_cxx, JFunc_void> {
+  struct JFunc_void_cxx final: public jni::HybridClass<JFunc_void_cxx, JFunc_void> {
   public:
     static jni::local_ref<JFunc_void::javaobject> fromCpp(const std::function<void()>& func) {
       return JFunc_void_cxx::newObjectCxxArgs(func);

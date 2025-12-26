@@ -17,16 +17,6 @@
 #else
 #error NitroModules cannot be found! Are you sure you installed NitroModules properly?
 #endif
-#if __has_include(<NitroModules/JSIHelpers.hpp>)
-#include <NitroModules/JSIHelpers.hpp>
-#else
-#error NitroModules cannot be found! Are you sure you installed NitroModules properly?
-#endif
-#if __has_include(<NitroModules/PropNameIDCache.hpp>)
-#include <NitroModules/PropNameIDCache.hpp>
-#else
-#error NitroModules cannot be found! Are you sure you installed NitroModules properly?
-#endif
 
 // Forward declaration of `GeolocationCoordinates` to properly resolve imports.
 namespace margelo::nitro::nitrogeolocation { struct GeolocationCoordinates; }
@@ -38,7 +28,7 @@ namespace margelo::nitro::nitrogeolocation {
   /**
    * A struct which can be represented as a JavaScript object (GeolocationResponse).
    */
-  struct GeolocationResponse final {
+  struct GeolocationResponse {
   public:
     GeolocationCoordinates coords     SWIFT_PRIVATE;
     double timestamp     SWIFT_PRIVATE;
@@ -46,9 +36,6 @@ namespace margelo::nitro::nitrogeolocation {
   public:
     GeolocationResponse() = default;
     explicit GeolocationResponse(GeolocationCoordinates coords, double timestamp): coords(coords), timestamp(timestamp) {}
-
-  public:
-    friend bool operator==(const GeolocationResponse& lhs, const GeolocationResponse& rhs) = default;
   };
 
 } // namespace margelo::nitro::nitrogeolocation
@@ -61,14 +48,14 @@ namespace margelo::nitro {
     static inline margelo::nitro::nitrogeolocation::GeolocationResponse fromJSI(jsi::Runtime& runtime, const jsi::Value& arg) {
       jsi::Object obj = arg.asObject(runtime);
       return margelo::nitro::nitrogeolocation::GeolocationResponse(
-        JSIConverter<margelo::nitro::nitrogeolocation::GeolocationCoordinates>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "coords"))),
-        JSIConverter<double>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "timestamp")))
+        JSIConverter<margelo::nitro::nitrogeolocation::GeolocationCoordinates>::fromJSI(runtime, obj.getProperty(runtime, "coords")),
+        JSIConverter<double>::fromJSI(runtime, obj.getProperty(runtime, "timestamp"))
       );
     }
     static inline jsi::Value toJSI(jsi::Runtime& runtime, const margelo::nitro::nitrogeolocation::GeolocationResponse& arg) {
       jsi::Object obj(runtime);
-      obj.setProperty(runtime, PropNameIDCache::get(runtime, "coords"), JSIConverter<margelo::nitro::nitrogeolocation::GeolocationCoordinates>::toJSI(runtime, arg.coords));
-      obj.setProperty(runtime, PropNameIDCache::get(runtime, "timestamp"), JSIConverter<double>::toJSI(runtime, arg.timestamp));
+      obj.setProperty(runtime, "coords", JSIConverter<margelo::nitro::nitrogeolocation::GeolocationCoordinates>::toJSI(runtime, arg.coords));
+      obj.setProperty(runtime, "timestamp", JSIConverter<double>::toJSI(runtime, arg.timestamp));
       return obj;
     }
     static inline bool canConvert(jsi::Runtime& runtime, const jsi::Value& value) {
@@ -76,11 +63,8 @@ namespace margelo::nitro {
         return false;
       }
       jsi::Object obj = value.getObject(runtime);
-      if (!nitro::isPlainObject(runtime, obj)) {
-        return false;
-      }
-      if (!JSIConverter<margelo::nitro::nitrogeolocation::GeolocationCoordinates>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "coords")))) return false;
-      if (!JSIConverter<double>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "timestamp")))) return false;
+      if (!JSIConverter<margelo::nitro::nitrogeolocation::GeolocationCoordinates>::canConvert(runtime, obj.getProperty(runtime, "coords"))) return false;
+      if (!JSIConverter<double>::canConvert(runtime, obj.getProperty(runtime, "timestamp"))) return false;
       return true;
     }
   };

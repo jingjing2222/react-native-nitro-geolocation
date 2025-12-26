@@ -9,6 +9,7 @@ package com.margelo.nitro.nitrogeolocation
 
 import androidx.annotation.Keep
 import com.facebook.proguard.annotations.DoNotStrip
+import com.margelo.nitro.core.*
 
 
 /**
@@ -16,26 +17,16 @@ import com.facebook.proguard.annotations.DoNotStrip
  */
 @DoNotStrip
 @Keep
-data class GeolocationResponse(
+data class GeolocationResponse
   @DoNotStrip
   @Keep
-  val coords: GeolocationCoordinates,
-  @DoNotStrip
-  @Keep
-  val timestamp: Double
-) {
-  /* primary constructor */
-
-  companion object {
-    /**
-     * Constructor called from C++
-     */
+  constructor(
     @DoNotStrip
     @Keep
-    @Suppress("unused")
-    @JvmStatic
-    private fun fromCpp(coords: GeolocationCoordinates, timestamp: Double): GeolocationResponse {
-      return GeolocationResponse(coords, timestamp)
-    }
-  }
+    val coords: GeolocationCoordinates,
+    @DoNotStrip
+    @Keep
+    val timestamp: Double
+  ) {
+  /* main constructor */
 }

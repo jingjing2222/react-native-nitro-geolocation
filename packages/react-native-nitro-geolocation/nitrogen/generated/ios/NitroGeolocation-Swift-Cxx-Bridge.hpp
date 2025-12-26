@@ -35,14 +35,12 @@ namespace NitroGeolocation { class HybridNitroGeolocationCompatSpec_cxx; }
 #include "GeolocationResponse.hpp"
 #include "HybridNitroGeolocationCompatSpec.hpp"
 #include "LocationProviderInternal.hpp"
-#include <NitroModules/Null.hpp>
 #include <NitroModules/Result.hpp>
 #include <exception>
 #include <functional>
 #include <memory>
 #include <optional>
 #include <string>
-#include <variant>
 
 /**
  * Contains specialized versions of C++ templated types so they can be accessed from Swift,
@@ -169,47 +167,18 @@ namespace margelo::nitro::nitrogeolocation::bridge::swift {
     return *optional;
   }
   
-  // pragma MARK: std::variant<nitro::NullType, double>
+  // pragma MARK: std::optional<double>
   /**
-   * Wrapper struct for `std::variant<nitro::NullType, double>`.
-   * std::variant cannot be used in Swift because of a Swift bug.
-   * Not even specializing it works. So we create a wrapper struct.
+   * Specialized version of `std::optional<double>`.
    */
-  struct std__variant_nitro__NullType__double_ final {
-    std::variant<nitro::NullType, double> variant;
-    std__variant_nitro__NullType__double_(std::variant<nitro::NullType, double> variant): variant(variant) { }
-    operator std::variant<nitro::NullType, double>() const noexcept {
-      return variant;
-    }
-    inline size_t index() const noexcept {
-      return variant.index();
-    }
-    inline nitro::NullType get_0() const noexcept {
-      return std::get<0>(variant);
-    }
-    inline double get_1() const noexcept {
-      return std::get<1>(variant);
-    }
-  };
-  inline std__variant_nitro__NullType__double_ create_std__variant_nitro__NullType__double_(nitro::NullType value) noexcept {
-    return std__variant_nitro__NullType__double_(value);
+  using std__optional_double_ = std::optional<double>;
+  inline std::optional<double> create_std__optional_double_(const double& value) noexcept {
+    return std::optional<double>(value);
   }
-  inline std__variant_nitro__NullType__double_ create_std__variant_nitro__NullType__double_(double value) noexcept {
-    return std__variant_nitro__NullType__double_(value);
-  }
-  
-  // pragma MARK: std::optional<std::variant<nitro::NullType, double>>
-  /**
-   * Specialized version of `std::optional<std::variant<nitro::NullType, double>>`.
-   */
-  using std__optional_std__variant_nitro__NullType__double__ = std::optional<std::variant<nitro::NullType, double>>;
-  inline std::optional<std::variant<nitro::NullType, double>> create_std__optional_std__variant_nitro__NullType__double__(const std::variant<nitro::NullType, double>& value) noexcept {
-    return std::optional<std::variant<nitro::NullType, double>>(value);
-  }
-  inline bool has_value_std__optional_std__variant_nitro__NullType__double__(const std::optional<std::variant<nitro::NullType, double>>& optional) noexcept {
+  inline bool has_value_std__optional_double_(const std::optional<double>& optional) noexcept {
     return optional.has_value();
   }
-  inline std::variant<nitro::NullType, double> get_std__optional_std__variant_nitro__NullType__double__(const std::optional<std::variant<nitro::NullType, double>>& optional) noexcept {
+  inline double get_std__optional_double_(const std::optional<double>& optional) noexcept {
     return *optional;
   }
   
@@ -235,21 +204,6 @@ namespace margelo::nitro::nitrogeolocation::bridge::swift {
     return Func_void_GeolocationResponse_Wrapper(std::move(value));
   }
   
-  // pragma MARK: std::optional<double>
-  /**
-   * Specialized version of `std::optional<double>`.
-   */
-  using std__optional_double_ = std::optional<double>;
-  inline std::optional<double> create_std__optional_double_(const double& value) noexcept {
-    return std::optional<double>(value);
-  }
-  inline bool has_value_std__optional_double_(const std::optional<double>& optional) noexcept {
-    return optional.has_value();
-  }
-  inline double get_std__optional_double_(const std::optional<double>& optional) noexcept {
-    return *optional;
-  }
-  
   // pragma MARK: std::optional<GeolocationOptions>
   /**
    * Specialized version of `std::optional<GeolocationOptions>`.
@@ -271,7 +225,7 @@ namespace margelo::nitro::nitrogeolocation::bridge::swift {
    */
   using std__shared_ptr_HybridNitroGeolocationCompatSpec_ = std::shared_ptr<HybridNitroGeolocationCompatSpec>;
   std::shared_ptr<HybridNitroGeolocationCompatSpec> create_std__shared_ptr_HybridNitroGeolocationCompatSpec_(void* NON_NULL swiftUnsafePointer) noexcept;
-  void* NON_NULL get_std__shared_ptr_HybridNitroGeolocationCompatSpec_(std__shared_ptr_HybridNitroGeolocationCompatSpec_ cppType);
+  void* NON_NULL get_std__shared_ptr_HybridNitroGeolocationCompatSpec_(std__shared_ptr_HybridNitroGeolocationCompatSpec_ cppType) noexcept;
   
   // pragma MARK: std::weak_ptr<HybridNitroGeolocationCompatSpec>
   using std__weak_ptr_HybridNitroGeolocationCompatSpec_ = std::weak_ptr<HybridNitroGeolocationCompatSpec>;

@@ -34,14 +34,12 @@ namespace margelo::nitro::nitrogeolocation { struct RNConfigurationInternal; }
 #include "HybridNitroGeolocationCompatSpec.hpp"
 #include "LocationProviderInternal.hpp"
 #include "RNConfigurationInternal.hpp"
-#include <NitroModules/Null.hpp>
 #include <NitroModules/Result.hpp>
 #include <exception>
 #include <functional>
 #include <memory>
 #include <optional>
 #include <string>
-#include <variant>
 
 // C++ helpers for Swift
 #include "NitroGeolocation-Swift-Cxx-Bridge.hpp"

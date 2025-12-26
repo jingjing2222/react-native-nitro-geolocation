@@ -5,7 +5,6 @@
 /// Copyright © 2025 Marc Rousavy @ Margelo
 ///
 
-import Foundation
 import NitroModules
 
 /**
@@ -65,52 +64,122 @@ public extension GeolocationOptions {
     }())
   }
 
-  @inline(__always)
   var timeout: Double? {
-    return self.__timeout.value
+    @inline(__always)
+    get {
+      return self.__timeout.value
+    }
+    @inline(__always)
+    set {
+      self.__timeout = { () -> bridge.std__optional_double_ in
+        if let __unwrappedValue = newValue {
+          return bridge.create_std__optional_double_(__unwrappedValue)
+        } else {
+          return .init()
+        }
+      }()
+    }
   }
   
-  @inline(__always)
   var maximumAge: Double? {
-    return self.__maximumAge.value
+    @inline(__always)
+    get {
+      return self.__maximumAge.value
+    }
+    @inline(__always)
+    set {
+      self.__maximumAge = { () -> bridge.std__optional_double_ in
+        if let __unwrappedValue = newValue {
+          return bridge.create_std__optional_double_(__unwrappedValue)
+        } else {
+          return .init()
+        }
+      }()
+    }
   }
   
-  @inline(__always)
   var enableHighAccuracy: Bool? {
-    return { () -> Bool? in
-      if bridge.has_value_std__optional_bool_(self.__enableHighAccuracy) {
-        let __unwrapped = bridge.get_std__optional_bool_(self.__enableHighAccuracy)
-        return __unwrapped
-      } else {
-        return nil
-      }
-    }()
+    @inline(__always)
+    get {
+      return self.__enableHighAccuracy.value
+    }
+    @inline(__always)
+    set {
+      self.__enableHighAccuracy = { () -> bridge.std__optional_bool_ in
+        if let __unwrappedValue = newValue {
+          return bridge.create_std__optional_bool_(__unwrappedValue)
+        } else {
+          return .init()
+        }
+      }()
+    }
   }
   
-  @inline(__always)
   var interval: Double? {
-    return self.__interval.value
+    @inline(__always)
+    get {
+      return self.__interval.value
+    }
+    @inline(__always)
+    set {
+      self.__interval = { () -> bridge.std__optional_double_ in
+        if let __unwrappedValue = newValue {
+          return bridge.create_std__optional_double_(__unwrappedValue)
+        } else {
+          return .init()
+        }
+      }()
+    }
   }
   
-  @inline(__always)
   var fastestInterval: Double? {
-    return self.__fastestInterval.value
+    @inline(__always)
+    get {
+      return self.__fastestInterval.value
+    }
+    @inline(__always)
+    set {
+      self.__fastestInterval = { () -> bridge.std__optional_double_ in
+        if let __unwrappedValue = newValue {
+          return bridge.create_std__optional_double_(__unwrappedValue)
+        } else {
+          return .init()
+        }
+      }()
+    }
   }
   
-  @inline(__always)
   var distanceFilter: Double? {
-    return self.__distanceFilter.value
+    @inline(__always)
+    get {
+      return self.__distanceFilter.value
+    }
+    @inline(__always)
+    set {
+      self.__distanceFilter = { () -> bridge.std__optional_double_ in
+        if let __unwrappedValue = newValue {
+          return bridge.create_std__optional_double_(__unwrappedValue)
+        } else {
+          return .init()
+        }
+      }()
+    }
   }
   
-  @inline(__always)
   var useSignificantChanges: Bool? {
-    return { () -> Bool? in
-      if bridge.has_value_std__optional_bool_(self.__useSignificantChanges) {
-        let __unwrapped = bridge.get_std__optional_bool_(self.__useSignificantChanges)
-        return __unwrapped
-      } else {
-        return nil
-      }
-    }()
+    @inline(__always)
+    get {
+      return self.__useSignificantChanges.value
+    }
+    @inline(__always)
+    set {
+      self.__useSignificantChanges = { () -> bridge.std__optional_bool_ in
+        if let __unwrappedValue = newValue {
+          return bridge.create_std__optional_bool_(__unwrappedValue)
+        } else {
+          return .init()
+        }
+      }()
+    }
   }
 }

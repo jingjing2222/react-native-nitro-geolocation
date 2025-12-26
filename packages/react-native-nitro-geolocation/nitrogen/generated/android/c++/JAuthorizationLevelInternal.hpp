@@ -41,15 +41,16 @@ namespace margelo::nitro::nitrogeolocation {
     [[maybe_unused]]
     static jni::alias_ref<JAuthorizationLevelInternal> fromCpp(AuthorizationLevelInternal value) {
       static const auto clazz = javaClassStatic();
+      static const auto fieldALWAYS = clazz->getStaticField<JAuthorizationLevelInternal>("ALWAYS");
+      static const auto fieldWHENINUSE = clazz->getStaticField<JAuthorizationLevelInternal>("WHENINUSE");
+      static const auto fieldAUTO = clazz->getStaticField<JAuthorizationLevelInternal>("AUTO");
+      
       switch (value) {
         case AuthorizationLevelInternal::ALWAYS:
-          static const auto fieldALWAYS = clazz->getStaticField<JAuthorizationLevelInternal>("ALWAYS");
           return clazz->getStaticFieldValue(fieldALWAYS);
         case AuthorizationLevelInternal::WHENINUSE:
-          static const auto fieldWHENINUSE = clazz->getStaticField<JAuthorizationLevelInternal>("WHENINUSE");
           return clazz->getStaticFieldValue(fieldWHENINUSE);
         case AuthorizationLevelInternal::AUTO:
-          static const auto fieldAUTO = clazz->getStaticField<JAuthorizationLevelInternal>("AUTO");
           return clazz->getStaticFieldValue(fieldAUTO);
         default:
           std::string stringValue = std::to_string(static_cast<int>(value));

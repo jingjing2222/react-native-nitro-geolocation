@@ -19,6 +19,4 @@ enum class LocationProviderInternal(@DoNotStrip @Keep val value: Int) {
   AUTO(0),
   PLAYSERVICES(1),
   ANDROID_PLATFORM(2);
-
-  companion object
 }

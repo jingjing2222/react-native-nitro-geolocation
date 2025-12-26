@@ -57,11 +57,7 @@ namespace margelo::nitro::nitrogeolocation {
      */
     [[maybe_unused]]
     static jni::local_ref<JRNConfigurationInternal::javaobject> fromCpp(const RNConfigurationInternal& value) {
-      using JSignature = JRNConfigurationInternal(jboolean, jni::alias_ref<JAuthorizationLevelInternal>, jni::alias_ref<jni::JBoolean>, jni::alias_ref<JLocationProviderInternal>);
-      static const auto clazz = javaClassStatic();
-      static const auto create = clazz->getStaticMethod<JSignature>("fromCpp");
-      return create(
-        clazz,
+      return newInstance(
         value.skipPermissionRequests,
         value.authorizationLevel.has_value() ? JAuthorizationLevelInternal::fromCpp(value.authorizationLevel.value()) : nullptr,
         value.enableBackgroundLocationUpdates.has_value() ? jni::JBoolean::valueOf(value.enableBackgroundLocationUpdates.value()) : nullptr,

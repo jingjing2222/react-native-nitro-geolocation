@@ -22,13 +22,6 @@ public protocol HybridNitroGeolocationCompatSpec_protocol: HybridObject {
   func stopObserving() throws -> Void
 }
 
-public extension HybridNitroGeolocationCompatSpec_protocol {
-  /// Default implementation of ``HybridObject.toString``
-  func toString() -> String {
-    return "[HybridObject NitroGeolocationCompat]"
-  }
-}
-
 /// See ``HybridNitroGeolocationCompatSpec``
 open class HybridNitroGeolocationCompatSpec_base {
   private weak var cxxWrapper: HybridNitroGeolocationCompatSpec_cxx? = nil

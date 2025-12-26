@@ -9,6 +9,7 @@ package com.margelo.nitro.nitrogeolocation
 
 import androidx.annotation.Keep
 import com.facebook.proguard.annotations.DoNotStrip
+import com.margelo.nitro.core.*
 
 
 /**
@@ -16,35 +17,25 @@ import com.facebook.proguard.annotations.DoNotStrip
  */
 @DoNotStrip
 @Keep
-data class GeolocationError(
+data class GeolocationError
   @DoNotStrip
   @Keep
-  val code: Double,
-  @DoNotStrip
-  @Keep
-  val message: String,
-  @DoNotStrip
-  @Keep
-  val PERMISSION_DENIED: Double,
-  @DoNotStrip
-  @Keep
-  val POSITION_UNAVAILABLE: Double,
-  @DoNotStrip
-  @Keep
-  val TIMEOUT: Double
-) {
-  /* primary constructor */
-
-  companion object {
-    /**
-     * Constructor called from C++
-     */
+  constructor(
     @DoNotStrip
     @Keep
-    @Suppress("unused")
-    @JvmStatic
-    private fun fromCpp(code: Double, message: String, PERMISSION_DENIED: Double, POSITION_UNAVAILABLE: Double, TIMEOUT: Double): GeolocationError {
-      return GeolocationError(code, message, PERMISSION_DENIED, POSITION_UNAVAILABLE, TIMEOUT)
-    }
-  }
+    val code: Double,
+    @DoNotStrip
+    @Keep
+    val message: String,
+    @DoNotStrip
+    @Keep
+    val PERMISSION_DENIED: Double,
+    @DoNotStrip
+    @Keep
+    val POSITION_UNAVAILABLE: Double,
+    @DoNotStrip
+    @Keep
+    val TIMEOUT: Double
+  ) {
+  /* main constructor */
 }

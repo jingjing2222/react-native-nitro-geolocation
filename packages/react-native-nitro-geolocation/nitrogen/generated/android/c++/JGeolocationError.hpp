@@ -56,11 +56,7 @@ namespace margelo::nitro::nitrogeolocation {
      */
     [[maybe_unused]]
     static jni::local_ref<JGeolocationError::javaobject> fromCpp(const GeolocationError& value) {
-      using JSignature = JGeolocationError(double, jni::alias_ref<jni::JString>, double, double, double);
-      static const auto clazz = javaClassStatic();
-      static const auto create = clazz->getStaticMethod<JSignature>("fromCpp");
-      return create(
-        clazz,
+      return newInstance(
         value.code,
         jni::make_jstring(value.message),
         value.PERMISSION_DENIED,

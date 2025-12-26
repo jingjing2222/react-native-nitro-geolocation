@@ -5,7 +5,6 @@
 /// Copyright © 2025 Marc Rousavy @ Margelo
 ///
 
-import Foundation
 import NitroModules
 
 /**
@@ -23,28 +22,58 @@ public extension GeolocationError {
     self.init(code, std.string(message), PERMISSION_DENIED, POSITION_UNAVAILABLE, TIMEOUT)
   }
 
-  @inline(__always)
   var code: Double {
-    return self.__code
+    @inline(__always)
+    get {
+      return self.__code
+    }
+    @inline(__always)
+    set {
+      self.__code = newValue
+    }
   }
   
-  @inline(__always)
   var message: String {
-    return String(self.__message)
+    @inline(__always)
+    get {
+      return String(self.__message)
+    }
+    @inline(__always)
+    set {
+      self.__message = std.string(newValue)
+    }
   }
   
-  @inline(__always)
   var PERMISSION_DENIED: Double {
-    return self.__PERMISSION_DENIED
+    @inline(__always)
+    get {
+      return self.__PERMISSION_DENIED
+    }
+    @inline(__always)
+    set {
+      self.__PERMISSION_DENIED = newValue
+    }
   }
   
-  @inline(__always)
   var POSITION_UNAVAILABLE: Double {
-    return self.__POSITION_UNAVAILABLE
+    @inline(__always)
+    get {
+      return self.__POSITION_UNAVAILABLE
+    }
+    @inline(__always)
+    set {
+      self.__POSITION_UNAVAILABLE = newValue
+    }
   }
   
-  @inline(__always)
   var TIMEOUT: Double {
-    return self.__TIMEOUT
+    @inline(__always)
+    get {
+      return self.__TIMEOUT
+    }
+    @inline(__always)
+    set {
+      self.__TIMEOUT = newValue
+    }
   }
 }

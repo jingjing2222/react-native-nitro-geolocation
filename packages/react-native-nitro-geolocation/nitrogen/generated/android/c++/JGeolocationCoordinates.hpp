@@ -10,11 +10,7 @@
 #include <fbjni/fbjni.h>
 #include "GeolocationCoordinates.hpp"
 
-#include "JVariant_NullType_Double.hpp"
-#include <NitroModules/JNull.hpp>
-#include <NitroModules/Null.hpp>
 #include <optional>
-#include <variant>
 
 namespace margelo::nitro::nitrogeolocation {
 
@@ -39,24 +35,24 @@ namespace margelo::nitro::nitrogeolocation {
       double latitude = this->getFieldValue(fieldLatitude);
       static const auto fieldLongitude = clazz->getField<double>("longitude");
       double longitude = this->getFieldValue(fieldLongitude);
-      static const auto fieldAltitude = clazz->getField<JVariant_NullType_Double>("altitude");
-      jni::local_ref<JVariant_NullType_Double> altitude = this->getFieldValue(fieldAltitude);
+      static const auto fieldAltitude = clazz->getField<jni::JDouble>("altitude");
+      jni::local_ref<jni::JDouble> altitude = this->getFieldValue(fieldAltitude);
       static const auto fieldAccuracy = clazz->getField<double>("accuracy");
       double accuracy = this->getFieldValue(fieldAccuracy);
-      static const auto fieldAltitudeAccuracy = clazz->getField<JVariant_NullType_Double>("altitudeAccuracy");
-      jni::local_ref<JVariant_NullType_Double> altitudeAccuracy = this->getFieldValue(fieldAltitudeAccuracy);
-      static const auto fieldHeading = clazz->getField<JVariant_NullType_Double>("heading");
-      jni::local_ref<JVariant_NullType_Double> heading = this->getFieldValue(fieldHeading);
-      static const auto fieldSpeed = clazz->getField<JVariant_NullType_Double>("speed");
-      jni::local_ref<JVariant_NullType_Double> speed = this->getFieldValue(fieldSpeed);
+      static const auto fieldAltitudeAccuracy = clazz->getField<jni::JDouble>("altitudeAccuracy");
+      jni::local_ref<jni::JDouble> altitudeAccuracy = this->getFieldValue(fieldAltitudeAccuracy);
+      static const auto fieldHeading = clazz->getField<jni::JDouble>("heading");
+      jni::local_ref<jni::JDouble> heading = this->getFieldValue(fieldHeading);
+      static const auto fieldSpeed = clazz->getField<jni::JDouble>("speed");
+      jni::local_ref<jni::JDouble> speed = this->getFieldValue(fieldSpeed);
       return GeolocationCoordinates(
         latitude,
         longitude,
-        altitude != nullptr ? std::make_optional(altitude->toCpp()) : std::nullopt,
+        altitude != nullptr ? std::make_optional(altitude->value()) : std::nullopt,
         accuracy,
-        altitudeAccuracy != nullptr ? std::make_optional(altitudeAccuracy->toCpp()) : std::nullopt,
-        heading != nullptr ? std::make_optional(heading->toCpp()) : std::nullopt,
-        speed != nullptr ? std::make_optional(speed->toCpp()) : std::nullopt
+        altitudeAccuracy != nullptr ? std::make_optional(altitudeAccuracy->value()) : std::nullopt,
+        heading != nullptr ? std::make_optional(heading->value()) : std::nullopt,
+        speed != nullptr ? std::make_optional(speed->value()) : std::nullopt
       );
     }
 
@@ -66,18 +62,14 @@ namespace margelo::nitro::nitrogeolocation {
      */
     [[maybe_unused]]
     static jni::local_ref<JGeolocationCoordinates::javaobject> fromCpp(const GeolocationCoordinates& value) {
-      using JSignature = JGeolocationCoordinates(double, double, jni::alias_ref<JVariant_NullType_Double>, double, jni::alias_ref<JVariant_NullType_Double>, jni::alias_ref<JVariant_NullType_Double>, jni::alias_ref<JVariant_NullType_Double>);
-      static const auto clazz = javaClassStatic();
-      static const auto create = clazz->getStaticMethod<JSignature>("fromCpp");
-      return create(
-        clazz,
+      return newInstance(
         value.latitude,
         value.longitude,
-        value.altitude.has_value() ? JVariant_NullType_Double::fromCpp(value.altitude.value()) : nullptr,
+        value.altitude.has_value() ? jni::JDouble::valueOf(value.altitude.value()) : nullptr,
         value.accuracy,
-        value.altitudeAccuracy.has_value() ? JVariant_NullType_Double::fromCpp(value.altitudeAccuracy.value()) : nullptr,
-        value.heading.has_value() ? JVariant_NullType_Double::fromCpp(value.heading.value()) : nullptr,
-        value.speed.has_value() ? JVariant_NullType_Double::fromCpp(value.speed.value()) : nullptr
+        value.altitudeAccuracy.has_value() ? jni::JDouble::valueOf(value.altitudeAccuracy.value()) : nullptr,
+        value.heading.has_value() ? jni::JDouble::valueOf(value.heading.value()) : nullptr,
+        value.speed.has_value() ? jni::JDouble::valueOf(value.speed.value()) : nullptr
       );
     }
   };

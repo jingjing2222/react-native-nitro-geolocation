@@ -17,16 +17,6 @@
 #else
 #error NitroModules cannot be found! Are you sure you installed NitroModules properly?
 #endif
-#if __has_include(<NitroModules/JSIHelpers.hpp>)
-#include <NitroModules/JSIHelpers.hpp>
-#else
-#error NitroModules cannot be found! Are you sure you installed NitroModules properly?
-#endif
-#if __has_include(<NitroModules/PropNameIDCache.hpp>)
-#include <NitroModules/PropNameIDCache.hpp>
-#else
-#error NitroModules cannot be found! Are you sure you installed NitroModules properly?
-#endif
 
 
 
@@ -37,7 +27,7 @@ namespace margelo::nitro::nitrogeolocation {
   /**
    * A struct which can be represented as a JavaScript object (GeolocationError).
    */
-  struct GeolocationError final {
+  struct GeolocationError {
   public:
     double code     SWIFT_PRIVATE;
     std::string message     SWIFT_PRIVATE;
@@ -48,9 +38,6 @@ namespace margelo::nitro::nitrogeolocation {
   public:
     GeolocationError() = default;
     explicit GeolocationError(double code, std::string message, double PERMISSION_DENIED, double POSITION_UNAVAILABLE, double TIMEOUT): code(code), message(message), PERMISSION_DENIED(PERMISSION_DENIED), POSITION_UNAVAILABLE(POSITION_UNAVAILABLE), TIMEOUT(TIMEOUT) {}
-
-  public:
-    friend bool operator==(const GeolocationError& lhs, const GeolocationError& rhs) = default;
   };
 
 } // namespace margelo::nitro::nitrogeolocation
@@ -63,20 +50,20 @@ namespace margelo::nitro {
     static inline margelo::nitro::nitrogeolocation::GeolocationError fromJSI(jsi::Runtime& runtime, const jsi::Value& arg) {
       jsi::Object obj = arg.asObject(runtime);
       return margelo::nitro::nitrogeolocation::GeolocationError(
-        JSIConverter<double>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "code"))),
-        JSIConverter<std::string>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "message"))),
-        JSIConverter<double>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "PERMISSION_DENIED"))),
-        JSIConverter<double>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "POSITION_UNAVAILABLE"))),
-        JSIConverter<double>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "TIMEOUT")))
+        JSIConverter<double>::fromJSI(runtime, obj.getProperty(runtime, "code")),
+        JSIConverter<std::string>::fromJSI(runtime, obj.getProperty(runtime, "message")),
+        JSIConverter<double>::fromJSI(runtime, obj.getProperty(runtime, "PERMISSION_DENIED")),
+        JSIConverter<double>::fromJSI(runtime, obj.getProperty(runtime, "POSITION_UNAVAILABLE")),
+        JSIConverter<double>::fromJSI(runtime, obj.getProperty(runtime, "TIMEOUT"))
       );
     }
     static inline jsi::Value toJSI(jsi::Runtime& runtime, const margelo::nitro::nitrogeolocation::GeolocationError& arg) {
       jsi::Object obj(runtime);
-      obj.setProperty(runtime, PropNameIDCache::get(runtime, "code"), JSIConverter<double>::toJSI(runtime, arg.code));
-      obj.setProperty(runtime, PropNameIDCache::get(runtime, "message"), JSIConverter<std::string>::toJSI(runtime, arg.message));
-      obj.setProperty(runtime, PropNameIDCache::get(runtime, "PERMISSION_DENIED"), JSIConverter<double>::toJSI(runtime, arg.PERMISSION_DENIED));
-      obj.setProperty(runtime, PropNameIDCache::get(runtime, "POSITION_UNAVAILABLE"), JSIConverter<double>::toJSI(runtime, arg.POSITION_UNAVAILABLE));
-      obj.setProperty(runtime, PropNameIDCache::get(runtime, "TIMEOUT"), JSIConverter<double>::toJSI(runtime, arg.TIMEOUT));
+      obj.setProperty(runtime, "code", JSIConverter<double>::toJSI(runtime, arg.code));
+      obj.setProperty(runtime, "message", JSIConverter<std::string>::toJSI(runtime, arg.message));
+      obj.setProperty(runtime, "PERMISSION_DENIED", JSIConverter<double>::toJSI(runtime, arg.PERMISSION_DENIED));
+      obj.setProperty(runtime, "POSITION_UNAVAILABLE", JSIConverter<double>::toJSI(runtime, arg.POSITION_UNAVAILABLE));
+      obj.setProperty(runtime, "TIMEOUT", JSIConverter<double>::toJSI(runtime, arg.TIMEOUT));
       return obj;
     }
     static inline bool canConvert(jsi::Runtime& runtime, const jsi::Value& value) {
@@ -84,14 +71,11 @@ namespace margelo::nitro {
         return false;
       }
       jsi::Object obj = value.getObject(runtime);
-      if (!nitro::isPlainObject(runtime, obj)) {
-        return false;
-      }
-      if (!JSIConverter<double>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "code")))) return false;
-      if (!JSIConverter<std::string>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "message")))) return false;
-      if (!JSIConverter<double>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "PERMISSION_DENIED")))) return false;
-      if (!JSIConverter<double>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "POSITION_UNAVAILABLE")))) return false;
-      if (!JSIConverter<double>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "TIMEOUT")))) return false;
+      if (!JSIConverter<double>::canConvert(runtime, obj.getProperty(runtime, "code"))) return false;
+      if (!JSIConverter<std::string>::canConvert(runtime, obj.getProperty(runtime, "message"))) return false;
+      if (!JSIConverter<double>::canConvert(runtime, obj.getProperty(runtime, "PERMISSION_DENIED"))) return false;
+      if (!JSIConverter<double>::canConvert(runtime, obj.getProperty(runtime, "POSITION_UNAVAILABLE"))) return false;
+      if (!JSIConverter<double>::canConvert(runtime, obj.getProperty(runtime, "TIMEOUT"))) return false;
       return true;
     }
   };

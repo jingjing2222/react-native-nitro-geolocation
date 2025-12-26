@@ -17,16 +17,6 @@
 #else
 #error NitroModules cannot be found! Are you sure you installed NitroModules properly?
 #endif
-#if __has_include(<NitroModules/JSIHelpers.hpp>)
-#include <NitroModules/JSIHelpers.hpp>
-#else
-#error NitroModules cannot be found! Are you sure you installed NitroModules properly?
-#endif
-#if __has_include(<NitroModules/PropNameIDCache.hpp>)
-#include <NitroModules/PropNameIDCache.hpp>
-#else
-#error NitroModules cannot be found! Are you sure you installed NitroModules properly?
-#endif
 
 // Forward declaration of `AuthorizationLevelInternal` to properly resolve imports.
 namespace margelo::nitro::nitrogeolocation { enum class AuthorizationLevelInternal; }
@@ -42,7 +32,7 @@ namespace margelo::nitro::nitrogeolocation {
   /**
    * A struct which can be represented as a JavaScript object (RNConfigurationInternal).
    */
-  struct RNConfigurationInternal final {
+  struct RNConfigurationInternal {
   public:
     bool skipPermissionRequests     SWIFT_PRIVATE;
     std::optional<AuthorizationLevelInternal> authorizationLevel     SWIFT_PRIVATE;
@@ -52,9 +42,6 @@ namespace margelo::nitro::nitrogeolocation {
   public:
     RNConfigurationInternal() = default;
     explicit RNConfigurationInternal(bool skipPermissionRequests, std::optional<AuthorizationLevelInternal> authorizationLevel, std::optional<bool> enableBackgroundLocationUpdates, std::optional<LocationProviderInternal> locationProvider): skipPermissionRequests(skipPermissionRequests), authorizationLevel(authorizationLevel), enableBackgroundLocationUpdates(enableBackgroundLocationUpdates), locationProvider(locationProvider) {}
-
-  public:
-    friend bool operator==(const RNConfigurationInternal& lhs, const RNConfigurationInternal& rhs) = default;
   };
 
 } // namespace margelo::nitro::nitrogeolocation
@@ -67,18 +54,18 @@ namespace margelo::nitro {
     static inline margelo::nitro::nitrogeolocation::RNConfigurationInternal fromJSI(jsi::Runtime& runtime, const jsi::Value& arg) {
       jsi::Object obj = arg.asObject(runtime);
       return margelo::nitro::nitrogeolocation::RNConfigurationInternal(
-        JSIConverter<bool>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "skipPermissionRequests"))),
-        JSIConverter<std::optional<margelo::nitro::nitrogeolocation::AuthorizationLevelInternal>>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "authorizationLevel"))),
-        JSIConverter<std::optional<bool>>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "enableBackgroundLocationUpdates"))),
-        JSIConverter<std::optional<margelo::nitro::nitrogeolocation::LocationProviderInternal>>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "locationProvider")))
+        JSIConverter<bool>::fromJSI(runtime, obj.getProperty(runtime, "skipPermissionRequests")),
+        JSIConverter<std::optional<margelo::nitro::nitrogeolocation::AuthorizationLevelInternal>>::fromJSI(runtime, obj.getProperty(runtime, "authorizationLevel")),
+        JSIConverter<std::optional<bool>>::fromJSI(runtime, obj.getProperty(runtime, "enableBackgroundLocationUpdates")),
+        JSIConverter<std::optional<margelo::nitro::nitrogeolocation::LocationProviderInternal>>::fromJSI(runtime, obj.getProperty(runtime, "locationProvider"))
       );
     }
     static inline jsi::Value toJSI(jsi::Runtime& runtime, const margelo::nitro::nitrogeolocation::RNConfigurationInternal& arg) {
       jsi::Object obj(runtime);
-      obj.setProperty(runtime, PropNameIDCache::get(runtime, "skipPermissionRequests"), JSIConverter<bool>::toJSI(runtime, arg.skipPermissionRequests));
-      obj.setProperty(runtime, PropNameIDCache::get(runtime, "authorizationLevel"), JSIConverter<std::optional<margelo::nitro::nitrogeolocation::AuthorizationLevelInternal>>::toJSI(runtime, arg.authorizationLevel));
-      obj.setProperty(runtime, PropNameIDCache::get(runtime, "enableBackgroundLocationUpdates"), JSIConverter<std::optional<bool>>::toJSI(runtime, arg.enableBackgroundLocationUpdates));
-      obj.setProperty(runtime, PropNameIDCache::get(runtime, "locationProvider"), JSIConverter<std::optional<margelo::nitro::nitrogeolocation::LocationProviderInternal>>::toJSI(runtime, arg.locationProvider));
+      obj.setProperty(runtime, "skipPermissionRequests", JSIConverter<bool>::toJSI(runtime, arg.skipPermissionRequests));
+      obj.setProperty(runtime, "authorizationLevel", JSIConverter<std::optional<margelo::nitro::nitrogeolocation::AuthorizationLevelInternal>>::toJSI(runtime, arg.authorizationLevel));
+      obj.setProperty(runtime, "enableBackgroundLocationUpdates", JSIConverter<std::optional<bool>>::toJSI(runtime, arg.enableBackgroundLocationUpdates));
+      obj.setProperty(runtime, "locationProvider", JSIConverter<std::optional<margelo::nitro::nitrogeolocation::LocationProviderInternal>>::toJSI(runtime, arg.locationProvider));
       return obj;
     }
     static inline bool canConvert(jsi::Runtime& runtime, const jsi::Value& value) {
@@ -86,13 +73,10 @@ namespace margelo::nitro {
         return false;
       }
       jsi::Object obj = value.getObject(runtime);
-      if (!nitro::isPlainObject(runtime, obj)) {
-        return false;
-      }
-      if (!JSIConverter<bool>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "skipPermissionRequests")))) return false;
-      if (!JSIConverter<std::optional<margelo::nitro::nitrogeolocation::AuthorizationLevelInternal>>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "authorizationLevel")))) return false;
-      if (!JSIConverter<std::optional<bool>>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "enableBackgroundLocationUpdates")))) return false;
-      if (!JSIConverter<std::optional<margelo::nitro::nitrogeolocation::LocationProviderInternal>>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "locationProvider")))) return false;
+      if (!JSIConverter<bool>::canConvert(runtime, obj.getProperty(runtime, "skipPermissionRequests"))) return false;
+      if (!JSIConverter<std::optional<margelo::nitro::nitrogeolocation::AuthorizationLevelInternal>>::canConvert(runtime, obj.getProperty(runtime, "authorizationLevel"))) return false;
+      if (!JSIConverter<std::optional<bool>>::canConvert(runtime, obj.getProperty(runtime, "enableBackgroundLocationUpdates"))) return false;
+      if (!JSIConverter<std::optional<margelo::nitro::nitrogeolocation::LocationProviderInternal>>::canConvert(runtime, obj.getProperty(runtime, "locationProvider"))) return false;
       return true;
     }
   };

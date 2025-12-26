@@ -10,7 +10,6 @@
 // Include C++ implementation defined types
 #include "HybridNitroGeolocationCompatSpecSwift.hpp"
 #include "NitroGeolocation-Swift-Cxx-Umbrella.hpp"
-#include <NitroModules/NitroDefines.hpp>
 
 namespace margelo::nitro::nitrogeolocation::bridge::swift {
 
@@ -43,7 +42,7 @@ namespace margelo::nitro::nitrogeolocation::bridge::swift {
     NitroGeolocation::HybridNitroGeolocationCompatSpec_cxx swiftPart = NitroGeolocation::HybridNitroGeolocationCompatSpec_cxx::fromUnsafe(swiftUnsafePointer);
     return std::make_shared<margelo::nitro::nitrogeolocation::HybridNitroGeolocationCompatSpecSwift>(swiftPart);
   }
-  void* NON_NULL get_std__shared_ptr_HybridNitroGeolocationCompatSpec_(std__shared_ptr_HybridNitroGeolocationCompatSpec_ cppType) {
+  void* NON_NULL get_std__shared_ptr_HybridNitroGeolocationCompatSpec_(std__shared_ptr_HybridNitroGeolocationCompatSpec_ cppType) noexcept {
     std::shared_ptr<margelo::nitro::nitrogeolocation::HybridNitroGeolocationCompatSpecSwift> swiftWrapper = std::dynamic_pointer_cast<margelo::nitro::nitrogeolocation::HybridNitroGeolocationCompatSpecSwift>(cppType);
     #ifdef NITRO_DEBUG
     if (swiftWrapper == nullptr) [[unlikely]] {
