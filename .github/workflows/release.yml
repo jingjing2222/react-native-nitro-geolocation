@@ -13,7 +13,7 @@ concurrency: ${{ github.workflow }}-${{ github.ref }}
 
 jobs:
   release:
-    name: Release
+    name: Create Version PR or Tag
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -26,21 +26,26 @@ jobs:
           node-version: 20
 
       - name: Enable Corepack
-        run: |
-          corepack enable
+        run: corepack enable
 
       - name: Install dependencies
-        run: |
-          yarn install
+        run: yarn install
 
-      - name: Create Release Pull Request or Publish
+      - name: Create Release Pull Request
         id: changesets
         uses: changesets/action@v1
-        with:
-          version: yarn changeset version
-          publish: yarn changeset publish
-          commit: "chore: version packages"
-          title: "chore: version packages"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+        with:
+          version: 'yarn changeset version'
+          commit: 'chore: version packages'
+          title: 'chore: version packages'
+
+      - name: Create and Push Tag
+        if: contains(github.event.head_commit.message, 'chore version packages')
+        run: |
+          VERSION=$(node -p "require('./packages/react-native-nitro-geolocation/package.json').version")
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git tag -a "v$VERSION" -m "Release v$VERSION"
+          git push origin "v$VERSION"

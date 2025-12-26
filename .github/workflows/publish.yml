@@ -1,0 +1,83 @@
+name: Publish
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+
+jobs:
+  publish:
+    name: Publish to NPM and Create Release
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          registry-url: 'https://registry.npmjs.org'
+
+      - name: Enable Corepack
+        run: corepack enable
+
+      - name: Install dependencies
+        run: yarn install
+
+      - name: Publish to NPM
+        run: |
+          cd packages/react-native-nitro-geolocation
+          npm publish --access public
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Extract version from tag
+        id: version
+        run: |
+          VERSION=${GITHUB_REF#refs/tags/v}
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+
+      - name: Extract changelog
+        id: changelog
+        run: |
+          VERSION="${{ steps.version.outputs.version }}"
+          CHANGELOG_FILE="packages/react-native-nitro-geolocation/CHANGELOG.md"
+
+          node -e "
+          const fs = require('fs');
+          const content = fs.readFileSync('${CHANGELOG_FILE}', 'utf8');
+          const lines = content.split('\n');
+          let inSection = false;
+          let notes = [];
+
+          for (let i = 0; i < lines.length; i++) {
+            const line = lines[i];
+            if (line.startsWith('## ${VERSION}')) {
+              inSection = true;
+              continue;
+            }
+            if (inSection && line.startsWith('## ')) {
+              break;
+            }
+            if (inSection && line.trim()) {
+              notes.push(line);
+            }
+          }
+
+          const output = notes.join('\n').trim() || 'No changelog available';
+          fs.writeFileSync('release-notes.txt', output);
+          "
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v1
+        with:
+          body_path: release-notes.txt
+          draft: false
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
