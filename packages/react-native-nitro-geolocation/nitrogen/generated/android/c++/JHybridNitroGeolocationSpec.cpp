@@ -7,41 +7,11 @@
 
 #include "JHybridNitroGeolocationSpec.hpp"
 
-// Forward declaration of `RNConfigurationInternal` to properly resolve imports.
-namespace margelo::nitro::nitrogeolocation { struct RNConfigurationInternal; }
-// Forward declaration of `AuthorizationLevelInternal` to properly resolve imports.
-namespace margelo::nitro::nitrogeolocation { enum class AuthorizationLevelInternal; }
-// Forward declaration of `LocationProviderInternal` to properly resolve imports.
-namespace margelo::nitro::nitrogeolocation { enum class LocationProviderInternal; }
-// Forward declaration of `GeolocationError` to properly resolve imports.
-namespace margelo::nitro::nitrogeolocation { struct GeolocationError; }
-// Forward declaration of `GeolocationResponse` to properly resolve imports.
-namespace margelo::nitro::nitrogeolocation { struct GeolocationResponse; }
-// Forward declaration of `GeolocationCoordinates` to properly resolve imports.
-namespace margelo::nitro::nitrogeolocation { struct GeolocationCoordinates; }
-// Forward declaration of `GeolocationOptions` to properly resolve imports.
-namespace margelo::nitro::nitrogeolocation { struct GeolocationOptions; }
 
-#include "RNConfigurationInternal.hpp"
-#include "JRNConfigurationInternal.hpp"
-#include "AuthorizationLevelInternal.hpp"
-#include <optional>
-#include "JAuthorizationLevelInternal.hpp"
-#include "LocationProviderInternal.hpp"
-#include "JLocationProviderInternal.hpp"
-#include <functional>
-#include "JFunc_void.hpp"
-#include "GeolocationError.hpp"
-#include "JFunc_void_GeolocationError.hpp"
-#include "JGeolocationError.hpp"
+
 #include <string>
-#include "GeolocationResponse.hpp"
-#include "JFunc_void_GeolocationResponse.hpp"
-#include "JGeolocationResponse.hpp"
-#include "GeolocationCoordinates.hpp"
-#include "JGeolocationCoordinates.hpp"
-#include "GeolocationOptions.hpp"
-#include "JGeolocationOptions.hpp"
+#include <NitroModules/Promise.hpp>
+#include <NitroModules/JPromise.hpp>
 
 namespace margelo::nitro::nitrogeolocation {
 
@@ -69,30 +39,21 @@ namespace margelo::nitro::nitrogeolocation {
   
 
   // Methods
-  void JHybridNitroGeolocationSpec::setRNConfiguration(const RNConfigurationInternal& config) {
-    static const auto method = javaClassStatic()->getMethod<void(jni::alias_ref<JRNConfigurationInternal> /* config */)>("setRNConfiguration");
-    method(_javaPart, JRNConfigurationInternal::fromCpp(config));
-  }
-  void JHybridNitroGeolocationSpec::requestAuthorization(const std::optional<std::function<void()>>& success, const std::optional<std::function<void(const GeolocationError& /* error */)>>& error) {
-    static const auto method = javaClassStatic()->getMethod<void(jni::alias_ref<JFunc_void::javaobject> /* success */, jni::alias_ref<JFunc_void_GeolocationError::javaobject> /* error */)>("requestAuthorization_cxx");
-    method(_javaPart, success.has_value() ? JFunc_void_cxx::fromCpp(success.value()) : nullptr, error.has_value() ? JFunc_void_GeolocationError_cxx::fromCpp(error.value()) : nullptr);
-  }
-  void JHybridNitroGeolocationSpec::getCurrentPosition(const std::function<void(const GeolocationResponse& /* position */)>& success, const std::optional<std::function<void(const GeolocationError& /* error */)>>& error, const std::optional<GeolocationOptions>& options) {
-    static const auto method = javaClassStatic()->getMethod<void(jni::alias_ref<JFunc_void_GeolocationResponse::javaobject> /* success */, jni::alias_ref<JFunc_void_GeolocationError::javaobject> /* error */, jni::alias_ref<JGeolocationOptions> /* options */)>("getCurrentPosition_cxx");
-    method(_javaPart, JFunc_void_GeolocationResponse_cxx::fromCpp(success), error.has_value() ? JFunc_void_GeolocationError_cxx::fromCpp(error.value()) : nullptr, options.has_value() ? JGeolocationOptions::fromCpp(options.value()) : nullptr);
-  }
-  double JHybridNitroGeolocationSpec::watchPosition(const std::function<void(const GeolocationResponse& /* position */)>& success, const std::optional<std::function<void(const GeolocationError& /* error */)>>& error, const std::optional<GeolocationOptions>& options) {
-    static const auto method = javaClassStatic()->getMethod<double(jni::alias_ref<JFunc_void_GeolocationResponse::javaobject> /* success */, jni::alias_ref<JFunc_void_GeolocationError::javaobject> /* error */, jni::alias_ref<JGeolocationOptions> /* options */)>("watchPosition_cxx");
-    auto __result = method(_javaPart, JFunc_void_GeolocationResponse_cxx::fromCpp(success), error.has_value() ? JFunc_void_GeolocationError_cxx::fromCpp(error.value()) : nullptr, options.has_value() ? JGeolocationOptions::fromCpp(options.value()) : nullptr);
-    return __result;
-  }
-  void JHybridNitroGeolocationSpec::clearWatch(double watchId) {
-    static const auto method = javaClassStatic()->getMethod<void(double /* watchId */)>("clearWatch");
-    method(_javaPart, watchId);
-  }
-  void JHybridNitroGeolocationSpec::stopObserving() {
-    static const auto method = javaClassStatic()->getMethod<void()>("stopObserving");
-    method(_javaPart);
+  std::shared_ptr<Promise<std::string>> JHybridNitroGeolocationSpec::helloWorld() {
+    static const auto method = javaClassStatic()->getMethod<jni::local_ref<JPromise::javaobject>()>("helloWorld");
+    auto __result = method(_javaPart);
+    return [&]() {
+      auto __promise = Promise<std::string>::create();
+      __result->cthis()->addOnResolvedListener([=](const jni::alias_ref<jni::JObject>& __boxedResult) {
+        auto __result = jni::static_ref_cast<jni::JString>(__boxedResult);
+        __promise->resolve(__result->toStdString());
+      });
+      __result->cthis()->addOnRejectedListener([=](const jni::alias_ref<jni::JThrowable>& __throwable) {
+        jni::JniException __jniError(__throwable);
+        __promise->reject(std::make_exception_ptr(__jniError));
+      });
+      return __promise;
+    }();
   }
 
 } // namespace margelo::nitro::nitrogeolocation

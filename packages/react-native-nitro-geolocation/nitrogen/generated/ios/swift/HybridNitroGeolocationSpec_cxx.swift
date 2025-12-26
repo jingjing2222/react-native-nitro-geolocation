@@ -110,127 +110,21 @@ open class HybridNitroGeolocationSpec_cxx {
 
   // Methods
   @inline(__always)
-  public final func setRNConfiguration(config: RNConfigurationInternal) -> bridge.Result_void_ {
+  public final func helloWorld() -> bridge.Result_std__shared_ptr_Promise_std__string___ {
     do {
-      try self.__implementation.setRNConfiguration(config: config)
-      return bridge.create_Result_void_()
+      let __result = try self.__implementation.helloWorld()
+      let __resultCpp = { () -> bridge.std__shared_ptr_Promise_std__string__ in
+        let __promise = bridge.create_std__shared_ptr_Promise_std__string__()
+        let __promiseHolder = bridge.wrap_std__shared_ptr_Promise_std__string__(__promise)
+        __result
+          .then({ __result in __promiseHolder.resolve(std.string(__result)) })
+          .catch({ __error in __promiseHolder.reject(__error.toCpp()) })
+        return __promise
+      }()
+      return bridge.create_Result_std__shared_ptr_Promise_std__string___(__resultCpp)
     } catch (let __error) {
       let __exceptionPtr = __error.toCpp()
-      return bridge.create_Result_void_(__exceptionPtr)
-    }
-  }
-  
-  @inline(__always)
-  public final func requestAuthorization(success: bridge.std__optional_std__function_void____, error: bridge.std__optional_std__function_void_const_GeolocationError_____error______) -> bridge.Result_void_ {
-    do {
-      try self.__implementation.requestAuthorization(success: { () -> (() -> Void)? in
-        if bridge.has_value_std__optional_std__function_void____(success) {
-          let __unwrapped = bridge.get_std__optional_std__function_void____(success)
-          return { () -> () -> Void in
-            let __wrappedFunction = bridge.wrap_Func_void(__unwrapped)
-            return { () -> Void in
-              __wrappedFunction.call()
-            }
-          }()
-        } else {
-          return nil
-        }
-      }(), error: { () -> ((_ error: GeolocationError) -> Void)? in
-        if bridge.has_value_std__optional_std__function_void_const_GeolocationError_____error______(error) {
-          let __unwrapped = bridge.get_std__optional_std__function_void_const_GeolocationError_____error______(error)
-          return { () -> (GeolocationError) -> Void in
-            let __wrappedFunction = bridge.wrap_Func_void_GeolocationError(__unwrapped)
-            return { (__error: GeolocationError) -> Void in
-              __wrappedFunction.call(__error)
-            }
-          }()
-        } else {
-          return nil
-        }
-      }())
-      return bridge.create_Result_void_()
-    } catch (let __error) {
-      let __exceptionPtr = __error.toCpp()
-      return bridge.create_Result_void_(__exceptionPtr)
-    }
-  }
-  
-  @inline(__always)
-  public final func getCurrentPosition(success: bridge.Func_void_GeolocationResponse, error: bridge.std__optional_std__function_void_const_GeolocationError_____error______, options: bridge.std__optional_GeolocationOptions_) -> bridge.Result_void_ {
-    do {
-      try self.__implementation.getCurrentPosition(success: { () -> (GeolocationResponse) -> Void in
-        let __wrappedFunction = bridge.wrap_Func_void_GeolocationResponse(success)
-        return { (__position: GeolocationResponse) -> Void in
-          __wrappedFunction.call(__position)
-        }
-      }(), error: { () -> ((_ error: GeolocationError) -> Void)? in
-        if bridge.has_value_std__optional_std__function_void_const_GeolocationError_____error______(error) {
-          let __unwrapped = bridge.get_std__optional_std__function_void_const_GeolocationError_____error______(error)
-          return { () -> (GeolocationError) -> Void in
-            let __wrappedFunction = bridge.wrap_Func_void_GeolocationError(__unwrapped)
-            return { (__error: GeolocationError) -> Void in
-              __wrappedFunction.call(__error)
-            }
-          }()
-        } else {
-          return nil
-        }
-      }(), options: options.value)
-      return bridge.create_Result_void_()
-    } catch (let __error) {
-      let __exceptionPtr = __error.toCpp()
-      return bridge.create_Result_void_(__exceptionPtr)
-    }
-  }
-  
-  @inline(__always)
-  public final func watchPosition(success: bridge.Func_void_GeolocationResponse, error: bridge.std__optional_std__function_void_const_GeolocationError_____error______, options: bridge.std__optional_GeolocationOptions_) -> bridge.Result_double_ {
-    do {
-      let __result = try self.__implementation.watchPosition(success: { () -> (GeolocationResponse) -> Void in
-        let __wrappedFunction = bridge.wrap_Func_void_GeolocationResponse(success)
-        return { (__position: GeolocationResponse) -> Void in
-          __wrappedFunction.call(__position)
-        }
-      }(), error: { () -> ((_ error: GeolocationError) -> Void)? in
-        if bridge.has_value_std__optional_std__function_void_const_GeolocationError_____error______(error) {
-          let __unwrapped = bridge.get_std__optional_std__function_void_const_GeolocationError_____error______(error)
-          return { () -> (GeolocationError) -> Void in
-            let __wrappedFunction = bridge.wrap_Func_void_GeolocationError(__unwrapped)
-            return { (__error: GeolocationError) -> Void in
-              __wrappedFunction.call(__error)
-            }
-          }()
-        } else {
-          return nil
-        }
-      }(), options: options.value)
-      let __resultCpp = __result
-      return bridge.create_Result_double_(__resultCpp)
-    } catch (let __error) {
-      let __exceptionPtr = __error.toCpp()
-      return bridge.create_Result_double_(__exceptionPtr)
-    }
-  }
-  
-  @inline(__always)
-  public final func clearWatch(watchId: Double) -> bridge.Result_void_ {
-    do {
-      try self.__implementation.clearWatch(watchId: watchId)
-      return bridge.create_Result_void_()
-    } catch (let __error) {
-      let __exceptionPtr = __error.toCpp()
-      return bridge.create_Result_void_(__exceptionPtr)
-    }
-  }
-  
-  @inline(__always)
-  public final func stopObserving() -> bridge.Result_void_ {
-    do {
-      try self.__implementation.stopObserving()
-      return bridge.create_Result_void_()
-    } catch (let __error) {
-      let __exceptionPtr = __error.toCpp()
-      return bridge.create_Result_void_(__exceptionPtr)
+      return bridge.create_Result_std__shared_ptr_Promise_std__string___(__exceptionPtr)
     }
   }
 }

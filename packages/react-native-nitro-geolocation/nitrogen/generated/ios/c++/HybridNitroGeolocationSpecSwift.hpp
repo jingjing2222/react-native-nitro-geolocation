@@ -12,31 +12,10 @@
 // Forward declaration of `HybridNitroGeolocationSpec_cxx` to properly resolve imports.
 namespace NitroGeolocation { class HybridNitroGeolocationSpec_cxx; }
 
-// Forward declaration of `RNConfigurationInternal` to properly resolve imports.
-namespace margelo::nitro::nitrogeolocation { struct RNConfigurationInternal; }
-// Forward declaration of `AuthorizationLevelInternal` to properly resolve imports.
-namespace margelo::nitro::nitrogeolocation { enum class AuthorizationLevelInternal; }
-// Forward declaration of `LocationProviderInternal` to properly resolve imports.
-namespace margelo::nitro::nitrogeolocation { enum class LocationProviderInternal; }
-// Forward declaration of `GeolocationError` to properly resolve imports.
-namespace margelo::nitro::nitrogeolocation { struct GeolocationError; }
-// Forward declaration of `GeolocationResponse` to properly resolve imports.
-namespace margelo::nitro::nitrogeolocation { struct GeolocationResponse; }
-// Forward declaration of `GeolocationCoordinates` to properly resolve imports.
-namespace margelo::nitro::nitrogeolocation { struct GeolocationCoordinates; }
-// Forward declaration of `GeolocationOptions` to properly resolve imports.
-namespace margelo::nitro::nitrogeolocation { struct GeolocationOptions; }
 
-#include "RNConfigurationInternal.hpp"
-#include "AuthorizationLevelInternal.hpp"
-#include <optional>
-#include "LocationProviderInternal.hpp"
-#include <functional>
-#include "GeolocationError.hpp"
+
 #include <string>
-#include "GeolocationResponse.hpp"
-#include "GeolocationCoordinates.hpp"
-#include "GeolocationOptions.hpp"
+#include <NitroModules/Promise.hpp>
 
 #include "NitroGeolocation-Swift-Cxx-Umbrella.hpp"
 
@@ -79,43 +58,13 @@ namespace margelo::nitro::nitrogeolocation {
 
   public:
     // Methods
-    inline void setRNConfiguration(const RNConfigurationInternal& config) override {
-      auto __result = _swiftPart.setRNConfiguration(std::forward<decltype(config)>(config));
-      if (__result.hasError()) [[unlikely]] {
-        std::rethrow_exception(__result.error());
-      }
-    }
-    inline void requestAuthorization(const std::optional<std::function<void()>>& success, const std::optional<std::function<void(const GeolocationError& /* error */)>>& error) override {
-      auto __result = _swiftPart.requestAuthorization(success, error);
-      if (__result.hasError()) [[unlikely]] {
-        std::rethrow_exception(__result.error());
-      }
-    }
-    inline void getCurrentPosition(const std::function<void(const GeolocationResponse& /* position */)>& success, const std::optional<std::function<void(const GeolocationError& /* error */)>>& error, const std::optional<GeolocationOptions>& options) override {
-      auto __result = _swiftPart.getCurrentPosition(success, error, options);
-      if (__result.hasError()) [[unlikely]] {
-        std::rethrow_exception(__result.error());
-      }
-    }
-    inline double watchPosition(const std::function<void(const GeolocationResponse& /* position */)>& success, const std::optional<std::function<void(const GeolocationError& /* error */)>>& error, const std::optional<GeolocationOptions>& options) override {
-      auto __result = _swiftPart.watchPosition(success, error, options);
+    inline std::shared_ptr<Promise<std::string>> helloWorld() override {
+      auto __result = _swiftPart.helloWorld();
       if (__result.hasError()) [[unlikely]] {
         std::rethrow_exception(__result.error());
       }
       auto __value = std::move(__result.value());
       return __value;
-    }
-    inline void clearWatch(double watchId) override {
-      auto __result = _swiftPart.clearWatch(std::forward<decltype(watchId)>(watchId));
-      if (__result.hasError()) [[unlikely]] {
-        std::rethrow_exception(__result.error());
-      }
-    }
-    inline void stopObserving() override {
-      auto __result = _swiftPart.stopObserving();
-      if (__result.hasError()) [[unlikely]] {
-        std::rethrow_exception(__result.error());
-      }
     }
 
   private:

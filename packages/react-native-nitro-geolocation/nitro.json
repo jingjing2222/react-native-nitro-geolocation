@@ -11,6 +11,10 @@
     "NitroGeolocation": {
       "swift": "NitroGeolocation",
       "kotlin": "NitroGeolocation"
+    },
+    "NitroGeolocationCompat": {
+      "swift": "NitroGeolocationCompat",
+      "kotlin": "NitroGeolocationCompat"
     }
   },
   "ignorePaths": ["node_modules", "example"]

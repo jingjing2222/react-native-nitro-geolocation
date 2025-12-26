@@ -42,42 +42,7 @@ abstract class HybridNitroGeolocationSpec: HybridObject() {
   // Methods
   @DoNotStrip
   @Keep
-  abstract fun setRNConfiguration(config: RNConfigurationInternal): Unit
-  
-  abstract fun requestAuthorization(success: (() -> Unit)?, error: ((error: GeolocationError) -> Unit)?): Unit
-  
-  @DoNotStrip
-  @Keep
-  private fun requestAuthorization_cxx(success: Func_void?, error: Func_void_GeolocationError?): Unit {
-    val __result = requestAuthorization(success?.let { it }, error?.let { it })
-    return __result
-  }
-  
-  abstract fun getCurrentPosition(success: (position: GeolocationResponse) -> Unit, error: ((error: GeolocationError) -> Unit)?, options: GeolocationOptions?): Unit
-  
-  @DoNotStrip
-  @Keep
-  private fun getCurrentPosition_cxx(success: Func_void_GeolocationResponse, error: Func_void_GeolocationError?, options: GeolocationOptions?): Unit {
-    val __result = getCurrentPosition(success, error?.let { it }, options)
-    return __result
-  }
-  
-  abstract fun watchPosition(success: (position: GeolocationResponse) -> Unit, error: ((error: GeolocationError) -> Unit)?, options: GeolocationOptions?): Double
-  
-  @DoNotStrip
-  @Keep
-  private fun watchPosition_cxx(success: Func_void_GeolocationResponse, error: Func_void_GeolocationError?, options: GeolocationOptions?): Double {
-    val __result = watchPosition(success, error?.let { it }, options)
-    return __result
-  }
-  
-  @DoNotStrip
-  @Keep
-  abstract fun clearWatch(watchId: Double): Unit
-  
-  @DoNotStrip
-  @Keep
-  abstract fun stopObserving(): Unit
+  abstract fun helloWorld(): Promise<String>
 
   private external fun initHybrid(): HybridData
 

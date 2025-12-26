@@ -13,21 +13,10 @@
 #error NitroModules cannot be found! Are you sure you installed NitroModules properly?
 #endif
 
-// Forward declaration of `RNConfigurationInternal` to properly resolve imports.
-namespace margelo::nitro::nitrogeolocation { struct RNConfigurationInternal; }
-// Forward declaration of `GeolocationError` to properly resolve imports.
-namespace margelo::nitro::nitrogeolocation { struct GeolocationError; }
-// Forward declaration of `GeolocationResponse` to properly resolve imports.
-namespace margelo::nitro::nitrogeolocation { struct GeolocationResponse; }
-// Forward declaration of `GeolocationOptions` to properly resolve imports.
-namespace margelo::nitro::nitrogeolocation { struct GeolocationOptions; }
 
-#include "RNConfigurationInternal.hpp"
-#include <functional>
-#include <optional>
-#include "GeolocationError.hpp"
-#include "GeolocationResponse.hpp"
-#include "GeolocationOptions.hpp"
+
+#include <string>
+#include <NitroModules/Promise.hpp>
 
 namespace margelo::nitro::nitrogeolocation {
 
@@ -60,12 +49,7 @@ namespace margelo::nitro::nitrogeolocation {
 
     public:
       // Methods
-      virtual void setRNConfiguration(const RNConfigurationInternal& config) = 0;
-      virtual void requestAuthorization(const std::optional<std::function<void()>>& success, const std::optional<std::function<void(const GeolocationError& /* error */)>>& error) = 0;
-      virtual void getCurrentPosition(const std::function<void(const GeolocationResponse& /* position */)>& success, const std::optional<std::function<void(const GeolocationError& /* error */)>>& error, const std::optional<GeolocationOptions>& options) = 0;
-      virtual double watchPosition(const std::function<void(const GeolocationResponse& /* position */)>& success, const std::optional<std::function<void(const GeolocationError& /* error */)>>& error, const std::optional<GeolocationOptions>& options) = 0;
-      virtual void clearWatch(double watchId) = 0;
-      virtual void stopObserving() = 0;
+      virtual std::shared_ptr<Promise<std::string>> helloWorld() = 0;
 
     protected:
       // Hybrid Setup

@@ -16,6 +16,7 @@
 #include <NitroModules/HybridObjectRegistry.hpp>
 
 #include "JHybridNitroGeolocationSpec.hpp"
+#include "JHybridNitroGeolocationCompatSpec.hpp"
 #include "JFunc_void.hpp"
 #include "JFunc_void_GeolocationError.hpp"
 #include "JFunc_void_GeolocationResponse.hpp"
@@ -31,6 +32,7 @@ int initialize(JavaVM* vm) {
   return facebook::jni::initialize(vm, [] {
     // Register native JNI methods
     margelo::nitro::nitrogeolocation::JHybridNitroGeolocationSpec::registerNatives();
+    margelo::nitro::nitrogeolocation::JHybridNitroGeolocationCompatSpec::registerNatives();
     margelo::nitro::nitrogeolocation::JFunc_void_cxx::registerNatives();
     margelo::nitro::nitrogeolocation::JFunc_void_GeolocationError_cxx::registerNatives();
     margelo::nitro::nitrogeolocation::JFunc_void_GeolocationResponse_cxx::registerNatives();
@@ -40,6 +42,14 @@ int initialize(JavaVM* vm) {
       "NitroGeolocation",
       []() -> std::shared_ptr<HybridObject> {
         static DefaultConstructableObject<JHybridNitroGeolocationSpec::javaobject> object("com/margelo/nitro/nitrogeolocation/NitroGeolocation");
+        auto instance = object.create();
+        return instance->cthis()->shared();
+      }
+    );
+    HybridObjectRegistry::registerHybridObjectConstructor(
+      "NitroGeolocationCompat",
+      []() -> std::shared_ptr<HybridObject> {
+        static DefaultConstructableObject<JHybridNitroGeolocationCompatSpec::javaobject> object("com/margelo/nitro/nitrogeolocation/NitroGeolocationCompat");
         auto instance = object.create();
         return instance->cthis()->shared();
       }

@@ -9,9 +9,10 @@ import {
   Text,
   View
 } from "react-native";
-import Geolocation, {
+import { Geolocation } from "react-native-nitro-geolocation";
+import GeolocationCompat, {
   type GeolocationResponse
-} from "react-native-nitro-geolocation";
+} from "react-native-nitro-geolocation/compat";
 
 export default function App() {
   const [permissionStatus, setPermissionStatus] = useState<string>("Unknown");
@@ -25,16 +26,20 @@ export default function App() {
   const [watchUpdateCount, setWatchUpdateCount] = useState(0);
 
   useEffect(() => {
-    Geolocation.setRNConfiguration({
+    GeolocationCompat.setRNConfiguration({
       skipPermissionRequests: false,
       authorizationLevel: "whenInUse",
       locationProvider: "auto"
     });
   }, []);
 
+  const handleHelloWorld = async () => {
+    Alert.alert("Hello world!", await Geolocation.helloWorld());
+  };
+
   const handleRequestAuthorization = () => {
     setPermissionStatus("Requesting...");
-    Geolocation.requestAuthorization(
+    GeolocationCompat.requestAuthorization(
       () => {
         setPermissionStatus("Granted ✅");
         Alert.alert("Success", "Location permission granted!");
@@ -47,7 +52,7 @@ export default function App() {
   };
 
   const handleTestConfig1 = () => {
-    Geolocation.setRNConfiguration({
+    GeolocationCompat.setRNConfiguration({
       skipPermissionRequests: true,
       authorizationLevel: "always",
       enableBackgroundLocationUpdates: true,
@@ -60,7 +65,7 @@ export default function App() {
   };
 
   const handleTestConfig2 = () => {
-    Geolocation.setRNConfiguration({
+    GeolocationCompat.setRNConfiguration({
       skipPermissionRequests: false,
       authorizationLevel: "whenInUse",
       locationProvider: "android"
@@ -72,7 +77,7 @@ export default function App() {
   };
 
   const handleTestConfig3 = () => {
-    Geolocation.setRNConfiguration({
+    GeolocationCompat.setRNConfiguration({
       skipPermissionRequests: false,
       locationProvider: "auto"
     });
@@ -86,7 +91,7 @@ export default function App() {
     setIsLoadingPosition(true);
     setCurrentPosition(null);
 
-    Geolocation.getCurrentPosition(
+    GeolocationCompat.getCurrentPosition(
       (position) => {
         setIsLoadingPosition(false);
         setCurrentPosition(position);
@@ -113,7 +118,7 @@ export default function App() {
     setWatchUpdateCount(0);
     setWatchedPosition(null);
 
-    const id = Geolocation.watchPosition(
+    const id = GeolocationCompat.watchPosition(
       (position) => {
         setWatchedPosition(position);
         setWatchUpdateCount((count) => count + 1);
@@ -138,7 +143,7 @@ export default function App() {
       return;
     }
 
-    Geolocation.clearWatch(watchId);
+    GeolocationCompat.clearWatch(watchId);
     setWatchId(null);
     Alert.alert("Success", "Stopped watching position");
   };
@@ -157,6 +162,14 @@ export default function App() {
             <View style={styles.statusContainer}>
               <Text style={styles.statusLabel}>Permission Status:</Text>
               <Text style={styles.statusValue}>{permissionStatus}</Text>
+            </View>
+
+            <View style={styles.buttonContainer}>
+              <Button
+                title="Hello world"
+                onPress={handleHelloWorld}
+                color="#2196F3"
+              />
             </View>
 
             <View style={styles.buttonContainer}>

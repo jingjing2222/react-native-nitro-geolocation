@@ -1,5 +1,5 @@
 import { NitroModules } from "react-native-nitro-modules";
-import type { NitroGeolocation } from "./NitroGeolocation.nitro";
+import type { NitroGeolocationCompat } from "../NitroGeolocationCompat.nitro";
 
 /**
  * Stops observing all location updates.
@@ -7,6 +7,8 @@ import type { NitroGeolocation } from "./NitroGeolocation.nitro";
  */
 export function stopObserving(): void {
   const nitroGeolocation =
-    NitroModules.createHybridObject<NitroGeolocation>("NitroGeolocation");
+    NitroModules.createHybridObject<NitroGeolocationCompat>(
+      "NitroGeolocationCompat"
+    );
   nitroGeolocation.stopObserving();
 }

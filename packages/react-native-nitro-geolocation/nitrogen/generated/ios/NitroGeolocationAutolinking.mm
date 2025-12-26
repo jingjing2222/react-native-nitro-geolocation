@@ -11,6 +11,7 @@
 #import <type_traits>
 
 #include "HybridNitroGeolocationSpecSwift.hpp"
+#include "HybridNitroGeolocationCompatSpecSwift.hpp"
 
 @interface NitroGeolocationAutolinking : NSObject
 @end
@@ -25,6 +26,13 @@
     "NitroGeolocation",
     []() -> std::shared_ptr<HybridObject> {
       std::shared_ptr<HybridNitroGeolocationSpec> hybridObject = NitroGeolocation::NitroGeolocationAutolinking::createNitroGeolocation();
+      return hybridObject;
+    }
+  );
+  HybridObjectRegistry::registerHybridObjectConstructor(
+    "NitroGeolocationCompat",
+    []() -> std::shared_ptr<HybridObject> {
+      std::shared_ptr<HybridNitroGeolocationCompatSpec> hybridObject = NitroGeolocation::NitroGeolocationAutolinking::createNitroGeolocationCompat();
       return hybridObject;
     }
   );
