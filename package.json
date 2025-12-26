@@ -13,7 +13,7 @@
     "format": "biome format --write .",
     "format:check": "biome ci --formatter-enabled=true --linter-enabled=false .",
     "lint": "biome ci --formatter-enabled=false --linter-enabled=true .",
-    "lint:fix": "biome ci --formatter-enabled=true --linter-enabled=true ."
+    "lint:fix": "biome check --write ."
   },
   "packageManager": "yarn@4.9.4",
   "devDependencies": {

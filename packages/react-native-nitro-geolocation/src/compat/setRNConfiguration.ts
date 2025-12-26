@@ -18,5 +18,7 @@ function mapConfigToInternal(
 }
 
 export function setRNConfiguration(config: GeolocationConfiguration): void {
-  NitroGeolocationHybridCompatObject.setRNConfiguration(mapConfigToInternal(config));
+  NitroGeolocationHybridCompatObject.setRNConfiguration(
+    mapConfigToInternal(config)
+  );
 }

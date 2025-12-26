@@ -19,5 +19,9 @@ export function watchPosition(
   error?: (error: GeolocationError) => void,
   options?: GeolocationOptions
 ): number {
-  return NitroGeolocationHybridCompatObject.watchPosition(success, error, options);
+  return NitroGeolocationHybridCompatObject.watchPosition(
+    success,
+    error,
+    options
+  );
 }

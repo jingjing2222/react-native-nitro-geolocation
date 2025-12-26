@@ -10,5 +10,9 @@ export function getCurrentPosition(
   error?: (error: GeolocationError) => void,
   options?: GeolocationOptions
 ): void {
-  NitroGeolocationHybridCompatObject.getCurrentPosition(success, error, options);
+  NitroGeolocationHybridCompatObject.getCurrentPosition(
+    success,
+    error,
+    options
+  );
 }

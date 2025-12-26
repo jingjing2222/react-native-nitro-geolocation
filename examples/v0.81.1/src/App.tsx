@@ -9,10 +9,10 @@ import {
   Text,
   View
 } from "react-native";
+import { Geolocation } from "react-native-nitro-geolocation";
 import GeolocationCompat, {
   type GeolocationResponse
 } from "react-native-nitro-geolocation/compat";
-import { Geolocation } from "react-native-nitro-geolocation";
 
 export default function App() {
   const [permissionStatus, setPermissionStatus] = useState<string>("Unknown");
@@ -34,8 +34,8 @@ export default function App() {
   }, []);
 
   const handleHelloWorld = async () => {
-    Alert.alert('Hello world!',await Geolocation.helloWorld())
-  }
+    Alert.alert("Hello world!", await Geolocation.helloWorld());
+  };
 
   const handleRequestAuthorization = () => {
     setPermissionStatus("Requesting...");

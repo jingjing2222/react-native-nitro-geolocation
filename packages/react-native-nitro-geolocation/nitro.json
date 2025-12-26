@@ -8,7 +8,7 @@
     "androidCxxLibName": "nitrogeolocation"
   },
   "autolinking": {
-    "NitroGeolocation":{
+    "NitroGeolocation": {
       "swift": "NitroGeolocation",
       "kotlin": "NitroGeolocation"
     },
