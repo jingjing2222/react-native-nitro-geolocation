@@ -19,7 +19,7 @@
 #include <NitroModules/Null.hpp>
 #include <variant>
 #include <optional>
-#include "JVariant_NullType_Double.hpp"
+#include "JNullableDouble.hpp"
 #include <NitroModules/JNull.hpp>
 
 namespace margelo::nitro::nitrogeolocation {

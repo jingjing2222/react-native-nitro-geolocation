@@ -25,19 +25,19 @@ data class GeolocationCoordinates(
   val longitude: Double,
   @DoNotStrip
   @Keep
-  val altitude: Variant_NullType_Double?,
+  val altitude: NullableDouble?,
   @DoNotStrip
   @Keep
   val accuracy: Double,
   @DoNotStrip
   @Keep
-  val altitudeAccuracy: Variant_NullType_Double?,
+  val altitudeAccuracy: NullableDouble?,
   @DoNotStrip
   @Keep
-  val heading: Variant_NullType_Double?,
+  val heading: NullableDouble?,
   @DoNotStrip
   @Keep
-  val speed: Variant_NullType_Double?
+  val speed: NullableDouble?
 ) {
   /* primary constructor */
 
@@ -49,7 +49,7 @@ data class GeolocationCoordinates(
     @Keep
     @Suppress("unused")
     @JvmStatic
-    private fun fromCpp(latitude: Double, longitude: Double, altitude: Variant_NullType_Double?, accuracy: Double, altitudeAccuracy: Variant_NullType_Double?, heading: Variant_NullType_Double?, speed: Variant_NullType_Double?): GeolocationCoordinates {
+    private fun fromCpp(latitude: Double, longitude: Double, altitude: NullableDouble?, accuracy: Double, altitudeAccuracy: NullableDouble?, heading: NullableDouble?, speed: NullableDouble?): GeolocationCoordinates {
       return GeolocationCoordinates(latitude, longitude, altitude, accuracy, altitudeAccuracy, heading, speed)
     }
   }
