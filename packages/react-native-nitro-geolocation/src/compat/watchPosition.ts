@@ -1,5 +1,4 @@
-import { NitroModules } from "react-native-nitro-modules";
-import type { NitroGeolocationCompat } from "../NitroGeolocationCompat.nitro";
+import { NitroGeolocationHybridCompatObject } from "../NitroGeolocationModule";
 import type {
   GeolocationError,
   GeolocationOptions,
@@ -20,9 +19,5 @@ export function watchPosition(
   error?: (error: GeolocationError) => void,
   options?: GeolocationOptions
 ): number {
-  const nitroGeolocation =
-    NitroModules.createHybridObject<NitroGeolocationCompat>(
-      "NitroGeolocationCompat"
-    );
-  return nitroGeolocation.watchPosition(success, error, options);
+  return NitroGeolocationHybridCompatObject.watchPosition(success, error, options);
 }

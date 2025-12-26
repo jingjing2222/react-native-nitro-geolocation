@@ -1,4 +1,5 @@
 import Foundation
+import NitroModules
 
 class NitroGeolocation: HybridNitroGeolocationSpec {
     public func helloWorld() throws -> Promise<String> {

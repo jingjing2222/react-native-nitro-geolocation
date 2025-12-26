@@ -1,8 +1,9 @@
 import { NitroModules } from "react-native-nitro-modules";
 import type { NitroGeolocationCompat } from "./NitroGeolocationCompat.nitro";
+import type { NitroGeolocation } from "./NitroGeolocation.nitro";
 
 export const NitroGeolocationHybridObject =
-  NitroModules.createHybridObject<NitroGeolocationCompat>(
+  NitroModules.createHybridObject<NitroGeolocation>(
     "NitroGeolocation"
   );
 
