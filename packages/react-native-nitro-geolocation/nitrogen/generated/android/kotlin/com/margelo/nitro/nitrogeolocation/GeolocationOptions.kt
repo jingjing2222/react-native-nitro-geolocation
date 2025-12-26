@@ -9,7 +9,6 @@ package com.margelo.nitro.nitrogeolocation
 
 import androidx.annotation.Keep
 import com.facebook.proguard.annotations.DoNotStrip
-import com.margelo.nitro.core.*
 
 
 /**
@@ -17,31 +16,41 @@ import com.margelo.nitro.core.*
  */
 @DoNotStrip
 @Keep
-data class GeolocationOptions
+data class GeolocationOptions(
   @DoNotStrip
   @Keep
-  constructor(
+  val timeout: Double?,
+  @DoNotStrip
+  @Keep
+  val maximumAge: Double?,
+  @DoNotStrip
+  @Keep
+  val enableHighAccuracy: Boolean?,
+  @DoNotStrip
+  @Keep
+  val interval: Double?,
+  @DoNotStrip
+  @Keep
+  val fastestInterval: Double?,
+  @DoNotStrip
+  @Keep
+  val distanceFilter: Double?,
+  @DoNotStrip
+  @Keep
+  val useSignificantChanges: Boolean?
+) {
+  /* primary constructor */
+
+  companion object {
+    /**
+     * Constructor called from C++
+     */
     @DoNotStrip
     @Keep
-    val timeout: Double?,
-    @DoNotStrip
-    @Keep
-    val maximumAge: Double?,
-    @DoNotStrip
-    @Keep
-    val enableHighAccuracy: Boolean?,
-    @DoNotStrip
-    @Keep
-    val interval: Double?,
-    @DoNotStrip
-    @Keep
-    val fastestInterval: Double?,
-    @DoNotStrip
-    @Keep
-    val distanceFilter: Double?,
-    @DoNotStrip
-    @Keep
-    val useSignificantChanges: Boolean?
-  ) {
-  /* main constructor */
+    @Suppress("unused")
+    @JvmStatic
+    private fun fromCpp(timeout: Double?, maximumAge: Double?, enableHighAccuracy: Boolean?, interval: Double?, fastestInterval: Double?, distanceFilter: Double?, useSignificantChanges: Boolean?): GeolocationOptions {
+      return GeolocationOptions(timeout, maximumAge, enableHighAccuracy, interval, fastestInterval, distanceFilter, useSignificantChanges)
+    }
+  }
 }

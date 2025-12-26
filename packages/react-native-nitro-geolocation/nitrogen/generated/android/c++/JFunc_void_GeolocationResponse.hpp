@@ -12,10 +12,15 @@
 
 #include "GeolocationResponse.hpp"
 #include <functional>
+#include <NitroModules/JNICallable.hpp>
 #include "JGeolocationResponse.hpp"
 #include "GeolocationCoordinates.hpp"
 #include "JGeolocationCoordinates.hpp"
+#include <NitroModules/Null.hpp>
+#include <variant>
 #include <optional>
+#include "JVariant_NullType_Double.hpp"
+#include <NitroModules/JNull.hpp>
 
 namespace margelo::nitro::nitrogeolocation {
 
@@ -42,7 +47,7 @@ namespace margelo::nitro::nitrogeolocation {
   /**
    * An implementation of Func_void_GeolocationResponse that is backed by a C++ implementation (using `std::function<...>`)
    */
-  struct JFunc_void_GeolocationResponse_cxx final: public jni::HybridClass<JFunc_void_GeolocationResponse_cxx, JFunc_void_GeolocationResponse> {
+  class JFunc_void_GeolocationResponse_cxx final: public jni::HybridClass<JFunc_void_GeolocationResponse_cxx, JFunc_void_GeolocationResponse> {
   public:
     static jni::local_ref<JFunc_void_GeolocationResponse::javaobject> fromCpp(const std::function<void(const GeolocationResponse& /* position */)>& func) {
       return JFunc_void_GeolocationResponse_cxx::newObjectCxxArgs(func);

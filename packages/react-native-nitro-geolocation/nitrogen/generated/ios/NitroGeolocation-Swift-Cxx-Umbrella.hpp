@@ -37,6 +37,7 @@ namespace margelo::nitro::nitrogeolocation { struct RNConfigurationInternal; }
 #include "HybridNitroGeolocationSpec.hpp"
 #include "LocationProviderInternal.hpp"
 #include "RNConfigurationInternal.hpp"
+#include <NitroModules/Null.hpp>
 #include <NitroModules/Promise.hpp>
 #include <NitroModules/Result.hpp>
 #include <exception>
@@ -44,6 +45,7 @@ namespace margelo::nitro::nitrogeolocation { struct RNConfigurationInternal; }
 #include <memory>
 #include <optional>
 #include <string>
+#include <variant>
 
 // C++ helpers for Swift
 #include "NitroGeolocation-Swift-Cxx-Bridge.hpp"

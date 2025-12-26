@@ -10,7 +10,7 @@ package com.margelo.nitro.nitrogeolocation
 import androidx.annotation.Keep
 import com.facebook.jni.HybridData
 import com.facebook.proguard.annotations.DoNotStrip
-import com.margelo.nitro.core.*
+import com.margelo.nitro.core.HybridObject
 
 /**
  * A Kotlin class representing the NitroGeolocationCompat HybridObject.
@@ -34,6 +34,11 @@ abstract class HybridNitroGeolocationCompatSpec: HybridObject() {
   override fun updateNative(hybridData: HybridData) {
     mHybridData = hybridData
     super.updateNative(hybridData)
+  }
+
+  // Default implementation of `HybridObject.toString()`
+  override fun toString(): String {
+    return "[HybridObject NitroGeolocationCompat]"
   }
 
   // Properties
@@ -82,6 +87,6 @@ abstract class HybridNitroGeolocationCompatSpec: HybridObject() {
   private external fun initHybrid(): HybridData
 
   companion object {
-    private const val TAG = "HybridNitroGeolocationCompatSpec"
+    protected const val TAG = "HybridNitroGeolocationCompatSpec"
   }
 }

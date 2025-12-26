@@ -5,6 +5,7 @@
 /// Copyright © 2025 Marc Rousavy @ Margelo
 ///
 
+import Foundation
 import NitroModules
 
 /**
@@ -22,25 +23,13 @@ public extension GeolocationResponse {
     self.init(coords, timestamp)
   }
 
+  @inline(__always)
   var coords: GeolocationCoordinates {
-    @inline(__always)
-    get {
-      return self.__coords
-    }
-    @inline(__always)
-    set {
-      self.__coords = newValue
-    }
+    return self.__coords
   }
   
+  @inline(__always)
   var timestamp: Double {
-    @inline(__always)
-    get {
-      return self.__timestamp
-    }
-    @inline(__always)
-    set {
-      self.__timestamp = newValue
-    }
+    return self.__timestamp
   }
 }
