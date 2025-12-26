@@ -20,6 +20,8 @@ namespace margelo::nitro::nitrogeolocation { struct GeolocationOptions; }
 namespace margelo::nitro::nitrogeolocation { struct GeolocationResponse; }
 // Forward declaration of `HybridNitroGeolocationCompatSpec` to properly resolve imports.
 namespace margelo::nitro::nitrogeolocation { class HybridNitroGeolocationCompatSpec; }
+// Forward declaration of `HybridNitroGeolocationSpec` to properly resolve imports.
+namespace margelo::nitro::nitrogeolocation { class HybridNitroGeolocationSpec; }
 // Forward declaration of `LocationProviderInternal` to properly resolve imports.
 namespace margelo::nitro::nitrogeolocation { enum class LocationProviderInternal; }
 // Forward declaration of `RNConfigurationInternal` to properly resolve imports.
@@ -32,8 +34,10 @@ namespace margelo::nitro::nitrogeolocation { struct RNConfigurationInternal; }
 #include "GeolocationOptions.hpp"
 #include "GeolocationResponse.hpp"
 #include "HybridNitroGeolocationCompatSpec.hpp"
+#include "HybridNitroGeolocationSpec.hpp"
 #include "LocationProviderInternal.hpp"
 #include "RNConfigurationInternal.hpp"
+#include <NitroModules/Promise.hpp>
 #include <NitroModules/Result.hpp>
 #include <exception>
 #include <functional>
@@ -53,6 +57,8 @@ namespace margelo::nitro::nitrogeolocation { struct RNConfigurationInternal; }
 // Forward declarations of Swift defined types
 // Forward declaration of `HybridNitroGeolocationCompatSpec_cxx` to properly resolve imports.
 namespace NitroGeolocation { class HybridNitroGeolocationCompatSpec_cxx; }
+// Forward declaration of `HybridNitroGeolocationSpec_cxx` to properly resolve imports.
+namespace NitroGeolocation { class HybridNitroGeolocationSpec_cxx; }
 
 // Include Swift defined types
 #if __has_include("NitroGeolocation-Swift.h")

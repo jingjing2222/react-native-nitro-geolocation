@@ -10,6 +10,7 @@
 #import "NitroGeolocation-Swift-Cxx-Umbrella.hpp"
 #import <type_traits>
 
+#include "HybridNitroGeolocationSpecSwift.hpp"
 #include "HybridNitroGeolocationCompatSpecSwift.hpp"
 
 @interface NitroGeolocationAutolinking : NSObject
@@ -21,6 +22,13 @@
   using namespace margelo::nitro;
   using namespace margelo::nitro::nitrogeolocation;
 
+  HybridObjectRegistry::registerHybridObjectConstructor(
+    "NitroGeolocation",
+    []() -> std::shared_ptr<HybridObject> {
+      std::shared_ptr<HybridNitroGeolocationSpec> hybridObject = NitroGeolocation::NitroGeolocationAutolinking::createNitroGeolocation();
+      return hybridObject;
+    }
+  );
   HybridObjectRegistry::registerHybridObjectConstructor(
     "NitroGeolocationCompat",
     []() -> std::shared_ptr<HybridObject> {

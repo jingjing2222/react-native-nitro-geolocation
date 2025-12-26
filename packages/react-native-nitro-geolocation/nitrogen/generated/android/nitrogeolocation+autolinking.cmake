@@ -33,8 +33,10 @@ target_sources(
   # Autolinking Setup
   ../nitrogen/generated/android/nitrogeolocationOnLoad.cpp
   # Shared Nitrogen C++ sources
+  ../nitrogen/generated/shared/c++/HybridNitroGeolocationSpec.cpp
   ../nitrogen/generated/shared/c++/HybridNitroGeolocationCompatSpec.cpp
   # Android-specific Nitrogen C++ sources
+  ../nitrogen/generated/android/c++/JHybridNitroGeolocationSpec.cpp
   ../nitrogen/generated/android/c++/JHybridNitroGeolocationCompatSpec.cpp
 )
 
