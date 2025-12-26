@@ -17,6 +17,16 @@
 #else
 #error NitroModules cannot be found! Are you sure you installed NitroModules properly?
 #endif
+#if __has_include(<NitroModules/JSIHelpers.hpp>)
+#include <NitroModules/JSIHelpers.hpp>
+#else
+#error NitroModules cannot be found! Are you sure you installed NitroModules properly?
+#endif
+#if __has_include(<NitroModules/PropNameIDCache.hpp>)
+#include <NitroModules/PropNameIDCache.hpp>
+#else
+#error NitroModules cannot be found! Are you sure you installed NitroModules properly?
+#endif
 
 
 
@@ -27,7 +37,7 @@ namespace margelo::nitro::nitrogeolocation {
   /**
    * A struct which can be represented as a JavaScript object (GeolocationOptions).
    */
-  struct GeolocationOptions {
+  struct GeolocationOptions final {
   public:
     std::optional<double> timeout     SWIFT_PRIVATE;
     std::optional<double> maximumAge     SWIFT_PRIVATE;
@@ -40,6 +50,9 @@ namespace margelo::nitro::nitrogeolocation {
   public:
     GeolocationOptions() = default;
     explicit GeolocationOptions(std::optional<double> timeout, std::optional<double> maximumAge, std::optional<bool> enableHighAccuracy, std::optional<double> interval, std::optional<double> fastestInterval, std::optional<double> distanceFilter, std::optional<bool> useSignificantChanges): timeout(timeout), maximumAge(maximumAge), enableHighAccuracy(enableHighAccuracy), interval(interval), fastestInterval(fastestInterval), distanceFilter(distanceFilter), useSignificantChanges(useSignificantChanges) {}
+
+  public:
+    friend bool operator==(const GeolocationOptions& lhs, const GeolocationOptions& rhs) = default;
   };
 
 } // namespace margelo::nitro::nitrogeolocation
@@ -52,24 +65,24 @@ namespace margelo::nitro {
     static inline margelo::nitro::nitrogeolocation::GeolocationOptions fromJSI(jsi::Runtime& runtime, const jsi::Value& arg) {
       jsi::Object obj = arg.asObject(runtime);
       return margelo::nitro::nitrogeolocation::GeolocationOptions(
-        JSIConverter<std::optional<double>>::fromJSI(runtime, obj.getProperty(runtime, "timeout")),
-        JSIConverter<std::optional<double>>::fromJSI(runtime, obj.getProperty(runtime, "maximumAge")),
-        JSIConverter<std::optional<bool>>::fromJSI(runtime, obj.getProperty(runtime, "enableHighAccuracy")),
-        JSIConverter<std::optional<double>>::fromJSI(runtime, obj.getProperty(runtime, "interval")),
-        JSIConverter<std::optional<double>>::fromJSI(runtime, obj.getProperty(runtime, "fastestInterval")),
-        JSIConverter<std::optional<double>>::fromJSI(runtime, obj.getProperty(runtime, "distanceFilter")),
-        JSIConverter<std::optional<bool>>::fromJSI(runtime, obj.getProperty(runtime, "useSignificantChanges"))
+        JSIConverter<std::optional<double>>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "timeout"))),
+        JSIConverter<std::optional<double>>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "maximumAge"))),
+        JSIConverter<std::optional<bool>>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "enableHighAccuracy"))),
+        JSIConverter<std::optional<double>>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "interval"))),
+        JSIConverter<std::optional<double>>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "fastestInterval"))),
+        JSIConverter<std::optional<double>>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "distanceFilter"))),
+        JSIConverter<std::optional<bool>>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "useSignificantChanges")))
       );
     }
     static inline jsi::Value toJSI(jsi::Runtime& runtime, const margelo::nitro::nitrogeolocation::GeolocationOptions& arg) {
       jsi::Object obj(runtime);
-      obj.setProperty(runtime, "timeout", JSIConverter<std::optional<double>>::toJSI(runtime, arg.timeout));
-      obj.setProperty(runtime, "maximumAge", JSIConverter<std::optional<double>>::toJSI(runtime, arg.maximumAge));
-      obj.setProperty(runtime, "enableHighAccuracy", JSIConverter<std::optional<bool>>::toJSI(runtime, arg.enableHighAccuracy));
-      obj.setProperty(runtime, "interval", JSIConverter<std::optional<double>>::toJSI(runtime, arg.interval));
-      obj.setProperty(runtime, "fastestInterval", JSIConverter<std::optional<double>>::toJSI(runtime, arg.fastestInterval));
-      obj.setProperty(runtime, "distanceFilter", JSIConverter<std::optional<double>>::toJSI(runtime, arg.distanceFilter));
-      obj.setProperty(runtime, "useSignificantChanges", JSIConverter<std::optional<bool>>::toJSI(runtime, arg.useSignificantChanges));
+      obj.setProperty(runtime, PropNameIDCache::get(runtime, "timeout"), JSIConverter<std::optional<double>>::toJSI(runtime, arg.timeout));
+      obj.setProperty(runtime, PropNameIDCache::get(runtime, "maximumAge"), JSIConverter<std::optional<double>>::toJSI(runtime, arg.maximumAge));
+      obj.setProperty(runtime, PropNameIDCache::get(runtime, "enableHighAccuracy"), JSIConverter<std::optional<bool>>::toJSI(runtime, arg.enableHighAccuracy));
+      obj.setProperty(runtime, PropNameIDCache::get(runtime, "interval"), JSIConverter<std::optional<double>>::toJSI(runtime, arg.interval));
+      obj.setProperty(runtime, PropNameIDCache::get(runtime, "fastestInterval"), JSIConverter<std::optional<double>>::toJSI(runtime, arg.fastestInterval));
+      obj.setProperty(runtime, PropNameIDCache::get(runtime, "distanceFilter"), JSIConverter<std::optional<double>>::toJSI(runtime, arg.distanceFilter));
+      obj.setProperty(runtime, PropNameIDCache::get(runtime, "useSignificantChanges"), JSIConverter<std::optional<bool>>::toJSI(runtime, arg.useSignificantChanges));
       return obj;
     }
     static inline bool canConvert(jsi::Runtime& runtime, const jsi::Value& value) {
@@ -77,13 +90,16 @@ namespace margelo::nitro {
         return false;
       }
       jsi::Object obj = value.getObject(runtime);
-      if (!JSIConverter<std::optional<double>>::canConvert(runtime, obj.getProperty(runtime, "timeout"))) return false;
-      if (!JSIConverter<std::optional<double>>::canConvert(runtime, obj.getProperty(runtime, "maximumAge"))) return false;
-      if (!JSIConverter<std::optional<bool>>::canConvert(runtime, obj.getProperty(runtime, "enableHighAccuracy"))) return false;
-      if (!JSIConverter<std::optional<double>>::canConvert(runtime, obj.getProperty(runtime, "interval"))) return false;
-      if (!JSIConverter<std::optional<double>>::canConvert(runtime, obj.getProperty(runtime, "fastestInterval"))) return false;
-      if (!JSIConverter<std::optional<double>>::canConvert(runtime, obj.getProperty(runtime, "distanceFilter"))) return false;
-      if (!JSIConverter<std::optional<bool>>::canConvert(runtime, obj.getProperty(runtime, "useSignificantChanges"))) return false;
+      if (!nitro::isPlainObject(runtime, obj)) {
+        return false;
+      }
+      if (!JSIConverter<std::optional<double>>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "timeout")))) return false;
+      if (!JSIConverter<std::optional<double>>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "maximumAge")))) return false;
+      if (!JSIConverter<std::optional<bool>>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "enableHighAccuracy")))) return false;
+      if (!JSIConverter<std::optional<double>>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "interval")))) return false;
+      if (!JSIConverter<std::optional<double>>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "fastestInterval")))) return false;
+      if (!JSIConverter<std::optional<double>>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "distanceFilter")))) return false;
+      if (!JSIConverter<std::optional<bool>>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "useSignificantChanges")))) return false;
       return true;
     }
   };

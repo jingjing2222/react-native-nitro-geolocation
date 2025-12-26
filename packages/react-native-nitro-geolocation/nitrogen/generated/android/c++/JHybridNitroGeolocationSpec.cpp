@@ -35,6 +35,12 @@ namespace margelo::nitro::nitrogeolocation {
     method(_javaPart);
   }
 
+  std::string JHybridNitroGeolocationSpec::toString() {
+    static const auto method = javaClassStatic()->getMethod<jni::JString()>("toString");
+    auto javaString = method(_javaPart);
+    return javaString->toStdString();
+  }
+
   // Properties
   
 

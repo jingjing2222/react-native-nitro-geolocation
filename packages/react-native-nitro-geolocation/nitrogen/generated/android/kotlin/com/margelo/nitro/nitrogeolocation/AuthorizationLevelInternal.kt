@@ -19,4 +19,6 @@ enum class AuthorizationLevelInternal(@DoNotStrip @Keep val value: Int) {
   ALWAYS(0),
   WHENINUSE(1),
   AUTO(2);
+
+  companion object
 }

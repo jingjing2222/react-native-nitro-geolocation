@@ -41,16 +41,15 @@ namespace margelo::nitro::nitrogeolocation {
     [[maybe_unused]]
     static jni::alias_ref<JLocationProviderInternal> fromCpp(LocationProviderInternal value) {
       static const auto clazz = javaClassStatic();
-      static const auto fieldAUTO = clazz->getStaticField<JLocationProviderInternal>("AUTO");
-      static const auto fieldPLAYSERVICES = clazz->getStaticField<JLocationProviderInternal>("PLAYSERVICES");
-      static const auto fieldANDROID_PLATFORM = clazz->getStaticField<JLocationProviderInternal>("ANDROID_PLATFORM");
-      
       switch (value) {
         case LocationProviderInternal::AUTO:
+          static const auto fieldAUTO = clazz->getStaticField<JLocationProviderInternal>("AUTO");
           return clazz->getStaticFieldValue(fieldAUTO);
         case LocationProviderInternal::PLAYSERVICES:
+          static const auto fieldPLAYSERVICES = clazz->getStaticField<JLocationProviderInternal>("PLAYSERVICES");
           return clazz->getStaticFieldValue(fieldPLAYSERVICES);
         case LocationProviderInternal::ANDROID_PLATFORM:
+          static const auto fieldANDROID_PLATFORM = clazz->getStaticField<JLocationProviderInternal>("ANDROID_PLATFORM");
           return clazz->getStaticFieldValue(fieldANDROID_PLATFORM);
         default:
           std::string stringValue = std::to_string(static_cast<int>(value));

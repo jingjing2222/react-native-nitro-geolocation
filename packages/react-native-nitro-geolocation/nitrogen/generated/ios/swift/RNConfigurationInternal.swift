@@ -5,6 +5,7 @@
 /// Copyright © 2025 Marc Rousavy @ Margelo
 ///
 
+import Foundation
 import NitroModules
 
 /**
@@ -40,65 +41,30 @@ public extension RNConfigurationInternal {
     }())
   }
 
+  @inline(__always)
   var skipPermissionRequests: Bool {
-    @inline(__always)
-    get {
-      return self.__skipPermissionRequests
-    }
-    @inline(__always)
-    set {
-      self.__skipPermissionRequests = newValue
-    }
+    return self.__skipPermissionRequests
   }
   
+  @inline(__always)
   var authorizationLevel: AuthorizationLevelInternal? {
-    @inline(__always)
-    get {
-      return self.__authorizationLevel.value
-    }
-    @inline(__always)
-    set {
-      self.__authorizationLevel = { () -> bridge.std__optional_AuthorizationLevelInternal_ in
-        if let __unwrappedValue = newValue {
-          return bridge.create_std__optional_AuthorizationLevelInternal_(__unwrappedValue)
-        } else {
-          return .init()
-        }
-      }()
-    }
+    return self.__authorizationLevel.value
   }
   
+  @inline(__always)
   var enableBackgroundLocationUpdates: Bool? {
-    @inline(__always)
-    get {
-      return self.__enableBackgroundLocationUpdates.value
-    }
-    @inline(__always)
-    set {
-      self.__enableBackgroundLocationUpdates = { () -> bridge.std__optional_bool_ in
-        if let __unwrappedValue = newValue {
-          return bridge.create_std__optional_bool_(__unwrappedValue)
-        } else {
-          return .init()
-        }
-      }()
-    }
+    return { () -> Bool? in
+      if bridge.has_value_std__optional_bool_(self.__enableBackgroundLocationUpdates) {
+        let __unwrapped = bridge.get_std__optional_bool_(self.__enableBackgroundLocationUpdates)
+        return __unwrapped
+      } else {
+        return nil
+      }
+    }()
   }
   
+  @inline(__always)
   var locationProvider: LocationProviderInternal? {
-    @inline(__always)
-    get {
-      return self.__locationProvider.value
-    }
-    @inline(__always)
-    set {
-      self.__locationProvider = { () -> bridge.std__optional_LocationProviderInternal_ in
-        if let __unwrappedValue = newValue {
-          return bridge.create_std__optional_LocationProviderInternal_(__unwrappedValue)
-        } else {
-          return .init()
-        }
-      }()
-    }
+    return self.__locationProvider.value
   }
 }

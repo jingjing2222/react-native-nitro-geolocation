@@ -487,11 +487,11 @@ class LocationManager: NSObject, CLLocationManagerDelegate {
         let coordsObj = GeolocationCoordinates(
             latitude: location.coordinate.latitude,
             longitude: location.coordinate.longitude,
-            altitude: altitude,
+            altitude: .second(altitude),
             accuracy: location.horizontalAccuracy,
-            altitudeAccuracy: altitudeAccuracy,
-            heading: heading,
-            speed: speed
+            altitudeAccuracy: .second(altitudeAccuracy),
+            heading: .second(heading),
+            speed: .second(speed)
         )
 
         let position = GeolocationResponse(

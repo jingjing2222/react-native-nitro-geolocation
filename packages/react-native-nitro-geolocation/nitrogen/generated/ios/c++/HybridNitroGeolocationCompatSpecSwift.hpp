@@ -36,6 +36,8 @@ namespace margelo::nitro::nitrogeolocation { struct GeolocationOptions; }
 #include <string>
 #include "GeolocationResponse.hpp"
 #include "GeolocationCoordinates.hpp"
+#include <NitroModules/Null.hpp>
+#include <variant>
 #include "GeolocationOptions.hpp"
 
 #include "NitroGeolocation-Swift-Cxx-Umbrella.hpp"
@@ -71,6 +73,9 @@ namespace margelo::nitro::nitrogeolocation {
     }
     void dispose() noexcept override {
       _swiftPart.dispose();
+    }
+    std::string toString() override {
+      return _swiftPart.toString();
     }
 
   public:

@@ -17,6 +17,13 @@ public protocol HybridNitroGeolocationSpec_protocol: HybridObject {
   func helloWorld() throws -> Promise<String>
 }
 
+public extension HybridNitroGeolocationSpec_protocol {
+  /// Default implementation of ``HybridObject.toString``
+  func toString() -> String {
+    return "[HybridObject NitroGeolocation]"
+  }
+}
+
 /// See ``HybridNitroGeolocationSpec``
 open class HybridNitroGeolocationSpec_base {
   private weak var cxxWrapper: HybridNitroGeolocationSpec_cxx? = nil

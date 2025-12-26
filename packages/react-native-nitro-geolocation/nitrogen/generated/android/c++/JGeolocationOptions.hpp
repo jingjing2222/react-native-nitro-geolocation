@@ -62,7 +62,11 @@ namespace margelo::nitro::nitrogeolocation {
      */
     [[maybe_unused]]
     static jni::local_ref<JGeolocationOptions::javaobject> fromCpp(const GeolocationOptions& value) {
-      return newInstance(
+      using JSignature = JGeolocationOptions(jni::alias_ref<jni::JDouble>, jni::alias_ref<jni::JDouble>, jni::alias_ref<jni::JBoolean>, jni::alias_ref<jni::JDouble>, jni::alias_ref<jni::JDouble>, jni::alias_ref<jni::JDouble>, jni::alias_ref<jni::JBoolean>);
+      static const auto clazz = javaClassStatic();
+      static const auto create = clazz->getStaticMethod<JSignature>("fromCpp");
+      return create(
+        clazz,
         value.timeout.has_value() ? jni::JDouble::valueOf(value.timeout.value()) : nullptr,
         value.maximumAge.has_value() ? jni::JDouble::valueOf(value.maximumAge.value()) : nullptr,
         value.enableHighAccuracy.has_value() ? jni::JBoolean::valueOf(value.enableHighAccuracy.value()) : nullptr,

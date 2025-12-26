@@ -11,6 +11,7 @@
 #include "HybridNitroGeolocationCompatSpecSwift.hpp"
 #include "HybridNitroGeolocationSpecSwift.hpp"
 #include "NitroGeolocation-Swift-Cxx-Umbrella.hpp"
+#include <NitroModules/NitroDefines.hpp>
 
 namespace margelo::nitro::nitrogeolocation::bridge::swift {
 
@@ -35,7 +36,7 @@ namespace margelo::nitro::nitrogeolocation::bridge::swift {
     NitroGeolocation::HybridNitroGeolocationSpec_cxx swiftPart = NitroGeolocation::HybridNitroGeolocationSpec_cxx::fromUnsafe(swiftUnsafePointer);
     return std::make_shared<margelo::nitro::nitrogeolocation::HybridNitroGeolocationSpecSwift>(swiftPart);
   }
-  void* NON_NULL get_std__shared_ptr_HybridNitroGeolocationSpec_(std__shared_ptr_HybridNitroGeolocationSpec_ cppType) noexcept {
+  void* NON_NULL get_std__shared_ptr_HybridNitroGeolocationSpec_(std__shared_ptr_HybridNitroGeolocationSpec_ cppType) {
     std::shared_ptr<margelo::nitro::nitrogeolocation::HybridNitroGeolocationSpecSwift> swiftWrapper = std::dynamic_pointer_cast<margelo::nitro::nitrogeolocation::HybridNitroGeolocationSpecSwift>(cppType);
     #ifdef NITRO_DEBUG
     if (swiftWrapper == nullptr) [[unlikely]] {
@@ -75,7 +76,7 @@ namespace margelo::nitro::nitrogeolocation::bridge::swift {
     NitroGeolocation::HybridNitroGeolocationCompatSpec_cxx swiftPart = NitroGeolocation::HybridNitroGeolocationCompatSpec_cxx::fromUnsafe(swiftUnsafePointer);
     return std::make_shared<margelo::nitro::nitrogeolocation::HybridNitroGeolocationCompatSpecSwift>(swiftPart);
   }
-  void* NON_NULL get_std__shared_ptr_HybridNitroGeolocationCompatSpec_(std__shared_ptr_HybridNitroGeolocationCompatSpec_ cppType) noexcept {
+  void* NON_NULL get_std__shared_ptr_HybridNitroGeolocationCompatSpec_(std__shared_ptr_HybridNitroGeolocationCompatSpec_ cppType) {
     std::shared_ptr<margelo::nitro::nitrogeolocation::HybridNitroGeolocationCompatSpecSwift> swiftWrapper = std::dynamic_pointer_cast<margelo::nitro::nitrogeolocation::HybridNitroGeolocationCompatSpecSwift>(cppType);
     #ifdef NITRO_DEBUG
     if (swiftWrapper == nullptr) [[unlikely]] {
