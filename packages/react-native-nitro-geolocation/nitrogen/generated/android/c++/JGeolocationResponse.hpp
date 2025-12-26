@@ -12,7 +12,7 @@
 
 #include "GeolocationCoordinates.hpp"
 #include "JGeolocationCoordinates.hpp"
-#include "JVariant_NullType_Double.hpp"
+#include "JNullableDouble.hpp"
 #include <NitroModules/JNull.hpp>
 #include <NitroModules/Null.hpp>
 #include <optional>

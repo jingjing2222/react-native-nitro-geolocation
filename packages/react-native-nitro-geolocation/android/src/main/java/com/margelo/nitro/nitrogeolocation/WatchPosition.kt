@@ -186,19 +186,19 @@ class WatchPosition(private val reactContext: ReactApplicationContext) {
                         GeolocationCoordinates(
                                 latitude = location.latitude,
                                 longitude = location.longitude,
-                                altitude = if (location.hasAltitude()) Variant_NullType_Double.create(location.altitude) else null,
+                                altitude = if (location.hasAltitude()) NullableDouble.create(location.altitude) else null,
                                 accuracy = location.accuracy.toDouble(),
                                 altitudeAccuracy =
                                         if (android.os.Build.VERSION.SDK_INT >=
                                                         android.os.Build.VERSION_CODES.O &&
                                                         location.hasVerticalAccuracy()
                                         )
-                                                Variant_NullType_Double.create(location.verticalAccuracyMeters.toDouble())
+                                                NullableDouble.create(location.verticalAccuracyMeters.toDouble())
                                         else null,
                                 heading =
-                                        if (location.hasBearing()) Variant_NullType_Double.create(location.bearing.toDouble())
+                                        if (location.hasBearing()) NullableDouble.create(location.bearing.toDouble())
                                         else null,
-                                speed = if (location.hasSpeed()) Variant_NullType_Double.create(location.speed.toDouble()) else null
+                                speed = if (location.hasSpeed()) NullableDouble.create(location.speed.toDouble()) else null
                         ),
                 timestamp = location.time.toDouble()
         )

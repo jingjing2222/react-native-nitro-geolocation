@@ -43,7 +43,7 @@ namespace margelo::nitro::nitrogeolocation { struct GeolocationOptions; }
 #include "JGeolocationCoordinates.hpp"
 #include <NitroModules/Null.hpp>
 #include <variant>
-#include "JVariant_NullType_Double.hpp"
+#include "JNullableDouble.hpp"
 #include <NitroModules/JNull.hpp>
 #include "GeolocationOptions.hpp"
 #include "JGeolocationOptions.hpp"

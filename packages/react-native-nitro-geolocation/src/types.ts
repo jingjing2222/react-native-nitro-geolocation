@@ -1,6 +1,7 @@
 // Public API types (compatible with @react-native-community/geolocation)
 export type AuthorizationLevel = "always" | "whenInUse" | "auto";
 export type LocationProvider = "playServices" | "android" | "auto";
+export type NullableDouble = number | null;
 
 export interface GeolocationConfiguration {
   skipPermissionRequests: boolean;
@@ -12,11 +13,11 @@ export interface GeolocationConfiguration {
 export interface GeolocationCoordinates {
   latitude: number;
   longitude: number;
-  altitude: number | null;
+  altitude: NullableDouble;
   accuracy: number;
-  altitudeAccuracy: number | null;
-  heading: number | null;
-  speed: number | null;
+  altitudeAccuracy: NullableDouble;
+  heading: NullableDouble;
+  speed: NullableDouble;
 }
 
 export interface GeolocationResponse {
