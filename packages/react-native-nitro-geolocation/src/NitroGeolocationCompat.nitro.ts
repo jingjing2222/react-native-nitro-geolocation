@@ -19,7 +19,7 @@ export interface RNConfigurationInternal {
   locationProvider?: LocationProviderInternal;
 }
 
-export interface NitroGeolocation
+export interface NitroGeolocationCompat
   extends HybridObject<{ ios: "swift"; android: "kotlin" }> {
   setRNConfiguration(config: RNConfigurationInternal): void;
   requestAuthorization(

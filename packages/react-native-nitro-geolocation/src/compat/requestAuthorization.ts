@@ -1,5 +1,5 @@
-import { NitroGeolocationHybridObject } from "./NitroGeolocationModule";
-import type { GeolocationError } from "./types";
+import { NitroGeolocationHybridObject } from "../NitroGeolocationModule";
+import type { GeolocationError } from "../types";
 
 export function requestAuthorization(
   success?: () => void,

@@ -18,8 +18,8 @@ namespace margelo::nitro::nitrogeolocation { struct GeolocationError; }
 namespace margelo::nitro::nitrogeolocation { struct GeolocationOptions; }
 // Forward declaration of `GeolocationResponse` to properly resolve imports.
 namespace margelo::nitro::nitrogeolocation { struct GeolocationResponse; }
-// Forward declaration of `HybridNitroGeolocationSpec` to properly resolve imports.
-namespace margelo::nitro::nitrogeolocation { class HybridNitroGeolocationSpec; }
+// Forward declaration of `HybridNitroGeolocationCompatSpec` to properly resolve imports.
+namespace margelo::nitro::nitrogeolocation { class HybridNitroGeolocationCompatSpec; }
 // Forward declaration of `LocationProviderInternal` to properly resolve imports.
 namespace margelo::nitro::nitrogeolocation { enum class LocationProviderInternal; }
 // Forward declaration of `RNConfigurationInternal` to properly resolve imports.
@@ -31,15 +31,17 @@ namespace margelo::nitro::nitrogeolocation { struct RNConfigurationInternal; }
 #include "GeolocationError.hpp"
 #include "GeolocationOptions.hpp"
 #include "GeolocationResponse.hpp"
-#include "HybridNitroGeolocationSpec.hpp"
+#include "HybridNitroGeolocationCompatSpec.hpp"
 #include "LocationProviderInternal.hpp"
 #include "RNConfigurationInternal.hpp"
+#include <NitroModules/Null.hpp>
 #include <NitroModules/Result.hpp>
 #include <exception>
 #include <functional>
 #include <memory>
 #include <optional>
 #include <string>
+#include <variant>
 
 // C++ helpers for Swift
 #include "NitroGeolocation-Swift-Cxx-Bridge.hpp"
@@ -51,8 +53,8 @@ namespace margelo::nitro::nitrogeolocation { struct RNConfigurationInternal; }
 #include <NitroModules/DateToChronoDate.hpp>
 
 // Forward declarations of Swift defined types
-// Forward declaration of `HybridNitroGeolocationSpec_cxx` to properly resolve imports.
-namespace NitroGeolocation { class HybridNitroGeolocationSpec_cxx; }
+// Forward declaration of `HybridNitroGeolocationCompatSpec_cxx` to properly resolve imports.
+namespace NitroGeolocation { class HybridNitroGeolocationCompatSpec_cxx; }
 
 // Include Swift defined types
 #if __has_include("NitroGeolocation-Swift.h")

@@ -1,5 +1,5 @@
 import { NitroModules } from "react-native-nitro-modules";
-import type { NitroGeolocation } from "./NitroGeolocation.nitro";
+import type { NitroGeolocationCompat } from "../NitroGeolocationCompat.nitro";
 
 /**
  * Clears a specific watch session identified by watchId.
@@ -8,6 +8,6 @@ import type { NitroGeolocation } from "./NitroGeolocation.nitro";
  */
 export function clearWatch(watchId: number): void {
   const nitroGeolocation =
-    NitroModules.createHybridObject<NitroGeolocation>("NitroGeolocation");
+    NitroModules.createHybridObject<NitroGeolocationCompat>("NitroGeolocationCompat");
   nitroGeolocation.clearWatch(watchId);
 }

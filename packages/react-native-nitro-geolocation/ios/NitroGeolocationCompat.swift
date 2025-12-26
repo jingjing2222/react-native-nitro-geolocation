@@ -1,6 +1,6 @@
 import CoreLocation
 
-class NitroGeolocation: HybridNitroGeolocationSpec {
+class NitroGeolocationCompat: HybridNitroGeolocationCompatSpec {
     // MARK: - Properties
 
     private var configuration: RNConfigurationInternal = RNConfigurationInternal(

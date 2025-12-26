@@ -9,39 +9,48 @@ package com.margelo.nitro.nitrogeolocation
 
 import androidx.annotation.Keep
 import com.facebook.proguard.annotations.DoNotStrip
-import com.margelo.nitro.core.*
-
+import com.margelo.nitro.core.NullType
 
 /**
  * Represents the JavaScript object/struct "GeolocationCoordinates".
  */
 @DoNotStrip
 @Keep
-data class GeolocationCoordinates
+data class GeolocationCoordinates(
   @DoNotStrip
   @Keep
-  constructor(
+  val latitude: Double,
+  @DoNotStrip
+  @Keep
+  val longitude: Double,
+  @DoNotStrip
+  @Keep
+  val altitude: Variant_NullType_Double?,
+  @DoNotStrip
+  @Keep
+  val accuracy: Double,
+  @DoNotStrip
+  @Keep
+  val altitudeAccuracy: Variant_NullType_Double?,
+  @DoNotStrip
+  @Keep
+  val heading: Variant_NullType_Double?,
+  @DoNotStrip
+  @Keep
+  val speed: Variant_NullType_Double?
+) {
+  /* primary constructor */
+
+  companion object {
+    /**
+     * Constructor called from C++
+     */
     @DoNotStrip
     @Keep
-    val latitude: Double,
-    @DoNotStrip
-    @Keep
-    val longitude: Double,
-    @DoNotStrip
-    @Keep
-    val altitude: Double?,
-    @DoNotStrip
-    @Keep
-    val accuracy: Double,
-    @DoNotStrip
-    @Keep
-    val altitudeAccuracy: Double?,
-    @DoNotStrip
-    @Keep
-    val heading: Double?,
-    @DoNotStrip
-    @Keep
-    val speed: Double?
-  ) {
-  /* main constructor */
+    @Suppress("unused")
+    @JvmStatic
+    private fun fromCpp(latitude: Double, longitude: Double, altitude: Variant_NullType_Double?, accuracy: Double, altitudeAccuracy: Variant_NullType_Double?, heading: Variant_NullType_Double?, speed: Variant_NullType_Double?): GeolocationCoordinates {
+      return GeolocationCoordinates(latitude, longitude, altitude, accuracy, altitudeAccuracy, heading, speed)
+    }
+  }
 }

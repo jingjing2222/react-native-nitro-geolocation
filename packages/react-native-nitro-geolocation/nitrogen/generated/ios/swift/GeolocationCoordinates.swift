@@ -5,6 +5,7 @@
 /// Copyright © 2025 Marc Rousavy @ Margelo
 ///
 
+import Foundation
 import NitroModules
 
 /**
@@ -18,132 +19,170 @@ public extension GeolocationCoordinates {
   /**
    * Create a new instance of `GeolocationCoordinates`.
    */
-  init(latitude: Double, longitude: Double, altitude: Double?, accuracy: Double, altitudeAccuracy: Double?, heading: Double?, speed: Double?) {
-    self.init(latitude, longitude, { () -> bridge.std__optional_double_ in
+  init(latitude: Double, longitude: Double, altitude: Variant_NullType_Double?, accuracy: Double, altitudeAccuracy: Variant_NullType_Double?, heading: Variant_NullType_Double?, speed: Variant_NullType_Double?) {
+    self.init(latitude, longitude, { () -> bridge.std__optional_std__variant_nitro__NullType__double__ in
       if let __unwrappedValue = altitude {
-        return bridge.create_std__optional_double_(__unwrappedValue)
+        return bridge.create_std__optional_std__variant_nitro__NullType__double__({ () -> bridge.std__variant_nitro__NullType__double_ in
+          switch __unwrappedValue {
+            case .first(let __value):
+              return bridge.create_std__variant_nitro__NullType__double_(margelo.nitro.NullType.null)
+            case .second(let __value):
+              return bridge.create_std__variant_nitro__NullType__double_(__value)
+          }
+        }().variant)
       } else {
         return .init()
       }
-    }(), accuracy, { () -> bridge.std__optional_double_ in
+    }(), accuracy, { () -> bridge.std__optional_std__variant_nitro__NullType__double__ in
       if let __unwrappedValue = altitudeAccuracy {
-        return bridge.create_std__optional_double_(__unwrappedValue)
+        return bridge.create_std__optional_std__variant_nitro__NullType__double__({ () -> bridge.std__variant_nitro__NullType__double_ in
+          switch __unwrappedValue {
+            case .first(let __value):
+              return bridge.create_std__variant_nitro__NullType__double_(margelo.nitro.NullType.null)
+            case .second(let __value):
+              return bridge.create_std__variant_nitro__NullType__double_(__value)
+          }
+        }().variant)
       } else {
         return .init()
       }
-    }(), { () -> bridge.std__optional_double_ in
+    }(), { () -> bridge.std__optional_std__variant_nitro__NullType__double__ in
       if let __unwrappedValue = heading {
-        return bridge.create_std__optional_double_(__unwrappedValue)
+        return bridge.create_std__optional_std__variant_nitro__NullType__double__({ () -> bridge.std__variant_nitro__NullType__double_ in
+          switch __unwrappedValue {
+            case .first(let __value):
+              return bridge.create_std__variant_nitro__NullType__double_(margelo.nitro.NullType.null)
+            case .second(let __value):
+              return bridge.create_std__variant_nitro__NullType__double_(__value)
+          }
+        }().variant)
       } else {
         return .init()
       }
-    }(), { () -> bridge.std__optional_double_ in
+    }(), { () -> bridge.std__optional_std__variant_nitro__NullType__double__ in
       if let __unwrappedValue = speed {
-        return bridge.create_std__optional_double_(__unwrappedValue)
+        return bridge.create_std__optional_std__variant_nitro__NullType__double__({ () -> bridge.std__variant_nitro__NullType__double_ in
+          switch __unwrappedValue {
+            case .first(let __value):
+              return bridge.create_std__variant_nitro__NullType__double_(margelo.nitro.NullType.null)
+            case .second(let __value):
+              return bridge.create_std__variant_nitro__NullType__double_(__value)
+          }
+        }().variant)
       } else {
         return .init()
       }
     }())
   }
 
+  @inline(__always)
   var latitude: Double {
-    @inline(__always)
-    get {
-      return self.__latitude
-    }
-    @inline(__always)
-    set {
-      self.__latitude = newValue
-    }
+    return self.__latitude
   }
   
+  @inline(__always)
   var longitude: Double {
-    @inline(__always)
-    get {
-      return self.__longitude
-    }
-    @inline(__always)
-    set {
-      self.__longitude = newValue
-    }
+    return self.__longitude
   }
   
-  var altitude: Double? {
-    @inline(__always)
-    get {
-      return self.__altitude.value
-    }
-    @inline(__always)
-    set {
-      self.__altitude = { () -> bridge.std__optional_double_ in
-        if let __unwrappedValue = newValue {
-          return bridge.create_std__optional_double_(__unwrappedValue)
-        } else {
-          return .init()
-        }
-      }()
-    }
+  @inline(__always)
+  var altitude: Variant_NullType_Double? {
+    return { () -> Variant_NullType_Double? in
+      if bridge.has_value_std__optional_std__variant_nitro__NullType__double__(self.__altitude) {
+        let __unwrapped = bridge.get_std__optional_std__variant_nitro__NullType__double__(self.__altitude)
+        return { () -> Variant_NullType_Double in
+          let __variant = bridge.std__variant_nitro__NullType__double_(__unwrapped)
+          switch __variant.index() {
+            case 0:
+              let __actual = __variant.get_0()
+              return .first(NullType.null)
+            case 1:
+              let __actual = __variant.get_1()
+              return .second(__actual)
+            default:
+              fatalError("Variant can never have index \(__variant.index())!")
+          }
+        }()
+      } else {
+        return nil
+      }
+    }()
   }
   
+  @inline(__always)
   var accuracy: Double {
-    @inline(__always)
-    get {
-      return self.__accuracy
-    }
-    @inline(__always)
-    set {
-      self.__accuracy = newValue
-    }
+    return self.__accuracy
   }
   
-  var altitudeAccuracy: Double? {
-    @inline(__always)
-    get {
-      return self.__altitudeAccuracy.value
-    }
-    @inline(__always)
-    set {
-      self.__altitudeAccuracy = { () -> bridge.std__optional_double_ in
-        if let __unwrappedValue = newValue {
-          return bridge.create_std__optional_double_(__unwrappedValue)
-        } else {
-          return .init()
-        }
-      }()
-    }
+  @inline(__always)
+  var altitudeAccuracy: Variant_NullType_Double? {
+    return { () -> Variant_NullType_Double? in
+      if bridge.has_value_std__optional_std__variant_nitro__NullType__double__(self.__altitudeAccuracy) {
+        let __unwrapped = bridge.get_std__optional_std__variant_nitro__NullType__double__(self.__altitudeAccuracy)
+        return { () -> Variant_NullType_Double in
+          let __variant = bridge.std__variant_nitro__NullType__double_(__unwrapped)
+          switch __variant.index() {
+            case 0:
+              let __actual = __variant.get_0()
+              return .first(NullType.null)
+            case 1:
+              let __actual = __variant.get_1()
+              return .second(__actual)
+            default:
+              fatalError("Variant can never have index \(__variant.index())!")
+          }
+        }()
+      } else {
+        return nil
+      }
+    }()
   }
   
-  var heading: Double? {
-    @inline(__always)
-    get {
-      return self.__heading.value
-    }
-    @inline(__always)
-    set {
-      self.__heading = { () -> bridge.std__optional_double_ in
-        if let __unwrappedValue = newValue {
-          return bridge.create_std__optional_double_(__unwrappedValue)
-        } else {
-          return .init()
-        }
-      }()
-    }
+  @inline(__always)
+  var heading: Variant_NullType_Double? {
+    return { () -> Variant_NullType_Double? in
+      if bridge.has_value_std__optional_std__variant_nitro__NullType__double__(self.__heading) {
+        let __unwrapped = bridge.get_std__optional_std__variant_nitro__NullType__double__(self.__heading)
+        return { () -> Variant_NullType_Double in
+          let __variant = bridge.std__variant_nitro__NullType__double_(__unwrapped)
+          switch __variant.index() {
+            case 0:
+              let __actual = __variant.get_0()
+              return .first(NullType.null)
+            case 1:
+              let __actual = __variant.get_1()
+              return .second(__actual)
+            default:
+              fatalError("Variant can never have index \(__variant.index())!")
+          }
+        }()
+      } else {
+        return nil
+      }
+    }()
   }
   
-  var speed: Double? {
-    @inline(__always)
-    get {
-      return self.__speed.value
-    }
-    @inline(__always)
-    set {
-      self.__speed = { () -> bridge.std__optional_double_ in
-        if let __unwrappedValue = newValue {
-          return bridge.create_std__optional_double_(__unwrappedValue)
-        } else {
-          return .init()
-        }
-      }()
-    }
+  @inline(__always)
+  var speed: Variant_NullType_Double? {
+    return { () -> Variant_NullType_Double? in
+      if bridge.has_value_std__optional_std__variant_nitro__NullType__double__(self.__speed) {
+        let __unwrapped = bridge.get_std__optional_std__variant_nitro__NullType__double__(self.__speed)
+        return { () -> Variant_NullType_Double in
+          let __variant = bridge.std__variant_nitro__NullType__double_(__unwrapped)
+          switch __variant.index() {
+            case 0:
+              let __actual = __variant.get_0()
+              return .first(NullType.null)
+            case 1:
+              let __actual = __variant.get_1()
+              return .second(__actual)
+            default:
+              fatalError("Variant can never have index \(__variant.index())!")
+          }
+        }()
+      } else {
+        return nil
+      }
+    }()
   }
 }

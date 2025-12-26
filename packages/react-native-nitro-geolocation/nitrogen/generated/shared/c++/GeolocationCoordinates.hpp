@@ -17,9 +17,21 @@
 #else
 #error NitroModules cannot be found! Are you sure you installed NitroModules properly?
 #endif
+#if __has_include(<NitroModules/JSIHelpers.hpp>)
+#include <NitroModules/JSIHelpers.hpp>
+#else
+#error NitroModules cannot be found! Are you sure you installed NitroModules properly?
+#endif
+#if __has_include(<NitroModules/PropNameIDCache.hpp>)
+#include <NitroModules/PropNameIDCache.hpp>
+#else
+#error NitroModules cannot be found! Are you sure you installed NitroModules properly?
+#endif
 
 
 
+#include <NitroModules/Null.hpp>
+#include <variant>
 #include <optional>
 
 namespace margelo::nitro::nitrogeolocation {
@@ -27,19 +39,22 @@ namespace margelo::nitro::nitrogeolocation {
   /**
    * A struct which can be represented as a JavaScript object (GeolocationCoordinates).
    */
-  struct GeolocationCoordinates {
+  struct GeolocationCoordinates final {
   public:
     double latitude     SWIFT_PRIVATE;
     double longitude     SWIFT_PRIVATE;
-    std::optional<double> altitude     SWIFT_PRIVATE;
+    std::optional<std::variant<nitro::NullType, double>> altitude     SWIFT_PRIVATE;
     double accuracy     SWIFT_PRIVATE;
-    std::optional<double> altitudeAccuracy     SWIFT_PRIVATE;
-    std::optional<double> heading     SWIFT_PRIVATE;
-    std::optional<double> speed     SWIFT_PRIVATE;
+    std::optional<std::variant<nitro::NullType, double>> altitudeAccuracy     SWIFT_PRIVATE;
+    std::optional<std::variant<nitro::NullType, double>> heading     SWIFT_PRIVATE;
+    std::optional<std::variant<nitro::NullType, double>> speed     SWIFT_PRIVATE;
 
   public:
     GeolocationCoordinates() = default;
-    explicit GeolocationCoordinates(double latitude, double longitude, std::optional<double> altitude, double accuracy, std::optional<double> altitudeAccuracy, std::optional<double> heading, std::optional<double> speed): latitude(latitude), longitude(longitude), altitude(altitude), accuracy(accuracy), altitudeAccuracy(altitudeAccuracy), heading(heading), speed(speed) {}
+    explicit GeolocationCoordinates(double latitude, double longitude, std::optional<std::variant<nitro::NullType, double>> altitude, double accuracy, std::optional<std::variant<nitro::NullType, double>> altitudeAccuracy, std::optional<std::variant<nitro::NullType, double>> heading, std::optional<std::variant<nitro::NullType, double>> speed): latitude(latitude), longitude(longitude), altitude(altitude), accuracy(accuracy), altitudeAccuracy(altitudeAccuracy), heading(heading), speed(speed) {}
+
+  public:
+    friend bool operator==(const GeolocationCoordinates& lhs, const GeolocationCoordinates& rhs) = default;
   };
 
 } // namespace margelo::nitro::nitrogeolocation
@@ -52,24 +67,24 @@ namespace margelo::nitro {
     static inline margelo::nitro::nitrogeolocation::GeolocationCoordinates fromJSI(jsi::Runtime& runtime, const jsi::Value& arg) {
       jsi::Object obj = arg.asObject(runtime);
       return margelo::nitro::nitrogeolocation::GeolocationCoordinates(
-        JSIConverter<double>::fromJSI(runtime, obj.getProperty(runtime, "latitude")),
-        JSIConverter<double>::fromJSI(runtime, obj.getProperty(runtime, "longitude")),
-        JSIConverter<std::optional<double>>::fromJSI(runtime, obj.getProperty(runtime, "altitude")),
-        JSIConverter<double>::fromJSI(runtime, obj.getProperty(runtime, "accuracy")),
-        JSIConverter<std::optional<double>>::fromJSI(runtime, obj.getProperty(runtime, "altitudeAccuracy")),
-        JSIConverter<std::optional<double>>::fromJSI(runtime, obj.getProperty(runtime, "heading")),
-        JSIConverter<std::optional<double>>::fromJSI(runtime, obj.getProperty(runtime, "speed"))
+        JSIConverter<double>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "latitude"))),
+        JSIConverter<double>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "longitude"))),
+        JSIConverter<std::optional<std::variant<nitro::NullType, double>>>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "altitude"))),
+        JSIConverter<double>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "accuracy"))),
+        JSIConverter<std::optional<std::variant<nitro::NullType, double>>>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "altitudeAccuracy"))),
+        JSIConverter<std::optional<std::variant<nitro::NullType, double>>>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "heading"))),
+        JSIConverter<std::optional<std::variant<nitro::NullType, double>>>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "speed")))
       );
     }
     static inline jsi::Value toJSI(jsi::Runtime& runtime, const margelo::nitro::nitrogeolocation::GeolocationCoordinates& arg) {
       jsi::Object obj(runtime);
-      obj.setProperty(runtime, "latitude", JSIConverter<double>::toJSI(runtime, arg.latitude));
-      obj.setProperty(runtime, "longitude", JSIConverter<double>::toJSI(runtime, arg.longitude));
-      obj.setProperty(runtime, "altitude", JSIConverter<std::optional<double>>::toJSI(runtime, arg.altitude));
-      obj.setProperty(runtime, "accuracy", JSIConverter<double>::toJSI(runtime, arg.accuracy));
-      obj.setProperty(runtime, "altitudeAccuracy", JSIConverter<std::optional<double>>::toJSI(runtime, arg.altitudeAccuracy));
-      obj.setProperty(runtime, "heading", JSIConverter<std::optional<double>>::toJSI(runtime, arg.heading));
-      obj.setProperty(runtime, "speed", JSIConverter<std::optional<double>>::toJSI(runtime, arg.speed));
+      obj.setProperty(runtime, PropNameIDCache::get(runtime, "latitude"), JSIConverter<double>::toJSI(runtime, arg.latitude));
+      obj.setProperty(runtime, PropNameIDCache::get(runtime, "longitude"), JSIConverter<double>::toJSI(runtime, arg.longitude));
+      obj.setProperty(runtime, PropNameIDCache::get(runtime, "altitude"), JSIConverter<std::optional<std::variant<nitro::NullType, double>>>::toJSI(runtime, arg.altitude));
+      obj.setProperty(runtime, PropNameIDCache::get(runtime, "accuracy"), JSIConverter<double>::toJSI(runtime, arg.accuracy));
+      obj.setProperty(runtime, PropNameIDCache::get(runtime, "altitudeAccuracy"), JSIConverter<std::optional<std::variant<nitro::NullType, double>>>::toJSI(runtime, arg.altitudeAccuracy));
+      obj.setProperty(runtime, PropNameIDCache::get(runtime, "heading"), JSIConverter<std::optional<std::variant<nitro::NullType, double>>>::toJSI(runtime, arg.heading));
+      obj.setProperty(runtime, PropNameIDCache::get(runtime, "speed"), JSIConverter<std::optional<std::variant<nitro::NullType, double>>>::toJSI(runtime, arg.speed));
       return obj;
     }
     static inline bool canConvert(jsi::Runtime& runtime, const jsi::Value& value) {
@@ -77,13 +92,16 @@ namespace margelo::nitro {
         return false;
       }
       jsi::Object obj = value.getObject(runtime);
-      if (!JSIConverter<double>::canConvert(runtime, obj.getProperty(runtime, "latitude"))) return false;
-      if (!JSIConverter<double>::canConvert(runtime, obj.getProperty(runtime, "longitude"))) return false;
-      if (!JSIConverter<std::optional<double>>::canConvert(runtime, obj.getProperty(runtime, "altitude"))) return false;
-      if (!JSIConverter<double>::canConvert(runtime, obj.getProperty(runtime, "accuracy"))) return false;
-      if (!JSIConverter<std::optional<double>>::canConvert(runtime, obj.getProperty(runtime, "altitudeAccuracy"))) return false;
-      if (!JSIConverter<std::optional<double>>::canConvert(runtime, obj.getProperty(runtime, "heading"))) return false;
-      if (!JSIConverter<std::optional<double>>::canConvert(runtime, obj.getProperty(runtime, "speed"))) return false;
+      if (!nitro::isPlainObject(runtime, obj)) {
+        return false;
+      }
+      if (!JSIConverter<double>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "latitude")))) return false;
+      if (!JSIConverter<double>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "longitude")))) return false;
+      if (!JSIConverter<std::optional<std::variant<nitro::NullType, double>>>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "altitude")))) return false;
+      if (!JSIConverter<double>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "accuracy")))) return false;
+      if (!JSIConverter<std::optional<std::variant<nitro::NullType, double>>>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "altitudeAccuracy")))) return false;
+      if (!JSIConverter<std::optional<std::variant<nitro::NullType, double>>>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "heading")))) return false;
+      if (!JSIConverter<std::optional<std::variant<nitro::NullType, double>>>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "speed")))) return false;
       return true;
     }
   };

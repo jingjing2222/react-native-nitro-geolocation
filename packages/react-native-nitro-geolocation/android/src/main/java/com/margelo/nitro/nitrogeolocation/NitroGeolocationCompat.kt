@@ -5,9 +5,9 @@ import com.facebook.react.bridge.ReactApplicationContext
 import com.margelo.nitro.NitroModules
 
 @DoNotStrip
-class NitroGeolocation(
+class NitroGeolocationCompat(
         private val reactContext: ReactApplicationContext = NitroModules.applicationContext!!
-) : HybridNitroGeolocationSpec() {
+) : HybridNitroGeolocationCompatSpec() {
     private var configuration: RNConfigurationInternal =
             RNConfigurationInternal(
                     skipPermissionRequests = false,

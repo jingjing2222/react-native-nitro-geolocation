@@ -1,6 +1,6 @@
-import type { RNConfigurationInternal } from "./NitroGeolocation.nitro";
-import { NitroGeolocationHybridObject } from "./NitroGeolocationModule";
-import type { GeolocationConfiguration } from "./types";
+import type { RNConfigurationInternal } from "../NitroGeolocationCompat.nitro";
+import { NitroGeolocationHybridObject } from "../NitroGeolocationModule";
+import type { GeolocationConfiguration } from "../types";
 
 // Mapping layer: convert "android" to "android_platform" for C++
 function mapConfigToInternal(
