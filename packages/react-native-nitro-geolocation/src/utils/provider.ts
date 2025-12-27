@@ -1,7 +1,7 @@
 /**
  * Location provider types supported on Android.
  */
-export type Provider = 'gps' | 'network' | null;
+export type Provider = "gps" | "network" | null;
 
 /**
  * Selects the best available location provider based on user preferences
@@ -37,16 +37,16 @@ export function selectProvider(
   networkAvailable: boolean
 ): Provider {
   // Determine preferred and fallback providers based on accuracy requirement
-  const preferredProvider = enableHighAccuracy ? 'gps' : 'network';
-  const fallbackProvider = enableHighAccuracy ? 'network' : 'gps';
+  const preferredProvider = enableHighAccuracy ? "gps" : "network";
+  const fallbackProvider = enableHighAccuracy ? "network" : "gps";
 
   // Check if preferred provider is available
   const isPreferredAvailable =
-    preferredProvider === 'gps' ? gpsAvailable : networkAvailable;
+    preferredProvider === "gps" ? gpsAvailable : networkAvailable;
 
   // Check if fallback provider is available
   const isFallbackAvailable =
-    fallbackProvider === 'gps' ? gpsAvailable : networkAvailable;
+    fallbackProvider === "gps" ? gpsAvailable : networkAvailable;
 
   // Return the best available provider
   if (isPreferredAvailable) {

@@ -8,9 +8,8 @@
  * ```tsx
  * import {
  *   GeolocationProvider,
- *   checkPermission,
- *   requestPermission,
- *   getCurrentPosition,
+ *   useRequestPermission,
+ *   useGetCurrentPosition,
  *   useWatchPosition
  * } from 'react-native-nitro-geolocation';
  *
@@ -29,6 +28,7 @@
  * }
  *
  * function LocationButton() {
+ *   const { getCurrentPosition } = useGetCurrentPosition();
  *   const [loading, setLoading] = useState(false);
  *
  *   const handlePress = async () => {
@@ -49,10 +49,10 @@
  */
 
 // Components
-export * from './components';
+export * from "./components";
 
 // Hooks
-export * from './hooks';
+export * from "./hooks";
 
 // Types from Nitro spec
 export type {
@@ -61,13 +61,13 @@ export type {
   LocationProvider,
   ModernGeolocationConfiguration,
   LocationRequestOptions,
-  LocationError,
-} from './NitroGeolocation.nitro';
+  LocationError
+} from "./NitroGeolocation.nitro";
 
 export type {
   GeolocationResponse,
-  GeolocationCoordinates,
-} from './types';
+  GeolocationCoordinates
+} from "./types";
 
 // Pure utility functions (advanced users only)
-export * from './utils';
+export * from "./utils";

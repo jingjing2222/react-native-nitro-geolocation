@@ -6,10 +6,10 @@ import type { GeolocationResponse } from "./types";
  * Matches native permission states across iOS and Android.
  */
 export type PermissionStatus =
-  | "granted"      // User has granted location permission
-  | "denied"       // User has denied permission
-  | "restricted"   // Permission is restricted (iOS parental controls)
-  | "undetermined" // Permission not yet requested
+  | "granted" // User has granted location permission
+  | "denied" // User has denied permission
+  | "restricted" // Permission is restricted (iOS parental controls)
+  | "undetermined"; // Permission not yet requested
 
 /**
  * iOS authorization level.
@@ -87,10 +87,9 @@ export interface LocationRequestOptions {
  * Location error structure.
  */
 export interface LocationError {
-  code: number;    // 1: PERMISSION_DENIED, 2: POSITION_UNAVAILABLE, 3: TIMEOUT
+  code: number; // 1: PERMISSION_DENIED, 2: POSITION_UNAVAILABLE, 3: TIMEOUT
   message: string;
 }
-
 
 /**
  * Modern Geolocation Nitro Module.
@@ -103,7 +102,6 @@ export interface LocationError {
  */
 export interface NitroGeolocation
   extends HybridObject<{ ios: "swift"; android: "kotlin" }> {
-
   /**
    * Set global geolocation configuration.
    * Should be called once at app startup via GeolocationProvider.

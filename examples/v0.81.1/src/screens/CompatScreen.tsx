@@ -1,18 +1,18 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState } from "react";
 import {
+  Alert,
+  Button,
   ScrollView,
   StyleSheet,
   Text,
-  View,
-  Button,
-  Alert,
-} from 'react-native';
+  View
+} from "react-native";
 import GeolocationCompat, {
-  type GeolocationResponse,
-} from 'react-native-nitro-geolocation/compat';
+  type GeolocationResponse
+} from "react-native-nitro-geolocation/compat";
 
 export default function CompatScreen() {
-  const [permissionStatus, setPermissionStatus] = useState<string>('Unknown');
+  const [permissionStatus, setPermissionStatus] = useState<string>("Unknown");
   const [currentPosition, setCurrentPosition] =
     useState<GeolocationResponse | null>(null);
   const [isLoadingPosition, setIsLoadingPosition] = useState(false);
@@ -25,21 +25,21 @@ export default function CompatScreen() {
   useEffect(() => {
     GeolocationCompat.setRNConfiguration({
       skipPermissionRequests: false,
-      authorizationLevel: 'whenInUse',
-      locationProvider: 'auto',
+      authorizationLevel: "whenInUse",
+      locationProvider: "auto"
     });
   }, []);
 
   const handleRequestAuthorization = () => {
-    setPermissionStatus('Requesting...');
+    setPermissionStatus("Requesting...");
     GeolocationCompat.requestAuthorization(
       () => {
-        setPermissionStatus('Granted ✅');
-        Alert.alert('Success', 'Location permission granted!');
+        setPermissionStatus("Granted ✅");
+        Alert.alert("Success", "Location permission granted!");
       },
       (error) => {
         setPermissionStatus(`Denied ❌ (Code: ${error.code})`);
-        Alert.alert('Error', error.message);
+        Alert.alert("Error", error.message);
       }
     );
   };
@@ -55,19 +55,19 @@ export default function CompatScreen() {
       },
       (error) => {
         setIsLoadingPosition(false);
-        Alert.alert('Error', `Code ${error.code}: ${error.message}`);
+        Alert.alert("Error", `Code ${error.code}: ${error.message}`);
       },
       {
         enableHighAccuracy: true,
         timeout: 15000,
-        maximumAge: 10000,
+        maximumAge: 10000
       }
     );
   };
 
   const handleStartWatching = () => {
     if (watchId !== null) {
-      Alert.alert('Info', 'Already watching position');
+      Alert.alert("Info", "Already watching position");
       return;
     }
 
@@ -80,12 +80,12 @@ export default function CompatScreen() {
         setWatchUpdateCount((count) => count + 1);
       },
       (error) => {
-        Alert.alert('Watch Error', `Code ${error.code}: ${error.message}`);
+        Alert.alert("Watch Error", `Code ${error.code}: ${error.message}`);
       },
       {
         enableHighAccuracy: true,
         distanceFilter: 10,
-        interval: 5000,
+        interval: 5000
       }
     );
 
@@ -94,7 +94,7 @@ export default function CompatScreen() {
 
   const handleStopWatching = () => {
     if (watchId === null) {
-      Alert.alert('Info', 'Not watching position');
+      Alert.alert("Info", "Not watching position");
       return;
     }
 
@@ -102,7 +102,10 @@ export default function CompatScreen() {
     setWatchId(null);
   };
 
-  const renderPositionInfo = (position: GeolocationResponse | null, title: string) => {
+  const renderPositionInfo = (
+    position: GeolocationResponse | null,
+    title: string
+  ) => {
     if (!position) return null;
 
     return (
@@ -144,7 +147,8 @@ export default function CompatScreen() {
       <View style={styles.header}>
         <Text style={styles.title}>Compat API</Text>
         <Text style={styles.subtitle}>
-          Legacy callback-based API compatible with @react-native-community/geolocation
+          Legacy callback-based API compatible with
+          @react-native-community/geolocation
         </Text>
       </View>
 
@@ -169,13 +173,13 @@ export default function CompatScreen() {
         <Text style={styles.sectionTitle}>Get Current Position (One-time)</Text>
         <View style={styles.buttonContainer}>
           <Button
-            title={isLoadingPosition ? 'Loading...' : 'Get Current Position'}
+            title={isLoadingPosition ? "Loading..." : "Get Current Position"}
             onPress={handleGetCurrentPosition}
             disabled={isLoadingPosition}
             color="#4CAF50"
           />
         </View>
-        {renderPositionInfo(currentPosition, 'Current Position')}
+        {renderPositionInfo(currentPosition, "Current Position")}
       </View>
 
       <View style={styles.divider} />
@@ -185,7 +189,9 @@ export default function CompatScreen() {
         <View style={styles.statusContainer}>
           <Text style={styles.statusLabel}>Watch Status:</Text>
           <Text style={styles.statusValue}>
-            {watchId !== null ? `Watching 🟢 (ID: ${watchId})` : 'Not Watching 🔴'}
+            {watchId !== null
+              ? `Watching 🟢 (ID: ${watchId})`
+              : "Not Watching 🔴"}
           </Text>
           {watchId !== null && (
             <Text style={styles.statusLabel}>Updates: {watchUpdateCount}</Text>
@@ -209,7 +215,7 @@ export default function CompatScreen() {
             />
           </View>
         </View>
-        {renderPositionInfo(watchedPosition, 'Watched Position (Live)')}
+        {renderPositionInfo(watchedPosition, "Watched Position (Live)")}
       </View>
 
       <View style={styles.footer}>
@@ -230,95 +236,95 @@ export default function CompatScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: "#fff"
   },
   header: {
     padding: 20,
-    backgroundColor: '#FF9800',
+    backgroundColor: "#FF9800"
   },
   title: {
     fontSize: 24,
-    fontWeight: '700',
-    color: '#fff',
-    marginBottom: 8,
+    fontWeight: "700",
+    color: "#fff",
+    marginBottom: 8
   },
   subtitle: {
     fontSize: 14,
-    color: '#FFF3E0',
+    color: "#FFF3E0"
   },
   section: {
-    padding: 20,
+    padding: 20
   },
   sectionTitle: {
     fontSize: 18,
-    fontWeight: '600',
-    color: '#000',
-    marginBottom: 12,
+    fontWeight: "600",
+    color: "#000",
+    marginBottom: 12
   },
   statusContainer: {
-    backgroundColor: '#FFF3E0',
+    backgroundColor: "#FFF3E0",
     padding: 12,
     borderRadius: 8,
-    marginBottom: 12,
+    marginBottom: 12
   },
   statusLabel: {
     fontSize: 14,
-    color: '#E65100',
-    fontWeight: '600',
+    color: "#E65100",
+    fontWeight: "600"
   },
   statusValue: {
     fontSize: 16,
-    color: '#000',
-    fontWeight: '700',
-    marginTop: 4,
+    color: "#000",
+    fontWeight: "700",
+    marginTop: 4
   },
   buttonContainer: {
-    marginVertical: 8,
+    marginVertical: 8
   },
   buttonRow: {
-    flexDirection: 'row',
-    gap: 12,
+    flexDirection: "row",
+    gap: 12
   },
   button: {
-    flex: 1,
+    flex: 1
   },
   positionContainer: {
     marginTop: 12,
     padding: 16,
-    backgroundColor: '#FFF3E0',
+    backgroundColor: "#FFF3E0",
     borderRadius: 8,
     borderWidth: 1,
-    borderColor: '#FF9800',
+    borderColor: "#FF9800"
   },
   positionTitle: {
     fontSize: 16,
-    fontWeight: '600',
-    color: '#E65100',
-    marginBottom: 8,
+    fontWeight: "600",
+    color: "#E65100",
+    marginBottom: 8
   },
   positionText: {
     fontSize: 14,
-    color: '#BF360C',
-    marginVertical: 2,
+    color: "#BF360C",
+    marginVertical: 2
   },
   divider: {
     height: 1,
-    backgroundColor: '#E0E0E0',
+    backgroundColor: "#E0E0E0"
   },
   footer: {
     padding: 20,
-    backgroundColor: '#F5F5F5',
-    marginTop: 20,
+    backgroundColor: "#F5F5F5",
+    marginTop: 20
   },
   footerTitle: {
     fontSize: 16,
-    fontWeight: '600',
-    color: '#000',
-    marginBottom: 8,
+    fontWeight: "600",
+    color: "#000",
+    marginBottom: 8
   },
   footerText: {
     fontSize: 14,
-    color: '#333',
-    marginVertical: 3,
-  },
+    color: "#333",
+    marginVertical: 3
+  }
 });

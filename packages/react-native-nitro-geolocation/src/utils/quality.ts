@@ -7,7 +7,7 @@ export interface LocationQuality {
   /** Horizontal accuracy in meters */
   accuracyMeters: number;
   /** Location provider type */
-  provider: 'gps' | 'network';
+  provider: "gps" | "network";
 }
 
 /** Time threshold for considering locations significantly newer/older (2 minutes) */

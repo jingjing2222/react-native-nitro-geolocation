@@ -14,7 +14,7 @@ export interface LocationRequest {
  * - 'medium': Network-assisted accuracy (~100 meters)
  * - 'low': Cell tower accuracy (~1000+ meters)
  */
-export type AccuracyLevel = 'high' | 'medium' | 'low';
+export type AccuracyLevel = "high" | "medium" | "low";
 
 /**
  * Merged configuration representing the optimal settings
@@ -61,19 +61,19 @@ export function mergeConfigurations(
   // If no requests, return default low-power settings
   if (requests.length === 0) {
     return {
-      bestAccuracy: 'low',
-      smallestDistanceFilter: 0,
+      bestAccuracy: "low",
+      smallestDistanceFilter: 0
     };
   }
 
-  let bestAccuracy: AccuracyLevel = 'low';
+  let bestAccuracy: AccuracyLevel = "low";
   let smallestDistanceFilter = Number.POSITIVE_INFINITY;
 
   // Iterate through all requests to find the most demanding settings
   for (const request of requests) {
     // If any request needs high accuracy, use high accuracy
     if (request.enableHighAccuracy) {
-      bestAccuracy = 'high';
+      bestAccuracy = "high";
     }
 
     // Use the smallest distance filter
@@ -86,6 +86,8 @@ export function mergeConfigurations(
   return {
     bestAccuracy,
     smallestDistanceFilter:
-      smallestDistanceFilter === Number.POSITIVE_INFINITY ? 0 : smallestDistanceFilter,
+      smallestDistanceFilter === Number.POSITIVE_INFINITY
+        ? 0
+        : smallestDistanceFilter
   };
 }

@@ -1,9 +1,9 @@
-import React from 'react';
-import { NavigationContainer } from '@react-navigation/native';
-import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import { GeolocationProvider } from 'react-native-nitro-geolocation';
-import DefaultScreen from './screens/DefaultScreen';
-import CompatScreen from './screens/CompatScreen';
+import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
+import { NavigationContainer } from "@react-navigation/native";
+import React from "react";
+import { GeolocationProvider } from "react-native-nitro-geolocation";
+import CompatScreen from "./screens/CompatScreen";
+import DefaultScreen from "./screens/DefaultScreen";
 
 const Tab = createBottomTabNavigator();
 
@@ -11,31 +11,31 @@ export default function App() {
   return (
     <GeolocationProvider
       config={{
-        authorizationLevel: 'whenInUse',
+        authorizationLevel: "whenInUse",
         enableBackgroundLocationUpdates: false,
-        locationProvider: 'auto',
+        locationProvider: "auto"
       }}
     >
       <NavigationContainer>
         <Tab.Navigator
           screenOptions={{
             headerShown: false,
-            tabBarActiveTintColor: '#2196F3',
-            tabBarInactiveTintColor: '#757575',
+            tabBarActiveTintColor: "#2196F3",
+            tabBarInactiveTintColor: "#757575"
           }}
         >
           <Tab.Screen
             name="Default"
             component={DefaultScreen}
             options={{
-              tabBarLabel: 'Default API',
+              tabBarLabel: "Default API"
             }}
           />
           <Tab.Screen
             name="Compat"
             component={CompatScreen}
             options={{
-              tabBarLabel: 'Compat API',
+              tabBarLabel: "Compat API"
             }}
           />
         </Tab.Navigator>

@@ -1,11 +1,11 @@
-import { useState, useEffect, useRef } from 'react';
-import { NitroGeolocationHybridObject } from '../NitroGeolocationModule';
-import { useGeolocationContext } from '../components/GeolocationProvider';
-import type { GeolocationResponse } from '../types';
+import { useEffect, useRef, useState } from "react";
 import type {
-  LocationRequestOptions,
   LocationError,
-} from '../NitroGeolocation.nitro';
+  LocationRequestOptions
+} from "../NitroGeolocation.nitro";
+import { NitroGeolocationHybridObject } from "../NitroGeolocationModule";
+import { useGeolocationContext } from "../components/GeolocationProvider";
+import type { GeolocationResponse } from "../types";
 
 /**
  * Options for useWatchPosition hook.
@@ -87,8 +87,9 @@ export function useWatchPosition(options?: UseWatchPositionOptions) {
         setData(position);
       },
       (err: LocationError) => {
-        // Error callback
+        // Error callback - throw to be caught by Error Boundary
         if (!isMountedRef.current) return;
+        throw new Error(err.message);
       },
       options
     );
@@ -109,7 +110,7 @@ export function useWatchPosition(options?: UseWatchPositionOptions) {
     options?.fastestInterval,
     options?.timeout,
     options?.maximumAge,
-    options?.useSignificantChanges,
+    options?.useSignificantChanges
   ]);
 
   // Track mount status
@@ -122,6 +123,6 @@ export function useWatchPosition(options?: UseWatchPositionOptions) {
 
   return {
     data,
-    isWatching,
+    isWatching
   };
 }

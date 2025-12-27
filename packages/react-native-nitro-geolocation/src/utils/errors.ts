@@ -8,7 +8,7 @@ export enum LocationErrorCode {
   /** Location provider is unavailable */
   POSITION_UNAVAILABLE = 2,
   /** The request to get location timed out */
-  TIMEOUT = 3,
+  TIMEOUT = 3
 }
 
 /**
@@ -75,7 +75,7 @@ export function mapCLErrorCode(clErrorCode: number): LocationErrorCode {
  * @returns The corresponding LocationErrorCode
  */
 export function mapAndroidException(exceptionType: string): LocationErrorCode {
-  if (exceptionType === 'SecurityException') {
+  if (exceptionType === "SecurityException") {
     return LocationErrorCode.PERMISSION_DENIED;
   }
   return LocationErrorCode.POSITION_UNAVAILABLE;
