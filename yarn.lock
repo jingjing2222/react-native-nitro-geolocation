@@ -9229,13 +9229,13 @@ __metadata:
   linkType: soft
 
 "react-native-nitro-geolocation@file:../../packages/react-native-nitro-geolocation/package.tgz::locator=react-native-nitro-geolocation-example%40workspace%3Aexamples%2Fv0.81.1":
-  version: 0.1.2
-  resolution: "react-native-nitro-geolocation@file:../../packages/react-native-nitro-geolocation/package.tgz#../../packages/react-native-nitro-geolocation/package.tgz::hash=daf9e5&locator=react-native-nitro-geolocation-example%40workspace%3Aexamples%2Fv0.81.1"
+  version: 0.2.0
+  resolution: "react-native-nitro-geolocation@file:../../packages/react-native-nitro-geolocation/package.tgz#../../packages/react-native-nitro-geolocation/package.tgz::hash=a1a0b5&locator=react-native-nitro-geolocation-example%40workspace%3Aexamples%2Fv0.81.1"
   peerDependencies:
     react: ">=18.0.0"
     react-native: ">=0.75.0"
     react-native-nitro-modules: ">=0.32.0"
-  checksum: 10c0/0cb381dc85ff523c959924215e68cfe5301f4974d5947682dd07e4973707cbc1414a3a668171e56abcfe51388dfa23ed088b00e0b4ef7be8cc0fee858d7d0ee8
+  checksum: 10c0/0303e70c6492d5cee15e10a62335b405386a4f21878f1fe973fac5c912a0296f90b7366c8ef1c3296efde32136ecd48b2acc808edc7ba120ab48d861d9a834b5
   languageName: node
   linkType: hard
 

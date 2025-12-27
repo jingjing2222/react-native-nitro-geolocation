@@ -185,13 +185,17 @@ export default function DefaultScreen() {
 
   const renderCurrentPositionSection = () => (
     <View style={styles.section}>
-      <Text style={styles.sectionTitle}>2. useGetCurrentPosition Hook (Query Style)</Text>
+      <Text style={styles.sectionTitle}>
+        2. useGetCurrentPosition Hook (Query Style)
+      </Text>
       <Text style={styles.description}>
         One-time location request with automatic state management
       </Text>
       {currentPositionError && (
         <View style={styles.errorContainer}>
-          <Text style={styles.errorText}>Error: {currentPositionError.message}</Text>
+          <Text style={styles.errorText}>
+            Error: {currentPositionError.message}
+          </Text>
         </View>
       )}
       <View style={styles.buttonContainer}>
@@ -208,7 +212,9 @@ export default function DefaultScreen() {
 
   const renderWatchPositionSection = () => (
     <View style={styles.section}>
-      <Text style={styles.sectionTitle}>3. useWatchPosition Hook (Stream Style)</Text>
+      <Text style={styles.sectionTitle}>
+        3. useWatchPosition Hook (Stream Style)
+      </Text>
       <Text style={styles.description}>
         Continuous location tracking with automatic cleanup
       </Text>
