@@ -25,7 +25,7 @@ private struct GeolocationErrorWrapper: Error {
  * - WatchPositionResult discriminated union
  * - Automatic subscription management
  */
-class NitroGeolocation: NSObject, HybridNitroGeolocationSpec {
+class NitroGeolocation: HybridNitroGeolocationSpec {
     // MARK: - Types
 
     private struct ParsedOptions {
@@ -119,7 +119,7 @@ class NitroGeolocation: NSObject, HybridNitroGeolocationSpec {
         // Already determined
         if currentStatus != .notDetermined {
             let status = self.mapCLAuthorizationStatus(currentStatus)
-            promise.resolve(status)
+            promise.resolve(withResult: status)
             return promise
         }
 
@@ -127,9 +127,9 @@ class NitroGeolocation: NSObject, HybridNitroGeolocationSpec {
         self.pendingPermissionResolvers.append { result in
             switch result {
             case .success(let status):
-                promise.resolve(status)
+                promise.resolve(withResult: status)
             case .failure(let error):
-                promise.reject(error)
+                promise.reject(withError: error)
             }
         }
 
@@ -155,7 +155,7 @@ class NitroGeolocation: NSObject, HybridNitroGeolocationSpec {
                 code: self.PERMISSION_DENIED,
                 message: message
             )
-            promise.reject(error)
+            promise.reject(withError: error)
             return promise
         }
 
@@ -164,7 +164,7 @@ class NitroGeolocation: NSObject, HybridNitroGeolocationSpec {
                 code: self.POSITION_UNAVAILABLE,
                 message: "Location services disabled."
             )
-            promise.reject(error)
+            promise.reject(withError: error)
             return promise
         }
 
@@ -176,7 +176,7 @@ class NitroGeolocation: NSObject, HybridNitroGeolocationSpec {
         if let cached = self.lastLocation,
            self.isCachedLocationValid(cached, options: parsedOptions) {
             let position = self.locationToPosition(cached)
-            promise.resolve(position)
+            promise.resolve(withResult: position)
             return promise
         }
 
@@ -187,9 +187,9 @@ class NitroGeolocation: NSObject, HybridNitroGeolocationSpec {
             resolver: { result in
                 switch result {
                 case .success(let response):
-                    promise.resolve(response)
+                    promise.resolve(withResult: response)
                 case .failure(let error):
-                    promise.reject(error)
+                    promise.reject(withError: error)
                 }
             },
             options: parsedOptions,
