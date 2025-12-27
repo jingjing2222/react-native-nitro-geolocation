@@ -56,7 +56,7 @@ Optional (for background access):
 
 ## 4. Usage with Modern API (Recommended)
 
-The Modern API provides a **TanStack Query-inspired** experience with Hooks and Provider pattern.
+The Modern API provides **React-friendly hooks** with role-based design patterns (Query, Mutation, Stream) and automatic state management.
 
 ### Setup Provider
 
@@ -92,16 +92,36 @@ function App() {
 import { useRequestPermission } from 'react-native-nitro-geolocation';
 
 function PermissionButton() {
-  const { requestPermission } = useRequestPermission();
+  const {
+    requestPermission,
+    status,
+    isPending,
+    isError,
+    error
+  } = useRequestPermission();
 
   const handlePress = async () => {
-    const status = await requestPermission();
-    if (status === 'granted') {
-      console.log('Permission granted!');
+    try {
+      const result = await requestPermission();
+      if (result === 'granted') {
+        console.log('Permission granted!');
+      }
+    } catch (err) {
+      console.error('Permission error:', err);
     }
   };
 
-  return <Button onPress={handlePress} title="Enable Location" />;
+  return (
+    <View>
+      <Button
+        onPress={handlePress}
+        disabled={isPending}
+        title={isPending ? 'Requesting...' : 'Enable Location'}
+      />
+      {isError && <Text>Error: {error?.message}</Text>}
+      {status && <Text>Status: {status}</Text>}
+    </View>
+  );
 }
 ```
 
@@ -111,26 +131,34 @@ function PermissionButton() {
 import { useGetCurrentPosition } from 'react-native-nitro-geolocation';
 
 function LocationButton() {
-  const { getCurrentPosition } = useGetCurrentPosition();
-  const [loading, setLoading] = useState(false);
+  const {
+    position,
+    isLoading,
+    isError,
+    error,
+    refetch
+  } = useGetCurrentPosition({
+    enabled: false,  // Manual trigger only
+    enableHighAccuracy: true,
+    timeout: 15000
+  });
 
-  const handlePress = async () => {
-    setLoading(true);
-    try {
-      const pos = await getCurrentPosition({
-        enableHighAccuracy: true,
-        timeout: 15000
-      });
-      console.log('Lat:', pos.coords.latitude);
-      console.log('Lng:', pos.coords.longitude);
-    } catch (error) {
-      console.error('Error:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  return <Button onPress={handlePress} disabled={loading} />;
+  return (
+    <View>
+      <Button
+        onPress={() => refetch()}
+        disabled={isLoading}
+        title={isLoading ? 'Loading...' : 'Get Location'}
+      />
+      {isError && <Text>Error: {error?.message}</Text>}
+      {position && (
+        <View>
+          <Text>Lat: {position.coords.latitude}</Text>
+          <Text>Lng: {position.coords.longitude}</Text>
+        </View>
+      )}
+    </View>
+  );
 }
 ```
 
@@ -142,7 +170,11 @@ import { useWatchPosition } from 'react-native-nitro-geolocation';
 function LiveTracker() {
   const [enabled, setEnabled] = useState(true);
 
-  const { data, isWatching } = useWatchPosition({
+  const {
+    position,
+    error,
+    isWatching
+  } = useWatchPosition({
     enabled,
     enableHighAccuracy: true,
     distanceFilter: 10  // Update every 10 meters
@@ -157,16 +189,20 @@ function LiveTracker() {
       />
 
       {isWatching ? (
-        <Text>Watching...</Text>
+        <Text>Watching 🟢</Text>
       ) : (
-        <Text>Stopped</Text>
+        <Text>Stopped 🔴</Text>
       )}
 
-      {data && (
+      {error && (
+        <Text style={{ color: 'red' }}>Error: {error.message}</Text>
+      )}
+
+      {position && (
         <View>
-          <Text>Lat: {data.coords.latitude}</Text>
-          <Text>Lng: {data.coords.longitude}</Text>
-          <Text>Accuracy: {data.coords.accuracy}m</Text>
+          <Text>Lat: {position.coords.latitude}</Text>
+          <Text>Lng: {position.coords.longitude}</Text>
+          <Text>Accuracy: {position.coords.accuracy}m</Text>
         </View>
       )}
     </View>
@@ -178,6 +214,7 @@ function LiveTracker() {
 - ✅ Automatic cleanup when component unmounts
 - ✅ Declarative start/stop with `enabled` prop
 - ✅ No need to manage watch IDs manually
+- ✅ Battery efficient - native subscription stops when disabled
 
 ---
 
@@ -268,12 +305,12 @@ function LocationTracker() {
 import { useWatchPosition } from 'react-native-nitro-geolocation';
 
 function LocationTracker() {
-  const { data } = useWatchPosition({
+  const { position } = useWatchPosition({
     enabled: true,
     enableHighAccuracy: true
   });
 
-  return <Map position={data} />;
+  return <Map position={position} />;
 }
 ```
 
@@ -283,6 +320,7 @@ function LocationTracker() {
 - Automatic cleanup
 - Declarative enable/disable
 - Better TypeScript support
+- Built-in state management (loading, error)
 
 ---
 
