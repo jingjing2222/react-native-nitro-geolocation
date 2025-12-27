@@ -56,7 +56,6 @@ export function useWatchPosition(options?: UseWatchPositionOptions) {
   useGeolocationContext();
 
   const [data, setData] = useState<GeolocationResponse | null>(null);
-  const [error, setError] = useState<LocationError | null>(null);
   const [isWatching, setIsWatching] = useState(false);
 
   // Store subscription token (hidden from user!)
@@ -86,12 +85,10 @@ export function useWatchPosition(options?: UseWatchPositionOptions) {
         // Success callback
         if (!isMountedRef.current) return;
         setData(position);
-        setError(null);
       },
       (err: LocationError) => {
         // Error callback
         if (!isMountedRef.current) return;
-        setError(err);
       },
       options
     );
@@ -125,7 +122,6 @@ export function useWatchPosition(options?: UseWatchPositionOptions) {
 
   return {
     data,
-    error,
     isWatching,
   };
 }

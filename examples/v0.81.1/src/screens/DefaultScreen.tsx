@@ -8,39 +8,26 @@ import {
   Switch,
 } from 'react-native';
 import {
-  useLocationPermission,
-  useCurrentPosition,
+  requestPermission,
+  getCurrentPosition,
   useWatchPosition,
 } from 'react-native-nitro-geolocation';
 import type { GeolocationResponse } from 'react-native-nitro-geolocation';
 
 export default function DefaultScreen() {
-  // Permission hook
-  const {
-    status: permissionStatus,
-    error: permissionError,
-    request: requestPermission,
-    isLoading: isPermissionLoading,
-  } = useLocationPermission();
+  // Permission state
+  const [permissionStatus, setPermissionStatus] = useState<string>('unknown');
+  const [isPermissionLoading, setIsPermissionLoading] = useState(false);
 
-  // Current position hook (one-time)
-  const {
-    data: currentPosition,
-    error: currentPositionError,
-    status: currentPositionStatus,
-    refetch,
-  } = useCurrentPosition({
-    enableHighAccuracy: true,
-    timeout: 15000,
-    maximumAge: 10000,
-    enabled: false, // Don't fetch on mount
-  });
+  // Current position state
+  const [currentPosition, setCurrentPosition] = useState<GeolocationResponse | null>(null);
+  const [isCurrentPositionLoading, setIsCurrentPositionLoading] = useState(false);
+  const [currentPositionError, setCurrentPositionError] = useState<string | null>(null);
 
   // Watch position hook (continuous)
   const [watchEnabled, setWatchEnabled] = useState(false);
   const {
     data: watchedPosition,
-    error: watchError,
     isWatching,
   } = useWatchPosition({
     enabled: watchEnabled,
@@ -50,11 +37,32 @@ export default function DefaultScreen() {
   });
 
   const handleRequestPermission = async () => {
-    await requestPermission();
+    setIsPermissionLoading(true);
+    try {
+      const status = await requestPermission();
+      setPermissionStatus(status);
+    } catch (err) {
+      setPermissionStatus('error');
+    } finally {
+      setIsPermissionLoading(false);
+    }
   };
 
-  const handleFetchPosition = () => {
-    refetch();
+  const handleFetchPosition = async () => {
+    setIsCurrentPositionLoading(true);
+    setCurrentPositionError(null);
+    try {
+      const position = await getCurrentPosition({
+        enableHighAccuracy: true,
+        timeout: 15000,
+        maximumAge: 10000,
+      });
+      setCurrentPosition(position);
+    } catch (err: any) {
+      setCurrentPositionError(err?.message || 'Unknown error');
+    } finally {
+      setIsCurrentPositionLoading(false);
+    }
   };
 
   const renderPermissionSection = () => (
@@ -68,11 +76,6 @@ export default function DefaultScreen() {
           {permissionStatus === 'denied' && ' ❌'}
         </Text>
       </View>
-      {permissionError && (
-        <View style={styles.errorContainer}>
-          <Text style={styles.errorText}>Error: {permissionError.message}</Text>
-        </View>
-      )}
       <View style={styles.buttonContainer}>
         <Button
           title={isPermissionLoading ? 'Loading...' : 'Request Permission'}
@@ -123,23 +126,17 @@ export default function DefaultScreen() {
 
   const renderCurrentPositionSection = () => (
     <View style={styles.section}>
-      <Text style={styles.sectionTitle}>Get Current Position (One-time)</Text>
-      <View style={styles.statusContainer}>
-        <Text style={styles.statusLabel}>Status:</Text>
-        <Text style={styles.statusValue}>{currentPositionStatus}</Text>
-      </View>
+      <Text style={styles.sectionTitle}>Get Current Position (On Demand)</Text>
       {currentPositionError && (
         <View style={styles.errorContainer}>
-          <Text style={styles.errorText}>
-            Error {currentPositionError.code}: {currentPositionError.message}
-          </Text>
+          <Text style={styles.errorText}>Error: {currentPositionError}</Text>
         </View>
       )}
       <View style={styles.buttonContainer}>
         <Button
-          title={currentPositionStatus === 'loading' ? 'Loading...' : 'Fetch Position'}
+          title={isCurrentPositionLoading ? 'Loading...' : 'Get Position'}
           onPress={handleFetchPosition}
-          disabled={currentPositionStatus === 'loading'}
+          disabled={isCurrentPositionLoading}
           color="#4CAF50"
         />
       </View>
@@ -160,13 +157,6 @@ export default function DefaultScreen() {
           {isWatching ? 'Watching 🟢' : 'Not Watching 🔴'}
         </Text>
       </View>
-      {watchError && (
-        <View style={styles.errorContainer}>
-          <Text style={styles.errorText}>
-            Error {watchError.code}: {watchError.message}
-          </Text>
-        </View>
-      )}
       {renderPositionInfo(watchedPosition, 'Watched Position (Live)')}
     </View>
   );
@@ -188,10 +178,10 @@ export default function DefaultScreen() {
 
       <View style={styles.footer}>
         <Text style={styles.footerTitle}>Features:</Text>
-        <Text style={styles.footerText}>✅ useLocationPermission hook</Text>
-        <Text style={styles.footerText}>✅ useCurrentPosition hook (React Query-like)</Text>
-        <Text style={styles.footerText}>✅ useWatchPosition hook (auto cleanup)</Text>
-        <Text style={styles.footerText}>✅ No manual subscription management</Text>
+        <Text style={styles.footerText}>✅ requestPermission() - Simple function</Text>
+        <Text style={styles.footerText}>✅ getCurrentPosition() - Simple async function</Text>
+        <Text style={styles.footerText}>✅ useWatchPosition() - Continuous tracking hook</Text>
+        <Text style={styles.footerText}>✅ Automatic cleanup via React lifecycle</Text>
         <Text style={styles.footerText}>✅ TypeScript first-class support</Text>
       </View>
     </ScrollView>

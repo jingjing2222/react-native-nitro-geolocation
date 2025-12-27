@@ -8,8 +8,9 @@
  * ```tsx
  * import {
  *   GeolocationProvider,
- *   useLocationPermission,
- *   useCurrentPosition,
+ *   checkPermission,
+ *   requestPermission,
+ *   getCurrentPosition,
  *   useWatchPosition
  * } from 'react-native-nitro-geolocation';
  *
@@ -27,15 +28,22 @@
  *   );
  * }
  *
- * function YourComponent() {
- *   const { data, error } = useCurrentPosition({
- *     enableHighAccuracy: true
- *   });
+ * function LocationButton() {
+ *   const [loading, setLoading] = useState(false);
  *
- *   if (error) return <Text>Error: {error.message}</Text>;
- *   if (!data) return <Text>Loading...</Text>;
+ *   const handlePress = async () => {
+ *     setLoading(true);
+ *     try {
+ *       const pos = await getCurrentPosition({ enableHighAccuracy: true });
+ *       console.log('Position:', pos);
+ *     } catch (error) {
+ *       console.error('Error:', error);
+ *     } finally {
+ *       setLoading(false);
+ *     }
+ *   };
  *
- *   return <Text>Lat: {data.coords.latitude}</Text>;
+ *   return <Button onPress={handlePress} disabled={loading} />;
  * }
  * ```
  */
