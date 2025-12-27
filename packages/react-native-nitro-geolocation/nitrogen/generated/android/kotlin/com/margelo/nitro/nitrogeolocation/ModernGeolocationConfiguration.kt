@@ -19,6 +19,9 @@ import com.facebook.proguard.annotations.DoNotStrip
 data class ModernGeolocationConfiguration(
   @DoNotStrip
   @Keep
+  val autoRequestPermission: Boolean?,
+  @DoNotStrip
+  @Keep
   val authorizationLevel: AuthorizationLevel?,
   @DoNotStrip
   @Keep
@@ -37,8 +40,8 @@ data class ModernGeolocationConfiguration(
     @Keep
     @Suppress("unused")
     @JvmStatic
-    private fun fromCpp(authorizationLevel: AuthorizationLevel?, enableBackgroundLocationUpdates: Boolean?, locationProvider: LocationProvider?): ModernGeolocationConfiguration {
-      return ModernGeolocationConfiguration(authorizationLevel, enableBackgroundLocationUpdates, locationProvider)
+    private fun fromCpp(autoRequestPermission: Boolean?, authorizationLevel: AuthorizationLevel?, enableBackgroundLocationUpdates: Boolean?, locationProvider: LocationProvider?): ModernGeolocationConfiguration {
+      return ModernGeolocationConfiguration(autoRequestPermission, authorizationLevel, enableBackgroundLocationUpdates, locationProvider)
     }
   }
 }

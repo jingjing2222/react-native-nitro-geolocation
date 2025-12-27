@@ -35,6 +35,8 @@ namespace margelo::nitro::nitrogeolocation {
     [[nodiscard]]
     ModernGeolocationConfiguration toCpp() const {
       static const auto clazz = javaClassStatic();
+      static const auto fieldAutoRequestPermission = clazz->getField<jni::JBoolean>("autoRequestPermission");
+      jni::local_ref<jni::JBoolean> autoRequestPermission = this->getFieldValue(fieldAutoRequestPermission);
       static const auto fieldAuthorizationLevel = clazz->getField<JAuthorizationLevel>("authorizationLevel");
       jni::local_ref<JAuthorizationLevel> authorizationLevel = this->getFieldValue(fieldAuthorizationLevel);
       static const auto fieldEnableBackgroundLocationUpdates = clazz->getField<jni::JBoolean>("enableBackgroundLocationUpdates");
@@ -42,6 +44,7 @@ namespace margelo::nitro::nitrogeolocation {
       static const auto fieldLocationProvider = clazz->getField<JLocationProvider>("locationProvider");
       jni::local_ref<JLocationProvider> locationProvider = this->getFieldValue(fieldLocationProvider);
       return ModernGeolocationConfiguration(
+        autoRequestPermission != nullptr ? std::make_optional(static_cast<bool>(autoRequestPermission->value())) : std::nullopt,
         authorizationLevel != nullptr ? std::make_optional(authorizationLevel->toCpp()) : std::nullopt,
         enableBackgroundLocationUpdates != nullptr ? std::make_optional(static_cast<bool>(enableBackgroundLocationUpdates->value())) : std::nullopt,
         locationProvider != nullptr ? std::make_optional(locationProvider->toCpp()) : std::nullopt
@@ -54,11 +57,12 @@ namespace margelo::nitro::nitrogeolocation {
      */
     [[maybe_unused]]
     static jni::local_ref<JModernGeolocationConfiguration::javaobject> fromCpp(const ModernGeolocationConfiguration& value) {
-      using JSignature = JModernGeolocationConfiguration(jni::alias_ref<JAuthorizationLevel>, jni::alias_ref<jni::JBoolean>, jni::alias_ref<JLocationProvider>);
+      using JSignature = JModernGeolocationConfiguration(jni::alias_ref<jni::JBoolean>, jni::alias_ref<JAuthorizationLevel>, jni::alias_ref<jni::JBoolean>, jni::alias_ref<JLocationProvider>);
       static const auto clazz = javaClassStatic();
       static const auto create = clazz->getStaticMethod<JSignature>("fromCpp");
       return create(
         clazz,
+        value.autoRequestPermission.has_value() ? jni::JBoolean::valueOf(value.autoRequestPermission.value()) : nullptr,
         value.authorizationLevel.has_value() ? JAuthorizationLevel::fromCpp(value.authorizationLevel.value()) : nullptr,
         value.enableBackgroundLocationUpdates.has_value() ? jni::JBoolean::valueOf(value.enableBackgroundLocationUpdates.value()) : nullptr,
         value.locationProvider.has_value() ? JLocationProvider::fromCpp(value.locationProvider.value()) : nullptr

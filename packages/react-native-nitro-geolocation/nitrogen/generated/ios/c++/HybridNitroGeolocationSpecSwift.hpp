@@ -30,8 +30,8 @@ namespace margelo::nitro::nitrogeolocation { struct LocationRequestOptions; }
 namespace margelo::nitro::nitrogeolocation { struct LocationError; }
 
 #include "ModernGeolocationConfiguration.hpp"
-#include "AuthorizationLevel.hpp"
 #include <optional>
+#include "AuthorizationLevel.hpp"
 #include "LocationProvider.hpp"
 #include "PermissionStatus.hpp"
 #include <NitroModules/Promise.hpp>

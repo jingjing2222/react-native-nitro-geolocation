@@ -3,12 +3,6 @@
  * These functions are platform-independent and can be tested with Jest.
  */
 
-export {
-  checkPermission,
-  requestPermission,
-  getCurrentPosition,
-} from './permission';
-
 export { isCachedLocationValid } from './cache';
 export {
   LocationErrorCode,

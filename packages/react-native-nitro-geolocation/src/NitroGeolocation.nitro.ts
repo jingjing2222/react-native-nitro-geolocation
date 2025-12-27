@@ -27,6 +27,14 @@ export type LocationProvider = "playServices" | "android" | "auto";
  */
 export interface ModernGeolocationConfiguration {
   /**
+   * Automatically request location permission when GeolocationProvider mounts.
+   * When true, permission is requested immediately on app start.
+   * When false, you must manually call useRequestPermission().
+   * @default false
+   */
+  autoRequestPermission?: boolean;
+
+  /**
    * iOS: Authorization level
    * - 'always': Request "Always" permission (background + foreground)
    * - 'whenInUse': Request "When In Use" permission (foreground only)

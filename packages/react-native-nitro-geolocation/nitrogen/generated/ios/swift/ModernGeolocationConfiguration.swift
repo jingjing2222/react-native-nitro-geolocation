@@ -19,8 +19,14 @@ public extension ModernGeolocationConfiguration {
   /**
    * Create a new instance of `ModernGeolocationConfiguration`.
    */
-  init(authorizationLevel: AuthorizationLevel?, enableBackgroundLocationUpdates: Bool?, locationProvider: LocationProvider?) {
-    self.init({ () -> bridge.std__optional_AuthorizationLevel_ in
+  init(autoRequestPermission: Bool?, authorizationLevel: AuthorizationLevel?, enableBackgroundLocationUpdates: Bool?, locationProvider: LocationProvider?) {
+    self.init({ () -> bridge.std__optional_bool_ in
+      if let __unwrappedValue = autoRequestPermission {
+        return bridge.create_std__optional_bool_(__unwrappedValue)
+      } else {
+        return .init()
+      }
+    }(), { () -> bridge.std__optional_AuthorizationLevel_ in
       if let __unwrappedValue = authorizationLevel {
         return bridge.create_std__optional_AuthorizationLevel_(__unwrappedValue)
       } else {
@@ -41,6 +47,18 @@ public extension ModernGeolocationConfiguration {
     }())
   }
 
+  @inline(__always)
+  var autoRequestPermission: Bool? {
+    return { () -> Bool? in
+      if bridge.has_value_std__optional_bool_(self.__autoRequestPermission) {
+        let __unwrapped = bridge.get_std__optional_bool_(self.__autoRequestPermission)
+        return __unwrapped
+      } else {
+        return nil
+      }
+    }()
+  }
+  
   @inline(__always)
   var authorizationLevel: AuthorizationLevel? {
     return self.__authorizationLevel.value

@@ -8,13 +8,17 @@ import {
   Switch,
 } from 'react-native';
 import {
-  requestPermission,
-  getCurrentPosition,
+  useRequestPermission,
+  useGetCurrentPosition,
   useWatchPosition,
 } from 'react-native-nitro-geolocation';
 import type { GeolocationResponse } from 'react-native-nitro-geolocation';
 
 export default function DefaultScreen() {
+  // Hooks
+  const requestPermission = useRequestPermission();
+  const getCurrentPosition = useGetCurrentPosition();
+
   // Permission state
   const [permissionStatus, setPermissionStatus] = useState<string>('unknown');
   const [isPermissionLoading, setIsPermissionLoading] = useState(false);
@@ -176,14 +180,6 @@ export default function DefaultScreen() {
       <View style={styles.divider} />
       {renderWatchPositionSection()}
 
-      <View style={styles.footer}>
-        <Text style={styles.footerTitle}>Features:</Text>
-        <Text style={styles.footerText}>✅ requestPermission() - Simple function</Text>
-        <Text style={styles.footerText}>✅ getCurrentPosition() - Simple async function</Text>
-        <Text style={styles.footerText}>✅ useWatchPosition() - Continuous tracking hook</Text>
-        <Text style={styles.footerText}>✅ Automatic cleanup via React lifecycle</Text>
-        <Text style={styles.footerText}>✅ TypeScript first-class support</Text>
-      </View>
     </ScrollView>
   );
 }
@@ -289,21 +285,5 @@ const styles = StyleSheet.create({
   divider: {
     height: 1,
     backgroundColor: '#E0E0E0',
-  },
-  footer: {
-    padding: 20,
-    backgroundColor: '#F5F5F5',
-    marginTop: 20,
-  },
-  footerTitle: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#000',
-    marginBottom: 8,
-  },
-  footerText: {
-    fontSize: 14,
-    color: '#333',
-    marginVertical: 3,
   },
 });

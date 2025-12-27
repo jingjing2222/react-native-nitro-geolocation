@@ -72,21 +72,6 @@ namespace NitroGeolocation { class HybridNitroGeolocationSpec_cxx; }
  */
 namespace margelo::nitro::nitrogeolocation::bridge::swift {
 
-  // pragma MARK: std::optional<AuthorizationLevel>
-  /**
-   * Specialized version of `std::optional<AuthorizationLevel>`.
-   */
-  using std__optional_AuthorizationLevel_ = std::optional<AuthorizationLevel>;
-  inline std::optional<AuthorizationLevel> create_std__optional_AuthorizationLevel_(const AuthorizationLevel& value) noexcept {
-    return std::optional<AuthorizationLevel>(value);
-  }
-  inline bool has_value_std__optional_AuthorizationLevel_(const std::optional<AuthorizationLevel>& optional) noexcept {
-    return optional.has_value();
-  }
-  inline AuthorizationLevel get_std__optional_AuthorizationLevel_(const std::optional<AuthorizationLevel>& optional) noexcept {
-    return *optional;
-  }
-  
   // pragma MARK: std::optional<bool>
   /**
    * Specialized version of `std::optional<bool>`.
@@ -99,6 +84,21 @@ namespace margelo::nitro::nitrogeolocation::bridge::swift {
     return optional.has_value();
   }
   inline bool get_std__optional_bool_(const std::optional<bool>& optional) noexcept {
+    return *optional;
+  }
+  
+  // pragma MARK: std::optional<AuthorizationLevel>
+  /**
+   * Specialized version of `std::optional<AuthorizationLevel>`.
+   */
+  using std__optional_AuthorizationLevel_ = std::optional<AuthorizationLevel>;
+  inline std::optional<AuthorizationLevel> create_std__optional_AuthorizationLevel_(const AuthorizationLevel& value) noexcept {
+    return std::optional<AuthorizationLevel>(value);
+  }
+  inline bool has_value_std__optional_AuthorizationLevel_(const std::optional<AuthorizationLevel>& optional) noexcept {
+    return optional.has_value();
+  }
+  inline AuthorizationLevel get_std__optional_AuthorizationLevel_(const std::optional<AuthorizationLevel>& optional) noexcept {
     return *optional;
   }
   

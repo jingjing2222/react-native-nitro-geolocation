@@ -78,6 +78,13 @@ export function GeolocationProvider({
   useEffect(() => {
     // Set configuration on mount
     NitroGeolocationHybridObject.setConfiguration(config);
+
+    // Auto-request permission if configured
+    if (config.autoRequestPermission === true) {
+      NitroGeolocationHybridObject.requestPermission().catch((error) => {
+        console.warn('Auto permission request failed:', error);
+      });
+    }
   }, [config]);
 
   const value: GeolocationContextValue = {
