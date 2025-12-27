@@ -58,6 +58,37 @@ User callback executed immediately
 - Each watch has its own callback (no shared event stream)
 - Minimal serialization (C++ structs → JS objects)
 
+## Modern Hooks Layer
+
+React Native Nitro Geolocation now provides a modern React-friendly layer on top of the JSI architecture:
+
+```
+User Code (React Components)
+  ↓ useWatchPosition({ enabled: true })
+  ↓ Declarative, auto-cleanup
+Modern API Layer (GeolocationClient + Hooks)
+  ↓ client.watchPosition(callback)
+  ↓ Provider context
+JSI Layer (Nitro Modules)
+  ↓ Direct callbacks, no Bridge
+Native Layer (Kotlin/Swift)
+  ↓ CLLocationManager / FusedLocationProvider
+Device GPS/Network
+```
+
+**Benefits of Modern Hooks Layer**:
+- **TanStack Query-inspired**: Familiar patterns for React developers
+- **Declarative**: `{ enabled }` prop instead of imperative start/stop
+- **Auto-cleanup**: No manual `clearWatch()` required
+- **Type-safe**: Full TypeScript inference
+- **Best practices**: Encourages proper React patterns
+
+**Architecture Layers**:
+1. **Presentation** (Hooks): `useWatchPosition`, `useGetCurrentPosition`
+2. **Business Logic** (Client): `GeolocationClient` manages state
+3. **JSI Bridge** (Nitro): Direct native communication
+4. **Native** (Platform): iOS/Android location APIs
+
 ## How JSI Enables Direct Callbacks
 
 Nitro Modules use **Nitrogen** code generation to create JSI bindings:
@@ -84,4 +115,13 @@ Nitro Modules use **Nitrogen** code generation to create JSI bindings:
 
 ## Summary
 
-`React Native Nitro Geolocation` transforms the geolocation API from a **Bridge-mediated event system** to a **JSI-powered direct callback system**, delivering native-level performance while maintaining 100% API compatibility with the original library.
+`React Native Nitro Geolocation` transforms the geolocation API at multiple levels:
+
+1. **Low-level**: Bridge-based events → JSI direct callbacks (Nitro Modules)
+2. **High-level**: Imperative callbacks → Declarative hooks (Modern API)
+
+This provides:
+- **Performance**: Native-level speed via JSI
+- **Developer Experience**: React-friendly hooks with TanStack Query patterns
+- **Flexibility**: Choose Modern API (hooks) or Legacy API (callbacks)
+- **Compatibility**: 100% backward compatible via `/compat`
