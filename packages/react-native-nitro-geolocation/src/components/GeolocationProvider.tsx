@@ -1,11 +1,11 @@
-import React, { createContext, useContext, useEffect } from "react";
-import type { ModernGeolocationConfiguration } from "../types";
-import { NitroGeolocationHybridObject } from "../NitroGeolocationModule";
+import React, { createContext, useContext } from "react";
+import type { GeolocationClient } from "../GeolocationClient";
+
 /**
  * Geolocation context value.
  */
 export interface GeolocationContextValue {
-  config: ModernGeolocationConfiguration;
+  client: GeolocationClient;
 }
 
 /**
@@ -14,20 +14,20 @@ export interface GeolocationContextValue {
 const GeolocationContext = createContext<GeolocationContextValue | null>(null);
 
 /**
- * Hook to access geolocation context.
- * Throws error if used outside GeolocationProvider.
+ * Hook to access GeolocationClient from context.
+ * Throws error if used outside GeolocationClientProvider.
  */
-export function useGeolocationContext(): GeolocationContextValue {
+export function useGeolocationClient(): GeolocationClient {
   const context = useContext(GeolocationContext);
 
   if (!context) {
     throw new Error(
-      "useGeolocationContext must be used within GeolocationProvider. " +
-        "Wrap your app with <GeolocationProvider> at the root level."
+      "useGeolocationClient must be used within GeolocationClientProvider. " +
+        "Wrap your component with <GeolocationClientProvider client={...}> at the root level."
     );
   }
 
-  return context;
+  return context.client;
 }
 
 /**
@@ -35,10 +35,10 @@ export function useGeolocationContext(): GeolocationContextValue {
  */
 export interface GeolocationProviderProps {
   /**
-   * Global geolocation configuration.
-   * This is applied once when the provider mounts.
+   * GeolocationClient instance (required).
+   * Create with: new GeolocationClient({...config})
    */
-  config: ModernGeolocationConfiguration;
+  client: GeolocationClient;
 
   /**
    * Child components that can use geolocation hooks.
@@ -47,57 +47,37 @@ export interface GeolocationProviderProps {
 }
 
 /**
- * Provider component for global geolocation configuration.
+ * Provider component for GeolocationClient.
  *
  * This component should wrap your app at the root level.
- * It injects the configuration into the native module on mount.
+ * It provides a GeolocationClient instance to all child components via context.
  *
  * @example
  * ```tsx
+ * // Create client instance
+ * const geolocationClient = new GeolocationClient({
+ *   authorizationLevel: 'whenInUse',
+ *   enableBackgroundLocationUpdates: false,
+ *   locationProvider: 'auto'
+ * });
+ *
  * function App() {
  *   return (
- *     <GeolocationProvider
- *       config={{
- *         authorizationLevel: 'whenInUse',
- *         enableBackgroundLocationUpdates: false,
- *         locationProvider: 'auto'
- *       }}
- *     >
+ *     <GeolocationClientProvider client={geolocationClient}>
  *       <NavigationContainer>
  *         <YourApp />
  *       </NavigationContainer>
- *     </GeolocationProvider>
+ *     </GeolocationClientProvider>
  *   );
  * }
  * ```
  */
 export function GeolocationProvider({
-  config,
+  client,
   children
 }: GeolocationProviderProps) {
-  useEffect(() => {
-    // Convert user-facing "android" to internal "android_platform" to avoid C++ macro conflicts
-    const nativeConfig = {
-      ...config,
-      locationProvider:
-        config.locationProvider === "android"
-          ? ("android_platform" as const)
-          : config.locationProvider
-    } as import("../NitroGeolocation.nitro").ModernGeolocationConfiguration;
-
-    // Set configuration on mount
-    NitroGeolocationHybridObject.setConfiguration(nativeConfig);
-
-    // Auto-request permission if configured
-    if (config.autoRequestPermission === true) {
-      NitroGeolocationHybridObject.requestPermission().catch((error) => {
-        console.warn("Auto permission request failed:", error);
-      });
-    }
-  }, [config]);
-
   const value: GeolocationContextValue = {
-    config
+    client
   };
 
   return (
@@ -106,3 +86,6 @@ export function GeolocationProvider({
     </GeolocationContext.Provider>
   );
 }
+
+// Modern alias (preferred)
+export const GeolocationClientProvider = GeolocationProvider;

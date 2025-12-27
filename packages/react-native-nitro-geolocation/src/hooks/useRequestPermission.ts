@@ -1,6 +1,5 @@
 import type { PermissionStatus } from "../NitroGeolocation.nitro";
-import { NitroGeolocationHybridObject } from "../NitroGeolocationModule";
-import { useGeolocationContext } from "../components/GeolocationProvider";
+import { useGeolocationClient } from "../components/GeolocationProvider";
 
 /**
  * Hook that returns a function to request location permission from the user.
@@ -29,12 +28,11 @@ import { useGeolocationContext } from "../components/GeolocationProvider";
  * ```
  */
 export function useRequestPermission() {
-  // Ensure this hook is used within GeolocationProvider
-  useGeolocationContext();
+  const client = useGeolocationClient();
 
   return {
     requestPermission: (): Promise<PermissionStatus> => {
-      return NitroGeolocationHybridObject.requestPermission();
+      return client.requestPermission();
     }
   };
 }

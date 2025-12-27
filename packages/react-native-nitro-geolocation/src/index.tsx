@@ -7,23 +7,25 @@
  * @example
  * ```tsx
  * import {
- *   GeolocationProvider,
+ *   GeolocationClient,
+ *   GeolocationClientProvider,
  *   useRequestPermission,
  *   useGetCurrentPosition,
  *   useWatchPosition
  * } from 'react-native-nitro-geolocation';
  *
+ * // Create GeolocationClient instance
+ * const geolocationClient = new GeolocationClient({
+ *   authorizationLevel: 'whenInUse',
+ *   enableBackgroundLocationUpdates: false,
+ *   locationProvider: 'auto'
+ * });
+ *
  * function App() {
  *   return (
- *     <GeolocationProvider
- *       config={{
- *         authorizationLevel: 'whenInUse',
- *         enableBackgroundLocationUpdates: false,
- *         locationProvider: 'auto'
- *       }}
- *     >
+ *     <GeolocationClientProvider client={geolocationClient}>
  *       <YourApp />
- *     </GeolocationProvider>
+ *     </GeolocationClientProvider>
  *   );
  * }
  *
@@ -47,6 +49,10 @@
  * }
  * ```
  */
+
+// Core
+export { GeolocationClient } from "./GeolocationClient";
+export type { GeolocationClientConfig } from "./GeolocationClient";
 
 // Components
 export * from "./components";

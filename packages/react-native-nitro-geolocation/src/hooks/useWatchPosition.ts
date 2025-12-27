@@ -3,8 +3,7 @@ import type {
   LocationError,
   LocationRequestOptions
 } from "../NitroGeolocation.nitro";
-import { NitroGeolocationHybridObject } from "../NitroGeolocationModule";
-import { useGeolocationContext } from "../components/GeolocationProvider";
+import { useGeolocationClient } from "../components/GeolocationProvider";
 import type { GeolocationResponse } from "../types";
 
 /**
@@ -52,8 +51,7 @@ export interface UseWatchPositionOptions extends LocationRequestOptions {
  * ```
  */
 export function useWatchPosition(options?: UseWatchPositionOptions) {
-  // Ensure this hook is used within GeolocationProvider
-  useGeolocationContext();
+  const client = useGeolocationClient();
 
   const [data, setData] = useState<GeolocationResponse | null>(null);
   const [isWatching, setIsWatching] = useState(false);
@@ -70,7 +68,7 @@ export function useWatchPosition(options?: UseWatchPositionOptions) {
     if (!enabled) {
       // Not enabled, ensure cleanup
       if (tokenRef.current) {
-        NitroGeolocationHybridObject.unwatch(tokenRef.current);
+        client.unwatch(tokenRef.current);
         tokenRef.current = null;
       }
       setIsWatching(false);
@@ -80,7 +78,7 @@ export function useWatchPosition(options?: UseWatchPositionOptions) {
     // Start watching
     setIsWatching(true);
 
-    const token = NitroGeolocationHybridObject.watchPosition(
+    const token = client.watchPosition(
       (position: GeolocationResponse) => {
         // Success callback
         if (!isMountedRef.current) return;
@@ -99,10 +97,11 @@ export function useWatchPosition(options?: UseWatchPositionOptions) {
     // Cleanup function
     return () => {
       if (token) {
-        NitroGeolocationHybridObject.unwatch(token);
+        client.unwatch(token);
       }
     };
   }, [
+    client,
     options?.enabled,
     options?.enableHighAccuracy,
     options?.distanceFilter,

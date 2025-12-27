@@ -1,21 +1,22 @@
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { NavigationContainer } from "@react-navigation/native";
 import React from "react";
-import { GeolocationProvider } from "react-native-nitro-geolocation";
+import { GeolocationClient, GeolocationClientProvider } from "react-native-nitro-geolocation";
 import CompatScreen from "./screens/CompatScreen";
 import DefaultScreen from "./screens/DefaultScreen";
 
 const Tab = createBottomTabNavigator();
+// Create GeolocationClient instance
+const geolocationClient =
+    new GeolocationClient({
+      authorizationLevel: "whenInUse",
+      enableBackgroundLocationUpdates: false,
+      locationProvider: "auto"
+    })
 
 export default function App() {
   return (
-    <GeolocationProvider
-      config={{
-        authorizationLevel: "whenInUse",
-        enableBackgroundLocationUpdates: false,
-        locationProvider: "auto"
-      }}
-    >
+    <GeolocationClientProvider client={geolocationClient}>
       <NavigationContainer>
         <Tab.Navigator
           screenOptions={{
@@ -40,6 +41,6 @@ export default function App() {
           />
         </Tab.Navigator>
       </NavigationContainer>
-    </GeolocationProvider>
+    </GeolocationClientProvider>
   );
 }

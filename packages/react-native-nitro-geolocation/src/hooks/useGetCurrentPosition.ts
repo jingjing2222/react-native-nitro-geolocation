@@ -1,6 +1,5 @@
 import type { LocationRequestOptions } from "../NitroGeolocation.nitro";
-import { NitroGeolocationHybridObject } from "../NitroGeolocationModule";
-import { useGeolocationContext } from "../components/GeolocationProvider";
+import { useGeolocationClient } from "../components/GeolocationProvider";
 import type { GeolocationResponse } from "../types";
 
 /**
@@ -33,14 +32,13 @@ import type { GeolocationResponse } from "../types";
  * ```
  */
 export function useGetCurrentPosition() {
-  // Ensure this hook is used within GeolocationProvider
-  useGeolocationContext();
+  const client = useGeolocationClient();
 
   return {
     getCurrentPosition: (
       options?: LocationRequestOptions
     ): Promise<GeolocationResponse> => {
-      return NitroGeolocationHybridObject.getCurrentPosition(options);
+      return client.getCurrentPosition(options);
     }
   };
 }
