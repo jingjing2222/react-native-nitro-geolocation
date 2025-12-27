@@ -1,5 +1,6 @@
 import { useState, useCallback } from 'react';
 import { NitroGeolocationHybridObject } from '../NitroGeolocationModule';
+import { useGeolocationContext } from '../components/GeolocationProvider';
 import type { PermissionStatus } from '../NitroGeolocation.nitro';
 import type { LocationError } from '../utils/errors';
 
@@ -28,6 +29,9 @@ import type { LocationError } from '../utils/errors';
  * ```
  */
 export function useLocationPermission() {
+  // Ensure this hook is used within GeolocationProvider
+  useGeolocationContext();
+
   const [status, setStatus] = useState<PermissionStatus>('undetermined');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<LocationError | null>(null);

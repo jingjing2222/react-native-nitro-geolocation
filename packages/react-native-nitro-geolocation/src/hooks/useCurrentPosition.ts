@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { NitroGeolocationHybridObject } from '../NitroGeolocationModule';
+import { useGeolocationContext } from '../components/GeolocationProvider';
 import type { GeolocationResponse } from '../types';
 import type { LocationRequestOptions } from '../NitroGeolocation.nitro';
 import type { LocationError } from '../utils/errors';
@@ -50,12 +51,19 @@ export interface UseCurrentPositionOptions extends LocationRequestOptions {
  * ```
  */
 export function useCurrentPosition(options?: UseCurrentPositionOptions) {
+  // Ensure this hook is used within GeolocationProvider
+  useGeolocationContext();
+
   const [data, setData] = useState<GeolocationResponse | null>(null);
   const [status, setStatus] = useState<CurrentPositionStatus>('idle');
   const [error, setError] = useState<LocationError | null>(null);
 
   const optionsRef = useRef(options);
+  const enabledRef = useRef(options?.enabled ?? true);
+
+  // Update refs
   optionsRef.current = options;
+  enabledRef.current = options?.enabled ?? true;
 
   const fetchPosition = useCallback(async () => {
     setStatus('loading');
@@ -76,12 +84,11 @@ export function useCurrentPosition(options?: UseCurrentPositionOptions) {
 
   // Auto-fetch on mount if enabled
   useEffect(() => {
-    const enabled = options?.enabled ?? true;
-
-    if (enabled) {
+    if (enabledRef.current) {
       fetchPosition();
     }
-  }, [options?.enabled, fetchPosition]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return {
     data,

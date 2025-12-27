@@ -1,6 +1,34 @@
-import React, { type ReactNode, useEffect } from 'react';
+import React, { createContext, useContext, useEffect } from 'react';
 import { NitroGeolocationHybridObject } from '../NitroGeolocationModule';
 import type { ModernGeolocationConfiguration } from '../NitroGeolocation.nitro';
+/**
+ * Geolocation context value.
+ */
+export interface GeolocationContextValue {
+  config: ModernGeolocationConfiguration;
+}
+
+/**
+ * Geolocation context.
+ */
+const GeolocationContext = createContext<GeolocationContextValue | null>(null);
+
+/**
+ * Hook to access geolocation context.
+ * Throws error if used outside GeolocationProvider.
+ */
+export function useGeolocationContext(): GeolocationContextValue {
+  const context = useContext(GeolocationContext);
+
+  if (!context) {
+    throw new Error(
+      'useGeolocationContext must be used within GeolocationProvider. ' +
+      'Wrap your app with <GeolocationProvider> at the root level.'
+    );
+  }
+
+  return context;
+}
 
 /**
  * Props for GeolocationProvider component.
@@ -15,7 +43,7 @@ export interface GeolocationProviderProps {
   /**
    * Child components that can use geolocation hooks.
    */
-  children: ReactNode;
+  children: React.ReactNode;
 }
 
 /**
@@ -52,5 +80,13 @@ export function GeolocationProvider({
     NitroGeolocationHybridObject.setConfiguration(config);
   }, [config]);
 
-  return <>{children}</>;
+  const value: GeolocationContextValue = {
+    config,
+  };
+
+  return (
+    <GeolocationContext.Provider value={value}>
+      {children}
+    </GeolocationContext.Provider>
+  );
 }

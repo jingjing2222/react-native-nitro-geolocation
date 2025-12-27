@@ -17,6 +17,30 @@ private struct GeolocationErrorWrapper: Error {
 }
 
 /**
+ * LocationManager Delegate class to handle CLLocationManager callbacks.
+ */
+private class LocationManagerDelegate: NSObject, CLLocationManagerDelegate {
+    weak var geolocation: NitroGeolocation?
+
+    init(geolocation: NitroGeolocation) {
+        self.geolocation = geolocation
+        super.init()
+    }
+
+    func locationManagerDidChangeAuthorization(_ manager: CLLocationManager) {
+        geolocation?.handleAuthorizationChange(manager)
+    }
+
+    func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
+        geolocation?.handleLocationUpdate(locations)
+    }
+
+    func locationManager(_ manager: CLLocationManager, didFailWithError error: Error) {
+        geolocation?.handleLocationError(error)
+    }
+}
+
+/**
  * Modern Geolocation implementation with Promise-based API.
  *
  * Key features:
@@ -70,6 +94,7 @@ class NitroGeolocation: HybridNitroGeolocationSpec {
 
     private var configuration: ModernGeolocationConfiguration?
     private var locationManager: CLLocationManager?
+    private var locationManagerDelegate: LocationManagerDelegate?
     private var lastLocation: CLLocation?
     private var usingSignificantChanges: Bool = false
 
@@ -258,9 +283,9 @@ class NitroGeolocation: HybridNitroGeolocationSpec {
         }
     }
 
-    // MARK: - CLLocationManagerDelegate
+    // MARK: - Location Manager Callbacks
 
-    func locationManagerDidChangeAuthorization(_ manager: CLLocationManager) {
+    fileprivate func handleAuthorizationChange(_ manager: CLLocationManager) {
         let status = getCurrentAuthorizationStatus(from: manager)
         let mappedStatus = mapCLAuthorizationStatus(status)
 
@@ -278,7 +303,7 @@ class NitroGeolocation: HybridNitroGeolocationSpec {
         }
     }
 
-    func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
+    fileprivate func handleLocationUpdate(_ locations: [CLLocation]) {
         guard let location = locations.last else { return }
 
         lastLocation = location
@@ -302,7 +327,7 @@ class NitroGeolocation: HybridNitroGeolocationSpec {
         }
     }
 
-    func locationManager(_ manager: CLLocationManager, didFailWithError error: Error) {
+    fileprivate func handleLocationError(_ error: Error) {
         let locationError: LocationError
         let errorWrapper: GeolocationErrorWrapper
 
@@ -363,11 +388,13 @@ class NitroGeolocation: HybridNitroGeolocationSpec {
 
         if Thread.isMainThread {
             locationManager = CLLocationManager()
-            locationManager?.delegate = self
+            locationManagerDelegate = LocationManagerDelegate(geolocation: self)
+            locationManager?.delegate = locationManagerDelegate
         } else {
             DispatchQueue.main.sync {
                 locationManager = CLLocationManager()
-                locationManager?.delegate = self
+                locationManagerDelegate = LocationManagerDelegate(geolocation: self)
+                locationManager?.delegate = locationManagerDelegate
             }
         }
     }
@@ -547,7 +574,3 @@ class NitroGeolocation: HybridNitroGeolocationSpec {
         )
     }
 }
-
-// MARK: - CLLocationManagerDelegate Conformance
-
-extension NitroGeolocation: CLLocationManagerDelegate {}

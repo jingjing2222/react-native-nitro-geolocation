@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { NitroGeolocationHybridObject } from '../NitroGeolocationModule';
+import { useGeolocationContext } from '../components/GeolocationProvider';
 import type { GeolocationResponse } from '../types';
 import type {
   LocationRequestOptions,
@@ -51,6 +52,9 @@ export interface UseWatchPositionOptions extends LocationRequestOptions {
  * ```
  */
 export function useWatchPosition(options?: UseWatchPositionOptions) {
+  // Ensure this hook is used within GeolocationProvider
+  useGeolocationContext();
+
   const [data, setData] = useState<GeolocationResponse | null>(null);
   const [error, setError] = useState<LocationError | null>(null);
   const [isWatching, setIsWatching] = useState(false);
