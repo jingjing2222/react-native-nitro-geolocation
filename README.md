@@ -6,7 +6,7 @@
 
 A complete reimplementation of [`@react-native-community/geolocation`](https://github.com/michalchudziak/react-native-geolocation) for the React Native New Architecture, featuring:
 
-- 🪝 **TanStack Query-inspired Hooks** for modern React patterns
+- 🪝 **Role-based Hook Design** (Query, Mutation, Stream) for modern React patterns
 - ⚡ **JSI-powered performance** with direct native calls
 - 🔁 **100% API compatibility** via `/compat` for easy migration
 - 🧹 **Automatic cleanup** — no manual subscription management
@@ -29,7 +29,7 @@ React Native Nitro Geolocation provides **two APIs** to fit your needs:
 
 ### 1. Modern API (Recommended)
 
-**TanStack Query-inspired** Hooks with Provider pattern for modern React apps:
+**Role-based Hook Design** with Provider pattern for modern React apps:
 
 ```tsx
 import {
@@ -56,14 +56,14 @@ function App() {
 
 // Use hooks anywhere
 function LocationTracker() {
-  const { data, isWatching } = useWatchPosition({
+  const { position, isWatching } = useWatchPosition({
     enabled: true,
     enableHighAccuracy: true
   });
 
   return (
     <Text>
-      {data?.coords.latitude}, {data?.coords.longitude}
+      {position?.coords.latitude}, {position?.coords.longitude}
     </Text>
   );
 }
@@ -103,7 +103,7 @@ Geolocation.clearWatch(watchId);
 ```
 React Components
   ↓ useWatchPosition({ enabled: true })
-  ↓ Declarative Hooks (TanStack Query-inspired)
+  ↓ Declarative Hooks (Role-based: Query, Mutation, Stream)
 GeolocationClient + Provider
   ↓ Provider context
   ↓ Subscription management
@@ -234,16 +234,36 @@ function App() {
 import { useRequestPermission } from 'react-native-nitro-geolocation';
 
 function PermissionButton() {
-  const { requestPermission } = useRequestPermission();
+  const {
+    requestPermission,
+    status,
+    isPending,
+    isError,
+    error
+  } = useRequestPermission();
 
   const handlePress = async () => {
-    const status = await requestPermission();
-    if (status === 'granted') {
-      console.log('Permission granted!');
+    try {
+      const result = await requestPermission();
+      if (result === 'granted') {
+        console.log('Permission granted!');
+      }
+    } catch (err) {
+      console.error('Permission error:', err);
     }
   };
 
-  return <Button onPress={handlePress} title="Enable Location" />;
+  return (
+    <View>
+      <Button
+        onPress={handlePress}
+        disabled={isPending}
+        title={isPending ? 'Requesting...' : 'Enable Location'}
+      />
+      {isError && <Text>Error: {error?.message}</Text>}
+      {status && <Text>Status: {status}</Text>}
+    </View>
+  );
 }
 ```
 
@@ -253,26 +273,34 @@ function PermissionButton() {
 import { useGetCurrentPosition } from 'react-native-nitro-geolocation';
 
 function LocationButton() {
-  const { getCurrentPosition } = useGetCurrentPosition();
-  const [loading, setLoading] = useState(false);
+  const {
+    position,
+    isLoading,
+    isError,
+    error,
+    refetch
+  } = useGetCurrentPosition({
+    enabled: false,  // Manual trigger only
+    enableHighAccuracy: true,
+    timeout: 15000
+  });
 
-  const handlePress = async () => {
-    setLoading(true);
-    try {
-      const position = await getCurrentPosition({
-        enableHighAccuracy: true,
-        timeout: 15000
-      });
-      console.log('Lat:', position.coords.latitude);
-      console.log('Lng:', position.coords.longitude);
-    } catch (error) {
-      console.error('Error:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  return <Button onPress={handlePress} disabled={loading} />;
+  return (
+    <View>
+      <Button
+        onPress={() => refetch()}
+        disabled={isLoading}
+        title={isLoading ? 'Loading...' : 'Get Location'}
+      />
+      {isError && <Text>Error: {error?.message}</Text>}
+      {position && (
+        <View>
+          <Text>Lat: {position.coords.latitude}</Text>
+          <Text>Lng: {position.coords.longitude}</Text>
+        </View>
+      )}
+    </View>
+  );
 }
 ```
 
@@ -284,7 +312,11 @@ import { useWatchPosition } from 'react-native-nitro-geolocation';
 function LiveTracker() {
   const [enabled, setEnabled] = useState(true);
 
-  const { data, isWatching } = useWatchPosition({
+  const {
+    position,
+    error,
+    isWatching
+  } = useWatchPosition({
     enabled,
     enableHighAccuracy: true,
     distanceFilter: 10  // Update every 10 meters
@@ -293,10 +325,11 @@ function LiveTracker() {
   return (
     <View>
       <Switch value={enabled} onValueChange={setEnabled} />
-      {isWatching && data && (
+      {error && <Text style={{ color: 'red' }}>Error: {error.message}</Text>}
+      {isWatching && position && (
         <Text>
-          {data.coords.latitude}, {data.coords.longitude}
-          {'\n'}Accuracy: {data.coords.accuracy}m
+          {position.coords.latitude}, {position.coords.longitude}
+          {'\n'}Accuracy: {position.coords.accuracy}m
         </Text>
       )}
     </View>
@@ -399,7 +432,7 @@ useEffect(() => {
 **After (Modern)**:
 
 ```tsx
-const { data } = useWatchPosition({
+const { position } = useWatchPosition({
   enabled: true,
   enableHighAccuracy: true
 });
@@ -478,11 +511,12 @@ Performance comparison between Nitro (JSI) and Community (Bridge):
 
 ### Modern API Features
 
-- 🪝 **TanStack Query-inspired** — Familiar patterns for React developers
+- 🪝 **Role-based Hook Design** — Query, Mutation, and Stream patterns for each use case
 - 🎯 **Declarative** — `{ enabled }` prop instead of imperative start/stop
 - 🧹 **Auto-cleanup** — No manual `clearWatch()` required
 - 🔌 **Provider pattern** — Configure once at app root
 - 📘 **TypeScript-first** — Full type inference
+- 🔋 **Battery efficient** — Native subscriptions stop immediately when disabled
 
 ### Technical Features
 
@@ -498,10 +532,10 @@ Performance comparison between Nitro (JSI) and Community (Bridge):
 
 **React Native Nitro Geolocation** transforms geolocation into a modern React experience:
 
-1. **Modern API**: TanStack Query-inspired Hooks with automatic lifecycle management
+1. **Modern API**: Role-based Hooks (Query, Mutation, Stream) with automatic lifecycle management
 2. **Legacy API**: 100% compatible with `@react-native-community/geolocation`
 3. **Performance**: JSI-powered direct callbacks — up to 22.95x faster
-4. **Developer Experience**: Declarative patterns, automatic cleanup, full TypeScript support
+4. **Developer Experience**: Declarative patterns, automatic cleanup, battery-efficient, full TypeScript support
 
 Choose the API that fits your project:
 - **New projects** → Modern API (Hooks + Provider)
