@@ -57,16 +57,16 @@ export * from "./hooks";
 // Types from Nitro spec
 export type {
   PermissionStatus,
-  AuthorizationLevel,
-  LocationProvider,
-  ModernGeolocationConfiguration,
   LocationRequestOptions,
   LocationError
 } from "./NitroGeolocation.nitro";
 
 export type {
   GeolocationResponse,
-  GeolocationCoordinates
+  GeolocationCoordinates,
+  AuthorizationLevel,
+  LocationProvider,
+  ModernGeolocationConfiguration
 } from "./types";
 
 // Pure utility functions (advanced users only)

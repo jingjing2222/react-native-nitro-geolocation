@@ -17,9 +17,10 @@ export type PermissionStatus =
 export type AuthorizationLevel = "always" | "whenInUse" | "auto";
 
 /**
- * Android location provider.
+ * Android location provider (internal).
+ * Note: Use "android_platform" instead of "android" to avoid C++ macro conflicts.
  */
-export type LocationProvider = "playServices" | "android" | "auto";
+export type LocationProvider = "playServices" | "android_platform" | "auto";
 
 /**
  * Global configuration for geolocation services.
@@ -51,7 +52,7 @@ export interface ModernGeolocationConfiguration {
   /**
    * Android: Location provider
    * - 'playServices': Use Google Play Services (fused location)
-   * - 'android': Use Android platform LocationManager
+   * - 'android_platform': Use Android platform LocationManager
    * - 'auto': Auto-select (prefer Play Services if available)
    */
   locationProvider?: LocationProvider;

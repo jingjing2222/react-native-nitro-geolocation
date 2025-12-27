@@ -3,6 +3,33 @@ export type AuthorizationLevel = "always" | "whenInUse" | "auto";
 export type LocationProvider = "playServices" | "android" | "auto";
 export type NullableDouble = number | null;
 
+/**
+ * User-facing geolocation configuration.
+ * This uses "android" instead of "android_platform" for better DX.
+ */
+export interface ModernGeolocationConfiguration {
+  /**
+   * Automatically request location permission when GeolocationProvider mounts.
+   * @default false
+   */
+  autoRequestPermission?: boolean;
+
+  /**
+   * iOS: Authorization level
+   */
+  authorizationLevel?: AuthorizationLevel;
+
+  /**
+   * iOS: Enable background location updates.
+   */
+  enableBackgroundLocationUpdates?: boolean;
+
+  /**
+   * Android: Location provider
+   */
+  locationProvider?: LocationProvider;
+}
+
 export interface GeolocationConfiguration {
   skipPermissionRequests: boolean;
   authorizationLevel?: AuthorizationLevel;

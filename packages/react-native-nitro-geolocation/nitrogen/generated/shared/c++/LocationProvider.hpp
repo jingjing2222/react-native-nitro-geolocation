@@ -31,7 +31,7 @@ namespace margelo::nitro::nitrogeolocation {
   enum class LocationProvider {
     AUTO      SWIFT_NAME(auto) = 0,
     PLAYSERVICES      SWIFT_NAME(playservices) = 1,
-    ANDROID      SWIFT_NAME(android) = 2,
+    ANDROID_PLATFORM      SWIFT_NAME(androidPlatform) = 2,
   } CLOSED_ENUM;
 
 } // namespace margelo::nitro::nitrogeolocation
@@ -46,7 +46,7 @@ namespace margelo::nitro {
       switch (hashString(unionValue.c_str(), unionValue.size())) {
         case hashString("auto"): return margelo::nitro::nitrogeolocation::LocationProvider::AUTO;
         case hashString("playServices"): return margelo::nitro::nitrogeolocation::LocationProvider::PLAYSERVICES;
-        case hashString("android"): return margelo::nitro::nitrogeolocation::LocationProvider::ANDROID;
+        case hashString("android_platform"): return margelo::nitro::nitrogeolocation::LocationProvider::ANDROID_PLATFORM;
         default: [[unlikely]]
           throw std::invalid_argument("Cannot convert \"" + unionValue + "\" to enum LocationProvider - invalid value!");
       }
@@ -55,7 +55,7 @@ namespace margelo::nitro {
       switch (arg) {
         case margelo::nitro::nitrogeolocation::LocationProvider::AUTO: return JSIConverter<std::string>::toJSI(runtime, "auto");
         case margelo::nitro::nitrogeolocation::LocationProvider::PLAYSERVICES: return JSIConverter<std::string>::toJSI(runtime, "playServices");
-        case margelo::nitro::nitrogeolocation::LocationProvider::ANDROID: return JSIConverter<std::string>::toJSI(runtime, "android");
+        case margelo::nitro::nitrogeolocation::LocationProvider::ANDROID_PLATFORM: return JSIConverter<std::string>::toJSI(runtime, "android_platform");
         default: [[unlikely]]
           throw std::invalid_argument("Cannot convert LocationProvider to JS - invalid value: "
                                     + std::to_string(static_cast<int>(arg)) + "!");
@@ -69,7 +69,7 @@ namespace margelo::nitro {
       switch (hashString(unionValue.c_str(), unionValue.size())) {
         case hashString("auto"):
         case hashString("playServices"):
-        case hashString("android"):
+        case hashString("android_platform"):
           return true;
         default:
           return false;

@@ -18,7 +18,7 @@ import com.facebook.proguard.annotations.DoNotStrip
 enum class LocationProvider(@DoNotStrip @Keep val value: Int) {
   AUTO(0),
   PLAYSERVICES(1),
-  ANDROID(2);
+  ANDROID_PLATFORM(2);
 
   companion object
 }

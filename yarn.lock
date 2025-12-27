@@ -9216,7 +9216,7 @@ __metadata:
     react-native-nitro-geolocation: "file:///Users/kimhyeongjeong/Desktop/code/react-native-nitro-geolocation/packages/react-native-nitro-geolocation/package.tgz"
     react-native-nitro-modules: "npm:^0.32.0"
     react-native-safe-area-context: "npm:^5.5.2"
-    react-native-screens: "npm:^4.19.0"
+    react-native-screens: "npm:4.19.0"
   languageName: unknown
   linkType: soft
 
@@ -9230,12 +9230,12 @@ __metadata:
 
 "react-native-nitro-geolocation@file:///Users/kimhyeongjeong/Desktop/code/react-native-nitro-geolocation/packages/react-native-nitro-geolocation/package.tgz::locator=react-native-nitro-geolocation-example%40workspace%3Aexamples%2Fv0.81.1":
   version: 0.1.2
-  resolution: "react-native-nitro-geolocation@file:///Users/kimhyeongjeong/Desktop/code/react-native-nitro-geolocation/packages/react-native-nitro-geolocation/package.tgz#///Users/kimhyeongjeong/Desktop/code/react-native-nitro-geolocation/packages/react-native-nitro-geolocation/package.tgz::hash=ea9c90&locator=react-native-nitro-geolocation-example%40workspace%3Aexamples%2Fv0.81.1"
+  resolution: "react-native-nitro-geolocation@file:///Users/kimhyeongjeong/Desktop/code/react-native-nitro-geolocation/packages/react-native-nitro-geolocation/package.tgz#///Users/kimhyeongjeong/Desktop/code/react-native-nitro-geolocation/packages/react-native-nitro-geolocation/package.tgz::hash=c6d1ce&locator=react-native-nitro-geolocation-example%40workspace%3Aexamples%2Fv0.81.1"
   peerDependencies:
     react: ">=18.0.0"
     react-native: ">=0.75.0"
     react-native-nitro-modules: ">=0.32.0"
-  checksum: 10c0/cf1fbe3efddc4e13fc9de8db68817ff124355b5df3c483f9ed20f19aba928f1cd561812c8c2fb416bf4424265713efd1d13ed107a21aa28e399541dc44377278
+  checksum: 10c0/94761e273dc04b136af7b320677b1ed1e5be943d44b93ca1c593a295d9a82f201470a4bd007e29f7eafa6bca721891d57b56b163a4c4e9d3c3f8a98d0d127ad8
   languageName: node
   linkType: hard
 
@@ -9288,7 +9288,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-native-screens@npm:^4.19.0":
+"react-native-screens@npm:4.19.0":
   version: 4.19.0
   resolution: "react-native-screens@npm:4.19.0"
   dependencies:

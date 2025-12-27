@@ -1,6 +1,7 @@
 package com.margelo.nitro.nitrogeolocation
 
 import android.Manifest
+import android.content.Context
 import android.content.pm.PackageManager
 import android.location.Location
 import android.location.LocationListener
@@ -39,7 +40,7 @@ private class GeolocationErrorException(
  */
 @DoNotStrip
 class NitroGeolocation(
-    private val reactContext: ReactApplicationContext
+    private val reactContext: ReactApplicationContext = NitroModules.applicationContext!!
 ) : HybridNitroGeolocationSpec() {
 
     // MARK: - Types
@@ -91,7 +92,7 @@ class NitroGeolocation(
 
     private var configuration: ModernGeolocationConfiguration? = null
     private val locationManager: AndroidLocationManager by lazy {
-        reactContext.getSystemService(ReactApplicationContext.LOCATION_SERVICE) as AndroidLocationManager
+        reactContext.getSystemService(Context.LOCATION_SERVICE) as AndroidLocationManager
     }
 
     // Permission promise resolvers
@@ -128,87 +129,101 @@ class NitroGeolocation(
     }
 
     override fun requestPermission(): Promise<PermissionStatus> {
-        return Promise.async { resolver ->
-            // Check if already determined
-            val currentStatus = getCurrentPermissionStatus()
-            if (currentStatus != PermissionStatus.undetermined) {
-                resolver(Result.success(currentStatus))
-                return@async
-            }
+        val promise = Promise<PermissionStatus>()
 
-            // Check if we have an activity
-            val activity = reactContext.currentActivity
-            if (activity == null) {
-                resolver(Result.failure(Exception("No activity available")))
-                return@async
-            }
+        // Check if already determined
+        val currentStatus = getCurrentPermissionStatus()
+        if (currentStatus != PermissionStatus.UNDETERMINED) {
+            promise.resolve(currentStatus)
+            return promise
+        }
 
-            // Queue resolver
-            pendingPermissionResolvers.add(resolver)
+        // Check if we have an activity
+        val activity = reactContext.currentActivity
+        if (activity == null) {
+            promise.reject(Exception("No activity available"))
+            return promise
+        }
 
-            // Request permission
-            val permissions = arrayOf(
-                Manifest.permission.ACCESS_FINE_LOCATION,
-                Manifest.permission.ACCESS_COARSE_LOCATION
-            )
-
-            ActivityCompat.requestPermissions(
-                activity,
-                permissions,
-                PERMISSION_REQUEST_CODE
+        // Queue resolver
+        pendingPermissionResolvers.add { result ->
+            result.fold(
+                onSuccess = { promise.resolve(it) },
+                onFailure = { promise.reject(it) }
             )
         }
+
+        // Request permission
+        val permissions = arrayOf(
+            Manifest.permission.ACCESS_FINE_LOCATION,
+            Manifest.permission.ACCESS_COARSE_LOCATION
+        )
+
+        ActivityCompat.requestPermissions(
+            activity,
+            permissions,
+            PERMISSION_REQUEST_CODE
+        )
+
+        return promise
     }
 
     // MARK: - Get Current Position (Promise-based)
 
     override fun getCurrentPosition(options: LocationRequestOptions?): Promise<GeolocationResponse> {
-        return Promise.async { resolver ->
-            // Check permission
-            if (!hasLocationPermission()) {
-                resolver(Result.failure(createLocationError(
-                    PERMISSION_DENIED,
-                    "Location permission not granted"
-                )))
-                return@async
-            }
+        val promise = Promise<GeolocationResponse>()
 
-            val parsedOptions = ParsedOptions.parse(options)
-
-            // Check cached location
-            val provider = getValidProvider(parsedOptions.enableHighAccuracy)
-            if (provider != null) {
-                val lastKnownLocation = try {
-                    locationManager.getLastKnownLocation(provider)
-                } catch (e: SecurityException) {
-                    null
-                }
-
-                if (lastKnownLocation != null && isCachedLocationValid(lastKnownLocation, parsedOptions)) {
-                    val position = locationToPosition(lastKnownLocation)
-                    resolver(Result.success(position))
-                    return@async
-                }
-
-                // maximumAge is Infinity -> use cached if available
-                if (lastKnownLocation != null && parsedOptions.maximumAge == Double.POSITIVE_INFINITY) {
-                    val position = locationToPosition(lastKnownLocation)
-                    resolver(Result.success(position))
-                    return@async
-                }
-            }
-
-            // Request fresh location
-            if (provider == null) {
-                resolver(Result.failure(createLocationError(
-                    POSITION_UNAVAILABLE,
-                    "No location provider available"
-                )))
-                return@async
-            }
-
-            requestFreshLocation(provider, parsedOptions, resolver)
+        // Check permission
+        if (!hasLocationPermission()) {
+            promise.reject(createLocationError(
+                PERMISSION_DENIED,
+                "Location permission not granted"
+            ))
+            return promise
         }
+
+        val parsedOptions = ParsedOptions.parse(options)
+
+        // Check cached location
+        val provider = getValidProvider(parsedOptions.enableHighAccuracy)
+        if (provider != null) {
+            val lastKnownLocation = try {
+                locationManager.getLastKnownLocation(provider)
+            } catch (e: SecurityException) {
+                null
+            }
+
+            if (lastKnownLocation != null && isCachedLocationValid(lastKnownLocation, parsedOptions)) {
+                val position = locationToPosition(lastKnownLocation)
+                promise.resolve(position)
+                return promise
+            }
+
+            // maximumAge is Infinity -> use cached if available
+            if (lastKnownLocation != null && parsedOptions.maximumAge == Double.POSITIVE_INFINITY) {
+                val position = locationToPosition(lastKnownLocation)
+                promise.resolve(position)
+                return promise
+            }
+        }
+
+        // Request fresh location
+        if (provider == null) {
+            promise.reject(createLocationError(
+                POSITION_UNAVAILABLE,
+                "No location provider available"
+            ))
+            return promise
+        }
+
+        requestFreshLocation(provider, parsedOptions) { result ->
+            result.fold(
+                onSuccess = { promise.resolve(it) },
+                onFailure = { promise.reject(it) }
+            )
+        }
+
+        return promise
     }
 
     // MARK: - Watch Position (Callback-based with tokens)
@@ -257,7 +272,7 @@ class NitroGeolocation(
     private fun getCurrentPermissionStatus(): PermissionStatus {
         // Legacy Android (< 6.0)
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
-            return PermissionStatus.granted
+            return PermissionStatus.GRANTED
         }
 
         val fineLocationGranted = ContextCompat.checkSelfPermission(
@@ -271,17 +286,17 @@ class NitroGeolocation(
         ) == PackageManager.PERMISSION_GRANTED
 
         return when {
-            fineLocationGranted || coarseLocationGranted -> PermissionStatus.granted
+            fineLocationGranted || coarseLocationGranted -> PermissionStatus.GRANTED
             else -> {
                 // On Android, there's no "restricted" state like iOS
                 // We could check if permission was previously denied, but for simplicity:
-                PermissionStatus.denied
+                PermissionStatus.DENIED
             }
         }
     }
 
     private fun hasLocationPermission(): Boolean {
-        return getCurrentPermissionStatus() == PermissionStatus.granted
+        return getCurrentPermissionStatus() == PermissionStatus.GRANTED
     }
 
     // Handle permission request result (called from Activity)
@@ -289,7 +304,7 @@ class NitroGeolocation(
         if (requestCode != PERMISSION_REQUEST_CODE) return
 
         val granted = grantResults.isNotEmpty() && grantResults.any { it == PackageManager.PERMISSION_GRANTED }
-        val status = if (granted) PermissionStatus.granted else PermissionStatus.denied
+        val status = if (granted) PermissionStatus.GRANTED else PermissionStatus.DENIED
 
         // Resolve all pending permission requests
         for (resolver in pendingPermissionResolvers) {
@@ -554,7 +569,10 @@ class NitroGeolocation(
             }
 
             override fun onProviderDisabled(provider: String) {
-                val error = createLocationError(POSITION_UNAVAILABLE, "Provider disabled: $provider")
+                val error = LocationError(
+                    code = POSITION_UNAVAILABLE,
+                    message = "Provider disabled: $provider"
+                )
 
                 for ((_, subscription) in watchSubscriptions) {
                     subscription.error?.invoke(error)
@@ -577,7 +595,10 @@ class NitroGeolocation(
                 Looper.getMainLooper()
             )
         } catch (e: SecurityException) {
-            val error = createLocationError(PERMISSION_DENIED, "Permission denied: ${e.message}")
+            val error = LocationError(
+                code = PERMISSION_DENIED,
+                message = "Permission denied: ${e.message}"
+            )
 
             for ((_, subscription) in watchSubscriptions) {
                 subscription.error?.invoke(error)
@@ -600,23 +621,35 @@ class NitroGeolocation(
     // MARK: - Helper Functions - Conversion
 
     private fun locationToPosition(location: Location): GeolocationResponse {
-        val altitude = if (location.hasAltitude()) location.altitude else 0.0
-        val altitudeAccuracy = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O && location.hasVerticalAccuracy()) {
-            location.verticalAccuracyMeters.toDouble()
+        val altitude = if (location.hasAltitude()) {
+            NullableDouble.create(location.altitude)
         } else {
-            0.0
+            null
         }
-        val heading = if (location.hasBearing()) location.bearing.toDouble() else -1.0
-        val speed = if (location.hasSpeed()) location.speed.toDouble() else 0.0
+        val altitudeAccuracy = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O && location.hasVerticalAccuracy()) {
+            NullableDouble.create(location.verticalAccuracyMeters.toDouble())
+        } else {
+            null
+        }
+        val heading = if (location.hasBearing()) {
+            NullableDouble.create(location.bearing.toDouble())
+        } else {
+            null
+        }
+        val speed = if (location.hasSpeed()) {
+            NullableDouble.create(location.speed.toDouble())
+        } else {
+            null
+        }
 
         val coords = GeolocationCoordinates(
             latitude = location.latitude,
             longitude = location.longitude,
-            altitude = Variant.ofVariantDouble(altitude),
+            altitude = altitude,
             accuracy = location.accuracy.toDouble(),
-            altitudeAccuracy = Variant.ofVariantDouble(altitudeAccuracy),
-            heading = Variant.ofVariantDouble(heading),
-            speed = Variant.ofVariantDouble(speed)
+            altitudeAccuracy = altitudeAccuracy,
+            heading = heading,
+            speed = speed
         )
 
         return GeolocationResponse(

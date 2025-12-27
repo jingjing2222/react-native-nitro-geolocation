@@ -21,8 +21,8 @@ public extension LocationProvider {
         self = .auto
       case "playServices":
         self = .playservices
-      case "android":
-        self = .android
+      case "android_platform":
+        self = .androidPlatform
       default:
         return nil
     }
@@ -37,8 +37,8 @@ public extension LocationProvider {
         return "auto"
       case .playservices:
         return "playServices"
-      case .android:
-        return "android"
+      case .androidPlatform:
+        return "android_platform"
     }
   }
 }

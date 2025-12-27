@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useEffect } from "react";
-import type { ModernGeolocationConfiguration } from "../NitroGeolocation.nitro";
+import type { ModernGeolocationConfiguration } from "../types";
 import { NitroGeolocationHybridObject } from "../NitroGeolocationModule";
 /**
  * Geolocation context value.
@@ -76,8 +76,17 @@ export function GeolocationProvider({
   children
 }: GeolocationProviderProps) {
   useEffect(() => {
+    // Convert user-facing "android" to internal "android_platform" to avoid C++ macro conflicts
+    const nativeConfig = {
+      ...config,
+      locationProvider:
+        config.locationProvider === "android"
+          ? ("android_platform" as const)
+          : config.locationProvider
+    } as import("../NitroGeolocation.nitro").ModernGeolocationConfiguration;
+
     // Set configuration on mount
-    NitroGeolocationHybridObject.setConfiguration(config);
+    NitroGeolocationHybridObject.setConfiguration(nativeConfig);
 
     // Auto-request permission if configured
     if (config.autoRequestPermission === true) {

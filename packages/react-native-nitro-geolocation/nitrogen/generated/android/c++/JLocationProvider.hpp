@@ -48,9 +48,9 @@ namespace margelo::nitro::nitrogeolocation {
         case LocationProvider::PLAYSERVICES:
           static const auto fieldPLAYSERVICES = clazz->getStaticField<JLocationProvider>("PLAYSERVICES");
           return clazz->getStaticFieldValue(fieldPLAYSERVICES);
-        case LocationProvider::ANDROID:
-          static const auto fieldANDROID = clazz->getStaticField<JLocationProvider>("ANDROID");
-          return clazz->getStaticFieldValue(fieldANDROID);
+        case LocationProvider::ANDROID_PLATFORM:
+          static const auto fieldANDROID_PLATFORM = clazz->getStaticField<JLocationProvider>("ANDROID_PLATFORM");
+          return clazz->getStaticFieldValue(fieldANDROID_PLATFORM);
         default:
           std::string stringValue = std::to_string(static_cast<int>(value));
           throw std::invalid_argument("Invalid enum value (" + stringValue + "!");
