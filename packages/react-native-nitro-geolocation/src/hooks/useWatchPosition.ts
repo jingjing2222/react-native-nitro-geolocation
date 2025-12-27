@@ -26,12 +26,12 @@ export interface UseWatchPositionOptions extends LocationRequestOptions {
  * Cleanup is automatic via useEffect.
  *
  * @param options - Location request options
- * @returns Object containing current position data, error, and watching status
+ * @returns Object containing current position, error, and watching status
  *
  * @example
  * ```tsx
  * function LiveTracking() {
- *   const { data, error, isWatching } = useWatchPosition({
+ *   const { position, error, isWatching } = useWatchPosition({
  *     enabled: true,
  *     enableHighAccuracy: true,
  *     distanceFilter: 10  // Update every 10 meters
@@ -39,12 +39,12 @@ export interface UseWatchPositionOptions extends LocationRequestOptions {
  *
  *   if (!isWatching) return <Text>Not watching</Text>;
  *   if (error) return <Text>Error: {error.message}</Text>;
- *   if (!data) return <Text>Waiting for location...</Text>;
+ *   if (!position) return <Text>Waiting for location...</Text>;
  *
  *   return (
  *     <Text>
- *       Current: {data.coords.latitude}, {data.coords.longitude}
- *       Accuracy: {data.coords.accuracy}m
+ *       Current: {position.coords.latitude}, {position.coords.longitude}
+ *       Accuracy: {position.coords.accuracy}m
  *     </Text>
  *   );
  * }
@@ -53,8 +53,9 @@ export interface UseWatchPositionOptions extends LocationRequestOptions {
 export function useWatchPosition(options?: UseWatchPositionOptions) {
   const client = useGeolocationClient();
 
-  const [data, setData] = useState<GeolocationResponse | null>(null);
+  const [position, setPosition] = useState<GeolocationResponse | null>(null);
   const [isWatching, setIsWatching] = useState(false);
+  const [error, setError] = useState<LocationError | null>(null);
 
   // Store subscription token (hidden from user!)
   const tokenRef = useRef<string | null>(null);
@@ -62,9 +63,18 @@ export function useWatchPosition(options?: UseWatchPositionOptions) {
   // Track if component is mounted to prevent state updates after unmount
   const isMountedRef = useRef(true);
 
-  useEffect(() => {
-    const enabled = options?.enabled ?? false;
+  // Store latest options in ref to avoid unnecessary re-subscriptions
+  const optionsRef = useRef(options);
 
+  // Update options ref whenever options change
+  useEffect(() => {
+    optionsRef.current = options;
+  }, [options]);
+
+  // Extract enabled flag for reactive dependency
+  const enabled = options?.enabled ?? false;
+
+  useEffect(() => {
     if (!enabled) {
       // Not enabled, ensure cleanup
       if (tokenRef.current) {
@@ -75,21 +85,23 @@ export function useWatchPosition(options?: UseWatchPositionOptions) {
       return;
     }
 
-    // Start watching
+    // Start watching with latest options
     setIsWatching(true);
+    setError(null);
 
     const token = client.watchPosition(
-      (position: GeolocationResponse) => {
+      (result: GeolocationResponse) => {
         // Success callback
         if (!isMountedRef.current) return;
-        setData(position);
+        setPosition(result);
+        setError(null);
       },
       (err: LocationError) => {
-        // Error callback - throw to be caught by Error Boundary
+        // Error callback
         if (!isMountedRef.current) return;
-        throw new Error(err.message);
+        setError(err);
       },
-      options
+      optionsRef.current
     );
 
     tokenRef.current = token;
@@ -100,17 +112,7 @@ export function useWatchPosition(options?: UseWatchPositionOptions) {
         client.unwatch(token);
       }
     };
-  }, [
-    client,
-    options?.enabled,
-    options?.enableHighAccuracy,
-    options?.distanceFilter,
-    options?.interval,
-    options?.fastestInterval,
-    options?.timeout,
-    options?.maximumAge,
-    options?.useSignificantChanges
-  ]);
+  }, [enabled, client]); // Only re-subscribe when enabled/client changes
 
   // Track mount status
   useEffect(() => {
@@ -121,7 +123,8 @@ export function useWatchPosition(options?: UseWatchPositionOptions) {
   }, []);
 
   return {
-    data,
+    position,
+    error,
     isWatching
   };
 }

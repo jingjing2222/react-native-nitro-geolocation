@@ -19,26 +19,35 @@ import type { GeolocationResponse } from "react-native-nitro-geolocation";
 export default function DefaultScreen() {
   // Hooks
   const { checkPermission } = useCheckPermission();
-  const { requestPermission } = useRequestPermission();
-  const { getCurrentPosition } = useGetCurrentPosition();
   const client = useGeolocationClient();
 
-  // Permission state
-  const [permissionStatus, setPermissionStatus] = useState<string>("unknown");
-  const [isPermissionLoading, setIsPermissionLoading] = useState(false);
+  // Permission hook (Mutation style)
+  const {
+    requestPermission,
+    status: permissionStatus,
+    isPending: isPermissionPending
+  } = useRequestPermission();
 
-  // Current position state
-  const [currentPosition, setCurrentPosition] =
-    useState<GeolocationResponse | null>(null);
-  const [isCurrentPositionLoading, setIsCurrentPositionLoading] =
-    useState(false);
-  const [currentPositionError, setCurrentPositionError] = useState<
-    string | null
-  >(null);
+  // Manual permission check state (separate from mutation)
+  const [checkedPermission, setCheckedPermission] = useState<string>("unknown");
+
+  // Current position hook (Query style - manual trigger)
+  const {
+    position: currentPosition,
+    isLoading: isCurrentPositionLoading,
+    error: currentPositionError,
+    refetch: refetchCurrentPosition
+  } = useGetCurrentPosition({
+    enabled: false // Manual trigger only
+  });
 
   // Watch position hook (continuous)
   const [watchEnabled, setWatchEnabled] = useState(false);
-  const { data: watchedPosition, isWatching } = useWatchPosition({
+  const {
+    position: watchedPosition,
+    error: watchError,
+    isWatching
+  } = useWatchPosition({
     enabled: watchEnabled,
     enableHighAccuracy: true,
     distanceFilter: 10,
@@ -52,44 +61,26 @@ export default function DefaultScreen() {
   const [clientError, setClientError] = useState<string | null>(null);
 
   const handleCheckPermission = async () => {
-    setIsPermissionLoading(true);
     try {
       const status = await checkPermission();
-      setPermissionStatus(status);
+      setCheckedPermission(status);
     } catch (err) {
-      setPermissionStatus("error");
-    } finally {
-      setIsPermissionLoading(false);
+      setCheckedPermission("error");
     }
   };
 
   const handleRequestPermission = async () => {
-    setIsPermissionLoading(true);
     try {
-      const status = await requestPermission();
-      setPermissionStatus(status);
+      await requestPermission();
+      // Status is now automatically managed by the hook
     } catch (err) {
-      setPermissionStatus("error");
-    } finally {
-      setIsPermissionLoading(false);
+      console.error("Permission request failed:", err);
     }
   };
 
   const handleFetchPosition = async () => {
-    setIsCurrentPositionLoading(true);
-    setCurrentPositionError(null);
-    try {
-      const position = await getCurrentPosition({
-        enableHighAccuracy: true,
-        timeout: 15000,
-        maximumAge: 10000
-      });
-      setCurrentPosition(position);
-    } catch (err: any) {
-      setCurrentPositionError(err?.message || "Unknown error");
-    } finally {
-      setIsCurrentPositionLoading(false);
-    }
+    // Use refetch from the hook
+    await refetchCurrentPosition();
   };
 
   const handleClientGetPosition = async () => {
@@ -112,27 +103,36 @@ export default function DefaultScreen() {
     <View style={styles.section}>
       <Text style={styles.sectionTitle}>1. Permission Management</Text>
       <View style={styles.statusContainer}>
-        <Text style={styles.statusLabel}>Status:</Text>
+        <Text style={styles.statusLabel}>Checked Status:</Text>
         <Text style={styles.statusValue}>
-          {permissionStatus || "Unknown"}
-          {permissionStatus === "granted" && " ✅"}
-          {permissionStatus === "denied" && " ❌"}
+          {checkedPermission || "Unknown"}
+          {checkedPermission === "granted" && " ✅"}
+          {checkedPermission === "denied" && " ❌"}
         </Text>
       </View>
+      {permissionStatus && (
+        <View style={styles.statusContainer}>
+          <Text style={styles.statusLabel}>Requested Status:</Text>
+          <Text style={styles.statusValue}>
+            {permissionStatus}
+            {permissionStatus === "granted" && " ✅"}
+            {permissionStatus === "denied" && " ❌"}
+          </Text>
+        </View>
+      )}
       <View style={styles.buttonRow}>
         <View style={styles.button}>
           <Button
-            title={isPermissionLoading ? "..." : "Check"}
+            title="Check"
             onPress={handleCheckPermission}
-            disabled={isPermissionLoading}
             color="#2196F3"
           />
         </View>
         <View style={styles.button}>
           <Button
-            title={isPermissionLoading ? "..." : "Request"}
+            title={isPermissionPending ? "Requesting..." : "Request"}
             onPress={handleRequestPermission}
-            disabled={isPermissionLoading}
+            disabled={isPermissionPending}
             color="#4CAF50"
           />
         </View>
@@ -185,13 +185,13 @@ export default function DefaultScreen() {
 
   const renderCurrentPositionSection = () => (
     <View style={styles.section}>
-      <Text style={styles.sectionTitle}>2. useGetCurrentPosition Hook</Text>
+      <Text style={styles.sectionTitle}>2. useGetCurrentPosition Hook (Query Style)</Text>
       <Text style={styles.description}>
-        One-time location request using hook
+        One-time location request with automatic state management
       </Text>
       {currentPositionError && (
         <View style={styles.errorContainer}>
-          <Text style={styles.errorText}>Error: {currentPositionError}</Text>
+          <Text style={styles.errorText}>Error: {currentPositionError.message}</Text>
         </View>
       )}
       <View style={styles.buttonContainer}>
@@ -208,7 +208,7 @@ export default function DefaultScreen() {
 
   const renderWatchPositionSection = () => (
     <View style={styles.section}>
-      <Text style={styles.sectionTitle}>3. useWatchPosition Hook</Text>
+      <Text style={styles.sectionTitle}>3. useWatchPosition Hook (Stream Style)</Text>
       <Text style={styles.description}>
         Continuous location tracking with automatic cleanup
       </Text>
@@ -222,6 +222,11 @@ export default function DefaultScreen() {
           {isWatching ? "Watching 🟢" : "Not Watching 🔴"}
         </Text>
       </View>
+      {watchError && (
+        <View style={styles.errorContainer}>
+          <Text style={styles.errorText}>Error: {watchError.message}</Text>
+        </View>
+      )}
       {renderPositionInfo(watchedPosition, "Watched Position (Live)")}
     </View>
   );

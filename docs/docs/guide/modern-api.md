@@ -2,18 +2,27 @@
 title: Modern API (Recommended)
 ---
 
-> Inspired by TanStack Query's developer experience
+> React-friendly hooks with role-based design patterns
 
 The Modern API provides a React-first approach to geolocation with Hooks and Provider patterns.
 
 ## Design Philosophy
 
-**TanStack Query Inspiration**:
+**Role-Based Hook Design**:
+
+Each hook follows the pattern that best fits its responsibility:
+
+- **Query style** (`useGetCurrentPosition`): Promise-based one-time requests with automatic state management
+- **Mutation style** (`useRequestPermission`): Explicit user actions with pending/error states
+- **Stream style** (`useWatchPosition`): Continuous data subscriptions with declarative on/off
+
+**Core Principles**:
 
 - **Provider-based configuration**: Set up once, use anywhere
 - **Declarative hooks**: `useWatchPosition({ enabled })` instead of imperative start/stop
 - **Automatic cleanup**: No need to manually unsubscribe
 - **Type-safe**: Full TypeScript support with inference
+- **Battery efficient**: Native subscriptions stop immediately when disabled
 
 ## GeolocationClientProvider
 
@@ -86,74 +95,116 @@ function PermissionStatus() {
 
 ### useRequestPermission()
 
-Request location permission from the user.
+Request location permission from the user in **Mutation style**.
 
 ```tsx
 import { useRequestPermission } from 'react-native-nitro-geolocation';
 
 function PermissionButton() {
-  const { requestPermission } = useRequestPermission();
+  const {
+    requestPermission,
+    status,
+    isPending,
+    isError,
+    error
+  } = useRequestPermission();
 
   const handlePress = async () => {
     try {
-      const status = await requestPermission();
-      if (status === 'granted') {
+      const result = await requestPermission();
+      if (result === 'granted') {
         console.log('Permission granted!');
-      } else {
-        console.log('Permission denied:', status);
       }
-    } catch (error) {
-      console.error('Permission error:', error);
+    } catch (err) {
+      console.error('Permission error:', err);
     }
   };
 
-  return <Button onPress={handlePress} title="Enable Location" />;
+  return (
+    <View>
+      <Button
+        onPress={handlePress}
+        disabled={isPending}
+        title={isPending ? 'Requesting...' : 'Enable Location'}
+      />
+      {isError && <Text>Error: {error?.message}</Text>}
+      {status && <Text>Status: {status}</Text>}
+    </View>
+  );
 }
 ```
 
 **Returns**:
 
-- `requestPermission`: `() => Promise<PermissionStatus>`
+- `requestPermission`: `() => Promise<PermissionStatus>` - Trigger permission request
+- `status`: `PermissionStatus | null` - Latest permission status after request
+- `isPending`: `boolean` - Whether request is in progress
+- `isError`: `boolean` - Whether an error occurred
+- `error`: `LocationError | null` - Error details if failed
 
 **Behavior**:
 
 - Shows system permission dialog if `undetermined`
 - Returns immediately if already `granted` or `denied`
 - On iOS, uses `authorizationLevel` from client config
+- State is automatically managed (loading, error, status)
 
 ---
 
 ### useGetCurrentPosition()
 
-Get current location (one-time request).
+Get current location (one-time request) in **Query style** with automatic state management.
 
 ```tsx
 import { useGetCurrentPosition } from 'react-native-nitro-geolocation';
 
-function LocationButton() {
-  const { getCurrentPosition } = useGetCurrentPosition();
-  const [position, setPosition] = useState(null);
-  const [loading, setLoading] = useState(false);
+// Auto-fetch on mount
+function LocationDisplay() {
+  const {
+    position,
+    isLoading,
+    isError,
+    error,
+    refetch
+  } = useGetCurrentPosition({
+    enabled: true,  // Auto-fetch (default)
+    enableHighAccuracy: true,
+    timeout: 15000,
+  });
 
-  const handlePress = async () => {
-    setLoading(true);
-    try {
-      const pos = await getCurrentPosition({
-        enableHighAccuracy: true,
-        timeout: 15000,
-        maximumAge: 10000,
-      });
-      setPosition(pos);
-    } catch (error) {
-      console.error('Location error:', error.message);
-    } finally {
-      setLoading(false);
-    }
-  };
+  if (isLoading) return <Text>Loading location...</Text>;
+  if (isError) return <Text>Error: {error?.message}</Text>;
+  if (!position) return null;
 
   return (
     <View>
-      <Button onPress={handlePress} disabled={loading} />
+      <Text>Lat: {position.coords.latitude}</Text>
+      <Text>Lng: {position.coords.longitude}</Text>
+      <Button title="Refresh" onPress={() => refetch()} />
+    </View>
+  );
+}
+
+// Manual trigger only
+function LocationButton() {
+  const {
+    position,
+    isLoading,
+    isError,
+    error,
+    refetch
+  } = useGetCurrentPosition({
+    enabled: false  // Manual only
+  });
+
+  return (
+    <View>
+      <Button
+        onPress={() => refetch()}
+        disabled={isLoading}
+        title={isLoading ? 'Loading...' : 'Get Location'}
+      />
+      {isError && <Text>Error: {error?.message}</Text>}
       {position && (
         <Text>
           {position.coords.latitude}, {position.coords.longitude}
@@ -166,10 +217,15 @@ function LocationButton() {
 
 **Returns**:
 
-- `getCurrentPosition`: `(options?) => Promise<GeolocationResponse>`
+- `position`: `GeolocationResponse | null` - Current location data
+- `isLoading`: `boolean` - Whether request is in progress
+- `isError`: `boolean` - Whether an error occurred
+- `error`: `LocationError | null` - Error details if failed
+- `refetch`: `() => Promise<void>` - Manually trigger location request
 
 **Options**:
 
+- `enabled?: boolean` - Auto-fetch on mount (default: `true`)
 - `timeout?: number` - Request timeout in ms (default: 600000 / 10 min)
 - `maximumAge?: number` - Max age of cached location in ms (default: 0)
 - `enableHighAccuracy?: boolean` - Use GPS vs network location
@@ -206,7 +262,7 @@ try {
 
 ### useWatchPosition({ enabled })
 
-Watch for continuous location updates with automatic lifecycle management.
+Watch for continuous location updates with automatic lifecycle management in **Stream style**.
 
 ```tsx
 import { useWatchPosition } from 'react-native-nitro-geolocation';
@@ -214,7 +270,11 @@ import { useWatchPosition } from 'react-native-nitro-geolocation';
 function LiveTracker() {
   const [enabled, setEnabled] = useState(true);
 
-  const { data, isWatching } = useWatchPosition({
+  const {
+    position,
+    error,
+    isWatching
+  } = useWatchPosition({
     enabled,
     enableHighAccuracy: true,
     distanceFilter: 10, // Update every 10 meters
@@ -230,16 +290,20 @@ function LiveTracker() {
       />
 
       {isWatching ? (
-        <Text>Watching...</Text>
+        <Text>Watching 🟢</Text>
       ) : (
-        <Text>Stopped</Text>
+        <Text>Stopped 🔴</Text>
       )}
 
-      {data && (
+      {error && (
+        <Text style={{ color: 'red' }}>Error: {error.message}</Text>
+      )}
+
+      {position && (
         <View>
-          <Text>Lat: {data.coords.latitude}</Text>
-          <Text>Lng: {data.coords.longitude}</Text>
-          <Text>Accuracy: {data.coords.accuracy}m</Text>
+          <Text>Lat: {position.coords.latitude}</Text>
+          <Text>Lng: {position.coords.longitude}</Text>
+          <Text>Accuracy: {position.coords.accuracy}m</Text>
         </View>
       )}
     </View>
@@ -249,7 +313,7 @@ function LiveTracker() {
 
 **Options**:
 
-- `enabled?: boolean` - Start/stop watching (default: false)
+- `enabled?: boolean` - Start/stop watching (default: `false`)
 - `enableHighAccuracy?: boolean` - Use GPS
 - `distanceFilter?: number` - Minimum distance change in meters
 - `interval?: number` - Update interval in ms (Android)
@@ -260,14 +324,16 @@ function LiveTracker() {
 
 **Returns**:
 
-- `data: GeolocationResponse | null` - Latest position (null if no update yet)
-- `isWatching: boolean` - Whether currently watching
+- `position`: `GeolocationResponse | null` - Latest position (null if no update yet)
+- `error`: `LocationError | null` - Error details if location watching failed
+- `isWatching`: `boolean` - Whether currently watching
 
 **Key Features**:
 
-- ✅ **Auto cleanup**: Unsubscribes when component unmounts
+- ✅ **Auto cleanup**: Unsubscribes when component unmounts or `enabled` becomes `false`
 - ✅ **Declarative**: Toggle with `enabled` prop
 - ✅ **No watch ID management**: Handled internally
+- ✅ **Battery efficient**: Native subscription stops immediately when disabled
 - ✅ **Reactive**: Changes to options restart the watch
 
 **Common Patterns**:
@@ -275,17 +341,17 @@ function LiveTracker() {
 1.  **Toggle tracking**:
     ```tsx
     const [tracking, setTracking] = useState(false);
-    const { data } = useWatchPosition({ enabled: tracking });
+    const { position } = useWatchPosition({ enabled: tracking });
     ```
 2.  **Conditional tracking** (track only when screen is focused):
     ```tsx
     const isFocused = useIsFocused(); // React Navigation
-    const { data } = useWatchPosition({ enabled: isFocused });
+    const { position } = useWatchPosition({ enabled: isFocused });
     ```
 3.  **Track only when permission granted**:
     ```tsx
     const [hasPermission, setHasPermission] = useState(false);
-    const { data } = useWatchPosition({
+    const { position, error } = useWatchPosition({
       enabled: hasPermission,
       enableHighAccuracy: true,
     });
@@ -297,25 +363,39 @@ function LiveTracker() {
 
 ```tsx
 function useLocationWithPermission() {
-  const { requestPermission } = useRequestPermission();
-  const { getCurrentPosition } = useGetCurrentPosition();
-  const [status, setStatus] = useState<PermissionStatus>('undetermined');
+  const {
+    requestPermission,
+    status: permissionStatus,
+    isPending: isRequestingPermission
+  } = useRequestPermission();
+
+  const {
+    position,
+    isLoading,
+    refetch
+  } = useGetCurrentPosition({
+    enabled: false  // Manual trigger
+  });
 
   const getLocation = async () => {
     // Request permission if needed
-    if (status !== 'granted') {
+    if (permissionStatus !== 'granted') {
       const newStatus = await requestPermission();
-      setStatus(newStatus);
       if (newStatus !== 'granted') {
         throw new Error('Permission denied');
       }
     }
 
     // Get location
-    return await getCurrentPosition();
+    await refetch();
   };
 
-  return { getLocation, status };
+  return {
+    getLocation,
+    position,
+    isLoading: isLoading || isRequestingPermission,
+    permissionStatus
+  };
 }
 ```
 
@@ -351,12 +431,17 @@ function BackgroundTracker() {
   const appState = useAppState();
   const isActive = appState === 'active';
 
-  const { data } = useWatchPosition({
+  const { position, error } = useWatchPosition({
     enabled: isActive,
     distanceFilter: 50,
   });
 
-  return <Map position={data?.coords} />;
+  return (
+    <>
+      {error && <ErrorBanner message={error.message} />}
+      <Map position={position?.coords} />
+    </>
+  );
 }
 ```
 
@@ -440,11 +525,16 @@ import type {
 Hooks provide full type inference:
 
 ```tsx
-const { data } = useWatchPosition({ enabled: true });
-// data: GeolocationResponse | null (inferred)
+const { position } = useWatchPosition({ enabled: true });
+// position: GeolocationResponse | null (inferred)
 
-const { getCurrentPosition } = useGetCurrentPosition();
-// getCurrentPosition: (options?: LocationRequestOptions) => Promise<GeolocationResponse>
+const { position, refetch } = useGetCurrentPosition({ enabled: false });
+// position: GeolocationResponse | null (inferred)
+// refetch: () => Promise<void> (inferred)
+
+const { requestPermission, status } = useRequestPermission();
+// requestPermission: () => Promise<PermissionStatus> (inferred)
+// status: PermissionStatus | null (inferred)
 ```
 
 ## Comparison with Legacy API
@@ -496,12 +586,12 @@ function LocationTracker() {
 import { useWatchPosition } from 'react-native-nitro-geolocation';
 
 function LocationTracker() {
-  const { data } = useWatchPosition({
+  const { position } = useWatchPosition({
     enabled: true,
     enableHighAccuracy: true,
   });
 
-  return <Map position={data} />;
+  return <Map position={position} />;
 }
 ```
 
