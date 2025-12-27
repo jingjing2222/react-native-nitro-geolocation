@@ -1,14 +1,15 @@
 import type {
   LocationError,
   LocationRequestOptions,
-  PermissionStatus,
-  ModernGeolocationConfiguration as NitroModernGeolocationConfiguration
+  ModernGeolocationConfiguration as NitroModernGeolocationConfiguration,
+  PermissionStatus
 } from "./NitroGeolocation.nitro";
 import { NitroGeolocationHybridObject } from "./NitroGeolocationModule";
 import type { ModernGeolocationConfiguration } from "./types";
 import type { GeolocationResponse } from "./types";
 
-export interface GeolocationClientConfig extends ModernGeolocationConfiguration {}
+export interface GeolocationClientConfig
+  extends ModernGeolocationConfiguration {}
 
 /**
  * GeolocationClient provides direct access to geolocation methods.

@@ -186,7 +186,9 @@ export default function DefaultScreen() {
   const renderCurrentPositionSection = () => (
     <View style={styles.section}>
       <Text style={styles.sectionTitle}>2. useGetCurrentPosition Hook</Text>
-      <Text style={styles.description}>One-time location request using hook</Text>
+      <Text style={styles.description}>
+        One-time location request using hook
+      </Text>
       {currentPositionError && (
         <View style={styles.errorContainer}>
           <Text style={styles.errorText}>Error: {currentPositionError}</Text>
