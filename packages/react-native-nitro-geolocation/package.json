@@ -57,7 +57,9 @@
     "typescript": "^5.9.3"
   },
   "peerDependencies": {
-    "react-native-nitro-modules": "*"
+    "react": ">=18.0.0",
+    "react-native": ">=0.75.0",
+    "react-native-nitro-modules": ">=0.32.0"
   },
   "create-react-native-library": {
     "languages": "kotlin-swift",

@@ -18,7 +18,7 @@
     "@react-navigation/native": "^7.1.26",
     "react": "19.1.0",
     "react-native": "0.81.1",
-    "react-native-nitro-geolocation": "workspace:*",
+    "react-native-nitro-geolocation": "file:///Users/kimhyeongjeong/Desktop/code/react-native-nitro-geolocation/packages/react-native-nitro-geolocation/package.tgz",
     "react-native-nitro-modules": "^0.32.0",
     "react-native-safe-area-context": "^5.5.2",
     "react-native-screens": "^4.19.0"
@@ -39,8 +39,5 @@
   },
   "engines": {
     "node": ">=20"
-  },
-  "installConfig": {
-    "hoistingLimits": "workspaces"
   }
 }

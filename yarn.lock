@@ -9213,7 +9213,7 @@ __metadata:
     react-native: "npm:0.81.1"
     react-native-builder-bob: "npm:^0.40.13"
     react-native-monorepo-config: "npm:^0.1.9"
-    react-native-nitro-geolocation: "workspace:*"
+    react-native-nitro-geolocation: "file:///Users/kimhyeongjeong/Desktop/code/react-native-nitro-geolocation/packages/react-native-nitro-geolocation/package.tgz"
     react-native-nitro-modules: "npm:^0.32.0"
     react-native-safe-area-context: "npm:^5.5.2"
     react-native-screens: "npm:^4.19.0"
@@ -9228,6 +9228,17 @@ __metadata:
   languageName: unknown
   linkType: soft
 
+"react-native-nitro-geolocation@file:///Users/kimhyeongjeong/Desktop/code/react-native-nitro-geolocation/packages/react-native-nitro-geolocation/package.tgz::locator=react-native-nitro-geolocation-example%40workspace%3Aexamples%2Fv0.81.1":
+  version: 0.1.2
+  resolution: "react-native-nitro-geolocation@file:///Users/kimhyeongjeong/Desktop/code/react-native-nitro-geolocation/packages/react-native-nitro-geolocation/package.tgz#///Users/kimhyeongjeong/Desktop/code/react-native-nitro-geolocation/packages/react-native-nitro-geolocation/package.tgz::hash=c78407&locator=react-native-nitro-geolocation-example%40workspace%3Aexamples%2Fv0.81.1"
+  peerDependencies:
+    react: ">=18.0.0"
+    react-native: ">=0.75.0"
+    react-native-nitro-modules: ">=0.32.0"
+  checksum: 10c0/e9d7efd1ee47aedc68bdc272c0bb6a446db9ef1a12b224fbc897bd72b414995c02635075e0243ece33d077d657f054f0b98bdd6f8c99d6b66fba2dec3d1492f1
+  languageName: node
+  linkType: hard
+
 "react-native-nitro-geolocation@workspace:*, react-native-nitro-geolocation@workspace:packages/react-native-nitro-geolocation":
   version: 0.0.0-use.local
   resolution: "react-native-nitro-geolocation@workspace:packages/react-native-nitro-geolocation"
@@ -9241,7 +9252,9 @@ __metadata:
     react-native-nitro-modules: "npm:0.32.0"
     typescript: "npm:^5.9.3"
   peerDependencies:
-    react-native-nitro-modules: "*"
+    react: ">=18.0.0"
+    react-native: ">=0.75.0"
+    react-native-nitro-modules: ">=0.32.0"
   languageName: unknown
   linkType: soft
 
