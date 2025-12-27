@@ -14,7 +14,13 @@ public protocol HybridNitroGeolocationSpec_protocol: HybridObject {
   
 
   // Methods
-  func helloWorld() throws -> Promise<String>
+  func setConfiguration(config: ModernGeolocationConfiguration) throws -> Void
+  func checkPermission() throws -> Promise<PermissionStatus>
+  func requestPermission() throws -> Promise<PermissionStatus>
+  func getCurrentPosition(options: LocationRequestOptions?) throws -> Promise<GeolocationResponse>
+  func watchPosition(success: @escaping (_ position: GeolocationResponse) -> Void, error: ((_ error: LocationError) -> Void)?, options: LocationRequestOptions?) throws -> String
+  func unwatch(token: String) throws -> Void
+  func stopObserving() throws -> Void
 }
 
 public extension HybridNitroGeolocationSpec_protocol {
