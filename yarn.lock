@@ -9213,7 +9213,7 @@ __metadata:
     react-native: "npm:0.81.1"
     react-native-builder-bob: "npm:^0.40.13"
     react-native-monorepo-config: "npm:^0.1.9"
-    react-native-nitro-geolocation: "file:///Users/kimhyeongjeong/Desktop/code/react-native-nitro-geolocation/packages/react-native-nitro-geolocation/package.tgz"
+    react-native-nitro-geolocation: "file:../../packages/react-native-nitro-geolocation/package.tgz"
     react-native-nitro-modules: "npm:^0.32.0"
     react-native-safe-area-context: "npm:^5.5.2"
     react-native-screens: "npm:4.19.0"
@@ -9228,14 +9228,14 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"react-native-nitro-geolocation@file:///Users/kimhyeongjeong/Desktop/code/react-native-nitro-geolocation/packages/react-native-nitro-geolocation/package.tgz::locator=react-native-nitro-geolocation-example%40workspace%3Aexamples%2Fv0.81.1":
+"react-native-nitro-geolocation@file:../../packages/react-native-nitro-geolocation/package.tgz::locator=react-native-nitro-geolocation-example%40workspace%3Aexamples%2Fv0.81.1":
   version: 0.1.2
-  resolution: "react-native-nitro-geolocation@file:///Users/kimhyeongjeong/Desktop/code/react-native-nitro-geolocation/packages/react-native-nitro-geolocation/package.tgz#///Users/kimhyeongjeong/Desktop/code/react-native-nitro-geolocation/packages/react-native-nitro-geolocation/package.tgz::hash=dfff46&locator=react-native-nitro-geolocation-example%40workspace%3Aexamples%2Fv0.81.1"
+  resolution: "react-native-nitro-geolocation@file:../../packages/react-native-nitro-geolocation/package.tgz#../../packages/react-native-nitro-geolocation/package.tgz::hash=daf9e5&locator=react-native-nitro-geolocation-example%40workspace%3Aexamples%2Fv0.81.1"
   peerDependencies:
     react: ">=18.0.0"
     react-native: ">=0.75.0"
     react-native-nitro-modules: ">=0.32.0"
-  checksum: 10c0/8f8c91c2588ac194a7af900b81fba0ce44a2d64fad68565a8525bc552d79e55e5fff27209bacea714d26d5f49a09576aa65bacc0a711ef95bee932f0b1f6e18e
+  checksum: 10c0/0cb381dc85ff523c959924215e68cfe5301f4974d5947682dd07e4973707cbc1414a3a668171e56abcfe51388dfa23ed088b00e0b4ef7be8cc0fee858d7d0ee8
   languageName: node
   linkType: hard
 
