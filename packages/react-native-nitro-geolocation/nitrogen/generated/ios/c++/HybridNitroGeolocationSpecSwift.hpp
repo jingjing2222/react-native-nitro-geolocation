@@ -12,10 +12,37 @@
 // Forward declaration of `HybridNitroGeolocationSpec_cxx` to properly resolve imports.
 namespace NitroGeolocation { class HybridNitroGeolocationSpec_cxx; }
 
+// Forward declaration of `ModernGeolocationConfiguration` to properly resolve imports.
+namespace margelo::nitro::nitrogeolocation { struct ModernGeolocationConfiguration; }
+// Forward declaration of `AuthorizationLevel` to properly resolve imports.
+namespace margelo::nitro::nitrogeolocation { enum class AuthorizationLevel; }
+// Forward declaration of `LocationProvider` to properly resolve imports.
+namespace margelo::nitro::nitrogeolocation { enum class LocationProvider; }
+// Forward declaration of `PermissionStatus` to properly resolve imports.
+namespace margelo::nitro::nitrogeolocation { enum class PermissionStatus; }
+// Forward declaration of `GeolocationResponse` to properly resolve imports.
+namespace margelo::nitro::nitrogeolocation { struct GeolocationResponse; }
+// Forward declaration of `GeolocationCoordinates` to properly resolve imports.
+namespace margelo::nitro::nitrogeolocation { struct GeolocationCoordinates; }
+// Forward declaration of `LocationRequestOptions` to properly resolve imports.
+namespace margelo::nitro::nitrogeolocation { struct LocationRequestOptions; }
+// Forward declaration of `LocationError` to properly resolve imports.
+namespace margelo::nitro::nitrogeolocation { struct LocationError; }
 
-
-#include <string>
+#include "ModernGeolocationConfiguration.hpp"
+#include <optional>
+#include "AuthorizationLevel.hpp"
+#include "LocationProvider.hpp"
+#include "PermissionStatus.hpp"
 #include <NitroModules/Promise.hpp>
+#include "GeolocationResponse.hpp"
+#include "GeolocationCoordinates.hpp"
+#include <NitroModules/Null.hpp>
+#include <variant>
+#include "LocationRequestOptions.hpp"
+#include <string>
+#include <functional>
+#include "LocationError.hpp"
 
 #include "NitroGeolocation-Swift-Cxx-Umbrella.hpp"
 
@@ -61,13 +88,55 @@ namespace margelo::nitro::nitrogeolocation {
 
   public:
     // Methods
-    inline std::shared_ptr<Promise<std::string>> helloWorld() override {
-      auto __result = _swiftPart.helloWorld();
+    inline void setConfiguration(const ModernGeolocationConfiguration& config) override {
+      auto __result = _swiftPart.setConfiguration(std::forward<decltype(config)>(config));
+      if (__result.hasError()) [[unlikely]] {
+        std::rethrow_exception(__result.error());
+      }
+    }
+    inline std::shared_ptr<Promise<PermissionStatus>> checkPermission() override {
+      auto __result = _swiftPart.checkPermission();
       if (__result.hasError()) [[unlikely]] {
         std::rethrow_exception(__result.error());
       }
       auto __value = std::move(__result.value());
       return __value;
+    }
+    inline std::shared_ptr<Promise<PermissionStatus>> requestPermission() override {
+      auto __result = _swiftPart.requestPermission();
+      if (__result.hasError()) [[unlikely]] {
+        std::rethrow_exception(__result.error());
+      }
+      auto __value = std::move(__result.value());
+      return __value;
+    }
+    inline std::shared_ptr<Promise<GeolocationResponse>> getCurrentPosition(const std::optional<LocationRequestOptions>& options) override {
+      auto __result = _swiftPart.getCurrentPosition(options);
+      if (__result.hasError()) [[unlikely]] {
+        std::rethrow_exception(__result.error());
+      }
+      auto __value = std::move(__result.value());
+      return __value;
+    }
+    inline std::string watchPosition(const std::function<void(const GeolocationResponse& /* position */)>& success, const std::optional<std::function<void(const LocationError& /* error */)>>& error, const std::optional<LocationRequestOptions>& options) override {
+      auto __result = _swiftPart.watchPosition(success, error, options);
+      if (__result.hasError()) [[unlikely]] {
+        std::rethrow_exception(__result.error());
+      }
+      auto __value = std::move(__result.value());
+      return __value;
+    }
+    inline void unwatch(const std::string& token) override {
+      auto __result = _swiftPart.unwatch(token);
+      if (__result.hasError()) [[unlikely]] {
+        std::rethrow_exception(__result.error());
+      }
+    }
+    inline void stopObserving() override {
+      auto __result = _swiftPart.stopObserving();
+      if (__result.hasError()) [[unlikely]] {
+        std::rethrow_exception(__result.error());
+      }
     }
 
   private:

@@ -37,8 +37,8 @@ target_sources(
   ../nitrogen/generated/shared/c++/HybridNitroGeolocationCompatSpec.cpp
   # Android-specific Nitrogen C++ sources
   ../nitrogen/generated/android/c++/JHybridNitroGeolocationSpec.cpp
-  ../nitrogen/generated/android/c++/JHybridNitroGeolocationCompatSpec.cpp
   ../nitrogen/generated/android/c++/JNullableDouble.cpp
+  ../nitrogen/generated/android/c++/JHybridNitroGeolocationCompatSpec.cpp
 )
 
 # From node_modules/react-native/ReactAndroid/cmake-utils/folly-flags.cmake

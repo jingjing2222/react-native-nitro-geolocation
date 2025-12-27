@@ -14,11 +14,14 @@
   "dependencies": {
     "@react-native-community/geolocation": "^3.4.0",
     "@react-native/new-app-screen": "0.81.1",
+    "@react-navigation/bottom-tabs": "^7.9.0",
+    "@react-navigation/native": "^7.1.26",
     "react": "19.1.0",
     "react-native": "0.81.1",
-    "react-native-nitro-geolocation": "workspace:*",
+    "react-native-nitro-geolocation": "file:../../packages/react-native-nitro-geolocation/package.tgz",
     "react-native-nitro-modules": "^0.32.0",
-    "react-native-safe-area-context": "^5.5.2"
+    "react-native-safe-area-context": "^5.5.2",
+    "react-native-screens": "4.19.0"
   },
   "devDependencies": {
     "@babel/core": "^7.25.2",
@@ -36,8 +39,5 @@
   },
   "engines": {
     "node": ">=20"
-  },
-  "installConfig": {
-    "hoistingLimits": "workspaces"
   }
 }

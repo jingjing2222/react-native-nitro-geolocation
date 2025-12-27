@@ -13,10 +13,26 @@
 #error NitroModules cannot be found! Are you sure you installed NitroModules properly?
 #endif
 
+// Forward declaration of `ModernGeolocationConfiguration` to properly resolve imports.
+namespace margelo::nitro::nitrogeolocation { struct ModernGeolocationConfiguration; }
+// Forward declaration of `PermissionStatus` to properly resolve imports.
+namespace margelo::nitro::nitrogeolocation { enum class PermissionStatus; }
+// Forward declaration of `GeolocationResponse` to properly resolve imports.
+namespace margelo::nitro::nitrogeolocation { struct GeolocationResponse; }
+// Forward declaration of `LocationRequestOptions` to properly resolve imports.
+namespace margelo::nitro::nitrogeolocation { struct LocationRequestOptions; }
+// Forward declaration of `LocationError` to properly resolve imports.
+namespace margelo::nitro::nitrogeolocation { struct LocationError; }
 
-
-#include <string>
+#include "ModernGeolocationConfiguration.hpp"
+#include "PermissionStatus.hpp"
 #include <NitroModules/Promise.hpp>
+#include "GeolocationResponse.hpp"
+#include "LocationRequestOptions.hpp"
+#include <optional>
+#include <string>
+#include <functional>
+#include "LocationError.hpp"
 
 namespace margelo::nitro::nitrogeolocation {
 
@@ -49,7 +65,13 @@ namespace margelo::nitro::nitrogeolocation {
 
     public:
       // Methods
-      virtual std::shared_ptr<Promise<std::string>> helloWorld() = 0;
+      virtual void setConfiguration(const ModernGeolocationConfiguration& config) = 0;
+      virtual std::shared_ptr<Promise<PermissionStatus>> checkPermission() = 0;
+      virtual std::shared_ptr<Promise<PermissionStatus>> requestPermission() = 0;
+      virtual std::shared_ptr<Promise<GeolocationResponse>> getCurrentPosition(const std::optional<LocationRequestOptions>& options) = 0;
+      virtual std::string watchPosition(const std::function<void(const GeolocationResponse& /* position */)>& success, const std::optional<std::function<void(const LocationError& /* error */)>>& error, const std::optional<LocationRequestOptions>& options) = 0;
+      virtual void unwatch(const std::string& token) = 0;
+      virtual void stopObserving() = 0;
 
     protected:
       // Hybrid Setup
