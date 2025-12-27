@@ -1,5 +1,11 @@
 # react-native-nitro-geolocation
 
+## 0.3.0
+
+### Minor Changes
+
+- bd454a9: docs: update
+
 ## 0.2.0
 
 ### Minor Changes
