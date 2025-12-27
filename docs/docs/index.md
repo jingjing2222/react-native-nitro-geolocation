@@ -4,7 +4,7 @@ pageType: home
 hero:
   name: React Native Nitro Geolocation
   text: A React Native Geolocation module
-  tagline: Native geolocation, now Nitro-powered.
+  tagline: Native geolocation with React Hooks, powered by Nitro.
   actions:
     - theme: brand
       text: Introduction
@@ -17,11 +17,14 @@ hero:
     alt: Nitro Geolocation Logo
 
 features:
+  - title: TanStack Query-inspired Hooks
+    details: Modern React patterns with Provider + Hooks for declarative geolocation and automatic lifecycle management.
+    icon: ⚛️
   - title: Fully native implementation
     details: Access device geolocation data through JSI and Nitro Modules for maximum performance.
     icon: 📡
-  - title: Drop-in replacement
-    details: Provides the same API surface as @react-native-community/geolocation for easy migration.
+  - title: Drop-in replacement (via /compat)
+    details: Legacy API provides 100% compatibility with @react-native-community/geolocation for easy migration.
     icon: 🔁
   - title: Consistent Android & iOS behavior
     details: Unified permission handling, background location consistency, and improved accuracy tuning.
@@ -29,8 +32,11 @@ features:
   - title: Direct JSI communication
     details: Built with Nitro Modules, enabling direct JS-to-native calls without bridge serialization overhead.
     icon: ⚙️
+  - title: Automatic cleanup
+    details: useWatchPosition automatically manages subscriptions with component lifecycle—no manual cleanup needed.
+    icon: 🧹
   - title: TypeScript ready
-    details: Full type definitions for getCurrentPosition, watchPosition, and clearWatch APIs.
+    details: Full type definitions for all APIs with complete type inference for Modern Hooks.
     icon: 📘
   - title: Easy integration
     details: Compatible with Expo modules, RN CLI, and custom native builds out of the box.
