@@ -8,6 +8,8 @@ import {
   View
 } from "react-native";
 import {
+  useCheckPermission,
+  useGeolocationClient,
   useGetCurrentPosition,
   useRequestPermission,
   useWatchPosition
@@ -16,8 +18,10 @@ import type { GeolocationResponse } from "react-native-nitro-geolocation";
 
 export default function DefaultScreen() {
   // Hooks
+  const { checkPermission } = useCheckPermission();
   const { requestPermission } = useRequestPermission();
   const { getCurrentPosition } = useGetCurrentPosition();
+  const client = useGeolocationClient();
 
   // Permission state
   const [permissionStatus, setPermissionStatus] = useState<string>("unknown");
@@ -40,6 +44,24 @@ export default function DefaultScreen() {
     distanceFilter: 10,
     interval: 5000
   });
+
+  // Direct client usage (without hooks)
+  const [clientPosition, setClientPosition] =
+    useState<GeolocationResponse | null>(null);
+  const [isClientLoading, setIsClientLoading] = useState(false);
+  const [clientError, setClientError] = useState<string | null>(null);
+
+  const handleCheckPermission = async () => {
+    setIsPermissionLoading(true);
+    try {
+      const status = await checkPermission();
+      setPermissionStatus(status);
+    } catch (err) {
+      setPermissionStatus("error");
+    } finally {
+      setIsPermissionLoading(false);
+    }
+  };
 
   const handleRequestPermission = async () => {
     setIsPermissionLoading(true);
@@ -70,9 +92,25 @@ export default function DefaultScreen() {
     }
   };
 
+  const handleClientGetPosition = async () => {
+    setIsClientLoading(true);
+    setClientError(null);
+    try {
+      const position = await client.getCurrentPosition({
+        enableHighAccuracy: true,
+        timeout: 15000
+      });
+      setClientPosition(position);
+    } catch (err: any) {
+      setClientError(err?.message || "Unknown error");
+    } finally {
+      setIsClientLoading(false);
+    }
+  };
+
   const renderPermissionSection = () => (
     <View style={styles.section}>
-      <Text style={styles.sectionTitle}>Permission Status</Text>
+      <Text style={styles.sectionTitle}>1. Permission Management</Text>
       <View style={styles.statusContainer}>
         <Text style={styles.statusLabel}>Status:</Text>
         <Text style={styles.statusValue}>
@@ -81,13 +119,23 @@ export default function DefaultScreen() {
           {permissionStatus === "denied" && " ❌"}
         </Text>
       </View>
-      <View style={styles.buttonContainer}>
-        <Button
-          title={isPermissionLoading ? "Loading..." : "Request Permission"}
-          onPress={handleRequestPermission}
-          disabled={isPermissionLoading}
-          color="#4CAF50"
-        />
+      <View style={styles.buttonRow}>
+        <View style={styles.button}>
+          <Button
+            title={isPermissionLoading ? "..." : "Check"}
+            onPress={handleCheckPermission}
+            disabled={isPermissionLoading}
+            color="#2196F3"
+          />
+        </View>
+        <View style={styles.button}>
+          <Button
+            title={isPermissionLoading ? "..." : "Request"}
+            onPress={handleRequestPermission}
+            disabled={isPermissionLoading}
+            color="#4CAF50"
+          />
+        </View>
       </View>
     </View>
   );
@@ -137,7 +185,8 @@ export default function DefaultScreen() {
 
   const renderCurrentPositionSection = () => (
     <View style={styles.section}>
-      <Text style={styles.sectionTitle}>Get Current Position (On Demand)</Text>
+      <Text style={styles.sectionTitle}>2. useGetCurrentPosition Hook</Text>
+      <Text style={styles.description}>One-time location request using hook</Text>
       {currentPositionError && (
         <View style={styles.errorContainer}>
           <Text style={styles.errorText}>Error: {currentPositionError}</Text>
@@ -157,7 +206,10 @@ export default function DefaultScreen() {
 
   const renderWatchPositionSection = () => (
     <View style={styles.section}>
-      <Text style={styles.sectionTitle}>Watch Position (Continuous)</Text>
+      <Text style={styles.sectionTitle}>3. useWatchPosition Hook</Text>
+      <Text style={styles.description}>
+        Continuous location tracking with automatic cleanup
+      </Text>
       <View style={styles.toggleContainer}>
         <Text style={styles.toggleLabel}>Enable Watching:</Text>
         <Switch value={watchEnabled} onValueChange={setWatchEnabled} />
@@ -172,12 +224,35 @@ export default function DefaultScreen() {
     </View>
   );
 
+  const renderClientSection = () => (
+    <View style={styles.section}>
+      <Text style={styles.sectionTitle}>4. useGeolocationClient Hook</Text>
+      <Text style={styles.description}>
+        Direct client access for advanced usage
+      </Text>
+      {clientError && (
+        <View style={styles.errorContainer}>
+          <Text style={styles.errorText}>Error: {clientError}</Text>
+        </View>
+      )}
+      <View style={styles.buttonContainer}>
+        <Button
+          title={isClientLoading ? "Loading..." : "Get Position (Client)"}
+          onPress={handleClientGetPosition}
+          disabled={isClientLoading}
+          color="#FF9800"
+        />
+      </View>
+      {renderPositionInfo(clientPosition, "Client Position")}
+    </View>
+  );
+
   return (
     <ScrollView style={styles.container}>
       <View style={styles.header}>
-        <Text style={styles.title}>Default API</Text>
+        <Text style={styles.title}>Modern Geolocation API</Text>
         <Text style={styles.subtitle}>
-          Declarative hooks-based API with automatic cleanup
+          All hooks and features demonstration
         </Text>
       </View>
 
@@ -186,6 +261,8 @@ export default function DefaultScreen() {
       {renderCurrentPositionSection()}
       <View style={styles.divider} />
       {renderWatchPositionSection()}
+      <View style={styles.divider} />
+      {renderClientSection()}
     </ScrollView>
   );
 }
@@ -216,7 +293,13 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: "600",
     color: "#000",
-    marginBottom: 12
+    marginBottom: 4
+  },
+  description: {
+    fontSize: 13,
+    color: "#666",
+    marginBottom: 12,
+    fontStyle: "italic"
   },
   statusContainer: {
     backgroundColor: "#E3F2FD",
@@ -247,7 +330,8 @@ const styles = StyleSheet.create({
   },
   buttonRow: {
     flexDirection: "row",
-    gap: 12
+    gap: 12,
+    marginVertical: 8
   },
   button: {
     flex: 1

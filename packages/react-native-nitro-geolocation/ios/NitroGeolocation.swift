@@ -5,8 +5,16 @@ import NitroModules
 /**
  * Swift Error wrapper for LocationError struct.
  */
-private struct GeolocationErrorWrapper: Error {
+private struct GeolocationErrorWrapper: Error, LocalizedError {
     let locationError: LocationError
+
+    var errorDescription: String? {
+        return locationError.message
+    }
+
+    var localizedDescription: String {
+        return locationError.message
+    }
 
     init(code: Int, message: String) {
         self.locationError = LocationError(
