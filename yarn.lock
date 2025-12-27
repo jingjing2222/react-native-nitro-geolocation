@@ -9230,12 +9230,12 @@ __metadata:
 
 "react-native-nitro-geolocation@file:///Users/kimhyeongjeong/Desktop/code/react-native-nitro-geolocation/packages/react-native-nitro-geolocation/package.tgz::locator=react-native-nitro-geolocation-example%40workspace%3Aexamples%2Fv0.81.1":
   version: 0.1.2
-  resolution: "react-native-nitro-geolocation@file:///Users/kimhyeongjeong/Desktop/code/react-native-nitro-geolocation/packages/react-native-nitro-geolocation/package.tgz#///Users/kimhyeongjeong/Desktop/code/react-native-nitro-geolocation/packages/react-native-nitro-geolocation/package.tgz::hash=273ef3&locator=react-native-nitro-geolocation-example%40workspace%3Aexamples%2Fv0.81.1"
+  resolution: "react-native-nitro-geolocation@file:///Users/kimhyeongjeong/Desktop/code/react-native-nitro-geolocation/packages/react-native-nitro-geolocation/package.tgz#///Users/kimhyeongjeong/Desktop/code/react-native-nitro-geolocation/packages/react-native-nitro-geolocation/package.tgz::hash=ea9c90&locator=react-native-nitro-geolocation-example%40workspace%3Aexamples%2Fv0.81.1"
   peerDependencies:
     react: ">=18.0.0"
     react-native: ">=0.75.0"
     react-native-nitro-modules: ">=0.32.0"
-  checksum: 10c0/0d5492fd5d5abd33cc42df3a408a26370239e4794695f57b4205a0c35400a652fac54125a7c91034e5cec4e4a2f74116914e710f24e9db3699fa66bf4017b6b8
+  checksum: 10c0/cf1fbe3efddc4e13fc9de8db68817ff124355b5df3c483f9ed20f19aba928f1cd561812c8c2fb416bf4424265713efd1d13ed107a21aa28e399541dc44377278
   languageName: node
   linkType: hard
 

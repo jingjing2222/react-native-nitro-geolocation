@@ -36,7 +36,7 @@
     "android/fix-prefab.gradle",
     "android/gradle.properties",
     "android/CMakeLists.txt",
-    "android/src",
+    "android/src/**/*",
     "ios/**/*.h",
     "ios/**/*.m",
     "ios/**/*.mm",

@@ -15,8 +15,18 @@ import androidx.core.content.ContextCompat
 import com.facebook.proguard.annotations.DoNotStrip
 import com.facebook.react.bridge.ReactApplicationContext
 import com.margelo.nitro.core.Promise
+import com.margelo.nitro.NitroModules
 import java.util.UUID
 import java.util.concurrent.ConcurrentHashMap
+
+/**
+ * Exception wrapper for LocationError struct.
+ * Nitrogen-generated LocationError doesn't extend Exception,
+ * so we need to wrap it for Promise.reject().
+ */
+private class GeolocationErrorException(
+    val locationError: LocationError
+) : Exception(locationError.message)
 
 /**
  * Modern Geolocation implementation for Android.
@@ -616,10 +626,11 @@ class NitroGeolocation(
     }
 
     private fun createLocationError(code: Double, message: String): Exception {
-        return LocationError(
+        val locationError = LocationError(
             code = code,
             message = message
         )
+        return GeolocationErrorException(locationError)
     }
 
     companion object {
