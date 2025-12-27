@@ -53,32 +53,32 @@ export default defineConfig({
       }
     ],
     sidebar: {
-      '/guide/': [
+      "/guide/": [
         {
-          text: 'Getting Started',
+          text: "Getting Started",
           items: [
-            { text: 'Introduction', link: '/guide/' },
-            { text: 'Quick Start', link: '/guide/quick-start' },
+            { text: "Introduction", link: "/guide/" },
+            { text: "Quick Start", link: "/guide/quick-start" }
           ]
         },
         {
-          text: 'API Reference',
+          text: "API Reference",
           items: [
             {
-              text: 'Modern API (Recommended)',
-              link: '/guide/modern-api'
+              text: "Modern API (Recommended)",
+              link: "/guide/modern-api"
             },
             {
-              text: 'Legacy API (Compat)',
-              link: '/guide/legacy-api'
-            },
+              text: "Legacy API (Compat)",
+              link: "/guide/legacy-api"
+            }
           ]
         },
         {
-          text: 'Learn More',
+          text: "Learn More",
           items: [
-            { text: 'Why Nitro Module?', link: '/guide/why-nitro-module' },
-            { text: 'Benchmark', link: '/guide/benchmark' },
+            { text: "Why Nitro Module?", link: "/guide/why-nitro-module" },
+            { text: "Benchmark", link: "/guide/benchmark" }
           ]
         }
       ]
