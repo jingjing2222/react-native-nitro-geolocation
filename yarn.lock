@@ -3961,9 +3961,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@rozenite/react-native-nitro-geolocation-plugin@workspace:packages/react-native-nitro-geolocation-plugin":
+"@rozenite/react-native-nitro-geolocation-plugin@workspace:packages/rozenite-devtools-plugin":
   version: 0.0.0-use.local
-  resolution: "@rozenite/react-native-nitro-geolocation-plugin@workspace:packages/react-native-nitro-geolocation-plugin"
+  resolution: "@rozenite/react-native-nitro-geolocation-plugin@workspace:packages/rozenite-devtools-plugin"
   dependencies:
     "@rozenite/plugin-bridge": "npm:1.0.0-alpha.3"
     "@rozenite/vite-plugin": "npm:1.0.0-alpha.3"
