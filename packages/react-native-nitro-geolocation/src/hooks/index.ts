@@ -1,9 +1,7 @@
 /**
- * Modern React hooks for geolocation.
- * These hooks provide a declarative, React-friendly API for location services.
+ * React hook for geolocation.
+ * Provides a declarative API for continuous location tracking.
  */
 
-export * from "./useCheckPermission";
-export * from "./useRequestPermission";
-export * from "./useGetCurrentPosition";
-export * from "./useWatchPosition";
+export { useWatchPosition } from "./useWatchPosition";
+export type { UseWatchPositionOptions } from "./useWatchPosition";

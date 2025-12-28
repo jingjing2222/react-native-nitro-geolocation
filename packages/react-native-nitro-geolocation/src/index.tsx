@@ -1,61 +1,61 @@
 /**
  * Modern Geolocation API for React Native.
  *
- * This is the main entry point for the modern, React-friendly API.
+ * This is the main entry point for the modern, functional API.
  * For legacy compatibility, use: import Geolocation from 'react-native-nitro-geolocation/compat'
  *
  * @example
  * ```tsx
  * import {
- *   GeolocationClient,
- *   GeolocationClientProvider,
- *   useRequestPermission,
- *   useGetCurrentPosition,
+ *   setConfiguration,
+ *   getCurrentPosition,
+ *   requestPermission,
  *   useWatchPosition
  * } from 'react-native-nitro-geolocation';
  *
- * // Create GeolocationClient instance
- * const geolocationClient = new GeolocationClient({
+ * // Set configuration at app startup
+ * setConfiguration({
  *   authorizationLevel: 'whenInUse',
  *   enableBackgroundLocationUpdates: false,
  *   locationProvider: 'auto'
  * });
  *
- * function App() {
- *   return (
- *     <GeolocationClientProvider client={geolocationClient}>
- *       <YourApp />
- *     </GeolocationClientProvider>
- *   );
+ * // Request permission
+ * async function setup() {
+ *   const status = await requestPermission();
+ *   if (status === 'granted') {
+ *     const position = await getCurrentPosition({ enableHighAccuracy: true });
+ *     console.log('Position:', position);
+ *   }
  * }
  *
- * function LocationButton() {
- *   const { getCurrentPosition } = useGetCurrentPosition();
- *   const [loading, setLoading] = useState(false);
+ * // Continuous tracking in React component
+ * function LiveTracking() {
+ *   const { position, error, isWatching } = useWatchPosition({
+ *     enabled: true,
+ *     enableHighAccuracy: true,
+ *     distanceFilter: 10
+ *   });
  *
- *   const handlePress = async () => {
- *     setLoading(true);
- *     try {
- *       const pos = await getCurrentPosition({ enableHighAccuracy: true });
- *       console.log('Position:', pos);
- *     } catch (error) {
- *       console.error('Error:', error);
- *     } finally {
- *       setLoading(false);
- *     }
- *   };
+ *   if (!isWatching) return <Text>Not watching</Text>;
+ *   if (error) return <Text>Error: {error.message}</Text>;
+ *   if (!position) return <Text>Waiting...</Text>;
  *
- *   return <Button onPress={handlePress} disabled={loading} />;
+ *   return <Text>Lat: {position.coords.latitude}</Text>;
  * }
  * ```
  */
 
-// Core
-export { GeolocationClient } from "./GeolocationClient";
-export type { GeolocationClientConfig } from "./GeolocationClient";
-
-// Components
-export * from "./components";
+// Core API functions
+export {
+  setConfiguration,
+  checkPermission,
+  requestPermission,
+  getCurrentPosition,
+  watchPosition,
+  unwatch,
+  stopObserving
+} from "./api";
 
 // Hooks
 export * from "./hooks";
