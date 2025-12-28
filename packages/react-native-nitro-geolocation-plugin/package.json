@@ -1,0 +1,32 @@
+{
+  "name": "@rozenite/react-native-nitro-geolocation-plugin",
+  "version": "0.0.1",
+  "description": "react-native-nitro-geolocation devtools plugin with rozenite",
+  "type": "module",
+  "main": "./dist/react-native.cjs",
+  "module": "./dist/react-native.js",
+  "types": "./dist/react-native.d.ts",
+  "scripts": {
+    "build": "rozenite build",
+    "dev": "rozenite dev"
+  },
+  "dependencies": {
+    "@rozenite/plugin-bridge": "1.0.0-alpha.3"
+  },
+  "devDependencies": {
+    "@rozenite/vite-plugin": "1.0.0-alpha.3",
+    "@types/react": "~18.3.12",
+    "react": "18.3.1",
+    "react-dom": "18.3.0",
+    "react-native": "0.76.0",
+    "react-native-web": "0.21.0",
+    "rozenite": "1.0.0-alpha.3",
+    "typescript": "^5.7.3",
+    "vite": "^6.0.0"
+  },
+  "peerDependencies": {
+    "react": "*",
+    "react-native": "*"
+  },
+  "license": "MIT"
+}
