@@ -1,5 +1,11 @@
 # react-native-nitro-geolocation
 
+## 0.4.0
+
+### Minor Changes
+
+- 1e5c2a1: feat: change API hook to functon
+
 ## 0.3.0
 
 ### Minor Changes
