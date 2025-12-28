@@ -8,38 +8,26 @@ import {
   View
 } from "react-native";
 import {
-  useCheckPermission,
-  useGeolocationClient,
-  useGetCurrentPosition,
-  useRequestPermission,
+  checkPermission,
+  getCurrentPosition,
+  requestPermission,
   useWatchPosition
 } from "react-native-nitro-geolocation";
 import type { GeolocationResponse } from "react-native-nitro-geolocation";
 
 export default function DefaultScreen() {
-  // Hooks
-  const { checkPermission } = useCheckPermission();
-  const client = useGeolocationClient();
+  // Permission state
+  const [permissionStatus, setPermissionStatus] = useState<string>("unknown");
+  const [isPermissionLoading, setIsPermissionLoading] = useState(false);
 
-  // Permission hook (Mutation style)
-  const {
-    requestPermission,
-    status: permissionStatus,
-    isPending: isPermissionPending
-  } = useRequestPermission();
-
-  // Manual permission check state (separate from mutation)
-  const [checkedPermission, setCheckedPermission] = useState<string>("unknown");
-
-  // Current position hook (Query style - manual trigger)
-  const {
-    position: currentPosition,
-    isLoading: isCurrentPositionLoading,
-    error: currentPositionError,
-    refetch: refetchCurrentPosition
-  } = useGetCurrentPosition({
-    enabled: false // Manual trigger only
-  });
+  // Current position state
+  const [currentPosition, setCurrentPosition] =
+    useState<GeolocationResponse | null>(null);
+  const [isCurrentPositionLoading, setIsCurrentPositionLoading] =
+    useState(false);
+  const [currentPositionError, setCurrentPositionError] = useState<
+    string | null
+  >(null);
 
   // Watch position hook (continuous)
   const [watchEnabled, setWatchEnabled] = useState(false);
@@ -54,72 +42,58 @@ export default function DefaultScreen() {
     interval: 5000
   });
 
-  // Direct client usage (without hooks)
-  const [clientPosition, setClientPosition] =
-    useState<GeolocationResponse | null>(null);
-  const [isClientLoading, setIsClientLoading] = useState(false);
-  const [clientError, setClientError] = useState<string | null>(null);
-
   const handleCheckPermission = async () => {
     try {
       const status = await checkPermission();
-      setCheckedPermission(status);
+      setPermissionStatus(status);
     } catch (err) {
-      setCheckedPermission("error");
+      setPermissionStatus("error");
     }
   };
 
   const handleRequestPermission = async () => {
+    setIsPermissionLoading(true);
     try {
-      await requestPermission();
-      // Status is now automatically managed by the hook
+      const status = await requestPermission();
+      setPermissionStatus(status);
     } catch (err) {
       console.error("Permission request failed:", err);
+      setPermissionStatus("error");
+    } finally {
+      setIsPermissionLoading(false);
     }
   };
 
   const handleFetchPosition = async () => {
-    // Use refetch from the hook
-    await refetchCurrentPosition();
-  };
-
-  const handleClientGetPosition = async () => {
-    setIsClientLoading(true);
-    setClientError(null);
+    setIsCurrentPositionLoading(true);
+    setCurrentPositionError(null);
     try {
-      const position = await client.getCurrentPosition({
+      const position = await getCurrentPosition({
         enableHighAccuracy: true,
         timeout: 15000
       });
-      setClientPosition(position);
+      setCurrentPosition(position);
     } catch (err: any) {
-      setClientError(err?.message || "Unknown error");
+      setCurrentPositionError(err?.message || "Unknown error");
     } finally {
-      setIsClientLoading(false);
+      setIsCurrentPositionLoading(false);
     }
   };
 
   const renderPermissionSection = () => (
     <View style={styles.section}>
       <Text style={styles.sectionTitle}>1. Permission Management</Text>
+      <Text style={styles.description}>
+        Check and request location permissions
+      </Text>
       <View style={styles.statusContainer}>
-        <Text style={styles.statusLabel}>Checked Status:</Text>
+        <Text style={styles.statusLabel}>Status:</Text>
         <Text style={styles.statusValue}>
-          {checkedPermission || "Unknown"}
-          {checkedPermission === "granted" && " ✅"}
-          {checkedPermission === "denied" && " ❌"}
+          {permissionStatus}
+          {permissionStatus === "granted" && " ✅"}
+          {permissionStatus === "denied" && " ❌"}
         </Text>
       </View>
-      {permissionStatus && (
-        <View style={styles.statusContainer}>
-          <Text style={styles.statusLabel}>Requested Status:</Text>
-          <Text style={styles.statusValue}>
-            {permissionStatus}
-            {permissionStatus === "granted" && " ✅"}
-            {permissionStatus === "denied" && " ❌"}
-          </Text>
-        </View>
-      )}
       <View style={styles.buttonRow}>
         <View style={styles.button}>
           <Button
@@ -130,9 +104,9 @@ export default function DefaultScreen() {
         </View>
         <View style={styles.button}>
           <Button
-            title={isPermissionPending ? "Requesting..." : "Request"}
+            title={isPermissionLoading ? "Requesting..." : "Request"}
             onPress={handleRequestPermission}
-            disabled={isPermissionPending}
+            disabled={isPermissionLoading}
             color="#4CAF50"
           />
         </View>
@@ -185,17 +159,13 @@ export default function DefaultScreen() {
 
   const renderCurrentPositionSection = () => (
     <View style={styles.section}>
-      <Text style={styles.sectionTitle}>
-        2. useGetCurrentPosition Hook (Query Style)
-      </Text>
+      <Text style={styles.sectionTitle}>2. Get Current Position</Text>
       <Text style={styles.description}>
-        One-time location request with automatic state management
+        One-time location request using getCurrentPosition()
       </Text>
       {currentPositionError && (
         <View style={styles.errorContainer}>
-          <Text style={styles.errorText}>
-            Error: {currentPositionError.message}
-          </Text>
+          <Text style={styles.errorText}>Error: {currentPositionError}</Text>
         </View>
       )}
       <View style={styles.buttonContainer}>
@@ -212,11 +182,9 @@ export default function DefaultScreen() {
 
   const renderWatchPositionSection = () => (
     <View style={styles.section}>
-      <Text style={styles.sectionTitle}>
-        3. useWatchPosition Hook (Stream Style)
-      </Text>
+      <Text style={styles.sectionTitle}>3. Watch Position (Hook)</Text>
       <Text style={styles.description}>
-        Continuous location tracking with automatic cleanup
+        Continuous location tracking with useWatchPosition()
       </Text>
       <View style={styles.toggleContainer}>
         <Text style={styles.toggleLabel}>Enable Watching:</Text>
@@ -237,36 +205,11 @@ export default function DefaultScreen() {
     </View>
   );
 
-  const renderClientSection = () => (
-    <View style={styles.section}>
-      <Text style={styles.sectionTitle}>4. useGeolocationClient Hook</Text>
-      <Text style={styles.description}>
-        Direct client access for advanced usage
-      </Text>
-      {clientError && (
-        <View style={styles.errorContainer}>
-          <Text style={styles.errorText}>Error: {clientError}</Text>
-        </View>
-      )}
-      <View style={styles.buttonContainer}>
-        <Button
-          title={isClientLoading ? "Loading..." : "Get Position (Client)"}
-          onPress={handleClientGetPosition}
-          disabled={isClientLoading}
-          color="#FF9800"
-        />
-      </View>
-      {renderPositionInfo(clientPosition, "Client Position")}
-    </View>
-  );
-
   return (
     <ScrollView style={styles.container}>
       <View style={styles.header}>
-        <Text style={styles.title}>Modern Geolocation API</Text>
-        <Text style={styles.subtitle}>
-          All hooks and features demonstration
-        </Text>
+        <Text style={styles.title}>Geolocation API</Text>
+        <Text style={styles.subtitle}>Simple and Modern API</Text>
       </View>
 
       {renderPermissionSection()}
@@ -274,8 +217,6 @@ export default function DefaultScreen() {
       {renderCurrentPositionSection()}
       <View style={styles.divider} />
       {renderWatchPositionSection()}
-      <View style={styles.divider} />
-      {renderClientSection()}
     </ScrollView>
   );
 }

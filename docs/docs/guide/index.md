@@ -8,46 +8,54 @@ This project — **React Native Nitro Geolocation** — is a complete reimplemen
 
 ## 1. Modern API (Recommended)
 
-**TanStack Query-inspired** Hooks + Provider pattern for modern React apps.
+**Simple functional API** with direct calls and minimal abstractions.
 
 ```tsx
 import {
-  GeolocationClient,
-  GeolocationClientProvider,
-  useWatchPosition,
-  useRequestPermission
+  setConfiguration,
+  requestPermission,
+  getCurrentPosition,
+  useWatchPosition
 } from 'react-native-nitro-geolocation';
 
-// Setup once at app root
-const client = new GeolocationClient({
+// Configure once at app startup
+setConfiguration({
   authorizationLevel: 'whenInUse',
   locationProvider: 'auto'
 });
 
-function App() {
-  return (
-    <GeolocationClientProvider client={client}>
-      <YourApp />
-    </GeolocationClientProvider>
-  );
-}
+// Request permission
+const status = await requestPermission();
 
-// Use hooks anywhere
+// Get current location
+const position = await getCurrentPosition({
+  enableHighAccuracy: true
+});
+
+// Continuous tracking with hook
 function LocationTracker() {
-  const { data, isWatching } = useWatchPosition({
+  const { position, error, isWatching } = useWatchPosition({
     enabled: true,
-    enableHighAccuracy: true
+    enableHighAccuracy: true,
+    distanceFilter: 10
   });
 
-  return <Text>{data?.coords.latitude}, {data?.coords.longitude}</Text>;
+  if (error) return <Text>Error: {error.message}</Text>;
+  if (!position) return <Text>Waiting...</Text>;
+
+  return (
+    <Text>
+      {position.coords.latitude}, {position.coords.longitude}
+    </Text>
+  );
 }
 ```
 
 **Key Features**:
-- 🪝 Declarative permission handling
-- 🧹 Auto-cleanup location tracking
-- 🔌 Provider-based configuration
-- 📘 Full TypeScript support with inference
+- 🎯 Simple and direct — No complex abstractions
+- 🪝 Single hook for continuous tracking
+- 🧹 Auto-cleanup when component unmounts
+- 📘 Full TypeScript support
 
 ## 2. Legacy API (Compatibility)
 
@@ -68,11 +76,10 @@ Geolocation.getCurrentPosition(
 - Minimal migration effort
 - Callback-based API preference
 
----
 
 ## Why Modern API?
 
-The Modern API brings React best practices to geolocation:
+The Modern API brings simplicity and modern React patterns to geolocation:
 
 ### Declarative vs Imperative
 
@@ -97,19 +104,18 @@ useEffect(() => {
 
 **After (Declarative)**:
 ```tsx
-const { data } = useWatchPosition({ enabled: true });
+const { position } = useWatchPosition({ enabled: true });
 // Auto cleanup, no watch ID management needed!
 ```
 
 ### Key Benefits
 
-- **🎯 Declarative**: Use `{ enabled }` prop instead of imperative start/stop
+- **🎯 Simple and Direct**: Just functions and one hook
 - **🧹 Auto-cleanup**: No need to remember `clearWatch()` in `useEffect` cleanup
-- **🔌 Provider pattern**: Configure once at app root, use anywhere
-- **🪝 TanStack Query-inspired**: Familiar patterns for data fetching
+- **🪝 Single Hook**: Only `useWatchPosition` for continuous tracking
 - **📘 Type-safe**: Full TypeScript support with inference
+- **⚡ High Performance**: JSI-powered for native speed
 
----
 
 ## Motivation
 
@@ -128,39 +134,37 @@ React Native has evolved with new architectural capabilities, and we wanted to b
 
 ### 2. Improve Developer Experience
 
-We drew inspiration from **TanStack Query** to create a geolocation API that:
+We created a geolocation API that:
 
-- **Separates configuration from usage**: Provider pattern for app-wide config
+- **Simple configuration**: Call `setConfiguration()` once
+- **Direct function calls**: No classes or complex abstractions
 - **Handles lifecycle automatically**: No manual cleanup required
 - **Provides declarative control**: `{ enabled }` prop instead of start/stop
-- **Embraces modern React patterns**: Hooks-first design
 - **Ensures type safety**: Full TypeScript inference
 
----
 
 ## Design Philosophy
 
-### TanStack Query Inspiration
+### Simple and Functional
 
-Just as TanStack Query revolutionized data fetching in React, we aim to bring the same paradigm to geolocation:
+Instead of complex provider patterns or class-based APIs, we provide:
 
-| Concept | TanStack Query | Nitro Geolocation |
-|---------|---------------|-------------------|
-| **Provider** | `QueryClientProvider` | `GeolocationClientProvider` |
-| **Client** | `QueryClient` | `GeolocationClient` |
-| **Hooks** | `useQuery`, `useMutation` | `useGetCurrentPosition`, `useWatchPosition` |
-| **Declarative** | `{ enabled }` option | `{ enabled }` option |
-| **Auto-cleanup** | Automatic cache management | Automatic subscription cleanup |
+| Concept | Modern API |
+|---------|------------|
+| **Configuration** | `setConfiguration()` |
+| **Permission** | `checkPermission()`, `requestPermission()` |
+| **Location** | `getCurrentPosition()`, `useWatchPosition()` |
+| **Cleanup** | Automatic (in hook) |
 
 ### Core Principles
 
-1. **Configuration at the top**: Set up once with Provider
-2. **Declarative everywhere**: Use hooks with `{ enabled }` control
-3. **Automatic lifecycle**: No manual cleanup code
-4. **Type-safe by default**: Full TypeScript inference
-5. **Performance first**: JSI-powered for native speed
+1. **Configuration at startup**: Set up once with `setConfiguration()`
+2. **Direct function calls**: Use Promise-based functions directly
+3. **Single hook for tracking**: `useWatchPosition` handles continuous updates
+4. **Automatic lifecycle**: No manual cleanup code
+5. **Type-safe by default**: Full TypeScript inference
+6. **Performance first**: JSI-powered for native speed
 
----
 
 ## What You Get
 
@@ -174,12 +178,11 @@ Whether you choose Modern or Legacy API, you get:
 
 Whether you're upgrading an existing app or building a new one using the latest React Native architecture, **React Native Nitro Geolocation** gives you modern tools with proven performance.
 
----
 
 ## Next Steps
 
 - [Quick Start Guide](/guide/quick-start) — Get up and running in minutes
-- [Modern API Reference](/guide/modern-api) — Explore Hooks and Provider
+- [Modern API Reference](/guide/modern-api) — Explore functions and hooks
 - [Legacy API Reference](/guide/legacy-api) — Compatibility documentation
 - [Why Nitro Module?](/guide/why-nitro-module) — Architecture deep dive
 - [Benchmark Results](/guide/benchmark) — Performance comparison
