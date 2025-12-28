@@ -7,6 +7,8 @@ import DefaultScreen from "./screens/DefaultScreen";
 
 const Tab = createBottomTabNavigator();
 
+console.log(process.env.WITH_ROZENITE)
+
 export default function App() {
   // Set configuration once on app startup
   useEffect(() => {
