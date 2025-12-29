@@ -65,6 +65,24 @@ export function calculateSpeed(distance: number, timeDelta: number): number {
   return distance / (timeDelta / 1000); // Convert ms to seconds
 }
 
+const METERS_PER_DEGREE = 111000; // Approximate meters per degree of latitude
+
+/**
+ * Convert speed from m/s to degrees per interval
+ * @param speedInMetersPerSecond Speed in meters per second
+ * @param intervalMs Interval in milliseconds
+ * @returns Speed in degrees per interval
+ */
+export function convertSpeedToDegreesPerInterval(
+  speedInMetersPerSecond: number,
+  intervalMs: number
+): number {
+  const distancePerInterval = speedInMetersPerSecond * (intervalMs / 1000);
+  return distancePerInterval / METERS_PER_DEGREE;
+}
+
+const TEN_CENTIMETERS = 0.1;
+
 /**
  * Create updated coordinates with calculated heading and speed
  */
@@ -87,7 +105,7 @@ export function createUpdatedCoordinates(
 
   // Only calculate heading if there's actual movement
   let heading: number | null = null;
-  if (distance > 0.1) {
+  if (distance > TEN_CENTIMETERS) {
     // Threshold: 10cm
     heading = calculateHeading(
       prevCoords.latitude,

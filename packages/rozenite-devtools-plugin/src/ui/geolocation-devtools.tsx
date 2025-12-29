@@ -2,12 +2,20 @@ import "./globals.css";
 import { LeafletMap } from "./components/LeafletMap";
 import { LocationPresetSelector } from "./components/LocationPresetSelector";
 import { PositionInfo } from "./components/PositionInfo";
+import { SpeedControl } from "./components/SpeedControl";
 import { useDarkMode } from "./hooks/useDarkMode";
 import { useGeolocationControl } from "./hooks/useGeolocationControl";
 
 export default function GeolocationDevToolsPanel() {
-  const { position, updatePosition, setPositionFromPreset } =
-    useGeolocationControl();
+  const {
+    position,
+    updatePosition,
+    setPositionFromPreset,
+    isSpeedLocked,
+    setIsSpeedLocked,
+    lockedSpeed,
+    setLockedSpeed
+  } = useGeolocationControl();
   useDarkMode();
 
   return (
@@ -15,6 +23,12 @@ export default function GeolocationDevToolsPanel() {
       <LocationPresetSelector
         onSelect={setPositionFromPreset}
         currentPosition={position}
+      />
+      <SpeedControl
+        isSpeedLocked={isSpeedLocked}
+        lockedSpeed={lockedSpeed}
+        onSpeedLockChange={setIsSpeedLocked}
+        onSpeedChange={setLockedSpeed}
       />
       <PositionInfo position={position} onUpdatePosition={updatePosition} />
       <LeafletMap position={position} onMapClick={updatePosition} />
