@@ -1,19 +1,19 @@
 import { useRozeniteDevToolsClient } from "@rozenite/plugin-bridge";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import {
   LOCATION_PRESETS,
   createPositionFromPreset
 } from "../../shared/presets";
-import type { GeolocationPluginEvents, Position } from "../../shared/types";
+import type { DevtoolsUIEvents, Position } from "../../shared/types";
 import { createUpdatedCoordinates } from "../utils/geolocation";
-import { useDevtoolsMessages } from "./useDevtoolsMessages";
+import { useDevtoolsUI } from "./useDevtoolsUI";
 
 const DEFAULT_POSITION: Position = createPositionFromPreset(
   LOCATION_PRESETS[0]
 );
 
 export function useGeolocationControl() {
-  const client = useRozeniteDevToolsClient<GeolocationPluginEvents>({
+  const client = useRozeniteDevToolsClient<DevtoolsUIEvents>({
     pluginId: "@rozenite/react-native-nitro-geolocation-plugin"
   });
 
@@ -27,27 +27,17 @@ export function useGeolocationControl() {
     [client]
   );
 
-  // Setup message handlers
-  const messageHandlers = useMemo(
-    () => ({
-      initialPosition: (data: Position) => {
-        console.log("[Devtools UI] Received initial position:", data);
+  // Setup devtools UI message handling
+  useDevtoolsUI({
+    client,
+    onInitialPosition: useCallback(
+      (data: Position) => {
         setPosition(data);
         sendPosition(data);
-      }
-    }),
-    [sendPosition]
-  );
-
-  useDevtoolsMessages(client, messageHandlers);
-
-  // Send "ready" signal when devtools UI mounts
-  useEffect(() => {
-    if (client) {
-      console.log("[Devtools UI] Sending ready signal");
-      client.send("ready", null);
-    }
-  }, [client]);
+      },
+      [sendPosition]
+    )
+  });
 
   // Update position and send to app
   const updatePosition = useCallback(
