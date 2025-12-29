@@ -326,7 +326,7 @@ function LocationTracker() {
 - Better TypeScript support
 
 
-## 7. Development Tools (Optional)
+## 7. Development Tools (Optional) - **COMMING SOON**
 
 For an enhanced development experience, install the Rozenite DevTools plugin to mock locations:
 
