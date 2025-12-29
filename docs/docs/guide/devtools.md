@@ -6,6 +6,10 @@ Mock geolocation data in development with an interactive map interface using the
 
 This plugin requires [Rozenite DevTools](https://github.com/rozenite/rozenite) to be set up in your project. Follow the [Rozenite installation guide](https://rozenite.dev/docs/getting-started) before proceeding.
 
+:::warning API Compatibility
+This DevTools plugin only works with the **Modern API** (`react-native-nitro-geolocation`). It does **not** support the Legacy API (`react-native-nitro-geolocation/compat`).
+:::
+
 ## Installation
 
 ```bash

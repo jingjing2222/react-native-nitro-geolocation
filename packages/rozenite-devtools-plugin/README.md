@@ -4,6 +4,8 @@ Rozenite DevTools Plugin for [react-native-nitro-geolocation](https://github.com
 
 > **⚠️ Prerequisites**: This plugin requires [Rozenite DevTools](https://github.com/rozenite/rozenite) to be set up in your project. Follow the [Rozenite installation guide](https://rozenite.dev/docs/getting-started) to configure DevTools before using this plugin.
 
+> **ℹ️ API Compatibility**: This DevTools plugin only works with the **Modern API** (`react-native-nitro-geolocation`). It does not support the Legacy API (`react-native-nitro-geolocation/compat`).
+
 ## Demo
 
 ![DevTools Plugin Demo](https://raw.githubusercontent.com/jingjing2222/react-native-nitro-geolocation/main/devtools.gif)

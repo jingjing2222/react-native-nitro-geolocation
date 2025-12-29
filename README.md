@@ -208,6 +208,8 @@ Optional (for background):
 #### DevTools Plugin (Rozenite)
 
 > **Prerequisites**: Requires [Rozenite DevTools](https://github.com/rozenite/rozenite) to be installed.
+>
+> **API Compatibility**: Only works with the Modern API. Does not support the Legacy API (`/compat`).
 
 Mock geolocation data during development with an interactive map interface:
 
