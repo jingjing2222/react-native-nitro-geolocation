@@ -18,6 +18,16 @@ const config = {
     nodeModulesPaths: [
       path.resolve(projectRoot, 'node_modules'),
     ],
+    resolveRequest: (context, moduleName, platform) => {
+      if (moduleName === 'react' || moduleName === 'react-native') {
+        return context.resolveRequest(
+          context,
+          path.resolve(projectRoot, 'node_modules', moduleName),
+          platform
+        );
+      }
+      return context.resolveRequest(context, moduleName, platform);
+    },
   },
 };
 

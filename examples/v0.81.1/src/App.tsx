@@ -4,12 +4,12 @@ import React, { useEffect } from "react";
 import { setConfiguration } from "react-native-nitro-geolocation";
 import CompatScreen from "./screens/CompatScreen";
 import DefaultScreen from "./screens/DefaultScreen";
+import { useGeolocationDevTools } from "@rozenite/react-native-nitro-geolocation-plugin";
 
 const Tab = createBottomTabNavigator();
 
-console.log(process.env.WITH_ROZENITE)
-
 export default function App() {
+  useGeolocationDevTools()
   // Set configuration once on app startup
   useEffect(() => {
     setConfiguration({

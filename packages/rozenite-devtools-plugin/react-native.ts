@@ -1,13 +1,13 @@
-/**
- * React Native DevTools Plugin Entry Point
- *
- * This file serves as the main entry point for your DevTools plugin in the React Native environment.
- * You have full access to all React Native APIs and can integrate with your app's functionality.
- *
- * To communicate with the DevTools panel, use the `@rozenite/plugin-bridge` package
- * which provides a reliable communication channel between your plugin and the DevTools interface.
- */
+export let useGeolocationDevTools: typeof import('./src/react-native/useGeolocationDevTools').useGeolocationDevTools;
 
-export const useDevTools = () => {
-  // TODO: Implement your plugin!
-};
+const isWeb =
+  typeof window !== 'undefined' && window.navigator.product !== 'ReactNative';
+const isDev = process.env.NODE_ENV !== 'production';
+const isServer = typeof window === 'undefined';
+
+if (isDev && !isWeb && !isServer) {
+  useGeolocationDevTools =
+    require('./src/react-native/useGeolocationDevTools').useGeolocationDevTools;
+} else {
+  useGeolocationDevTools = () => ({ isConnected: false });
+}

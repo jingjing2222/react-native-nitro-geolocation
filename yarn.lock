@@ -3961,12 +3961,13 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@rozenite/react-native-nitro-geolocation-plugin@workspace:packages/rozenite-devtools-plugin":
+"@rozenite/react-native-nitro-geolocation-plugin@workspace: *, @rozenite/react-native-nitro-geolocation-plugin@workspace:packages/rozenite-devtools-plugin":
   version: 0.0.0-use.local
   resolution: "@rozenite/react-native-nitro-geolocation-plugin@workspace:packages/rozenite-devtools-plugin"
   dependencies:
     "@rozenite/plugin-bridge": "npm:1.0.0-alpha.3"
     "@rozenite/vite-plugin": "npm:1.0.0-alpha.3"
+    "@types/node": "npm:^25.0.3"
     "@types/react": "npm:~18.3.12"
     react: "npm:18.3.1"
     react-dom: "npm:18.3.0"
@@ -4757,6 +4758,15 @@ __metadata:
   dependencies:
     undici-types: "npm:~5.26.4"
   checksum: 10c0/a5b9c49588d354994213fae1d6f4cfd9539be3d561a1ce4696763aa24b989d1bbb8e434230611583e3cd3fdebdf89347e2f705827c3b520561ccf8aa311a0cdc
+  languageName: node
+  linkType: hard
+
+"@types/node@npm:^25.0.3":
+  version: 25.0.3
+  resolution: "@types/node@npm:25.0.3"
+  dependencies:
+    undici-types: "npm:~7.16.0"
+  checksum: 10c0/b7568f0d765d9469621615e2bb257c7fd1953d95e9acbdb58dffb6627a2c4150d405a4600aa1ad8a40182a94fe5f903cafd3c0a2f5132814debd0e3bfd61f835
   languageName: node
   linkType: hard
 
@@ -11689,12 +11699,13 @@ __metadata:
     "@react-navigation/bottom-tabs": "npm:^7.9.0"
     "@react-navigation/native": "npm:^7.1.26"
     "@rozenite/metro": "npm:^1.1.0"
+    "@rozenite/react-native-nitro-geolocation-plugin": "workspace: *"
     "@types/react": "npm:^19.1.0"
     react: "npm:19.1.0"
     react-native: "npm:0.81.1"
     react-native-builder-bob: "npm:^0.40.13"
     react-native-monorepo-config: "npm:^0.1.9"
-    react-native-nitro-geolocation: "file:../../packages/react-native-nitro-geolocation/package.tgz"
+    react-native-nitro-geolocation: "workspace: *"
     react-native-nitro-modules: "npm:^0.32.0"
     react-native-safe-area-context: "npm:^5.5.2"
     react-native-screens: "npm:4.19.0"
@@ -11709,18 +11720,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"react-native-nitro-geolocation@file:../../packages/react-native-nitro-geolocation/package.tgz::locator=react-native-nitro-geolocation-example%40workspace%3Aexamples%2Fv0.81.1":
-  version: 0.4.0
-  resolution: "react-native-nitro-geolocation@file:../../packages/react-native-nitro-geolocation/package.tgz#../../packages/react-native-nitro-geolocation/package.tgz::hash=04a2ac&locator=react-native-nitro-geolocation-example%40workspace%3Aexamples%2Fv0.81.1"
-  peerDependencies:
-    react: ">=18.0.0"
-    react-native: ">=0.75.0"
-    react-native-nitro-modules: ">=0.32.0"
-  checksum: 10c0/8ea30eb787f39a5404ae6bd841fc69afea9837427fa6b27f34b1b1df7800be58ab6aedb78f2424c0a328f84667ca9c54bf9093a3ce83574d88595e4ad4687526
-  languageName: node
-  linkType: hard
-
-"react-native-nitro-geolocation@workspace:*, react-native-nitro-geolocation@workspace:packages/react-native-nitro-geolocation":
+"react-native-nitro-geolocation@workspace: *, react-native-nitro-geolocation@workspace:*, react-native-nitro-geolocation@workspace:packages/react-native-nitro-geolocation":
   version: 0.0.0-use.local
   resolution: "react-native-nitro-geolocation@workspace:packages/react-native-nitro-geolocation"
   dependencies:
@@ -13718,6 +13718,13 @@ __metadata:
   version: 7.13.0
   resolution: "undici-types@npm:7.13.0"
   checksum: 10c0/44bbb0935425291351bfd8039571f017295b5d6dc5727045d0a4fea8c6ffe73a6703b48ce010f9cb539b9041a75b463f8cfe1e7309cab7486452505fb0d66151
+  languageName: node
+  linkType: hard
+
+"undici-types@npm:~7.16.0":
+  version: 7.16.0
+  resolution: "undici-types@npm:7.16.0"
+  checksum: 10c0/3033e2f2b5c9f1504bdc5934646cb54e37ecaca0f9249c983f7b1fc2e87c6d18399ebb05dc7fd5419e02b2e915f734d872a65da2e3eeed1813951c427d33cc9a
   languageName: node
   linkType: hard
 

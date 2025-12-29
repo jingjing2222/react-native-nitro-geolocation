@@ -2,7 +2,7 @@ export default {
   panels: [
     {
       name: 'Hello world!',
-      source: './src/hello-world.tsx',
+      source: './src/ui/hello-world.tsx',
     },
   ],
 };
