@@ -63,3 +63,9 @@ android/keystores/debug.keystore
 !.yarn/releases
 !.yarn/sdks
 !.yarn/versions
+
+# ROZENITE
+dist
+
+# Nx
+.nx

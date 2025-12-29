@@ -3,7 +3,7 @@ import type {
   LocationError,
   LocationRequestOptions
 } from "../NitroGeolocation.nitro";
-import { NitroGeolocationHybridObject } from "../NitroGeolocationModule";
+import { unwatch, watchPosition } from "../api";
 import type { GeolocationResponse } from "../types";
 
 /**
@@ -76,7 +76,7 @@ export function useWatchPosition(options?: UseWatchPositionOptions) {
     if (!enabled) {
       // Not enabled, ensure cleanup
       if (tokenRef.current) {
-        NitroGeolocationHybridObject.unwatch(tokenRef.current);
+        unwatch(tokenRef.current);
         tokenRef.current = null;
       }
       setIsWatching(false);
@@ -87,7 +87,7 @@ export function useWatchPosition(options?: UseWatchPositionOptions) {
     setIsWatching(true);
     setError(null);
 
-    const token = NitroGeolocationHybridObject.watchPosition(
+    const token = watchPosition(
       (result: GeolocationResponse) => {
         // Success callback
         if (!isMountedRef.current) return;
@@ -107,7 +107,7 @@ export function useWatchPosition(options?: UseWatchPositionOptions) {
     // Cleanup function
     return () => {
       if (token) {
-        NitroGeolocationHybridObject.unwatch(token);
+        unwatch(token);
       }
     };
   }, [enabled]); // Only re-subscribe when enabled changes

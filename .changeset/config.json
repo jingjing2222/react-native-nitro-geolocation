@@ -7,5 +7,10 @@
   "access": "public",
   "baseBranch": "main",
   "updateInternalDependencies": "patch",
-  "ignore": ["benchmark", "react-native-nitro-geolocation-example", "docs"]
+  "ignore": [
+    "benchmark",
+    "react-native-nitro-geolocation-example",
+    "docs",
+    "@rozenite/react-native-nitro-geolocation-plugin"
+  ]
 }

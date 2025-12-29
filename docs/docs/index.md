@@ -35,6 +35,9 @@ features:
   - title: Automatic cleanup
     details: useWatchPosition automatically manages subscriptions with component lifecycle—no manual cleanup needed.
     icon: 🧹
+  - title: DevTools Plugin for Rozenite
+    details: Mock locations in development with an interactive map interface, city presets, and keyboard controls.
+    icon: 🛠️
   - title: TypeScript ready
     details: Full type definitions for all APIs with complete type inference for functions and hooks.
     icon: 📘

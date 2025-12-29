@@ -1,3 +1,4 @@
+const { withRozenite } = require('@rozenite/metro');
 const { getDefaultConfig, mergeConfig } = require('@react-native/metro-config');
 const path = require('path');
 
@@ -17,7 +18,17 @@ const config = {
     nodeModulesPaths: [
       path.resolve(projectRoot, 'node_modules'),
     ],
+    resolveRequest: (context, moduleName, platform) => {
+      if (moduleName === 'react' || moduleName === 'react-native') {
+        return context.resolveRequest(
+          context,
+          path.resolve(projectRoot, 'node_modules', moduleName),
+          platform
+        );
+      }
+      return context.resolveRequest(context, moduleName, platform);
+    },
   },
 };
 
-module.exports = mergeConfig(getDefaultConfig(__dirname), config);
+module.exports = withRozenite(mergeConfig(getDefaultConfig(__dirname), config), { enabled: process.env.WITH_ROZENITE === 'true' });

@@ -6,7 +6,7 @@
   "scripts": {
     "android": "react-native run-android",
     "ios": "react-native run-ios",
-    "start": "react-native start",
+    "start": "react-native start WITH_ROZENITE=true",
     "build:android": "react-native build-android --extra-params \"--no-daemon --console=plain -PreactNativeArchitectures=arm64-v8a\"",
     "build:ios": "react-native build-ios --mode Debug",
     "typecheck": "tsc --noEmit"
@@ -16,9 +16,10 @@
     "@react-native/new-app-screen": "0.81.1",
     "@react-navigation/bottom-tabs": "^7.9.0",
     "@react-navigation/native": "^7.1.26",
+    "@rozenite/react-native-nitro-geolocation-plugin": "workspace: *",
     "react": "19.1.0",
     "react-native": "0.81.1",
-    "react-native-nitro-geolocation": "file:../../packages/react-native-nitro-geolocation/package.tgz",
+    "react-native-nitro-geolocation": "workspace: *",
     "react-native-nitro-modules": "^0.32.0",
     "react-native-safe-area-context": "^5.5.2",
     "react-native-screens": "4.19.0"
@@ -33,6 +34,7 @@
     "@react-native/babel-preset": "0.81.1",
     "@react-native/metro-config": "0.81.1",
     "@react-native/typescript-config": "0.81.1",
+    "@rozenite/metro": "^1.1.0",
     "@types/react": "^19.1.0",
     "react-native-builder-bob": "^0.40.13",
     "react-native-monorepo-config": "^0.1.9"
