@@ -1,8 +1,8 @@
+import path from "node:path";
 import { rozenitePlugin } from "@rozenite/vite-plugin";
+import tailwindcss from "@tailwindcss/vite";
 /// <reference types='vitest' />
 import { defineConfig } from "vite";
-import tailwindcss from "@tailwindcss/vite"
-import path from 'node:path';
 
 export default defineConfig({
   root: __dirname,
@@ -20,8 +20,8 @@ export default defineConfig({
     open: true
   },
   resolve: {
-      alias: {
-        "@": path.resolve(__dirname, "./src"),
-      },
-    },
+    alias: {
+      "@": path.resolve(__dirname, "./src")
+    }
+  }
 });

@@ -8,7 +8,7 @@ import { useGeolocationControl } from "./hooks/useGeolocationControl";
 export default function GeolocationDevToolsPanel() {
   const { position, updatePosition, handleJoystickMove } =
     useGeolocationControl();
-    useDarkMode();
+  useDarkMode();
 
   return (
     <div className="min-h-screen bg-background p-5 transition-colors">
