@@ -2,14 +2,17 @@ import { useRozeniteDevToolsClient } from "@rozenite/plugin-bridge";
 import { Button, SafeAreaView, ScrollView, StyleSheet } from "react-native";
 import type { GeolocationPluginEvents, Position } from "../shared/types";
 
-const DEFAULT_POSITION:Position = {
-  latitude: 0,
-  longitude: 0,
-  accuracy: 0,
-  altitude: 0,
-  altitudeAccuracy: 0,
-  heading: 0,
-  speed: 0,
+const DEFAULT_POSITION: Position = {
+  coords: {
+    latitude: 37.5665,
+    longitude: 126.978,
+    accuracy: 10,
+    altitude: 50,
+    altitudeAccuracy: 5,
+    heading: 45,
+    speed: 1.5
+  },
+  timestamp: Date.now()
 };
 
 export default function HelloWorldPanel() {

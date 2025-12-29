@@ -2,11 +2,25 @@ import { useRozeniteDevToolsClient } from "@rozenite/plugin-bridge";
 import type { GeolocationPluginEvents, Position } from "../shared/types";
 import { useSetDevToolsEnabled } from "./hooks/useSetDevToolsEnabled";
 
-interface Devtools {
-  position: Position;
+declare global {
+  var __geolocationDevtools:
+    | {
+        position: Position | null;
+      }
+    | undefined;
+  var __geolocationDevToolsEnabled: boolean | undefined;
 }
 
-export const useGeolocationDevTools = (devtools: Devtools) => {
+function getDevtoolsState() {
+  if (!globalThis.__geolocationDevtools) {
+    globalThis.__geolocationDevtools = {
+      position: null
+    };
+  }
+  return globalThis.__geolocationDevtools;
+}
+
+export const useGeolocationDevTools = () => {
   const client = useRozeniteDevToolsClient<GeolocationPluginEvents>({
     pluginId: "@rozenite/react-native-nitro-geolocation-plugin"
   });
@@ -14,7 +28,8 @@ export const useGeolocationDevTools = (devtools: Devtools) => {
   useSetDevToolsEnabled();
 
   client?.onMessage("position", (data) => {
-    console.log("Received position:", data.accuracy);
+    console.log("Received position:", data);
+    const devtools = getDevtoolsState();
     devtools.position = data;
   });
 };

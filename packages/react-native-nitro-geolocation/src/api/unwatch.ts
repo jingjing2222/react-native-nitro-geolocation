@@ -1,4 +1,5 @@
 import { NitroGeolocationHybridObject } from "../NitroGeolocationModule";
+import { devtoolsUnwatch } from "../devtools/watchPosition";
 
 /**
  * Stop a specific watch subscription.
@@ -14,5 +15,8 @@ import { NitroGeolocationHybridObject } from "../NitroGeolocationModule";
  * ```
  */
 export function unwatch(token: string): void {
+  if (devtoolsUnwatch(token)) {
+    return;
+  }
   NitroGeolocationHybridObject.unwatch(token);
 }
