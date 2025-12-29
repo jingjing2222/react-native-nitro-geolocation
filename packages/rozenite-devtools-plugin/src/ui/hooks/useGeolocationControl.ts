@@ -1,6 +1,7 @@
 import { useRozeniteDevToolsClient } from "@rozenite/plugin-bridge";
 import { useCallback, useEffect, useState } from "react";
 import type { GeolocationPluginEvents, Position } from "../../shared/types";
+import { createUpdatedCoordinates } from "../utils/geolocation";
 
 const DEFAULT_POSITION: Position = {
   coords: {
@@ -9,8 +10,8 @@ const DEFAULT_POSITION: Position = {
     accuracy: 10,
     altitude: 50,
     altitudeAccuracy: 5,
-    heading: 45,
-    speed: 1.5
+    heading: null,
+    speed: 0
   },
   timestamp: Date.now()
 };
@@ -40,18 +41,24 @@ export function useGeolocationControl() {
   // Update position and send to app
   const updatePosition = useCallback(
     (lat: number, lng: number) => {
-      const newPosition: Position = {
-        coords: {
-          ...position.coords,
-          latitude: lat,
-          longitude: lng
-        },
-        timestamp: Date.now()
-      };
-      setPosition(newPosition);
-      sendPosition(newPosition);
+      setPosition((prevPosition) => {
+        const newTimestamp = Date.now();
+        const newCoords = createUpdatedCoordinates(
+          prevPosition.coords,
+          lat,
+          lng,
+          prevPosition.timestamp,
+          newTimestamp
+        );
+        const newPosition: Position = {
+          coords: newCoords,
+          timestamp: newTimestamp
+        };
+        sendPosition(newPosition);
+        return newPosition;
+      });
     },
-    [position, sendPosition]
+    [sendPosition]
   );
 
   // Joystick movement with speed based on distance from center
@@ -68,12 +75,28 @@ export function useGeolocationControl() {
       const latDelta = -deltaY * 0.00001 * speedMultiplier;
       const lngDelta = deltaX * 0.00001 * speedMultiplier;
 
-      updatePosition(
-        position.coords.latitude + latDelta,
-        position.coords.longitude + lngDelta
-      );
+      setPosition((prevPosition) => {
+        const newLat = prevPosition.coords.latitude + latDelta;
+        const newLng = prevPosition.coords.longitude + lngDelta;
+        const newTimestamp = Date.now();
+
+        const newCoords = createUpdatedCoordinates(
+          prevPosition.coords,
+          newLat,
+          newLng,
+          prevPosition.timestamp,
+          newTimestamp
+        );
+
+        const newPosition: Position = {
+          coords: newCoords,
+          timestamp: newTimestamp
+        };
+        sendPosition(newPosition);
+        return newPosition;
+      });
     },
-    [position, updatePosition]
+    [sendPosition]
   );
 
   // Keyboard controls
@@ -116,13 +139,21 @@ export function useGeolocationControl() {
 
             if (latDelta !== 0 || lngDelta !== 0) {
               setPosition((prevPosition) => {
+                const newLat = prevPosition.coords.latitude + latDelta;
+                const newLng = prevPosition.coords.longitude + lngDelta;
+                const newTimestamp = Date.now();
+
+                const newCoords = createUpdatedCoordinates(
+                  prevPosition.coords,
+                  newLat,
+                  newLng,
+                  prevPosition.timestamp,
+                  newTimestamp
+                );
+
                 const newPosition: Position = {
-                  coords: {
-                    ...prevPosition.coords,
-                    latitude: prevPosition.coords.latitude + latDelta,
-                    longitude: prevPosition.coords.longitude + lngDelta
-                  },
-                  timestamp: Date.now()
+                  coords: newCoords,
+                  timestamp: newTimestamp
                 };
                 sendPosition(newPosition);
                 return newPosition;

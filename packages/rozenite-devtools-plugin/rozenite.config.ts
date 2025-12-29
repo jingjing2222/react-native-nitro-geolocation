@@ -1,7 +1,7 @@
 export default {
   panels: [
     {
-      name: "Geolocation DevTools",
+      name: "Geolocation",
       source: "./src/ui/geolocation-devtools.tsx"
     }
   ]

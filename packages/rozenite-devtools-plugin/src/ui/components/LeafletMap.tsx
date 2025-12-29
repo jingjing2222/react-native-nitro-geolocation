@@ -48,11 +48,6 @@ export function LeafletMap({ position, onMapClick }: LeafletMapProps) {
       { icon: customIcon }
     ).addTo(map);
 
-    // Handle map clicks
-    map.on("click", (e: L.LeafletMouseEvent) => {
-      onMapClick(e.latlng.lat, e.latlng.lng);
-    });
-
     mapRef.current = map;
     markerRef.current = marker;
 
@@ -60,6 +55,21 @@ export function LeafletMap({ position, onMapClick }: LeafletMapProps) {
       map.remove();
     };
   }, []);
+
+  // Update click handler when onMapClick changes
+  useEffect(() => {
+    if (!mapRef.current) return;
+
+    const handleClick = (e: L.LeafletMouseEvent) => {
+      onMapClick(e.latlng.lat, e.latlng.lng);
+    };
+
+    mapRef.current.on("click", handleClick);
+
+    return () => {
+      mapRef.current?.off("click", handleClick);
+    };
+  }, [onMapClick]);
 
   // Update marker position when position changes
   useEffect(() => {
