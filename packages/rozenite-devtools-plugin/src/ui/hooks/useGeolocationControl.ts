@@ -15,6 +15,9 @@ const DEFAULT_POSITION: Position = createPositionFromPreset(
   LOCATION_PRESETS[0]
 );
 
+const INTERVAL_MS = 50;
+const DEFAULT_SPEED_MPS = 27.78;
+
 export function useGeolocationControl() {
   const client = useRozeniteDevToolsClient<DevtoolsUIEvents>({
     pluginId: "@rozenite/react-native-nitro-geolocation-plugin"
@@ -22,7 +25,7 @@ export function useGeolocationControl() {
 
   const [position, setPosition] = useState<Position>(DEFAULT_POSITION);
   const [isSpeedLocked, setIsSpeedLocked] = useState(false);
-  const [lockedSpeed, setLockedSpeed] = useState(27.78); // Default: 27.78 m/s (100 km/h)
+  const [lockedSpeed, setLockedSpeed] = useState(DEFAULT_SPEED_MPS); // Default: 27.78 m/s (100 km/h)
 
   // Send position to React Native app
   const sendPosition = useCallback(
@@ -69,8 +72,6 @@ export function useGeolocationControl() {
 
   // Arrow key controls
   useEffect(() => {
-    const INTERVAL_MS = 50;
-    const DEFAULT_SPEED_MPS = 27.78; // Default speed: 27.78 m/s (100 km/h)
     const speedInMetersPerSecond = isSpeedLocked
       ? lockedSpeed
       : DEFAULT_SPEED_MPS;
