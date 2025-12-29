@@ -3,10 +3,10 @@ import type { GeolocationPluginEvents } from "../shared/types";
 
 export const useGeolocationDevTools = () => {
   const client = useRozeniteDevToolsClient<GeolocationPluginEvents>({
-    pluginId: '@rozenite/react-native-nitro-geolocation-plugin',
+    pluginId: "@rozenite/react-native-nitro-geolocation-plugin"
   });
 
-  client?.onMessage('helloworld', (data) => {
-    console.log('Received message:', data.message);
+  client?.onMessage("helloworld", (data) => {
+    console.log("Received message:", data.message);
   });
-}
+};

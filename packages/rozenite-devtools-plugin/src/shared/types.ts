@@ -1,5 +1,5 @@
 export interface GeolocationPluginEvents extends Record<string, unknown> {
-  'helloworld': {
+  helloworld: {
     message: string;
-  }
+  };
 }

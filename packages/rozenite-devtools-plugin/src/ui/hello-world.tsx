@@ -1,10 +1,10 @@
-import { useRozeniteDevToolsClient } from '@rozenite/plugin-bridge';
-import { StyleSheet, ScrollView, SafeAreaView, Button } from 'react-native';
-import type { GeolocationPluginEvents } from '../shared/types';
+import { useRozeniteDevToolsClient } from "@rozenite/plugin-bridge";
+import { Button, SafeAreaView, ScrollView, StyleSheet } from "react-native";
+import type { GeolocationPluginEvents } from "../shared/types";
 
 export default function HelloWorldPanel() {
   const client = useRozeniteDevToolsClient<GeolocationPluginEvents>({
-    pluginId: '@rozenite/react-native-nitro-geolocation-plugin',
+    pluginId: "@rozenite/react-native-nitro-geolocation-plugin"
   });
 
   return (
@@ -13,7 +13,12 @@ export default function HelloWorldPanel() {
         style={styles.scrollView}
         contentContainerStyle={styles.scrollContent}
       >
-        <Button title='helloworld' onPress={() => { client?.send('helloworld', {message: 'Hello World!'}) }} />
+        <Button
+          title="helloworld"
+          onPress={() => {
+            client?.send("helloworld", { message: "Hello World!" });
+          }}
+        />
       </ScrollView>
     </SafeAreaView>
   );
@@ -22,12 +27,12 @@ export default function HelloWorldPanel() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f8f9fa',
+    backgroundColor: "#f8f9fa"
   },
   scrollView: {
-    flex: 1,
+    flex: 1
   },
   scrollContent: {
-    paddingBottom: 20,
+    paddingBottom: 20
   }
 });

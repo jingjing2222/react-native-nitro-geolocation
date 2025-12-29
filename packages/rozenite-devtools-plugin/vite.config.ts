@@ -1,20 +1,20 @@
+import { rozenitePlugin } from "@rozenite/vite-plugin";
 /// <reference types='vitest' />
-import { defineConfig } from 'vite';
-import { rozenitePlugin } from '@rozenite/vite-plugin';
+import { defineConfig } from "vite";
 
 export default defineConfig({
   root: __dirname,
   plugins: [rozenitePlugin()],
-  base: './',
+  base: "./",
   build: {
-    outDir: './dist',
+    outDir: "./dist",
     emptyOutDir: false,
     reportCompressedSize: false,
     minify: true,
-    sourcemap: false,
+    sourcemap: false
   },
   server: {
     port: 3000,
-    open: true,
-  },
+    open: true
+  }
 });
