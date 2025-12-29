@@ -1,8 +1,8 @@
 export default {
   panels: [
     {
-      name: "Hello world!",
-      source: "./src/ui/hello-world.tsx"
+      name: "Geolocation DevTools",
+      source: "./src/ui/geolocation-devtools.tsx"
     }
   ]
 };

@@ -1,6 +1,16 @@
 import { useRozeniteDevToolsClient } from "@rozenite/plugin-bridge";
 import { Button, SafeAreaView, ScrollView, StyleSheet } from "react-native";
-import type { GeolocationPluginEvents } from "../shared/types";
+import type { GeolocationPluginEvents, Position } from "../shared/types";
+
+const DEFAULT_POSITION:Position = {
+  latitude: 0,
+  longitude: 0,
+  accuracy: 0,
+  altitude: 0,
+  altitudeAccuracy: 0,
+  heading: 0,
+  speed: 0,
+};
 
 export default function HelloWorldPanel() {
   const client = useRozeniteDevToolsClient<GeolocationPluginEvents>({
@@ -14,9 +24,9 @@ export default function HelloWorldPanel() {
         contentContainerStyle={styles.scrollContent}
       >
         <Button
-          title="helloworld"
+          title="position"
           onPress={() => {
-            client?.send("helloworld", { message: "Hello World!" });
+            client?.send("position", DEFAULT_POSITION);
           }}
         />
       </ScrollView>
