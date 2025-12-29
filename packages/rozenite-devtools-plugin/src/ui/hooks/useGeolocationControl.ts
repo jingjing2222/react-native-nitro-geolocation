@@ -5,7 +5,10 @@ import {
   createPositionFromPreset
 } from "../../shared/presets";
 import type { DevtoolsUIEvents, Position } from "../../shared/types";
-import { createUpdatedCoordinates } from "../utils/geolocation";
+import {
+  convertSpeedToDegreesPerInterval,
+  createUpdatedCoordinates
+} from "../utils/geolocation";
 import { useDevtoolsUI } from "./useDevtoolsUI";
 
 const DEFAULT_POSITION: Position = createPositionFromPreset(
@@ -18,6 +21,8 @@ export function useGeolocationControl() {
   });
 
   const [position, setPosition] = useState<Position>(DEFAULT_POSITION);
+  const [isSpeedLocked, setIsSpeedLocked] = useState(false);
+  const [lockedSpeed, setLockedSpeed] = useState(27.78); // Default: 27.78 m/s (100 km/h)
 
   // Send position to React Native app
   const sendPosition = useCallback(
@@ -64,7 +69,15 @@ export function useGeolocationControl() {
 
   // Arrow key controls
   useEffect(() => {
-    const keySpeed = 0.0001; // Base speed for keyboard
+    const INTERVAL_MS = 50;
+    const DEFAULT_SPEED_MPS = 27.78; // Default speed: 27.78 m/s (100 km/h)
+    const speedInMetersPerSecond = isSpeedLocked
+      ? lockedSpeed
+      : DEFAULT_SPEED_MPS;
+    const keySpeed = convertSpeedToDegreesPerInterval(
+      speedInMetersPerSecond,
+      INTERVAL_MS
+    );
     let keyboardInterval: NodeJS.Timeout | null = null;
     const pressedKeys = new Set<string>();
 
@@ -80,12 +93,19 @@ export function useGeolocationControl() {
             let latDelta = 0;
             let lngDelta = 0;
 
-            if (pressedKeys.has("arrowup")) latDelta += keySpeed;
-            if (pressedKeys.has("arrowdown")) latDelta -= keySpeed;
-            if (pressedKeys.has("arrowleft")) lngDelta -= keySpeed;
-            if (pressedKeys.has("arrowright")) lngDelta += keySpeed;
+            if (pressedKeys.has("arrowup")) latDelta += 1;
+            if (pressedKeys.has("arrowdown")) latDelta -= 1;
+            if (pressedKeys.has("arrowleft")) lngDelta -= 1;
+            if (pressedKeys.has("arrowright")) lngDelta += 1;
 
             if (latDelta !== 0 || lngDelta !== 0) {
+              // Normalize diagonal movement to maintain constant speed
+              const magnitude = Math.sqrt(
+                latDelta * latDelta + lngDelta * lngDelta
+              );
+              latDelta = (latDelta / magnitude) * keySpeed;
+              lngDelta = (lngDelta / magnitude) * keySpeed;
+
               setPosition((prevPosition) => {
                 const newLat = prevPosition.coords.latitude + latDelta;
                 const newLng = prevPosition.coords.longitude + lngDelta;
@@ -107,7 +127,7 @@ export function useGeolocationControl() {
                 return newPosition;
               });
             }
-          }, 50);
+          }, INTERVAL_MS);
         }
       }
     };
@@ -131,7 +151,7 @@ export function useGeolocationControl() {
       window.removeEventListener("keyup", handleKeyUp);
       if (keyboardInterval) clearInterval(keyboardInterval);
     };
-  }, [sendPosition]);
+  }, [sendPosition, isSpeedLocked, lockedSpeed]);
 
   // Set position from preset
   const setPositionFromPreset = useCallback(
@@ -145,6 +165,10 @@ export function useGeolocationControl() {
   return {
     position,
     updatePosition,
-    setPositionFromPreset
+    setPositionFromPreset,
+    isSpeedLocked,
+    setIsSpeedLocked,
+    lockedSpeed,
+    setLockedSpeed
   };
 }

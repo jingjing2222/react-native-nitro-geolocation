@@ -66,6 +66,21 @@ export function calculateSpeed(distance: number, timeDelta: number): number {
 }
 
 /**
+ * Convert speed from m/s to degrees per interval
+ * @param speedInMetersPerSecond Speed in meters per second
+ * @param intervalMs Interval in milliseconds
+ * @returns Speed in degrees per interval
+ */
+export function convertSpeedToDegreesPerInterval(
+  speedInMetersPerSecond: number,
+  intervalMs: number
+): number {
+  const METERS_PER_DEGREE = 111000; // Approximate meters per degree of latitude
+  const distancePerInterval = speedInMetersPerSecond * (intervalMs / 1000);
+  return distancePerInterval / METERS_PER_DEGREE;
+}
+
+/**
  * Create updated coordinates with calculated heading and speed
  */
 export function createUpdatedCoordinates(
