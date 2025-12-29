@@ -12,6 +12,7 @@ A complete reimplementation of [`@react-native-community/geolocation`](https://g
 - 🪝 **Single Hook** — `useWatchPosition` for continuous tracking
 - 🧹 **Automatic cleanup** — No manual subscription management
 - 📱 **Consistent behavior** across iOS and Android
+- 🛠️ **DevTools Plugin** — Mock locations with interactive map (Rozenite)
 
 ![react-native-nitro-geolocation](https://raw.githubusercontent.com/jingjing2222/react-native-nitro-geolocation/main/demo.gif)
 
@@ -202,7 +203,50 @@ Optional (for background):
 
 ---
 
-### 4. Usage Examples
+### 4. Development Tools (Optional)
+
+#### DevTools Plugin (Rozenite)
+
+> **Prerequisites**: Requires [Rozenite DevTools](https://github.com/rozenite/rozenite) to be installed.
+
+Mock geolocation data during development with an interactive map interface:
+
+```bash
+npm install @rozenite/react-native-nitro-geolocation-plugin
+# or
+yarn add @rozenite/react-native-nitro-geolocation-plugin
+```
+
+**Setup**:
+
+```tsx
+import { useGeolocationDevTools } from '@rozenite/react-native-nitro-geolocation-plugin';
+import { createPosition } from '@rozenite/react-native-nitro-geolocation-plugin/presets';
+
+function App() {
+  // Enable location mocking in development
+  useGeolocationDevTools({
+    initialPosition: createPosition('Seoul, South Korea')
+  });
+
+  return <YourApp />;
+}
+```
+
+**Features**:
+- 🗺️ Interactive Leaflet map interface
+- 📍 Click to set location instantly
+- ⌨️ Arrow key navigation for precise control
+- 🏙️ 20 pre-configured city presets
+- ✏️ Manual latitude/longitude input
+- 📊 Real-time heading, speed, and accuracy calculation
+- 🌓 Dark mode support
+
+[See full DevTools guide →](https://react-native-nitro-geolocation.pages.dev/guide/devtools)
+
+---
+
+### 5. Usage Examples
 
 #### Modern API (Recommended)
 
@@ -571,6 +615,7 @@ Choose the API that fits your project:
 - [Quick Start Guide](https://react-native-nitro-geolocation.pages.dev/guide/quick-start)
 - [Modern API Reference](https://react-native-nitro-geolocation.pages.dev/guide/modern-api)
 - [Legacy API Reference](https://react-native-nitro-geolocation.pages.dev/guide/legacy-api)
+- [DevTools Plugin Guide](https://react-native-nitro-geolocation.pages.dev/guide/devtools)
 - [Why Nitro Module?](https://react-native-nitro-geolocation.pages.dev/guide/why-nitro-module)
 - [Benchmark Results](https://react-native-nitro-geolocation.pages.dev/guide/benchmark)
 

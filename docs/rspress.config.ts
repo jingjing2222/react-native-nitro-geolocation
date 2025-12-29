@@ -75,6 +75,15 @@ export default defineConfig({
           ]
         },
         {
+          text: "Development Tools",
+          items: [
+            {
+              text: "DevTools Plugin (Rozenite)",
+              link: "/guide/devtools"
+            }
+          ]
+        },
+        {
           text: "Learn More",
           items: [
             { text: "Why Nitro Module?", link: "/guide/why-nitro-module" },

@@ -326,8 +326,49 @@ function LocationTracker() {
 - Better TypeScript support
 
 
+## 7. Development Tools (Optional)
+
+For an enhanced development experience, install the Rozenite DevTools plugin to mock locations:
+
+```bash
+npm install @rozenite/react-native-nitro-geolocation-plugin
+# or
+yarn add @rozenite/react-native-nitro-geolocation-plugin
+```
+
+Add to your app:
+
+```tsx
+import { useGeolocationDevTools } from '@rozenite/react-native-nitro-geolocation-plugin';
+import { createPosition } from '@rozenite/react-native-nitro-geolocation-plugin/presets';
+
+function App() {
+  // Enable location mocking in development
+  useGeolocationDevTools({
+    initialPosition: createPosition('Seoul, South Korea')
+  });
+
+  // ... rest of your app
+}
+```
+
+**Features**:
+- 🗺️ Interactive map interface
+- 📍 Click to set location
+- ⌨️ Arrow key navigation
+- 🏙️ 20 city presets
+- 📊 Real-time heading/speed calculation
+
+Learn more in the [DevTools Plugin Guide](/guide/devtools).
+
+:::warning Prerequisites
+The DevTools plugin requires [Rozenite DevTools](https://github.com/rozenite/rozenite) to be installed in your project.
+:::
+
+
 ## Next Steps
 
+- [DevTools Plugin Guide](/guide/devtools) — Mock locations in development
 - [Modern API Reference](/guide/modern-api) — Complete documentation
 - [Legacy API Reference](/guide/legacy-api) — Compatibility methods
 - [Why Nitro Module?](/guide/why-nitro-module) — Architecture deep dive
