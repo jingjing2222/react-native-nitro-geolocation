@@ -15,4 +15,6 @@ export interface Position {
 
 export interface GeolocationPluginEvents extends Record<string, unknown> {
   position: Position;
+  initialPosition: Position;
+  ready: null;
 }

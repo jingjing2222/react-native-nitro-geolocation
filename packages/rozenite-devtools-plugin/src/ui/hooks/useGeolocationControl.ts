@@ -1,20 +1,16 @@
 import { useRozeniteDevToolsClient } from "@rozenite/plugin-bridge";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import {
+  LOCATION_PRESETS,
+  createPositionFromPreset
+} from "../../shared/presets";
 import type { GeolocationPluginEvents, Position } from "../../shared/types";
 import { createUpdatedCoordinates } from "../utils/geolocation";
+import { useDevtoolsMessages } from "./useDevtoolsMessages";
 
-const DEFAULT_POSITION: Position = {
-  coords: {
-    latitude: 37.5665,
-    longitude: 126.978,
-    accuracy: 10,
-    altitude: 50,
-    altitudeAccuracy: 5,
-    heading: null,
-    speed: 0
-  },
-  timestamp: Date.now()
-};
+const DEFAULT_POSITION: Position = createPositionFromPreset(
+  LOCATION_PRESETS[0]
+);
 
 export function useGeolocationControl() {
   const client = useRozeniteDevToolsClient<GeolocationPluginEvents>({
@@ -31,12 +27,27 @@ export function useGeolocationControl() {
     [client]
   );
 
-  // Send initial position when component mounts
+  // Setup message handlers
+  const messageHandlers = useMemo(
+    () => ({
+      initialPosition: (data: Position) => {
+        console.log("[Devtools UI] Received initial position:", data);
+        setPosition(data);
+        sendPosition(data);
+      }
+    }),
+    [sendPosition]
+  );
+
+  useDevtoolsMessages(client, messageHandlers);
+
+  // Send "ready" signal when devtools UI mounts
   useEffect(() => {
     if (client) {
-      sendPosition(DEFAULT_POSITION);
+      console.log("[Devtools UI] Sending ready signal");
+      client.send("ready", null);
     }
-  }, [client, sendPosition]);
+  }, [client]);
 
   // Update position and send to app
   const updatePosition = useCallback(
@@ -61,45 +72,7 @@ export function useGeolocationControl() {
     [sendPosition]
   );
 
-  // Joystick movement with speed based on distance from center
-  const handleJoystickMove = useCallback(
-    (deltaX: number, deltaY: number) => {
-      // Calculate distance from center (0 to 50)
-      const distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
-      const maxDistance = 50;
-
-      // Speed multiplier: increases quadratically with distance
-      const speedMultiplier = (distance / maxDistance) ** 2 * 5;
-
-      // Convert pixel movement to lat/lng delta with speed
-      const latDelta = -deltaY * 0.00001 * speedMultiplier;
-      const lngDelta = deltaX * 0.00001 * speedMultiplier;
-
-      setPosition((prevPosition) => {
-        const newLat = prevPosition.coords.latitude + latDelta;
-        const newLng = prevPosition.coords.longitude + lngDelta;
-        const newTimestamp = Date.now();
-
-        const newCoords = createUpdatedCoordinates(
-          prevPosition.coords,
-          newLat,
-          newLng,
-          prevPosition.timestamp,
-          newTimestamp
-        );
-
-        const newPosition: Position = {
-          coords: newCoords,
-          timestamp: newTimestamp
-        };
-        sendPosition(newPosition);
-        return newPosition;
-      });
-    },
-    [sendPosition]
-  );
-
-  // Keyboard controls
+  // Arrow key controls
   useEffect(() => {
     const keySpeed = 0.0001; // Base speed for keyboard
     let keyboardInterval: NodeJS.Timeout | null = null;
@@ -107,18 +80,7 @@ export function useGeolocationControl() {
 
     const handleKeyDown = (e: KeyboardEvent) => {
       const key = e.key.toLowerCase();
-      if (
-        [
-          "w",
-          "a",
-          "s",
-          "d",
-          "arrowup",
-          "arrowdown",
-          "arrowleft",
-          "arrowright"
-        ].includes(key)
-      ) {
+      if (["arrowup", "arrowdown", "arrowleft", "arrowright"].includes(key)) {
         e.preventDefault();
         pressedKeys.add(key);
 
@@ -128,14 +90,10 @@ export function useGeolocationControl() {
             let latDelta = 0;
             let lngDelta = 0;
 
-            if (pressedKeys.has("w") || pressedKeys.has("arrowup"))
-              latDelta += keySpeed;
-            if (pressedKeys.has("s") || pressedKeys.has("arrowdown"))
-              latDelta -= keySpeed;
-            if (pressedKeys.has("a") || pressedKeys.has("arrowleft"))
-              lngDelta -= keySpeed;
-            if (pressedKeys.has("d") || pressedKeys.has("arrowright"))
-              lngDelta += keySpeed;
+            if (pressedKeys.has("arrowup")) latDelta += keySpeed;
+            if (pressedKeys.has("arrowdown")) latDelta -= keySpeed;
+            if (pressedKeys.has("arrowleft")) lngDelta -= keySpeed;
+            if (pressedKeys.has("arrowright")) lngDelta += keySpeed;
 
             if (latDelta !== 0 || lngDelta !== 0) {
               setPosition((prevPosition) => {
@@ -185,9 +143,18 @@ export function useGeolocationControl() {
     };
   }, [sendPosition]);
 
+  // Set position from preset
+  const setPositionFromPreset = useCallback(
+    (preset: Position) => {
+      setPosition(preset);
+      sendPosition(preset);
+    },
+    [sendPosition]
+  );
+
   return {
     position,
     updatePosition,
-    handleJoystickMove
+    setPositionFromPreset
   };
 }

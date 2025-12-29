@@ -1,22 +1,33 @@
-import type {
-  LocationError,
-  LocationRequestOptions
-} from "../NitroGeolocation.nitro";
-import type { GeolocationResponse } from "../types";
+import type { GeolocationError, GeolocationResponse } from "../types";
 import { getDevtoolsState } from "./index";
 
 export function devtoolsWatchPosition(
   success: (position: GeolocationResponse) => void,
-  error?: (error: LocationError) => void,
-  options?: LocationRequestOptions
+  error?: (error: GeolocationError) => void
 ): string {
   const devtools = getDevtoolsState();
+
+  // Check if devtools has position at all
+  if (!devtools.position) {
+    // Call error callback immediately if provided
+    if (error) {
+      error({
+        code: 2, // POSITION_UNAVAILABLE
+        message:
+          "Geolocation devtools not connected. Press 'j' in Metro to open devtools and enable the geolocation plugin.",
+        PERMISSION_DENIED: 1,
+        POSITION_UNAVAILABLE: 2,
+        TIMEOUT: 3
+      });
+    }
+    // Return a dummy token that does nothing
+    return `devtools-error-${Date.now()}`;
+  }
+
   let previousPosition = devtools.position;
 
   // Send initial position immediately if available
-  if (devtools.position) {
-    success(devtools.position);
-  }
+  success(devtools.position);
 
   const interval = setInterval(() => {
     if (devtools.position && devtools.position !== previousPosition) {
@@ -37,6 +48,11 @@ export function devtoolsWatchPosition(
 export function devtoolsUnwatch(token: string): boolean {
   if (!token.startsWith("devtools-")) {
     return false;
+  }
+
+  // Handle error tokens (no cleanup needed)
+  if (token.startsWith("devtools-error-")) {
+    return true;
   }
 
   const watchers = (globalThis as any).__devtoolsWatchers;

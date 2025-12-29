@@ -34,7 +34,7 @@ export function getCurrentPosition(
   options?: LocationRequestOptions
 ): Promise<GeolocationResponse> {
   if (isDevtoolsEnabled()) {
-    const devtoolsResult = getDevtoolsCurrentPosition(options);
+    const devtoolsResult = getDevtoolsCurrentPosition();
     if (devtoolsResult) {
       return devtoolsResult;
     }
