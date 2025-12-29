@@ -5,7 +5,10 @@ interface PositionInfoProps {
   onUpdatePosition: (lat: number, lng: number) => void;
 }
 
-export function PositionInfo({ position, onUpdatePosition }: PositionInfoProps) {
+export function PositionInfo({
+  position,
+  onUpdatePosition
+}: PositionInfoProps) {
   const handleInputChange = (
     field: "latitude" | "longitude",
     value: string
@@ -89,9 +92,7 @@ export function PositionInfo({ position, onUpdatePosition }: PositionInfoProps) 
           </p>
         </div>
         <div>
-          <div className="text-xs text-muted-foreground block mb-1">
-            Speed
-          </div>
+          <div className="text-xs text-muted-foreground block mb-1">Speed</div>
           <p className="text-sm text-muted-foreground py-1">
             {position.coords.speed?.toFixed(2) ?? "0.00"}m/s
           </p>
