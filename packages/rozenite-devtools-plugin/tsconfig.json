@@ -15,10 +15,6 @@
     "isolatedModules": true,
     "noEmit": true,
     "jsx": "react-jsx",
-    "baseUrl": ".",
-    "paths": {
-      "@/*": ["./src/*"]
-    }
   },
   "include": ["src/**/*", "react-native.ts", "rozenite.config.ts"],
   "exclude": ["node_modules", "dist", "build"]
