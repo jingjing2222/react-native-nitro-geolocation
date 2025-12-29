@@ -13,6 +13,11 @@ export function devtoolsWatchPosition(
   const devtools = getDevtoolsState();
   let previousPosition = devtools.position;
 
+  // Send initial position immediately if available
+  if (devtools.position) {
+    success(devtools.position);
+  }
+
   const interval = setInterval(() => {
     if (devtools.position && devtools.position !== previousPosition) {
       previousPosition = devtools.position;
