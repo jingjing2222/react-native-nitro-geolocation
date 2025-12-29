@@ -30,11 +30,10 @@ export function LeafletMap({ position, onMapClick }: LeafletMapProps) {
       shadowSize: [41, 41]
     });
 
-    // Create map
-    const map = L.map(mapContainerRef.current).setView(
-      [position.coords.latitude, position.coords.longitude],
-      15
-    );
+    // Create map with keyboard disabled
+    const map = L.map(mapContainerRef.current, {
+      keyboard: false
+    }).setView([position.coords.latitude, position.coords.longitude], 15);
 
     // Add OpenStreetMap tiles
     L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {

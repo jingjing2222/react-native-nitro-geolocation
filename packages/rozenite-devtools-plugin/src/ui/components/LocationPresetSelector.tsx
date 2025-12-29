@@ -58,7 +58,7 @@ export function LocationPresetSelector({
                 0.0001 &&
               Math.abs(p.coords.longitude - currentPosition.coords.longitude) <
                 0.0001
-          )?.name || "Custom Location"}
+          )?.name || "Select Location"}
         </span>
         <ChevronDown
           className={`w-4 h-4 transition-transform ${isOpen ? "rotate-180" : ""}`}

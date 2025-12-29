@@ -16,7 +16,7 @@ export default function GeolocationDevToolsPanel() {
         onSelect={setPositionFromPreset}
         currentPosition={position}
       />
-      <PositionInfo position={position} />
+      <PositionInfo position={position} onUpdatePosition={updatePosition} />
       <LeafletMap position={position} onMapClick={updatePosition} />
       <p className="text-center text-sm text-muted-foreground mt-5">
         Use arrow keys to navigate or click on the map
