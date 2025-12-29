@@ -9,6 +9,8 @@ export {
   type LocationPresetName
 } from "./src/shared/presets";
 
+export type { Position, GeolocationCoordinates } from "./src/shared/types";
+
 const isWeb =
   typeof window !== "undefined" && window.navigator.product !== "ReactNative";
 const isDev = process.env.NODE_ENV !== "production";

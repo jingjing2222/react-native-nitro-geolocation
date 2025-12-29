@@ -14,16 +14,6 @@ declare global {
   var __geolocationDevToolsEnabled: boolean | undefined;
 }
 
-function getDevtoolsState() {
-  if (!globalThis.__geolocationDevtools) {
-    globalThis.__geolocationDevtools = {
-      position: null,
-      initialPosition: null
-    };
-  }
-  return globalThis.__geolocationDevtools;
-}
-
 interface UseGeolocationDevToolsOptions {
   initialPosition?: Position;
 }
