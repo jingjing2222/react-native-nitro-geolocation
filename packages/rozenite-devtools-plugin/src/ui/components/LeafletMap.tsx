@@ -76,13 +76,7 @@ export function LeafletMap({ position, onMapClick }: LeafletMapProps) {
   return (
     <div
       ref={mapContainerRef}
-      style={{
-        width: "100%",
-        height: 400,
-        marginBottom: 20,
-        borderRadius: 8,
-        overflow: "hidden"
-      }}
+      className="w-full h-100 mb-5 rounded-lg overflow-hidden border border-border shadow-sm transition-all"
     />
   );
 }

@@ -1,26 +1,20 @@
-import { StyleSheet, View } from "react-native";
+import "./globals.css";
 import { Joystick } from "./components/Joystick";
 import { LeafletMap } from "./components/LeafletMap";
 import { PositionInfo } from "./components/PositionInfo";
+import { useDarkMode } from "./hooks/useDarkMode";
 import { useGeolocationControl } from "./hooks/useGeolocationControl";
 
 export default function GeolocationDevToolsPanel() {
   const { position, updatePosition, handleJoystickMove } =
     useGeolocationControl();
+    useDarkMode();
 
   return (
-    <View style={styles.container}>
+    <div className="min-h-screen bg-background p-5 transition-colors">
       <PositionInfo position={position} />
       <LeafletMap position={position} onMapClick={updatePosition} />
       <Joystick onMove={handleJoystickMove} />
-    </View>
+    </div>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#f8f9fa",
-    padding: 20
-  }
-});

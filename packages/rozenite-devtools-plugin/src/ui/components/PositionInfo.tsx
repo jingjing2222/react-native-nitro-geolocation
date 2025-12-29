@@ -1,4 +1,3 @@
-import { StyleSheet, Text, View } from "react-native";
 import type { Position } from "../../shared/types";
 
 interface PositionInfoProps {
@@ -7,37 +6,19 @@ interface PositionInfoProps {
 
 export function PositionInfo({ position }: PositionInfoProps) {
   return (
-    <View style={styles.positionInfo}>
-      <Text style={styles.infoTitle}>Current Position</Text>
-      <Text style={styles.infoText}>
+    <div className="bg-card rounded-lg p-4 mb-5 shadow-sm border border-border transition-all">
+      <h3 className="text-lg font-bold mb-2.5 text-card-foreground">
+        Current Position
+      </h3>
+      <p className="text-sm mb-1 text-muted-foreground">
         Lat: {position.coords.latitude.toFixed(6)}
-      </Text>
-      <Text style={styles.infoText}>
+      </p>
+      <p className="text-sm mb-1 text-muted-foreground">
         Lng: {position.coords.longitude.toFixed(6)}
-      </Text>
-      <Text style={styles.infoText}>Accuracy: {position.coords.accuracy}m</Text>
-    </View>
+      </p>
+      <p className="text-sm text-muted-foreground m-0">
+        Accuracy: {position.coords.accuracy}m
+      </p>
+    </div>
   );
 }
-
-const styles = StyleSheet.create({
-  positionInfo: {
-    backgroundColor: "white",
-    padding: 15,
-    borderRadius: 8,
-    marginBottom: 20,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4
-  },
-  infoTitle: {
-    fontSize: 18,
-    fontWeight: "bold",
-    marginBottom: 10
-  },
-  infoText: {
-    fontSize: 14,
-    marginBottom: 5
-  }
-});
