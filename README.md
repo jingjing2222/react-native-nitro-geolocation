@@ -211,6 +211,8 @@ Optional (for background):
 
 Mock geolocation data during development with an interactive map interface:
 
+![DevTools Plugin](https://raw.githubusercontent.com/jingjing2222/react-native-nitro-geolocation/main/devtools.gif)
+
 ```bash
 npm install @rozenite/react-native-nitro-geolocation-plugin
 # or

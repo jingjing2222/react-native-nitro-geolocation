@@ -4,6 +4,10 @@ Rozenite DevTools Plugin for [react-native-nitro-geolocation](https://github.com
 
 > **⚠️ Prerequisites**: This plugin requires [Rozenite DevTools](https://github.com/rozenite/rozenite) to be set up in your project. Follow the [Rozenite installation guide](https://rozenite.dev/docs/getting-started) to configure DevTools before using this plugin.
 
+## Demo
+
+![DevTools Plugin Demo](https://raw.githubusercontent.com/jingjing2222/react-native-nitro-geolocation/main/devtools.gif)
+
 ## Features
 
 - 🗺️ Interactive map-based position control
@@ -38,13 +42,41 @@ function App() {
 
 ### With initial position
 
+#### Using city presets
+
 ```tsx
-import { useGeolocationDevTools } from '@rozenite/react-native-nitro-geolocation-plugin';
-import { createPosition } from '@rozenite/react-native-nitro-geolocation-plugin/presets';
+import { useGeolocationDevTools, createPosition } from '@rozenite/react-native-nitro-geolocation-plugin';
 
 function App() {
   useGeolocationDevTools({
-    initialPosition: createPosition('Tokyo, Japan')
+    initialPosition: createPosition('Dubai, UAE')
+  });
+
+  return <YourApp />;
+}
+```
+
+#### Using custom coordinates
+
+```tsx
+import { useGeolocationDevTools, type Position } from '@rozenite/react-native-nitro-geolocation-plugin';
+
+const customPosition: Position = {
+  coords: {
+    latitude: 37.7749,
+    longitude: -122.4194,
+    altitude: 0,
+    accuracy: 100,
+    altitudeAccuracy: 100,
+    heading: 0,
+    speed: 0,
+  },
+  timestamp: Date.now()
+};
+
+function App() {
+  useGeolocationDevTools({
+    initialPosition: customPosition
   });
 
   return <YourApp />;

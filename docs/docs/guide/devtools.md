@@ -31,15 +31,45 @@ function App() {
 
 ### With Initial Position
 
-Use a preset city or custom coordinates:
+#### Using City Presets
+
+Choose from 20 pre-configured city locations:
 
 ```tsx
-import { useGeolocationDevTools } from '@rozenite/react-native-nitro-geolocation-plugin';
-import { createPosition } from '@rozenite/react-native-nitro-geolocation-plugin/presets';
+import { useGeolocationDevTools, createPosition } from '@rozenite/react-native-nitro-geolocation-plugin';
 
 function App() {
   useGeolocationDevTools({
-    initialPosition: createPosition('New York, USA')
+    initialPosition: createPosition('Dubai, UAE')
+  });
+
+  return <YourApp />;
+}
+```
+
+#### Using Custom Coordinates
+
+Manually define a position with specific coordinates:
+
+```tsx
+import { useGeolocationDevTools, type Position } from '@rozenite/react-native-nitro-geolocation-plugin';
+
+const customPosition: Position = {
+  coords: {
+    latitude: 37.7749,
+    longitude: -122.4194,
+    altitude: 0,
+    accuracy: 100,
+    altitudeAccuracy: 100,
+    heading: 0,
+    speed: 0,
+  },
+  timestamp: Date.now()
+};
+
+function App() {
+  useGeolocationDevTools({
+    initialPosition: customPosition
   });
 
   return <YourApp />;
@@ -95,7 +125,7 @@ The plugin automatically calculates and updates:
 
 ## Demo
 
-[Video demonstration coming soon]
+![DevTools Plugin in Action](https://raw.githubusercontent.com/jingjing2222/react-native-nitro-geolocation/main/devtools.gif)
 
 ## How It Works
 
