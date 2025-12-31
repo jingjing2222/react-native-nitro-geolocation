@@ -1,5 +1,16 @@
 # react-native-nitro-geolocation
 
+## 0.5.0
+
+### Minor Changes
+
+- ebda398: feat: devtools
+- 37c6d36: docs: devtools package name
+
+### Patch Changes
+
+- 0c7b851: docs: delete comming soon
+
 ## 0.4.0
 
 ### Minor Changes
