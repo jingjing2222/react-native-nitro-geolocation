@@ -13,10 +13,10 @@
   },
   "dependencies": {
     "@react-native-community/geolocation": "^3.4.0",
+    "@react-native-nitro-geolocation/rozenite-plugin": "workspace: *",
     "@react-native/new-app-screen": "0.81.1",
     "@react-navigation/bottom-tabs": "^7.9.0",
     "@react-navigation/native": "^7.1.26",
-    "@rozenite/react-native-nitro-geolocation-plugin": "workspace: *",
     "react": "19.1.0",
     "react-native": "0.81.1",
     "react-native-nitro-geolocation": "workspace: *",
