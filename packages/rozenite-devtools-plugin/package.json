@@ -6,6 +6,24 @@
   "main": "./dist/react-native.cjs",
   "module": "./dist/react-native.js",
   "types": "./dist/react-native.d.ts",
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/jingjing2222/react-native-nitro-geolocation.git",
+    "directory": "packages/rozenite-devtools-plugin"
+  },
+  "keywords": [
+    "react-native",
+    "geolocation",
+    "nitro",
+    "devtools",
+    "rozenite",
+    "location",
+    "mock"
+  ],
   "scripts": {
     "build": "rozenite build",
     "dev": "rozenite dev"
@@ -38,6 +56,9 @@
   "peerDependencies": {
     "react": "*",
     "react-native": "*"
+  },
+  "publishConfig": {
+    "access": "public"
   },
   "license": "MIT"
 }
