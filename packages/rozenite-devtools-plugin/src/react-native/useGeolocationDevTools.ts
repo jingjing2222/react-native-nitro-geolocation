@@ -22,7 +22,7 @@ export const useGeolocationDevTools = (
   options?: UseGeolocationDevToolsOptions
 ) => {
   const client = useRozeniteDevToolsClient<DevtoolsRNEvents>({
-    pluginId: "@rozenite/react-native-nitro-geolocation-plugin"
+    pluginId: "@react-native-nitro-geolocation/rozenite-plugin"
   });
 
   useSetDevToolsEnabled();

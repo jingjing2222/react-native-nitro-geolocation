@@ -331,16 +331,15 @@ function LocationTracker() {
 For an enhanced development experience, install the Rozenite DevTools plugin to mock locations:
 
 ```bash
-npm install @rozenite/react-native-nitro-geolocation-plugin
+npm install @react-native-nitro-geolocation/rozenite-plugin
 # or
-yarn add @rozenite/react-native-nitro-geolocation-plugin
+yarn add @react-native-nitro-geolocation/rozenite-plugin
 ```
 
 Add to your app:
 
 ```tsx
-import { useGeolocationDevTools } from '@rozenite/react-native-nitro-geolocation-plugin';
-import { createPosition } from '@rozenite/react-native-nitro-geolocation-plugin/presets';
+import { useGeolocationDevTools, createPosition } from '@react-native-nitro-geolocation/rozenite-plugin';
 
 function App() {
   // Enable location mocking in development

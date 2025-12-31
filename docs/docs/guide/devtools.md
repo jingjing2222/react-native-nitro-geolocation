@@ -13,9 +13,9 @@ This DevTools plugin only works with the **Modern API** (`react-native-nitro-geo
 ## Installation
 
 ```bash
-npm install @rozenite/react-native-nitro-geolocation-plugin
+npm install @react-native-nitro-geolocation/rozenite-plugin
 # or
-yarn add @rozenite/react-native-nitro-geolocation-plugin
+yarn add @react-native-nitro-geolocation/rozenite-plugin
 ```
 
 ## Setup
@@ -23,7 +23,7 @@ yarn add @rozenite/react-native-nitro-geolocation-plugin
 Add the devtools hook to your app entry point:
 
 ```tsx
-import { useGeolocationDevTools } from '@rozenite/react-native-nitro-geolocation-plugin';
+import { useGeolocationDevTools } from '@react-native-nitro-geolocation/rozenite-plugin';
 
 function App() {
   // Enable devtools with default position (Seoul)
@@ -40,7 +40,7 @@ function App() {
 Choose from 20 pre-configured city locations:
 
 ```tsx
-import { useGeolocationDevTools, createPosition } from '@rozenite/react-native-nitro-geolocation-plugin';
+import { useGeolocationDevTools, createPosition } from '@react-native-nitro-geolocation/rozenite-plugin';
 
 function App() {
   useGeolocationDevTools({
@@ -56,7 +56,7 @@ function App() {
 Manually define a position with specific coordinates:
 
 ```tsx
-import { useGeolocationDevTools, type Position } from '@rozenite/react-native-nitro-geolocation-plugin';
+import { useGeolocationDevTools, type Position } from '@react-native-nitro-geolocation/rozenite-plugin';
 
 const customPosition: Position = {
   coords: {
@@ -158,8 +158,7 @@ getCurrentPosition() / useWatchPosition() → Returns mocked position
 ### Typical Usage
 
 ```tsx
-import { useGeolocationDevTools } from '@rozenite/react-native-nitro-geolocation-plugin';
-import { createPosition } from '@rozenite/react-native-nitro-geolocation-plugin/presets';
+import { useGeolocationDevTools, createPosition } from '@react-native-nitro-geolocation/rozenite-plugin';
 import { useWatchPosition } from 'react-native-nitro-geolocation';
 
 function App() {

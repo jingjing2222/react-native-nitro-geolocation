@@ -216,16 +216,15 @@ Mock geolocation data during development with an interactive map interface:
 ![DevTools Plugin](https://raw.githubusercontent.com/jingjing2222/react-native-nitro-geolocation/main/devtools.gif)
 
 ```bash
-npm install @rozenite/react-native-nitro-geolocation-plugin
+npm install @react-native-nitro-geolocation/rozenite-plugin
 # or
-yarn add @rozenite/react-native-nitro-geolocation-plugin
+yarn add @react-native-nitro-geolocation/rozenite-plugin
 ```
 
 **Setup**:
 
 ```tsx
-import { useGeolocationDevTools } from '@rozenite/react-native-nitro-geolocation-plugin';
-import { createPosition } from '@rozenite/react-native-nitro-geolocation-plugin/presets';
+import { useGeolocationDevTools, createPosition } from '@react-native-nitro-geolocation/rozenite-plugin';
 
 function App() {
   // Enable location mocking in development

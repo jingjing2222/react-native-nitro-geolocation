@@ -11,6 +11,6 @@
     "benchmark",
     "react-native-nitro-geolocation-example",
     "docs",
-    "@rozenite/react-native-nitro-geolocation-plugin"
+    "@react-native-nitro-geolocation/rozenite-plugin"
   ]
 }

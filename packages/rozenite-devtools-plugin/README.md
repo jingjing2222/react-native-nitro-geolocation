@@ -1,4 +1,4 @@
-# @rozenite/react-native-nitro-geolocation-plugin
+# @react-native-nitro-geolocation/rozenite-plugin
 
 Rozenite DevTools Plugin for [react-native-nitro-geolocation](https://github.com/mrousavy/react-native-nitro-geolocation). Mock geolocation data in development with an interactive map interface.
 
@@ -23,9 +23,9 @@ Rozenite DevTools Plugin for [react-native-nitro-geolocation](https://github.com
 ## Installation
 
 ```bash
-npm install @rozenite/react-native-nitro-geolocation-plugin
+npm install @react-native-nitro-geolocation/rozenite-plugin
 # or
-yarn add @rozenite/react-native-nitro-geolocation-plugin
+yarn add @react-native-nitro-geolocation/rozenite-plugin
 ```
 
 ## Usage
@@ -33,7 +33,7 @@ yarn add @rozenite/react-native-nitro-geolocation-plugin
 Add the devtools hook to your app:
 
 ```tsx
-import { useGeolocationDevTools } from '@rozenite/react-native-nitro-geolocation-plugin';
+import { useGeolocationDevTools } from '@react-native-nitro-geolocation/rozenite-plugin';
 
 function App() {
   useGeolocationDevTools();
@@ -47,7 +47,7 @@ function App() {
 #### Using city presets
 
 ```tsx
-import { useGeolocationDevTools, createPosition } from '@rozenite/react-native-nitro-geolocation-plugin';
+import { useGeolocationDevTools, createPosition } from '@react-native-nitro-geolocation/rozenite-plugin';
 
 function App() {
   useGeolocationDevTools({
@@ -61,7 +61,7 @@ function App() {
 #### Using custom coordinates
 
 ```tsx
-import { useGeolocationDevTools, type Position } from '@rozenite/react-native-nitro-geolocation-plugin';
+import { useGeolocationDevTools, type Position } from '@react-native-nitro-geolocation/rozenite-plugin';
 
 const customPosition: Position = {
   coords: {
