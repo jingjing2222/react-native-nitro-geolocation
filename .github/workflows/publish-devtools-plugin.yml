@@ -3,14 +3,14 @@ name: Publish Devtools Plugin
 on:
   push:
     tags:
-      - '@rozenite/react-native-nitro-geolocation-plugin@*'
+      - '@react-native-nitro-geolocation/rozenite-plugin@*'
 
 permissions:
   contents: write
 
 jobs:
   publish:
-    name: Publish @rozenite/react-native-nitro-geolocation-plugin
+    name: Publish @react-native-nitro-geolocation/rozenite-plugin
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -28,7 +28,7 @@ jobs:
         id: tag_version
         run: |
           TAG=${GITHUB_REF#refs/tags/}
-          VERSION=${TAG#@rozenite/react-native-nitro-geolocation-plugin@}
+          VERSION=${TAG#@react-native-nitro-geolocation/rozenite-plugin@}
           echo "version=$VERSION" >> $GITHUB_OUTPUT
           echo "tag=$TAG" >> $GITHUB_OUTPUT
 

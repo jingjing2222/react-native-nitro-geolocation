@@ -1,5 +1,5 @@
 {
-  "name": "@rozenite/react-native-nitro-geolocation-plugin",
+  "name": "@react-native-nitro-geolocation/rozenite-plugin",
   "version": "0.0.1",
   "description": "react-native-nitro-geolocation devtools plugin with rozenite",
   "type": "module",

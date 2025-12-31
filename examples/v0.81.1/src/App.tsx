@@ -1,9 +1,9 @@
-import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
-import { NavigationContainer } from "@react-navigation/native";
 import {
   createPosition,
   useGeolocationDevTools
-} from "@rozenite/react-native-nitro-geolocation-plugin";
+} from "@react-native-nitro-geolocation/rozenite-plugin";
+import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
+import { NavigationContainer } from "@react-navigation/native";
 import React, { useEffect } from "react";
 import { setConfiguration } from "react-native-nitro-geolocation";
 import CompatScreen from "./screens/CompatScreen";

@@ -3162,6 +3162,37 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@react-native-nitro-geolocation/rozenite-plugin@workspace: *, @react-native-nitro-geolocation/rozenite-plugin@workspace:packages/rozenite-devtools-plugin":
+  version: 0.0.0-use.local
+  resolution: "@react-native-nitro-geolocation/rozenite-plugin@workspace:packages/rozenite-devtools-plugin"
+  dependencies:
+    "@rozenite/plugin-bridge": "npm:1.0.0-alpha.3"
+    "@rozenite/vite-plugin": "npm:1.0.0-alpha.3"
+    "@tailwindcss/vite": "npm:^4.1.18"
+    "@types/leaflet": "npm:^1.9.21"
+    "@types/node": "npm:^25.0.3"
+    "@types/react": "npm:~18.3.12"
+    class-variance-authority: "npm:^0.7.1"
+    clsx: "npm:^2.1.1"
+    leaflet: "npm:^1.9.4"
+    lucide-react: "npm:^0.562.0"
+    react: "npm:18.3.1"
+    react-dom: "npm:18.3.0"
+    react-native: "npm:0.76.0"
+    react-native-web: "npm:0.21.0"
+    rozenite: "npm:1.0.0-alpha.3"
+    tailwind-merge: "npm:^3.4.0"
+    tailwindcss: "npm:^4.1.18"
+    tailwindcss-animate: "npm:^1.0.7"
+    tw-animate-css: "npm:^1.4.0"
+    typescript: "npm:^5.7.3"
+    vite: "npm:^6.0.0"
+  peerDependencies:
+    react: "*"
+    react-native: "*"
+  languageName: unknown
+  linkType: soft
+
 "@react-native/assets-registry@npm:0.76.0":
   version: 0.76.0
   resolution: "@react-native/assets-registry@npm:0.76.0"
@@ -4103,37 +4134,6 @@ __metadata:
   checksum: 10c0/44ec05ea7a5da50bf220fc10f41b9b99329f7af7a4f8cff00ffbccd6924d0c8d48ef8206a7b7779db0e5fa0e01a5023ca92cb01b97262b2c19e0b5dfb5dd2368
   languageName: node
   linkType: hard
-
-"@rozenite/react-native-nitro-geolocation-plugin@workspace: *, @rozenite/react-native-nitro-geolocation-plugin@workspace:packages/rozenite-devtools-plugin":
-  version: 0.0.0-use.local
-  resolution: "@rozenite/react-native-nitro-geolocation-plugin@workspace:packages/rozenite-devtools-plugin"
-  dependencies:
-    "@rozenite/plugin-bridge": "npm:1.0.0-alpha.3"
-    "@rozenite/vite-plugin": "npm:1.0.0-alpha.3"
-    "@tailwindcss/vite": "npm:^4.1.18"
-    "@types/leaflet": "npm:^1.9.21"
-    "@types/node": "npm:^25.0.3"
-    "@types/react": "npm:~18.3.12"
-    class-variance-authority: "npm:^0.7.1"
-    clsx: "npm:^2.1.1"
-    leaflet: "npm:^1.9.4"
-    lucide-react: "npm:^0.562.0"
-    react: "npm:18.3.1"
-    react-dom: "npm:18.3.0"
-    react-native: "npm:0.76.0"
-    react-native-web: "npm:0.21.0"
-    rozenite: "npm:1.0.0-alpha.3"
-    tailwind-merge: "npm:^3.4.0"
-    tailwindcss: "npm:^4.1.18"
-    tailwindcss-animate: "npm:^1.0.7"
-    tw-animate-css: "npm:^1.4.0"
-    typescript: "npm:^5.7.3"
-    vite: "npm:^6.0.0"
-  peerDependencies:
-    react: "*"
-    react-native: "*"
-  languageName: unknown
-  linkType: soft
 
 "@rozenite/runtime@npm:1.1.0":
   version: 1.1.0
@@ -12645,6 +12645,7 @@ __metadata:
     "@react-native-community/cli-platform-android": "npm:20.0.0"
     "@react-native-community/cli-platform-ios": "npm:20.0.0"
     "@react-native-community/geolocation": "npm:^3.4.0"
+    "@react-native-nitro-geolocation/rozenite-plugin": "workspace: *"
     "@react-native/babel-preset": "npm:0.81.1"
     "@react-native/metro-config": "npm:0.81.1"
     "@react-native/new-app-screen": "npm:0.81.1"
@@ -12652,7 +12653,6 @@ __metadata:
     "@react-navigation/bottom-tabs": "npm:^7.9.0"
     "@react-navigation/native": "npm:^7.1.26"
     "@rozenite/metro": "npm:^1.1.0"
-    "@rozenite/react-native-nitro-geolocation-plugin": "workspace: *"
     "@types/react": "npm:^19.1.0"
     react: "npm:19.1.0"
     react-native: "npm:0.81.1"

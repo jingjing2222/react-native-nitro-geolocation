@@ -20,7 +20,7 @@ const DEFAULT_SPEED_MPS = 27.78;
 
 export function useGeolocationControl() {
   const client = useRozeniteDevToolsClient<DevtoolsUIEvents>({
-    pluginId: "@rozenite/react-native-nitro-geolocation-plugin"
+    pluginId: "@react-native-nitro-geolocation/rozenite-plugin"
   });
 
   const [position, setPosition] = useState<Position>(DEFAULT_POSITION);
