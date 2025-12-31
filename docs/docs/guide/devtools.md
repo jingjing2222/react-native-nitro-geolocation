@@ -1,4 +1,4 @@
-# DevTools Plugin (Rozenite) - **COMMING SOON**
+# DevTools Plugin (Rozenite)
 
 Mock geolocation data in development with an interactive map interface using the Rozenite DevTools plugin.
 

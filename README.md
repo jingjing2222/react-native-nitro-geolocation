@@ -203,7 +203,7 @@ Optional (for background):
 
 ---
 
-### 4. Development Tools (Optional) - **COMMING SOON**
+### 4. Development Tools (Optional)
 
 #### DevTools Plugin (Rozenite)
 
