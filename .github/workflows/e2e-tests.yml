@@ -14,7 +14,7 @@ concurrency:
 jobs:
   e2e-ios:
     name: E2E Tests (iOS)
-    runs-on: macos-16
+    runs-on: macos-latest # Currently macOS 14 (Sonoma)
     timeout-minutes: 60
 
     steps:
