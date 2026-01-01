@@ -32,6 +32,9 @@ jobs:
       - name: Install dependencies
         run: yarn install --immutable
 
+      - name: Build monorepo packages
+        run: yarn build:all
+
       - name: Cache Pods
         uses: actions/cache@v4
         with:
@@ -112,6 +115,9 @@ jobs:
 
       - name: Install dependencies
         run: yarn install --immutable
+
+      - name: Build monorepo packages
+        run: yarn build:all
 
       - name: Setup Java 17
         uses: actions/setup-java@v4

@@ -43,16 +43,14 @@ export default function App() {
           name="Default"
           component={DefaultScreen}
           options={{
-            tabBarLabel: "Default API",
-            tabBarTestID: "default-api-tab"
+            tabBarLabel: "Default API"
           }}
         />
         <Tab.Screen
           name="Compat"
           component={CompatScreen}
           options={{
-            tabBarLabel: "Compat API",
-            tabBarTestID: "compat-api-tab"
+            tabBarLabel: "Compat API"
           }}
         />
       </Tab.Navigator>
