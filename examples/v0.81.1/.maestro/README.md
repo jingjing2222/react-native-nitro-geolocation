@@ -130,56 +130,64 @@ London: 51.5074, -0.1278
 
 ## CI/CD Integration
 
-A complete GitHub Actions workflow is available at `.github/workflows/e2e-tests.yml` in the root of this repository.
+### Local Testing First (Recommended)
 
-### Features
+**For Pull Requests:** Run E2E tests locally and include results in your PR description.
 
-- ✅ Runs on both iOS (macOS) and Android (Ubuntu with emulator)
-- ✅ Caches dependencies (Pods, Gradle, AVD)
-- ✅ Generates JUnit test reports
-- ✅ Uploads test artifacts (screenshots, logs)
-- ✅ Publishes test results as PR comments
-- ✅ Can be triggered manually via `workflow_dispatch`
+**Why local testing?**
+- ⚡ **Faster feedback**: No waiting for CI runners
+- 💰 **Cost savings**: macOS CI runners are expensive
+- 🐛 **Early detection**: Catch issues before pushing
+- 🎯 **Better debugging**: Full access to logs and device
 
-### Quick Setup
+**How to include test results in PRs:**
 
-1. **Add the workflow file** (already included):
-   ```
-   .github/workflows/e2e-tests.yml
-   ```
-
-2. **Push to your repository**:
+1. Run tests locally:
    ```bash
-   git add .github/workflows/e2e-tests.yml
-   git commit -m "Add Maestro E2E tests CI"
-   git push
+   cd examples/v0.81.1
+   yarn ios  # or yarn android
+   yarn test:e2e
    ```
 
-3. **View results**:
-   - Go to Actions tab in your GitHub repository
-   - Tests run automatically on push/PR to `main`
-   - Manually trigger via Actions → E2E Tests → Run workflow
+2. Copy the terminal output
 
-### Test Results
+3. Paste in the "E2E Test Results" section of your PR description
 
-Test results are:
-- Published as check annotations on PRs
-- Available as downloadable artifacts
-- Stored in JUnit XML format for integration with other tools
+4. Include platform and version tested
 
-### Cost Considerations
+**Example PR description section:**
+```markdown
+## E2E Test Results
 
-- **iOS tests**: Run on `macos-14` (paid minutes on public repos)
-- **Android tests**: Run on `ubuntu-latest` (free on public repos)
-- Consider running only on `main` branch or specific paths:
+✅ Run permission-check.yaml
+✅ Run current-position.yaml
+✅ Run watch-position.yaml
+✅ Run location-simulation.yaml
+
+**Platform tested:**
+- [x] iOS 17.0
+```
+
+### Automated CI (Main Branch Only)
+
+A GitHub Actions workflow runs E2E tests automatically on the `main` branch.
+
+- **Manual trigger**: Actions → E2E Tests → Run workflow
+- **Automatic**: Runs on push to `main` branch
+- **Not for PRs**: To save time and costs
+
+### Quick CI Setup
+
+The workflow file is at `.github/workflows/e2e-tests.yml`.
+
+To enable CI tests on PRs (not recommended due to cost):
 
 ```yaml
 on:
   push:
     branches: [main]
-    paths:
-      - 'packages/**'
-      - 'examples/**'
+  pull_request:  # Add this
+    branches: [main]
 ```
 
 ## Writing Tests - Best Practices
