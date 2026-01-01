@@ -1,7 +1,7 @@
 import {
+  type Position,
   createPosition,
-  useGeolocationDevTools,
-  type Position
+  useGeolocationDevTools
 } from "@react-native-nitro-geolocation/rozenite-plugin";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { NavigationContainer } from "@react-navigation/native";
@@ -23,7 +23,7 @@ const customPosition: Position = {
     speed: 0
   },
   timestamp: Date.now()
-}
+};
 
 export default function App() {
   useGeolocationDevTools({
