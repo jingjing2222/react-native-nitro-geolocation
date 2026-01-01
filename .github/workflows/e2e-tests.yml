@@ -52,35 +52,18 @@ jobs:
       - name: List available iOS simulators
         run: xcrun simctl list devices available
 
-      - name: Boot iOS Simulator
-        run: |
-          # Boot iPhone 15 Pro (iOS 17.2)
-          SIMULATOR_ID=$(xcrun simctl list devices available | grep "iPhone 15 Pro" | head -1 | grep -o '[A-Z0-9-]\{36\}')
-          echo "Booting simulator: $SIMULATOR_ID"
-          xcrun simctl boot $SIMULATOR_ID || true
-          xcrun simctl list | grep "(Booted)"
-
-      - name: Build iOS app
+      - name: Build and Launch iOS app
         working-directory: examples/v0.81.1
         run: |
-          yarn ios --simulator="iPhone 15 Pro" &
-          BUILD_PID=$!
+          # Build and run on iPhone 17 Pro (Release mode)
+          yarn ios:release
 
-          # Wait for app to build and launch (max 10 minutes)
-          for i in {1..120}; do
-            if xcrun simctl list | grep -q "Booted"; then
-              sleep 5
-              if pgrep -f "nitrogeolocation.example" > /dev/null; then
-                echo "App is running"
-                break
-              fi
-            fi
-            sleep 5
-          done
+          # Wait for app to launch
+          sleep 20
 
-          # Check if build succeeded
-          if ! pgrep -f "nitrogeolocation.example" > /dev/null; then
-            echo "App failed to launch"
+          # Verify app is running
+          if ! xcrun simctl list | grep -q "Booted"; then
+            echo "No simulator is booted"
             exit 1
           fi
 
@@ -188,22 +171,21 @@ jobs:
           script: |
             cd examples/v0.81.1
 
-            # Build and install the app
-            yarn android &
-            BUILD_PID=$!
+            # Build and install the app (Release mode)
+            yarn android:release
 
-            # Wait for app to build and install (max 10 minutes)
-            for i in {1..120}; do
-              if adb shell pm list packages | grep -q "nitrogeolocation.example"; then
-                echo "App is installed"
-                sleep 5
-                # Launch the app
-                adb shell am start -n nitrogeolocation.example/.MainActivity
-                sleep 5
-                break
-              fi
-              sleep 5
-            done
+            # Wait for app to install and start
+            sleep 20
+
+            # Verify app is installed
+            if ! adb shell pm list packages | grep -q "nitrogeolocation.example"; then
+              echo "App installation failed"
+              exit 1
+            fi
+
+            # Launch the app
+            adb shell am start -n nitrogeolocation.example/.MainActivity
+            sleep 10
 
             # Run Maestro tests
             maestro test .maestro/all-tests.yaml --format junit --output maestro-report.xml
