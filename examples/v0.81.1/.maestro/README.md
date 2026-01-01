@@ -6,16 +6,6 @@ This directory contains E2E tests for the `react-native-nitro-geolocation` modul
 
 ### 1. Install Maestro
 
-**Using curl (macOS/Linux):**
-```bash
-curl -Ls "https://get.maestro.mobile.dev" | bash
-```
-
-**Using Homebrew (macOS):**
-```bash
-brew install maestro
-```
-
 **Using mise (recommended for team projects):**
 ```bash
 # Install globally
@@ -140,35 +130,56 @@ London: 51.5074, -0.1278
 
 ## CI/CD Integration
 
-### GitHub Actions Example
+A complete GitHub Actions workflow is available at `.github/workflows/e2e-tests.yml` in the root of this repository.
+
+### Features
+
+- ✅ Runs on both iOS (macOS) and Android (Ubuntu with emulator)
+- ✅ Caches dependencies (Pods, Gradle, AVD)
+- ✅ Generates JUnit test reports
+- ✅ Uploads test artifacts (screenshots, logs)
+- ✅ Publishes test results as PR comments
+- ✅ Can be triggered manually via `workflow_dispatch`
+
+### Quick Setup
+
+1. **Add the workflow file** (already included):
+   ```
+   .github/workflows/e2e-tests.yml
+   ```
+
+2. **Push to your repository**:
+   ```bash
+   git add .github/workflows/e2e-tests.yml
+   git commit -m "Add Maestro E2E tests CI"
+   git push
+   ```
+
+3. **View results**:
+   - Go to Actions tab in your GitHub repository
+   - Tests run automatically on push/PR to `main`
+   - Manually trigger via Actions → E2E Tests → Run workflow
+
+### Test Results
+
+Test results are:
+- Published as check annotations on PRs
+- Available as downloadable artifacts
+- Stored in JUnit XML format for integration with other tools
+
+### Cost Considerations
+
+- **iOS tests**: Run on `macos-14` (paid minutes on public repos)
+- **Android tests**: Run on `ubuntu-latest` (free on public repos)
+- Consider running only on `main` branch or specific paths:
 
 ```yaml
-name: E2E Tests
-
-on: [push, pull_request]
-
-jobs:
-  test:
-    runs-on: macos-latest
-    steps:
-      - uses: actions/checkout@v3
-
-      - name: Setup Node
-        uses: actions/setup-node@v3
-        with:
-          node-version: '20'
-
-      - name: Install dependencies
-        run: yarn install
-
-      - name: Install Maestro
-        run: curl -Ls "https://get.maestro.mobile.dev" | bash
-
-      - name: Build iOS app
-        run: yarn build:ios
-
-      - name: Run E2E tests
-        run: yarn test:e2e:ios
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'packages/**'
+      - 'examples/**'
 ```
 
 ## Writing Tests - Best Practices
