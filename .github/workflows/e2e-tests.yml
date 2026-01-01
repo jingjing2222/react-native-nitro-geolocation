@@ -57,8 +57,12 @@ jobs:
 
       - name: Build and Launch iOS app
         working-directory: examples/v0.81.1
+        env:
+          WITH_ROZENITE: false
+          CI: true
         run: |
           # Build and run on iPhone 17 Pro (Release mode)
+          # CI=true disables Metro auto-start in Xcode
           yarn ios:release
 
           # Wait for app to launch
