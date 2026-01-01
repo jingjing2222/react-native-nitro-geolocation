@@ -5,11 +5,24 @@
   "source": "src/index",
   "scripts": {
     "android": "react-native run-android",
+    "android:release": "react-native run-android --mode Release",
     "ios": "react-native run-ios",
+    "ios:release": "react-native run-ios --mode Release",
     "start": "WITH_ROZENITE=true react-native start",
     "build:android": "react-native build-android --extra-params \"--no-daemon --console=plain -PreactNativeArchitectures=arm64-v8a\"",
+    "build:android:release": "cd android && ./gradlew assembleRelease && cd ..",
+    "build:android:bundle": "cd android && ./gradlew bundleRelease && cd ..",
     "build:ios": "react-native build-ios --mode Debug",
-    "typecheck": "tsc --noEmit"
+    "build:ios:release": "react-native build-ios --mode Release",
+    "typecheck": "tsc --noEmit",
+    "test:e2e": "maestro test .maestro/all-tests.yaml",
+    "test:e2e:permission": "maestro test .maestro/permission-check.yaml",
+    "test:e2e:current": "maestro test .maestro/current-position.yaml",
+    "test:e2e:watch": "maestro test .maestro/watch-position.yaml",
+    "test:e2e:location": "maestro test .maestro/location-simulation.yaml",
+    "test:e2e:compat": "maestro test .maestro/compat-api.yaml",
+    "test:e2e:android": "maestro test --platform android .maestro/all-tests.yaml",
+    "test:e2e:ios": "maestro test --platform ios .maestro/all-tests.yaml"
   },
   "dependencies": {
     "@react-native-community/geolocation": "^3.4.0",

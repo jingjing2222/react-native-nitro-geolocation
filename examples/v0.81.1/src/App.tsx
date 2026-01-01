@@ -1,30 +1,34 @@
 import {
   createPosition,
-  useGeolocationDevTools
+  useGeolocationDevTools,
+  type Position
 } from "@react-native-nitro-geolocation/rozenite-plugin";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { NavigationContainer } from "@react-navigation/native";
-import React, { useEffect } from "react";
-import { setConfiguration } from "react-native-nitro-geolocation";
+import React from "react";
 import CompatScreen from "./screens/CompatScreen";
 import DefaultScreen from "./screens/DefaultScreen";
 
 const Tab = createBottomTabNavigator();
 
 const initialPosition = createPosition("Los Angeles, USA");
+const customPosition: Position = {
+  coords: {
+    latitude: 34.052235,
+    longitude: -118.243683,
+    accuracy: 100,
+    altitude: 0,
+    altitudeAccuracy: 0,
+    heading: 0,
+    speed: 0
+  },
+  timestamp: Date.now()
+}
 
 export default function App() {
   useGeolocationDevTools({
     initialPosition
   });
-  // Set configuration once on app startup
-  useEffect(() => {
-    setConfiguration({
-      authorizationLevel: "whenInUse",
-      enableBackgroundLocationUpdates: false,
-      locationProvider: "auto"
-    });
-  }, []);
 
   return (
     <NavigationContainer>
@@ -39,14 +43,16 @@ export default function App() {
           name="Default"
           component={DefaultScreen}
           options={{
-            tabBarLabel: "Default API"
+            tabBarLabel: "Default API",
+            tabBarTestID: "default-api-tab"
           }}
         />
         <Tab.Screen
           name="Compat"
           component={CompatScreen}
           options={{
-            tabBarLabel: "Compat API"
+            tabBarLabel: "Compat API",
+            tabBarTestID: "compat-api-tab"
           }}
         />
       </Tab.Navigator>

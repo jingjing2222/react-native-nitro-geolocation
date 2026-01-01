@@ -1,5 +1,6 @@
 [tools]
 biome = "1.9.4"
 java = "21.0.2"
+maestro = "latest"
 node = "22"
 ruby = "3.3.0"

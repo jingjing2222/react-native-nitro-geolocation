@@ -1,0 +1,33 @@
+appId: nitrogeolocation.example
+---
+# Test 2: Get Current Position
+- launchApp
+
+# First ensure we have permission
+- tapOn: "Request"
+- extendedWaitUntil:
+    visible: "granted ✅"
+    timeout: 10000
+
+# Scroll to current position section
+- scrollUntilVisible:
+    element: "2. Get Current Position"
+    direction: DOWN
+
+# Get current position
+- tapOn: "Get Position"
+
+# Wait for position to be fetched
+- extendedWaitUntil:
+    visible: "Current Position"
+    timeout: 15000
+
+# Verify position data is displayed using testID
+- assertVisible:
+    id: "position-info"
+- assertVisible:
+    id: "latitude-text"
+- assertVisible:
+    id: "longitude-text"
+- assertVisible:
+    id: "accuracy-text"

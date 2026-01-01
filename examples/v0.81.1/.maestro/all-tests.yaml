@@ -1,0 +1,8 @@
+appId: nitrogeolocation.example
+---
+# Run all geolocation tests in sequence
+
+- runFlow: permission-check.yaml
+- runFlow: current-position.yaml
+- runFlow: watch-position.yaml
+- runFlow: location-simulation.yaml

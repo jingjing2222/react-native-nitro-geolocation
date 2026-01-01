@@ -121,15 +121,15 @@ export default function DefaultScreen() {
     if (!position) return null;
 
     return (
-      <View style={styles.positionContainer}>
+      <View style={styles.positionContainer} testID="position-info">
         <Text style={styles.positionTitle}>{title}</Text>
-        <Text style={styles.positionText}>
+        <Text style={styles.positionText} testID="latitude-text">
           Latitude: {position.coords.latitude.toFixed(6)}
         </Text>
-        <Text style={styles.positionText}>
+        <Text style={styles.positionText} testID="longitude-text">
           Longitude: {position.coords.longitude.toFixed(6)}
         </Text>
-        <Text style={styles.positionText}>
+        <Text style={styles.positionText} testID="accuracy-text">
           Accuracy: {position.coords.accuracy.toFixed(2)}m
         </Text>
         {position.coords.altitude !== null &&
@@ -188,11 +188,15 @@ export default function DefaultScreen() {
       </Text>
       <View style={styles.toggleContainer}>
         <Text style={styles.toggleLabel}>Enable Watching:</Text>
-        <Switch value={watchEnabled} onValueChange={setWatchEnabled} />
+        <Switch
+          testID="watch-toggle-switch"
+          value={watchEnabled}
+          onValueChange={setWatchEnabled}
+        />
       </View>
       <View style={styles.statusContainer}>
         <Text style={styles.statusLabel}>Status:</Text>
-        <Text style={styles.statusValue}>
+        <Text style={styles.statusValue} testID="watch-status">
           {isWatching ? "Watching 🟢" : "Not Watching 🔴"}
         </Text>
       </View>
