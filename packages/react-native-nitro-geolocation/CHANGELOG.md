@@ -1,5 +1,11 @@
 # react-native-nitro-geolocation
 
+## 1.0.0
+
+### Major Changes
+
+- 2e9da67: feat: E2E, unlicense license
+
 ## 0.5.0
 
 ### Minor Changes
