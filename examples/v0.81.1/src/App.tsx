@@ -1,7 +1,7 @@
 import {
   type Position,
   createPosition,
-  useGeolocationDevTools
+  useGeolocationDevTools,
 } from "@react-native-nitro-geolocation/rozenite-plugin";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { NavigationContainer } from "@react-navigation/native";
@@ -20,14 +20,14 @@ const customPosition: Position = {
     altitude: 0,
     altitudeAccuracy: 0,
     heading: 0,
-    speed: 0
+    speed: 0,
   },
-  timestamp: Date.now()
+  timestamp: Date.now(),
 };
 
 export default function App() {
   useGeolocationDevTools({
-    initialPosition
+    initialPosition,
   });
 
   return (
@@ -36,21 +36,21 @@ export default function App() {
         screenOptions={{
           headerShown: false,
           tabBarActiveTintColor: "#2196F3",
-          tabBarInactiveTintColor: "#757575"
+          tabBarInactiveTintColor: "#757575",
         }}
       >
         <Tab.Screen
           name="Default"
           component={DefaultScreen}
           options={{
-            tabBarLabel: "Default API"
+            tabBarLabel: "Default API",
           }}
         />
         <Tab.Screen
           name="Compat"
           component={CompatScreen}
           options={{
-            tabBarLabel: "Compat API"
+            tabBarLabel: "Compat API",
           }}
         />
       </Tab.Navigator>
