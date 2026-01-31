@@ -42,7 +42,7 @@ jobs:
           title: 'chore: version packages'
 
       - name: Create and Push Tag
-        if: contains(github.event.head_commit.message, 'chore version packages')
+        if: "contains(github.event.head_commit.message, 'chore: version packages')"
         run: |
           VERSION=$(node -p "require('./packages/react-native-nitro-geolocation/package.json').version")
           git config user.name "github-actions[bot]"

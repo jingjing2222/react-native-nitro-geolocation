@@ -1,0 +1,59 @@
+appId: nitrogeolocation.example
+---
+# Test 5: Location Simulation
+# This test simulates different locations to verify position updates
+
+- launchApp
+
+# Request permission
+- tapOn: "Request"
+- extendedWaitUntil:
+    visible: "granted ✅"
+    timeout: 10000
+
+# Scroll to current position section
+- scrollUntilVisible:
+    element: "2. Get Current Position"
+    direction: DOWN
+
+# Simulate location: San Francisco
+- setLocation:
+    latitude: 37.7749
+    longitude: -122.4194
+
+- tapOn: "Get Position"
+- extendedWaitUntil:
+    visible: "Current Position"
+    timeout: 15000
+
+# Verify position loaded
+- assertVisible:
+    id: "position-info"
+
+# Simulate location: New York
+- setLocation:
+    latitude: 40.7128
+    longitude: -74.0060
+
+- tapOn: "Get Position"
+- extendedWaitUntil:
+    visible: "Current Position"
+    timeout: 15000
+
+# Verify position loaded
+- assertVisible:
+    id: "position-info"
+
+# Simulate location: Seoul
+- setLocation:
+    latitude: 37.5665
+    longitude: 126.9780
+
+- tapOn: "Get Position"
+- extendedWaitUntil:
+    visible: "Current Position"
+    timeout: 15000
+
+# Verify position loaded
+- assertVisible:
+    id: "position-info"

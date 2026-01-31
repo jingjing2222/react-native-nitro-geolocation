@@ -1,0 +1,50 @@
+appId: nitrogeolocation.example
+---
+# Test 3: Watch Position (Continuous Tracking)
+- launchApp
+
+# Ensure permission is granted
+- tapOn: "Request"
+- extendedWaitUntil:
+    visible: "granted ✅"
+    timeout: 10000
+
+# Scroll to watch position section
+- scrollUntilVisible:
+    element: "3. Watch Position (Hook)"
+    direction: DOWN
+
+# Verify initial state is not watching
+- assertVisible: "Not Watching 🔴"
+
+# Enable watching by toggling switch directly
+- tapOn:
+    id: "watch-toggle-switch"
+
+# Verify watching is active
+- extendedWaitUntil:
+    visible: "Watching 🟢"
+    timeout: 10000
+
+# Wait for position update
+- extendedWaitUntil:
+    visible: "Watched Position (Live)"
+    timeout: 15000
+
+# Verify position data is displayed
+- assertVisible:
+    id: "position-info"
+- assertVisible:
+    id: "latitude-text"
+- assertVisible:
+    id: "longitude-text"
+
+# Wait 5 seconds to see if position updates
+- waitForAnimationToEnd
+
+# Disable watching
+- tapOn:
+    id: "watch-toggle-switch"
+
+# Verify watching stopped
+- assertVisible: "Not Watching 🔴"

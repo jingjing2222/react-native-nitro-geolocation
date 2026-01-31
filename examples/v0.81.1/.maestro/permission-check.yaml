@@ -1,0 +1,23 @@
+appId: nitrogeolocation.example
+---
+# Test 1: Permission Check and Request
+- launchApp
+
+# Navigate to Default API tab (should be default)
+- assertVisible: "Geolocation API"
+- assertVisible: "1. Permission Management"
+
+# Check initial permission status
+- tapOn: "Check"
+
+# Request permission
+- tapOn: "Request"
+
+# Wait for permission dialog and result
+- extendedWaitUntil:
+    visible: "granted ✅"
+    timeout: 10000
+
+# Verify permission is now granted
+- tapOn: "Check"
+- assertVisible: "granted ✅"

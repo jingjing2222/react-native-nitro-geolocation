@@ -109,15 +109,15 @@ export default function CompatScreen() {
     if (!position) return null;
 
     return (
-      <View style={styles.positionContainer}>
+      <View style={styles.positionContainer} testID="position-info">
         <Text style={styles.positionTitle}>{title}</Text>
-        <Text style={styles.positionText}>
+        <Text style={styles.positionText} testID="latitude-text">
           Latitude: {position.coords.latitude.toFixed(6)}
         </Text>
-        <Text style={styles.positionText}>
+        <Text style={styles.positionText} testID="longitude-text">
           Longitude: {position.coords.longitude.toFixed(6)}
         </Text>
-        <Text style={styles.positionText}>
+        <Text style={styles.positionText} testID="accuracy-text">
           Accuracy: {position.coords.accuracy.toFixed(2)}m
         </Text>
         {position.coords.altitude !== null && (
