@@ -13,39 +13,29 @@
 
 ## Checklist
 
-- [ ] I have read the [contributing guidelines](../CONTRIBUTING.md)
-- [ ] My code follows the code style of this project
-- [ ] I have added/updated tests that prove my fix is effective or that my feature works
-- [ ] All new and existing tests passed locally
-- [ ] I have updated the documentation accordingly
+- [ ] My code follows the project style
+- [ ] I've tested my changes locally
+- [ ] Documentation updated (if needed)
 
 ## E2E Test Results
 
 <!--
-REQUIRED: Run E2E tests locally and paste the results below.
+If your PR includes code changes, please run E2E tests locally.
+For documentation-only changes, you can skip this section.
 
 Run the following command in the example app:
 ```bash
 cd examples/v0.81.1
-yarn ios  # or yarn android
-yarn test:e2e
+yarn test:e2e:ios  # or yarn test:e2e:android
 ```
-
-Paste the output here:
 -->
 
-```
-# Paste Maestro test output here
-# Example:
-# ✅ Run permission-check.yaml
-# ✅ Run current-position.yaml
-# ✅ Run watch-position.yaml
-# ✅ Run location-simulation.yaml
-```
+<!-- Paste Maestro test output or write "N/A for docs-only changes" -->
 
 **Platform tested:**
-- [ ] iOS (version: )
-- [ ] Android (version: )
+- [ ] iOS
+- [ ] Android
+- [ ] N/A (docs only)
 
 **Test artifacts:**
 <!-- Optional: Upload screenshots or videos if there were failures -->
