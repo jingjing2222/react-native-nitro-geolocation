@@ -33,7 +33,7 @@ yarn add @react-native-nitro-geolocation/rozenite-plugin
 Add the devtools hook to your app:
 
 ```tsx
-import { useGeolocationDevTools } from '@react-native-nitro-geolocation/rozenite-plugin';
+import { useGeolocationDevTools } from "@react-native-nitro-geolocation/rozenite-plugin";
 
 function App() {
   useGeolocationDevTools();
@@ -47,11 +47,14 @@ function App() {
 #### Using city presets
 
 ```tsx
-import { useGeolocationDevTools, createPosition } from '@react-native-nitro-geolocation/rozenite-plugin';
+import {
+  useGeolocationDevTools,
+  createPosition,
+} from "@react-native-nitro-geolocation/rozenite-plugin";
 
 function App() {
   useGeolocationDevTools({
-    initialPosition: createPosition('Dubai, UAE')
+    initialPosition: createPosition("Dubai, UAE"),
   });
 
   return <YourApp />;
@@ -61,7 +64,10 @@ function App() {
 #### Using custom coordinates
 
 ```tsx
-import { useGeolocationDevTools, type Position } from '@react-native-nitro-geolocation/rozenite-plugin';
+import {
+  useGeolocationDevTools,
+  type Position,
+} from "@react-native-nitro-geolocation/rozenite-plugin";
 
 const customPosition: Position = {
   coords: {
@@ -73,12 +79,12 @@ const customPosition: Position = {
     heading: 0,
     speed: 0,
   },
-  timestamp: Date.now()
+  timestamp: Date.now(),
 };
 
 function App() {
   useGeolocationDevTools({
-    initialPosition: customPosition
+    initialPosition: customPosition,
   });
 
   return <YourApp />;
@@ -105,4 +111,4 @@ Seoul, Tokyo, Beijing, Singapore, Mumbai, London, Paris, Berlin, Moscow, Istanbu
 
 ## License
 
-MIT
+Unlicense — This project is released into the public domain.
