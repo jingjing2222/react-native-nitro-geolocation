@@ -15,14 +15,7 @@
     "build:ios": "react-native build-ios --mode Debug",
     "build:ios:release": "react-native build-ios --mode Release",
     "typecheck": "tsc --noEmit",
-    "test:e2e": "maestro test .maestro/all-tests.yaml",
-    "test:e2e:permission": "maestro test .maestro/permission-check.yaml",
-    "test:e2e:current": "maestro test .maestro/current-position.yaml",
-    "test:e2e:watch": "maestro test .maestro/watch-position.yaml",
-    "test:e2e:location": "maestro test .maestro/location-simulation.yaml",
-    "test:e2e:compat": "maestro test .maestro/compat-api.yaml",
-    "test:e2e:android": "maestro test --platform android .maestro/all-tests.yaml",
-    "test:e2e:ios": "maestro test --platform ios .maestro/all-tests.yaml"
+    "test:e2e": "maestro test .maestro/all-tests.yaml"
   },
   "dependencies": {
     "@react-native-community/geolocation": "^3.4.0",
