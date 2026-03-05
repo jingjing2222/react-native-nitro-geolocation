@@ -53,13 +53,13 @@
     "@types/react-test-renderer": "^18.0.0",
     "react": "19.1.0",
     "react-native": "0.81.1",
-    "react-native-nitro-modules": "0.32.0",
+    "react-native-nitro-modules": "0.35.0",
     "typescript": "^5.9.3"
   },
   "peerDependencies": {
     "react": ">=18.0.0",
     "react-native": ">=0.75.0",
-    "react-native-nitro-modules": ">=0.32.0"
+    "react-native-nitro-modules": ">=0.35.0"
   },
   "create-react-native-library": {
     "languages": "kotlin-swift",

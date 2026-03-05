@@ -100,10 +100,10 @@ Geolocation.clearWatch(watchId);
 
 ```bash
 # Install Nitro core and Geolocation module
-yarn add react-native-nitro-modules@">=0.32.0" react-native-nitro-geolocation
+yarn add react-native-nitro-modules@">=0.35.0" react-native-nitro-geolocation
 
 # or using npm
-npm install react-native-nitro-modules@">=0.32.0" react-native-nitro-geolocation
+npm install react-native-nitro-modules@">=0.35.0" react-native-nitro-geolocation
 ```
 
 Rebuild your native app:
