@@ -25,6 +25,7 @@
     "mock"
   ],
   "scripts": {
+    "prepack": "rozenite build",
     "build": "rozenite build",
     "dev": "rozenite dev"
   },

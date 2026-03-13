@@ -1,3 +1,11 @@
+# @react-native-nitro-geolocation/rozenite-plugin
+
+## 1.0.1
+
+### Patch Changes
+
+- chore: license, README
+
 ## 1.0.0
 
 ### Major Changes

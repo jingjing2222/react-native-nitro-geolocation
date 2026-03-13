@@ -58,4 +58,11 @@ Before opening a PR:
 - Respond to review comments promptly; mention if you need help reproducing something locally.
 - Once merged, the maintainers will release through Changesets. If you were told to add a release note, keep the text concise and accurate.
 
+## Release workflow
+
+- The repo uses a single Changesets-driven workflow in `.github/workflows/release.yml` for every published package.
+- On `main`, that workflow either updates the version PR or publishes the packages that were versioned by a merged Changesets PR.
+- Git tags and GitHub Releases follow the package-version format that Changesets generates, such as `react-native-nitro-geolocation@1.2.0` and `@react-native-nitro-geolocation/rozenite-plugin@1.0.2`.
+- Keep package release notes in each package's `CHANGELOG.md`; Changesets uses the matching version section when it creates GitHub Releases.
+
 Thanks again for contributing — every fix, doc tweak, and example improvement makes the library better for everyone.
