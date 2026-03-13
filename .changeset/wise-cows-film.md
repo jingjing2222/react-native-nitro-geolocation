@@ -1,3 +1,4 @@
+---
 "react-native-nitro-geolocation": minor
 ---
 
