@@ -5940,7 +5940,7 @@ __metadata:
     react: "npm:19.1.0"
     react-native: "npm:0.81.4"
     react-native-nitro-geolocation: "workspace:*"
-    react-native-nitro-modules: "npm:^0.29.8"
+    react-native-nitro-modules: "npm:^0.35.0"
     react-native-safe-area-context: "npm:^5.5.2"
     react-test-renderer: "npm:19.1.0"
     typescript: "npm:^5.9.3"
@@ -12659,7 +12659,7 @@ __metadata:
     react-native-builder-bob: "npm:^0.40.13"
     react-native-monorepo-config: "npm:^0.1.9"
     react-native-nitro-geolocation: "workspace: *"
-    react-native-nitro-modules: "npm:^0.32.0"
+    react-native-nitro-modules: "npm:^0.35.0"
     react-native-safe-area-context: "npm:^5.5.2"
     react-native-screens: "npm:4.19.0"
   languageName: unknown
@@ -12684,32 +12684,22 @@ __metadata:
     "@types/react-test-renderer": "npm:^18.0.0"
     react: "npm:19.1.0"
     react-native: "npm:0.81.1"
-    react-native-nitro-modules: "npm:0.32.0"
+    react-native-nitro-modules: "npm:0.35.0"
     typescript: "npm:^5.9.3"
   peerDependencies:
     react: ">=18.0.0"
     react-native: ">=0.75.0"
-    react-native-nitro-modules: ">=0.32.0"
+    react-native-nitro-modules: "*"
   languageName: unknown
   linkType: soft
 
-"react-native-nitro-modules@npm:0.32.0, react-native-nitro-modules@npm:^0.32.0":
-  version: 0.32.0
-  resolution: "react-native-nitro-modules@npm:0.32.0"
+"react-native-nitro-modules@npm:0.35.0, react-native-nitro-modules@npm:^0.35.0":
+  version: 0.35.0
+  resolution: "react-native-nitro-modules@npm:0.35.0"
   peerDependencies:
     react: "*"
     react-native: "*"
-  checksum: 10c0/4074d93391a5691175d9df335549c3719e2c549e9639d1c092a591c22196e596a1654a77496e9b6c56708605d6074d3a25199ace091db1682d69fbc0d100af04
-  languageName: node
-  linkType: hard
-
-"react-native-nitro-modules@npm:^0.29.8":
-  version: 0.29.8
-  resolution: "react-native-nitro-modules@npm:0.29.8"
-  peerDependencies:
-    react: "*"
-    react-native: "*"
-  checksum: 10c0/9b91ded90531cdc39a5456be6982a6c4f766eb5dc5ee25e7e8b9c5aa4c686f7ea147d60a33bf4f2bf8e72e5c4caca42cb8472622f843515d024c831a3bacdbfe
+  checksum: 10c0/3e1360081b0b9b6fc315f062a65d48dc5398ca03effdf8869c00dce808ddd320a3fe1869077784c86c3b9dd3d500cb6fd84e0d0b07a73ecbe1598fb800a4b0bb
   languageName: node
   linkType: hard
 
