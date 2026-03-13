@@ -1,4 +1,4 @@
-name: Release
+name: Release Packages
 
 on:
   push:
@@ -14,7 +14,7 @@ concurrency: ${{ github.workflow }}-${{ github.ref }}
 
 jobs:
   release:
-    name: Create Version PR or Tag
+    name: Create version PR or publish packages
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -33,57 +33,14 @@ jobs:
       - name: Install dependencies
         run: yarn install
 
-      - name: Verify npm identity
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-        run: npm whoami --registry=https://registry.npmjs.org
-
-      - name: Verify npm package access
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-        run: npm access list collaborators react-native-nitro-geolocation
-
-      - name: Create Release Pull Request or Publish
-        id: changesets
+      - name: Create version PR or publish packages
         uses: changesets/action@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
         with:
           version: 'yarn changeset version'
           publish: 'yarn changeset publish'
           commit: 'chore: version packages'
           title: 'chore: version packages'
-          createGithubReleases: false
-
-      - name: Extract published version
-        if: steps.changesets.outputs.published == 'true'
-        id: version
-        run: |
-          VERSION=$(node -p "require('./packages/react-native-nitro-geolocation/package.json').version")
-          echo "version=$VERSION" >> $GITHUB_OUTPUT
-
-      - name: Create and Push Tag
-        if: steps.changesets.outputs.published == 'true'
-        run: |
-          TAG="v${{ steps.version.outputs.version }}"
-          if git ls-remote --exit-code --tags origin "refs/tags/$TAG" >/dev/null 2>&1; then
-            echo "$TAG already exists on origin, skipping tag push."
-            exit 0
-          fi
-
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-          git tag -a "$TAG" -m "Release $TAG"
-          git push origin "$TAG"
-
-      - name: Create GitHub Release
-        if: steps.changesets.outputs.published == 'true'
-        uses: softprops/action-gh-release@v1
-        with:
-          tag_name: v${{ steps.version.outputs.version }}
-          name: v${{ steps.version.outputs.version }}
-          body_path: packages/react-native-nitro-geolocation/CHANGELOG.md
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          createGithubReleases: true

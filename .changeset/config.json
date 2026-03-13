@@ -10,7 +10,6 @@
   "ignore": [
     "benchmark",
     "react-native-nitro-geolocation-example",
-    "docs",
-    "@react-native-nitro-geolocation/rozenite-plugin"
+    "docs"
   ]
 }
