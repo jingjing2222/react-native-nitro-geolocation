@@ -33,6 +33,14 @@ jobs:
       - name: Install dependencies
         run: yarn install
 
+      - name: Configure npm auth
+        run: |
+          cat <<EOF > "$HOME/.npmrc"
+          //registry.npmjs.org/:_authToken=${NPM_TOKEN}
+          EOF
+        env:
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+
       - name: Verify npm identity
         run: npm whoami --registry=https://registry.npmjs.org
 
