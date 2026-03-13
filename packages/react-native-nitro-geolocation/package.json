@@ -25,7 +25,10 @@
   "author": "jingjing2222",
   "license": "Unlicense",
   "homepage": "https://react-native-nitro-geolocation.pages.dev",
-  "repository": "https://github.com/jingjing2222/react-native-nitro-geolocation",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jingjing2222/react-native-nitro-geolocation.git"
+  },
   "files": [
     "src",
     "react-native.config.js",
