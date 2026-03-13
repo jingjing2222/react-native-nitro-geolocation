@@ -33,6 +33,12 @@ jobs:
       - name: Install dependencies
         run: yarn install
 
+      - name: Verify npm identity
+        run: npm whoami --registry=https://registry.npmjs.org
+
+      - name: Verify npm package access
+        run: npm access list collaborators react-native-nitro-geolocation
+
       - name: Create Release Pull Request or Publish
         id: changesets
         uses: changesets/action@v1
