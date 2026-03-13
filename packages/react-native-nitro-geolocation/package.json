@@ -59,7 +59,7 @@
   "peerDependencies": {
     "react": ">=18.0.0",
     "react-native": ">=0.75.0",
-    "react-native-nitro-modules": ">=0.35.0"
+    "react-native-nitro-modules": "*"
   },
   "create-react-native-library": {
     "languages": "kotlin-swift",
