@@ -1,8 +1,3 @@
-import {
-  type Position,
-  createPosition,
-  useGeolocationDevTools
-} from "@react-native-nitro-geolocation/rozenite-plugin";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { NavigationContainer } from "@react-navigation/native";
 import React from "react";
@@ -11,24 +6,20 @@ import DefaultScreen from "./screens/DefaultScreen";
 
 const Tab = createBottomTabNavigator();
 
-const initialPosition = createPosition("Los Angeles, USA");
-const customPosition: Position = {
-  coords: {
-    latitude: 34.052235,
-    longitude: -118.243683,
-    accuracy: 100,
-    altitude: 0,
-    altitudeAccuracy: 0,
-    heading: 0,
-    speed: 0
-  },
-  timestamp: Date.now()
-};
+function useExampleGeolocationDevTools() {
+  if (!__DEV__) {
+    return;
+  }
+
+  const { createPosition, useGeolocationDevTools } = require("@react-native-nitro-geolocation/rozenite-plugin") as typeof import("@react-native-nitro-geolocation/rozenite-plugin");
+
+  useGeolocationDevTools({
+    initialPosition: createPosition("Los Angeles, USA")
+  });
+}
 
 export default function App() {
-  useGeolocationDevTools({
-    initialPosition
-  });
+  useExampleGeolocationDevTools();
 
   return (
     <NavigationContainer>

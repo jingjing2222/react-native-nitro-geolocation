@@ -3,8 +3,7 @@ import type {
   LocationRequestOptions
 } from "../NitroGeolocation.nitro";
 import { NitroGeolocationHybridObject } from "../NitroGeolocationModule";
-import { isDevtoolsEnabled } from "../devtools";
-import { devtoolsWatchPosition } from "../devtools/watchPosition";
+import { watchDevtoolsPositionIfEnabled } from "../devtools/runtime";
 import type { GeolocationResponse } from "../types";
 
 /**
@@ -36,8 +35,9 @@ export function watchPosition(
   error?: (error: LocationError) => void,
   options?: LocationRequestOptions
 ): string {
-  if (isDevtoolsEnabled()) {
-    return devtoolsWatchPosition(success, error);
+  const devtoolsToken = watchDevtoolsPositionIfEnabled(success, error);
+  if (devtoolsToken) {
+    return devtoolsToken;
   }
   return NitroGeolocationHybridObject.watchPosition(success, error, options);
 }
