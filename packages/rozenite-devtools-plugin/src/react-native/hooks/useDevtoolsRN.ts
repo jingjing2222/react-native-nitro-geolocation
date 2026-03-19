@@ -3,26 +3,8 @@ import type {
   Subscription
 } from "@rozenite/plugin-bridge";
 import { useEffect } from "react";
-import type { DevtoolsRNEvents, Position } from "../../shared/types";
-
-declare global {
-  var __geolocationDevtools:
-    | {
-        position: Position | null;
-        initialPosition: Position | null;
-      }
-    | undefined;
-}
-
-function getDevtoolsState() {
-  if (!globalThis.__geolocationDevtools) {
-    globalThis.__geolocationDevtools = {
-      position: null,
-      initialPosition: null
-    };
-  }
-  return globalThis.__geolocationDevtools;
-}
+import type { DevtoolsRNEvents } from "../../shared/types";
+import { getDevtoolsState } from "../devtoolsRuntime";
 
 interface UseDevtoolsRNOptions {
   client: RozeniteDevToolsClient<DevtoolsRNEvents> | null;

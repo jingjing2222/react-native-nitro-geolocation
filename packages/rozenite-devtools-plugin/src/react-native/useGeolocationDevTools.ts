@@ -4,16 +4,6 @@ import { useDevtoolsRN } from "./hooks/useDevtoolsRN";
 import { useInitialPosition } from "./hooks/useInitialPosition";
 import { useSetDevToolsEnabled } from "./hooks/useSetDevToolsEnabled";
 
-declare global {
-  var __geolocationDevtools:
-    | {
-        position: Position | null;
-        initialPosition: Position | null;
-      }
-    | undefined;
-  var __geolocationDevToolsEnabled: boolean | undefined;
-}
-
 interface UseGeolocationDevToolsOptions {
   initialPosition?: Position;
 }

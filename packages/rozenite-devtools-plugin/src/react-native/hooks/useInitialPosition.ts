@@ -1,24 +1,6 @@
 import { useEffect } from "react";
 import type { Position } from "../../shared/types";
-
-declare global {
-  var __geolocationDevtools:
-    | {
-        position: Position | null;
-        initialPosition: Position | null;
-      }
-    | undefined;
-}
-
-function getDevtoolsState() {
-  if (!globalThis.__geolocationDevtools) {
-    globalThis.__geolocationDevtools = {
-      position: null,
-      initialPosition: null
-    };
-  }
-  return globalThis.__geolocationDevtools;
-}
+import { getDevtoolsState } from "../devtoolsRuntime";
 
 export function useInitialPosition(initialPosition?: Position) {
   useEffect(() => {
