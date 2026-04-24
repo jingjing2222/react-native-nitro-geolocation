@@ -23,7 +23,7 @@
     "typecheck": "tsc --noEmit"
   },
   "author": "jingjing2222",
-  "license": "Unlicense",
+  "license": "MIT",
   "homepage": "https://react-native-nitro-geolocation.pages.dev",
   "repository": {
     "type": "git",

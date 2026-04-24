@@ -111,4 +111,4 @@ Seoul, Tokyo, Beijing, Singapore, Mumbai, London, Paris, Berlin, Moscow, Istanbu
 
 ## License
 
-Unlicense — This project is released into the public domain.
+MIT License.

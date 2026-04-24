@@ -9,6 +9,7 @@ on:
 permissions:
   contents: write
   pull-requests: write
+  id-token: write
 
 concurrency: ${{ github.workflow }}-${{ github.ref }}
 
@@ -24,7 +25,7 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 24
           registry-url: 'https://registry.npmjs.org'
 
       - name: Enable Corepack
@@ -33,14 +34,14 @@ jobs:
       - name: Install dependencies
         run: yarn install
 
-      - name: Create version PR or publish packages
-        uses: changesets/action@v1
+      - name: Create package release PRs
+        run: node .github/scripts/release-packages.mjs version-prs
         env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
-        with:
-          version: 'yarn changeset version'
-          publish: 'yarn changeset publish'
-          commit: 'chore: version packages'
-          title: 'chore: version packages'
-          createGithubReleases: true
+
+      - name: Publish unpublished packages
+        run: node .github/scripts/release-packages.mjs publish
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

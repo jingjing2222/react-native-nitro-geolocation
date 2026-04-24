@@ -28,4 +28,5 @@ jobs:
           yarn install
 
       - name: Check for changeset
+        if: ${{ !startsWith(github.head_ref, 'changeset-release/') }}
         run: yarn changeset status --since=origin/main
