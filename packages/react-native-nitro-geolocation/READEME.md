@@ -248,4 +248,4 @@ Change the import to use `/compat` — 100% API compatible:
 
 ## License
 
-Unlicense — This project is released into the public domain.
+MIT License.
