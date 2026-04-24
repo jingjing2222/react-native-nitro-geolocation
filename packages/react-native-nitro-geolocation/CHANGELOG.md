@@ -1,5 +1,11 @@
 # react-native-nitro-geolocation
 
+## 1.1.1
+
+### Patch Changes
+
+- 2d30232: Change the package license to MIT.
+
 ## 1.1.0
 
 ### Minor Changes
