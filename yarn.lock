@@ -2203,16 +2203,16 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@granite-js/vitest@npm:^1.0.22":
-  version: 1.0.22
-  resolution: "@granite-js/vitest@npm:1.0.22"
+"@granite-js/vitest@npm:1.0.23":
+  version: 1.0.23
+  resolution: "@granite-js/vitest@npm:1.0.23"
   dependencies:
     flow-remove-types: "npm:2.291.0"
   peerDependencies:
     react: "*"
     react-native: "*"
     vitest: "*"
-  checksum: 10c0/1586a93df9430926b78aecb478ae49d7afa4b63ba83f3325dbe066f8caafdd62fd48ae3456c647a780c2705451df4335ba7ef8ce42710d0427c49f3c6831415b
+  checksum: 10c0/ddd03e3ed533de09acfd900827f8b05414752f44c0a55e9fe2158457cb4303c85d1fd372f794947902fe14e414befcf4873905ef38bc77ccae91fa573c2a47a6
   languageName: node
   linkType: hard
 
@@ -13147,7 +13147,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "react-native-nitro-geolocation@workspace:packages/react-native-nitro-geolocation"
   dependencies:
-    "@granite-js/vitest": "npm:^1.0.22"
+    "@granite-js/vitest": "npm:1.0.23"
     "@react-native/babel-preset": "npm:0.81.1"
     "@tsconfig/react-native": "npm:^3.0.7"
     "@types/react": "npm:^19.1.0"
@@ -13155,8 +13155,8 @@ __metadata:
     react: "npm:19.1.0"
     react-native: "npm:0.81.1"
     react-native-nitro-modules: "npm:0.35.0"
-    typescript: "npm:^5.9.3"
-    vitest: "npm:^4.1.5"
+    typescript: "npm:5.9.3"
+    vitest: "npm:4.1.5"
   peerDependencies:
     react: ">=18.0.0"
     react-native: ">=0.75.0"
@@ -15256,7 +15256,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"typescript@npm:^5.7.3, typescript@npm:^5.9.3":
+"typescript@npm:5.9.3, typescript@npm:^5.7.3, typescript@npm:^5.9.3":
   version: 5.9.3
   resolution: "typescript@npm:5.9.3"
   bin:
@@ -15276,7 +15276,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"typescript@patch:typescript@npm%3A^5.7.3#optional!builtin<compat/typescript>, typescript@patch:typescript@npm%3A^5.9.3#optional!builtin<compat/typescript>":
+"typescript@patch:typescript@npm%3A5.9.3#optional!builtin<compat/typescript>, typescript@patch:typescript@npm%3A^5.7.3#optional!builtin<compat/typescript>, typescript@patch:typescript@npm%3A^5.9.3#optional!builtin<compat/typescript>":
   version: 5.9.3
   resolution: "typescript@patch:typescript@npm%3A5.9.3#optional!builtin<compat/typescript>::version=5.9.3&hash=5786d5"
   bin:
@@ -15823,7 +15823,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"vitest@npm:^4.1.5":
+"vitest@npm:4.1.5":
   version: 4.1.5
   resolution: "vitest@npm:4.1.5"
   dependencies:

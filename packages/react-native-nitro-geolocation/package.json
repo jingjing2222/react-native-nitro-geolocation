@@ -52,7 +52,7 @@
     "README.md"
   ],
   "devDependencies": {
-    "@granite-js/vitest": "1.0.22",
+    "@granite-js/vitest": "1.0.23",
     "@react-native/babel-preset": "0.81.1",
     "@tsconfig/react-native": "^3.0.7",
     "@types/react": "^19.1.0",
