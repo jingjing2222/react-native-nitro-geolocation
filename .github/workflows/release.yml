@@ -34,7 +34,7 @@ jobs:
       - name: Install dependencies
         run: yarn install
 
-      - name: Create package release PRs
+      - name: Create release PR
         run: node .github/scripts/release-packages.mjs version-prs
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}

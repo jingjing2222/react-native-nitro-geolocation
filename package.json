@@ -10,8 +10,6 @@
   "homepage": "react-native-nitro-geolocation.pages.dev",
   "scripts": {
     "build:all": "nx run-many -t build",
-    "changeset": "node .github/scripts/changeset.mjs",
-    "changeset:split": "node .github/scripts/split-changesets.mjs",
     "typecheck": "nx run-many -t typecheck",
     "format": "biome format --write .",
     "format:check": "biome ci --formatter-enabled=true --linter-enabled=false .",

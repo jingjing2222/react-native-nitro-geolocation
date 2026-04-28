@@ -8,29 +8,19 @@ import path from "node:path";
 const baseBranch = process.env.BASE_BRANCH ?? "main";
 const remote = process.env.BASE_REMOTE ?? "origin";
 const baseRef = `${remote}/${baseBranch}`;
+const releaseBranch = "changeset-release/main";
+const releaseTitle = "chore: version packages";
 
-const releaseGroups = [
+const releasePackages = [
   {
-    id: "react-native-nitro-geolocation",
     packageName: "react-native-nitro-geolocation",
-    packageDir: "packages/react-native-nitro-geolocation",
-    branch: "changeset-release/react-native-nitro-geolocation",
-    title: "chore: version react-native-nitro-geolocation",
-    ignoredPackages: ["@react-native-nitro-geolocation/rozenite-plugin"]
+    packageDir: "packages/react-native-nitro-geolocation"
   },
   {
-    id: "rozenite-plugin",
     packageName: "@react-native-nitro-geolocation/rozenite-plugin",
-    packageDir: "packages/rozenite-devtools-plugin",
-    branch: "changeset-release/rozenite-plugin",
-    title: "chore: version rozenite plugin",
-    ignoredPackages: ["react-native-nitro-geolocation"]
+    packageDir: "packages/rozenite-devtools-plugin"
   }
 ];
-
-const releasePackageNames = new Set(
-  releaseGroups.map((group) => group.packageName)
-);
 
 function run(command, args, options = {}) {
   console.log(`$ ${[command, ...args].join(" ")}`);
@@ -86,58 +76,15 @@ function readChangesets() {
     });
 }
 
-function getChangesetsByGroup() {
-  const changesets = readChangesets();
-  const byGroup = new Map(releaseGroups.map((group) => [group.id, []]));
-
-  for (const changeset of changesets) {
-    const independentlyReleasedPackages = changeset.releases
-      .map((release) => release.name)
-      .filter((name) => releasePackageNames.has(name));
-
-    if (new Set(independentlyReleasedPackages).size > 1) {
-      throw new Error(
-        [
-          `.changeset/${changeset.file} includes multiple independently released packages:`,
-          `  ${independentlyReleasedPackages.join(", ")}`,
-          "Split it into one changeset per package so release PRs can be generated independently.",
-          "Run `yarn changeset:split`, or use `yarn changeset` so new mixed changesets are split automatically."
-        ].join("\n")
-      );
-    }
-
-    for (const group of releaseGroups) {
-      if (
-        changeset.releases.some((release) => release.name === group.packageName)
-      ) {
-        byGroup.get(group.id).push(changeset);
-      }
-    }
-  }
-
-  return byGroup;
+function hasPendingChangesets() {
+  return readChangesets().length > 0;
 }
 
-function readChangesetConfig() {
-  return JSON.parse(readFileSync(".changeset/config.json", "utf8"));
-}
-
-function writeChangesetConfigForGroup(group) {
-  const config = readChangesetConfig();
-  config.ignore = [
-    ...new Set([...(config.ignore ?? []), ...group.ignoredPackages])
-  ];
-  writeFileSync(
-    ".changeset/config.json",
-    `${JSON.stringify(config, null, 2)}\n`
-  );
-}
-
-function createOrUpdatePullRequest(group) {
+function createOrUpdatePullRequest() {
   const body = [
-    `This PR versions \`${group.packageName}\` from its pending changesets.`,
+    "This PR versions packages from pending changesets.",
     "",
-    "Merge this PR to publish the package from `release.yml` with npm trusted publishing."
+    "Merge this PR to publish updated package versions from `release.yml` with npm trusted publishing."
   ].join("\n");
 
   const openPrs = JSON.parse(
@@ -145,7 +92,7 @@ function createOrUpdatePullRequest(group) {
       "pr",
       "list",
       "--head",
-      group.branch,
+      releaseBranch,
       "--base",
       baseBranch,
       "--state",
@@ -161,7 +108,7 @@ function createOrUpdatePullRequest(group) {
       "edit",
       String(openPrs[0].number),
       "--title",
-      group.title,
+      releaseTitle,
       "--body",
       body
     ]);
@@ -174,49 +121,35 @@ function createOrUpdatePullRequest(group) {
     "--base",
     baseBranch,
     "--head",
-    group.branch,
+    releaseBranch,
     "--title",
-    group.title,
+    releaseTitle,
     "--body",
     body
   ]);
 }
 
-function createReleasePullRequests() {
+function createReleasePullRequest() {
   configureGit();
   run("git", ["fetch", remote, baseBranch, "--tags"]);
 
-  const changesetsByGroup = getChangesetsByGroup();
-
-  for (const group of releaseGroups) {
-    const groupChangesets = changesetsByGroup.get(group.id);
-    if (groupChangesets.length === 0) {
-      console.log(`No pending changesets for ${group.packageName}.`);
-      continue;
-    }
-
-    run("git", ["switch", "-C", group.branch, baseRef]);
-    writeChangesetConfigForGroup(group);
-    run("yarn", ["changeset", "version"]);
-    run("git", [
-      "restore",
-      "--source",
-      baseRef,
-      "--",
-      ".changeset/config.json"
-    ]);
-
-    if (!hasStatusChanges()) {
-      console.log(`No version changes generated for ${group.packageName}.`);
-      continue;
-    }
-
-    run("git", ["add", "-A"]);
-    run("git", ["commit", "-m", group.title]);
-    run("git", ["push", "--force-with-lease", remote, group.branch]);
-    createOrUpdatePullRequest(group);
+  if (!hasPendingChangesets()) {
+    console.log("No pending changesets. Skipping version PR.");
+    return;
   }
 
+  run("git", ["switch", "-C", releaseBranch, baseRef]);
+  run("yarn", ["changeset", "version"]);
+
+  if (!hasStatusChanges()) {
+    console.log("No version changes generated.");
+    return;
+  }
+
+  run("git", ["add", "-A"]);
+  run("git", ["commit", "-m", releaseTitle]);
+  run("git", ["push", "--force-with-lease", remote, releaseBranch]);
+  createOrUpdatePullRequest();
   run("git", ["switch", "--detach", baseRef]);
 }
 
@@ -253,18 +186,21 @@ function getReleaseNotes(packageDir, version) {
 
 function createOrUpdateGitHubRelease(tag) {
   const parsed = parseTag(tag);
-  const group = releaseGroups.find(
-    (releaseGroup) => releaseGroup.packageName === parsed?.packageName
+  const releasePackage = releasePackages.find(
+    (candidate) => candidate.packageName === parsed?.packageName
   );
 
-  if (!parsed || !group) {
+  if (!parsed || !releasePackage) {
     console.log(`Skipping GitHub release for unrecognized tag ${tag}.`);
     return;
   }
 
   const tempDir = mkdtempSync(path.join(tmpdir(), "release-notes-"));
   const notesPath = path.join(tempDir, "notes.md");
-  writeFileSync(notesPath, getReleaseNotes(group.packageDir, parsed.version));
+  writeFileSync(
+    notesPath,
+    getReleaseNotes(releasePackage.packageDir, parsed.version)
+  );
 
   const existingRelease = spawnSync("gh", ["release", "view", tag], {
     stdio: "ignore",
@@ -300,6 +236,13 @@ function publishUnpublishedPackages() {
   run("git", ["fetch", remote, baseBranch, "--tags"]);
   run("git", ["switch", "--detach", baseRef]);
 
+  if (hasPendingChangesets()) {
+    console.log(
+      "Pending changesets found. Skipping publish until the version PR is merged."
+    );
+    return;
+  }
+
   const tagsBefore = new Set(
     output("git", ["tag", "--list"]).split("\n").filter(Boolean)
   );
@@ -326,14 +269,17 @@ function publishUnpublishedPackages() {
 }
 
 function checkReleasePlan() {
-  const changesetsByGroup = getChangesetsByGroup();
-  for (const group of releaseGroups) {
-    const files = changesetsByGroup
-      .get(group.id)
-      .map((changeset) => changeset.file);
-    console.log(
-      `${group.packageName}: ${files.length ? files.join(", ") : "none"}`
+  const changesets = readChangesets();
+  if (changesets.length === 0) {
+    console.log("No pending changesets.");
+    return;
+  }
+
+  for (const changeset of changesets) {
+    const releases = changeset.releases.map(
+      (release) => `${release.name}@${release.type}`
     );
+    console.log(`${changeset.file}: ${releases.join(", ") || "empty"}`);
   }
 }
 
@@ -341,7 +287,7 @@ const command = process.argv[2];
 
 switch (command) {
   case "version-prs":
-    createReleasePullRequests();
+    createReleasePullRequest();
     break;
   case "publish":
     publishUnpublishedPackages();
