@@ -85,6 +85,8 @@ class NitroGeolocation(
         val resolver: (Result<GeolocationResponse>) -> Unit,
         val options: ParsedOptions,
         val handler: Handler,
+        val providers: List<String>,
+        var providerIndex: Int = 0,
         var cancellationSignal: CancellationSignal? = null
     )
 
@@ -184,31 +186,8 @@ class NitroGeolocation(
 
         val parsedOptions = ParsedOptions.parse(options)
 
-        // Check cached location
-        val provider = getValidProvider(parsedOptions.enableHighAccuracy)
-        if (provider != null) {
-            val lastKnownLocation = try {
-                locationManager.getLastKnownLocation(provider)
-            } catch (e: SecurityException) {
-                null
-            }
-
-            if (lastKnownLocation != null && isCachedLocationValid(lastKnownLocation, parsedOptions)) {
-                val position = locationToPosition(lastKnownLocation)
-                promise.resolve(position)
-                return promise
-            }
-
-            // maximumAge is Infinity -> use cached if available
-            if (lastKnownLocation != null && parsedOptions.maximumAge == Double.POSITIVE_INFINITY) {
-                val position = locationToPosition(lastKnownLocation)
-                promise.resolve(position)
-                return promise
-            }
-        }
-
-        // Request fresh location
-        if (provider == null) {
+        val providers = getValidProviders(parsedOptions.enableHighAccuracy)
+        if (providers.isEmpty()) {
             promise.reject(createLocationError(
                 POSITION_UNAVAILABLE,
                 "No location provider available"
@@ -216,7 +195,14 @@ class NitroGeolocation(
             return promise
         }
 
-        requestFreshLocation(provider, parsedOptions) { result ->
+        val cachedLocation = getBestCachedLocation(providers, parsedOptions)
+        if (cachedLocation != null) {
+            promise.resolve(locationToPosition(cachedLocation))
+            return promise
+        }
+
+        // Request fresh location
+        requestFreshLocation(providers, parsedOptions) { result ->
             result.fold(
                 onSuccess = { promise.resolve(it) },
                 onFailure = { promise.reject(it) }
@@ -299,6 +285,20 @@ class NitroGeolocation(
         return getCurrentPermissionStatus() == PermissionStatus.GRANTED
     }
 
+    private fun hasFineLocationPermission(): Boolean {
+        return ContextCompat.checkSelfPermission(
+            reactContext,
+            Manifest.permission.ACCESS_FINE_LOCATION
+        ) == PackageManager.PERMISSION_GRANTED
+    }
+
+    private fun hasCoarseLocationPermission(): Boolean {
+        return ContextCompat.checkSelfPermission(
+            reactContext,
+            Manifest.permission.ACCESS_COARSE_LOCATION
+        ) == PackageManager.PERMISSION_GRANTED
+    }
+
     // Handle permission request result (called from Activity)
     fun onPermissionResult(requestCode: Int, grantResults: IntArray) {
         if (requestCode != PERMISSION_REQUEST_CODE) return
@@ -316,6 +316,10 @@ class NitroGeolocation(
     // MARK: - Helper Functions - Provider Selection
 
     private fun getValidProvider(highAccuracy: Boolean): String? {
+        return getValidProviders(highAccuracy).firstOrNull()
+    }
+
+    private fun getValidProviders(highAccuracy: Boolean): List<String> {
         val preferredProvider = if (highAccuracy)
             AndroidLocationManager.GPS_PROVIDER
         else
@@ -326,16 +330,20 @@ class NitroGeolocation(
         else
             AndroidLocationManager.GPS_PROVIDER
 
-        return when {
-            isProviderValid(preferredProvider) -> preferredProvider
-            isProviderValid(fallbackProvider) -> fallbackProvider
-            else -> null
-        }
+        return listOf(preferredProvider, fallbackProvider)
+            .distinct()
+            .filter { provider -> isProviderValid(provider) }
     }
 
     private fun isProviderValid(provider: String): Boolean {
         return try {
-            locationManager.isProviderEnabled(provider)
+            if (!locationManager.isProviderEnabled(provider)) return false
+
+            when (provider) {
+                AndroidLocationManager.GPS_PROVIDER -> hasFineLocationPermission()
+                AndroidLocationManager.NETWORK_PROVIDER -> hasCoarseLocationPermission() || hasFineLocationPermission()
+                else -> hasLocationPermission()
+            }
         } catch (e: Exception) {
             false
         }
@@ -348,10 +356,32 @@ class NitroGeolocation(
         return locationAge < options.maximumAge
     }
 
+    private fun getBestCachedLocation(providers: List<String>, options: ParsedOptions): Location? {
+        var bestLocation: Location? = null
+
+        for (provider in providers) {
+            val lastKnownLocation = try {
+                locationManager.getLastKnownLocation(provider)
+            } catch (e: SecurityException) {
+                null
+            }
+
+            if (
+                lastKnownLocation != null &&
+                (isCachedLocationValid(lastKnownLocation, options) ||
+                    options.maximumAge == Double.POSITIVE_INFINITY)
+            ) {
+                bestLocation = selectBestLocation(lastKnownLocation, bestLocation)
+            }
+        }
+
+        return bestLocation
+    }
+
     // MARK: - Helper Functions - Request Fresh Location
 
     private fun requestFreshLocation(
-        provider: String,
+        providers: List<String>,
         options: ParsedOptions,
         resolver: (Result<GeolocationResponse>) -> Unit
     ) {
@@ -362,16 +392,31 @@ class NitroGeolocation(
             id = id,
             resolver = resolver,
             options = options,
-            handler = handler
+            handler = handler,
+            providers = providers
         )
 
         pendingPositionRequests[id] = request
+        requestFreshLocationForCurrentProvider(id)
+    }
+
+    private fun requestFreshLocationForCurrentProvider(requestId: UUID) {
+        val request = pendingPositionRequests[requestId] ?: return
+        val provider = request.providers.getOrNull(request.providerIndex)
+
+        if (provider == null) {
+            pendingPositionRequests.remove(requestId)?.resolver(Result.failure(createLocationError(
+                POSITION_UNAVAILABLE,
+                "No location provider available"
+            )))
+            return
+        }
 
         // Use modern API on Android 11+
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-            requestCurrentLocationModern(provider, options, id, handler)
+            requestCurrentLocationModern(provider, request.options, requestId, request.handler)
         } else {
-            requestCurrentLocationLegacy(provider, options, id, handler)
+            requestCurrentLocationLegacy(provider, request.options, requestId, request.handler)
         }
     }
 
@@ -397,16 +442,17 @@ class NitroGeolocation(
             ) { location ->
                 handler.removeCallbacks(timeoutRunnable)
 
-                val request = pendingPositionRequests.remove(requestId)
+                val request = pendingPositionRequests[requestId]
                 if (request != null) {
                     if (location != null) {
+                        pendingPositionRequests.remove(requestId)
                         val position = locationToPosition(location)
                         request.resolver(Result.success(position))
                     } else {
-                        request.resolver(Result.failure(createLocationError(
+                        handleProviderFailure(requestId, createLocationError(
                             POSITION_UNAVAILABLE,
                             "Unable to get location"
-                        )))
+                        ))
                     }
                 }
             }
@@ -416,12 +462,11 @@ class NitroGeolocation(
             pendingPositionRequests[requestId]?.cancellationSignal = cancellationSignal
 
         } catch (e: SecurityException) {
-            pendingPositionRequests.remove(requestId)
-            val request = pendingPositionRequests[requestId]
-            request?.resolver(Result.failure(createLocationError(
+            handler.removeCallbacks(timeoutRunnable)
+            handleProviderFailure(requestId, createLocationError(
                 PERMISSION_DENIED,
                 "Security exception: ${e.message}"
-            )))
+            ))
         }
     }
 
@@ -493,11 +538,26 @@ class NitroGeolocation(
             handler.postDelayed(timeoutRunnable, options.timeout.toLong())
 
         } catch (e: SecurityException) {
-            pendingPositionRequests.remove(requestId)?.resolver(Result.failure(createLocationError(
+            handleProviderFailure(requestId, createLocationError(
                 PERMISSION_DENIED,
                 "Security exception: ${e.message}"
-            )))
+            ))
         }
+    }
+
+    private fun handleProviderFailure(requestId: UUID, error: Exception) {
+        val request = pendingPositionRequests[requestId] ?: return
+
+        request.cancellationSignal?.cancel()
+        request.cancellationSignal = null
+        request.providerIndex += 1
+
+        if (request.providerIndex < request.providers.size) {
+            requestFreshLocationForCurrentProvider(requestId)
+            return
+        }
+
+        pendingPositionRequests.remove(requestId)?.resolver(Result.failure(error))
     }
 
     private fun selectBestLocation(newLocation: Location, currentBest: Location?): Location {
@@ -526,16 +586,15 @@ class NitroGeolocation(
     }
 
     private fun handlePositionTimeout(requestId: UUID) {
-        val request = pendingPositionRequests.remove(requestId)
+        val request = pendingPositionRequests[requestId]
         if (request != null) {
-            request.cancellationSignal?.cancel()
             request.handler.removeCallbacksAndMessages(null)
 
             val timeoutSeconds = request.options.timeout / 1000.0
             val message = String.format("Unable to fetch location within %.1fs.", timeoutSeconds)
             val error = createLocationError(TIMEOUT, message)
 
-            request.resolver(Result.failure(error))
+            handleProviderFailure(requestId, error)
         }
     }
 
