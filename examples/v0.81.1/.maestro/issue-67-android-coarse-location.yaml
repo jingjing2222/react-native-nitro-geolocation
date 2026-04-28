@@ -16,6 +16,9 @@ appId: nitrogeolocation.example
 
 - openLink:
     link: nitrogeolocation://app/issue-67
+- tapOn:
+    text: "열기|Open"
+    optional: true
 
 - extendedWaitUntil:
     visible: "Android approximate/coarse getCurrentPosition contract"

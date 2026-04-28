@@ -4,6 +4,9 @@ appId: nitrogeolocation.example
 - launchApp
 - openLink:
     link: nitrogeolocation://app/watch-position
+- tapOn:
+    text: "열기|Open"
+    optional: true
 
 # Ensure permission is granted
 - tapOn: "Request"

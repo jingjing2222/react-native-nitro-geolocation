@@ -58,7 +58,7 @@ yarn test:e2e:android
 yarn test:e2e:ios
 ```
 
-The Android and iOS scripts install the Release build first (`yarn android:release` or `yarn ios:release`), then run `.maestro/all-tests.yaml` with the matching Maestro platform flag. Android-only flows are selected inside the master flow with `when.platform`.
+The Android and iOS package scripts install the Release build first (`yarn android:release` or `yarn ios:release`), then run `.maestro/all-tests.yaml` with the matching Maestro platform flag. Android-only flows are selected inside the master flow with `when.platform`.
 
 ## Test Files
 
