@@ -1,5 +1,11 @@
 # @react-native-nitro-geolocation/rozenite-plugin
 
+## 1.0.3
+
+### Patch Changes
+
+- 0fe3880: Fix repository links in the DevTools plugin documentation.
+
 ## 1.0.2
 
 ### Patch Changes
