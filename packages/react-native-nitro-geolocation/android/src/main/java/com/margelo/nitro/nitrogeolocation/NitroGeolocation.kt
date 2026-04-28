@@ -655,7 +655,11 @@ class NitroGeolocation(
             smallestDistanceFilter = minOf(smallestDistanceFilter, subscription.options.distanceFilter.toFloat())
         }
 
-        val provider = getValidProvider(useHighAccuracy) ?: return
+        val provider = getValidProvider(useHighAccuracy)
+        if (provider == null) {
+            notifyWatchProviderUnavailable()
+            return
+        }
         currentWatchProvider = provider
 
         val listener = object : LocationListener {
@@ -703,6 +707,15 @@ class NitroGeolocation(
             for ((_, subscription) in watchSubscriptions) {
                 subscription.error?.invoke(error)
             }
+        }
+    }
+
+    private fun notifyWatchProviderUnavailable() {
+        for ((_, subscription) in watchSubscriptions) {
+            subscription.error?.invoke(LocationError(
+                code = POSITION_UNAVAILABLE,
+                message = getNoLocationProviderMessage(subscription.options)
+            ))
         }
     }
 
