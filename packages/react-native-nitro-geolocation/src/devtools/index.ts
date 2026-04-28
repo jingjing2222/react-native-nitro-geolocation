@@ -1,5 +1,7 @@
 import type { GeolocationResponse } from "../types";
 
+declare const __DEV__: boolean;
+
 declare global {
   var __geolocationDevToolsEnabled: boolean | undefined;
   var __geolocationDevtools: DevtoolsState | undefined;
@@ -18,6 +20,10 @@ export function getDevtoolsState(): DevtoolsState {
   return globalThis.__geolocationDevtools;
 }
 
+function isReactNativeDev(): boolean {
+  return typeof __DEV__ !== "undefined" && __DEV__ === true;
+}
+
 export function isDevtoolsEnabled(): boolean {
-  return globalThis.__geolocationDevToolsEnabled === true;
+  return isReactNativeDev() && globalThis.__geolocationDevToolsEnabled === true;
 }
