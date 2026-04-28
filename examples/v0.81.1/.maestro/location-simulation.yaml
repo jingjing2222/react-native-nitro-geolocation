@@ -4,6 +4,8 @@ appId: nitrogeolocation.example
 # This test simulates different locations to verify position updates
 
 - launchApp
+- openLink:
+    link: nitrogeolocation://app/location-simulation
 
 # Request permission
 - tapOn: "Request"
@@ -11,7 +13,7 @@ appId: nitrogeolocation.example
     visible: "granted ✅"
     timeout: 10000
 
-# Scroll to current position section
+# Navigate within the location-simulation contract page
 - scrollUntilVisible:
     element: "2. Get Current Position"
     direction: DOWN

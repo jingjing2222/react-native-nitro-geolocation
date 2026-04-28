@@ -1,0 +1,37 @@
+appId: nitrogeolocation.example
+---
+# Issue 67: coarse-only low-accuracy requests must not fall back to an invalid
+# GPS-only path when the network provider is unavailable.
+
+- launchApp:
+    clearState: true
+    permissions:
+      all: deny
+      android.permission.ACCESS_COARSE_LOCATION: allow
+      android.permission.ACCESS_FINE_LOCATION: deny
+
+- extendedWaitUntil:
+    visible: "Geolocation API"
+    timeout: 10000
+
+- openLink:
+    link: nitrogeolocation://app/issue-67
+
+- extendedWaitUntil:
+    visible: "Android approximate/coarse getCurrentPosition contract"
+    timeout: 10000
+
+- tapOn: "REFRESH"
+
+- assertVisible: "Fine:"
+- assertVisible: "denied"
+- assertVisible: "Coarse:"
+- assertVisible: "granted"
+
+- tapOn: "GET APPROXIMATE POSITION"
+
+- extendedWaitUntil:
+    visible: "Result: error"
+    timeout: 5000
+
+- assertVisible: "No location provider available"

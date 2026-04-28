@@ -15,7 +15,25 @@ import {
 } from "react-native-nitro-geolocation";
 import type { GeolocationResponse } from "react-native-nitro-geolocation";
 
-export default function DefaultScreen() {
+type DefaultScreenSection = "permission" | "currentPosition" | "watchPosition";
+
+interface DefaultScreenProps {
+  sections?: DefaultScreenSection[];
+  subtitle?: string;
+  title?: string;
+}
+
+const defaultSections: DefaultScreenSection[] = [
+  "permission",
+  "currentPosition",
+  "watchPosition"
+];
+
+export default function DefaultScreen({
+  sections = defaultSections,
+  subtitle = "Simple and Modern API",
+  title = "Geolocation API"
+}: DefaultScreenProps) {
   // Permission state
   const [permissionStatus, setPermissionStatus] = useState<string>("unknown");
   const [isPermissionLoading, setIsPermissionLoading] = useState(false);
@@ -209,18 +227,30 @@ export default function DefaultScreen() {
     </View>
   );
 
+  const renderSection = (section: DefaultScreenSection) => {
+    switch (section) {
+      case "permission":
+        return renderPermissionSection();
+      case "currentPosition":
+        return renderCurrentPositionSection();
+      case "watchPosition":
+        return renderWatchPositionSection();
+    }
+  };
+
   return (
     <ScrollView style={styles.container}>
       <View style={styles.header}>
-        <Text style={styles.title}>Geolocation API</Text>
-        <Text style={styles.subtitle}>Simple and Modern API</Text>
+        <Text style={styles.title}>{title}</Text>
+        <Text style={styles.subtitle}>{subtitle}</Text>
       </View>
 
-      {renderPermissionSection()}
-      <View style={styles.divider} />
-      {renderCurrentPositionSection()}
-      <View style={styles.divider} />
-      {renderWatchPositionSection()}
+      {sections.map((section, index) => (
+        <React.Fragment key={section}>
+          {index > 0 && <View style={styles.divider} />}
+          {renderSection(section)}
+        </React.Fragment>
+      ))}
     </ScrollView>
   );
 }
