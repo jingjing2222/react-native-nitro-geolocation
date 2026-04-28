@@ -91,9 +91,14 @@ class NitroGeolocation(
         val options: ParsedOptions,
         val handler: Handler,
         val providers: List<String>,
+        val deadlineElapsedRealtime: Long,
         var providerIndex: Int = 0,
         var cancellationSignal: CancellationSignal? = null
-    )
+    ) {
+        fun remainingTimeoutMillis(): Long {
+            return (deadlineElapsedRealtime - SystemClock.elapsedRealtime()).coerceAtLeast(0L)
+        }
+    }
 
     // MARK: - Properties
 
@@ -414,7 +419,8 @@ class NitroGeolocation(
             resolver = resolver,
             options = options,
             handler = handler,
-            providers = providers
+            providers = providers,
+            deadlineElapsedRealtime = SystemClock.elapsedRealtime() + options.timeout.toLong().coerceAtLeast(0L)
         )
 
         pendingPositionRequests[id] = request
@@ -424,6 +430,7 @@ class NitroGeolocation(
     private fun requestFreshLocationForCurrentProvider(requestId: UUID) {
         val request = pendingPositionRequests[requestId] ?: return
         val provider = request.providers.getOrNull(request.providerIndex)
+        val remainingTimeoutMillis = request.remainingTimeoutMillis()
 
         if (provider == null) {
             pendingPositionRequests.remove(requestId)?.resolver(Result.failure(
@@ -432,20 +439,27 @@ class NitroGeolocation(
             return
         }
 
+        if (remainingTimeoutMillis <= 0L) {
+            pendingPositionRequests.remove(requestId)?.resolver(Result.failure(
+                createPositionTimeoutError(request.options)
+            ))
+            return
+        }
+
         // Use modern API on Android 11+
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-            requestCurrentLocationModern(provider, request.options, requestId, request.handler)
+            requestCurrentLocationModern(provider, requestId, request.handler, remainingTimeoutMillis)
         } else {
-            requestCurrentLocationLegacy(provider, request.options, requestId, request.handler)
+            requestCurrentLocationLegacy(provider, requestId, request.handler, remainingTimeoutMillis)
         }
     }
 
     @androidx.annotation.RequiresApi(Build.VERSION_CODES.R)
     private fun requestCurrentLocationModern(
         provider: String,
-        options: ParsedOptions,
         requestId: UUID,
-        handler: Handler
+        handler: Handler,
+        timeoutMillis: Long
     ) {
         val cancellationSignal = CancellationSignal()
 
@@ -477,7 +491,7 @@ class NitroGeolocation(
                 }
             }
 
-            handler.postDelayed(timeoutRunnable, options.timeout.toLong())
+            handler.postDelayed(timeoutRunnable, timeoutMillis)
 
             pendingPositionRequests[requestId]?.cancellationSignal = cancellationSignal
 
@@ -492,9 +506,9 @@ class NitroGeolocation(
 
     private fun requestCurrentLocationLegacy(
         provider: String,
-        options: ParsedOptions,
         requestId: UUID,
-        handler: Handler
+        handler: Handler,
+        timeoutMillis: Long
     ) {
         var isResolved = false
         var oldLocation: Location? = null
@@ -555,7 +569,7 @@ class NitroGeolocation(
                 Looper.getMainLooper()
             )
 
-            handler.postDelayed(timeoutRunnable, options.timeout.toLong())
+            handler.postDelayed(timeoutRunnable, timeoutMillis)
 
         } catch (e: SecurityException) {
             handleProviderFailure(requestId, createLocationError(
@@ -573,6 +587,13 @@ class NitroGeolocation(
         request.providerIndex += 1
 
         if (request.providerIndex < request.providers.size) {
+            if (request.remainingTimeoutMillis() <= 0L) {
+                pendingPositionRequests.remove(requestId)?.resolver(Result.failure(
+                    createPositionTimeoutError(request.options)
+                ))
+                return
+            }
+
             requestFreshLocationForCurrentProvider(requestId)
             return
         }
@@ -609,12 +630,12 @@ class NitroGeolocation(
         val request = pendingPositionRequests[requestId]
         if (request != null) {
             request.handler.removeCallbacksAndMessages(null)
+            request.cancellationSignal?.cancel()
+            request.cancellationSignal = null
 
-            val timeoutSeconds = request.options.timeout / 1000.0
-            val message = String.format("Unable to fetch location within %.1fs.", timeoutSeconds)
-            val error = createLocationError(TIMEOUT, message)
-
-            handleProviderFailure(requestId, error)
+            pendingPositionRequests.remove(requestId)?.resolver(Result.failure(
+                createPositionTimeoutError(request.options)
+            ))
         }
     }
 
@@ -743,6 +764,12 @@ class NitroGeolocation(
             message = message
         )
         return GeolocationErrorException(locationError)
+    }
+
+    private fun createPositionTimeoutError(options: ParsedOptions): Exception {
+        val timeoutSeconds = options.timeout / 1000.0
+        val message = String.format("Unable to fetch location within %.1fs.", timeoutSeconds)
+        return createLocationError(TIMEOUT, message)
     }
 
     companion object {
