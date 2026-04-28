@@ -420,7 +420,7 @@ class NitroGeolocation(
             options = options,
             handler = handler,
             providers = providers,
-            deadlineElapsedRealtime = SystemClock.elapsedRealtime() + options.timeout.toLong().coerceAtLeast(0L)
+            deadlineElapsedRealtime = createRequestDeadlineElapsedRealtime(options.timeout)
         )
 
         pendingPositionRequests[id] = request
@@ -770,6 +770,26 @@ class NitroGeolocation(
         val timeoutSeconds = options.timeout / 1000.0
         val message = String.format("Unable to fetch location within %.1fs.", timeoutSeconds)
         return createLocationError(TIMEOUT, message)
+    }
+
+    private fun createRequestDeadlineElapsedRealtime(timeout: Double): Long {
+        val now = SystemClock.elapsedRealtime()
+        val timeoutMillis = coerceTimeoutMillis(timeout)
+        val maxTimeoutMillis = Long.MAX_VALUE - now
+
+        return if (timeoutMillis >= maxTimeoutMillis) {
+            Long.MAX_VALUE
+        } else {
+            now + timeoutMillis
+        }
+    }
+
+    private fun coerceTimeoutMillis(timeout: Double): Long {
+        return when {
+            timeout.isNaN() || timeout <= 0.0 -> 0L
+            timeout.isInfinite() || timeout >= Long.MAX_VALUE.toDouble() -> Long.MAX_VALUE
+            else -> timeout.toLong()
+        }
     }
 
     companion object {
