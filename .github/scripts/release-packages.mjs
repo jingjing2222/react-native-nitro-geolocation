@@ -100,7 +100,8 @@ function getChangesetsByGroup() {
         [
           `.changeset/${changeset.file} includes multiple independently released packages:`,
           `  ${independentlyReleasedPackages.join(", ")}`,
-          "Split it into one changeset per package so release PRs can be generated independently."
+          "Split it into one changeset per package so release PRs can be generated independently.",
+          "Run `yarn changeset:split`, or use `yarn changeset` so new mixed changesets are split automatically."
         ].join("\n")
       );
     }
