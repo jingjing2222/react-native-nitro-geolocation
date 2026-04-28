@@ -69,3 +69,5 @@ dist
 
 # Nx
 .nx
+
+.vitest

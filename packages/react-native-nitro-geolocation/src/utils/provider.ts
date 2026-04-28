@@ -3,6 +3,18 @@
  */
 export type Provider = "gps" | "network" | null;
 
+export interface AndroidProviderSelectionInput {
+  enableHighAccuracy: boolean;
+  providers: {
+    gps: boolean;
+    network: boolean;
+  };
+  permissions: {
+    fine: boolean;
+    coarse: boolean;
+  };
+}
+
 /**
  * Selects the best available location provider based on user preferences
  * and provider availability.
@@ -58,4 +70,16 @@ export function selectProvider(
   }
 
   return null;
+}
+
+export function selectProviderForAndroidPermissions({
+  enableHighAccuracy,
+  providers,
+  permissions
+}: AndroidProviderSelectionInput): Provider {
+  const gpsAvailable = providers.gps && permissions.fine;
+  const networkAvailable =
+    providers.network && (permissions.coarse || permissions.fine);
+
+  return selectProvider(enableHighAccuracy, gpsAvailable, networkAvailable);
 }

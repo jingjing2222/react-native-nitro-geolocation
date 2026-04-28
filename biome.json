@@ -9,6 +9,8 @@
       "**/package.json",
       "**/dist/**",
       "**/build/**",
+      "**/.vitest/**",
+      ".nx/**",
       "node_modules/**",
       "**/*.js",
       "**/ios/**",
