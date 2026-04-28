@@ -53,32 +53,12 @@ yarn android
 ### Run All Tests
 
 ```bash
-# Run all tests
-yarn test:e2e
-
 # Platform-specific
-yarn test:e2e:ios
 yarn test:e2e:android
+yarn test:e2e:ios
 ```
 
-### Run Individual Tests
-
-```bash
-# Permission tests only
-yarn test:e2e:permission
-
-# Get current position test
-yarn test:e2e:current
-
-# Watch position (continuous tracking) test
-yarn test:e2e:watch
-
-# Location simulation test
-yarn test:e2e:location
-
-# Compat API test (currently skipped)
-yarn test:e2e:compat
-```
+The Android and iOS scripts both run `.maestro/all-tests.yaml` with the matching Maestro platform flag. Android-only flows are selected inside the master flow with `when.platform`.
 
 ## Test Files
 
@@ -99,13 +79,19 @@ yarn test:e2e:compat
 - Tests behavior at different locations
 - Simulates locations: San Francisco, New York, Seoul
 
+### `issue-67-android-coarse-location.yaml`
+- Android-only contract for approximate/coarse permission handling
+- Uses Maestro permissions to grant `ACCESS_COARSE_LOCATION` and deny `ACCESS_FINE_LOCATION`
+- Uses `setLocation` to provide deterministic coordinates, then verifies `enableHighAccuracy=false` returns a position instead of timing out
+
 ### `compat-api.yaml`
 - Tests `@react-native-community/geolocation` compatibility API
 - **Currently minimal**: Due to Maestro bottom tab navigation limitations
 - Since Compat API uses the same native module as Default API, testing Default API provides sufficient coverage
 
 ### `all-tests.yaml`
-- Master flow that runs all tests sequentially
+- Master flow that runs all platform-compatible tests sequentially
+- Includes Android-only contracts with `when.platform`
 
 ## Location Simulation
 
@@ -146,7 +132,7 @@ London: 51.5074, -0.1278
    ```bash
    cd examples/v0.81.1
    yarn ios  # or yarn android
-   yarn test:e2e
+   yarn test:e2e:ios  # or yarn test:e2e:android
    ```
 
 2. Copy the terminal output
@@ -163,10 +149,13 @@ London: 51.5074, -0.1278
 ✅ Run current-position.yaml
 ✅ Run watch-position.yaml
 ✅ Run location-simulation.yaml
+✅ Run issue-67-android-coarse-location.yaml
 
 **Platform tested:**
-- [x] iOS 17.0
+- [x] Android 16
 ```
+
+For iOS results, omit Android-only flows from the list.
 
 ### Automated CI (Main Branch Only)
 
