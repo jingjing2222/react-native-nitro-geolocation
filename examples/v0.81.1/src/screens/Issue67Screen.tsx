@@ -22,10 +22,16 @@ const LOW_ACCURACY_OPTIONS = {
   maximumAge: 120000
 };
 
+const APPROXIMATE_PROVIDER_UNAVAILABLE_MESSAGE =
+  "No location provider is available for approximate location. ACCESS_COARSE_LOCATION is granted, but no enabled coarse-compatible provider is available.";
+
 const getDisplayErrorMessage = (err: any) => {
   const message = err?.message || String(err);
-  if (message.includes("No location provider available")) {
-    return "No location provider available";
+  if (message.includes(APPROXIMATE_PROVIDER_UNAVAILABLE_MESSAGE)) {
+    return APPROXIMATE_PROVIDER_UNAVAILABLE_MESSAGE;
+  }
+  if (message.includes("No location provider")) {
+    return message.split("\n")[0] || "No location provider available";
   }
   if (message.includes("Unable to fetch location within")) {
     return "Unable to fetch location within timeout";

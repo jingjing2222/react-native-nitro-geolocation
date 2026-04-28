@@ -29,6 +29,11 @@ private class GeolocationErrorException(
     val locationError: LocationError
 ) : Exception(locationError.message)
 
+private const val NO_LOCATION_PROVIDER_AVAILABLE_MESSAGE = "No location provider available"
+private const val NO_APPROXIMATE_LOCATION_PROVIDER_AVAILABLE_MESSAGE =
+    "No location provider is available for approximate location. " +
+        "ACCESS_COARSE_LOCATION is granted, but no enabled coarse-compatible provider is available."
+
 /**
  * Modern Geolocation implementation for Android.
  *
@@ -188,10 +193,7 @@ class NitroGeolocation(
 
         val providers = getValidProviders(parsedOptions.enableHighAccuracy)
         if (providers.isEmpty()) {
-            promise.reject(createLocationError(
-                POSITION_UNAVAILABLE,
-                "No location provider available"
-            ))
+            promise.reject(createNoLocationProviderError(parsedOptions))
             return promise
         }
 
@@ -349,6 +351,25 @@ class NitroGeolocation(
         }
     }
 
+    private fun createNoLocationProviderError(options: ParsedOptions): Exception {
+        return createLocationError(
+            POSITION_UNAVAILABLE,
+            getNoLocationProviderMessage(options)
+        )
+    }
+
+    private fun getNoLocationProviderMessage(options: ParsedOptions): String {
+        if (
+            !options.enableHighAccuracy &&
+            hasCoarseLocationPermission() &&
+            !hasFineLocationPermission()
+        ) {
+            return NO_APPROXIMATE_LOCATION_PROVIDER_AVAILABLE_MESSAGE
+        }
+
+        return NO_LOCATION_PROVIDER_AVAILABLE_MESSAGE
+    }
+
     // MARK: - Helper Functions - Cache Validation
 
     private fun isCachedLocationValid(location: Location, options: ParsedOptions): Boolean {
@@ -405,10 +426,9 @@ class NitroGeolocation(
         val provider = request.providers.getOrNull(request.providerIndex)
 
         if (provider == null) {
-            pendingPositionRequests.remove(requestId)?.resolver(Result.failure(createLocationError(
-                POSITION_UNAVAILABLE,
-                "No location provider available"
-            )))
+            pendingPositionRequests.remove(requestId)?.resolver(Result.failure(
+                createNoLocationProviderError(request.options)
+            ))
             return
         }
 

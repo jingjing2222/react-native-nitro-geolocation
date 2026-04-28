@@ -34,4 +34,4 @@ appId: nitrogeolocation.example
     visible: "Result: error"
     timeout: 5000
 
-- assertVisible: "No location provider available"
+- assertVisible: "No location provider is available for approximate location. ACCESS_COARSE_LOCATION is granted, but no enabled coarse-compatible provider is available."
