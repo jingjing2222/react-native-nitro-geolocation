@@ -69,3 +69,7 @@ dist
 
 # Nx
 .nx
+
+.vitest
+
+evidence

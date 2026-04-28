@@ -2,6 +2,11 @@ appId: nitrogeolocation.example
 ---
 # Test 2: Get Current Position
 - launchApp
+- openLink:
+    link: nitrogeolocation://app/current-position
+- tapOn:
+    text: "열기|Open"
+    optional: true
 
 # First ensure we have permission
 - tapOn: "Request"
@@ -9,7 +14,7 @@ appId: nitrogeolocation.example
     visible: "granted ✅"
     timeout: 10000
 
-# Scroll to current position section
+# Navigate within the current-position contract page
 - scrollUntilVisible:
     element: "2. Get Current Position"
     direction: DOWN

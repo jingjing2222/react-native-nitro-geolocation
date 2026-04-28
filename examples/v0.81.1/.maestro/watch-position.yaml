@@ -2,6 +2,11 @@ appId: nitrogeolocation.example
 ---
 # Test 3: Watch Position (Continuous Tracking)
 - launchApp
+- openLink:
+    link: nitrogeolocation://app/watch-position
+- tapOn:
+    text: "열기|Open"
+    optional: true
 
 # Ensure permission is granted
 - tapOn: "Request"
@@ -9,7 +14,7 @@ appId: nitrogeolocation.example
     visible: "granted ✅"
     timeout: 10000
 
-# Scroll to watch position section
+# Navigate within the watch-position contract page
 - scrollUntilVisible:
     element: "3. Watch Position (Hook)"
     direction: DOWN

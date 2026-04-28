@@ -14,7 +14,10 @@
     "format": "biome format --write .",
     "format:check": "biome ci --formatter-enabled=true --linter-enabled=false .",
     "lint": "biome ci --formatter-enabled=false --linter-enabled=true .",
-    "lint:fix": "biome check --write ."
+    "lint:fix": "biome check --write .",
+    "test:unit": "yarn workspace react-native-nitro-geolocation test",
+    "test:e2e:android": "yarn workspace react-native-nitro-geolocation-example test:e2e:android",
+    "test:e2e:ios": "yarn workspace react-native-nitro-geolocation-example test:e2e:ios"
   },
   "packageManager": "yarn@4.9.4",
   "devDependencies": {

@@ -2,8 +2,13 @@ appId: nitrogeolocation.example
 ---
 # Test 1: Permission Check and Request
 - launchApp
+- openLink:
+    link: nitrogeolocation://app/permission-check
+- tapOn:
+    text: "열기|Open"
+    optional: true
 
-# Navigate to Default API tab (should be default)
+# Navigate directly to the permission contract page.
 - assertVisible: "Geolocation API"
 - assertVisible: "1. Permission Management"
 

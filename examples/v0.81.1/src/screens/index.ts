@@ -1,2 +1,7 @@
 export { default as DefaultScreen } from "./DefaultScreen";
 export { default as CompatScreen } from "./CompatScreen";
+export { default as CurrentPositionScreen } from "./CurrentPositionScreen";
+export { default as Issue67Screen } from "./Issue67Screen";
+export { default as LocationSimulationScreen } from "./LocationSimulationScreen";
+export { default as PermissionCheckScreen } from "./PermissionCheckScreen";
+export { default as WatchPositionScreen } from "./WatchPositionScreen";

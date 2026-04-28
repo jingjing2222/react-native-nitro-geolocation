@@ -1,0 +1,51 @@
+appId: nitrogeolocation.example
+---
+# Issue 67: coarse-only low-accuracy requests must return an approximate
+# location instead of timing out.
+
+- launchApp:
+    clearState: true
+    permissions:
+      all: deny
+      android.permission.ACCESS_COARSE_LOCATION: allow
+      android.permission.ACCESS_FINE_LOCATION: deny
+
+- extendedWaitUntil:
+    visible: "Geolocation API"
+    timeout: 10000
+
+- openLink:
+    link: nitrogeolocation://app/issue-67
+- tapOn:
+    text: "열기|Open"
+    optional: true
+
+- extendedWaitUntil:
+    visible: "Android approximate/coarse getCurrentPosition contract"
+    timeout: 10000
+
+- setLocation:
+    latitude: 37.5665
+    longitude: 126.978
+
+- tapOn: "REFRESH"
+
+- assertVisible: "Fine:"
+- assertVisible: "denied"
+- assertVisible: "Coarse:"
+- assertVisible: "granted"
+
+- tapOn: "GET APPROXIMATE POSITION"
+
+- extendedWaitUntil:
+    visible: "Result: success"
+    timeout: 15000
+
+- assertVisible:
+    id: "issue67-position-info"
+- assertVisible:
+    id: "issue67-latitude"
+- assertVisible:
+    id: "issue67-longitude"
+- assertVisible:
+    id: "issue67-accuracy"

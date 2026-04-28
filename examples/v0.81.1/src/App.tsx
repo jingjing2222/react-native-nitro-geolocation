@@ -7,9 +7,31 @@ import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { NavigationContainer } from "@react-navigation/native";
 import React from "react";
 import CompatScreen from "./screens/CompatScreen";
+import CurrentPositionScreen from "./screens/CurrentPositionScreen";
 import DefaultScreen from "./screens/DefaultScreen";
+import Issue67Screen from "./screens/Issue67Screen";
+import LocationSimulationScreen from "./screens/LocationSimulationScreen";
+import PermissionCheckScreen from "./screens/PermissionCheckScreen";
+import WatchPositionScreen from "./screens/WatchPositionScreen";
 
 const Tab = createBottomTabNavigator();
+const linking = {
+  prefixes: ["nitrogeolocation://app"],
+  config: {
+    screens: {
+      Default: "",
+      Compat: "compat",
+      PermissionCheck: "permission-check",
+      CurrentPosition: "current-position",
+      WatchPosition: "watch-position",
+      LocationSimulation: "location-simulation",
+      Issue67: "issue-67"
+    }
+  }
+};
+const hiddenTabOptions = {
+  tabBarButton: () => null
+};
 
 const initialPosition = createPosition("Los Angeles, USA");
 const customPosition: Position = {
@@ -26,12 +48,14 @@ const customPosition: Position = {
 };
 
 export default function App() {
-  useGeolocationDevTools({
-    initialPosition
-  });
+  if (__DEV__) {
+    useGeolocationDevTools({
+      initialPosition
+    });
+  }
 
   return (
-    <NavigationContainer>
+    <NavigationContainer linking={linking}>
       <Tab.Navigator
         screenOptions={{
           headerShown: false,
@@ -45,6 +69,31 @@ export default function App() {
           options={{
             tabBarLabel: "Default API"
           }}
+        />
+        <Tab.Screen
+          name="Issue67"
+          component={Issue67Screen}
+          options={hiddenTabOptions}
+        />
+        <Tab.Screen
+          name="PermissionCheck"
+          component={PermissionCheckScreen}
+          options={hiddenTabOptions}
+        />
+        <Tab.Screen
+          name="CurrentPosition"
+          component={CurrentPositionScreen}
+          options={hiddenTabOptions}
+        />
+        <Tab.Screen
+          name="WatchPosition"
+          component={WatchPositionScreen}
+          options={hiddenTabOptions}
+        />
+        <Tab.Screen
+          name="LocationSimulation"
+          component={LocationSimulationScreen}
+          options={hiddenTabOptions}
         />
         <Tab.Screen
           name="Compat"

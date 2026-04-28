@@ -8,7 +8,7 @@ PODS:
   - hermes-engine (0.81.1):
     - hermes-engine/Pre-built (= 0.81.1)
   - hermes-engine/Pre-built (0.81.1)
-  - NitroGeolocation (1.0.0):
+  - NitroGeolocation (1.1.1):
     - boost
     - DoubleConversion
     - fast_float
@@ -2736,7 +2736,7 @@ SPEC CHECKSUMS:
   fmt: a40bb5bd0294ea969aaaba240a927bd33d878cdd
   glog: 5683914934d5b6e4240e497e0f4a3b42d1854183
   hermes-engine: 4f8246b1f6d79f625e0d99472d1f3a71da4d28ca
-  NitroGeolocation: 3f73c4d434ae9c8dbfbe7fe890947a82b0941a0a
+  NitroGeolocation: fd4339607882fbd9b694c44cfd1d2a7951ed5d1b
   NitroModules: 1dc73273d6e3aee937eec41ef3ed9470804b9884
   RCT-Folly: 846fda9475e61ec7bcbf8a3fe81edfcaeb090669
   RCTDeprecation: c4b9e2fd0ab200e3af72b013ed6113187c607077
@@ -2807,6 +2807,6 @@ SPEC CHECKSUMS:
   SocketRocket: d4aabe649be1e368d1318fdf28a022d714d65748
   Yoga: 11c9686a21e2cd82a094a723649d9f4507200fb0
 
-PODFILE CHECKSUM: 95831d69f1e49b5f26394c84c2e62fcba20d1ede
+PODFILE CHECKSUM: f61ed94d0740686f1d830520b809de11f8780cd4
 
-COCOAPODS: 1.15.2
+COCOAPODS: 1.16.2
