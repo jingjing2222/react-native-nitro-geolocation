@@ -1,6 +1,6 @@
 # @react-native-nitro-geolocation/rozenite-plugin
 
-Rozenite DevTools Plugin for [react-native-nitro-geolocation](https://github.com/mrousavy/react-native-nitro-geolocation). Mock geolocation data in development with an interactive map interface.
+Rozenite DevTools Plugin for [react-native-nitro-geolocation](https://github.com/jingjing2222/react-native-nitro-geolocation). Mock geolocation data in development with an interactive map interface.
 
 > **⚠️ Prerequisites**: This plugin requires [Rozenite DevTools](https://github.com/rozenite/rozenite) to be set up in your project. Follow the [Rozenite installation guide](https://rozenite.dev/docs/getting-started) to configure DevTools before using this plugin.
 
