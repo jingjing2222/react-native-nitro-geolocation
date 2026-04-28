@@ -48,9 +48,11 @@ const customPosition: Position = {
 };
 
 export default function App() {
-  useGeolocationDevTools({
-    initialPosition
-  });
+  if (__DEV__) {
+    useGeolocationDevTools({
+      initialPosition
+    });
+  }
 
   return (
     <NavigationContainer linking={linking}>
