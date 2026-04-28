@@ -1,5 +1,12 @@
 # @react-native-nitro-geolocation/rozenite-plugin
 
+## 1.0.3
+
+### Patch Changes
+
+- b84154b: Guard geolocation devtools activation behind React Native `__DEV__`.
+- 0fe3880: Fix repository links in the DevTools plugin documentation.
+
 ## 1.0.2
 
 ### Patch Changes
