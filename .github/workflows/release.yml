@@ -34,14 +34,9 @@ jobs:
       - name: Install dependencies
         run: yarn install
 
-      - name: Create release PR
-        run: node .github/scripts/release-packages.mjs version-prs
+      - name: Create release PR or publish packages
+        uses: changesets/action@v1
+        with:
+          publish: yarn changeset publish
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Publish unpublished packages
-        run: node .github/scripts/release-packages.mjs publish
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
