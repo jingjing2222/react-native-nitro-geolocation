@@ -2,6 +2,8 @@ export let useGeolocationDevTools: typeof import(
   "./src/react-native/useGeolocationDevTools"
 ).useGeolocationDevTools;
 
+declare const __DEV__: boolean;
+
 export {
   LOCATION_PRESETS,
   createPosition,
@@ -11,12 +13,12 @@ export {
 
 export type { Position, GeolocationCoordinates } from "./src/shared/types";
 
+const isReactNativeDev = typeof __DEV__ !== "undefined" && __DEV__ === true;
 const isWeb =
   typeof window !== "undefined" && window.navigator.product !== "ReactNative";
-const isDev = process.env.NODE_ENV !== "production";
 const isServer = typeof window === "undefined";
 
-if (isDev && !isWeb && !isServer) {
+if (isReactNativeDev && !isWeb && !isServer) {
   useGeolocationDevTools =
     require("./src/react-native/useGeolocationDevTools").useGeolocationDevTools;
 } else {
