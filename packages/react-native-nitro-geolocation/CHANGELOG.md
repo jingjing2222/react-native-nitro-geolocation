@@ -1,5 +1,11 @@
 # react-native-nitro-geolocation
 
+## 1.1.3
+
+### Patch Changes
+
+- b84154b: Guard geolocation devtools activation behind React Native `__DEV__`.
+
 ## 1.1.2
 
 ### Patch Changes
