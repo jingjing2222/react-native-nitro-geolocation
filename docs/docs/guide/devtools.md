@@ -224,5 +224,5 @@ The plugin integrates seamlessly with both Modern and Legacy APIs. No code chang
 ## Source Code
 
 View the full source code on GitHub:
-- [Plugin Repository](https://github.com/mrousavy/react-native-nitro-geolocation/tree/main/packages/rozenite-devtools-plugin)
-- [Report Issues](https://github.com/mrousavy/react-native-nitro-geolocation/issues)
+- [Plugin Repository](https://github.com/jingjing2222/react-native-nitro-geolocation/tree/main/packages/rozenite-devtools-plugin)
+- [Report Issues](https://github.com/jingjing2222/react-native-nitro-geolocation/issues)
