@@ -1,5 +1,11 @@
 # react-native-nitro-geolocation
 
+## 1.1.2
+
+### Patch Changes
+
+- 93d92a0: fix: Android coarse-only location handling
+
 ## 1.1.1
 
 ### Patch Changes
