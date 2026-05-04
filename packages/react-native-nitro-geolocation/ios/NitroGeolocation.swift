@@ -298,6 +298,8 @@ class NitroGeolocation: HybridNitroGeolocationSpec {
         // Stop monitoring if no more subscriptions or pending requests
         if watchSubscriptions.isEmpty && pendingPositionRequests.isEmpty {
             stopMonitoring()
+        } else {
+            updateLocationManagerConfiguration()
         }
     }
 
@@ -307,6 +309,8 @@ class NitroGeolocation: HybridNitroGeolocationSpec {
         // Stop monitoring if no pending requests
         if pendingPositionRequests.isEmpty {
             stopMonitoring()
+        } else {
+            updateLocationManagerConfiguration()
         }
     }
 
@@ -351,6 +355,8 @@ class NitroGeolocation: HybridNitroGeolocationSpec {
         // 3. Stop monitoring if no more subscriptions or pending requests
         if watchSubscriptions.isEmpty && pendingPositionRequests.isEmpty {
             stopMonitoring()
+        } else {
+            updateLocationManagerConfiguration()
         }
     }
 
@@ -417,24 +423,30 @@ class NitroGeolocation: HybridNitroGeolocationSpec {
         guard let manager = locationManager else { return }
 
         // Merge configurations from all pending requests and watches
-        var bestAccuracy = kCLLocationAccuracyHundredMeters
-        var smallestDistanceFilter = kCLDistanceFilterNone
+        var bestAccuracy: CLLocationAccuracy?
+        var smallestDistanceFilter: CLLocationDistance?
         var shouldUseSignificantChanges = false
 
         for (_, request) in pendingPositionRequests {
-            bestAccuracy = min(bestAccuracy, request.options.accuracy)
-            smallestDistanceFilter = min(smallestDistanceFilter, request.options.distanceFilter)
+            bestAccuracy = mergeAccuracy(bestAccuracy, request.options.accuracy)
+            smallestDistanceFilter = mergeDistanceFilter(
+                smallestDistanceFilter,
+                request.options.distanceFilter
+            )
             shouldUseSignificantChanges = shouldUseSignificantChanges || request.options.useSignificantChanges
         }
 
         for (_, subscription) in watchSubscriptions {
-            bestAccuracy = min(bestAccuracy, subscription.options.accuracy)
-            smallestDistanceFilter = min(smallestDistanceFilter, subscription.options.distanceFilter)
+            bestAccuracy = mergeAccuracy(bestAccuracy, subscription.options.accuracy)
+            smallestDistanceFilter = mergeDistanceFilter(
+                smallestDistanceFilter,
+                subscription.options.distanceFilter
+            )
             shouldUseSignificantChanges = shouldUseSignificantChanges || subscription.options.useSignificantChanges
         }
 
-        manager.desiredAccuracy = bestAccuracy
-        manager.distanceFilter = smallestDistanceFilter
+        manager.desiredAccuracy = bestAccuracy ?? kCLLocationAccuracyHundredMeters
+        manager.distanceFilter = smallestDistanceFilter ?? kCLDistanceFilterNone
 
         // Update significant changes mode if changed
         if shouldUseSignificantChanges != usingSignificantChanges {
@@ -442,6 +454,32 @@ class NitroGeolocation: HybridNitroGeolocationSpec {
             usingSignificantChanges = shouldUseSignificantChanges
             startMonitoring()
         }
+    }
+
+    private func mergeAccuracy(
+        _ current: CLLocationAccuracy?,
+        _ next: CLLocationAccuracy
+    ) -> CLLocationAccuracy {
+        guard let current else {
+            return next
+        }
+
+        return min(current, next)
+    }
+
+    private func mergeDistanceFilter(
+        _ current: CLLocationDistance?,
+        _ next: CLLocationDistance
+    ) -> CLLocationDistance {
+        guard let current else {
+            return next
+        }
+
+        if current == kCLDistanceFilterNone || next == kCLDistanceFilterNone {
+            return kCLDistanceFilterNone
+        }
+
+        return min(current, next)
     }
 
     private func startMonitoring() {
@@ -487,6 +525,8 @@ class NitroGeolocation: HybridNitroGeolocationSpec {
         // Stop monitoring if no more watches or pending requests
         if watchSubscriptions.isEmpty && pendingPositionRequests.isEmpty {
             stopMonitoring()
+        } else {
+            updateLocationManagerConfiguration()
         }
     }
 

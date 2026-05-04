@@ -200,10 +200,6 @@ class LocationManager: NSObject, CLLocationManagerDelegate {
 
         initializeLocationManagerIfNeeded()
 
-        // Configure location manager
-        locationManager?.desiredAccuracy = parsedOptions.accuracy
-        locationManager?.distanceFilter = parsedOptions.distanceFilter
-
         // Create request
         var request = LocationRequest(
             success: success,
@@ -223,7 +219,8 @@ class LocationManager: NSObject, CLLocationManagerDelegate {
 
         pendingRequests.append(request)
 
-        // Start location updates
+        // Update configuration and start location updates
+        updateLocationManagerConfiguration()
         startMonitoring()
     }
 
@@ -248,10 +245,7 @@ class LocationManager: NSObject, CLLocationManagerDelegate {
 
         initializeLocationManagerIfNeeded()
 
-        // Configure location manager
-        locationManager?.desiredAccuracy = parsedOptions.accuracy
-        locationManager?.distanceFilter = parsedOptions.distanceFilter
-
+        updateLocationManagerConfiguration()
         startMonitoring()
 
         return watchId
@@ -263,6 +257,8 @@ class LocationManager: NSObject, CLLocationManagerDelegate {
         // Stop monitoring if no more watches or pending requests
         if activeWatches.isEmpty && pendingRequests.isEmpty {
             stopMonitoring()
+        } else {
+            updateLocationManagerConfiguration()
         }
     }
 
@@ -272,6 +268,8 @@ class LocationManager: NSObject, CLLocationManagerDelegate {
         // Stop monitoring if no pending requests
         if pendingRequests.isEmpty {
             stopMonitoring()
+        } else {
+            updateLocationManagerConfiguration()
         }
     }
 
@@ -314,6 +312,8 @@ class LocationManager: NSObject, CLLocationManagerDelegate {
         // 3. Stop monitoring if no more watches or pending requests
         if activeWatches.isEmpty && pendingRequests.isEmpty {
             stopMonitoring()
+        } else {
+            updateLocationManagerConfiguration()
         }
     }
 
@@ -375,26 +375,32 @@ class LocationManager: NSObject, CLLocationManagerDelegate {
         guard let manager = locationManager else { return }
 
         // Find the best (most accurate) settings from all pending requests and active watches
-        var bestAccuracy = kCLLocationAccuracyHundredMeters
-        var smallestDistanceFilter = kCLDistanceFilterNone
+        var bestAccuracy: CLLocationAccuracy?
+        var smallestDistanceFilter: CLLocationDistance?
         var shouldUseSignificantChanges = false
 
         for request in pendingRequests {
-            bestAccuracy = min(bestAccuracy, request.options.accuracy)
-            smallestDistanceFilter = min(smallestDistanceFilter, request.options.distanceFilter)
+            bestAccuracy = mergeAccuracy(bestAccuracy, request.options.accuracy)
+            smallestDistanceFilter = mergeDistanceFilter(
+                smallestDistanceFilter,
+                request.options.distanceFilter
+            )
             shouldUseSignificantChanges =
                 shouldUseSignificantChanges || request.options.useSignificantChanges
         }
 
         for (_, watch) in activeWatches {
-            bestAccuracy = min(bestAccuracy, watch.options.accuracy)
-            smallestDistanceFilter = min(smallestDistanceFilter, watch.options.distanceFilter)
+            bestAccuracy = mergeAccuracy(bestAccuracy, watch.options.accuracy)
+            smallestDistanceFilter = mergeDistanceFilter(
+                smallestDistanceFilter,
+                watch.options.distanceFilter
+            )
             shouldUseSignificantChanges =
                 shouldUseSignificantChanges || watch.options.useSignificantChanges
         }
 
-        manager.desiredAccuracy = bestAccuracy
-        manager.distanceFilter = smallestDistanceFilter
+        manager.desiredAccuracy = bestAccuracy ?? kCLLocationAccuracyHundredMeters
+        manager.distanceFilter = smallestDistanceFilter ?? kCLDistanceFilterNone
 
         // Update significant changes mode if changed
         if shouldUseSignificantChanges != usingSignificantChanges {
@@ -402,6 +408,32 @@ class LocationManager: NSObject, CLLocationManagerDelegate {
             usingSignificantChanges = shouldUseSignificantChanges
             startMonitoring()
         }
+    }
+
+    private func mergeAccuracy(
+        _ current: CLLocationAccuracy?,
+        _ next: CLLocationAccuracy
+    ) -> CLLocationAccuracy {
+        guard let current else {
+            return next
+        }
+
+        return min(current, next)
+    }
+
+    private func mergeDistanceFilter(
+        _ current: CLLocationDistance?,
+        _ next: CLLocationDistance
+    ) -> CLLocationDistance {
+        guard let current else {
+            return next
+        }
+
+        if current == kCLDistanceFilterNone || next == kCLDistanceFilterNone {
+            return kCLDistanceFilterNone
+        }
+
+        return min(current, next)
     }
 
     private func startMonitoring() {
@@ -457,6 +489,8 @@ class LocationManager: NSObject, CLLocationManagerDelegate {
             // Stop monitoring if no more watches or pending requests
             if activeWatches.isEmpty && pendingRequests.isEmpty {
                 stopMonitoring()
+            } else {
+                updateLocationManagerConfiguration()
             }
         }
     }
