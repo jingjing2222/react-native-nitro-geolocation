@@ -1,3 +1,4 @@
+import { withMockMetadata } from "./position";
 import type { Position } from "./types";
 
 export interface LocationPreset {
@@ -136,7 +137,7 @@ export const LOCATION_PRESETS = [
 export type LocationPresetName = (typeof LOCATION_PRESETS)[number]["name"];
 
 export function createPositionFromPreset(preset: LocationPreset): Position {
-  return {
+  return withMockMetadata({
     coords: {
       latitude: preset.coords.latitude,
       longitude: preset.coords.longitude,
@@ -146,10 +147,8 @@ export function createPositionFromPreset(preset: LocationPreset): Position {
       heading: null,
       speed: 0
     },
-    timestamp: Date.now(),
-    mocked: true,
-    provider: "unknown"
-  };
+    timestamp: Date.now()
+  });
 }
 
 export function createPosition(cityName: LocationPresetName): Position {
