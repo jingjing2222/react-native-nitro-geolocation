@@ -54,3 +54,22 @@ appId: nitrogeolocation.example
     id: "api-error-details"
 - assertVisible: "Code: 3"
 - assertVisible: "Name: TIMEOUT"
+
+- scrollUntilVisible:
+    element: "Error Code Contract"
+    direction: DOWN
+
+- assertVisible:
+    id: "api-error-code-contract"
+- assertVisible:
+    id: "api-error-contract-INTERNAL_ERROR"
+- assertVisible:
+    id: "api-error-contract-PERMISSION_DENIED"
+- assertVisible:
+    id: "api-error-contract-POSITION_UNAVAILABLE"
+- assertVisible:
+    id: "api-error-contract-TIMEOUT"
+- assertVisible:
+    id: "api-error-contract-PLAY_SERVICE_NOT_AVAILABLE"
+- assertVisible:
+    id: "api-error-contract-SETTINGS_NOT_SATISFIED"

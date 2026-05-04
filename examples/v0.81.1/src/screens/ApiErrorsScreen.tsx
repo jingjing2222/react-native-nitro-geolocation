@@ -21,6 +21,41 @@ const TIMEOUT_CONTRACT_OPTIONS = {
   timeout: 0
 };
 
+const ERROR_CODE_CONTRACT = [
+  {
+    code: LocationErrorCode.INTERNAL_ERROR,
+    name: getLocationErrorCodeName(LocationErrorCode.INTERNAL_ERROR),
+    meaning: "Modern-only internal/native failure"
+  },
+  {
+    code: LocationErrorCode.PERMISSION_DENIED,
+    name: getLocationErrorCodeName(LocationErrorCode.PERMISSION_DENIED),
+    meaning: "Permission was denied"
+  },
+  {
+    code: LocationErrorCode.POSITION_UNAVAILABLE,
+    name: getLocationErrorCodeName(LocationErrorCode.POSITION_UNAVAILABLE),
+    meaning: "Position fix is unavailable"
+  },
+  {
+    code: LocationErrorCode.TIMEOUT,
+    name: getLocationErrorCodeName(LocationErrorCode.TIMEOUT),
+    meaning: "Request timed out"
+  },
+  {
+    code: LocationErrorCode.PLAY_SERVICE_NOT_AVAILABLE,
+    name: getLocationErrorCodeName(
+      LocationErrorCode.PLAY_SERVICE_NOT_AVAILABLE
+    ),
+    meaning: "Modern-only Google Play Services failure"
+  },
+  {
+    code: LocationErrorCode.SETTINGS_NOT_SATISFIED,
+    name: getLocationErrorCodeName(LocationErrorCode.SETTINGS_NOT_SATISFIED),
+    meaning: "Modern-only provider/settings failure"
+  }
+] as const;
+
 const runNativeLocationRequest = async <T,>(request: () => Promise<T>) => {
   const previousDevtoolsEnabled = (globalThis as any)
     .__geolocationDevToolsEnabled;
@@ -215,10 +250,21 @@ export default function ApiErrorsScreen() {
             </Text>
           </View>
         )}
-        <View style={styles.constantsContainer}>
-          <Text style={styles.constantsText}>
-            {`Modern-only: PLAY_SERVICE_NOT_AVAILABLE=${LocationErrorCode.PLAY_SERVICE_NOT_AVAILABLE}, SETTINGS_NOT_SATISFIED=${LocationErrorCode.SETTINGS_NOT_SATISFIED}, INTERNAL_ERROR=${LocationErrorCode.INTERNAL_ERROR}`}
-          </Text>
+        <View style={styles.contractContainer} testID="api-error-code-contract">
+          <Text style={styles.contractTitle}>Error Code Contract</Text>
+          {ERROR_CODE_CONTRACT.map((item) => (
+            <View
+              key={item.name}
+              style={styles.contractRow}
+              testID={`api-error-contract-${item.name}`}
+            >
+              <Text style={styles.contractCode}>Code {item.code}</Text>
+              <View style={styles.contractDetails}>
+                <Text style={styles.contractName}>{item.name}</Text>
+                <Text style={styles.contractMeaning}>{item.meaning}</Text>
+              </View>
+            </View>
+          ))}
         </View>
       </View>
     </ScrollView>
@@ -326,14 +372,44 @@ const styles = StyleSheet.create({
     color: "#B71C1C",
     marginVertical: 2
   },
-  constantsContainer: {
+  contractContainer: {
     backgroundColor: "#FFF3E0",
     padding: 12,
     borderRadius: 8,
     marginTop: 12
   },
-  constantsText: {
+  contractTitle: {
+    fontSize: 15,
+    fontWeight: "700",
+    color: "#E65100",
+    marginBottom: 8
+  },
+  contractRow: {
+    flexDirection: "row",
+    alignItems: "flex-start",
+    borderTopWidth: 1,
+    borderTopColor: "#FFE0B2",
+    paddingTop: 8,
+    marginTop: 8,
+    gap: 10
+  },
+  contractCode: {
+    width: 64,
     fontSize: 13,
-    color: "#E65100"
+    color: "#E65100",
+    fontWeight: "700"
+  },
+  contractDetails: {
+    flex: 1
+  },
+  contractName: {
+    fontSize: 13,
+    color: "#3E2723",
+    fontWeight: "700"
+  },
+  contractMeaning: {
+    fontSize: 13,
+    color: "#5D4037",
+    marginTop: 2
   }
 });

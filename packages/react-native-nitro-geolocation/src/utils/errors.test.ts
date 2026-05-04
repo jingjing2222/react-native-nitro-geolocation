@@ -102,6 +102,19 @@ describe("LocationErrorCode", () => {
     expect(getLocationErrorCodeName(LocationErrorCode.INTERNAL_ERROR)).toBe(
       "INTERNAL_ERROR"
     );
+    expect(getLocationErrorCodeName(LocationErrorCode.PERMISSION_DENIED)).toBe(
+      "PERMISSION_DENIED"
+    );
+    expect(
+      getLocationErrorCodeName(LocationErrorCode.POSITION_UNAVAILABLE)
+    ).toBe("POSITION_UNAVAILABLE");
+    expect(getLocationErrorCodeName(LocationErrorCode.TIMEOUT)).toBe("TIMEOUT");
+    expect(
+      getLocationErrorCodeName(LocationErrorCode.PLAY_SERVICE_NOT_AVAILABLE)
+    ).toBe("PLAY_SERVICE_NOT_AVAILABLE");
+    expect(
+      getLocationErrorCodeName(LocationErrorCode.SETTINGS_NOT_SATISFIED)
+    ).toBe("SETTINGS_NOT_SATISFIED");
     expect(getLocationErrorCodeName(999)).toBe("UNKNOWN_LOCATION_ERROR");
   });
 });
