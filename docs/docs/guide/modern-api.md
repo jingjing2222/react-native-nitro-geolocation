@@ -458,6 +458,39 @@ import type {
 
 `ModernGeolocationConfiguration` is still exported as a deprecated compatibility alias.
 
+### Added in v1.2
+
+v1.2 adds optional metadata to the root Modern API response. The `/compat` API keeps the `@react-native-community/geolocation` response shape and does not include these fields.
+
+```typescript
+export type LocationProviderUsed =
+  | 'fused'
+  | 'gps'
+  | 'network'
+  | 'passive'
+  | 'unknown';
+
+export interface GeolocationResponse {
+  coords: GeolocationCoordinates;
+  timestamp: number;
+  mocked?: boolean;
+  provider?: LocationProviderUsed;
+}
+
+export type GeolocationConfiguration = {
+  autoRequestPermission?: boolean;
+  authorizationLevel?: 'always' | 'whenInUse' | 'auto';
+  enableBackgroundLocationUpdates?: boolean;
+  locationProvider?: 'playServices' | 'android' | 'auto';
+};
+
+/**
+ * @deprecated Use `GeolocationConfiguration` instead.
+ * This alias is kept only for backward compatibility.
+ */
+export type ModernGeolocationConfiguration = GeolocationConfiguration;
+```
+
 ### Type Inference
 
 Functions and hooks provide full type inference:
