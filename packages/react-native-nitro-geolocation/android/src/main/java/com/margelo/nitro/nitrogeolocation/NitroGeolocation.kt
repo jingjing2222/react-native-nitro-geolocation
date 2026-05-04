@@ -15,8 +15,10 @@ import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import com.facebook.proguard.annotations.DoNotStrip
 import com.facebook.react.bridge.ReactApplicationContext
-import com.margelo.nitro.core.Promise
+import com.google.android.gms.common.ConnectionResult
+import com.google.android.gms.common.GoogleApiAvailability
 import com.margelo.nitro.NitroModules
+import com.margelo.nitro.core.Promise
 import java.util.UUID
 import java.util.concurrent.ConcurrentHashMap
 
@@ -193,11 +195,8 @@ class NitroGeolocation(
         }
 
         val parsedOptions = ParsedOptions.parse(options)
-        if (configuration?.locationProvider == LocationProvider.PLAYSERVICES) {
-            error?.invoke(createLocationError(
-                PLAY_SERVICE_NOT_AVAILABLE,
-                "Google Play Services location provider is not available."
-            ))
+        if (requiresPlayServices() && !isGooglePlayServicesAvailable()) {
+            error?.invoke(createPlayServicesUnavailableError())
             return
         }
 
@@ -324,6 +323,15 @@ class NitroGeolocation(
     }
 
     // MARK: - Helper Functions - Provider Selection
+
+    private fun requiresPlayServices(): Boolean {
+        return configuration?.locationProvider == LocationProvider.PLAYSERVICES
+    }
+
+    private fun isGooglePlayServicesAvailable(): Boolean {
+        return GoogleApiAvailability.getInstance()
+            .isGooglePlayServicesAvailable(reactContext) == ConnectionResult.SUCCESS
+    }
 
     private fun getValidProvider(highAccuracy: Boolean): String? {
         return getValidProviders(highAccuracy).firstOrNull()
@@ -645,7 +653,7 @@ class NitroGeolocation(
     // MARK: - Helper Functions - Watch Position
 
     private fun startWatchingLocation() {
-        if (configuration?.locationProvider == LocationProvider.PLAYSERVICES) {
+        if (requiresPlayServices() && !isGooglePlayServicesAvailable()) {
             notifyWatchPlayServicesUnavailable()
             return
         }
@@ -729,10 +737,7 @@ class NitroGeolocation(
 
     private fun notifyWatchPlayServicesUnavailable() {
         for ((_, subscription) in watchSubscriptions) {
-            subscription.error?.invoke(LocationError(
-                code = PLAY_SERVICE_NOT_AVAILABLE,
-                message = "Google Play Services location provider is not available."
-            ))
+            subscription.error?.invoke(createPlayServicesUnavailableError())
         }
     }
 
@@ -773,6 +778,13 @@ class NitroGeolocation(
         return LocationError(
             code = code,
             message = message
+        )
+    }
+
+    private fun createPlayServicesUnavailableError(): LocationError {
+        return createLocationError(
+            PLAY_SERVICE_NOT_AVAILABLE,
+            "Google Play Services location provider is not available."
         )
     }
 
