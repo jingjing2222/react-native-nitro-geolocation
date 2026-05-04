@@ -7,9 +7,5 @@
   "access": "public",
   "baseBranch": "v2",
   "updateInternalDependencies": "patch",
-  "ignore": [
-    "benchmark",
-    "react-native-nitro-geolocation-example",
-    "docs"
-  ]
+  "ignore": ["benchmark", "react-native-nitro-geolocation-example", "docs"]
 }
