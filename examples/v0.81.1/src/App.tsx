@@ -6,6 +6,7 @@ import {
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { NavigationContainer } from "@react-navigation/native";
 import React from "react";
+import AccuracyPresetsScreen from "./screens/AccuracyPresetsScreen";
 import ApiErrorsScreen from "./screens/ApiErrorsScreen";
 import CompatScreen from "./screens/CompatScreen";
 import CurrentPositionScreen from "./screens/CurrentPositionScreen";
@@ -31,6 +32,7 @@ const linking = {
       MockedMetadata: "mocked-metadata",
       ProviderSettings: "provider-settings",
       ApiErrors: "api-errors",
+      AccuracyPresets: "accuracy-presets",
       Issue67: "issue-67"
     }
   }
@@ -114,6 +116,11 @@ export default function App() {
         <Tab.Screen
           name="ApiErrors"
           component={ApiErrorsScreen}
+          options={hiddenTabOptions}
+        />
+        <Tab.Screen
+          name="AccuracyPresets"
+          component={AccuracyPresetsScreen}
           options={hiddenTabOptions}
         />
         <Tab.Screen

@@ -6,6 +6,7 @@ appId: nitrogeolocation.example
 - runFlow: current-position.yaml
 - runFlow: watch-position.yaml
 - runFlow: location-simulation.yaml
+- runFlow: accuracy-presets.yaml
 - runFlow:
     when:
       platform: Android

@@ -24,7 +24,9 @@
  * async function setup() {
  *   const status = await requestPermission();
  *   if (status === 'granted') {
- *     const position = await getCurrentPosition({ enableHighAccuracy: true });
+ *     const position = await getCurrentPosition({
+ *       accuracy: { android: 'high', ios: 'best' }
+ *     });
  *     console.log('Position:', position);
  *   }
  * }
@@ -33,7 +35,7 @@
  * function LiveTracking() {
  *   const { position, error, isWatching } = useWatchPosition({
  *     enabled: true,
- *     enableHighAccuracy: true,
+ *     accuracy: { android: 'high', ios: 'best' },
  *     distanceFilter: 10
  *   });
  *
@@ -75,6 +77,9 @@ export type {
   GeolocationResponse,
   GeolocationCoordinates,
   LocationProviderStatus,
+  AndroidAccuracyPreset,
+  IOSAccuracyPreset,
+  LocationAccuracyOptions,
   AuthorizationLevel,
   LocationProvider,
   LocationProviderUsed,

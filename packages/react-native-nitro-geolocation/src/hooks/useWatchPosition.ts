@@ -33,7 +33,7 @@ export interface UseWatchPositionOptions extends LocationRequestOptions {
  * function LiveTracking() {
  *   const { position, error, isWatching } = useWatchPosition({
  *     enabled: true,
- *     enableHighAccuracy: true,
+ *     accuracy: { android: "high", ios: "best" },
  *     distanceFilter: 10  // Update every 10 meters
  *   });
  *

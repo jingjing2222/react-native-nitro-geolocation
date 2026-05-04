@@ -18,10 +18,16 @@ public extension LocationSettingsOptions {
   /**
    * Create a new instance of `LocationSettingsOptions`.
    */
-  init(enableHighAccuracy: Bool?, interval: Double?, fastestInterval: Double?, distanceFilter: Double?, alwaysShow: Bool?, needBle: Bool?) {
+  init(enableHighAccuracy: Bool?, accuracy: LocationAccuracyOptions?, interval: Double?, fastestInterval: Double?, distanceFilter: Double?, alwaysShow: Bool?, needBle: Bool?) {
     self.init({ () -> bridge.std__optional_bool_ in
       if let __unwrappedValue = enableHighAccuracy {
         return bridge.create_std__optional_bool_(__unwrappedValue)
+      } else {
+        return .init()
+      }
+    }(), { () -> bridge.std__optional_LocationAccuracyOptions_ in
+      if let __unwrappedValue = accuracy {
+        return bridge.create_std__optional_LocationAccuracyOptions_(__unwrappedValue)
       } else {
         return .init()
       }
@@ -68,6 +74,11 @@ public extension LocationSettingsOptions {
         return nil
       }
     }()
+  }
+  
+  @inline(__always)
+  var accuracy: LocationAccuracyOptions? {
+    return self.__accuracy.value
   }
   
   @inline(__always)

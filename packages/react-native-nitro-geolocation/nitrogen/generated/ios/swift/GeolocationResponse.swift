@@ -38,12 +38,12 @@ public extension GeolocationResponse {
   var coords: GeolocationCoordinates {
     return self.__coords
   }
-
+  
   @inline(__always)
   var timestamp: Double {
     return self.__timestamp
   }
-
+  
   @inline(__always)
   var mocked: Bool? {
     return { () -> Bool? in
@@ -55,7 +55,7 @@ public extension GeolocationResponse {
       }
     }()
   }
-
+  
   @inline(__always)
   var provider: LocationProviderUsed? {
     return self.__provider.value

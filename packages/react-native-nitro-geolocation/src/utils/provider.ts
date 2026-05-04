@@ -1,13 +1,23 @@
+import type { AndroidAccuracyPreset, LocationAccuracyOptions } from "../types";
+
 /**
  * Location provider types supported on Android.
  */
-export type Provider = "gps" | "network" | null;
+export type Provider = "gps" | "network" | "passive" | null;
+export type AndroidAccuracyMode = AndroidAccuracyPreset;
+
+export interface AndroidAccuracyResolution {
+  mode: AndroidAccuracyMode;
+  explicitPreset?: AndroidAccuracyPreset;
+}
 
 export interface AndroidProviderSelectionInput {
   enableHighAccuracy: boolean;
+  accuracy?: LocationAccuracyOptions;
   providers: {
     gps: boolean;
     network: boolean;
+    passive?: boolean;
   };
   permissions: {
     fine: boolean;
@@ -72,14 +82,49 @@ export function selectProvider(
   return null;
 }
 
+export function resolveAndroidAccuracy(
+  accuracy: LocationAccuracyOptions | undefined,
+  enableHighAccuracy: boolean
+): AndroidAccuracyResolution {
+  const preset = accuracy?.android;
+
+  return {
+    mode: preset ?? (enableHighAccuracy ? "high" : "balanced"),
+    explicitPreset: preset
+  };
+}
+
+export function getAndroidProviderOrder({
+  mode,
+  explicitPreset
+}: AndroidAccuracyResolution): Exclude<Provider, null>[] {
+  switch (mode) {
+    case "high":
+      return ["gps", "network"];
+    case "balanced":
+      return explicitPreset ? ["network"] : ["network", "gps"];
+    case "low":
+      return ["network", "passive"];
+    case "passive":
+      return ["passive"];
+  }
+}
+
 export function selectProviderForAndroidPermissions({
   enableHighAccuracy,
+  accuracy,
   providers,
   permissions
 }: AndroidProviderSelectionInput): Provider {
-  const gpsAvailable = providers.gps && permissions.fine;
-  const networkAvailable =
-    providers.network && (permissions.coarse || permissions.fine);
+  const providerOrder = getAndroidProviderOrder(
+    resolveAndroidAccuracy(accuracy, enableHighAccuracy)
+  );
 
-  return selectProvider(enableHighAccuracy, gpsAvailable, networkAvailable);
+  return (
+    providerOrder.find((provider) => {
+      if (!providers[provider]) return false;
+      if (provider === "gps") return permissions.fine;
+      return permissions.coarse || permissions.fine;
+    }) ?? null
+  );
 }

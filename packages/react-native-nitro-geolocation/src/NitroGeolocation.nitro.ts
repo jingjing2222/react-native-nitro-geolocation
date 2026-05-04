@@ -1,5 +1,9 @@
 import type { HybridObject } from "react-native-nitro-modules";
-import type { GeolocationResponse, LocationProviderStatus } from "./types";
+import type {
+  GeolocationResponse,
+  LocationAccuracyOptions,
+  LocationProviderStatus
+} from "./types";
 
 /**
  * Permission status for location services.
@@ -68,8 +72,25 @@ export interface LocationRequestOptions {
   /** Maximum age of cached location in milliseconds (default: 0) */
   maximumAge?: number;
 
-  /** Enable high accuracy mode (GPS) */
+  /**
+   * Enable high accuracy mode (GPS).
+   *
+   * @deprecated Since v1.2, use `accuracy` for explicit platform-native
+   * presets. This remains available for v1 compatibility and is planned for
+   * removal from the Modern API in v2.
+   */
   enableHighAccuracy?: boolean;
+
+  /**
+   * Platform-specific accuracy preset.
+   *
+   * Available since v1.2.
+   *
+   * When provided, this takes precedence over `enableHighAccuracy` on the
+   * matching platform while keeping `enableHighAccuracy` available for the
+   * legacy true/false contract.
+   */
+  accuracy?: LocationAccuracyOptions;
 
   /** Minimum time interval between updates in milliseconds (watch only) */
   interval?: number;
@@ -96,8 +117,23 @@ export interface LocationSettingsOptions {
    * Request high accuracy Android location settings.
    * Defaults to true because this API is primarily used before user-facing
    * precise location flows.
+   *
+   * @deprecated Since v1.2, use `accuracy.android` for explicit Android
+   * settings priorities. This remains available for v1 compatibility and is
+   * planned for removal from the Modern API in v2.
    */
   enableHighAccuracy?: boolean;
+
+  /**
+   * Platform-specific accuracy preset for settings checks.
+   *
+   * Available since v1.2.
+   *
+   * Android uses `accuracy.android` to map to the native location request
+   * priority. iOS ignores this option because iOS has no equivalent settings
+   * resolution dialog.
+   */
+  accuracy?: LocationAccuracyOptions;
 
   /** Desired update interval in milliseconds. */
   interval?: number;

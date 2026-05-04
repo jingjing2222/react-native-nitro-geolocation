@@ -17,14 +17,14 @@ public extension LocationProviderUsed {
    */
   init?(fromString string: String) {
     switch string {
+      case "passive":
+        self = .passive
       case "fused":
         self = .fused
       case "gps":
         self = .gps
       case "network":
         self = .network
-      case "passive":
-        self = .passive
       case "unknown":
         self = .unknown
       default:
@@ -37,14 +37,14 @@ public extension LocationProviderUsed {
    */
   var stringValue: String {
     switch self {
+      case .passive:
+        return "passive"
       case .fused:
         return "fused"
       case .gps:
         return "gps"
       case .network:
         return "network"
-      case .passive:
-        return "passive"
       case .unknown:
         return "unknown"
     }

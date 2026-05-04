@@ -18,7 +18,7 @@ public extension LocationRequestOptions {
   /**
    * Create a new instance of `LocationRequestOptions`.
    */
-  init(timeout: Double?, maximumAge: Double?, enableHighAccuracy: Bool?, interval: Double?, fastestInterval: Double?, distanceFilter: Double?, useSignificantChanges: Bool?) {
+  init(timeout: Double?, maximumAge: Double?, enableHighAccuracy: Bool?, accuracy: LocationAccuracyOptions?, interval: Double?, fastestInterval: Double?, distanceFilter: Double?, useSignificantChanges: Bool?) {
     self.init({ () -> bridge.std__optional_double_ in
       if let __unwrappedValue = timeout {
         return bridge.create_std__optional_double_(__unwrappedValue)
@@ -34,6 +34,12 @@ public extension LocationRequestOptions {
     }(), { () -> bridge.std__optional_bool_ in
       if let __unwrappedValue = enableHighAccuracy {
         return bridge.create_std__optional_bool_(__unwrappedValue)
+      } else {
+        return .init()
+      }
+    }(), { () -> bridge.std__optional_LocationAccuracyOptions_ in
+      if let __unwrappedValue = accuracy {
+        return bridge.create_std__optional_LocationAccuracyOptions_(__unwrappedValue)
       } else {
         return .init()
       }
@@ -98,6 +104,11 @@ public extension LocationRequestOptions {
         return nil
       }
     }()
+  }
+  
+  @inline(__always)
+  var accuracy: LocationAccuracyOptions? {
+    return self.__accuracy.value
   }
   
   @inline(__always)

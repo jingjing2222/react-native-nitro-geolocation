@@ -24,7 +24,7 @@ import type { GeolocationResponse } from "../publicTypes";
  * const token = watchPosition(
  *   (position) => console.log(position.coords),
  *   (error) => console.error(error.message),
- *   { enableHighAccuracy: true, distanceFilter: 10 }
+ *   { accuracy: { android: "high", ios: "best" }, distanceFilter: 10 }
  * );
  *
  * // Later: cleanup

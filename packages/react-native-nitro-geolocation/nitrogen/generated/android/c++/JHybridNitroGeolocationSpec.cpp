@@ -21,6 +21,12 @@ namespace margelo::nitro::nitrogeolocation { enum class LocationProvider; }
 namespace margelo::nitro::nitrogeolocation { struct LocationError; }
 // Forward declaration of `LocationSettingsOptions` to properly resolve imports.
 namespace margelo::nitro::nitrogeolocation { struct LocationSettingsOptions; }
+// Forward declaration of `LocationAccuracyOptions` to properly resolve imports.
+namespace margelo::nitro::nitrogeolocation { struct LocationAccuracyOptions; }
+// Forward declaration of `AndroidAccuracyPreset` to properly resolve imports.
+namespace margelo::nitro::nitrogeolocation { enum class AndroidAccuracyPreset; }
+// Forward declaration of `IOSAccuracyPreset` to properly resolve imports.
+namespace margelo::nitro::nitrogeolocation { enum class IOSAccuracyPreset; }
 // Forward declaration of `GeolocationResponse` to properly resolve imports.
 namespace margelo::nitro::nitrogeolocation { struct GeolocationResponse; }
 // Forward declaration of `GeolocationCoordinates` to properly resolve imports.
@@ -53,6 +59,12 @@ namespace margelo::nitro::nitrogeolocation { struct LocationRequestOptions; }
 #include "JFunc_void_LocationProviderStatus.hpp"
 #include "LocationSettingsOptions.hpp"
 #include "JLocationSettingsOptions.hpp"
+#include "LocationAccuracyOptions.hpp"
+#include "JLocationAccuracyOptions.hpp"
+#include "AndroidAccuracyPreset.hpp"
+#include "JAndroidAccuracyPreset.hpp"
+#include "IOSAccuracyPreset.hpp"
+#include "JIOSAccuracyPreset.hpp"
 #include "GeolocationResponse.hpp"
 #include "JFunc_void_GeolocationResponse.hpp"
 #include "JGeolocationResponse.hpp"

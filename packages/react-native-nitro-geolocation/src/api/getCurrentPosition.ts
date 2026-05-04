@@ -21,7 +21,7 @@ import type { GeolocationResponse } from "../publicTypes";
  *
  * try {
  *   const position = await getCurrentPosition({
- *     enableHighAccuracy: true,
+ *     accuracy: { android: "high", ios: "best" },
  *     timeout: 15000
  *   });
  *   console.log(position.coords.latitude, position.coords.longitude);

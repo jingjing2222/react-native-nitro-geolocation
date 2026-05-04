@@ -22,6 +22,9 @@ data class LocationSettingsOptions(
   val enableHighAccuracy: Boolean?,
   @DoNotStrip
   @Keep
+  val accuracy: LocationAccuracyOptions?,
+  @DoNotStrip
+  @Keep
   val interval: Double?,
   @DoNotStrip
   @Keep
@@ -46,8 +49,8 @@ data class LocationSettingsOptions(
     @Keep
     @Suppress("unused")
     @JvmStatic
-    private fun fromCpp(enableHighAccuracy: Boolean?, interval: Double?, fastestInterval: Double?, distanceFilter: Double?, alwaysShow: Boolean?, needBle: Boolean?): LocationSettingsOptions {
-      return LocationSettingsOptions(enableHighAccuracy, interval, fastestInterval, distanceFilter, alwaysShow, needBle)
+    private fun fromCpp(enableHighAccuracy: Boolean?, accuracy: LocationAccuracyOptions?, interval: Double?, fastestInterval: Double?, distanceFilter: Double?, alwaysShow: Boolean?, needBle: Boolean?): LocationSettingsOptions {
+      return LocationSettingsOptions(enableHighAccuracy, accuracy, interval, fastestInterval, distanceFilter, alwaysShow, needBle)
     }
   }
 }
