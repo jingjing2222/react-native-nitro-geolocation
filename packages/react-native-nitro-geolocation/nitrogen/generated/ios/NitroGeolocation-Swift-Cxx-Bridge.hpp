@@ -14,12 +14,12 @@ namespace margelo::nitro::nitrogeolocation { enum class AuthorizationLevelIntern
 namespace margelo::nitro::nitrogeolocation { enum class AuthorizationLevel; }
 // Forward declaration of `GeolocationCoordinates` to properly resolve imports.
 namespace margelo::nitro::nitrogeolocation { struct GeolocationCoordinates; }
-// Forward declaration of `GeolocationError` to properly resolve imports.
-namespace margelo::nitro::nitrogeolocation { struct GeolocationError; }
-// Forward declaration of `GeolocationOptions` to properly resolve imports.
-namespace margelo::nitro::nitrogeolocation { struct GeolocationOptions; }
-// Forward declaration of `GeolocationResponse` to properly resolve imports.
-namespace margelo::nitro::nitrogeolocation { struct GeolocationResponse; }
+// Forward declaration of `CompatGeolocationError` to properly resolve imports.
+namespace margelo::nitro::nitrogeolocation { struct CompatGeolocationError; }
+// Forward declaration of `CompatGeolocationOptions` to properly resolve imports.
+namespace margelo::nitro::nitrogeolocation { struct CompatGeolocationOptions; }
+// Forward declaration of `CompatGeolocationResponse` to properly resolve imports.
+namespace margelo::nitro::nitrogeolocation { struct CompatGeolocationResponse; }
 // Forward declaration of `HybridNitroGeolocationCompatSpec` to properly resolve imports.
 namespace margelo::nitro::nitrogeolocation { class HybridNitroGeolocationCompatSpec; }
 // Forward declaration of `HybridNitroGeolocationSpec` to properly resolve imports.
@@ -34,8 +34,8 @@ namespace margelo::nitro::nitrogeolocation { enum class LocationProviderUsed; }
 namespace margelo::nitro::nitrogeolocation { enum class LocationProvider; }
 // Forward declaration of `LocationRequestOptions` to properly resolve imports.
 namespace margelo::nitro::nitrogeolocation { struct LocationRequestOptions; }
-// Forward declaration of `ModernGeolocationResponse` to properly resolve imports.
-namespace margelo::nitro::nitrogeolocation { struct ModernGeolocationResponse; }
+// Forward declaration of `GeolocationResponse` to properly resolve imports.
+namespace margelo::nitro::nitrogeolocation { struct GeolocationResponse; }
 // Forward declaration of `PermissionStatus` to properly resolve imports.
 namespace margelo::nitro::nitrogeolocation { enum class PermissionStatus; }
 
@@ -49,9 +49,9 @@ namespace NitroGeolocation { class HybridNitroGeolocationSpec_cxx; }
 #include "AuthorizationLevel.hpp"
 #include "AuthorizationLevelInternal.hpp"
 #include "GeolocationCoordinates.hpp"
-#include "GeolocationError.hpp"
-#include "GeolocationOptions.hpp"
-#include "GeolocationResponse.hpp"
+#include "CompatGeolocationError.hpp"
+#include "CompatGeolocationOptions.hpp"
+#include "CompatGeolocationResponse.hpp"
 #include "HybridNitroGeolocationCompatSpec.hpp"
 #include "HybridNitroGeolocationSpec.hpp"
 #include "LocationError.hpp"
@@ -59,7 +59,7 @@ namespace NitroGeolocation { class HybridNitroGeolocationSpec_cxx; }
 #include "LocationProviderInternal.hpp"
 #include "LocationProviderUsed.hpp"
 #include "LocationRequestOptions.hpp"
-#include "ModernGeolocationResponse.hpp"
+#include "GeolocationResponse.hpp"
 #include "PermissionStatus.hpp"
 #include <NitroModules/Null.hpp>
 #include <NitroModules/Promise.hpp>
@@ -238,38 +238,38 @@ namespace margelo::nitro::nitrogeolocation::bridge::swift {
     return optional.value();
   }
   
-  // pragma MARK: std::shared_ptr<Promise<ModernGeolocationResponse>>
+  // pragma MARK: std::shared_ptr<Promise<GeolocationResponse>>
   /**
-   * Specialized version of `std::shared_ptr<Promise<ModernGeolocationResponse>>`.
+   * Specialized version of `std::shared_ptr<Promise<GeolocationResponse>>`.
    */
-  using std__shared_ptr_Promise_ModernGeolocationResponse__ = std::shared_ptr<Promise<ModernGeolocationResponse>>;
-  inline std::shared_ptr<Promise<ModernGeolocationResponse>> create_std__shared_ptr_Promise_ModernGeolocationResponse__() noexcept {
-    return Promise<ModernGeolocationResponse>::create();
+  using std__shared_ptr_Promise_GeolocationResponse__ = std::shared_ptr<Promise<GeolocationResponse>>;
+  inline std::shared_ptr<Promise<GeolocationResponse>> create_std__shared_ptr_Promise_GeolocationResponse__() noexcept {
+    return Promise<GeolocationResponse>::create();
   }
-  inline PromiseHolder<ModernGeolocationResponse> wrap_std__shared_ptr_Promise_ModernGeolocationResponse__(std::shared_ptr<Promise<ModernGeolocationResponse>> promise) noexcept {
-    return PromiseHolder<ModernGeolocationResponse>(std::move(promise));
+  inline PromiseHolder<GeolocationResponse> wrap_std__shared_ptr_Promise_GeolocationResponse__(std::shared_ptr<Promise<GeolocationResponse>> promise) noexcept {
+    return PromiseHolder<GeolocationResponse>(std::move(promise));
   }
   
-  // pragma MARK: std::function<void(const ModernGeolocationResponse& /* result */)>
+  // pragma MARK: std::function<void(const GeolocationResponse& /* result */)>
   /**
-   * Specialized version of `std::function<void(const ModernGeolocationResponse&)>`.
+   * Specialized version of `std::function<void(const GeolocationResponse&)>`.
    */
-  using Func_void_ModernGeolocationResponse = std::function<void(const ModernGeolocationResponse& /* result */)>;
+  using Func_void_GeolocationResponse = std::function<void(const GeolocationResponse& /* result */)>;
   /**
-   * Wrapper class for a `std::function<void(const ModernGeolocationResponse& / * result * /)>`, this can be used from Swift.
+   * Wrapper class for a `std::function<void(const GeolocationResponse& / * result * /)>`, this can be used from Swift.
    */
-  class Func_void_ModernGeolocationResponse_Wrapper final {
+  class Func_void_GeolocationResponse_Wrapper final {
   public:
-    explicit Func_void_ModernGeolocationResponse_Wrapper(std::function<void(const ModernGeolocationResponse& /* result */)>&& func): _function(std::make_unique<std::function<void(const ModernGeolocationResponse& /* result */)>>(std::move(func))) {}
-    inline void call(ModernGeolocationResponse result) const noexcept {
+    explicit Func_void_GeolocationResponse_Wrapper(std::function<void(const GeolocationResponse& /* result */)>&& func): _function(std::make_unique<std::function<void(const GeolocationResponse& /* result */)>>(std::move(func))) {}
+    inline void call(GeolocationResponse result) const noexcept {
       _function->operator()(result);
     }
   private:
-    std::unique_ptr<std::function<void(const ModernGeolocationResponse& /* result */)>> _function;
+    std::unique_ptr<std::function<void(const GeolocationResponse& /* result */)>> _function;
   } SWIFT_NONCOPYABLE;
-  Func_void_ModernGeolocationResponse create_Func_void_ModernGeolocationResponse(void* NON_NULL swiftClosureWrapper) noexcept;
-  inline Func_void_ModernGeolocationResponse_Wrapper wrap_Func_void_ModernGeolocationResponse(Func_void_ModernGeolocationResponse value) noexcept {
-    return Func_void_ModernGeolocationResponse_Wrapper(std::move(value));
+  Func_void_GeolocationResponse create_Func_void_GeolocationResponse(void* NON_NULL swiftClosureWrapper) noexcept;
+  inline Func_void_GeolocationResponse_Wrapper wrap_Func_void_GeolocationResponse(Func_void_GeolocationResponse value) noexcept {
+    return Func_void_GeolocationResponse_Wrapper(std::move(value));
   }
   
   // pragma MARK: std::optional<double>
@@ -369,13 +369,13 @@ namespace margelo::nitro::nitrogeolocation::bridge::swift {
     return Result<std::shared_ptr<Promise<PermissionStatus>>>::withError(error);
   }
   
-  // pragma MARK: Result<std::shared_ptr<Promise<ModernGeolocationResponse>>>
-  using Result_std__shared_ptr_Promise_ModernGeolocationResponse___ = Result<std::shared_ptr<Promise<ModernGeolocationResponse>>>;
-  inline Result_std__shared_ptr_Promise_ModernGeolocationResponse___ create_Result_std__shared_ptr_Promise_ModernGeolocationResponse___(const std::shared_ptr<Promise<ModernGeolocationResponse>>& value) noexcept {
-    return Result<std::shared_ptr<Promise<ModernGeolocationResponse>>>::withValue(value);
+  // pragma MARK: Result<std::shared_ptr<Promise<GeolocationResponse>>>
+  using Result_std__shared_ptr_Promise_GeolocationResponse___ = Result<std::shared_ptr<Promise<GeolocationResponse>>>;
+  inline Result_std__shared_ptr_Promise_GeolocationResponse___ create_Result_std__shared_ptr_Promise_GeolocationResponse___(const std::shared_ptr<Promise<GeolocationResponse>>& value) noexcept {
+    return Result<std::shared_ptr<Promise<GeolocationResponse>>>::withValue(value);
   }
-  inline Result_std__shared_ptr_Promise_ModernGeolocationResponse___ create_Result_std__shared_ptr_Promise_ModernGeolocationResponse___(const std::exception_ptr& error) noexcept {
-    return Result<std::shared_ptr<Promise<ModernGeolocationResponse>>>::withError(error);
+  inline Result_std__shared_ptr_Promise_GeolocationResponse___ create_Result_std__shared_ptr_Promise_GeolocationResponse___(const std::exception_ptr& error) noexcept {
+    return Result<std::shared_ptr<Promise<GeolocationResponse>>>::withError(error);
   }
   
   // pragma MARK: Result<std::string>
@@ -454,77 +454,77 @@ namespace margelo::nitro::nitrogeolocation::bridge::swift {
     return optional.value();
   }
   
-  // pragma MARK: std::function<void(const GeolocationError& /* error */)>
+  // pragma MARK: std::function<void(const CompatGeolocationError& /* error */)>
   /**
-   * Specialized version of `std::function<void(const GeolocationError&)>`.
+   * Specialized version of `std::function<void(const CompatGeolocationError&)>`.
    */
-  using Func_void_GeolocationError = std::function<void(const GeolocationError& /* error */)>;
+  using Func_void_CompatGeolocationError = std::function<void(const CompatGeolocationError& /* error */)>;
   /**
-   * Wrapper class for a `std::function<void(const GeolocationError& / * error * /)>`, this can be used from Swift.
+   * Wrapper class for a `std::function<void(const CompatGeolocationError& / * error * /)>`, this can be used from Swift.
    */
-  class Func_void_GeolocationError_Wrapper final {
+  class Func_void_CompatGeolocationError_Wrapper final {
   public:
-    explicit Func_void_GeolocationError_Wrapper(std::function<void(const GeolocationError& /* error */)>&& func): _function(std::make_unique<std::function<void(const GeolocationError& /* error */)>>(std::move(func))) {}
-    inline void call(GeolocationError error) const noexcept {
+    explicit Func_void_CompatGeolocationError_Wrapper(std::function<void(const CompatGeolocationError& /* error */)>&& func): _function(std::make_unique<std::function<void(const CompatGeolocationError& /* error */)>>(std::move(func))) {}
+    inline void call(CompatGeolocationError error) const noexcept {
       _function->operator()(error);
     }
   private:
-    std::unique_ptr<std::function<void(const GeolocationError& /* error */)>> _function;
+    std::unique_ptr<std::function<void(const CompatGeolocationError& /* error */)>> _function;
   } SWIFT_NONCOPYABLE;
-  Func_void_GeolocationError create_Func_void_GeolocationError(void* NON_NULL swiftClosureWrapper) noexcept;
-  inline Func_void_GeolocationError_Wrapper wrap_Func_void_GeolocationError(Func_void_GeolocationError value) noexcept {
-    return Func_void_GeolocationError_Wrapper(std::move(value));
+  Func_void_CompatGeolocationError create_Func_void_CompatGeolocationError(void* NON_NULL swiftClosureWrapper) noexcept;
+  inline Func_void_CompatGeolocationError_Wrapper wrap_Func_void_CompatGeolocationError(Func_void_CompatGeolocationError value) noexcept {
+    return Func_void_CompatGeolocationError_Wrapper(std::move(value));
   }
   
-  // pragma MARK: std::optional<std::function<void(const GeolocationError& /* error */)>>
+  // pragma MARK: std::optional<std::function<void(const CompatGeolocationError& /* error */)>>
   /**
-   * Specialized version of `std::optional<std::function<void(const GeolocationError& / * error * /)>>`.
+   * Specialized version of `std::optional<std::function<void(const CompatGeolocationError& / * error * /)>>`.
    */
-  using std__optional_std__function_void_const_GeolocationError_____error______ = std::optional<std::function<void(const GeolocationError& /* error */)>>;
-  inline std::optional<std::function<void(const GeolocationError& /* error */)>> create_std__optional_std__function_void_const_GeolocationError_____error______(const std::function<void(const GeolocationError& /* error */)>& value) noexcept {
-    return std::optional<std::function<void(const GeolocationError& /* error */)>>(value);
+  using std__optional_std__function_void_const_CompatGeolocationError_____error______ = std::optional<std::function<void(const CompatGeolocationError& /* error */)>>;
+  inline std::optional<std::function<void(const CompatGeolocationError& /* error */)>> create_std__optional_std__function_void_const_CompatGeolocationError_____error______(const std::function<void(const CompatGeolocationError& /* error */)>& value) noexcept {
+    return std::optional<std::function<void(const CompatGeolocationError& /* error */)>>(value);
   }
-  inline bool has_value_std__optional_std__function_void_const_GeolocationError_____error______(const std::optional<std::function<void(const GeolocationError& /* error */)>>& optional) noexcept {
+  inline bool has_value_std__optional_std__function_void_const_CompatGeolocationError_____error______(const std::optional<std::function<void(const CompatGeolocationError& /* error */)>>& optional) noexcept {
     return optional.has_value();
   }
-  inline std::function<void(const GeolocationError& /* error */)> get_std__optional_std__function_void_const_GeolocationError_____error______(const std::optional<std::function<void(const GeolocationError& /* error */)>>& optional) noexcept {
+  inline std::function<void(const CompatGeolocationError& /* error */)> get_std__optional_std__function_void_const_CompatGeolocationError_____error______(const std::optional<std::function<void(const CompatGeolocationError& /* error */)>>& optional) noexcept {
     return optional.value();
   }
   
-  // pragma MARK: std::function<void(const GeolocationResponse& /* position */)>
+  // pragma MARK: std::function<void(const CompatGeolocationResponse& /* position */)>
   /**
-   * Specialized version of `std::function<void(const GeolocationResponse&)>`.
+   * Specialized version of `std::function<void(const CompatGeolocationResponse&)>`.
    */
-  using Func_void_GeolocationResponse = std::function<void(const GeolocationResponse& /* position */)>;
+  using Func_void_CompatGeolocationResponse = std::function<void(const CompatGeolocationResponse& /* position */)>;
   /**
-   * Wrapper class for a `std::function<void(const GeolocationResponse& / * position * /)>`, this can be used from Swift.
+   * Wrapper class for a `std::function<void(const CompatGeolocationResponse& / * position * /)>`, this can be used from Swift.
    */
-  class Func_void_GeolocationResponse_Wrapper final {
+  class Func_void_CompatGeolocationResponse_Wrapper final {
   public:
-    explicit Func_void_GeolocationResponse_Wrapper(std::function<void(const GeolocationResponse& /* position */)>&& func): _function(std::make_unique<std::function<void(const GeolocationResponse& /* position */)>>(std::move(func))) {}
-    inline void call(GeolocationResponse position) const noexcept {
+    explicit Func_void_CompatGeolocationResponse_Wrapper(std::function<void(const CompatGeolocationResponse& /* position */)>&& func): _function(std::make_unique<std::function<void(const CompatGeolocationResponse& /* position */)>>(std::move(func))) {}
+    inline void call(CompatGeolocationResponse position) const noexcept {
       _function->operator()(position);
     }
   private:
-    std::unique_ptr<std::function<void(const GeolocationResponse& /* position */)>> _function;
+    std::unique_ptr<std::function<void(const CompatGeolocationResponse& /* position */)>> _function;
   } SWIFT_NONCOPYABLE;
-  Func_void_GeolocationResponse create_Func_void_GeolocationResponse(void* NON_NULL swiftClosureWrapper) noexcept;
-  inline Func_void_GeolocationResponse_Wrapper wrap_Func_void_GeolocationResponse(Func_void_GeolocationResponse value) noexcept {
-    return Func_void_GeolocationResponse_Wrapper(std::move(value));
+  Func_void_CompatGeolocationResponse create_Func_void_CompatGeolocationResponse(void* NON_NULL swiftClosureWrapper) noexcept;
+  inline Func_void_CompatGeolocationResponse_Wrapper wrap_Func_void_CompatGeolocationResponse(Func_void_CompatGeolocationResponse value) noexcept {
+    return Func_void_CompatGeolocationResponse_Wrapper(std::move(value));
   }
 
-  // pragma MARK: std::optional<GeolocationOptions>
+  // pragma MARK: std::optional<CompatGeolocationOptions>
   /**
-   * Specialized version of `std::optional<GeolocationOptions>`.
+   * Specialized version of `std::optional<CompatGeolocationOptions>`.
    */
-  using std__optional_GeolocationOptions_ = std::optional<GeolocationOptions>;
-  inline std::optional<GeolocationOptions> create_std__optional_GeolocationOptions_(const GeolocationOptions& value) noexcept {
-    return std::optional<GeolocationOptions>(value);
+  using std__optional_CompatGeolocationOptions_ = std::optional<CompatGeolocationOptions>;
+  inline std::optional<CompatGeolocationOptions> create_std__optional_CompatGeolocationOptions_(const CompatGeolocationOptions& value) noexcept {
+    return std::optional<CompatGeolocationOptions>(value);
   }
-  inline bool has_value_std__optional_GeolocationOptions_(const std::optional<GeolocationOptions>& optional) noexcept {
+  inline bool has_value_std__optional_CompatGeolocationOptions_(const std::optional<CompatGeolocationOptions>& optional) noexcept {
     return optional.has_value();
   }
-  inline GeolocationOptions get_std__optional_GeolocationOptions_(const std::optional<GeolocationOptions>& optional) noexcept {
+  inline CompatGeolocationOptions get_std__optional_CompatGeolocationOptions_(const std::optional<CompatGeolocationOptions>& optional) noexcept {
     return optional.value();
   }
   

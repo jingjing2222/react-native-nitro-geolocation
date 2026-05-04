@@ -12,16 +12,16 @@
 // Forward declaration of `HybridNitroGeolocationSpec_cxx` to properly resolve imports.
 namespace NitroGeolocation { class HybridNitroGeolocationSpec_cxx; }
 
-// Forward declaration of `ModernGeolocationConfiguration` to properly resolve imports.
-namespace margelo::nitro::nitrogeolocation { struct ModernGeolocationConfiguration; }
+// Forward declaration of `GeolocationConfiguration` to properly resolve imports.
+namespace margelo::nitro::nitrogeolocation { struct GeolocationConfiguration; }
 // Forward declaration of `AuthorizationLevel` to properly resolve imports.
 namespace margelo::nitro::nitrogeolocation { enum class AuthorizationLevel; }
 // Forward declaration of `LocationProvider` to properly resolve imports.
 namespace margelo::nitro::nitrogeolocation { enum class LocationProvider; }
 // Forward declaration of `PermissionStatus` to properly resolve imports.
 namespace margelo::nitro::nitrogeolocation { enum class PermissionStatus; }
-// Forward declaration of `ModernGeolocationResponse` to properly resolve imports.
-namespace margelo::nitro::nitrogeolocation { struct ModernGeolocationResponse; }
+// Forward declaration of `GeolocationResponse` to properly resolve imports.
+namespace margelo::nitro::nitrogeolocation { struct GeolocationResponse; }
 // Forward declaration of `LocationProviderUsed` to properly resolve imports.
 namespace margelo::nitro::nitrogeolocation { enum class LocationProviderUsed; }
 // Forward declaration of `GeolocationCoordinates` to properly resolve imports.
@@ -31,13 +31,13 @@ namespace margelo::nitro::nitrogeolocation { struct LocationRequestOptions; }
 // Forward declaration of `LocationError` to properly resolve imports.
 namespace margelo::nitro::nitrogeolocation { struct LocationError; }
 
-#include "ModernGeolocationConfiguration.hpp"
+#include "GeolocationConfiguration.hpp"
 #include <optional>
 #include "AuthorizationLevel.hpp"
 #include "LocationProvider.hpp"
 #include "PermissionStatus.hpp"
 #include <NitroModules/Promise.hpp>
-#include "ModernGeolocationResponse.hpp"
+#include "GeolocationResponse.hpp"
 #include "LocationProviderUsed.hpp"
 #include "GeolocationCoordinates.hpp"
 #include <NitroModules/Null.hpp>
@@ -97,7 +97,7 @@ namespace margelo::nitro::nitrogeolocation {
 
   public:
     // Methods
-    inline void setConfiguration(const ModernGeolocationConfiguration& config) override {
+    inline void setConfiguration(const GeolocationConfiguration& config) override {
       auto __result = _swiftPart.setConfiguration(std::forward<decltype(config)>(config));
       if (__result.hasError()) [[unlikely]] {
         std::rethrow_exception(__result.error());
@@ -119,7 +119,7 @@ namespace margelo::nitro::nitrogeolocation {
       auto __value = std::move(__result.value());
       return __value;
     }
-    inline std::shared_ptr<Promise<ModernGeolocationResponse>> getCurrentPosition(const std::optional<LocationRequestOptions>& options) override {
+    inline std::shared_ptr<Promise<GeolocationResponse>> getCurrentPosition(const std::optional<LocationRequestOptions>& options) override {
       auto __result = _swiftPart.getCurrentPosition(options);
       if (__result.hasError()) [[unlikely]] {
         std::rethrow_exception(__result.error());
@@ -127,7 +127,7 @@ namespace margelo::nitro::nitrogeolocation {
       auto __value = std::move(__result.value());
       return __value;
     }
-    inline std::string watchPosition(const std::function<void(const ModernGeolocationResponse& /* position */)>& success, const std::optional<std::function<void(const LocationError& /* error */)>>& error, const std::optional<LocationRequestOptions>& options) override {
+    inline std::string watchPosition(const std::function<void(const GeolocationResponse& /* position */)>& success, const std::optional<std::function<void(const LocationError& /* error */)>>& error, const std::optional<LocationRequestOptions>& options) override {
       auto __result = _swiftPart.watchPosition(success, error, options);
       if (__result.hasError()) [[unlikely]] {
         std::rethrow_exception(__result.error());

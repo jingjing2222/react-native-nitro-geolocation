@@ -14,12 +14,12 @@ namespace margelo::nitro::nitrogeolocation { enum class AuthorizationLevelIntern
 namespace margelo::nitro::nitrogeolocation { enum class AuthorizationLevel; }
 // Forward declaration of `GeolocationCoordinates` to properly resolve imports.
 namespace margelo::nitro::nitrogeolocation { struct GeolocationCoordinates; }
-// Forward declaration of `GeolocationError` to properly resolve imports.
-namespace margelo::nitro::nitrogeolocation { struct GeolocationError; }
-// Forward declaration of `GeolocationOptions` to properly resolve imports.
-namespace margelo::nitro::nitrogeolocation { struct GeolocationOptions; }
-// Forward declaration of `GeolocationResponse` to properly resolve imports.
-namespace margelo::nitro::nitrogeolocation { struct GeolocationResponse; }
+// Forward declaration of `CompatGeolocationError` to properly resolve imports.
+namespace margelo::nitro::nitrogeolocation { struct CompatGeolocationError; }
+// Forward declaration of `CompatGeolocationOptions` to properly resolve imports.
+namespace margelo::nitro::nitrogeolocation { struct CompatGeolocationOptions; }
+// Forward declaration of `CompatGeolocationResponse` to properly resolve imports.
+namespace margelo::nitro::nitrogeolocation { struct CompatGeolocationResponse; }
 // Forward declaration of `HybridNitroGeolocationCompatSpec` to properly resolve imports.
 namespace margelo::nitro::nitrogeolocation { class HybridNitroGeolocationCompatSpec; }
 // Forward declaration of `HybridNitroGeolocationSpec` to properly resolve imports.
@@ -34,22 +34,22 @@ namespace margelo::nitro::nitrogeolocation { enum class LocationProviderUsed; }
 namespace margelo::nitro::nitrogeolocation { enum class LocationProvider; }
 // Forward declaration of `LocationRequestOptions` to properly resolve imports.
 namespace margelo::nitro::nitrogeolocation { struct LocationRequestOptions; }
-// Forward declaration of `ModernGeolocationConfiguration` to properly resolve imports.
-namespace margelo::nitro::nitrogeolocation { struct ModernGeolocationConfiguration; }
-// Forward declaration of `ModernGeolocationResponse` to properly resolve imports.
-namespace margelo::nitro::nitrogeolocation { struct ModernGeolocationResponse; }
+// Forward declaration of `GeolocationConfiguration` to properly resolve imports.
+namespace margelo::nitro::nitrogeolocation { struct GeolocationConfiguration; }
+// Forward declaration of `GeolocationResponse` to properly resolve imports.
+namespace margelo::nitro::nitrogeolocation { struct GeolocationResponse; }
 // Forward declaration of `PermissionStatus` to properly resolve imports.
 namespace margelo::nitro::nitrogeolocation { enum class PermissionStatus; }
-// Forward declaration of `RNConfigurationInternal` to properly resolve imports.
-namespace margelo::nitro::nitrogeolocation { struct RNConfigurationInternal; }
+// Forward declaration of `CompatGeolocationConfigurationInternal` to properly resolve imports.
+namespace margelo::nitro::nitrogeolocation { struct CompatGeolocationConfigurationInternal; }
 
 // Include C++ defined types
 #include "AuthorizationLevel.hpp"
 #include "AuthorizationLevelInternal.hpp"
 #include "GeolocationCoordinates.hpp"
-#include "GeolocationError.hpp"
-#include "GeolocationOptions.hpp"
-#include "GeolocationResponse.hpp"
+#include "CompatGeolocationError.hpp"
+#include "CompatGeolocationOptions.hpp"
+#include "CompatGeolocationResponse.hpp"
 #include "HybridNitroGeolocationCompatSpec.hpp"
 #include "HybridNitroGeolocationSpec.hpp"
 #include "LocationError.hpp"
@@ -57,10 +57,10 @@ namespace margelo::nitro::nitrogeolocation { struct RNConfigurationInternal; }
 #include "LocationProviderInternal.hpp"
 #include "LocationProviderUsed.hpp"
 #include "LocationRequestOptions.hpp"
-#include "ModernGeolocationConfiguration.hpp"
-#include "ModernGeolocationResponse.hpp"
+#include "GeolocationConfiguration.hpp"
+#include "GeolocationResponse.hpp"
 #include "PermissionStatus.hpp"
-#include "RNConfigurationInternal.hpp"
+#include "CompatGeolocationConfigurationInternal.hpp"
 #include <NitroModules/Null.hpp>
 #include <NitroModules/Promise.hpp>
 #include <NitroModules/Result.hpp>

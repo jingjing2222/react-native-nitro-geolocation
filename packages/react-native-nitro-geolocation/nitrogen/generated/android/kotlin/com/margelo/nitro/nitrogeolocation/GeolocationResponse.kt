@@ -19,6 +19,12 @@ import com.facebook.proguard.annotations.DoNotStrip
 data class GeolocationResponse(
   @DoNotStrip
   @Keep
+  val mocked: Boolean?,
+  @DoNotStrip
+  @Keep
+  val provider: LocationProviderUsed?,
+  @DoNotStrip
+  @Keep
   val coords: GeolocationCoordinates,
   @DoNotStrip
   @Keep
@@ -34,8 +40,8 @@ data class GeolocationResponse(
     @Keep
     @Suppress("unused")
     @JvmStatic
-    private fun fromCpp(coords: GeolocationCoordinates, timestamp: Double): GeolocationResponse {
-      return GeolocationResponse(coords, timestamp)
+    private fun fromCpp(mocked: Boolean?, provider: LocationProviderUsed?, coords: GeolocationCoordinates, timestamp: Double): GeolocationResponse {
+      return GeolocationResponse(mocked, provider, coords, timestamp)
     }
   }
 }

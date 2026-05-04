@@ -125,7 +125,7 @@ open class HybridNitroGeolocationCompatSpec_cxx {
 
   // Methods
   @inline(__always)
-  public final func setRNConfiguration(config: RNConfigurationInternal) -> bridge.Result_void_ {
+  public final func setRNConfiguration(config: CompatGeolocationConfigurationInternal) -> bridge.Result_void_ {
     do {
       try self.__implementation.setRNConfiguration(config: config)
       return bridge.create_Result_void_()
@@ -136,7 +136,7 @@ open class HybridNitroGeolocationCompatSpec_cxx {
   }
   
   @inline(__always)
-  public final func requestAuthorization(success: bridge.std__optional_std__function_void____, error: bridge.std__optional_std__function_void_const_GeolocationError_____error______) -> bridge.Result_void_ {
+  public final func requestAuthorization(success: bridge.std__optional_std__function_void____, error: bridge.std__optional_std__function_void_const_CompatGeolocationError_____error______) -> bridge.Result_void_ {
     do {
       try self.__implementation.requestAuthorization(success: { () -> (() -> Void)? in
         if bridge.has_value_std__optional_std__function_void____(success) {
@@ -150,12 +150,12 @@ open class HybridNitroGeolocationCompatSpec_cxx {
         } else {
           return nil
         }
-      }(), error: { () -> ((_ error: GeolocationError) -> Void)? in
-        if bridge.has_value_std__optional_std__function_void_const_GeolocationError_____error______(error) {
-          let __unwrapped = bridge.get_std__optional_std__function_void_const_GeolocationError_____error______(error)
-          return { () -> (GeolocationError) -> Void in
-            let __wrappedFunction = bridge.wrap_Func_void_GeolocationError(__unwrapped)
-            return { (__error: GeolocationError) -> Void in
+      }(), error: { () -> ((_ error: CompatGeolocationError) -> Void)? in
+        if bridge.has_value_std__optional_std__function_void_const_CompatGeolocationError_____error______(error) {
+          let __unwrapped = bridge.get_std__optional_std__function_void_const_CompatGeolocationError_____error______(error)
+          return { () -> (CompatGeolocationError) -> Void in
+            let __wrappedFunction = bridge.wrap_Func_void_CompatGeolocationError(__unwrapped)
+            return { (__error: CompatGeolocationError) -> Void in
               __wrappedFunction.call(__error)
             }
           }()
@@ -171,19 +171,19 @@ open class HybridNitroGeolocationCompatSpec_cxx {
   }
   
   @inline(__always)
-  public final func getCurrentPosition(success: bridge.Func_void_GeolocationResponse, error: bridge.std__optional_std__function_void_const_GeolocationError_____error______, options: bridge.std__optional_GeolocationOptions_) -> bridge.Result_void_ {
+  public final func getCurrentPosition(success: bridge.Func_void_CompatGeolocationResponse, error: bridge.std__optional_std__function_void_const_CompatGeolocationError_____error______, options: bridge.std__optional_CompatGeolocationOptions_) -> bridge.Result_void_ {
     do {
-      try self.__implementation.getCurrentPosition(success: { () -> (GeolocationResponse) -> Void in
-        let __wrappedFunction = bridge.wrap_Func_void_GeolocationResponse(success)
-        return { (__position: GeolocationResponse) -> Void in
+      try self.__implementation.getCurrentPosition(success: { () -> (CompatGeolocationResponse) -> Void in
+        let __wrappedFunction = bridge.wrap_Func_void_CompatGeolocationResponse(success)
+        return { (__position: CompatGeolocationResponse) -> Void in
           __wrappedFunction.call(__position)
         }
-      }(), error: { () -> ((_ error: GeolocationError) -> Void)? in
-        if bridge.has_value_std__optional_std__function_void_const_GeolocationError_____error______(error) {
-          let __unwrapped = bridge.get_std__optional_std__function_void_const_GeolocationError_____error______(error)
-          return { () -> (GeolocationError) -> Void in
-            let __wrappedFunction = bridge.wrap_Func_void_GeolocationError(__unwrapped)
-            return { (__error: GeolocationError) -> Void in
+      }(), error: { () -> ((_ error: CompatGeolocationError) -> Void)? in
+        if bridge.has_value_std__optional_std__function_void_const_CompatGeolocationError_____error______(error) {
+          let __unwrapped = bridge.get_std__optional_std__function_void_const_CompatGeolocationError_____error______(error)
+          return { () -> (CompatGeolocationError) -> Void in
+            let __wrappedFunction = bridge.wrap_Func_void_CompatGeolocationError(__unwrapped)
+            return { (__error: CompatGeolocationError) -> Void in
               __wrappedFunction.call(__error)
             }
           }()
@@ -199,19 +199,19 @@ open class HybridNitroGeolocationCompatSpec_cxx {
   }
   
   @inline(__always)
-  public final func watchPosition(success: bridge.Func_void_GeolocationResponse, error: bridge.std__optional_std__function_void_const_GeolocationError_____error______, options: bridge.std__optional_GeolocationOptions_) -> bridge.Result_double_ {
+  public final func watchPosition(success: bridge.Func_void_CompatGeolocationResponse, error: bridge.std__optional_std__function_void_const_CompatGeolocationError_____error______, options: bridge.std__optional_CompatGeolocationOptions_) -> bridge.Result_double_ {
     do {
-      let __result = try self.__implementation.watchPosition(success: { () -> (GeolocationResponse) -> Void in
-        let __wrappedFunction = bridge.wrap_Func_void_GeolocationResponse(success)
-        return { (__position: GeolocationResponse) -> Void in
+      let __result = try self.__implementation.watchPosition(success: { () -> (CompatGeolocationResponse) -> Void in
+        let __wrappedFunction = bridge.wrap_Func_void_CompatGeolocationResponse(success)
+        return { (__position: CompatGeolocationResponse) -> Void in
           __wrappedFunction.call(__position)
         }
-      }(), error: { () -> ((_ error: GeolocationError) -> Void)? in
-        if bridge.has_value_std__optional_std__function_void_const_GeolocationError_____error______(error) {
-          let __unwrapped = bridge.get_std__optional_std__function_void_const_GeolocationError_____error______(error)
-          return { () -> (GeolocationError) -> Void in
-            let __wrappedFunction = bridge.wrap_Func_void_GeolocationError(__unwrapped)
-            return { (__error: GeolocationError) -> Void in
+      }(), error: { () -> ((_ error: CompatGeolocationError) -> Void)? in
+        if bridge.has_value_std__optional_std__function_void_const_CompatGeolocationError_____error______(error) {
+          let __unwrapped = bridge.get_std__optional_std__function_void_const_CompatGeolocationError_____error______(error)
+          return { () -> (CompatGeolocationError) -> Void in
+            let __wrappedFunction = bridge.wrap_Func_void_CompatGeolocationError(__unwrapped)
+            return { (__error: CompatGeolocationError) -> Void in
               __wrappedFunction.call(__error)
             }
           }()

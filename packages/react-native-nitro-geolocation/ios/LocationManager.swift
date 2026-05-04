@@ -11,15 +11,15 @@ class LocationManager: NSObject, CLLocationManagerDelegate {
 
     private struct LocationRequest {
         let id: UUID = UUID()
-        let success: (GeolocationResponse) -> Void
-        let error: ((GeolocationError) -> Void)?
+        let success: (CompatGeolocationResponse) -> Void
+        let error: ((CompatGeolocationError) -> Void)?
         let options: ParsedOptions
         var timer: DispatchSourceTimer?
     }
 
     private struct WatchSubscription {
-        let success: (GeolocationResponse) -> Void
-        let error: ((GeolocationError) -> Void)?
+        let success: (CompatGeolocationResponse) -> Void
+        let error: ((CompatGeolocationError) -> Void)?
         let options: ParsedOptions
     }
 
@@ -30,7 +30,7 @@ class LocationManager: NSObject, CLLocationManagerDelegate {
         let distanceFilter: CLLocationDistance
         let useSignificantChanges: Bool
 
-        static func parse(from options: GeolocationOptions?) -> ParsedOptions {
+        static func parse(from options: CompatGeolocationOptions?) -> ParsedOptions {
             let timeout = options?.timeout ?? DEFAULT_TIMEOUT
             let maximumAge = options?.maximumAge ?? DEFAULT_MAXIMUM_AGE
             let enableHighAccuracy = options?.enableHighAccuracy ?? false
@@ -57,7 +57,7 @@ class LocationManager: NSObject, CLLocationManagerDelegate {
 
     // Authorization
     private var queuedAuthorizationCallbacks:
-        [(success: (() -> Void)?, error: ((GeolocationError) -> Void)?)] = []
+        [(success: (() -> Void)?, error: ((CompatGeolocationError) -> Void)?)] = []
 
     // getCurrentPosition
     private var pendingRequests: [LocationRequest] = []
@@ -83,7 +83,7 @@ class LocationManager: NSObject, CLLocationManagerDelegate {
         skipPermissionRequests: Bool,
         enableBackgroundLocationUpdates: Bool,
         success: (() -> Void)?,
-        error: ((GeolocationError) -> Void)?
+        error: ((CompatGeolocationError) -> Void)?
     ) {
         initializeLocationManagerIfNeeded()
         enqueueAuthorizationCallbacks(success: success, error: error)
@@ -114,7 +114,7 @@ class LocationManager: NSObject, CLLocationManagerDelegate {
     }
 
     private func enqueueAuthorizationCallbacks(
-        success: (() -> Void)?, error: ((GeolocationError) -> Void)?
+        success: (() -> Void)?, error: ((CompatGeolocationError) -> Void)?
     ) {
         guard success != nil || error != nil else { return }
         queuedAuthorizationCallbacks.append((success: success, error: error))
@@ -146,9 +146,9 @@ class LocationManager: NSObject, CLLocationManagerDelegate {
     // MARK: - Get Current Position
 
     func getCurrentPosition(
-        success: @escaping (GeolocationResponse) -> Void,
-        error: ((GeolocationError) -> Void)?,
-        options: GeolocationOptions?
+        success: @escaping (CompatGeolocationResponse) -> Void,
+        error: ((CompatGeolocationError) -> Void)?,
+        options: CompatGeolocationOptions?
     ) {
         let parsedOptions = ParsedOptions.parse(from: options)
 
@@ -200,9 +200,9 @@ class LocationManager: NSObject, CLLocationManagerDelegate {
     // MARK: - Watch Position
 
     func watchPosition(
-        success: @escaping (GeolocationResponse) -> Void,
-        error: ((GeolocationError) -> Void)?,
-        options: GeolocationOptions?
+        success: @escaping (CompatGeolocationResponse) -> Void,
+        error: ((CompatGeolocationError) -> Void)?,
+        options: CompatGeolocationOptions?
     ) -> Double {
         let parsedOptions = ParsedOptions.parse(from: options)
         let watchId = nextWatchId
@@ -288,7 +288,7 @@ class LocationManager: NSObject, CLLocationManagerDelegate {
     }
 
     func locationManager(_ manager: CLLocationManager, didFailWithError error: Error) {
-        let geoError: GeolocationError
+        let geoError: CompatGeolocationError
 
         if let clError = error as? CLError {
             switch clError.code {
@@ -450,13 +450,13 @@ class LocationManager: NSObject, CLLocationManagerDelegate {
         invokeQueuedAuthorizationCallbacks(error: error)
     }
 
-    private func createGeolocationError(for status: CLAuthorizationStatus) -> GeolocationError {
+    private func createGeolocationError(for status: CLAuthorizationStatus) -> CompatGeolocationError {
         let message =
             status == .restricted
             ? "This application is not authorized to use location services"
             : "User denied access to location services."
 
-        return GeolocationError(
+        return CompatGeolocationError(
             code: Double(PERMISSION_DENIED),
             message: message,
             PERMISSION_DENIED: Double(PERMISSION_DENIED),
@@ -466,7 +466,7 @@ class LocationManager: NSObject, CLLocationManagerDelegate {
     }
 
     private func invokeQueuedAuthorizationCallbacks(
-        success: Bool = false, error: GeolocationError? = nil
+        success: Bool = false, error: CompatGeolocationError? = nil
     ) {
         for callback in queuedAuthorizationCallbacks {
             if success {
@@ -478,7 +478,7 @@ class LocationManager: NSObject, CLLocationManagerDelegate {
         queuedAuthorizationCallbacks.removeAll()
     }
 
-    func locationToPosition(_ location: CLLocation) -> GeolocationResponse {
+    func locationToPosition(_ location: CLLocation) -> CompatGeolocationResponse {
         let coordsObj = GeolocationCoordinates(
             latitude: location.coordinate.latitude,
             longitude: location.coordinate.longitude,
@@ -489,7 +489,7 @@ class LocationManager: NSObject, CLLocationManagerDelegate {
             speed: location.nitroGeolocationSpeed
         )
 
-        let position = GeolocationResponse(
+        let position = CompatGeolocationResponse(
             coords: coordsObj,
             timestamp: location.timestamp.timeIntervalSince1970 * 1000
         )
@@ -497,8 +497,8 @@ class LocationManager: NSObject, CLLocationManagerDelegate {
         return position
     }
 
-    private func createError(code: Int, message: String) -> GeolocationError {
-        return GeolocationError(
+    private func createError(code: Int, message: String) -> CompatGeolocationError {
+        return CompatGeolocationError(
             code: Double(code),
             message: message,
             PERMISSION_DENIED: Double(PERMISSION_DENIED),

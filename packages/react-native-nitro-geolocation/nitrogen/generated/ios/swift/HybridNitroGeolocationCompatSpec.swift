@@ -13,10 +13,10 @@ public protocol HybridNitroGeolocationCompatSpec_protocol: HybridObject {
   
 
   // Methods
-  func setRNConfiguration(config: RNConfigurationInternal) throws -> Void
-  func requestAuthorization(success: (() -> Void)?, error: ((_ error: GeolocationError) -> Void)?) throws -> Void
-  func getCurrentPosition(success: @escaping (_ position: GeolocationResponse) -> Void, error: ((_ error: GeolocationError) -> Void)?, options: GeolocationOptions?) throws -> Void
-  func watchPosition(success: @escaping (_ position: GeolocationResponse) -> Void, error: ((_ error: GeolocationError) -> Void)?, options: GeolocationOptions?) throws -> Double
+  func setRNConfiguration(config: CompatGeolocationConfigurationInternal) throws -> Void
+  func requestAuthorization(success: (() -> Void)?, error: ((_ error: CompatGeolocationError) -> Void)?) throws -> Void
+  func getCurrentPosition(success: @escaping (_ position: CompatGeolocationResponse) -> Void, error: ((_ error: CompatGeolocationError) -> Void)?, options: CompatGeolocationOptions?) throws -> Void
+  func watchPosition(success: @escaping (_ position: CompatGeolocationResponse) -> Void, error: ((_ error: CompatGeolocationError) -> Void)?, options: CompatGeolocationOptions?) throws -> Double
   func clearWatch(watchId: Double) throws -> Void
   func stopObserving() throws -> Void
 }

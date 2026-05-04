@@ -25,12 +25,12 @@ sealed class PermissionResult {
 class RequestAuthorization(
         private val reactContext: ReactApplicationContext,
         private val onPermissionResult:
-                (PermissionResult, (() -> Unit)?, ((GeolocationError) -> Unit)?) -> Unit
+                (PermissionResult, (() -> Unit)?, ((CompatGeolocationError) -> Unit)?) -> Unit
 ) {
     private var pendingAuthSuccess: (() -> Unit)? = null
-    private var pendingAuthError: ((error: GeolocationError) -> Unit)? = null
+    private var pendingAuthError: ((error: CompatGeolocationError) -> Unit)? = null
 
-    fun execute(success: (() -> Unit)?, error: ((error: GeolocationError) -> Unit)?) {
+    fun execute(success: (() -> Unit)?, error: ((error: CompatGeolocationError) -> Unit)?) {
         val state = determinePermissionState()
         executePermissionAction(state, success, error)
     }
@@ -81,7 +81,7 @@ class RequestAuthorization(
     private fun executePermissionAction(
             state: PermissionState,
             success: (() -> Unit)?,
-            error: ((error: GeolocationError) -> Unit)?
+            error: ((error: CompatGeolocationError) -> Unit)?
     ) {
         when (state) {
             is PermissionState.LegacyAndroid -> success?.invoke()
@@ -93,7 +93,7 @@ class RequestAuthorization(
 
     private fun showPermissionDialog(
             success: (() -> Unit)?,
-            error: ((error: GeolocationError) -> Unit)?
+            error: ((error: CompatGeolocationError) -> Unit)?
     ) {
         pendingAuthSuccess = success
         pendingAuthError = error
@@ -141,7 +141,7 @@ class RequestAuthorization(
     }
 
     private fun createPermissionError(message: String) =
-            GeolocationError(
+            CompatGeolocationError(
                     code = PERMISSION_DENIED.toDouble(),
                     message = message,
                     PERMISSION_DENIED = PERMISSION_DENIED.toDouble(),

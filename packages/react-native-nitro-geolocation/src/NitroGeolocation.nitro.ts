@@ -1,5 +1,5 @@
 import type { HybridObject } from "react-native-nitro-modules";
-import type { ModernGeolocationResponse } from "./types";
+import type { GeolocationResponse } from "./types";
 
 /**
  * Permission status for location services.
@@ -26,7 +26,7 @@ export type LocationProvider = "playServices" | "android_platform" | "auto";
  * Global configuration for geolocation services.
  * Set once via GeolocationProvider.
  */
-export interface ModernGeolocationConfiguration {
+export interface GeolocationConfiguration {
   /**
    * Automatically request location permission when GeolocationProvider mounts.
    * When true, permission is requested immediately on app start.
@@ -93,7 +93,7 @@ export interface LocationError {
 }
 
 /**
- * Modern Geolocation Nitro Module.
+ * Geolocation Nitro Module.
  *
  * Key Features:
  * - Promise-based for async operations
@@ -109,7 +109,7 @@ export interface NitroGeolocation
    *
    * @param config - Platform-specific configuration
    */
-  setConfiguration(config: ModernGeolocationConfiguration): void;
+  setConfiguration(config: GeolocationConfiguration): void;
 
   /**
    * Check current location permission status.
@@ -141,7 +141,7 @@ export interface NitroGeolocation
    */
   getCurrentPosition(
     options?: LocationRequestOptions
-  ): Promise<ModernGeolocationResponse>;
+  ): Promise<GeolocationResponse>;
 
   /**
    * Start watching for continuous location updates.
@@ -159,7 +159,7 @@ export interface NitroGeolocation
    * @returns Subscription token (UUID string) for cleanup
    */
   watchPosition(
-    success: (position: ModernGeolocationResponse) => void,
+    success: (position: GeolocationResponse) => void,
     error?: (error: LocationError) => void,
     options?: LocationRequestOptions
   ): string;

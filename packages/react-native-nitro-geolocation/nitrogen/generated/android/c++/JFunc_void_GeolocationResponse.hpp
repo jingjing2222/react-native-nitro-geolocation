@@ -14,11 +14,13 @@
 #include <functional>
 #include <NitroModules/JNICallable.hpp>
 #include "JGeolocationResponse.hpp"
+#include <optional>
+#include "LocationProviderUsed.hpp"
+#include "JLocationProviderUsed.hpp"
 #include "GeolocationCoordinates.hpp"
 #include "JGeolocationCoordinates.hpp"
 #include <NitroModules/Null.hpp>
 #include <variant>
-#include <optional>
 #include "JNullableDouble.hpp"
 #include <NitroModules/JNull.hpp>
 

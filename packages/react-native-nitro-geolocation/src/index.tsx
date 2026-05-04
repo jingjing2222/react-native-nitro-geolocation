@@ -1,7 +1,7 @@
 /**
- * Modern Geolocation API for React Native.
+ * Geolocation API for React Native.
  *
- * This is the main entry point for the modern, functional API.
+ * This is the main entry point for the functional API.
  * For legacy compatibility, use: import Geolocation from 'react-native-nitro-geolocation/compat'
  *
  * @example

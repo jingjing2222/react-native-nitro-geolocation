@@ -49,7 +49,7 @@ private class LocationManagerDelegate: NSObject, CLLocationManagerDelegate {
 }
 
 /**
- * Modern Geolocation implementation with Promise-based API.
+ * Geolocation implementation with Promise-based API.
  *
  * Key features:
  * - Promise-based permission and getCurrentPosition
@@ -93,14 +93,14 @@ class NitroGeolocation: HybridNitroGeolocationSpec {
     // Watch subscription storage (first-class functions!)
     private struct WatchSubscription {
         let token: String
-        let success: (ModernGeolocationResponse) -> Void
+        let success: (GeolocationResponse) -> Void
         let error: ((LocationError) -> Void)?
         let options: ParsedOptions
     }
 
     // MARK: - Properties
 
-    private var configuration: ModernGeolocationConfiguration?
+    private var configuration: GeolocationConfiguration?
     private var locationManager: CLLocationManager?
     private var locationManagerDelegate: LocationManagerDelegate?
     private var lastLocation: CLLocation?
@@ -114,7 +114,7 @@ class NitroGeolocation: HybridNitroGeolocationSpec {
 
     private struct PositionRequest {
         let id: UUID
-        let resolver: (Result<ModernGeolocationResponse, Error>) -> Void
+        let resolver: (Result<GeolocationResponse, Error>) -> Void
         let options: ParsedOptions
         var timer: DispatchSourceTimer?
     }
@@ -129,7 +129,7 @@ class NitroGeolocation: HybridNitroGeolocationSpec {
 
     // MARK: - Configuration
 
-    func setConfiguration(config: ModernGeolocationConfiguration) {
+    func setConfiguration(config: GeolocationConfiguration) {
         self.configuration = config
     }
 
@@ -175,8 +175,8 @@ class NitroGeolocation: HybridNitroGeolocationSpec {
 
     // MARK: - Get Current Position (Promise-based)
 
-    func getCurrentPosition(options: LocationRequestOptions?) throws -> Promise<ModernGeolocationResponse> {
-        let promise = Promise<ModernGeolocationResponse>()
+    func getCurrentPosition(options: LocationRequestOptions?) throws -> Promise<GeolocationResponse> {
+        let promise = Promise<GeolocationResponse>()
 
         // Check permission
         let status = CLLocationManager.authorizationStatus()
@@ -250,7 +250,7 @@ class NitroGeolocation: HybridNitroGeolocationSpec {
     // MARK: - Watch Position (Callback-based with tokens)
 
     func watchPosition(
-        success: @escaping (ModernGeolocationResponse) -> Void,
+        success: @escaping (GeolocationResponse) -> Void,
         error: ((LocationError) -> Void)?,
         options: LocationRequestOptions?
     ) -> String {
@@ -553,7 +553,7 @@ class NitroGeolocation: HybridNitroGeolocationSpec {
         }
     }
 
-    private func locationToPosition(_ location: CLLocation) -> ModernGeolocationResponse {
+    private func locationToPosition(_ location: CLLocation) -> GeolocationResponse {
         let coords = GeolocationCoordinates(
             latitude: location.coordinate.latitude,
             longitude: location.coordinate.longitude,
@@ -564,7 +564,7 @@ class NitroGeolocation: HybridNitroGeolocationSpec {
             speed: location.nitroGeolocationSpeed
         )
 
-        return ModernGeolocationResponse(
+        return GeolocationResponse(
             mocked: location.nitroGeolocationMocked,
             provider: location.nitroGeolocationProvider,
             coords: coords,

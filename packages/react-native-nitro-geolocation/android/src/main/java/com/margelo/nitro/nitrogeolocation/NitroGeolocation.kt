@@ -35,7 +35,7 @@ private const val NO_APPROXIMATE_LOCATION_PROVIDER_AVAILABLE_MESSAGE =
         "ACCESS_COARSE_LOCATION is granted, but no enabled coarse-compatible provider is available."
 
 /**
- * Modern Geolocation implementation for Android.
+ * Geolocation implementation for Android.
  *
  * Key features:
  * - Promise-based permission and getCurrentPosition
@@ -80,14 +80,14 @@ class NitroGeolocation(
 
     private data class WatchSubscription(
         val token: String,
-        val success: (ModernGeolocationResponse) -> Unit,
+        val success: (GeolocationResponse) -> Unit,
         val error: ((LocationError) -> Unit)?,
         val options: ParsedOptions
     )
 
     private data class PositionRequest(
         val id: UUID,
-        val resolver: (Result<ModernGeolocationResponse>) -> Unit,
+        val resolver: (Result<GeolocationResponse>) -> Unit,
         val options: ParsedOptions,
         val handler: Handler,
         val providers: List<String>,
@@ -102,7 +102,7 @@ class NitroGeolocation(
 
     // MARK: - Properties
 
-    private var configuration: ModernGeolocationConfiguration? = null
+    private var configuration: GeolocationConfiguration? = null
     private val locationManager: AndroidLocationManager by lazy {
         reactContext.getSystemService(Context.LOCATION_SERVICE) as AndroidLocationManager
     }
@@ -127,7 +127,7 @@ class NitroGeolocation(
 
     // MARK: - Configuration
 
-    override fun setConfiguration(config: ModernGeolocationConfiguration) {
+    override fun setConfiguration(config: GeolocationConfiguration) {
         this.configuration = config
     }
 
@@ -182,8 +182,8 @@ class NitroGeolocation(
 
     // MARK: - Get Current Position (Promise-based)
 
-    override fun getCurrentPosition(options: LocationRequestOptions?): Promise<ModernGeolocationResponse> {
-        val promise = Promise<ModernGeolocationResponse>()
+    override fun getCurrentPosition(options: LocationRequestOptions?): Promise<GeolocationResponse> {
+        val promise = Promise<GeolocationResponse>()
 
         // Check permission
         if (!hasLocationPermission()) {
@@ -222,7 +222,7 @@ class NitroGeolocation(
     // MARK: - Watch Position (Callback-based with tokens)
 
     override fun watchPosition(
-        success: (ModernGeolocationResponse) -> Unit,
+        success: (GeolocationResponse) -> Unit,
         error: ((LocationError) -> Unit)?,
         options: LocationRequestOptions?
     ): String {
@@ -409,7 +409,7 @@ class NitroGeolocation(
     private fun requestFreshLocation(
         providers: List<String>,
         options: ParsedOptions,
-        resolver: (Result<ModernGeolocationResponse>) -> Unit
+        resolver: (Result<GeolocationResponse>) -> Unit
     ) {
         val id = UUID.randomUUID()
         val handler = Handler(Looper.getMainLooper())
@@ -446,7 +446,7 @@ class NitroGeolocation(
             return
         }
 
-        // Use modern API on Android 11+
+        // Use the Android 11+ platform API when available.
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
             requestCurrentLocationModern(provider, requestId, request.handler, remainingTimeoutMillis)
         } else {
@@ -733,7 +733,7 @@ class NitroGeolocation(
 
     // MARK: - Helper Functions - Conversion
 
-    private fun locationToPosition(location: Location): ModernGeolocationResponse {
+    private fun locationToPosition(location: Location): GeolocationResponse {
         val coords = GeolocationCoordinates(
             latitude = location.latitude,
             longitude = location.longitude,
@@ -744,7 +744,7 @@ class NitroGeolocation(
             speed = location.speedValue()
         )
 
-        return ModernGeolocationResponse(
+        return GeolocationResponse(
             coords = coords,
             timestamp = location.time.toDouble(),
             mocked = location.isMocked(),

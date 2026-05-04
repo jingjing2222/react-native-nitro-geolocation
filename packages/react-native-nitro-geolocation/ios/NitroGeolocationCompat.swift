@@ -3,7 +3,7 @@ import CoreLocation
 class NitroGeolocationCompat: HybridNitroGeolocationCompatSpec {
     // MARK: - Properties
 
-    private var configuration: RNConfigurationInternal = RNConfigurationInternal(
+    private var configuration: CompatGeolocationConfigurationInternal = CompatGeolocationConfigurationInternal(
         skipPermissionRequests: false,
         authorizationLevel: nil,
         enableBackgroundLocationUpdates: nil,
@@ -14,11 +14,11 @@ class NitroGeolocationCompat: HybridNitroGeolocationCompatSpec {
 
     // MARK: - Public API
 
-    public func setRNConfiguration(config: RNConfigurationInternal) throws {
+    public func setRNConfiguration(config: CompatGeolocationConfigurationInternal) throws {
         configuration = config
     }
 
-    public func requestAuthorization(success: (() -> Void)?, error: ((GeolocationError) -> Void)?)
+    public func requestAuthorization(success: (() -> Void)?, error: ((CompatGeolocationError) -> Void)?)
         throws
     {
         let authType = determineAuthorizationType()
@@ -35,8 +35,8 @@ class NitroGeolocationCompat: HybridNitroGeolocationCompatSpec {
     }
 
     public func getCurrentPosition(
-        success: @escaping (GeolocationResponse) -> Void, error: ((GeolocationError) -> Void)?,
-        options: GeolocationOptions?
+        success: @escaping (CompatGeolocationResponse) -> Void, error: ((CompatGeolocationError) -> Void)?,
+        options: CompatGeolocationOptions?
     ) throws {
         // Fast path: check cached location immediately (no dispatch overhead!)
         let parsedOptions = LocationManager.ParsedOptions.parse(from: options)
@@ -52,8 +52,8 @@ class NitroGeolocationCompat: HybridNitroGeolocationCompatSpec {
     }
 
     public func watchPosition(
-        success: @escaping (GeolocationResponse) -> Void, error: ((GeolocationError) -> Void)?,
-        options: GeolocationOptions?
+        success: @escaping (CompatGeolocationResponse) -> Void, error: ((CompatGeolocationError) -> Void)?,
+        options: CompatGeolocationOptions?
     ) throws -> Double {
         return locationManager.watchPosition(success: success, error: error, options: options)
     }

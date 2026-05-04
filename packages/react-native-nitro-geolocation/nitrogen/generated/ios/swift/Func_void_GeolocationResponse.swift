@@ -8,21 +8,21 @@
 import NitroModules
 
 /**
- * Wraps a Swift `(_ position: GeolocationResponse) -> Void` as a class.
+ * Wraps a Swift `(_ value: GeolocationResponse) -> Void` as a class.
  * This class can be used from C++, e.g. to wrap the Swift closure as a `std::function`.
  */
 public final class Func_void_GeolocationResponse {
   public typealias bridge = margelo.nitro.nitrogeolocation.bridge.swift
 
-  private let closure: (_ position: GeolocationResponse) -> Void
+  private let closure: (_ value: GeolocationResponse) -> Void
 
-  public init(_ closure: @escaping (_ position: GeolocationResponse) -> Void) {
+  public init(_ closure: @escaping (_ value: GeolocationResponse) -> Void) {
     self.closure = closure
   }
 
   @inline(__always)
-  public func call(position: GeolocationResponse) -> Void {
-    self.closure(position)
+  public func call(value: GeolocationResponse) -> Void {
+    self.closure(value)
   }
 
   /**

@@ -1,7 +1,7 @@
 import type { NitroGeolocation } from "./NitroGeolocation.nitro";
 import type {
-  NitroGeolocationCompat,
-  RNConfigurationInternal
+  CompatGeolocationConfigurationInternal,
+  NitroGeolocationCompat
 } from "./NitroGeolocationCompat.nitro";
 
 type CallbackValue<TCallback> = TCallback extends (value: infer Value) => void
@@ -46,7 +46,7 @@ export type GeolocationConfiguration = Omit<
 };
 
 export type CompatGeolocationConfiguration = Omit<
-  RNConfigurationInternal,
+  CompatGeolocationConfigurationInternal,
   "locationProvider"
 > & {
   locationProvider?: LocationProvider;

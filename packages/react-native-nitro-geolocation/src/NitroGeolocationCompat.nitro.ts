@@ -1,8 +1,8 @@
 import type { HybridObject } from "react-native-nitro-modules";
 import type {
-  GeolocationError,
-  GeolocationOptions,
-  GeolocationResponse
+  CompatGeolocationError,
+  CompatGeolocationOptions,
+  CompatGeolocationResponse
 } from "./types";
 
 // Configuration - Internal (for C++ codegen, avoiding ANDROID macro conflict)
@@ -12,7 +12,7 @@ export type LocationProviderInternal =
   | "android_platform"
   | "auto";
 
-export interface RNConfigurationInternal {
+export interface CompatGeolocationConfigurationInternal {
   skipPermissionRequests: boolean;
   authorizationLevel?: AuthorizationLevelInternal;
   enableBackgroundLocationUpdates?: boolean;
@@ -21,20 +21,20 @@ export interface RNConfigurationInternal {
 
 export interface NitroGeolocationCompat
   extends HybridObject<{ ios: "swift"; android: "kotlin" }> {
-  setRNConfiguration(config: RNConfigurationInternal): void;
+  setRNConfiguration(config: CompatGeolocationConfigurationInternal): void;
   requestAuthorization(
     success?: () => void,
-    error?: (error: GeolocationError) => void
+    error?: (error: CompatGeolocationError) => void
   ): void;
   getCurrentPosition(
-    success: (position: GeolocationResponse) => void,
-    error?: (error: GeolocationError) => void,
-    options?: GeolocationOptions
+    success: (position: CompatGeolocationResponse) => void,
+    error?: (error: CompatGeolocationError) => void,
+    options?: CompatGeolocationOptions
   ): void;
   watchPosition(
-    success: (position: GeolocationResponse) => void,
-    error?: (error: GeolocationError) => void,
-    options?: GeolocationOptions
+    success: (position: CompatGeolocationResponse) => void,
+    error?: (error: CompatGeolocationError) => void,
+    options?: CompatGeolocationOptions
   ): number;
   clearWatch(watchId: number): void;
   stopObserving(): void;
