@@ -73,7 +73,8 @@ export type {
   AuthorizationLevel,
   LocationProvider,
   LocationProviderUsed,
-  GeolocationConfiguration
+  GeolocationConfiguration,
+  ModernGeolocationConfiguration
 } from "./publicTypes";
 
 // Pure utility functions (advanced users only)

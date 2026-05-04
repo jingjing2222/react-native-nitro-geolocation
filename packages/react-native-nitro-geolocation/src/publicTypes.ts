@@ -45,6 +45,12 @@ export type GeolocationConfiguration = Omit<
   locationProvider?: LocationProvider;
 };
 
+/**
+ * @deprecated Use `GeolocationConfiguration` instead. This alias preserves the
+ * pre-v1.2 root export for minor-version compatibility.
+ */
+export type ModernGeolocationConfiguration = GeolocationConfiguration;
+
 export type CompatGeolocationConfiguration = Omit<
   RNConfigurationInternal,
   "locationProvider"
