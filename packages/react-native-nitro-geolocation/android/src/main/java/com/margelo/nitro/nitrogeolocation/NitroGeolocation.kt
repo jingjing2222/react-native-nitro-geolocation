@@ -734,35 +734,14 @@ class NitroGeolocation(
     // MARK: - Helper Functions - Conversion
 
     private fun locationToPosition(location: Location): ModernGeolocationResponse {
-        val altitude = if (location.hasAltitude()) {
-            NullableDouble.create(location.altitude)
-        } else {
-            null
-        }
-        val altitudeAccuracy = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O && location.hasVerticalAccuracy()) {
-            NullableDouble.create(location.verticalAccuracyMeters.toDouble())
-        } else {
-            null
-        }
-        val heading = if (location.hasBearing()) {
-            NullableDouble.create(location.bearing.toDouble())
-        } else {
-            null
-        }
-        val speed = if (location.hasSpeed()) {
-            NullableDouble.create(location.speed.toDouble())
-        } else {
-            null
-        }
-
         val coords = GeolocationCoordinates(
             latitude = location.latitude,
             longitude = location.longitude,
-            altitude = altitude,
+            altitude = location.altitudeValue(),
             accuracy = location.accuracy.toDouble(),
-            altitudeAccuracy = altitudeAccuracy,
-            heading = heading,
-            speed = speed
+            altitudeAccuracy = location.altitudeAccuracyValue(),
+            heading = location.headingValue(),
+            speed = location.speedValue()
         )
 
         return ModernGeolocationResponse(

@@ -1,4 +1,4 @@
-import type { ModernGeolocationResponse } from "../types";
+import type { ModernGeolocationResponse } from "../publicTypes";
 
 declare const __DEV__: boolean;
 

@@ -1,4 +1,5 @@
-// Public API types (compatible with @react-native-community/geolocation)
+// Shared Nitro schema structs. Public entry points re-export inferred aliases
+// from the Nitro/Compat specs in publicTypes.ts.
 export type AuthorizationLevel = "always" | "whenInUse" | "auto";
 export type LocationProvider = "playServices" | "android" | "auto";
 export type LocationProviderUsed =

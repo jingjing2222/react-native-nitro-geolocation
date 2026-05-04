@@ -291,19 +291,11 @@ class GetCurrentPosition(private val reactContext: ReactApplicationContext) {
                         GeolocationCoordinates(
                                 latitude = location.latitude,
                                 longitude = location.longitude,
-                                altitude = if (location.hasAltitude()) NullableDouble.create(location.altitude) else null,
+                                altitude = location.altitudeValue(),
                                 accuracy = location.accuracy.toDouble(),
-                                altitudeAccuracy =
-                                        if (android.os.Build.VERSION.SDK_INT >=
-                                                        android.os.Build.VERSION_CODES.O &&
-                                                        location.hasVerticalAccuracy()
-                                        )
-                                                NullableDouble.create(location.verticalAccuracyMeters.toDouble())
-                                        else null,
-                                heading =
-                                        if (location.hasBearing()) NullableDouble.create(location.bearing.toDouble())
-                                        else null,
-                                speed = if (location.hasSpeed()) NullableDouble.create(location.speed.toDouble()) else null
+                                altitudeAccuracy = location.altitudeAccuracyValue(),
+                                heading = location.headingValue(),
+                                speed = location.speedValue()
                         ),
                 timestamp = location.time.toDouble()
         )

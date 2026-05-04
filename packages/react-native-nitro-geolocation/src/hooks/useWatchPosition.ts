@@ -4,7 +4,7 @@ import type {
   LocationRequestOptions
 } from "../NitroGeolocation.nitro";
 import { unwatch, watchPosition } from "../api";
-import type { ModernGeolocationResponse } from "../types";
+import type { ModernGeolocationResponse } from "../publicTypes";
 
 /**
  * Options for useWatchPosition hook.

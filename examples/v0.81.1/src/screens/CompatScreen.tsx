@@ -120,24 +120,21 @@ export default function CompatScreen() {
         <Text style={styles.positionText} testID="accuracy-text">
           Accuracy: {position.coords.accuracy.toFixed(2)}m
         </Text>
-        {position.coords.altitude !== null &&
-          position.coords.altitude !== undefined && (
-            <Text style={styles.positionText}>
-              Altitude: {position.coords.altitude.toFixed(2)}m
-            </Text>
-          )}
-        {position.coords.speed !== null &&
-          position.coords.speed !== undefined && (
-            <Text style={styles.positionText}>
-              Speed: {position.coords.speed.toFixed(2)}m/s
-            </Text>
-          )}
-        {position.coords.heading !== null &&
-          position.coords.heading !== undefined && (
-            <Text style={styles.positionText}>
-              Heading: {position.coords.heading.toFixed(2)}°
-            </Text>
-          )}
+        {position.coords.altitude !== null && (
+          <Text style={styles.positionText}>
+            Altitude: {position.coords.altitude.toFixed(2)}m
+          </Text>
+        )}
+        {position.coords.speed !== null && (
+          <Text style={styles.positionText}>
+            Speed: {position.coords.speed.toFixed(2)}m/s
+          </Text>
+        )}
+        {position.coords.heading !== null && (
+          <Text style={styles.positionText}>
+            Heading: {position.coords.heading.toFixed(2)}°
+          </Text>
+        )}
         <Text style={styles.positionText}>
           Time: {new Date(position.timestamp).toLocaleString()}
         </Text>

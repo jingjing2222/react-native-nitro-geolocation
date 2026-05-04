@@ -479,19 +479,14 @@ class LocationManager: NSObject, CLLocationManagerDelegate {
     }
 
     func locationToPosition(_ location: CLLocation) -> GeolocationResponse {
-        let altitude = location.verticalAccuracy < 0 ? 0.0 : location.altitude
-        let altitudeAccuracy = location.verticalAccuracy < 0 ? 0.0 : location.verticalAccuracy
-        let heading = location.course >= 0 ? location.course : -1.0
-        let speed = location.speed >= 0 ? location.speed : 0.0
-
         let coordsObj = GeolocationCoordinates(
             latitude: location.coordinate.latitude,
             longitude: location.coordinate.longitude,
-            altitude: .second(altitude),
+            altitude: location.nitroGeolocationAltitude,
             accuracy: location.horizontalAccuracy,
-            altitudeAccuracy: .second(altitudeAccuracy),
-            heading: .second(heading),
-            speed: .second(speed)
+            altitudeAccuracy: location.nitroGeolocationAltitudeAccuracy,
+            heading: location.nitroGeolocationHeading,
+            speed: location.nitroGeolocationSpeed
         )
 
         let position = GeolocationResponse(

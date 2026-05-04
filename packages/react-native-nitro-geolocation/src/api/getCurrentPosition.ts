@@ -2,7 +2,7 @@ import type { LocationRequestOptions } from "../NitroGeolocation.nitro";
 import { NitroGeolocationHybridObject } from "../NitroGeolocationModule";
 import { isDevtoolsEnabled } from "../devtools";
 import { getDevtoolsCurrentPosition } from "../devtools/getCurrentPosition";
-import type { ModernGeolocationResponse } from "../types";
+import type { ModernGeolocationResponse } from "../publicTypes";
 
 /**
  * Get current location (one-time request).

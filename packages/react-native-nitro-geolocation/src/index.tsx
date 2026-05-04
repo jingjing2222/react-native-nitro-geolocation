@@ -75,7 +75,7 @@ export type {
   LocationProvider,
   LocationProviderUsed,
   ModernGeolocationConfiguration
-} from "./types";
+} from "./publicTypes";
 
 // Pure utility functions (advanced users only)
 export * from "./utils";
