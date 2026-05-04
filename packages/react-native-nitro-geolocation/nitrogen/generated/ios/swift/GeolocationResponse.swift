@@ -18,8 +18,8 @@ public extension GeolocationResponse {
   /**
    * Create a new instance of `GeolocationResponse`.
    */
-  init(mocked: Bool?, provider: LocationProviderUsed?, coords: GeolocationCoordinates, timestamp: Double) {
-    self.init({ () -> bridge.std__optional_bool_ in
+  init(coords: GeolocationCoordinates, timestamp: Double, mocked: Bool?, provider: LocationProviderUsed?) {
+    self.init(coords, timestamp, { () -> bridge.std__optional_bool_ in
       if let __unwrappedValue = mocked {
         return bridge.create_std__optional_bool_(__unwrappedValue)
       } else {
@@ -31,7 +31,17 @@ public extension GeolocationResponse {
       } else {
         return .init()
       }
-    }(), coords, timestamp)
+    }())
+  }
+
+  @inline(__always)
+  var coords: GeolocationCoordinates {
+    return self.__coords
+  }
+
+  @inline(__always)
+  var timestamp: Double {
+    return self.__timestamp
   }
 
   @inline(__always)
@@ -49,15 +59,5 @@ public extension GeolocationResponse {
   @inline(__always)
   var provider: LocationProviderUsed? {
     return self.__provider.value
-  }
-
-  @inline(__always)
-  var coords: GeolocationCoordinates {
-    return self.__coords
-  }
-
-  @inline(__always)
-  var timestamp: Double {
-    return self.__timestamp
   }
 }

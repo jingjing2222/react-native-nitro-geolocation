@@ -51,6 +51,9 @@ export {
   setConfiguration,
   checkPermission,
   requestPermission,
+  hasServicesEnabled,
+  getProviderStatus,
+  requestLocationSettings,
   getCurrentPosition,
   watchPosition,
   unwatch,
@@ -64,12 +67,14 @@ export * from "./hooks";
 export type {
   PermissionStatus,
   LocationRequestOptions,
+  LocationSettingsOptions,
   LocationError
 } from "./NitroGeolocation.nitro";
 
 export type {
   GeolocationResponse,
   GeolocationCoordinates,
+  LocationProviderStatus,
   AuthorizationLevel,
   LocationProvider,
   LocationProviderUsed,

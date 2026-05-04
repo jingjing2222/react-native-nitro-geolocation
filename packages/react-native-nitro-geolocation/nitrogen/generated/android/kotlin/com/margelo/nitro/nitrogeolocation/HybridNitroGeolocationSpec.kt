@@ -26,21 +26,19 @@ import com.margelo.nitro.core.HybridObject
 )
 abstract class HybridNitroGeolocationSpec: HybridObject() {
   // Properties
-  
+
 
   // Methods
   @DoNotStrip
   @Keep
   abstract fun setConfiguration(config: GeolocationConfiguration): Unit
-  
+
   @DoNotStrip
   @Keep
   abstract fun checkPermission(): Promise<PermissionStatus>
-  
-  @DoNotStrip
-  @Keep
+
   abstract fun requestPermission(success: (status: PermissionStatus) -> Unit, error: ((error: LocationError) -> Unit)?): Unit
-  
+
   @DoNotStrip
   @Keep
   private fun requestPermission_cxx(success: Func_void_PermissionStatus, error: Func_void_LocationError?): Unit {
@@ -50,6 +48,21 @@ abstract class HybridNitroGeolocationSpec: HybridObject() {
 
   @DoNotStrip
   @Keep
+  abstract fun hasServicesEnabled(): Promise<Boolean>
+
+  @DoNotStrip
+  @Keep
+  abstract fun getProviderStatus(): Promise<LocationProviderStatus>
+
+  abstract fun requestLocationSettings(success: (status: LocationProviderStatus) -> Unit, error: ((error: LocationError) -> Unit)?, options: LocationSettingsOptions?): Unit
+
+  @DoNotStrip
+  @Keep
+  private fun requestLocationSettings_cxx(success: Func_void_LocationProviderStatus, error: Func_void_LocationError?, options: LocationSettingsOptions?): Unit {
+    val __result = requestLocationSettings(success, error?.let { it }, options)
+    return __result
+  }
+
   abstract fun getCurrentPosition(success: (position: GeolocationResponse) -> Unit, error: ((error: LocationError) -> Unit)?, options: LocationRequestOptions?): Unit
 
   @DoNotStrip
@@ -58,20 +71,20 @@ abstract class HybridNitroGeolocationSpec: HybridObject() {
     val __result = getCurrentPosition(success, error?.let { it }, options)
     return __result
   }
-  
+
   abstract fun watchPosition(success: (position: GeolocationResponse) -> Unit, error: ((error: LocationError) -> Unit)?, options: LocationRequestOptions?): String
-  
+
   @DoNotStrip
   @Keep
   private fun watchPosition_cxx(success: Func_void_GeolocationResponse, error: Func_void_LocationError?, options: LocationRequestOptions?): String {
     val __result = watchPosition(success, error?.let { it }, options)
     return __result
   }
-  
+
   @DoNotStrip
   @Keep
   abstract fun unwatch(token: String): Unit
-  
+
   @DoNotStrip
   @Keep
   abstract fun stopObserving(): Unit

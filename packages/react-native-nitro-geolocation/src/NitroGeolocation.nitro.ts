@@ -1,5 +1,5 @@
 import type { HybridObject } from "react-native-nitro-modules";
-import type { GeolocationResponse } from "./types";
+import type { GeolocationResponse, LocationProviderStatus } from "./types";
 
 /**
  * Permission status for location services.
@@ -85,6 +85,37 @@ export interface LocationRequestOptions {
 }
 
 /**
+ * Android-only location settings request options.
+ *
+ * Used by `requestLocationSettings()` on Android to build the native
+ * `LocationSettingsRequest`. On iOS these options are ignored because iOS does
+ * not provide an equivalent system settings resolution dialog.
+ */
+export interface LocationSettingsOptions {
+  /**
+   * Request high accuracy Android location settings.
+   * Defaults to true because this API is primarily used before user-facing
+   * precise location flows.
+   */
+  enableHighAccuracy?: boolean;
+
+  /** Desired update interval in milliseconds. */
+  interval?: number;
+
+  /** Fastest acceptable update interval in milliseconds. */
+  fastestInterval?: number;
+
+  /** Minimum distance change in meters. */
+  distanceFilter?: number;
+
+  /** Ask Android to always show the resolution dialog when possible. */
+  alwaysShow?: boolean;
+
+  /** Require BLE availability for the location settings request. */
+  needBle?: boolean;
+}
+
+/**
  * Location error structure.
  */
 export interface LocationError {
@@ -132,6 +163,42 @@ export interface NitroGeolocation
   requestPermission(
     success: (status: PermissionStatus) => void,
     error?: (error: LocationError) => void
+  ): void;
+
+  /**
+   * Check whether device-level location services are enabled.
+   *
+   * Android: checks Android system location/provider state.
+   * iOS: maps to `CLLocationManager.locationServicesEnabled()`.
+   */
+  hasServicesEnabled(): Promise<boolean>;
+
+  /**
+   * Get native provider/settings state.
+   *
+   * Android: returns Android provider availability and Google Location Accuracy
+   * state when available.
+   *
+   * iOS: returns Core Location service availability and app background location
+   * mode only. Android-specific provider fields are `undefined`.
+   */
+  getProviderStatus(): Promise<LocationProviderStatus>;
+
+  /**
+   * Android-only settings resolution API.
+   *
+   * Android: checks whether current device settings satisfy the requested
+   * location requirements and shows the native settings resolution dialog when
+   * Android can resolve the mismatch.
+   *
+   * iOS: does not show a settings dialog and ignores `options`. It resolves
+   * with `locationServicesEnabled`, `backgroundModeEnabled`, and `undefined`
+   * Android-specific provider fields.
+   */
+  requestLocationSettings(
+    success: (status: LocationProviderStatus) => void,
+    error?: (error: LocationError) => void,
+    options?: LocationSettingsOptions
   ): void;
 
   /**

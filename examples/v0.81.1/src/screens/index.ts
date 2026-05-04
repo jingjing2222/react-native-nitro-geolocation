@@ -6,4 +6,5 @@ export { default as Issue67Screen } from "./Issue67Screen";
 export { default as LocationSimulationScreen } from "./LocationSimulationScreen";
 export { default as MockedMetadataScreen } from "./MockedMetadataScreen";
 export { default as PermissionCheckScreen } from "./PermissionCheckScreen";
+export { default as ProviderSettingsScreen } from "./ProviderSettingsScreen";
 export { default as WatchPositionScreen } from "./WatchPositionScreen";

@@ -148,6 +148,56 @@ function PermissionButton() {
 
 ## Location Functions
 
+### Android Provider and Settings
+
+Available since `v1.2`.
+
+Use these helpers before user-facing precise-location flows where the app needs
+to know whether Android device settings can satisfy the request.
+
+```tsx
+import {
+  getCurrentPosition,
+  getProviderStatus,
+  hasServicesEnabled,
+  requestLocationSettings
+} from 'react-native-nitro-geolocation';
+
+async function prepareAccurateLocation() {
+  const servicesEnabled = await hasServicesEnabled();
+  const providerStatus = await getProviderStatus();
+
+  if (!servicesEnabled || providerStatus.googleLocationAccuracyEnabled === false) {
+    await requestLocationSettings({
+      enableHighAccuracy: true,
+      interval: 5000,
+      fastestInterval: 1000
+    });
+  }
+
+  return getCurrentPosition({
+    enableHighAccuracy: true,
+    timeout: 15000
+  });
+}
+```
+
+**Functions**:
+
+- `hasServicesEnabled(): Promise<boolean>` - Checks whether device-level
+  location services are enabled.
+- `getProviderStatus(): Promise<LocationProviderStatus>` - Returns provider
+  state such as `locationServicesEnabled`, `gpsAvailable`,
+  `networkAvailable`, `passiveAvailable`, and Android Google Location Accuracy
+  when Google Play Services exposes it.
+- `requestLocationSettings(options?): Promise<LocationProviderStatus>` -
+  Checks the requested Android location settings and shows Android's native
+  resolution dialog when available. It resolves with the updated provider
+  status after the settings satisfy the request.
+
+`requestLocationSettings()` is Android-focused. On iOS it resolves with the
+current Core Location service status and does not show a settings dialog.
+
 ### getCurrentPosition()
 
 Get current location (one-time request).

@@ -5,6 +5,7 @@ import type {
 } from "./NitroGeolocationCompat.nitro";
 import type {
   GeolocationResponse as SchemaGeolocationResponse,
+  LocationProviderStatus as SchemaLocationProviderStatus,
   LocationProviderUsed as SchemaLocationProviderUsed
 } from "./types";
 
@@ -23,6 +24,7 @@ type NativeLocationProvider = NonNullable<
 >;
 
 export type GeolocationResponse = SchemaGeolocationResponse;
+export type LocationProviderStatus = SchemaLocationProviderStatus;
 
 export type CompatGeolocationResponse = CallbackValue<CompatSuccessCallback>;
 
