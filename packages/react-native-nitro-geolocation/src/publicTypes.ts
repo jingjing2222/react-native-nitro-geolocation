@@ -45,7 +45,10 @@ export type GeolocationConfiguration = Omit<
   locationProvider?: LocationProvider;
 };
 
-/** @deprecated Use GeolocationConfiguration instead. */
+/**
+ * @deprecated Use `GeolocationConfiguration` instead.
+ * This alias is kept only for backward compatibility.
+ */
 export type ModernGeolocationConfiguration = GeolocationConfiguration;
 
 export type CompatGeolocationConfiguration = Omit<
