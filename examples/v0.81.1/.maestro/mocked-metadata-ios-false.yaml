@@ -5,6 +5,10 @@ appId: nitrogeolocation.example
 # Run this on a physical iOS device/provider that is not using simulated
 # location. It is intentionally not included in all-tests.yaml because
 # simulator setLocation() state can persist outside app state.
+#
+# Do not add setLocation() to this flow. For mocked=false, the contract is about
+# source metadata from a real/non-simulated provider; injected coordinates must
+# not be part of the assertion logic.
 
 - launchApp:
     clearState: true

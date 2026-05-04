@@ -4,7 +4,8 @@ appId: nitrogeolocation.example
 #
 # This flow verifies the simulated-location branch. Maestro setLocation()
 # updates the simulator location, so iOS 15+ should expose mocked=true through
-# CLLocation sourceInformation.
+# CLLocation sourceInformation. Coordinate injection is part of this true-case
+# fixture.
 
 - launchApp:
     clearState: true
@@ -45,6 +46,10 @@ appId: nitrogeolocation.example
 
 - assertVisible:
     id: "position-info"
+- assertVisible:
+    id: "latitude-text"
+- assertVisible:
+    id: "longitude-text"
 - assertVisible:
     id: "mocked-text"
 - assertVisible: "Mocked: true"

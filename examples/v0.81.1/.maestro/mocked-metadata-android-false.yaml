@@ -5,6 +5,10 @@ appId: nitrogeolocation.example
 # Run this on a device/provider that is not currently using a test location
 # provider. It is intentionally not included in all-tests.yaml because Maestro
 # setLocation() and emulator mock state can persist outside app state.
+#
+# Do not add setLocation() to this flow. For mocked=false, the contract is about
+# provider metadata from a real/non-test provider; injected coordinates must not
+# be part of the assertion logic.
 
 - launchApp:
     clearState: true

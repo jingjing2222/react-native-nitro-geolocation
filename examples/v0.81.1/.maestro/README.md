@@ -105,6 +105,13 @@ maestro test --platform android examples/v0.81.1/.maestro/mocked-metadata-androi
 maestro test --platform android examples/v0.81.1/.maestro/mocked-metadata-android-true.yaml
 ```
 
+The two Android cases intentionally differ like this:
+
+| Case | Uses `setLocation` | Expected metadata | Coordinate assertions |
+| --- | --- | --- | --- |
+| `mocked-metadata-android-true.yaml` | Yes | `Mocked: true`, `Provider: gps` | Presence only |
+| `mocked-metadata-android-false.yaml` | No | `Mocked: false` | None |
+
 ### `mocked-metadata-ios-true.yaml`
 - iOS-only contract for `mocked=true` and `provider` response metadata
 - Opens the dedicated mocked metadata page
@@ -125,6 +132,13 @@ Run both metadata cases when you need to compare the visible iOS contract:
 maestro test --platform ios examples/v0.81.1/.maestro/mocked-metadata-ios-false.yaml
 maestro test --platform ios examples/v0.81.1/.maestro/mocked-metadata-ios-true.yaml
 ```
+
+The two iOS cases intentionally differ like this:
+
+| Case | Uses `setLocation` | Expected metadata | Coordinate assertions |
+| --- | --- | --- | --- |
+| `mocked-metadata-ios-true.yaml` | Yes | `Mocked: true`, `Provider: unknown` | Presence only |
+| `mocked-metadata-ios-false.yaml` | No | `Mocked: false`, `Provider: unknown` | None |
 
 ### `compat-api.yaml`
 - Tests `@react-native-community/geolocation` compatibility API
