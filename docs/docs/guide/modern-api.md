@@ -268,9 +268,11 @@ setup/provider codes (`INTERNAL_ERROR`, `PLAY_SERVICE_NOT_AVAILABLE`, and
 `SETTINGS_NOT_SATISFIED`) were added in v1.2; codes 1-3 remain aligned with the
 legacy browser-style contract.
 
-The code is committed by the native layer before a `LocationError` callback is
-sent to JS. Promise rejections still use Nitro's native `Error` transport and
-are not parsed or reclassified in JS.
+The code is committed by the native layer before a `LocationError` is sent to
+JS. Both `watchPosition` error callbacks and public Promise rejections from
+`getCurrentPosition`/`requestPermission` receive the same `{ code, message }`
+shape; JS only relays that object and does not parse or reclassify native
+messages.
 
 | Code | Name                         | Meaning                                      |
 | ---- | ---------------------------- | -------------------------------------------- |

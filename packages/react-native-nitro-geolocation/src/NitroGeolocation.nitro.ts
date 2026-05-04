@@ -98,7 +98,8 @@ export interface LocationError {
  * Geolocation Nitro Module.
  *
  * Key Features:
- * - Promise-based for async operations
+ * - Public async APIs are wrapped in JS Promises
+ * - Native sends structured LocationError callbacks
  * - First-class function callbacks for continuous updates
  * - Token-based subscriptions (internal use only)
  * - Type-safe across JS ↔ Native boundary
@@ -125,9 +126,13 @@ export interface NitroGeolocation
    * Request location permission from the user.
    * Shows system permission dialog if not yet determined.
    *
-   * @returns Promise resolving to new permission status
+   * Internal native contract. The public JS API wraps this in a Promise so
+   * native remains the source of truth for structured LocationError objects.
    */
-  requestPermission(): Promise<PermissionStatus>;
+  requestPermission(
+    success: (status: PermissionStatus) => void,
+    error?: (error: LocationError) => void
+  ): void;
 
   /**
    * Get current location (one-time request).
@@ -137,13 +142,18 @@ export interface NitroGeolocation
    * 2. Request fresh location from GPS/Network
    * 3. Timeout after specified duration
    *
+   * Internal native contract. The public JS API wraps this in a Promise so
+   * native remains the source of truth for structured LocationError objects.
+   *
+   * @param success - Called with the current position
+   * @param error - Called with native-classified LocationError
    * @param options - Location request options
-   * @returns Promise resolving to current position
-   * @throws LocationError if permission denied, timeout, or unavailable
    */
   getCurrentPosition(
+    success: (position: GeolocationResponse) => void,
+    error?: (error: LocationError) => void,
     options?: LocationRequestOptions
-  ): Promise<GeolocationResponse>;
+  ): void;
 
   /**
    * Start watching for continuous location updates.

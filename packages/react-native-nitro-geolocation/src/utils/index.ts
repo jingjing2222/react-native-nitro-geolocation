@@ -9,8 +9,7 @@ export {
   createLocationError,
   getLocationErrorCodeName,
   mapCLErrorCode,
-  mapAndroidException,
-  type LocationError
+  mapAndroidException
 } from "./errors";
 export {
   isBetterLocation,

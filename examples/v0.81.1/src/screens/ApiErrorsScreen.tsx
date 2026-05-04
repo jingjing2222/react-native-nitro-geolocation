@@ -10,7 +10,7 @@ import {
 import type { GeolocationResponse } from "react-native-nitro-geolocation";
 
 type CapturedLocationError = {
-  code: number | null;
+  code: number;
   name: string;
   message: string;
 };
@@ -70,14 +70,16 @@ const runNativeLocationRequest = async <T,>(request: () => Promise<T>) => {
 
 const captureLocationError = (error: unknown): CapturedLocationError => {
   const maybeError = error as { code?: unknown; message?: unknown };
-  const code = typeof maybeError.code === "number" ? maybeError.code : null;
+  const code =
+    typeof maybeError.code === "number"
+      ? maybeError.code
+      : LocationErrorCode.INTERNAL_ERROR;
   const message =
     typeof maybeError.message === "string" ? maybeError.message : String(error);
 
   return {
     code,
-    name:
-      code === null ? "NATIVE_PROMISE_ERROR" : getLocationErrorCodeName(code),
+    name: getLocationErrorCodeName(code),
     message
   };
 };
@@ -238,7 +240,7 @@ export default function ApiErrorsScreen() {
         {error && (
           <View style={styles.errorContainer} testID="api-error-details">
             <Text style={styles.errorText} testID="api-error-code">
-              Code: {error.code === null ? "native promise error" : error.code}
+              Code: {error.code}
             </Text>
             <Text style={styles.errorText} testID="api-error-name">
               Name: {error.name}

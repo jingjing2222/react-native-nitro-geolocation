@@ -3,32 +3,6 @@ import CoreLocation
 import NitroModules
 
 /**
- * Swift Error wrapper for LocationError struct.
- */
-private struct GeolocationErrorWrapper: Error, LocalizedError, CustomStringConvertible {
-    let locationError: LocationError
-
-    var errorDescription: String? {
-        return locationError.message
-    }
-
-    var localizedDescription: String {
-        return locationError.message
-    }
-
-    var description: String {
-        return locationError.message
-    }
-
-    init(code: Int, message: String) {
-        self.locationError = LocationError(
-            code: Double(code),
-            message: message
-        )
-    }
-}
-
-/**
  * LocationManager Delegate class to handle CLLocationManager callbacks.
  */
 private class LocationManagerDelegate: NSObject, CLLocationManagerDelegate {
@@ -53,10 +27,10 @@ private class LocationManagerDelegate: NSObject, CLLocationManagerDelegate {
 }
 
 /**
- * Geolocation implementation with Promise-based API.
+ * Geolocation implementation for the native Modern API contract.
  *
  * Key features:
- * - Promise-based permission and getCurrentPosition
+ * - Callback-based native permission and getCurrentPosition for structured errors
  * - Token-based watch subscriptions (functions are first-class!)
  * - WatchPositionResult discriminated union
  * - Automatic subscription management
@@ -110,15 +84,16 @@ class NitroGeolocation: HybridNitroGeolocationSpec {
     private var lastLocation: CLLocation?
     private var usingSignificantChanges: Bool = false
 
-    // Permission promise resolvers
-    private var pendingPermissionResolvers: [(Result<PermissionStatus, Error>) -> Void] = []
+    // Permission callbacks
+    private var pendingPermissionResolvers: [(PermissionStatus) -> Void] = []
 
     // getCurrentPosition promise resolvers with timeout
     private var pendingPositionRequests: [UUID: PositionRequest] = [:]
 
     private struct PositionRequest {
         let id: UUID
-        let resolver: (Result<GeolocationResponse, Error>) -> Void
+        let success: (GeolocationResponse) -> Void
+        let error: (LocationError) -> Void
         let options: ParsedOptions
         var timer: DispatchSourceTimer?
     }
@@ -140,7 +115,7 @@ class NitroGeolocation: HybridNitroGeolocationSpec {
         self.configuration = config
     }
 
-    // MARK: - Permission API (Promise-based)
+    // MARK: - Permission API
 
     func checkPermission() throws -> Promise<PermissionStatus> {
         return Promise.async {
@@ -149,9 +124,10 @@ class NitroGeolocation: HybridNitroGeolocationSpec {
         }
     }
 
-    func requestPermission() throws -> Promise<PermissionStatus> {
-        let promise = Promise<PermissionStatus>()
-
+    func requestPermission(
+        success: @escaping (PermissionStatus) -> Void,
+        error: ((LocationError) -> Void)?
+    ) throws -> Void {
         self.initializeLocationManagerIfNeeded()
 
         let currentStatus = CLLocationManager.authorizationStatus()
@@ -159,53 +135,44 @@ class NitroGeolocation: HybridNitroGeolocationSpec {
         // Already determined
         if currentStatus != .notDetermined {
             let status = self.mapCLAuthorizationStatus(currentStatus)
-            promise.resolve(withResult: status)
-            return promise
+            success(status)
+            return
         }
 
         // Queue resolver
-        self.pendingPermissionResolvers.append { result in
-            switch result {
-            case .success(let status):
-                promise.resolve(withResult: status)
-            case .failure(let error):
-                promise.reject(withError: error)
-            }
-        }
+        self.pendingPermissionResolvers.append(success)
 
         // Request permission
         let authLevel = self.determineAuthorizationLevel()
         self.requestSystemPermission(for: authLevel)
-
-        return promise
     }
 
-    // MARK: - Get Current Position (Promise-based)
+    // MARK: - Get Current Position
 
-    func getCurrentPosition(options: LocationRequestOptions?) throws -> Promise<GeolocationResponse> {
-        let promise = Promise<GeolocationResponse>()
-
+    func getCurrentPosition(
+        success: @escaping (GeolocationResponse) -> Void,
+        error: ((LocationError) -> Void)?,
+        options: LocationRequestOptions?
+    ) throws -> Void {
         // Check permission
         let status = CLLocationManager.authorizationStatus()
         if status == .denied || status == .restricted {
             let message = status == .restricted
                 ? "This application is not authorized to use location services"
                 : "User denied access to location services."
-            let error = GeolocationErrorWrapper(
+            error?(createLocationError(
                 code: self.PERMISSION_DENIED,
                 message: message
-            )
-            promise.reject(withError: error)
-            return promise
+            ))
+            return
         }
 
         if !CLLocationManager.locationServicesEnabled() {
-            let error = GeolocationErrorWrapper(
+            error?(createLocationError(
                 code: self.SETTINGS_NOT_SATISFIED,
                 message: "Location services disabled."
-            )
-            promise.reject(withError: error)
-            return promise
+            ))
+            return
         }
 
         self.initializeLocationManagerIfNeeded()
@@ -216,21 +183,17 @@ class NitroGeolocation: HybridNitroGeolocationSpec {
         if let cached = self.lastLocation,
            self.isCachedLocationValid(cached, options: parsedOptions) {
             let position = self.locationToPosition(cached)
-            promise.resolve(withResult: position)
-            return promise
+            success(position)
+            return
         }
 
         // Create position request
         let id = UUID()
         var request = PositionRequest(
             id: id,
-            resolver: { result in
-                switch result {
-                case .success(let response):
-                    promise.resolve(withResult: response)
-                case .failure(let error):
-                    promise.reject(withError: error)
-                }
+            success: success,
+            error: { locationError in
+                error?(locationError)
             },
             options: parsedOptions,
             timer: nil
@@ -250,8 +213,6 @@ class NitroGeolocation: HybridNitroGeolocationSpec {
         // Update configuration and start monitoring
         self.updateLocationManagerConfiguration()
         self.startMonitoring()
-
-        return promise
     }
 
     // MARK: - Watch Position (Callback-based with tokens)
@@ -306,7 +267,7 @@ class NitroGeolocation: HybridNitroGeolocationSpec {
 
         // Resolve pending permission requests
         for resolver in pendingPermissionResolvers {
-            resolver(.success(mappedStatus))
+            resolver(mappedStatus)
         }
         pendingPermissionResolvers.removeAll()
 
@@ -327,7 +288,7 @@ class NitroGeolocation: HybridNitroGeolocationSpec {
         // 1. Resolve all pending getCurrentPosition requests
         for (id, request) in pendingPositionRequests {
             request.timer?.cancel()
-            request.resolver(.success(position))
+            request.success(position)
         }
         pendingPositionRequests.removeAll()
 
@@ -344,16 +305,11 @@ class NitroGeolocation: HybridNitroGeolocationSpec {
 
     fileprivate func handleLocationError(_ error: Error) {
         let locationError: LocationError
-        let errorWrapper: GeolocationErrorWrapper
 
         if let clError = error as? CLError {
             switch clError.code {
             case .denied:
                 locationError = createLocationError(
-                    code: PERMISSION_DENIED,
-                    message: "User denied access to location services."
-                )
-                errorWrapper = GeolocationErrorWrapper(
                     code: PERMISSION_DENIED,
                     message: "User denied access to location services."
                 )
@@ -365,17 +321,9 @@ class NitroGeolocation: HybridNitroGeolocationSpec {
                     code: POSITION_UNAVAILABLE,
                     message: "Unable to retrieve location: \(error.localizedDescription)"
                 )
-                errorWrapper = GeolocationErrorWrapper(
-                    code: POSITION_UNAVAILABLE,
-                    message: "Unable to retrieve location: \(error.localizedDescription)"
-                )
             }
         } else {
             locationError = createLocationError(
-                code: POSITION_UNAVAILABLE,
-                message: "Unable to retrieve location: \(error.localizedDescription)"
-            )
-            errorWrapper = GeolocationErrorWrapper(
                 code: POSITION_UNAVAILABLE,
                 message: "Unable to retrieve location: \(error.localizedDescription)"
             )
@@ -384,7 +332,7 @@ class NitroGeolocation: HybridNitroGeolocationSpec {
         // 1. Reject all pending getCurrentPosition requests
         for (_, request) in pendingPositionRequests {
             request.timer?.cancel()
-            request.resolver(.failure(errorWrapper))
+            request.error(locationError)
         }
         pendingPositionRequests.removeAll()
 
@@ -481,9 +429,9 @@ class NitroGeolocation: HybridNitroGeolocationSpec {
 
         let timeoutSeconds = request.options.timeout / 1000.0
         let message = String(format: "Unable to fetch location within %.1fs.", timeoutSeconds)
-        let error = GeolocationErrorWrapper(code: TIMEOUT, message: message)
+        let error = createLocationError(code: TIMEOUT, message: message)
 
-        request.resolver(.failure(error))
+        request.error(error)
 
         // Stop monitoring if no more watches or pending requests
         if watchSubscriptions.isEmpty && pendingPositionRequests.isEmpty {

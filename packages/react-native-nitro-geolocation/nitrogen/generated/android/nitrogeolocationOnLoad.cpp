@@ -16,6 +16,7 @@
 #include <NitroModules/HybridObjectRegistry.hpp>
 
 #include "JHybridNitroGeolocationSpec.hpp"
+#include "JFunc_void_PermissionStatus.hpp"
 #include "JFunc_void_GeolocationResponse.hpp"
 #include "JFunc_void_LocationError.hpp"
 #include "JHybridNitroGeolocationCompatSpec.hpp"
@@ -55,6 +56,7 @@ void registerAllNatives() {
 
   // Register native JNI methods
   margelo::nitro::nitrogeolocation::JHybridNitroGeolocationSpec::CxxPart::registerNatives();
+  margelo::nitro::nitrogeolocation::JFunc_void_PermissionStatus_cxx::registerNatives();
   margelo::nitro::nitrogeolocation::JFunc_void_GeolocationResponse_cxx::registerNatives();
   margelo::nitro::nitrogeolocation::JFunc_void_LocationError_cxx::registerNatives();
   margelo::nitro::nitrogeolocation::JHybridNitroGeolocationCompatSpec::CxxPart::registerNatives();

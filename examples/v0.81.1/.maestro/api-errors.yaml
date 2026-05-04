@@ -53,6 +53,10 @@ appId: nitrogeolocation.example
 - assertVisible:
     id: "api-error-details"
 - assertVisible:
+    text: "Code: 3"
+- assertVisible:
+    text: "Name: TIMEOUT"
+- assertVisible:
     id: "api-error-message"
 
 - scrollUntilVisible:

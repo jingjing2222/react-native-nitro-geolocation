@@ -17,5 +17,7 @@ import { NitroGeolocationHybridObject } from "../NitroGeolocationModule";
  * ```
  */
 export function requestPermission(): Promise<PermissionStatus> {
-  return NitroGeolocationHybridObject.requestPermission();
+  return new Promise((resolve, reject) => {
+    NitroGeolocationHybridObject.requestPermission(resolve, reject);
+  });
 }

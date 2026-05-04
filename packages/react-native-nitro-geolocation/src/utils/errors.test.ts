@@ -17,27 +17,16 @@ describe("LocationErrorCode", () => {
     expect(LocationErrorCode.SETTINGS_NOT_SATISFIED).toBe(5);
   });
 
-  it("adds all constants to created LocationError objects", () => {
+  it("creates the same plain LocationError shape native sends to JS", () => {
     const error = createLocationError(
       LocationErrorCode.SETTINGS_NOT_SATISFIED,
       "Location settings are disabled"
     );
 
-    expect(error).toBeInstanceOf(Error);
-    expect(error.name).toBe("LocationError");
-    expect(error.code).toBe(LocationErrorCode.SETTINGS_NOT_SATISFIED);
-    expect(error.PERMISSION_DENIED).toBe(LocationErrorCode.PERMISSION_DENIED);
-    expect(error.POSITION_UNAVAILABLE).toBe(
-      LocationErrorCode.POSITION_UNAVAILABLE
-    );
-    expect(error.TIMEOUT).toBe(LocationErrorCode.TIMEOUT);
-    expect(error.PLAY_SERVICE_NOT_AVAILABLE).toBe(
-      LocationErrorCode.PLAY_SERVICE_NOT_AVAILABLE
-    );
-    expect(error.SETTINGS_NOT_SATISFIED).toBe(
-      LocationErrorCode.SETTINGS_NOT_SATISFIED
-    );
-    expect(error.INTERNAL_ERROR).toBe(LocationErrorCode.INTERNAL_ERROR);
+    expect(error).toEqual({
+      code: LocationErrorCode.SETTINGS_NOT_SATISFIED,
+      message: "Location settings are disabled"
+    });
   });
 
   it("maps platform-specific error sources", () => {

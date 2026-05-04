@@ -1,3 +1,5 @@
+import type { LocationError as NativeLocationError } from "../NitroGeolocation.nitro";
+
 /**
  * Error codes for geolocation errors.
  * Codes 1-3 match the W3C Geolocation API specification. Modern API also
@@ -22,16 +24,7 @@ export enum LocationErrorCode {
 /**
  * Geolocation error object.
  */
-export interface LocationError extends Error {
-  code: LocationErrorCode;
-  message: string;
-  PERMISSION_DENIED: LocationErrorCode.PERMISSION_DENIED;
-  POSITION_UNAVAILABLE: LocationErrorCode.POSITION_UNAVAILABLE;
-  TIMEOUT: LocationErrorCode.TIMEOUT;
-  PLAY_SERVICE_NOT_AVAILABLE: LocationErrorCode.PLAY_SERVICE_NOT_AVAILABLE;
-  SETTINGS_NOT_SATISFIED: LocationErrorCode.SETTINGS_NOT_SATISFIED;
-  INTERNAL_ERROR: LocationErrorCode.INTERNAL_ERROR;
-}
+export type LocationError = NativeLocationError;
 
 const locationErrorCodeNames: Record<LocationErrorCode, string> = {
   [LocationErrorCode.INTERNAL_ERROR]: "INTERNAL_ERROR",
@@ -61,17 +54,7 @@ export function createLocationError(
   code: LocationErrorCode,
   message: string
 ): LocationError {
-  const error = new Error(message) as LocationError;
-  error.name = "LocationError";
-  error.code = code;
-  error.PERMISSION_DENIED = LocationErrorCode.PERMISSION_DENIED;
-  error.POSITION_UNAVAILABLE = LocationErrorCode.POSITION_UNAVAILABLE;
-  error.TIMEOUT = LocationErrorCode.TIMEOUT;
-  error.PLAY_SERVICE_NOT_AVAILABLE =
-    LocationErrorCode.PLAY_SERVICE_NOT_AVAILABLE;
-  error.SETTINGS_NOT_SATISFIED = LocationErrorCode.SETTINGS_NOT_SATISFIED;
-  error.INTERNAL_ERROR = LocationErrorCode.INTERNAL_ERROR;
-  return error;
+  return { code, message };
 }
 
 export function getLocationErrorCodeName(code: number): string {

@@ -15,8 +15,8 @@ public protocol HybridNitroGeolocationSpec_protocol: HybridObject {
   // Methods
   func setConfiguration(config: GeolocationConfiguration) throws -> Void
   func checkPermission() throws -> Promise<PermissionStatus>
-  func requestPermission() throws -> Promise<PermissionStatus>
-  func getCurrentPosition(options: LocationRequestOptions?) throws -> Promise<GeolocationResponse>
+  func requestPermission(success: @escaping (_ status: PermissionStatus) -> Void, error: ((_ error: LocationError) -> Void)?) throws -> Void
+  func getCurrentPosition(success: @escaping (_ position: GeolocationResponse) -> Void, error: ((_ error: LocationError) -> Void)?, options: LocationRequestOptions?) throws -> Void
   func watchPosition(success: @escaping (_ position: GeolocationResponse) -> Void, error: ((_ error: LocationError) -> Void)?, options: LocationRequestOptions?) throws -> String
   func unwatch(token: String) throws -> Void
   func stopObserving() throws -> Void
