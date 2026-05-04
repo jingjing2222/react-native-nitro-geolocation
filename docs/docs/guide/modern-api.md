@@ -42,9 +42,27 @@ setConfiguration({
 
 **Options**:
 
+- `autoRequestPermission?: boolean` - Automatically request permission when configured
 - `authorizationLevel?: 'whenInUse' | 'always' | 'auto'` - iOS: Authorization level
 - `enableBackgroundLocationUpdates?: boolean` - iOS: Enable background location
 - `locationProvider?: 'playServices' | 'android' | 'auto'` - Android: Location provider
+
+**Type**:
+
+```typescript
+export type GeolocationConfiguration = {
+  autoRequestPermission?: boolean;
+  authorizationLevel?: 'always' | 'whenInUse' | 'auto';
+  enableBackgroundLocationUpdates?: boolean;
+  locationProvider?: 'playServices' | 'android' | 'auto';
+};
+
+/**
+ * @deprecated Use `GeolocationConfiguration` instead.
+ * This alias is kept only for backward compatibility.
+ */
+export type ModernGeolocationConfiguration = GeolocationConfiguration;
+```
 
 **When to call**:
 
@@ -196,6 +214,13 @@ function LocationButton() {
 **Response**:
 
 ```typescript
+export type LocationProviderUsed =
+  | 'fused'
+  | 'gps'
+  | 'network'
+  | 'passive'
+  | 'unknown';
+
 interface GeolocationResponse {
   coords: {
     latitude: number;
@@ -208,9 +233,11 @@ interface GeolocationResponse {
   };
   timestamp: number;
   mocked?: boolean;
-  provider?: 'fused' | 'gps' | 'network' | 'passive' | 'unknown';
+  provider?: LocationProviderUsed;
 }
 ```
+
+`mocked` and `provider` are optional metadata fields added to the Modern API response in v1.2. The `/compat` API keeps the `@react-native-community/geolocation` response shape and does not include these fields.
 
 **Error Handling**:
 
@@ -457,39 +484,6 @@ import type {
 ```
 
 `ModernGeolocationConfiguration` is still exported as a deprecated compatibility alias.
-
-### Added in v1.2
-
-v1.2 adds optional metadata to the root Modern API response. The `/compat` API keeps the `@react-native-community/geolocation` response shape and does not include these fields.
-
-```typescript
-export type LocationProviderUsed =
-  | 'fused'
-  | 'gps'
-  | 'network'
-  | 'passive'
-  | 'unknown';
-
-export interface GeolocationResponse {
-  coords: GeolocationCoordinates;
-  timestamp: number;
-  mocked?: boolean;
-  provider?: LocationProviderUsed;
-}
-
-export type GeolocationConfiguration = {
-  autoRequestPermission?: boolean;
-  authorizationLevel?: 'always' | 'whenInUse' | 'auto';
-  enableBackgroundLocationUpdates?: boolean;
-  locationProvider?: 'playServices' | 'android' | 'auto';
-};
-
-/**
- * @deprecated Use `GeolocationConfiguration` instead.
- * This alias is kept only for backward compatibility.
- */
-export type ModernGeolocationConfiguration = GeolocationConfiguration;
-```
 
 ### Type Inference
 
