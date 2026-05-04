@@ -1,6 +1,6 @@
 appId: nitrogeolocation.example
 ---
-# User flow: open the legacy Compat API screen, request authorization, then
+# User flow: select the legacy Compat API tab, request authorization, then
 # fetch and inspect a current position through the callback API.
 
 - launchApp
@@ -9,10 +9,11 @@ appId: nitrogeolocation.example
     visible: "Geolocation API"
     timeout: 10000
 
-- openLink:
-    link: nitrogeolocation://app/compat
 - tapOn:
-    text: "열기|Open"
+    text: "Compat API, tab, 8 of 8"
+    optional: true
+- tapOn:
+    text: "Compat API"
     optional: true
 
 - extendedWaitUntil:
