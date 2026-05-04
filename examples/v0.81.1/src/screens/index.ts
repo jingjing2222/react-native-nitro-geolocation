@@ -1,4 +1,3 @@
-export { default as CompatMetadataScreen } from "./CompatMetadataScreen";
 export { default as DefaultScreen } from "./DefaultScreen";
 export { default as CompatScreen } from "./CompatScreen";
 export { default as CurrentPositionScreen } from "./CurrentPositionScreen";

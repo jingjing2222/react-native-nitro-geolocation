@@ -89,15 +89,10 @@ The Android and iOS package scripts install the Release build first (`yarn andro
 - Opens the dedicated mocked metadata page
 - Uses Maestro `setLocation`, then verifies the public result surfaces `Mocked: true` and `Provider: gps`
 
-### `compat-metadata-android.yaml`
-- Android-only contract for the legacy compat response shape
-- Opens the dedicated compat metadata contract page
-- Uses Maestro `setLocation`, then verifies the compat result does not include modern `mocked`/`provider` metadata
-
 ### `compat-api.yaml`
 - Tests `@react-native-community/geolocation` compatibility API
-- **Currently minimal**: Due to Maestro bottom tab navigation limitations
-- Since Compat API uses the same native module as Default API, testing Default API provides sufficient coverage
+- Opens the real Compat API screen
+- Requests authorization, simulates a user location, then verifies the callback API renders a current position
 
 ### `all-tests.yaml`
 - Master flow that runs all platform-compatible tests sequentially

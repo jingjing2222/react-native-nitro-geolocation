@@ -23,9 +23,18 @@ appId: nitrogeolocation.example
     visible: "Mocked location metadata contract"
     timeout: 10000
 
+- tapOn: "Request"
+- extendedWaitUntil:
+    visible: "granted ✅"
+    timeout: 10000
+
 - setLocation:
     latitude: 37.5665
     longitude: 126.978
+
+- scrollUntilVisible:
+    element: "2. Get Current Position"
+    direction: DOWN
 
 - tapOn: "Get Position"
 
