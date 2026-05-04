@@ -39,7 +39,7 @@ Thank you for helping improve **react-native-nitro-geolocation**. This document 
 
 ## Documentation & examples
 
-- The main README (`README.md`) and each package README (for example, `packages/react-native-nitro-geolocation/READEME.md`) are the canonical entry points. Keep them in sync with any API or workflow changes.
+- The main README (`README.md`) and each package README (for example, `packages/react-native-nitro-geolocation/README.md`) are the canonical entry points. Keep them in sync with any API or workflow changes.
 - The `/docs` site is powered by Rspress. Update the content under `docs/docs/` and rerun `yarn build` if you touch the published documentation.
 - Examples live in `examples/`; rebuild or rerun sample apps whenever you change native modules so you can verify on-device behavior.
 
