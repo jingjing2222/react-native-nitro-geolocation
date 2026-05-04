@@ -2,7 +2,6 @@ import { describe, expect, it } from "vitest";
 import {
   LocationErrorCode,
   createLocationError,
-  encodeLocationErrorMessage,
   getLocationErrorCodeName,
   mapAndroidException,
   mapCLErrorCode,
@@ -45,10 +44,7 @@ describe("LocationErrorCode", () => {
   it("normalizes encoded native promise errors without leaking the code prefix", () => {
     const error = normalizeLocationError(
       new Error(
-        encodeLocationErrorMessage(
-          LocationErrorCode.TIMEOUT,
-          "Unable to fetch location within 0.0s."
-        )
+        "NitroGeolocationError(code=3): Unable to fetch location within 0.0s."
       )
     );
 
@@ -59,10 +55,7 @@ describe("LocationErrorCode", () => {
   it("normalizes encoded native errors even when the bridge prepends context", () => {
     const error = normalizeLocationError(
       new Error(
-        `NativeException: ${encodeLocationErrorMessage(
-          LocationErrorCode.SETTINGS_NOT_SATISFIED,
-          "Location services disabled."
-        )}`
+        "NativeException: NitroGeolocationError(code=5): Location services disabled."
       )
     );
 
@@ -70,18 +63,33 @@ describe("LocationErrorCode", () => {
     expect(error.message).toBe("Location services disabled.");
   });
 
-  it("infers setup and provider errors from native messages", () => {
+  it("uses the native-committed code for setup and provider errors", () => {
     expect(
-      normalizeLocationError(new Error("No activity available")).code
+      normalizeLocationError(
+        new Error("NitroGeolocationError(code=-1): No activity available")
+      ).code
     ).toBe(LocationErrorCode.INTERNAL_ERROR);
     expect(
-      normalizeLocationError(new Error("No location provider available")).code
+      normalizeLocationError(
+        new Error(
+          "NitroGeolocationError(code=5): No location provider available"
+        )
+      ).code
     ).toBe(LocationErrorCode.SETTINGS_NOT_SATISFIED);
     expect(
       normalizeLocationError(
-        new Error("Google Play Services location provider is not available.")
+        new Error(
+          "NitroGeolocationError(code=4): Google Play Services location provider is not available."
+        )
       ).code
     ).toBe(LocationErrorCode.PLAY_SERVICE_NOT_AVAILABLE);
+  });
+
+  it("falls back to internal error when native does not provide a code", () => {
+    const error = normalizeLocationError(new Error("Unexpected bridge error"));
+
+    expect(error.code).toBe(LocationErrorCode.INTERNAL_ERROR);
+    expect(error.message).toBe("Unexpected bridge error");
   });
 
   it("maps platform-specific error sources", () => {

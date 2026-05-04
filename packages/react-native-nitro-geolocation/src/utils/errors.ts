@@ -93,51 +93,6 @@ function parseEncodedLocationError(message: string): {
   };
 }
 
-function inferLocationErrorCode(message: string): LocationErrorCode {
-  const lowerMessage = message.toLowerCase();
-
-  if (
-    lowerMessage.includes("permission") ||
-    lowerMessage.includes("denied access") ||
-    lowerMessage.includes("not authorized")
-  ) {
-    return LocationErrorCode.PERMISSION_DENIED;
-  }
-
-  if (
-    lowerMessage.includes("timed out") ||
-    lowerMessage.includes("timeout") ||
-    lowerMessage.includes("within")
-  ) {
-    return LocationErrorCode.TIMEOUT;
-  }
-
-  if (
-    lowerMessage.includes("play service") ||
-    lowerMessage.includes("google play")
-  ) {
-    return LocationErrorCode.PLAY_SERVICE_NOT_AVAILABLE;
-  }
-
-  if (
-    lowerMessage.includes("settings") ||
-    lowerMessage.includes("location services disabled") ||
-    lowerMessage.includes("provider disabled") ||
-    lowerMessage.includes("no location provider")
-  ) {
-    return LocationErrorCode.SETTINGS_NOT_SATISFIED;
-  }
-
-  if (
-    lowerMessage.includes("no activity") ||
-    lowerMessage.includes("internal")
-  ) {
-    return LocationErrorCode.INTERNAL_ERROR;
-  }
-
-  return LocationErrorCode.POSITION_UNAVAILABLE;
-}
-
 /**
  * Creates a standardized LocationError object.
  *
@@ -170,13 +125,6 @@ export function createLocationError(
   return error;
 }
 
-export function encodeLocationErrorMessage(
-  code: LocationErrorCode,
-  message: string
-): string {
-  return `${LOCATION_ERROR_PREFIX}(code=${code}): ${message}`;
-}
-
 export function getLocationErrorCodeName(code: number): string {
   return (
     locationErrorCodeNames[code as LocationErrorCode] ??
@@ -203,8 +151,10 @@ export function normalizeLocationError(error: unknown): LocationError {
   const rawMessage = getRawMessage(error);
   const encoded = parseEncodedLocationError(rawMessage);
   const message = encoded.message;
+  // Native owns the semantic code. JS only preserves structured callback errors
+  // and decodes native promise errors flattened by the bridge.
   const code =
-    rawCode ?? nestedCode ?? encoded.code ?? inferLocationErrorCode(message);
+    rawCode ?? nestedCode ?? encoded.code ?? LocationErrorCode.INTERNAL_ERROR;
 
   return createLocationError(code, message);
 }
