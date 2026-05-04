@@ -220,7 +220,7 @@ function LocationButton() {
     setError(null);
     try {
       const pos = await getCurrentPosition({
-        enableHighAccuracy: true,
+        accuracy: { android: 'high', ios: 'best' },
         timeout: 15000
       });
       setPosition(pos);
@@ -257,15 +257,13 @@ function LocationButton() {
 
 - `timeout?: number` - Request timeout in ms (default: 600000 / 10 min)
 - `maximumAge?: number` - Max age of cached location in ms (default: 0)
-- `enableHighAccuracy?: boolean` - Use GPS vs network location
-- `accuracy?: { android?: 'high' | 'balanced' | 'low' | 'passive'; ios?: 'bestForNavigation' | 'best' | 'nearestTenMeters' | 'hundredMeters' | 'kilometer' | 'threeKilometers' | 'reduced' }` - Platform-specific accuracy preset. When a preset is provided for the current platform, it takes precedence over `enableHighAccuracy`.
+- `enableHighAccuracy?: boolean` - Deprecated since `v1.2`. Kept for v1 compatibility only; prefer `accuracy`. It is expected to be removed from the Modern API in v2.
+- `accuracy?: { android?: 'high' | 'balanced' | 'low' | 'passive'; ios?: 'bestForNavigation' | 'best' | 'nearestTenMeters' | 'hundredMeters' | 'kilometer' | 'threeKilometers' | 'reduced' }` - Platform-specific accuracy preset, available since `v1.2`. When a preset is provided for the current platform, it takes precedence over `enableHighAccuracy`.
 
-`enableHighAccuracy` remains supported for compatibility. Prefer `accuracy`
-when you need explicit platform-native behavior:
+Use `accuracy` when you need explicit platform-native behavior:
 
 ```tsx
 await getCurrentPosition({
-  enableHighAccuracy: false,
   accuracy: {
     android: 'high',
     ios: 'bestForNavigation'
@@ -372,7 +370,7 @@ function LiveTracker() {
 
   const { position, error, isWatching } = useWatchPosition({
     enabled,
-    enableHighAccuracy: true,
+    accuracy: { android: 'high', ios: 'best' },
     distanceFilter: 10, // Update every 10 meters
     interval: 5000, // Update every 5 seconds (Android)
   });
@@ -409,7 +407,8 @@ function LiveTracker() {
 **Options**:
 
 - `enabled?: boolean` - Start/stop watching (default: `false`)
-- `enableHighAccuracy?: boolean` - Use GPS
+- `enableHighAccuracy?: boolean` - Deprecated since `v1.2`. Kept for v1 compatibility only; prefer `accuracy`. It is expected to be removed from the Modern API in v2.
+- `accuracy?: { android?: 'high' | 'balanced' | 'low' | 'passive'; ios?: 'bestForNavigation' | 'best' | 'nearestTenMeters' | 'hundredMeters' | 'kilometer' | 'threeKilometers' | 'reduced' }` - Platform-specific accuracy preset, available since `v1.2`.
 - `distanceFilter?: number` - Minimum distance change in meters
 - `interval?: number` - Update interval in ms (Android)
 - `fastestInterval?: number` - Fastest interval in ms (Android)
@@ -448,7 +447,7 @@ function LiveTracker() {
     const [hasPermission, setHasPermission] = useState(false);
     const { position, error } = useWatchPosition({
       enabled: hasPermission,
-      enableHighAccuracy: true,
+      accuracy: { android: 'high', ios: 'best' },
     });
     ```
 
@@ -470,7 +469,7 @@ const token = watchPosition(
     console.error('Location error:', error.message);
   },
   {
-    enableHighAccuracy: true,
+    accuracy: { android: 'high', ios: 'best' },
     distanceFilter: 10
   }
 );
@@ -531,7 +530,7 @@ async function getLocationWithPermission() {
   // Get location if granted
   if (status === 'granted') {
     const position = await getCurrentPosition({
-      enableHighAccuracy: true
+      accuracy: { android: 'high', ios: 'best' }
     });
     return position;
   } else {
@@ -660,7 +659,7 @@ import { useWatchPosition } from 'react-native-nitro-geolocation';
 function LocationTracker() {
   const { position } = useWatchPosition({
     enabled: true,
-    enableHighAccuracy: true,
+    accuracy: { android: 'high', ios: 'best' },
   });
 
   return <Map position={position} />;

@@ -216,9 +216,16 @@ const { position, error } = useWatchPosition({
 });
 ```
 
-`enableHighAccuracy` is still supported. When `accuracy.android` or
+Accuracy presets are available since `v1.2`.
+
+`enableHighAccuracy` is deprecated in the Modern API and remains supported only
+for v1 compatibility. Prefer `accuracy`; when `accuracy.android` or
 `accuracy.ios` is provided for the current platform, that explicit preset takes
-precedence over the boolean.
+precedence over the boolean. `enableHighAccuracy` is expected to be removed from
+the Modern API in v2.
+
+The `/compat` API keeps `enableHighAccuracy` for drop-in compatibility with
+`@react-native-community/geolocation`.
 
 #### Compat API (Compatibility)
 
