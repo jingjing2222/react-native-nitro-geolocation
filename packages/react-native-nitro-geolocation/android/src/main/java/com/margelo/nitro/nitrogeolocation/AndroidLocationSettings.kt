@@ -8,6 +8,8 @@ import android.content.IntentSender
 import android.content.pm.PackageManager
 import android.location.LocationManager as AndroidLocationManager
 import android.os.Build
+import android.os.Handler
+import android.os.Looper
 import androidx.core.content.ContextCompat
 import com.facebook.react.bridge.BaseActivityEventListener
 import com.facebook.react.bridge.ReactApplicationContext
@@ -18,11 +20,10 @@ import com.google.android.gms.location.LocationRequest as GmsLocationRequest
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.location.LocationSettingsRequest
 import com.google.android.gms.location.Priority
-import com.google.android.gms.tasks.Tasks
-import java.util.concurrent.TimeUnit
+import java.util.concurrent.atomic.AtomicBoolean
 
 private const val LOCATION_SETTINGS_REQUEST_CODE = 8948
-private const val GOOGLE_LOCATION_ACCURACY_TIMEOUT_SECONDS = 2L
+private const val GOOGLE_LOCATION_ACCURACY_TIMEOUT_MS = 2_000L
 
 internal class AndroidLocationSettings(
     private val reactContext: ReactApplicationContext,
@@ -81,6 +82,7 @@ internal class AndroidLocationSettings(
     )
 
     private var pendingLocationSettingsRequest: PendingLocationSettingsRequest? = null
+    private val mainHandler = Handler(Looper.getMainLooper())
 
     private val activityEventListener = object : BaseActivityEventListener() {
         override fun onActivityResult(
@@ -119,14 +121,22 @@ internal class AndroidLocationSettings(
         }
     }
 
-    fun getProviderStatus(): LocationProviderStatus {
+    fun getProviderStatus(success: (LocationProviderStatus) -> Unit) {
+        getGoogleLocationAccuracyEnabled { googleLocationAccuracyEnabled ->
+            success(createProviderStatus(googleLocationAccuracyEnabled))
+        }
+    }
+
+    private fun createProviderStatus(
+        googleLocationAccuracyEnabled: Boolean?
+    ): LocationProviderStatus {
         return LocationProviderStatus(
             locationServicesEnabled = hasServicesEnabled(),
             backgroundModeEnabled = hasBackgroundLocationPermission(),
             gpsAvailable = isProviderEnabled(AndroidLocationManager.GPS_PROVIDER),
             networkAvailable = isProviderEnabled(AndroidLocationManager.NETWORK_PROVIDER),
             passiveAvailable = isProviderEnabled(AndroidLocationManager.PASSIVE_PROVIDER),
-            googleLocationAccuracyEnabled = getGoogleLocationAccuracyEnabled()
+            googleLocationAccuracyEnabled = googleLocationAccuracyEnabled
         )
     }
 
@@ -165,7 +175,7 @@ internal class AndroidLocationSettings(
         settingsClient
             .checkLocationSettings(buildLocationSettingsRequest(pendingRequest.options))
             .addOnSuccessListener {
-                pendingRequest.success(getProviderStatus())
+                getProviderStatus(pendingRequest.success)
             }
             .addOnFailureListener { exception ->
                 if (shouldShowResolution && exception is ResolvableApiException) {
@@ -246,19 +256,43 @@ internal class AndroidLocationSettings(
         ) == PackageManager.PERMISSION_GRANTED
     }
 
-    private fun getGoogleLocationAccuracyEnabled(): Boolean? {
-        if (!isGooglePlayServicesAvailable()) return null
+    private fun getGoogleLocationAccuracyEnabled(success: (Boolean?) -> Unit) {
+        if (!isGooglePlayServicesAvailable()) {
+            success(null)
+            return
+        }
 
-        return try {
-            Tasks.await(
-                LocationServices
-                    .getSettingsClient(reactContext)
-                    .isGoogleLocationAccuracyEnabled,
-                GOOGLE_LOCATION_ACCURACY_TIMEOUT_SECONDS,
-                TimeUnit.SECONDS
-            )
+        val didComplete = AtomicBoolean(false)
+        val timeoutRunnable = Runnable {
+            if (didComplete.compareAndSet(false, true)) {
+                success(null)
+            }
+        }
+
+        fun complete(value: Boolean?) {
+            if (didComplete.compareAndSet(false, true)) {
+                mainHandler.removeCallbacks(timeoutRunnable)
+                success(value)
+            }
+        }
+
+        mainHandler.postDelayed(timeoutRunnable, GOOGLE_LOCATION_ACCURACY_TIMEOUT_MS)
+
+        try {
+            LocationServices
+                .getSettingsClient(reactContext)
+                .isGoogleLocationAccuracyEnabled
+                .addOnSuccessListener { enabled ->
+                    complete(enabled)
+                }
+                .addOnFailureListener {
+                    complete(null)
+                }
+                .addOnCanceledListener {
+                    complete(null)
+                }
         } catch (e: Exception) {
-            null
+            complete(null)
         }
     }
 
