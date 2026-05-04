@@ -174,30 +174,30 @@ open class HybridNitroGeolocationSpec_cxx {
   }
   
   @inline(__always)
-  public final func getCurrentPosition(options: bridge.std__optional_LocationRequestOptions_) -> bridge.Result_std__shared_ptr_Promise_GeolocationResponse___ {
+  public final func getCurrentPosition(options: bridge.std__optional_LocationRequestOptions_) -> bridge.Result_std__shared_ptr_Promise_ModernGeolocationResponse___ {
     do {
       let __result = try self.__implementation.getCurrentPosition(options: options.value)
-      let __resultCpp = { () -> bridge.std__shared_ptr_Promise_GeolocationResponse__ in
-        let __promise = bridge.create_std__shared_ptr_Promise_GeolocationResponse__()
-        let __promiseHolder = bridge.wrap_std__shared_ptr_Promise_GeolocationResponse__(__promise)
+      let __resultCpp = { () -> bridge.std__shared_ptr_Promise_ModernGeolocationResponse__ in
+        let __promise = bridge.create_std__shared_ptr_Promise_ModernGeolocationResponse__()
+        let __promiseHolder = bridge.wrap_std__shared_ptr_Promise_ModernGeolocationResponse__(__promise)
         __result
           .then({ __result in __promiseHolder.resolve(__result) })
           .catch({ __error in __promiseHolder.reject(__error.toCpp()) })
         return __promise
       }()
-      return bridge.create_Result_std__shared_ptr_Promise_GeolocationResponse___(__resultCpp)
+      return bridge.create_Result_std__shared_ptr_Promise_ModernGeolocationResponse___(__resultCpp)
     } catch (let __error) {
       let __exceptionPtr = __error.toCpp()
-      return bridge.create_Result_std__shared_ptr_Promise_GeolocationResponse___(__exceptionPtr)
+      return bridge.create_Result_std__shared_ptr_Promise_ModernGeolocationResponse___(__exceptionPtr)
     }
   }
   
   @inline(__always)
-  public final func watchPosition(success: bridge.Func_void_GeolocationResponse, error: bridge.std__optional_std__function_void_const_LocationError_____error______, options: bridge.std__optional_LocationRequestOptions_) -> bridge.Result_std__string_ {
+  public final func watchPosition(success: bridge.Func_void_ModernGeolocationResponse, error: bridge.std__optional_std__function_void_const_LocationError_____error______, options: bridge.std__optional_LocationRequestOptions_) -> bridge.Result_std__string_ {
     do {
-      let __result = try self.__implementation.watchPosition(success: { () -> (GeolocationResponse) -> Void in
-        let __wrappedFunction = bridge.wrap_Func_void_GeolocationResponse(success)
-        return { (__position: GeolocationResponse) -> Void in
+      let __result = try self.__implementation.watchPosition(success: { () -> (ModernGeolocationResponse) -> Void in
+        let __wrappedFunction = bridge.wrap_Func_void_ModernGeolocationResponse(success)
+        return { (__position: ModernGeolocationResponse) -> Void in
           __wrappedFunction.call(__position)
         }
       }(), error: { () -> ((_ error: LocationError) -> Void)? in

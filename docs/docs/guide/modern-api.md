@@ -207,8 +207,16 @@ interface GeolocationResponse {
     speed: number | null;
   };
   timestamp: number;
+  mocked?: boolean;
+  provider?: 'fused' | 'gps' | 'network' | 'passive' | 'unknown';
 }
 ```
+
+`mocked` is reported when the platform exposes mock/simulated location metadata.
+`provider` identifies the native provider when available, or `'unknown'` when the
+platform does not expose a matching provider.
+The `/compat` legacy entry point keeps the original drop-in response shape and
+does not include these modern metadata fields.
 
 **Error Handling**:
 

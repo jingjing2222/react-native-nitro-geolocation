@@ -16,11 +16,12 @@
 #include <NitroModules/HybridObjectRegistry.hpp>
 
 #include "JHybridNitroGeolocationSpec.hpp"
-#include "JFunc_void_GeolocationResponse.hpp"
+#include "JFunc_void_ModernGeolocationResponse.hpp"
 #include "JFunc_void_LocationError.hpp"
 #include "JHybridNitroGeolocationCompatSpec.hpp"
 #include "JFunc_void.hpp"
 #include "JFunc_void_GeolocationError.hpp"
+#include "JFunc_void_GeolocationResponse.hpp"
 #include <NitroModules/DefaultConstructableObject.hpp>
 
 namespace margelo::nitro::nitrogeolocation {
@@ -54,11 +55,12 @@ void registerAllNatives() {
 
   // Register native JNI methods
   margelo::nitro::nitrogeolocation::JHybridNitroGeolocationSpec::CxxPart::registerNatives();
-  margelo::nitro::nitrogeolocation::JFunc_void_GeolocationResponse_cxx::registerNatives();
+  margelo::nitro::nitrogeolocation::JFunc_void_ModernGeolocationResponse_cxx::registerNatives();
   margelo::nitro::nitrogeolocation::JFunc_void_LocationError_cxx::registerNatives();
   margelo::nitro::nitrogeolocation::JHybridNitroGeolocationCompatSpec::CxxPart::registerNatives();
   margelo::nitro::nitrogeolocation::JFunc_void_cxx::registerNatives();
   margelo::nitro::nitrogeolocation::JFunc_void_GeolocationError_cxx::registerNatives();
+  margelo::nitro::nitrogeolocation::JFunc_void_GeolocationResponse_cxx::registerNatives();
 
   // Register Nitro Hybrid Objects
   HybridObjectRegistry::registerHybridObjectConstructor(

@@ -1,8 +1,8 @@
-import type { GeolocationError, GeolocationResponse } from "../types";
+import type { GeolocationError, ModernGeolocationResponse } from "../types";
 import { getDevtoolsState } from "./index";
 
 export function devtoolsWatchPosition(
-  success: (position: GeolocationResponse) => void,
+  success: (position: ModernGeolocationResponse) => void,
   error?: (error: GeolocationError) => void
 ): string {
   const devtools = getDevtoolsState();

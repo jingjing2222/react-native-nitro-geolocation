@@ -80,14 +80,14 @@ class NitroGeolocation(
 
     private data class WatchSubscription(
         val token: String,
-        val success: (GeolocationResponse) -> Unit,
+        val success: (ModernGeolocationResponse) -> Unit,
         val error: ((LocationError) -> Unit)?,
         val options: ParsedOptions
     )
 
     private data class PositionRequest(
         val id: UUID,
-        val resolver: (Result<GeolocationResponse>) -> Unit,
+        val resolver: (Result<ModernGeolocationResponse>) -> Unit,
         val options: ParsedOptions,
         val handler: Handler,
         val providers: List<String>,
@@ -182,8 +182,8 @@ class NitroGeolocation(
 
     // MARK: - Get Current Position (Promise-based)
 
-    override fun getCurrentPosition(options: LocationRequestOptions?): Promise<GeolocationResponse> {
-        val promise = Promise<GeolocationResponse>()
+    override fun getCurrentPosition(options: LocationRequestOptions?): Promise<ModernGeolocationResponse> {
+        val promise = Promise<ModernGeolocationResponse>()
 
         // Check permission
         if (!hasLocationPermission()) {
@@ -222,7 +222,7 @@ class NitroGeolocation(
     // MARK: - Watch Position (Callback-based with tokens)
 
     override fun watchPosition(
-        success: (GeolocationResponse) -> Unit,
+        success: (ModernGeolocationResponse) -> Unit,
         error: ((LocationError) -> Unit)?,
         options: LocationRequestOptions?
     ): String {
@@ -409,7 +409,7 @@ class NitroGeolocation(
     private fun requestFreshLocation(
         providers: List<String>,
         options: ParsedOptions,
-        resolver: (Result<GeolocationResponse>) -> Unit
+        resolver: (Result<ModernGeolocationResponse>) -> Unit
     ) {
         val id = UUID.randomUUID()
         val handler = Handler(Looper.getMainLooper())
@@ -733,7 +733,7 @@ class NitroGeolocation(
 
     // MARK: - Helper Functions - Conversion
 
-    private fun locationToPosition(location: Location): GeolocationResponse {
+    private fun locationToPosition(location: Location): ModernGeolocationResponse {
         val altitude = if (location.hasAltitude()) {
             NullableDouble.create(location.altitude)
         } else {
@@ -765,9 +765,11 @@ class NitroGeolocation(
             speed = speed
         )
 
-        return GeolocationResponse(
+        return ModernGeolocationResponse(
             coords = coords,
-            timestamp = location.time.toDouble()
+            timestamp = location.time.toDouble(),
+            mocked = location.isMocked(),
+            provider = location.providerUsed()
         )
     }
 

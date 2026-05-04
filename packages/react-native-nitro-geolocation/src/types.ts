@@ -1,6 +1,12 @@
 // Public API types (compatible with @react-native-community/geolocation)
 export type AuthorizationLevel = "always" | "whenInUse" | "auto";
 export type LocationProvider = "playServices" | "android" | "auto";
+export type LocationProviderUsed =
+  | "fused"
+  | "gps"
+  | "network"
+  | "passive"
+  | "unknown";
 export type NullableDouble = number | null;
 
 /**
@@ -50,6 +56,11 @@ export interface GeolocationCoordinates {
 export interface GeolocationResponse {
   coords: GeolocationCoordinates;
   timestamp: number;
+}
+
+export interface ModernGeolocationResponse extends GeolocationResponse {
+  mocked?: boolean;
+  provider?: LocationProviderUsed;
 }
 
 export interface GeolocationError {

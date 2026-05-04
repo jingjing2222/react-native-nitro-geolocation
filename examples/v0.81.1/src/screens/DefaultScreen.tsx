@@ -150,6 +150,16 @@ export default function DefaultScreen({
         <Text style={styles.positionText} testID="accuracy-text">
           Accuracy: {position.coords.accuracy.toFixed(2)}m
         </Text>
+        {position.mocked !== undefined && (
+          <Text style={styles.positionText} testID="mocked-text">
+            Mocked: {position.mocked ? "true" : "false"}
+          </Text>
+        )}
+        {position.provider !== undefined && (
+          <Text style={styles.positionText} testID="provider-text">
+            Provider: {position.provider}
+          </Text>
+        )}
         {position.coords.altitude !== null &&
           position.coords.altitude !== undefined && (
             <Text style={styles.positionText}>

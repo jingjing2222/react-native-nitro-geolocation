@@ -57,8 +57,8 @@ namespace margelo::nitro::nitrogeolocation {
     void setConfiguration(const ModernGeolocationConfiguration& config) override;
     std::shared_ptr<Promise<PermissionStatus>> checkPermission() override;
     std::shared_ptr<Promise<PermissionStatus>> requestPermission() override;
-    std::shared_ptr<Promise<GeolocationResponse>> getCurrentPosition(const std::optional<LocationRequestOptions>& options) override;
-    std::string watchPosition(const std::function<void(const GeolocationResponse& /* position */)>& success, const std::optional<std::function<void(const LocationError& /* error */)>>& error, const std::optional<LocationRequestOptions>& options) override;
+    std::shared_ptr<Promise<ModernGeolocationResponse>> getCurrentPosition(const std::optional<LocationRequestOptions>& options) override;
+    std::string watchPosition(const std::function<void(const ModernGeolocationResponse& /* position */)>& success, const std::optional<std::function<void(const LocationError& /* error */)>>& error, const std::optional<LocationRequestOptions>& options) override;
     void unwatch(const std::string& token) override;
     void stopObserving() override;
 

@@ -10,3 +10,11 @@ appId: nitrogeolocation.example
     when:
       platform: Android
     file: issue-67-android-coarse-location.yaml
+- runFlow:
+    when:
+      platform: Android
+    file: mocked-metadata-android.yaml
+- runFlow:
+    when:
+      platform: Android
+    file: compat-metadata-android.yaml

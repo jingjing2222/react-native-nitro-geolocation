@@ -84,6 +84,16 @@ The Android and iOS package scripts install the Release build first (`yarn andro
 - Uses Maestro permissions to grant `ACCESS_COARSE_LOCATION` and deny `ACCESS_FINE_LOCATION`
 - Uses `setLocation` to provide deterministic coordinates, then verifies `enableHighAccuracy=false` returns a position instead of timing out
 
+### `mocked-metadata-android.yaml`
+- Android-only contract for `mocked` and `provider` response metadata
+- Opens the dedicated mocked metadata page
+- Uses Maestro `setLocation`, then verifies the public result surfaces `Mocked: true` and `Provider: gps`
+
+### `compat-metadata-android.yaml`
+- Android-only contract for the legacy compat response shape
+- Opens the dedicated compat metadata contract page
+- Uses Maestro `setLocation`, then verifies the compat result does not include modern `mocked`/`provider` metadata
+
 ### `compat-api.yaml`
 - Tests `@react-native-community/geolocation` compatibility API
 - **Currently minimal**: Due to Maestro bottom tab navigation limitations

@@ -61,7 +61,9 @@ export function useGeolocationControl() {
         );
         const newPosition: Position = {
           coords: newCoords,
-          timestamp: newTimestamp
+          timestamp: newTimestamp,
+          mocked: true,
+          provider: prevPosition.provider ?? "unknown"
         };
         sendPosition(newPosition);
         return newPosition;
@@ -122,7 +124,9 @@ export function useGeolocationControl() {
 
                 const newPosition: Position = {
                   coords: newCoords,
-                  timestamp: newTimestamp
+                  timestamp: newTimestamp,
+                  mocked: true,
+                  provider: prevPosition.provider ?? "unknown"
                 };
                 sendPosition(newPosition);
                 return newPosition;

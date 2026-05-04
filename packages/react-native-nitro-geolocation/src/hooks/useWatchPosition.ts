@@ -4,7 +4,7 @@ import type {
   LocationRequestOptions
 } from "../NitroGeolocation.nitro";
 import { unwatch, watchPosition } from "../api";
-import type { GeolocationResponse } from "../types";
+import type { ModernGeolocationResponse } from "../types";
 
 /**
  * Options for useWatchPosition hook.
@@ -51,7 +51,9 @@ export interface UseWatchPositionOptions extends LocationRequestOptions {
  * ```
  */
 export function useWatchPosition(options?: UseWatchPositionOptions) {
-  const [position, setPosition] = useState<GeolocationResponse | null>(null);
+  const [position, setPosition] = useState<ModernGeolocationResponse | null>(
+    null
+  );
   const [isWatching, setIsWatching] = useState(false);
   const [error, setError] = useState<LocationError | null>(null);
 
@@ -88,7 +90,7 @@ export function useWatchPosition(options?: UseWatchPositionOptions) {
     setError(null);
 
     const token = watchPosition(
-      (result: GeolocationResponse) => {
+      (result: ModernGeolocationResponse) => {
         // Success callback
         if (!isMountedRef.current) return;
         setPosition(result);

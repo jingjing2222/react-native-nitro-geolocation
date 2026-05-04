@@ -1,4 +1,4 @@
-import type { GeolocationResponse } from "../types";
+import type { ModernGeolocationResponse } from "../types";
 
 declare const __DEV__: boolean;
 
@@ -8,7 +8,7 @@ declare global {
 }
 
 interface DevtoolsState {
-  position: GeolocationResponse | null;
+  position: ModernGeolocationResponse | null;
 }
 
 export function getDevtoolsState(): DevtoolsState {

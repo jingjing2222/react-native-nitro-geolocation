@@ -1,0 +1,43 @@
+appId: nitrogeolocation.example
+---
+# Android contract: mocked locations expose mocked/provider metadata on the
+# dedicated mocked metadata page.
+
+- launchApp:
+    clearState: true
+    permissions:
+      android.permission.ACCESS_COARSE_LOCATION: allow
+      android.permission.ACCESS_FINE_LOCATION: allow
+
+- extendedWaitUntil:
+    visible: "Geolocation API"
+    timeout: 10000
+
+- openLink:
+    link: nitrogeolocation://app/mocked-metadata
+- tapOn:
+    text: "열기|Open"
+    optional: true
+
+- extendedWaitUntil:
+    visible: "Mocked location metadata contract"
+    timeout: 10000
+
+- setLocation:
+    latitude: 37.5665
+    longitude: 126.978
+
+- tapOn: "Get Position"
+
+- extendedWaitUntil:
+    visible: "Current Position"
+    timeout: 15000
+
+- assertVisible:
+    id: "position-info"
+- assertVisible:
+    id: "mocked-text"
+- assertVisible: "Mocked: true"
+- assertVisible:
+    id: "provider-text"
+- assertVisible: "Provider: gps"

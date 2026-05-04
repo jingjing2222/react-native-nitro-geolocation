@@ -93,7 +93,7 @@ class NitroGeolocation: HybridNitroGeolocationSpec {
     // Watch subscription storage (first-class functions!)
     private struct WatchSubscription {
         let token: String
-        let success: (GeolocationResponse) -> Void
+        let success: (ModernGeolocationResponse) -> Void
         let error: ((LocationError) -> Void)?
         let options: ParsedOptions
     }
@@ -114,7 +114,7 @@ class NitroGeolocation: HybridNitroGeolocationSpec {
 
     private struct PositionRequest {
         let id: UUID
-        let resolver: (Result<GeolocationResponse, Error>) -> Void
+        let resolver: (Result<ModernGeolocationResponse, Error>) -> Void
         let options: ParsedOptions
         var timer: DispatchSourceTimer?
     }
@@ -175,8 +175,8 @@ class NitroGeolocation: HybridNitroGeolocationSpec {
 
     // MARK: - Get Current Position (Promise-based)
 
-    func getCurrentPosition(options: LocationRequestOptions?) throws -> Promise<GeolocationResponse> {
-        let promise = Promise<GeolocationResponse>()
+    func getCurrentPosition(options: LocationRequestOptions?) throws -> Promise<ModernGeolocationResponse> {
+        let promise = Promise<ModernGeolocationResponse>()
 
         // Check permission
         let status = CLLocationManager.authorizationStatus()
@@ -250,7 +250,7 @@ class NitroGeolocation: HybridNitroGeolocationSpec {
     // MARK: - Watch Position (Callback-based with tokens)
 
     func watchPosition(
-        success: @escaping (GeolocationResponse) -> Void,
+        success: @escaping (ModernGeolocationResponse) -> Void,
         error: ((LocationError) -> Void)?,
         options: LocationRequestOptions?
     ) -> String {
@@ -553,7 +553,7 @@ class NitroGeolocation: HybridNitroGeolocationSpec {
         }
     }
 
-    private func locationToPosition(_ location: CLLocation) -> GeolocationResponse {
+    private func locationToPosition(_ location: CLLocation) -> ModernGeolocationResponse {
         let altitude = location.verticalAccuracy < 0 ? 0.0 : location.altitude
         let altitudeAccuracy = location.verticalAccuracy < 0 ? 0.0 : location.verticalAccuracy
         let heading = location.course >= 0 ? location.course : -1.0
@@ -569,7 +569,9 @@ class NitroGeolocation: HybridNitroGeolocationSpec {
             speed: .second(speed)
         )
 
-        return GeolocationResponse(
+        return ModernGeolocationResponse(
+            mocked: location.nitroGeolocationMocked,
+            provider: location.nitroGeolocationProvider,
             coords: coords,
             timestamp: location.timestamp.timeIntervalSince1970 * 1000
         )

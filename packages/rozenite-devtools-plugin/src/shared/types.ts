@@ -8,9 +8,18 @@ export interface GeolocationCoordinates {
   speed: number | null;
 }
 
+export type LocationProviderUsed =
+  | "fused"
+  | "gps"
+  | "network"
+  | "passive"
+  | "unknown";
+
 export interface Position {
   coords: GeolocationCoordinates;
   timestamp: number;
+  mocked?: boolean;
+  provider?: LocationProviderUsed;
 }
 
 // UI receives these messages from RN

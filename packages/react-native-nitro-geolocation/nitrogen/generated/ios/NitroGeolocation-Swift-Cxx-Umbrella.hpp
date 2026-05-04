@@ -28,12 +28,16 @@ namespace margelo::nitro::nitrogeolocation { class HybridNitroGeolocationSpec; }
 namespace margelo::nitro::nitrogeolocation { struct LocationError; }
 // Forward declaration of `LocationProviderInternal` to properly resolve imports.
 namespace margelo::nitro::nitrogeolocation { enum class LocationProviderInternal; }
+// Forward declaration of `LocationProviderUsed` to properly resolve imports.
+namespace margelo::nitro::nitrogeolocation { enum class LocationProviderUsed; }
 // Forward declaration of `LocationProvider` to properly resolve imports.
 namespace margelo::nitro::nitrogeolocation { enum class LocationProvider; }
 // Forward declaration of `LocationRequestOptions` to properly resolve imports.
 namespace margelo::nitro::nitrogeolocation { struct LocationRequestOptions; }
 // Forward declaration of `ModernGeolocationConfiguration` to properly resolve imports.
 namespace margelo::nitro::nitrogeolocation { struct ModernGeolocationConfiguration; }
+// Forward declaration of `ModernGeolocationResponse` to properly resolve imports.
+namespace margelo::nitro::nitrogeolocation { struct ModernGeolocationResponse; }
 // Forward declaration of `PermissionStatus` to properly resolve imports.
 namespace margelo::nitro::nitrogeolocation { enum class PermissionStatus; }
 // Forward declaration of `RNConfigurationInternal` to properly resolve imports.
@@ -51,8 +55,10 @@ namespace margelo::nitro::nitrogeolocation { struct RNConfigurationInternal; }
 #include "LocationError.hpp"
 #include "LocationProvider.hpp"
 #include "LocationProviderInternal.hpp"
+#include "LocationProviderUsed.hpp"
 #include "LocationRequestOptions.hpp"
 #include "ModernGeolocationConfiguration.hpp"
+#include "ModernGeolocationResponse.hpp"
 #include "PermissionStatus.hpp"
 #include "RNConfigurationInternal.hpp"
 #include <NitroModules/Null.hpp>

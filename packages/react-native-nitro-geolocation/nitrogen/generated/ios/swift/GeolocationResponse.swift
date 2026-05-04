@@ -26,7 +26,7 @@ public extension GeolocationResponse {
   var coords: GeolocationCoordinates {
     return self.__coords
   }
-  
+
   @inline(__always)
   var timestamp: Double {
     return self.__timestamp

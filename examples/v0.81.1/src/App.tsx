@@ -6,11 +6,13 @@ import {
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { NavigationContainer } from "@react-navigation/native";
 import React from "react";
+import CompatMetadataScreen from "./screens/CompatMetadataScreen";
 import CompatScreen from "./screens/CompatScreen";
 import CurrentPositionScreen from "./screens/CurrentPositionScreen";
 import DefaultScreen from "./screens/DefaultScreen";
 import Issue67Screen from "./screens/Issue67Screen";
 import LocationSimulationScreen from "./screens/LocationSimulationScreen";
+import MockedMetadataScreen from "./screens/MockedMetadataScreen";
 import PermissionCheckScreen from "./screens/PermissionCheckScreen";
 import WatchPositionScreen from "./screens/WatchPositionScreen";
 
@@ -25,6 +27,8 @@ const linking = {
       CurrentPosition: "current-position",
       WatchPosition: "watch-position",
       LocationSimulation: "location-simulation",
+      MockedMetadata: "mocked-metadata",
+      CompatMetadata: "compat-metadata",
       Issue67: "issue-67"
     }
   }
@@ -93,6 +97,16 @@ export default function App() {
         <Tab.Screen
           name="LocationSimulation"
           component={LocationSimulationScreen}
+          options={hiddenTabOptions}
+        />
+        <Tab.Screen
+          name="MockedMetadata"
+          component={MockedMetadataScreen}
+          options={hiddenTabOptions}
+        />
+        <Tab.Screen
+          name="CompatMetadata"
+          component={CompatMetadataScreen}
           options={hiddenTabOptions}
         />
         <Tab.Screen

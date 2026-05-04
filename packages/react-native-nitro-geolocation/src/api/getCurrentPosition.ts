@@ -2,7 +2,7 @@ import type { LocationRequestOptions } from "../NitroGeolocation.nitro";
 import { NitroGeolocationHybridObject } from "../NitroGeolocationModule";
 import { isDevtoolsEnabled } from "../devtools";
 import { getDevtoolsCurrentPosition } from "../devtools/getCurrentPosition";
-import type { GeolocationResponse } from "../types";
+import type { ModernGeolocationResponse } from "../types";
 
 /**
  * Get current location (one-time request).
@@ -32,7 +32,7 @@ import type { GeolocationResponse } from "../types";
  */
 export function getCurrentPosition(
   options?: LocationRequestOptions
-): Promise<GeolocationResponse> {
+): Promise<ModernGeolocationResponse> {
   if (isDevtoolsEnabled()) {
     const devtoolsResult = getDevtoolsCurrentPosition();
     if (devtoolsResult) {

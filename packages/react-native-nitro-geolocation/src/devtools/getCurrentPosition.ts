@@ -1,7 +1,7 @@
-import type { GeolocationResponse } from "../types";
+import type { ModernGeolocationResponse } from "../types";
 import { getDevtoolsState } from "./index";
 
-export function getDevtoolsCurrentPosition(): Promise<GeolocationResponse> | null {
+export function getDevtoolsCurrentPosition(): Promise<ModernGeolocationResponse> | null {
   const devtools = getDevtoolsState();
   if (devtools.position) {
     return Promise.resolve(devtools.position);

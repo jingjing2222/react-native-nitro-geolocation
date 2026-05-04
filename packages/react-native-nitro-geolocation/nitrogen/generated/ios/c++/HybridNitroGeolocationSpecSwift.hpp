@@ -20,8 +20,10 @@ namespace margelo::nitro::nitrogeolocation { enum class AuthorizationLevel; }
 namespace margelo::nitro::nitrogeolocation { enum class LocationProvider; }
 // Forward declaration of `PermissionStatus` to properly resolve imports.
 namespace margelo::nitro::nitrogeolocation { enum class PermissionStatus; }
-// Forward declaration of `GeolocationResponse` to properly resolve imports.
-namespace margelo::nitro::nitrogeolocation { struct GeolocationResponse; }
+// Forward declaration of `ModernGeolocationResponse` to properly resolve imports.
+namespace margelo::nitro::nitrogeolocation { struct ModernGeolocationResponse; }
+// Forward declaration of `LocationProviderUsed` to properly resolve imports.
+namespace margelo::nitro::nitrogeolocation { enum class LocationProviderUsed; }
 // Forward declaration of `GeolocationCoordinates` to properly resolve imports.
 namespace margelo::nitro::nitrogeolocation { struct GeolocationCoordinates; }
 // Forward declaration of `LocationRequestOptions` to properly resolve imports.
@@ -35,7 +37,8 @@ namespace margelo::nitro::nitrogeolocation { struct LocationError; }
 #include "LocationProvider.hpp"
 #include "PermissionStatus.hpp"
 #include <NitroModules/Promise.hpp>
-#include "GeolocationResponse.hpp"
+#include "ModernGeolocationResponse.hpp"
+#include "LocationProviderUsed.hpp"
 #include "GeolocationCoordinates.hpp"
 #include <NitroModules/Null.hpp>
 #include <variant>
@@ -116,7 +119,7 @@ namespace margelo::nitro::nitrogeolocation {
       auto __value = std::move(__result.value());
       return __value;
     }
-    inline std::shared_ptr<Promise<GeolocationResponse>> getCurrentPosition(const std::optional<LocationRequestOptions>& options) override {
+    inline std::shared_ptr<Promise<ModernGeolocationResponse>> getCurrentPosition(const std::optional<LocationRequestOptions>& options) override {
       auto __result = _swiftPart.getCurrentPosition(options);
       if (__result.hasError()) [[unlikely]] {
         std::rethrow_exception(__result.error());
@@ -124,7 +127,7 @@ namespace margelo::nitro::nitrogeolocation {
       auto __value = std::move(__result.value());
       return __value;
     }
-    inline std::string watchPosition(const std::function<void(const GeolocationResponse& /* position */)>& success, const std::optional<std::function<void(const LocationError& /* error */)>>& error, const std::optional<LocationRequestOptions>& options) override {
+    inline std::string watchPosition(const std::function<void(const ModernGeolocationResponse& /* position */)>& success, const std::optional<std::function<void(const LocationError& /* error */)>>& error, const std::optional<LocationRequestOptions>& options) override {
       auto __result = _swiftPart.watchPosition(success, error, options);
       if (__result.hasError()) [[unlikely]] {
         std::rethrow_exception(__result.error());

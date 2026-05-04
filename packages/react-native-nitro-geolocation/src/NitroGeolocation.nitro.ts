@@ -1,5 +1,5 @@
 import type { HybridObject } from "react-native-nitro-modules";
-import type { GeolocationResponse } from "./types";
+import type { ModernGeolocationResponse } from "./types";
 
 /**
  * Permission status for location services.
@@ -141,7 +141,7 @@ export interface NitroGeolocation
    */
   getCurrentPosition(
     options?: LocationRequestOptions
-  ): Promise<GeolocationResponse>;
+  ): Promise<ModernGeolocationResponse>;
 
   /**
    * Start watching for continuous location updates.
@@ -159,7 +159,7 @@ export interface NitroGeolocation
    * @returns Subscription token (UUID string) for cleanup
    */
   watchPosition(
-    success: (position: GeolocationResponse) => void,
+    success: (position: ModernGeolocationResponse) => void,
     error?: (error: LocationError) => void,
     options?: LocationRequestOptions
   ): string;

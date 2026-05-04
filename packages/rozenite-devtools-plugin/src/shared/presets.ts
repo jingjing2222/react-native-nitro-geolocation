@@ -146,7 +146,9 @@ export function createPositionFromPreset(preset: LocationPreset): Position {
       heading: null,
       speed: 0
     },
-    timestamp: Date.now()
+    timestamp: Date.now(),
+    mocked: true,
+    provider: "unknown"
   };
 }
 

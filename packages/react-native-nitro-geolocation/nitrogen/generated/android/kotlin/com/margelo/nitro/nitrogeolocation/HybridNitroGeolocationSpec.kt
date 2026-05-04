@@ -43,13 +43,13 @@ abstract class HybridNitroGeolocationSpec: HybridObject() {
   
   @DoNotStrip
   @Keep
-  abstract fun getCurrentPosition(options: LocationRequestOptions?): Promise<GeolocationResponse>
+  abstract fun getCurrentPosition(options: LocationRequestOptions?): Promise<ModernGeolocationResponse>
   
-  abstract fun watchPosition(success: (position: GeolocationResponse) -> Unit, error: ((error: LocationError) -> Unit)?, options: LocationRequestOptions?): String
+  abstract fun watchPosition(success: (position: ModernGeolocationResponse) -> Unit, error: ((error: LocationError) -> Unit)?, options: LocationRequestOptions?): String
   
   @DoNotStrip
   @Keep
-  private fun watchPosition_cxx(success: Func_void_GeolocationResponse, error: Func_void_LocationError?, options: LocationRequestOptions?): String {
+  private fun watchPosition_cxx(success: Func_void_ModernGeolocationResponse, error: Func_void_LocationError?, options: LocationRequestOptions?): String {
     val __result = watchPosition(success, error?.let { it }, options)
     return __result
   }
