@@ -300,6 +300,11 @@ class NitroGeolocation(
         }
 
         val parsedOptions = ParsedOptions.parseLastKnown(options)
+        if (requiresPlayServices() && !isGooglePlayServicesAvailable()) {
+            error?.invoke(createPlayServicesUnavailableError())
+            return
+        }
+
         val providers = getValidProviders(parsedOptions.androidAccuracy)
         if (providers.isEmpty()) {
             error?.invoke(createNoLocationProviderError(parsedOptions))

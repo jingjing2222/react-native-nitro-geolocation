@@ -42,14 +42,39 @@ appId: nitrogeolocation.example
     text: ".*without starting a fresh request.*"
 
 - scrollUntilVisible:
-    element: "3. Seeded Cache Read"
+    element: "3. System Cache Read"
     direction: DOWN
+
+- tapOn:
+    id: "last-known-position-run-system-button"
+
+- extendedWaitUntil:
+    visible: "System cache: passed"
+    timeout: 20000
+
+- assertVisible:
+    id: "last-known-position-system-result"
+- assertVisible:
+    text: ".*37.566500, 126.978000.*"
+- assertVisible:
+    text: ".*without getCurrentPosition.*"
+
+- scrollUntilVisible:
+    element: "4. Seeded Cache Read"
+    direction: DOWN
+
+- scrollUntilVisible:
+    element:
+      id: "last-known-position-run-cache-button"
+    direction: DOWN
+    centerElement: true
 
 - tapOn:
     id: "last-known-position-run-cache-button"
 
-- extendedWaitUntil:
-    visible: "Seeded cache: passed"
+- scrollUntilVisible:
+    element: "Seeded cache: passed"
+    direction: DOWN
     timeout: 60000
 
 - assertVisible:
@@ -83,7 +108,7 @@ appId: nitrogeolocation.example
     timeout: 10000
 
 - scrollUntilVisible:
-    element: "4. Permission Denied"
+    element: "5. Permission Denied"
     direction: DOWN
 
 - tapOn:

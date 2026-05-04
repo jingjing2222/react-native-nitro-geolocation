@@ -11,6 +11,7 @@ import {
   ResultBlock,
   assertFixtureCoordinates,
   assertLocationErrorCode,
+  captureLocationError,
   createIdleResult,
   getDisplayErrorMessage,
   runWithNativeGeolocation,
@@ -19,9 +20,12 @@ import {
 import type { ScenarioResult } from "./scenarioUtils";
 
 const PREFIX = "last-known-position";
+const SYSTEM_CACHE_RETRY_TIMEOUT_MS = 10000;
+const SYSTEM_CACHE_RETRY_INTERVAL_MS = 500;
 
 const initialResults = {
   stale: createIdleResult(),
+  system: createIdleResult(),
   cache: createIdleResult(),
   denied: createIdleResult()
 };
@@ -50,6 +54,38 @@ export default function LastKnownPositionScreen() {
     const status = await requestPermission();
     setPermissionStatus(status);
     return status;
+  };
+
+  const sleep = (durationMs: number) =>
+    new Promise<void>((resolve) => {
+      setTimeout(() => resolve(), durationMs);
+    });
+
+  const readSystemCacheOnly = async () => {
+    const startedAt = Date.now();
+    let lastUnavailableMessage = "No cached location available.";
+
+    while (Date.now() - startedAt <= SYSTEM_CACHE_RETRY_TIMEOUT_MS) {
+      try {
+        const position = await runWithNativeGeolocation(() =>
+          getLastKnownPosition()
+        );
+        return {
+          elapsedMs: Date.now() - startedAt,
+          position
+        };
+      } catch (error) {
+        const locationError = captureLocationError(error);
+        if (locationError.code !== LocationErrorCode.POSITION_UNAVAILABLE) {
+          throw error;
+        }
+
+        lastUnavailableMessage = locationError.message;
+        await sleep(SYSTEM_CACHE_RETRY_INTERVAL_MS);
+      }
+    }
+
+    throw new Error(lastUnavailableMessage);
   };
 
   const runStaleCacheScenario = async () => {
@@ -82,6 +118,35 @@ export default function LastKnownPositionScreen() {
           message: getDisplayErrorMessage(assertionError)
         });
       }
+    }
+  };
+
+  const runSystemCacheReadScenario = async () => {
+    setResult("system", {
+      status: "running",
+      message: "Reading system/provider cache without seeding module state"
+    });
+
+    try {
+      const status = await requestLocationPermission();
+      if (status !== "granted") {
+        throw new Error(`Permission was not granted: ${status}`);
+      }
+
+      const { elapsedMs, position } = await readSystemCacheOnly();
+      const coordinates = assertFixtureCoordinates(position);
+
+      setResult("system", {
+        status: "passed",
+        message: `System cache ${coordinates}; cache-only read ${elapsedMs}ms without getCurrentPosition.`
+      });
+    } catch (error) {
+      setResult("system", {
+        status: "failed",
+        message: getDisplayErrorMessage(error)
+      });
+    } finally {
+      await refreshPermission();
     }
   };
 
@@ -224,7 +289,27 @@ export default function LastKnownPositionScreen() {
       <View style={sharedStyles.divider} />
 
       <View style={sharedStyles.section}>
-        <Text style={sharedStyles.sectionTitle}>3. Seeded Cache Read</Text>
+        <Text style={sharedStyles.sectionTitle}>3. System Cache Read</Text>
+        <View style={sharedStyles.buttonContainer}>
+          <Button
+            title="Read System Cache"
+            onPress={runSystemCacheReadScenario}
+            color="#00897B"
+            testID={`${PREFIX}-run-system-button`}
+          />
+        </View>
+        <ResultBlock
+          prefix={PREFIX}
+          id="system"
+          label="System cache"
+          result={results.system}
+        />
+      </View>
+
+      <View style={sharedStyles.divider} />
+
+      <View style={sharedStyles.section}>
+        <Text style={sharedStyles.sectionTitle}>4. Seeded Cache Read</Text>
         <View style={sharedStyles.buttonContainer}>
           <Button
             title="Seed And Read Cache"
@@ -244,7 +329,7 @@ export default function LastKnownPositionScreen() {
       <View style={sharedStyles.divider} />
 
       <View style={sharedStyles.section}>
-        <Text style={sharedStyles.sectionTitle}>4. Permission Denied</Text>
+        <Text style={sharedStyles.sectionTitle}>5. Permission Denied</Text>
         <View style={sharedStyles.buttonContainer}>
           <Button
             title="Run Denied Cache Read"

@@ -312,8 +312,8 @@ class NitroGeolocation: HybridNitroGeolocationSpec {
         let parsedOptions = ParsedOptions.parse(from: options)
 
         // Check cached location
-        if let cached = self.lastLocation,
-           self.isCachedLocationValid(cached, options: parsedOptions) {
+        if let cached = self.getBestCachedLocation(options: parsedOptions) {
+            self.lastLocation = cached
             let position = self.locationToPosition(cached)
             success(position)
             return
@@ -365,8 +365,7 @@ class NitroGeolocation: HybridNitroGeolocationSpec {
         }
 
         let parsedOptions = ParsedOptions.parseLastKnown(from: options)
-        guard let cached = self.lastLocation,
-              self.isCachedLocationValid(cached, options: parsedOptions) else {
+        guard let cached = self.getBestCachedLocation(options: parsedOptions) else {
             error?(createLocationError(
                 code: self.POSITION_UNAVAILABLE,
                 message: "No cached location available."
@@ -374,6 +373,7 @@ class NitroGeolocation: HybridNitroGeolocationSpec {
             return
         }
 
+        self.lastLocation = cached
         success(self.locationToPosition(cached))
     }
 
@@ -688,6 +688,15 @@ class NitroGeolocation: HybridNitroGeolocationSpec {
         // Check age
         let age = Date().timeIntervalSince(location.timestamp) * 1000  // ms
         return age < options.maximumAge
+    }
+
+    private func getBestCachedLocation(options: ParsedOptions) -> CLLocation? {
+        initializeLocationManagerIfNeeded()
+
+        return [lastLocation, locationManager?.location]
+            .compactMap { $0 }
+            .filter { isCachedLocationValid($0, options: options) }
+            .max { $0.timestamp < $1.timestamp }
     }
 
     private func handlePositionTimeout(requestId: UUID) {
