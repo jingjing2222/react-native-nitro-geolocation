@@ -31,7 +31,7 @@ internal class AndroidLocationSettings(
     private val createPlayServicesUnavailableError: () -> LocationError
 ) {
     private data class ParsedSettingsOptions(
-        val enableHighAccuracy: Boolean,
+        val androidAccuracy: AndroidAccuracyResolution,
         val intervalMillis: Long,
         val fastestIntervalMillis: Long,
         val distanceFilterMeters: Float,
@@ -44,8 +44,12 @@ internal class AndroidLocationSettings(
             private const val DEFAULT_DISTANCE_FILTER_METERS = 0.0
 
             fun parse(options: LocationSettingsOptions?): ParsedSettingsOptions {
+                val enableHighAccuracy = options?.enableHighAccuracy ?: true
                 return ParsedSettingsOptions(
-                    enableHighAccuracy = options?.enableHighAccuracy ?: true,
+                    androidAccuracy = resolveAndroidAccuracy(
+                        options?.accuracy,
+                        enableHighAccuracy
+                    ),
                     intervalMillis = coercePositiveMillis(
                         options?.interval,
                         DEFAULT_INTERVAL_MS
@@ -209,10 +213,11 @@ internal class AndroidLocationSettings(
     private fun buildLocationSettingsRequest(
         options: ParsedSettingsOptions
     ): LocationSettingsRequest {
-        val priority = if (options.enableHighAccuracy) {
-            Priority.PRIORITY_HIGH_ACCURACY
-        } else {
-            Priority.PRIORITY_BALANCED_POWER_ACCURACY
+        val priority = when (options.androidAccuracy.mode) {
+            AndroidAccuracyMode.HIGH -> Priority.PRIORITY_HIGH_ACCURACY
+            AndroidAccuracyMode.BALANCED -> Priority.PRIORITY_BALANCED_POWER_ACCURACY
+            AndroidAccuracyMode.LOW -> Priority.PRIORITY_LOW_POWER
+            AndroidAccuracyMode.PASSIVE -> Priority.PRIORITY_PASSIVE
         }
 
         val request = GmsLocationRequest

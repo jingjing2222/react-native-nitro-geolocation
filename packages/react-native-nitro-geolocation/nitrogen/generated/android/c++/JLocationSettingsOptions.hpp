@@ -10,6 +10,12 @@
 #include <fbjni/fbjni.h>
 #include "LocationSettingsOptions.hpp"
 
+#include "AndroidAccuracyPreset.hpp"
+#include "IOSAccuracyPreset.hpp"
+#include "JAndroidAccuracyPreset.hpp"
+#include "JIOSAccuracyPreset.hpp"
+#include "JLocationAccuracyOptions.hpp"
+#include "LocationAccuracyOptions.hpp"
 #include <optional>
 
 namespace margelo::nitro::nitrogeolocation {
@@ -33,6 +39,8 @@ namespace margelo::nitro::nitrogeolocation {
       static const auto clazz = javaClassStatic();
       static const auto fieldEnableHighAccuracy = clazz->getField<jni::JBoolean>("enableHighAccuracy");
       jni::local_ref<jni::JBoolean> enableHighAccuracy = this->getFieldValue(fieldEnableHighAccuracy);
+      static const auto fieldAccuracy = clazz->getField<JLocationAccuracyOptions>("accuracy");
+      jni::local_ref<JLocationAccuracyOptions> accuracy = this->getFieldValue(fieldAccuracy);
       static const auto fieldInterval = clazz->getField<jni::JDouble>("interval");
       jni::local_ref<jni::JDouble> interval = this->getFieldValue(fieldInterval);
       static const auto fieldFastestInterval = clazz->getField<jni::JDouble>("fastestInterval");
@@ -45,6 +53,7 @@ namespace margelo::nitro::nitrogeolocation {
       jni::local_ref<jni::JBoolean> needBle = this->getFieldValue(fieldNeedBle);
       return LocationSettingsOptions(
         enableHighAccuracy != nullptr ? std::make_optional(static_cast<bool>(enableHighAccuracy->value())) : std::nullopt,
+        accuracy != nullptr ? std::make_optional(accuracy->toCpp()) : std::nullopt,
         interval != nullptr ? std::make_optional(interval->value()) : std::nullopt,
         fastestInterval != nullptr ? std::make_optional(fastestInterval->value()) : std::nullopt,
         distanceFilter != nullptr ? std::make_optional(distanceFilter->value()) : std::nullopt,
@@ -59,12 +68,13 @@ namespace margelo::nitro::nitrogeolocation {
      */
     [[maybe_unused]]
     static jni::local_ref<JLocationSettingsOptions::javaobject> fromCpp(const LocationSettingsOptions& value) {
-      using JSignature = JLocationSettingsOptions(jni::alias_ref<jni::JBoolean>, jni::alias_ref<jni::JDouble>, jni::alias_ref<jni::JDouble>, jni::alias_ref<jni::JDouble>, jni::alias_ref<jni::JBoolean>, jni::alias_ref<jni::JBoolean>);
+      using JSignature = JLocationSettingsOptions(jni::alias_ref<jni::JBoolean>, jni::alias_ref<JLocationAccuracyOptions>, jni::alias_ref<jni::JDouble>, jni::alias_ref<jni::JDouble>, jni::alias_ref<jni::JDouble>, jni::alias_ref<jni::JBoolean>, jni::alias_ref<jni::JBoolean>);
       static const auto clazz = javaClassStatic();
       static const auto create = clazz->getStaticMethod<JSignature>("fromCpp");
       return create(
         clazz,
         value.enableHighAccuracy.has_value() ? jni::JBoolean::valueOf(value.enableHighAccuracy.value()) : nullptr,
+        value.accuracy.has_value() ? JLocationAccuracyOptions::fromCpp(value.accuracy.value()) : nullptr,
         value.interval.has_value() ? jni::JDouble::valueOf(value.interval.value()) : nullptr,
         value.fastestInterval.has_value() ? jni::JDouble::valueOf(value.fastestInterval.value()) : nullptr,
         value.distanceFilter.has_value() ? jni::JDouble::valueOf(value.distanceFilter.value()) : nullptr,

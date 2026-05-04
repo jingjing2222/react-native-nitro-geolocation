@@ -28,6 +28,9 @@ data class LocationRequestOptions(
   val enableHighAccuracy: Boolean?,
   @DoNotStrip
   @Keep
+  val accuracy: LocationAccuracyOptions?,
+  @DoNotStrip
+  @Keep
   val interval: Double?,
   @DoNotStrip
   @Keep
@@ -49,8 +52,8 @@ data class LocationRequestOptions(
     @Keep
     @Suppress("unused")
     @JvmStatic
-    private fun fromCpp(timeout: Double?, maximumAge: Double?, enableHighAccuracy: Boolean?, interval: Double?, fastestInterval: Double?, distanceFilter: Double?, useSignificantChanges: Boolean?): LocationRequestOptions {
-      return LocationRequestOptions(timeout, maximumAge, enableHighAccuracy, interval, fastestInterval, distanceFilter, useSignificantChanges)
+    private fun fromCpp(timeout: Double?, maximumAge: Double?, enableHighAccuracy: Boolean?, accuracy: LocationAccuracyOptions?, interval: Double?, fastestInterval: Double?, distanceFilter: Double?, useSignificantChanges: Boolean?): LocationRequestOptions {
+      return LocationRequestOptions(timeout, maximumAge, enableHighAccuracy, accuracy, interval, fastestInterval, distanceFilter, useSignificantChanges)
     }
   }
 }

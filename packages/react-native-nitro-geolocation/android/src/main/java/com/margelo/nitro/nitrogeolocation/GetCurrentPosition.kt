@@ -29,7 +29,7 @@ class GetCurrentPosition(private val reactContext: ReactApplicationContext) {
         }
 
         val opts = parseOptions(options)
-        val provider = getValidProvider(locationManager, opts.enableHighAccuracy)
+        val provider = getValidProvider(locationManager, opts.androidAccuracy)
 
         if (provider == null) {
             Log.e(TAG, "No location provider available")
@@ -68,7 +68,11 @@ class GetCurrentPosition(private val reactContext: ReactApplicationContext) {
         return ParsedOptions(
                 timeout = options?.timeout ?: DEFAULT_TIMEOUT,
                 maximumAge = options?.maximumAge ?: DEFAULT_MAXIMUM_AGE,
-                enableHighAccuracy = options?.enableHighAccuracy ?: false
+                androidAccuracy =
+                        resolveAndroidAccuracy(
+                                options?.accuracy,
+                                options?.enableHighAccuracy ?: false
+                        )
         )
     }
 
@@ -77,29 +81,34 @@ class GetCurrentPosition(private val reactContext: ReactApplicationContext) {
         return age < options.maximumAge
     }
 
-    private fun getValidProvider(locationManager: LocationManager, highAccuracy: Boolean): String? {
-        val preferredProvider =
-                if (highAccuracy) LocationManager.GPS_PROVIDER else LocationManager.NETWORK_PROVIDER
-        val fallbackProvider =
-                if (highAccuracy) LocationManager.NETWORK_PROVIDER else LocationManager.GPS_PROVIDER
-
-        return when {
-            isProviderValid(locationManager, preferredProvider) -> preferredProvider
-            isProviderValid(locationManager, fallbackProvider) -> fallbackProvider
-            else -> null
+    private fun getValidProvider(
+            locationManager: LocationManager,
+            accuracy: AndroidAccuracyResolution
+    ): String? {
+        return accuracy.providerOrder().firstOrNull { provider ->
+            isProviderValid(locationManager, provider)
         }
     }
 
     private fun isProviderValid(locationManager: LocationManager, provider: String): Boolean {
         if (!locationManager.isProviderEnabled(provider)) return false
 
-        val permission =
-                if (provider == LocationManager.GPS_PROVIDER)
+        val fineGranted =
+                ContextCompat.checkSelfPermission(
+                        reactContext,
                         Manifest.permission.ACCESS_FINE_LOCATION
-                else Manifest.permission.ACCESS_COARSE_LOCATION
+                ) == PackageManager.PERMISSION_GRANTED
+        val coarseGranted =
+                ContextCompat.checkSelfPermission(
+                        reactContext,
+                        Manifest.permission.ACCESS_COARSE_LOCATION
+                ) == PackageManager.PERMISSION_GRANTED
 
-        return ContextCompat.checkSelfPermission(reactContext, permission) ==
-                PackageManager.PERMISSION_GRANTED
+        return if (provider == LocationManager.GPS_PROVIDER) {
+            fineGranted
+        } else {
+            coarseGranted || fineGranted
+        }
     }
 
     private fun requestFreshLocation(
@@ -316,7 +325,7 @@ class GetCurrentPosition(private val reactContext: ReactApplicationContext) {
     private data class ParsedOptions(
             val timeout: Double,
             val maximumAge: Double,
-            val enableHighAccuracy: Boolean
+            val androidAccuracy: AndroidAccuracyResolution
     )
 
     companion object {

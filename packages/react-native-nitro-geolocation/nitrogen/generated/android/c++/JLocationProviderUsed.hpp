@@ -42,6 +42,9 @@ namespace margelo::nitro::nitrogeolocation {
     static jni::alias_ref<JLocationProviderUsed> fromCpp(LocationProviderUsed value) {
       static const auto clazz = javaClassStatic();
       switch (value) {
+        case LocationProviderUsed::PASSIVE:
+          static const auto fieldPASSIVE = clazz->getStaticField<JLocationProviderUsed>("PASSIVE");
+          return clazz->getStaticFieldValue(fieldPASSIVE);
         case LocationProviderUsed::FUSED:
           static const auto fieldFUSED = clazz->getStaticField<JLocationProviderUsed>("FUSED");
           return clazz->getStaticFieldValue(fieldFUSED);
@@ -51,9 +54,6 @@ namespace margelo::nitro::nitrogeolocation {
         case LocationProviderUsed::NETWORK:
           static const auto fieldNETWORK = clazz->getStaticField<JLocationProviderUsed>("NETWORK");
           return clazz->getStaticFieldValue(fieldNETWORK);
-        case LocationProviderUsed::PASSIVE:
-          static const auto fieldPASSIVE = clazz->getStaticField<JLocationProviderUsed>("PASSIVE");
-          return clazz->getStaticFieldValue(fieldPASSIVE);
         case LocationProviderUsed::UNKNOWN:
           static const auto fieldUNKNOWN = clazz->getStaticField<JLocationProviderUsed>("UNKNOWN");
           return clazz->getStaticFieldValue(fieldUNKNOWN);

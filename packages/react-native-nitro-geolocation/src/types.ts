@@ -7,6 +7,20 @@ export type LocationProviderUsed =
   | "passive"
   | "unknown";
 export type NullableDouble = number | null;
+export type AndroidAccuracyPreset = "high" | "balanced" | "low" | "passive";
+export type IOSAccuracyPreset =
+  | "bestForNavigation"
+  | "best"
+  | "nearestTenMeters"
+  | "hundredMeters"
+  | "kilometer"
+  | "threeKilometers"
+  | "reduced";
+
+export interface LocationAccuracyOptions {
+  android?: AndroidAccuracyPreset;
+  ios?: IOSAccuracyPreset;
+}
 
 export interface GeolocationCoordinates {
   latitude: number;
@@ -77,6 +91,7 @@ export interface CompatGeolocationOptions {
   timeout?: number;
   maximumAge?: number;
   enableHighAccuracy?: boolean;
+  accuracy?: LocationAccuracyOptions;
   interval?: number;
   fastestInterval?: number;
   distanceFilter?: number;

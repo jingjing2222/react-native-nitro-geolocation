@@ -169,14 +169,14 @@ async function prepareAccurateLocation() {
 
   if (!servicesEnabled || providerStatus.googleLocationAccuracyEnabled === false) {
     await requestLocationSettings({
-      enableHighAccuracy: true,
+      accuracy: { android: 'high' },
       interval: 5000,
       fastestInterval: 1000
     });
   }
 
   return getCurrentPosition({
-    enableHighAccuracy: true,
+    accuracy: { android: 'high', ios: 'best' },
     timeout: 15000
   });
 }
@@ -258,6 +258,26 @@ function LocationButton() {
 - `timeout?: number` - Request timeout in ms (default: 600000 / 10 min)
 - `maximumAge?: number` - Max age of cached location in ms (default: 0)
 - `enableHighAccuracy?: boolean` - Use GPS vs network location
+- `accuracy?: { android?: 'high' | 'balanced' | 'low' | 'passive'; ios?: 'bestForNavigation' | 'best' | 'nearestTenMeters' | 'hundredMeters' | 'kilometer' | 'threeKilometers' | 'reduced' }` - Platform-specific accuracy preset. When a preset is provided for the current platform, it takes precedence over `enableHighAccuracy`.
+
+`enableHighAccuracy` remains supported for compatibility. Prefer `accuracy`
+when you need explicit platform-native behavior:
+
+```tsx
+await getCurrentPosition({
+  enableHighAccuracy: false,
+  accuracy: {
+    android: 'high',
+    ios: 'bestForNavigation'
+  },
+  timeout: 15000
+});
+```
+
+Android maps the presets to native provider/priority intent: `high` prefers
+GPS with a network fallback, `balanced` uses the network provider, `low` uses
+network/passive providers, and `passive` only listens through the passive
+provider. iOS maps the presets to Core Location `desiredAccuracy` constants.
 
 **Returns**: `Promise<GeolocationResponse>`
 

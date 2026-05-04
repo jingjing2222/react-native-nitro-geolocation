@@ -1,5 +1,9 @@
 import type { HybridObject } from "react-native-nitro-modules";
-import type { GeolocationResponse, LocationProviderStatus } from "./types";
+import type {
+  GeolocationResponse,
+  LocationAccuracyOptions,
+  LocationProviderStatus
+} from "./types";
 
 /**
  * Permission status for location services.
@@ -71,6 +75,15 @@ export interface LocationRequestOptions {
   /** Enable high accuracy mode (GPS) */
   enableHighAccuracy?: boolean;
 
+  /**
+   * Platform-specific accuracy preset.
+   *
+   * When provided, this takes precedence over `enableHighAccuracy` on the
+   * matching platform while keeping `enableHighAccuracy` available for the
+   * legacy true/false contract.
+   */
+  accuracy?: LocationAccuracyOptions;
+
   /** Minimum time interval between updates in milliseconds (watch only) */
   interval?: number;
 
@@ -98,6 +111,15 @@ export interface LocationSettingsOptions {
    * precise location flows.
    */
   enableHighAccuracy?: boolean;
+
+  /**
+   * Platform-specific accuracy preset for settings checks.
+   *
+   * Android uses `accuracy.android` to map to the native location request
+   * priority. iOS ignores this option because iOS has no equivalent settings
+   * resolution dialog.
+   */
+  accuracy?: LocationAccuracyOptions;
 
   /** Desired update interval in milliseconds. */
   interval?: number;

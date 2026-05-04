@@ -81,6 +81,13 @@ The Android and iOS package scripts install the Release build first (`yarn andro
 - Tests behavior at different locations
 - Simulates locations: San Francisco, New York, Seoul
 
+### `accuracy-presets.yaml`
+- Tests `accuracy.android` and `accuracy.ios` through real Modern API native requests
+- Uses `setLocation` and the app verifies returned coordinates against the injected fixture, so the assertion is not a static option display
+- Checks preset override behavior with `enableHighAccuracy` set to the opposite boolean
+- Checks invalid preset rejection by crossing the Nitro native boundary with a deliberately unsupported preset
+- Relaunches with location permission denied and verifies the native `PERMISSION_DENIED` result
+
 ### `issue-67-android-coarse-location.yaml`
 - Android-only contract for approximate/coarse permission handling
 - Uses Maestro permissions to grant `ACCESS_COARSE_LOCATION` and deny `ACCESS_FINE_LOCATION`

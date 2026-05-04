@@ -46,7 +46,7 @@ class NitroGeolocation(
     private data class ParsedOptions(
         val timeout: Double,
         val maximumAge: Double,
-        val enableHighAccuracy: Boolean,
+        val androidAccuracy: AndroidAccuracyResolution,
         val interval: Double,
         val fastestInterval: Double,
         val distanceFilter: Double
@@ -59,10 +59,14 @@ class NitroGeolocation(
             private const val DEFAULT_DISTANCE_FILTER = 0.0
 
             fun parse(options: LocationRequestOptions?): ParsedOptions {
+                val enableHighAccuracy = options?.enableHighAccuracy ?: false
                 return ParsedOptions(
                     timeout = options?.timeout ?: DEFAULT_TIMEOUT,
                     maximumAge = options?.maximumAge ?: DEFAULT_MAXIMUM_AGE,
-                    enableHighAccuracy = options?.enableHighAccuracy ?: false,
+                    androidAccuracy = resolveAndroidAccuracy(
+                        options?.accuracy,
+                        enableHighAccuracy
+                    ),
                     interval = options?.interval ?: DEFAULT_INTERVAL,
                     fastestInterval = options?.fastestInterval ?: DEFAULT_FASTEST_INTERVAL,
                     distanceFilter = options?.distanceFilter ?: DEFAULT_DISTANCE_FILTER
@@ -230,7 +234,7 @@ class NitroGeolocation(
             return
         }
 
-        val providers = getValidProviders(parsedOptions.enableHighAccuracy)
+        val providers = getValidProviders(parsedOptions.androidAccuracy)
         if (providers.isEmpty()) {
             error?.invoke(createNoLocationProviderError(parsedOptions))
             return
@@ -273,6 +277,8 @@ class NitroGeolocation(
         // Start watching if first subscriber
         if (watchSubscriptions.size == 1) {
             startWatchingLocation()
+        } else {
+            restartWatchingLocation()
         }
 
         return token
@@ -284,6 +290,8 @@ class NitroGeolocation(
         // Stop watching if no more subscribers
         if (watchSubscriptions.isEmpty()) {
             stopWatchingLocation()
+        } else {
+            restartWatchingLocation()
         }
     }
 
@@ -363,22 +371,12 @@ class NitroGeolocation(
             .isGooglePlayServicesAvailable(reactContext) == ConnectionResult.SUCCESS
     }
 
-    private fun getValidProvider(highAccuracy: Boolean): String? {
-        return getValidProviders(highAccuracy).firstOrNull()
+    private fun getValidProvider(accuracy: AndroidAccuracyResolution): String? {
+        return getValidProviders(accuracy).firstOrNull()
     }
 
-    private fun getValidProviders(highAccuracy: Boolean): List<String> {
-        val preferredProvider = if (highAccuracy)
-            AndroidLocationManager.GPS_PROVIDER
-        else
-            AndroidLocationManager.NETWORK_PROVIDER
-
-        val fallbackProvider = if (highAccuracy)
-            AndroidLocationManager.NETWORK_PROVIDER
-        else
-            AndroidLocationManager.GPS_PROVIDER
-
-        return listOf(preferredProvider, fallbackProvider)
+    private fun getValidProviders(accuracy: AndroidAccuracyResolution): List<String> {
+        return accuracy.providerOrder()
             .distinct()
             .filter { provider -> isProviderValid(provider) }
     }
@@ -390,6 +388,7 @@ class NitroGeolocation(
             when (provider) {
                 AndroidLocationManager.GPS_PROVIDER -> hasFineLocationPermission()
                 AndroidLocationManager.NETWORK_PROVIDER -> hasCoarseLocationPermission() || hasFineLocationPermission()
+                AndroidLocationManager.PASSIVE_PROVIDER -> hasLocationPermission()
                 else -> hasLocationPermission()
             }
         } catch (e: Exception) {
@@ -406,7 +405,7 @@ class NitroGeolocation(
 
     private fun getNoLocationProviderMessage(options: ParsedOptions): String {
         if (
-            !options.enableHighAccuracy &&
+            options.androidAccuracy.mode != AndroidAccuracyMode.HIGH &&
             hasCoarseLocationPermission() &&
             !hasFineLocationPermission()
         ) {
@@ -689,19 +688,22 @@ class NitroGeolocation(
         }
 
         // Determine best provider and options from all subscriptions
-        var useHighAccuracy = false
+        var androidAccuracy: AndroidAccuracyResolution? = null
         var smallestInterval = Double.MAX_VALUE
         var smallestDistanceFilter = Float.MAX_VALUE
 
         for ((_, subscription) in watchSubscriptions) {
-            if (subscription.options.enableHighAccuracy) {
-                useHighAccuracy = true
-            }
+            androidAccuracy = mostDemandingAndroidAccuracy(
+                androidAccuracy,
+                subscription.options.androidAccuracy
+            )
             smallestInterval = minOf(smallestInterval, subscription.options.interval)
             smallestDistanceFilter = minOf(smallestDistanceFilter, subscription.options.distanceFilter.toFloat())
         }
 
-        val provider = getValidProvider(useHighAccuracy)
+        val provider = getValidProvider(
+            androidAccuracy ?: resolveAndroidAccuracy(null, enableHighAccuracy = false)
+        )
         if (provider == null) {
             notifyWatchProviderUnavailable()
             return
@@ -781,6 +783,11 @@ class NitroGeolocation(
         }
         watchLocationListener = null
         currentWatchProvider = null
+    }
+
+    private fun restartWatchingLocation() {
+        stopWatchingLocation()
+        startWatchingLocation()
     }
 
     // MARK: - Helper Functions - Conversion

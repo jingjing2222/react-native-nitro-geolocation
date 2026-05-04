@@ -26,6 +26,12 @@ namespace margelo::nitro::nitrogeolocation { struct CompatGeolocationResponse; }
 namespace margelo::nitro::nitrogeolocation { struct GeolocationCoordinates; }
 // Forward declaration of `CompatGeolocationOptions` to properly resolve imports.
 namespace margelo::nitro::nitrogeolocation { struct CompatGeolocationOptions; }
+// Forward declaration of `LocationAccuracyOptions` to properly resolve imports.
+namespace margelo::nitro::nitrogeolocation { struct LocationAccuracyOptions; }
+// Forward declaration of `AndroidAccuracyPreset` to properly resolve imports.
+namespace margelo::nitro::nitrogeolocation { enum class AndroidAccuracyPreset; }
+// Forward declaration of `IOSAccuracyPreset` to properly resolve imports.
+namespace margelo::nitro::nitrogeolocation { enum class IOSAccuracyPreset; }
 
 #include "CompatGeolocationConfigurationInternal.hpp"
 #include "AuthorizationLevelInternal.hpp"
@@ -39,6 +45,9 @@ namespace margelo::nitro::nitrogeolocation { struct CompatGeolocationOptions; }
 #include <NitroModules/Null.hpp>
 #include <variant>
 #include "CompatGeolocationOptions.hpp"
+#include "LocationAccuracyOptions.hpp"
+#include "AndroidAccuracyPreset.hpp"
+#include "IOSAccuracyPreset.hpp"
 
 #include "NitroGeolocation-Swift-Cxx-Umbrella.hpp"
 

@@ -51,18 +51,18 @@ setConfiguration({
 const status = await requestPermission();
 
 // Android, v1.2+: ask the user to enable settings required for accurate location
-await requestLocationSettings({ enableHighAccuracy: true });
+await requestLocationSettings({ accuracy: { android: "high" } });
 
 // Get current location
 const position = await getCurrentPosition({
-  enableHighAccuracy: true,
+  accuracy: { android: "high", ios: "best" },
 });
 
 // Continuous tracking with hook
 function LocationTracker() {
   const { position, error, isWatching } = useWatchPosition({
     enabled: true,
-    enableHighAccuracy: true,
+    accuracy: { android: "high", ios: "bestForNavigation" },
     distanceFilter: 10,
   });
 
@@ -204,14 +204,21 @@ function App() {
 
 ```tsx
 // Get current location
-const position = await getCurrentPosition({ enableHighAccuracy: true });
+const position = await getCurrentPosition({
+  accuracy: { android: "high", ios: "best" },
+});
 
 // Real-time tracking with hook
 const { position, error } = useWatchPosition({
   enabled: true,
+  accuracy: { android: "balanced", ios: "nearestTenMeters" },
   distanceFilter: 10
 });
 ```
+
+`enableHighAccuracy` is still supported. When `accuracy.android` or
+`accuracy.ios` is provided for the current platform, that explicit preset takes
+precedence over the boolean.
 
 #### Compat API (Compatibility)
 

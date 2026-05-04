@@ -34,8 +34,10 @@ class LocationManager: NSObject, CLLocationManagerDelegate {
             let timeout = options?.timeout ?? DEFAULT_TIMEOUT
             let maximumAge = options?.maximumAge ?? DEFAULT_MAXIMUM_AGE
             let enableHighAccuracy = options?.enableHighAccuracy ?? false
-            let accuracy =
-                enableHighAccuracy ? kCLLocationAccuracyBest : kCLLocationAccuracyHundredMeters
+            let accuracy = resolveAccuracy(
+                preset: options?.accuracy?.ios,
+                enableHighAccuracy: enableHighAccuracy
+            )
             let distanceFilter = options?.distanceFilter ?? kCLDistanceFilterNone
             let useSignificantChanges = options?.useSignificantChanges ?? false
 
@@ -46,6 +48,34 @@ class LocationManager: NSObject, CLLocationManagerDelegate {
                 distanceFilter: distanceFilter,
                 useSignificantChanges: useSignificantChanges
             )
+        }
+
+        private static func resolveAccuracy(
+            preset: IOSAccuracyPreset?,
+            enableHighAccuracy: Bool
+        ) -> CLLocationAccuracy {
+            guard let preset else {
+                return enableHighAccuracy
+                    ? kCLLocationAccuracyBest
+                    : kCLLocationAccuracyHundredMeters
+            }
+
+            switch preset {
+            case .bestfornavigation:
+                return kCLLocationAccuracyBestForNavigation
+            case .best:
+                return kCLLocationAccuracyBest
+            case .nearesttenmeters:
+                return kCLLocationAccuracyNearestTenMeters
+            case .hundredmeters:
+                return kCLLocationAccuracyHundredMeters
+            case .kilometer:
+                return kCLLocationAccuracyKilometer
+            case .threekilometers:
+                return kCLLocationAccuracyThreeKilometers
+            case .reduced:
+                return kCLLocationAccuracyReduced
+            }
         }
     }
 
