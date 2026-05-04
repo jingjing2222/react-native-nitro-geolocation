@@ -11,6 +11,28 @@ Version 2.0 keeps the package split simple:
 
 Use the modern API for Promise functions and `useWatchPosition`. Use `/compat` when you need a drop-in replacement for `@react-native-community/geolocation`.
 
+## Migration Skill
+
+The repository includes an Agent Skills migration helper for v2. Install it with the `skills` CLI:
+
+```bash
+npx skills add https://github.com/jingjing2222/react-native-nitro-geolocation/tree/v2/skills/react-native-nitro-geolocation-v2-migration
+```
+
+If you are working from a local checkout of this repository, install it from the local skill folder:
+
+```bash
+npx skills add ./skills/react-native-nitro-geolocation-v2-migration
+```
+
+Then ask your agent to use the skill in the app you are migrating:
+
+```text
+Use $react-native-nitro-geolocation-v2-migration to migrate this app to react-native-nitro-geolocation v2.
+```
+
+The skill is designed to keep `/compat` call sites unchanged, rename the removed configuration type, and add optional `mocked === true` handling only where the app needs mock-location logic.
+
 ## Breaking Change
 
 The modern API configuration type was renamed:
@@ -30,7 +52,7 @@ The modern API configuration type was renamed:
 
 No runtime configuration behavior changed. The rename only removes the modern API naming prefix from the public type surface.
 
-## Root Response Metadata
+## Modern Response Metadata
 
 Modern API responses now include optional metadata when the native platform exposes it:
 
@@ -87,4 +109,5 @@ When `mocked` is `false` or omitted, DevTools location updates should not be tre
 2. Keep `/compat` imports unchanged for drop-in replacement paths.
 3. Add optional `mocked === true` handling only where the app needs mock-location detection.
 4. Treat `provider` as informational metadata, not a required routing primitive.
-5. Run TypeScript and the relevant iOS/Android location flows after the migration.
+5. Use `$react-native-nitro-geolocation-v2-migration` for an agent-assisted migration pass when useful.
+6. Run TypeScript and the relevant iOS/Android location flows after the migration.
