@@ -1,5 +1,78 @@
 import { describe, expect, it } from "vitest";
-import { selectProviderForAndroidPermissions } from "./provider";
+import {
+  getAndroidProviderOrder,
+  resolveAndroidAccuracy,
+  selectProviderForAndroidPermissions
+} from "./provider";
+
+describe("resolveAndroidAccuracy", () => {
+  it("keeps enableHighAccuracy as the legacy default", () => {
+    expect(resolveAndroidAccuracy(undefined, true)).toEqual({
+      mode: "high",
+      explicitPreset: undefined
+    });
+
+    expect(resolveAndroidAccuracy(undefined, false)).toEqual({
+      mode: "balanced",
+      explicitPreset: undefined
+    });
+  });
+
+  it("lets explicit Android accuracy override enableHighAccuracy", () => {
+    expect(resolveAndroidAccuracy({ android: "high" }, false)).toEqual({
+      mode: "high",
+      explicitPreset: "high"
+    });
+
+    expect(resolveAndroidAccuracy({ android: "low" }, true)).toEqual({
+      mode: "low",
+      explicitPreset: "low"
+    });
+  });
+
+  it("ignores iOS-only accuracy presets on Android", () => {
+    expect(resolveAndroidAccuracy({ ios: "bestForNavigation" }, false)).toEqual(
+      {
+        mode: "balanced",
+        explicitPreset: undefined
+      }
+    );
+  });
+});
+
+describe("getAndroidProviderOrder", () => {
+  it("keeps GPS fallback only for legacy balanced mode", () => {
+    expect(
+      getAndroidProviderOrder({
+        mode: "balanced",
+        explicitPreset: undefined
+      })
+    ).toEqual(["network", "gps"]);
+
+    expect(
+      getAndroidProviderOrder({
+        mode: "balanced",
+        explicitPreset: "balanced"
+      })
+    ).toEqual(["network"]);
+  });
+
+  it("keeps low accuracy network-first and passive accuracy passive-only", () => {
+    expect(
+      getAndroidProviderOrder({
+        mode: "low",
+        explicitPreset: "low"
+      })
+    ).toEqual(["network", "passive"]);
+
+    expect(
+      getAndroidProviderOrder({
+        mode: "passive",
+        explicitPreset: "passive"
+      })
+    ).toEqual(["passive"]);
+  });
+});
 
 describe("selectProviderForAndroidPermissions", () => {
   it("prefers the network provider for low-accuracy coarse-only requests", () => {

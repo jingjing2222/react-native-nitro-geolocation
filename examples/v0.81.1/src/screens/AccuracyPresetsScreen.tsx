@@ -34,6 +34,12 @@ type AccuracyScenario = {
   acceptNoGpsFallbackRejection?: boolean;
 };
 
+type PositiveScenarioMessage = {
+  id: string;
+  title: string;
+  message: string;
+};
+
 const SEOUL_FIXTURE = {
   latitude: 37.5665,
   longitude: 126.978
@@ -208,7 +214,9 @@ const getPositiveScenarios = (): AccuracyScenario[] => {
 export default function AccuracyPresetsScreen() {
   const [permissionStatus, setPermissionStatus] = useState("unknown");
   const [results, setResults] = useState(initialResults);
-  const [scenarioMessages, setScenarioMessages] = useState<string[]>([]);
+  const [scenarioMessages, setScenarioMessages] = useState<
+    PositiveScenarioMessage[]
+  >([]);
 
   const setResult = (
     key: keyof typeof initialResults,
@@ -251,24 +259,30 @@ export default function AccuracyPresetsScreen() {
         throw new Error(`Permission was not granted: ${status}`);
       }
 
-      const messages: string[] = [];
+      const messages: PositiveScenarioMessage[] = [];
       for (const scenario of getPositiveScenarios()) {
         try {
           const position = await getCurrentPosition(scenario.options);
           const summary = scenario.assertPosition
             ? scenario.assertPosition(position)
             : assertFixtureCoordinates(position);
-          messages.push(`${scenario.title}: ${summary}`);
+          messages.push({
+            id: scenario.id,
+            title: scenario.title,
+            message: `contract passed with injected location ${summary}`
+          });
         } catch (error) {
           if (
             scenario.acceptNoGpsFallbackRejection &&
             isNoGpsFallbackRejection(error)
           ) {
-            messages.push(
-              `${scenario.title}: rejected instead of using GPS (${getDisplayErrorMessage(
+            messages.push({
+              id: scenario.id,
+              title: scenario.title,
+              message: `contract passed by rejecting instead of using GPS (${getDisplayErrorMessage(
                 error
               )})`
-            );
+            });
             continue;
           }
 
@@ -279,7 +293,7 @@ export default function AccuracyPresetsScreen() {
       setScenarioMessages(messages);
       setResult("positive", {
         status: "passed",
-        message: `${messages.length} native preset requests returned the injected location.`
+        message: `${messages.length} accuracy preset contracts passed.`
       });
     } catch (error) {
       setResult("positive", {
@@ -406,14 +420,25 @@ export default function AccuracyPresetsScreen() {
           label="Positive presets"
           result={results.positive}
         />
-        {scenarioMessages.map((message) => (
-          <Text
-            key={message}
-            style={styles.scenarioText}
-            testID="accuracy-presets-scenario-message"
+        {scenarioMessages.map((scenario, index) => (
+          <View
+            key={scenario.id}
+            style={styles.scenarioContainer}
+            testID={`accuracy-presets-scenario-${index}`}
           >
-            {message}
-          </Text>
+            <Text
+              style={styles.scenarioTitle}
+              testID={`accuracy-presets-scenario-${index}-title`}
+            >
+              {scenario.title}
+            </Text>
+            <Text
+              style={styles.scenarioText}
+              testID={`accuracy-presets-scenario-${index}-message`}
+            >
+              {scenario.message}
+            </Text>
+          </View>
         ))}
       </View>
 
@@ -566,10 +591,18 @@ const styles = StyleSheet.create({
     fontSize: 13,
     color: "#424242"
   },
+  scenarioContainer: {
+    marginTop: 8
+  },
+  scenarioTitle: {
+    fontSize: 12,
+    color: "#000",
+    fontWeight: "700"
+  },
   scenarioText: {
     fontSize: 12,
     color: "#263238",
-    marginTop: 8
+    marginTop: 2
   },
   divider: {
     height: 1,
