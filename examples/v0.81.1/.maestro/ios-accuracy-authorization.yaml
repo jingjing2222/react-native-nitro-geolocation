@@ -55,15 +55,16 @@ appId: nitrogeolocation.example
     text: ".*Purpose PreciseE2E resolved (full|reduced); current authorization (full|reduced).*"
 
 - scrollUntilVisible:
-    element: "4. Invalid Purpose Key"
+    element: "Run Invalid Purpose Key"
     direction: DOWN
+    centerElement: true
 
 - tapOn:
-    id: "ios-accuracy-authorization-run-invalid-button"
+    text: "Run Invalid Purpose Key"
 
-- extendedWaitUntil:
-    visible: "Invalid purposeKey: passed"
-    timeout: 10000
+- scrollUntilVisible:
+    element: "Invalid purposeKey: passed"
+    direction: DOWN
 
 - assertVisible:
     id: "ios-accuracy-authorization-invalid-result"
@@ -94,11 +95,12 @@ appId: nitrogeolocation.example
     timeout: 10000
 
 - scrollUntilVisible:
-    element: "5. Permission Denied Read"
+    element: "Run Denied Authorization Read"
     direction: DOWN
+    centerElement: true
 
 - tapOn:
-    id: "ios-accuracy-authorization-run-denied-button"
+    text: "Run Denied Authorization Read"
 
 - scrollUntilVisible:
     element: "Denied read: passed"

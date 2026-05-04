@@ -54,6 +54,10 @@ abstract class HybridNitroGeolocationSpec: HybridObject() {
   @Keep
   abstract fun getProviderStatus(): Promise<LocationProviderStatus>
 
+  @DoNotStrip
+  @Keep
+  abstract fun getLocationAvailability(): Promise<LocationAvailability>
+
   abstract fun requestLocationSettings(success: (status: LocationProviderStatus) -> Unit, error: ((error: LocationError) -> Unit)?, options: LocationSettingsOptions?): Unit
 
   @DoNotStrip
@@ -91,6 +95,24 @@ abstract class HybridNitroGeolocationSpec: HybridObject() {
   @Keep
   private fun getLastKnownPosition_cxx(success: Func_void_GeolocationResponse, error: Func_void_LocationError?, options: LocationRequestOptions?): Unit {
     val __result = getLastKnownPosition(success, error?.let { it }, options)
+    return __result
+  }
+
+  abstract fun getHeading(success: (heading: Heading) -> Unit, error: ((error: LocationError) -> Unit)?): Unit
+
+  @DoNotStrip
+  @Keep
+  private fun getHeading_cxx(success: Func_void_Heading, error: Func_void_LocationError?): Unit {
+    val __result = getHeading(success, error?.let { it })
+    return __result
+  }
+
+  abstract fun watchHeading(success: (heading: Heading) -> Unit, error: ((error: LocationError) -> Unit)?, options: HeadingOptions?): String
+
+  @DoNotStrip
+  @Keep
+  private fun watchHeading_cxx(success: Func_void_Heading, error: Func_void_LocationError?, options: HeadingOptions?): String {
+    val __result = watchHeading(success, error?.let { it }, options)
     return __result
   }
 

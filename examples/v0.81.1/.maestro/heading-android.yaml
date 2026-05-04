@@ -1,0 +1,110 @@
+appId: nitrogeolocation.example
+---
+# Heading APIs: prove getHeading/watchHeading produce real sensor readings and
+# invalid/permission-denied cases reject through the native error contract.
+
+- launchApp:
+    clearState: true
+    permissions:
+      all: allow
+
+- extendedWaitUntil:
+    visible: "Geolocation API"
+    timeout: 10000
+
+- stopApp
+
+- openLink:
+    link: nitrogeolocation://app/heading
+- tapOn:
+    text: "열기|Open"
+    optional: true
+
+- extendedWaitUntil:
+    visible: "Compass-style heading contract with watch and rejection paths"
+    timeout: 10000
+
+- tapOn:
+    id: "heading-run-current-button"
+
+- extendedWaitUntil:
+    visible: "Single heading: passed"
+    timeout: 20000
+
+- assertVisible:
+    id: "heading-current-result"
+- assertVisible:
+    text: ".*Single heading .*deg.*resolved in .*ms.*"
+
+- scrollUntilVisible:
+    element: "3. Heading Watch"
+    direction: DOWN
+
+- tapOn:
+    id: "heading-run-watch-button"
+
+- extendedWaitUntil:
+    visible: "Heading watch: passed"
+    timeout: 25000
+
+- assertVisible:
+    id: "heading-watch-result"
+- assertVisible:
+    text: ".*Watch delivered 2 real heading updates.*"
+
+- scrollUntilVisible:
+    element: "4. Invalid Filter"
+    direction: DOWN
+
+- tapOn:
+    id: "heading-run-invalid-button"
+
+- scrollUntilVisible:
+    element: "Invalid filter: passed"
+    direction: DOWN
+    timeout: 10000
+
+- assertVisible:
+    id: "heading-invalid-result"
+- assertVisible:
+    text: ".*Invalid headingFilter rejected.*"
+
+- stopApp
+
+- launchApp:
+    clearState: true
+    permissions:
+      all: deny
+
+- extendedWaitUntil:
+    visible: "Geolocation API"
+    timeout: 10000
+
+- stopApp
+
+- openLink:
+    link: nitrogeolocation://app/heading
+- tapOn:
+    text: "열기|Open"
+    optional: true
+
+- extendedWaitUntil:
+    visible: "Compass-style heading contract with watch and rejection paths"
+    timeout: 10000
+
+- scrollUntilVisible:
+    element: "5. Permission Denied"
+    direction: DOWN
+
+- tapOn:
+    id: "heading-run-denied-button"
+
+- scrollUntilVisible:
+    element: "Permission denied: passed"
+    direction: DOWN
+    timeout: 15000
+
+- assertVisible:
+    id: "heading-denied-result"
+- assertVisible:
+    text: ".*PERMISSION_DENIED.*heading follows native permission checks.*"

@@ -55,6 +55,14 @@ namespace margelo::nitro::nitrogeolocation::bridge::swift {
     };
   }
 
+  // pragma MARK: std::function<void(const LocationAvailability& /* result */)>
+  Func_void_LocationAvailability create_Func_void_LocationAvailability(void* NON_NULL swiftClosureWrapper) noexcept {
+    auto swiftClosure = NitroGeolocation::Func_void_LocationAvailability::fromUnsafe(swiftClosureWrapper);
+    return [swiftClosure = std::move(swiftClosure)](const LocationAvailability& result) mutable -> void {
+      swiftClosure.call(result);
+    };
+  }
+
   // pragma MARK: std::function<void(AccuracyAuthorization /* result */)>
   Func_void_AccuracyAuthorization create_Func_void_AccuracyAuthorization(void* NON_NULL swiftClosureWrapper) noexcept {
     auto swiftClosure = NitroGeolocation::Func_void_AccuracyAuthorization::fromUnsafe(swiftClosureWrapper);
@@ -68,6 +76,14 @@ namespace margelo::nitro::nitrogeolocation::bridge::swift {
     auto swiftClosure = NitroGeolocation::Func_void_GeolocationResponse::fromUnsafe(swiftClosureWrapper);
     return [swiftClosure = std::move(swiftClosure)](const GeolocationResponse& position) mutable -> void {
       swiftClosure.call(position);
+    };
+  }
+
+  // pragma MARK: std::function<void(const Heading& /* heading */)>
+  Func_void_Heading create_Func_void_Heading(void* NON_NULL swiftClosureWrapper) noexcept {
+    auto swiftClosure = NitroGeolocation::Func_void_Heading::fromUnsafe(swiftClosureWrapper);
+    return [swiftClosure = std::move(swiftClosure)](const Heading& heading) mutable -> void {
+      swiftClosure.call(heading);
     };
   }
 

@@ -1,0 +1,131 @@
+appId: nitrogeolocation.example
+---
+# Android request options: exercise Fused request controls, watch auto-stop via
+# maxUpdates, invalid numeric options, and fine-granularity permission gating.
+
+- launchApp:
+    clearState: true
+    permissions:
+      android.permission.ACCESS_COARSE_LOCATION: allow
+      android.permission.ACCESS_FINE_LOCATION: allow
+
+- extendedWaitUntil:
+    visible: "Geolocation API"
+    timeout: 10000
+
+- stopApp
+
+- openLink:
+    link: nitrogeolocation://app/android-request-options
+- tapOn:
+    text: "열기|Open"
+    optional: true
+
+- extendedWaitUntil:
+    visible: "Fused request controls with update limits and rejection paths"
+    timeout: 10000
+
+- setLocation:
+    latitude: 37.5665
+    longitude: 126.978
+
+- tapOn:
+    id: "android-request-options-run-fused-button"
+
+- extendedWaitUntil:
+    visible: "Fused request: passed"
+    timeout: 60000
+
+- assertVisible:
+    id: "android-request-options-fused-result"
+- assertVisible:
+    text: ".*Fused coarse request returned 37\\.[0-9]+, 126\\.[0-9]+; provider=fused.*"
+- assertVisible:
+    text: ".*provider=.*"
+
+- scrollUntilVisible:
+    element: "3. Max Updates Watch"
+    direction: DOWN
+
+- setLocation:
+    latitude: 37.5665
+    longitude: 126.978
+
+- tapOn:
+    id: "android-request-options-run-max-updates-button"
+
+- setLocation:
+    latitude: 37.5667
+    longitude: 126.9782
+- waitForAnimationToEnd
+- setLocation:
+    latitude: 37.5669
+    longitude: 126.9784
+
+- extendedWaitUntil:
+    visible: "Max updates: passed"
+    timeout: 30000
+
+- assertVisible:
+    id: "android-request-options-max-updates-result"
+- assertVisible:
+    text: ".*Watch stopped after 1 update with maxUpdates=1.*"
+
+- scrollUntilVisible:
+    element: "4. Invalid Max Updates"
+    direction: DOWN
+
+- tapOn:
+    id: "android-request-options-run-invalid-button"
+
+- scrollUntilVisible:
+    element: "Invalid maxUpdates: passed"
+    direction: DOWN
+    timeout: 10000
+
+- assertVisible:
+    id: "android-request-options-invalid-result"
+- assertVisible:
+    text: ".*maxUpdates=0 rejected.*"
+
+- stopApp
+
+- launchApp:
+    clearState: true
+    permissions:
+      all: deny
+      android.permission.ACCESS_COARSE_LOCATION: allow
+      android.permission.ACCESS_FINE_LOCATION: deny
+
+- extendedWaitUntil:
+    visible: "Geolocation API"
+    timeout: 10000
+
+- stopApp
+
+- openLink:
+    link: nitrogeolocation://app/android-request-options
+- tapOn:
+    text: "열기|Open"
+    optional: true
+
+- extendedWaitUntil:
+    visible: "Fused request controls with update limits and rejection paths"
+    timeout: 10000
+
+- scrollUntilVisible:
+    element: "5. Fine Permission Gate"
+    direction: DOWN
+
+- tapOn:
+    id: "android-request-options-run-fine-denied-button"
+
+- scrollUntilVisible:
+    element: "Fine permission: passed"
+    direction: DOWN
+    timeout: 15000
+
+- assertVisible:
+    id: "android-request-options-fine-denied-result"
+- assertVisible:
+    text: ".*PERMISSION_DENIED.*granularity=fine.*"

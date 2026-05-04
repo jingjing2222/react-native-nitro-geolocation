@@ -19,11 +19,14 @@ namespace margelo::nitro::nitrogeolocation {
       prototype.registerHybridMethod("requestPermission", &HybridNitroGeolocationSpec::requestPermission);
       prototype.registerHybridMethod("hasServicesEnabled", &HybridNitroGeolocationSpec::hasServicesEnabled);
       prototype.registerHybridMethod("getProviderStatus", &HybridNitroGeolocationSpec::getProviderStatus);
+      prototype.registerHybridMethod("getLocationAvailability", &HybridNitroGeolocationSpec::getLocationAvailability);
       prototype.registerHybridMethod("requestLocationSettings", &HybridNitroGeolocationSpec::requestLocationSettings);
       prototype.registerHybridMethod("getAccuracyAuthorization", &HybridNitroGeolocationSpec::getAccuracyAuthorization);
       prototype.registerHybridMethod("requestTemporaryFullAccuracy", &HybridNitroGeolocationSpec::requestTemporaryFullAccuracy);
       prototype.registerHybridMethod("getCurrentPosition", &HybridNitroGeolocationSpec::getCurrentPosition);
       prototype.registerHybridMethod("getLastKnownPosition", &HybridNitroGeolocationSpec::getLastKnownPosition);
+      prototype.registerHybridMethod("getHeading", &HybridNitroGeolocationSpec::getHeading);
+      prototype.registerHybridMethod("watchHeading", &HybridNitroGeolocationSpec::watchHeading);
       prototype.registerHybridMethod("watchPosition", &HybridNitroGeolocationSpec::watchPosition);
       prototype.registerHybridMethod("unwatch", &HybridNitroGeolocationSpec::unwatch);
       prototype.registerHybridMethod("stopObserving", &HybridNitroGeolocationSpec::stopObserving);

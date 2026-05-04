@@ -1,9 +1,13 @@
 import type { HybridObject } from "react-native-nitro-modules";
 import type {
   AccuracyAuthorization,
+  AndroidGranularity,
   GeolocationResponse,
+  Heading,
+  HeadingOptions,
   IOSActivityType,
   LocationAccuracyOptions,
+  LocationAvailability,
   LocationProviderStatus
 } from "./types";
 
@@ -102,6 +106,45 @@ export interface LocationRequestOptions {
 
   /** Minimum distance change in meters for updates (watch only) */
   distanceFilter?: number;
+
+  /**
+   * Android-only location granularity.
+   *
+   * Available since v1.2.
+   *
+   * `permission` follows the granted permission level, `coarse` prevents fine
+   * GPS-only requests from being used, and `fine` requires fine location
+   * permission.
+   */
+  granularity?: AndroidGranularity;
+
+  /**
+   * Android-only option for high-accuracy initial updates.
+   *
+   * Available since v1.2.
+   */
+  waitForAccurateLocation?: boolean;
+
+  /**
+   * Android-only maximum age for an initial update in milliseconds.
+   *
+   * Available since v1.2.
+   */
+  maxUpdateAge?: number;
+
+  /**
+   * Android-only maximum batching delay in milliseconds.
+   *
+   * Available since v1.2.
+   */
+  maxUpdateDelay?: number;
+
+  /**
+   * Android-only maximum number of updates before a watch stops itself.
+   *
+   * Available since v1.2.
+   */
+  maxUpdates?: number;
 
   /** Use significant location changes mode (iOS watch only) */
   useSignificantChanges?: boolean;
@@ -246,6 +289,16 @@ export interface NitroGeolocation
   getProviderStatus(): Promise<LocationProviderStatus>;
 
   /**
+   * Get whether the current platform is likely to deliver location updates.
+   *
+   * Android: uses Fused Location availability when the configured provider is
+   * Play Services, otherwise falls back to platform provider/service checks.
+   *
+   * iOS: maps Core Location service and authorization state.
+   */
+  getLocationAvailability(): Promise<LocationAvailability>;
+
+  /**
    * Android-only settings resolution API.
    *
    * Android: checks whether current device settings satisfy the requested
@@ -316,6 +369,25 @@ export interface NitroGeolocation
     error?: (error: LocationError) => void,
     options?: LocationRequestOptions
   ): void;
+
+  /**
+   * Get one heading reading from the platform heading sensor.
+   */
+  getHeading(
+    success: (heading: Heading) => void,
+    error?: (error: LocationError) => void
+  ): void;
+
+  /**
+   * Start watching heading updates.
+   *
+   * Use `unwatch(token)` to stop a heading watch.
+   */
+  watchHeading(
+    success: (heading: Heading) => void,
+    error?: (error: LocationError) => void,
+    options?: HeadingOptions
+  ): string;
 
   /**
    * Start watching for continuous location updates.

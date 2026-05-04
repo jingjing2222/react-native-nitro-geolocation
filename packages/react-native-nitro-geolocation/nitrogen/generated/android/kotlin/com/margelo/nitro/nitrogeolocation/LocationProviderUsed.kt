@@ -17,10 +17,10 @@ import com.facebook.proguard.annotations.DoNotStrip
 @Keep
 enum class LocationProviderUsed(@DoNotStrip @Keep val value: Int) {
   PASSIVE(0),
-  FUSED(1),
-  GPS(2),
-  NETWORK(3),
-  UNKNOWN(4);
+  UNKNOWN(1),
+  FUSED(2),
+  GPS(3),
+  NETWORK(4);
 
   companion object
 }

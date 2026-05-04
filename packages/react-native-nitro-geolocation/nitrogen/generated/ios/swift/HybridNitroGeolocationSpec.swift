@@ -10,7 +10,7 @@ import NitroModules
 /// See ``HybridNitroGeolocationSpec``
 public protocol HybridNitroGeolocationSpec_protocol: HybridObject {
   // Properties
-  
+
 
   // Methods
   func setConfiguration(config: GeolocationConfiguration) throws -> Void
@@ -18,11 +18,14 @@ public protocol HybridNitroGeolocationSpec_protocol: HybridObject {
   func requestPermission(success: @escaping (_ status: PermissionStatus) -> Void, error: ((_ error: LocationError) -> Void)?) throws -> Void
   func hasServicesEnabled() throws -> Promise<Bool>
   func getProviderStatus() throws -> Promise<LocationProviderStatus>
+  func getLocationAvailability() throws -> Promise<LocationAvailability>
   func requestLocationSettings(success: @escaping (_ status: LocationProviderStatus) -> Void, error: ((_ error: LocationError) -> Void)?, options: LocationSettingsOptions?) throws -> Void
   func getAccuracyAuthorization() throws -> Promise<AccuracyAuthorization>
   func requestTemporaryFullAccuracy(purposeKey: String, success: @escaping (_ authorization: AccuracyAuthorization) -> Void, error: ((_ error: LocationError) -> Void)?) throws -> Void
   func getCurrentPosition(success: @escaping (_ position: GeolocationResponse) -> Void, error: ((_ error: LocationError) -> Void)?, options: LocationRequestOptions?) throws -> Void
   func getLastKnownPosition(success: @escaping (_ position: GeolocationResponse) -> Void, error: ((_ error: LocationError) -> Void)?, options: LocationRequestOptions?) throws -> Void
+  func getHeading(success: @escaping (_ heading: Heading) -> Void, error: ((_ error: LocationError) -> Void)?) throws -> Void
+  func watchHeading(success: @escaping (_ heading: Heading) -> Void, error: ((_ error: LocationError) -> Void)?, options: HeadingOptions?) throws -> String
   func watchPosition(success: @escaping (_ position: GeolocationResponse) -> Void, error: ((_ error: LocationError) -> Void)?, options: LocationRequestOptions?) throws -> String
   func unwatch(token: String) throws -> Void
   func stopObserving() throws -> Void

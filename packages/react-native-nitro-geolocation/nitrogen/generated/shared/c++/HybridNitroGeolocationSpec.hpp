@@ -21,6 +21,8 @@ namespace margelo::nitro::nitrogeolocation { enum class PermissionStatus; }
 namespace margelo::nitro::nitrogeolocation { struct LocationError; }
 // Forward declaration of `LocationProviderStatus` to properly resolve imports.
 namespace margelo::nitro::nitrogeolocation { struct LocationProviderStatus; }
+// Forward declaration of `LocationAvailability` to properly resolve imports.
+namespace margelo::nitro::nitrogeolocation { struct LocationAvailability; }
 // Forward declaration of `LocationSettingsOptions` to properly resolve imports.
 namespace margelo::nitro::nitrogeolocation { struct LocationSettingsOptions; }
 // Forward declaration of `AccuracyAuthorization` to properly resolve imports.
@@ -29,6 +31,10 @@ namespace margelo::nitro::nitrogeolocation { enum class AccuracyAuthorization; }
 namespace margelo::nitro::nitrogeolocation { struct GeolocationResponse; }
 // Forward declaration of `LocationRequestOptions` to properly resolve imports.
 namespace margelo::nitro::nitrogeolocation { struct LocationRequestOptions; }
+// Forward declaration of `Heading` to properly resolve imports.
+namespace margelo::nitro::nitrogeolocation { struct Heading; }
+// Forward declaration of `HeadingOptions` to properly resolve imports.
+namespace margelo::nitro::nitrogeolocation { struct HeadingOptions; }
 
 #include "GeolocationConfiguration.hpp"
 #include "PermissionStatus.hpp"
@@ -37,11 +43,14 @@ namespace margelo::nitro::nitrogeolocation { struct LocationRequestOptions; }
 #include "LocationError.hpp"
 #include <optional>
 #include "LocationProviderStatus.hpp"
+#include "LocationAvailability.hpp"
 #include "LocationSettingsOptions.hpp"
 #include "AccuracyAuthorization.hpp"
 #include <string>
 #include "GeolocationResponse.hpp"
 #include "LocationRequestOptions.hpp"
+#include "Heading.hpp"
+#include "HeadingOptions.hpp"
 
 namespace margelo::nitro::nitrogeolocation {
 
@@ -70,7 +79,7 @@ namespace margelo::nitro::nitrogeolocation {
 
     public:
       // Properties
-      
+
 
     public:
       // Methods
@@ -79,11 +88,14 @@ namespace margelo::nitro::nitrogeolocation {
       virtual void requestPermission(const std::function<void(PermissionStatus /* status */)>& success, const std::optional<std::function<void(const LocationError& /* error */)>>& error) = 0;
       virtual std::shared_ptr<Promise<bool>> hasServicesEnabled() = 0;
       virtual std::shared_ptr<Promise<LocationProviderStatus>> getProviderStatus() = 0;
+      virtual std::shared_ptr<Promise<LocationAvailability>> getLocationAvailability() = 0;
       virtual void requestLocationSettings(const std::function<void(const LocationProviderStatus& /* status */)>& success, const std::optional<std::function<void(const LocationError& /* error */)>>& error, const std::optional<LocationSettingsOptions>& options) = 0;
       virtual std::shared_ptr<Promise<AccuracyAuthorization>> getAccuracyAuthorization() = 0;
       virtual void requestTemporaryFullAccuracy(const std::string& purposeKey, const std::function<void(AccuracyAuthorization /* authorization */)>& success, const std::optional<std::function<void(const LocationError& /* error */)>>& error) = 0;
       virtual void getCurrentPosition(const std::function<void(const GeolocationResponse& /* position */)>& success, const std::optional<std::function<void(const LocationError& /* error */)>>& error, const std::optional<LocationRequestOptions>& options) = 0;
       virtual void getLastKnownPosition(const std::function<void(const GeolocationResponse& /* position */)>& success, const std::optional<std::function<void(const LocationError& /* error */)>>& error, const std::optional<LocationRequestOptions>& options) = 0;
+      virtual void getHeading(const std::function<void(const Heading& /* heading */)>& success, const std::optional<std::function<void(const LocationError& /* error */)>>& error) = 0;
+      virtual std::string watchHeading(const std::function<void(const Heading& /* heading */)>& success, const std::optional<std::function<void(const LocationError& /* error */)>>& error, const std::optional<HeadingOptions>& options) = 0;
       virtual std::string watchPosition(const std::function<void(const GeolocationResponse& /* position */)>& success, const std::optional<std::function<void(const LocationError& /* error */)>>& error, const std::optional<LocationRequestOptions>& options) = 0;
       virtual void unwatch(const std::string& token) = 0;
       virtual void stopObserving() = 0;

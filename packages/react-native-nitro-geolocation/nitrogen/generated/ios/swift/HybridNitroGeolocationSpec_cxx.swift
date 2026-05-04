@@ -221,6 +221,25 @@ open class HybridNitroGeolocationSpec_cxx {
   }
 
   @inline(__always)
+  public final func getLocationAvailability() -> bridge.Result_std__shared_ptr_Promise_LocationAvailability___ {
+    do {
+      let __result = try self.__implementation.getLocationAvailability()
+      let __resultCpp = { () -> bridge.std__shared_ptr_Promise_LocationAvailability__ in
+        let __promise = bridge.create_std__shared_ptr_Promise_LocationAvailability__()
+        let __promiseHolder = bridge.wrap_std__shared_ptr_Promise_LocationAvailability__(__promise)
+        __result
+          .then({ __result in __promiseHolder.resolve(__result) })
+          .catch({ __error in __promiseHolder.reject(__error.toCpp()) })
+        return __promise
+      }()
+      return bridge.create_Result_std__shared_ptr_Promise_LocationAvailability___(__resultCpp)
+    } catch (let __error) {
+      let __exceptionPtr = __error.toCpp()
+      return bridge.create_Result_std__shared_ptr_Promise_LocationAvailability___(__exceptionPtr)
+    }
+  }
+
+  @inline(__always)
   public final func requestLocationSettings(success: bridge.Func_void_LocationProviderStatus, error: bridge.std__optional_std__function_void_const_LocationError_____error______, options: bridge.std__optional_LocationSettingsOptions_) -> bridge.Result_void_ {
     do {
       try self.__implementation.requestLocationSettings(success: { () -> (LocationProviderStatus) -> Void in
@@ -348,6 +367,63 @@ open class HybridNitroGeolocationSpec_cxx {
     } catch (let __error) {
       let __exceptionPtr = __error.toCpp()
       return bridge.create_Result_void_(__exceptionPtr)
+    }
+  }
+
+  @inline(__always)
+  public final func getHeading(success: bridge.Func_void_Heading, error: bridge.std__optional_std__function_void_const_LocationError_____error______) -> bridge.Result_void_ {
+    do {
+      try self.__implementation.getHeading(success: { () -> (Heading) -> Void in
+        let __wrappedFunction = bridge.wrap_Func_void_Heading(success)
+        return { (__heading: Heading) -> Void in
+          __wrappedFunction.call(__heading)
+        }
+      }(), error: { () -> ((_ error: LocationError) -> Void)? in
+        if bridge.has_value_std__optional_std__function_void_const_LocationError_____error______(error) {
+          let __unwrapped = bridge.get_std__optional_std__function_void_const_LocationError_____error______(error)
+          return { () -> (LocationError) -> Void in
+            let __wrappedFunction = bridge.wrap_Func_void_LocationError(__unwrapped)
+            return { (__error: LocationError) -> Void in
+              __wrappedFunction.call(__error)
+            }
+          }()
+        } else {
+          return nil
+        }
+      }())
+      return bridge.create_Result_void_()
+    } catch (let __error) {
+      let __exceptionPtr = __error.toCpp()
+      return bridge.create_Result_void_(__exceptionPtr)
+    }
+  }
+
+  @inline(__always)
+  public final func watchHeading(success: bridge.Func_void_Heading, error: bridge.std__optional_std__function_void_const_LocationError_____error______, options: bridge.std__optional_HeadingOptions_) -> bridge.Result_std__string_ {
+    do {
+      let __result = try self.__implementation.watchHeading(success: { () -> (Heading) -> Void in
+        let __wrappedFunction = bridge.wrap_Func_void_Heading(success)
+        return { (__heading: Heading) -> Void in
+          __wrappedFunction.call(__heading)
+        }
+      }(), error: { () -> ((_ error: LocationError) -> Void)? in
+        if bridge.has_value_std__optional_std__function_void_const_LocationError_____error______(error) {
+          let __unwrapped = bridge.get_std__optional_std__function_void_const_LocationError_____error______(error)
+          return { () -> (LocationError) -> Void in
+            let __wrappedFunction = bridge.wrap_Func_void_LocationError(__unwrapped)
+            return { (__error: LocationError) -> Void in
+              __wrappedFunction.call(__error)
+            }
+          }()
+        } else {
+          return nil
+        }
+      }(), options: options.value)
+      let __resultCpp = std.string(__result)
+      return bridge.create_Result_std__string_(__resultCpp)
+    } catch (let __error) {
+      let __exceptionPtr = __error.toCpp()
+      return bridge.create_Result_std__string_(__exceptionPtr)
     }
   }
 
