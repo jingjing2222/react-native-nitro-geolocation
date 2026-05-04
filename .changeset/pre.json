@@ -1,0 +1,12 @@
+{
+  "mode": "pre",
+  "tag": "next",
+  "initialVersions": {
+    "docs": "1.0.1",
+    "benchmark": "0.0.1",
+    "react-native-nitro-geolocation-example": "0.0.1",
+    "react-native-nitro-geolocation": "1.1.4",
+    "@react-native-nitro-geolocation/rozenite-plugin": "1.0.3"
+  },
+  "changesets": []
+}
