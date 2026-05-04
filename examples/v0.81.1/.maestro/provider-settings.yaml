@@ -1,0 +1,71 @@
+appId: nitrogeolocation.example
+---
+# User flow: a field worker prepares an accurate Android check-in by checking
+# real provider state, requesting Android's native location settings resolution,
+# then confirming the current position.
+
+- launchApp:
+    clearState: true
+    permissions:
+      android.permission.ACCESS_COARSE_LOCATION: allow
+      android.permission.ACCESS_FINE_LOCATION: allow
+
+- extendedWaitUntil:
+    visible: "Geolocation API"
+    timeout: 10000
+
+- stopApp
+
+- openLink:
+    link: nitrogeolocation://app/provider-settings
+- tapOn:
+    text: "열기|Open"
+    optional: true
+
+- extendedWaitUntil:
+    visible: "Accurate Check-In"
+    timeout: 10000
+
+- tapOn: "Check Device"
+- extendedWaitUntil:
+    visible: "Services:"
+    timeout: 10000
+
+- assertVisible:
+    id: "provider-settings-status"
+- assertVisible:
+    id: "provider-settings-services"
+- assertVisible:
+    id: "provider-settings-gps"
+- assertVisible:
+    id: "provider-settings-network"
+
+- tapOn: "Prepare Check-In"
+- tapOn:
+    text: "Turn on|OK|확인|켜기|사용"
+    optional: true
+- extendedWaitUntil:
+    visible: "Settings: ready"
+    timeout: 15000
+
+- assertVisible:
+    id: "provider-settings-result"
+
+- setLocation:
+    latitude: 37.5665
+    longitude: 126.978
+
+- tapOn: "Confirm Location"
+- scrollUntilVisible:
+    element: "Ready to check in"
+    direction: DOWN
+    timeout: 15000
+
+- assertVisible:
+    id: "provider-position"
+- assertVisible:
+    id: "provider-latitude"
+- assertVisible:
+    id: "provider-longitude"
+- assertVisible:
+    id: "provider-accuracy"

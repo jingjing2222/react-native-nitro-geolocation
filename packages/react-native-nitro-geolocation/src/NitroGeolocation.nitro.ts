@@ -1,5 +1,5 @@
 import type { HybridObject } from "react-native-nitro-modules";
-import type { GeolocationResponse } from "./types";
+import type { GeolocationResponse, LocationProviderStatus } from "./types";
 
 /**
  * Permission status for location services.
@@ -85,6 +85,33 @@ export interface LocationRequestOptions {
 }
 
 /**
+ * Android location settings request options.
+ */
+export interface LocationSettingsOptions {
+  /**
+   * Request high accuracy Android location settings.
+   * Defaults to true because this API is primarily used before user-facing
+   * precise location flows.
+   */
+  enableHighAccuracy?: boolean;
+
+  /** Desired update interval in milliseconds. */
+  interval?: number;
+
+  /** Fastest acceptable update interval in milliseconds. */
+  fastestInterval?: number;
+
+  /** Minimum distance change in meters. */
+  distanceFilter?: number;
+
+  /** Ask Android to always show the resolution dialog when possible. */
+  alwaysShow?: boolean;
+
+  /** Require BLE availability for the location settings request. */
+  needBle?: boolean;
+}
+
+/**
  * Location error structure.
  */
 export interface LocationError {
@@ -132,6 +159,29 @@ export interface NitroGeolocation
   requestPermission(
     success: (status: PermissionStatus) => void,
     error?: (error: LocationError) => void
+  ): void;
+
+  /**
+   * Check whether device-level location services are enabled.
+   */
+  hasServicesEnabled(): Promise<boolean>;
+
+  /**
+   * Get native provider/settings state.
+   */
+  getProviderStatus(): Promise<LocationProviderStatus>;
+
+  /**
+   * Android: check whether current device settings satisfy the requested
+   * location requirements and show the native settings resolution dialog when
+   * Android can resolve the mismatch.
+   *
+   * iOS resolves with the current provider status without showing a dialog.
+   */
+  requestLocationSettings(
+    success: (status: LocationProviderStatus) => void,
+    error?: (error: LocationError) => void,
+    options?: LocationSettingsOptions
   ): void;
 
   /**

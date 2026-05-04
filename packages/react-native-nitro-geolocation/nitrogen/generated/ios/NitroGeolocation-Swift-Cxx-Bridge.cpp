@@ -22,7 +22,7 @@ namespace margelo::nitro::nitrogeolocation::bridge::swift {
       swiftClosure.call(static_cast<int>(result));
     };
   }
-  
+
   // pragma MARK: std::function<void(const std::exception_ptr& /* error */)>
   Func_void_std__exception_ptr create_Func_void_std__exception_ptr(void* NON_NULL swiftClosureWrapper) noexcept {
     auto swiftClosure = NitroGeolocation::Func_void_std__exception_ptr::fromUnsafe(swiftClosureWrapper);
@@ -30,15 +30,7 @@ namespace margelo::nitro::nitrogeolocation::bridge::swift {
       swiftClosure.call(error);
     };
   }
-  
-  // pragma MARK: std::function<void(const GeolocationResponse& /* result */)>
-  Func_void_GeolocationResponse create_Func_void_GeolocationResponse(void* NON_NULL swiftClosureWrapper) noexcept {
-    auto swiftClosure = NitroGeolocation::Func_void_GeolocationResponse::fromUnsafe(swiftClosureWrapper);
-    return [swiftClosure = std::move(swiftClosure)](const GeolocationResponse& result) mutable -> void {
-      swiftClosure.call(result);
-    };
-  }
-  
+
   // pragma MARK: std::function<void(const LocationError& /* error */)>
   Func_void_LocationError create_Func_void_LocationError(void* NON_NULL swiftClosureWrapper) noexcept {
     auto swiftClosure = NitroGeolocation::Func_void_LocationError::fromUnsafe(swiftClosureWrapper);
@@ -46,7 +38,31 @@ namespace margelo::nitro::nitrogeolocation::bridge::swift {
       swiftClosure.call(error);
     };
   }
-  
+
+  // pragma MARK: std::function<void(bool /* result */)>
+  Func_void_bool create_Func_void_bool(void* NON_NULL swiftClosureWrapper) noexcept {
+    auto swiftClosure = NitroGeolocation::Func_void_bool::fromUnsafe(swiftClosureWrapper);
+    return [swiftClosure = std::move(swiftClosure)](bool result) mutable -> void {
+      swiftClosure.call(result);
+    };
+  }
+
+  // pragma MARK: std::function<void(const LocationProviderStatus& /* result */)>
+  Func_void_LocationProviderStatus create_Func_void_LocationProviderStatus(void* NON_NULL swiftClosureWrapper) noexcept {
+    auto swiftClosure = NitroGeolocation::Func_void_LocationProviderStatus::fromUnsafe(swiftClosureWrapper);
+    return [swiftClosure = std::move(swiftClosure)](const LocationProviderStatus& result) mutable -> void {
+      swiftClosure.call(result);
+    };
+  }
+
+  // pragma MARK: std::function<void(const GeolocationResponse& /* position */)>
+  Func_void_GeolocationResponse create_Func_void_GeolocationResponse(void* NON_NULL swiftClosureWrapper) noexcept {
+    auto swiftClosure = NitroGeolocation::Func_void_GeolocationResponse::fromUnsafe(swiftClosureWrapper);
+    return [swiftClosure = std::move(swiftClosure)](const GeolocationResponse& position) mutable -> void {
+      swiftClosure.call(position);
+    };
+  }
+
   // pragma MARK: std::shared_ptr<HybridNitroGeolocationSpec>
   std::shared_ptr<HybridNitroGeolocationSpec> create_std__shared_ptr_HybridNitroGeolocationSpec_(void* NON_NULL swiftUnsafePointer) noexcept {
     NitroGeolocation::HybridNitroGeolocationSpec_cxx swiftPart = NitroGeolocation::HybridNitroGeolocationSpec_cxx::fromUnsafe(swiftUnsafePointer);
@@ -62,7 +78,7 @@ namespace margelo::nitro::nitrogeolocation::bridge::swift {
     NitroGeolocation::HybridNitroGeolocationSpec_cxx& swiftPart = swiftWrapper->getSwiftPart();
     return swiftPart.toUnsafe();
   }
-  
+
   // pragma MARK: std::function<void()>
   Func_void create_Func_void(void* NON_NULL swiftClosureWrapper) noexcept {
     auto swiftClosure = NitroGeolocation::Func_void::fromUnsafe(swiftClosureWrapper);
@@ -70,7 +86,7 @@ namespace margelo::nitro::nitrogeolocation::bridge::swift {
       swiftClosure.call();
     };
   }
-  
+
   // pragma MARK: std::function<void(const CompatGeolocationError& /* error */)>
   Func_void_CompatGeolocationError create_Func_void_CompatGeolocationError(void* NON_NULL swiftClosureWrapper) noexcept {
     auto swiftClosure = NitroGeolocation::Func_void_CompatGeolocationError::fromUnsafe(swiftClosureWrapper);
@@ -78,7 +94,7 @@ namespace margelo::nitro::nitrogeolocation::bridge::swift {
       swiftClosure.call(error);
     };
   }
-  
+
   // pragma MARK: std::function<void(const CompatGeolocationResponse& /* position */)>
   Func_void_CompatGeolocationResponse create_Func_void_CompatGeolocationResponse(void* NON_NULL swiftClosureWrapper) noexcept {
     auto swiftClosure = NitroGeolocation::Func_void_CompatGeolocationResponse::fromUnsafe(swiftClosureWrapper);

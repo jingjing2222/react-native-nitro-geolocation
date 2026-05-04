@@ -12,14 +12,20 @@
 namespace margelo::nitro::nitrogeolocation { enum class AuthorizationLevelInternal; }
 // Forward declaration of `AuthorizationLevel` to properly resolve imports.
 namespace margelo::nitro::nitrogeolocation { enum class AuthorizationLevel; }
-// Forward declaration of `GeolocationCoordinates` to properly resolve imports.
-namespace margelo::nitro::nitrogeolocation { struct GeolocationCoordinates; }
+// Forward declaration of `CompatGeolocationConfigurationInternal` to properly resolve imports.
+namespace margelo::nitro::nitrogeolocation { struct CompatGeolocationConfigurationInternal; }
 // Forward declaration of `CompatGeolocationError` to properly resolve imports.
 namespace margelo::nitro::nitrogeolocation { struct CompatGeolocationError; }
 // Forward declaration of `CompatGeolocationOptions` to properly resolve imports.
 namespace margelo::nitro::nitrogeolocation { struct CompatGeolocationOptions; }
 // Forward declaration of `CompatGeolocationResponse` to properly resolve imports.
 namespace margelo::nitro::nitrogeolocation { struct CompatGeolocationResponse; }
+// Forward declaration of `GeolocationConfiguration` to properly resolve imports.
+namespace margelo::nitro::nitrogeolocation { struct GeolocationConfiguration; }
+// Forward declaration of `GeolocationCoordinates` to properly resolve imports.
+namespace margelo::nitro::nitrogeolocation { struct GeolocationCoordinates; }
+// Forward declaration of `GeolocationResponse` to properly resolve imports.
+namespace margelo::nitro::nitrogeolocation { struct GeolocationResponse; }
 // Forward declaration of `HybridNitroGeolocationCompatSpec` to properly resolve imports.
 namespace margelo::nitro::nitrogeolocation { class HybridNitroGeolocationCompatSpec; }
 // Forward declaration of `HybridNitroGeolocationSpec` to properly resolve imports.
@@ -28,39 +34,39 @@ namespace margelo::nitro::nitrogeolocation { class HybridNitroGeolocationSpec; }
 namespace margelo::nitro::nitrogeolocation { struct LocationError; }
 // Forward declaration of `LocationProviderInternal` to properly resolve imports.
 namespace margelo::nitro::nitrogeolocation { enum class LocationProviderInternal; }
+// Forward declaration of `LocationProviderStatus` to properly resolve imports.
+namespace margelo::nitro::nitrogeolocation { struct LocationProviderStatus; }
 // Forward declaration of `LocationProviderUsed` to properly resolve imports.
 namespace margelo::nitro::nitrogeolocation { enum class LocationProviderUsed; }
 // Forward declaration of `LocationProvider` to properly resolve imports.
 namespace margelo::nitro::nitrogeolocation { enum class LocationProvider; }
 // Forward declaration of `LocationRequestOptions` to properly resolve imports.
 namespace margelo::nitro::nitrogeolocation { struct LocationRequestOptions; }
-// Forward declaration of `GeolocationConfiguration` to properly resolve imports.
-namespace margelo::nitro::nitrogeolocation { struct GeolocationConfiguration; }
-// Forward declaration of `GeolocationResponse` to properly resolve imports.
-namespace margelo::nitro::nitrogeolocation { struct GeolocationResponse; }
+// Forward declaration of `LocationSettingsOptions` to properly resolve imports.
+namespace margelo::nitro::nitrogeolocation { struct LocationSettingsOptions; }
 // Forward declaration of `PermissionStatus` to properly resolve imports.
 namespace margelo::nitro::nitrogeolocation { enum class PermissionStatus; }
-// Forward declaration of `CompatGeolocationConfigurationInternal` to properly resolve imports.
-namespace margelo::nitro::nitrogeolocation { struct CompatGeolocationConfigurationInternal; }
 
 // Include C++ defined types
 #include "AuthorizationLevel.hpp"
 #include "AuthorizationLevelInternal.hpp"
-#include "GeolocationCoordinates.hpp"
+#include "CompatGeolocationConfigurationInternal.hpp"
 #include "CompatGeolocationError.hpp"
 #include "CompatGeolocationOptions.hpp"
 #include "CompatGeolocationResponse.hpp"
+#include "GeolocationConfiguration.hpp"
+#include "GeolocationCoordinates.hpp"
+#include "GeolocationResponse.hpp"
 #include "HybridNitroGeolocationCompatSpec.hpp"
 #include "HybridNitroGeolocationSpec.hpp"
 #include "LocationError.hpp"
 #include "LocationProvider.hpp"
 #include "LocationProviderInternal.hpp"
+#include "LocationProviderStatus.hpp"
 #include "LocationProviderUsed.hpp"
 #include "LocationRequestOptions.hpp"
-#include "GeolocationConfiguration.hpp"
-#include "GeolocationResponse.hpp"
+#include "LocationSettingsOptions.hpp"
 #include "PermissionStatus.hpp"
-#include "CompatGeolocationConfigurationInternal.hpp"
 #include <NitroModules/Null.hpp>
 #include <NitroModules/Promise.hpp>
 #include <NitroModules/Result.hpp>

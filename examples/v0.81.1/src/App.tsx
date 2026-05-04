@@ -14,6 +14,7 @@ import Issue67Screen from "./screens/Issue67Screen";
 import LocationSimulationScreen from "./screens/LocationSimulationScreen";
 import MockedMetadataScreen from "./screens/MockedMetadataScreen";
 import PermissionCheckScreen from "./screens/PermissionCheckScreen";
+import ProviderSettingsScreen from "./screens/ProviderSettingsScreen";
 import WatchPositionScreen from "./screens/WatchPositionScreen";
 
 const Tab = createBottomTabNavigator();
@@ -28,6 +29,7 @@ const linking = {
       WatchPosition: "watch-position",
       LocationSimulation: "location-simulation",
       MockedMetadata: "mocked-metadata",
+      ProviderSettings: "provider-settings",
       ApiErrors: "api-errors",
       Issue67: "issue-67"
     }
@@ -102,6 +104,11 @@ export default function App() {
         <Tab.Screen
           name="MockedMetadata"
           component={MockedMetadataScreen}
+          options={hiddenTabOptions}
+        />
+        <Tab.Screen
+          name="ProviderSettings"
+          component={ProviderSettingsScreen}
           options={hiddenTabOptions}
         />
         <Tab.Screen

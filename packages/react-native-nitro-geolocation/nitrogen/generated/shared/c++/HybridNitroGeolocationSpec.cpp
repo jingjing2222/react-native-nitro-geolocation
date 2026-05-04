@@ -17,6 +17,9 @@ namespace margelo::nitro::nitrogeolocation {
       prototype.registerHybridMethod("setConfiguration", &HybridNitroGeolocationSpec::setConfiguration);
       prototype.registerHybridMethod("checkPermission", &HybridNitroGeolocationSpec::checkPermission);
       prototype.registerHybridMethod("requestPermission", &HybridNitroGeolocationSpec::requestPermission);
+      prototype.registerHybridMethod("hasServicesEnabled", &HybridNitroGeolocationSpec::hasServicesEnabled);
+      prototype.registerHybridMethod("getProviderStatus", &HybridNitroGeolocationSpec::getProviderStatus);
+      prototype.registerHybridMethod("requestLocationSettings", &HybridNitroGeolocationSpec::requestLocationSettings);
       prototype.registerHybridMethod("getCurrentPosition", &HybridNitroGeolocationSpec::getCurrentPosition);
       prototype.registerHybridMethod("watchPosition", &HybridNitroGeolocationSpec::watchPosition);
       prototype.registerHybridMethod("unwatch", &HybridNitroGeolocationSpec::unwatch);

@@ -17,22 +17,28 @@
 namespace margelo::nitro::nitrogeolocation { struct GeolocationConfiguration; }
 // Forward declaration of `PermissionStatus` to properly resolve imports.
 namespace margelo::nitro::nitrogeolocation { enum class PermissionStatus; }
+// Forward declaration of `LocationError` to properly resolve imports.
+namespace margelo::nitro::nitrogeolocation { struct LocationError; }
+// Forward declaration of `LocationProviderStatus` to properly resolve imports.
+namespace margelo::nitro::nitrogeolocation { struct LocationProviderStatus; }
+// Forward declaration of `LocationSettingsOptions` to properly resolve imports.
+namespace margelo::nitro::nitrogeolocation { struct LocationSettingsOptions; }
 // Forward declaration of `GeolocationResponse` to properly resolve imports.
 namespace margelo::nitro::nitrogeolocation { struct GeolocationResponse; }
 // Forward declaration of `LocationRequestOptions` to properly resolve imports.
 namespace margelo::nitro::nitrogeolocation { struct LocationRequestOptions; }
-// Forward declaration of `LocationError` to properly resolve imports.
-namespace margelo::nitro::nitrogeolocation { struct LocationError; }
 
 #include "GeolocationConfiguration.hpp"
 #include "PermissionStatus.hpp"
 #include <NitroModules/Promise.hpp>
-#include "GeolocationResponse.hpp"
-#include "LocationRequestOptions.hpp"
-#include <optional>
-#include <string>
 #include <functional>
 #include "LocationError.hpp"
+#include <optional>
+#include "LocationProviderStatus.hpp"
+#include "LocationSettingsOptions.hpp"
+#include "GeolocationResponse.hpp"
+#include "LocationRequestOptions.hpp"
+#include <string>
 
 namespace margelo::nitro::nitrogeolocation {
 
@@ -68,6 +74,9 @@ namespace margelo::nitro::nitrogeolocation {
       virtual void setConfiguration(const GeolocationConfiguration& config) = 0;
       virtual std::shared_ptr<Promise<PermissionStatus>> checkPermission() = 0;
       virtual void requestPermission(const std::function<void(PermissionStatus /* status */)>& success, const std::optional<std::function<void(const LocationError& /* error */)>>& error) = 0;
+      virtual std::shared_ptr<Promise<bool>> hasServicesEnabled() = 0;
+      virtual std::shared_ptr<Promise<LocationProviderStatus>> getProviderStatus() = 0;
+      virtual void requestLocationSettings(const std::function<void(const LocationProviderStatus& /* status */)>& success, const std::optional<std::function<void(const LocationError& /* error */)>>& error, const std::optional<LocationSettingsOptions>& options) = 0;
       virtual void getCurrentPosition(const std::function<void(const GeolocationResponse& /* position */)>& success, const std::optional<std::function<void(const LocationError& /* error */)>>& error, const std::optional<LocationRequestOptions>& options) = 0;
       virtual std::string watchPosition(const std::function<void(const GeolocationResponse& /* position */)>& success, const std::optional<std::function<void(const LocationError& /* error */)>>& error, const std::optional<LocationRequestOptions>& options) = 0;
       virtual void unwatch(const std::string& token) = 0;

@@ -128,6 +128,7 @@ def kotlin_version = getExtOrDefault("kotlinVersion")
 dependencies {
   implementation "com.facebook.react:react-android"
   implementation "com.google.android.gms:play-services-base:${getExtOrDefaultValue('playServicesBaseVersion', '18.5.0')}"
+  implementation "com.google.android.gms:play-services-location:${getExtOrDefaultValue('playServicesLocationVersion', '21.3.0')}"
   implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
   implementation project(":react-native-nitro-modules")
 }

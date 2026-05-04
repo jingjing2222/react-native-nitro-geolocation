@@ -147,6 +147,28 @@ class NitroGeolocation: HybridNitroGeolocationSpec {
         self.requestSystemPermission(for: authLevel)
     }
 
+    // MARK: - Provider/Settings API
+
+    func hasServicesEnabled() throws -> Promise<Bool> {
+        return Promise.async {
+            return CLLocationManager.locationServicesEnabled()
+        }
+    }
+
+    func getProviderStatus() throws -> Promise<LocationProviderStatus> {
+        return Promise.async {
+            return self.createLocationProviderStatus()
+        }
+    }
+
+    func requestLocationSettings(
+        success: @escaping (LocationProviderStatus) -> Void,
+        error: ((LocationError) -> Void)?,
+        options: LocationSettingsOptions?
+    ) throws -> Void {
+        success(createLocationProviderStatus())
+    }
+
     // MARK: - Get Current Position
 
     func getCurrentPosition(
@@ -532,5 +554,26 @@ class NitroGeolocation: HybridNitroGeolocationSpec {
             code: Double(code),
             message: message
         )
+    }
+
+    private func createLocationProviderStatus() -> LocationProviderStatus {
+        return LocationProviderStatus(
+            locationServicesEnabled: CLLocationManager.locationServicesEnabled(),
+            backgroundModeEnabled: isLocationBackgroundModeEnabled(),
+            gpsAvailable: nil,
+            networkAvailable: nil,
+            passiveAvailable: nil,
+            googleLocationAccuracyEnabled: nil
+        )
+    }
+
+    private func isLocationBackgroundModeEnabled() -> Bool {
+        guard let backgroundModes = Bundle.main.object(
+            forInfoDictionaryKey: "UIBackgroundModes"
+        ) as? [String] else {
+            return false
+        }
+
+        return backgroundModes.contains("location")
     }
 }

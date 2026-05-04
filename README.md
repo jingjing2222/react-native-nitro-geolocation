@@ -36,6 +36,7 @@ React Native Nitro Geolocation provides **two APIs** to fit your needs:
 import {
   setConfiguration,
   requestPermission,
+  requestLocationSettings,
   getCurrentPosition,
   useWatchPosition,
 } from "react-native-nitro-geolocation";
@@ -48,6 +49,9 @@ setConfiguration({
 
 // Request permission
 const status = await requestPermission();
+
+// Android: ask the user to enable settings required for accurate location
+await requestLocationSettings({ enableHighAccuracy: true });
 
 // Get current location
 const position = await getCurrentPosition({

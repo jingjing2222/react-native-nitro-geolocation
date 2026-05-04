@@ -9,44 +9,34 @@
 
 // Forward declaration of `PermissionStatus` to properly resolve imports.
 namespace margelo::nitro::nitrogeolocation { enum class PermissionStatus; }
-// Forward declaration of `GeolocationResponse` to properly resolve imports.
-namespace margelo::nitro::nitrogeolocation { struct GeolocationResponse; }
-// Forward declaration of `LocationProviderUsed` to properly resolve imports.
-namespace margelo::nitro::nitrogeolocation { enum class LocationProviderUsed; }
-// Forward declaration of `GeolocationCoordinates` to properly resolve imports.
-namespace margelo::nitro::nitrogeolocation { struct GeolocationCoordinates; }
+// Forward declaration of `LocationProviderStatus` to properly resolve imports.
+namespace margelo::nitro::nitrogeolocation { struct LocationProviderStatus; }
 // Forward declaration of `GeolocationConfiguration` to properly resolve imports.
 namespace margelo::nitro::nitrogeolocation { struct GeolocationConfiguration; }
 // Forward declaration of `AuthorizationLevel` to properly resolve imports.
 namespace margelo::nitro::nitrogeolocation { enum class AuthorizationLevel; }
 // Forward declaration of `LocationProvider` to properly resolve imports.
 namespace margelo::nitro::nitrogeolocation { enum class LocationProvider; }
-// Forward declaration of `LocationRequestOptions` to properly resolve imports.
-namespace margelo::nitro::nitrogeolocation { struct LocationRequestOptions; }
 // Forward declaration of `LocationError` to properly resolve imports.
 namespace margelo::nitro::nitrogeolocation { struct LocationError; }
+// Forward declaration of `LocationSettingsOptions` to properly resolve imports.
+namespace margelo::nitro::nitrogeolocation { struct LocationSettingsOptions; }
+// Forward declaration of `GeolocationResponse` to properly resolve imports.
+namespace margelo::nitro::nitrogeolocation { struct GeolocationResponse; }
+// Forward declaration of `GeolocationCoordinates` to properly resolve imports.
+namespace margelo::nitro::nitrogeolocation { struct GeolocationCoordinates; }
+// Forward declaration of `LocationProviderUsed` to properly resolve imports.
+namespace margelo::nitro::nitrogeolocation { enum class LocationProviderUsed; }
+// Forward declaration of `LocationRequestOptions` to properly resolve imports.
+namespace margelo::nitro::nitrogeolocation { struct LocationRequestOptions; }
 
 #include "PermissionStatus.hpp"
 #include <NitroModules/Promise.hpp>
 #include <NitroModules/JPromise.hpp>
 #include "JPermissionStatus.hpp"
-#include <functional>
-#include "JFunc_void_PermissionStatus.hpp"
-#include <NitroModules/JNICallable.hpp>
-#include "LocationError.hpp"
-#include "JFunc_void_LocationError.hpp"
-#include "JLocationError.hpp"
+#include "LocationProviderStatus.hpp"
+#include "JLocationProviderStatus.hpp"
 #include <optional>
-#include "GeolocationResponse.hpp"
-#include "JGeolocationResponse.hpp"
-#include "LocationProviderUsed.hpp"
-#include "JLocationProviderUsed.hpp"
-#include "GeolocationCoordinates.hpp"
-#include "JGeolocationCoordinates.hpp"
-#include <NitroModules/Null.hpp>
-#include <variant>
-#include "JNullableDouble.hpp"
-#include <NitroModules/JNull.hpp>
 #include <string>
 #include "GeolocationConfiguration.hpp"
 #include "JGeolocationConfiguration.hpp"
@@ -54,9 +44,28 @@ namespace margelo::nitro::nitrogeolocation { struct LocationError; }
 #include "JAuthorizationLevel.hpp"
 #include "LocationProvider.hpp"
 #include "JLocationProvider.hpp"
+#include <functional>
+#include "JFunc_void_PermissionStatus.hpp"
+#include <NitroModules/JNICallable.hpp>
+#include "LocationError.hpp"
+#include "JFunc_void_LocationError.hpp"
+#include "JLocationError.hpp"
+#include "JFunc_void_LocationProviderStatus.hpp"
+#include "LocationSettingsOptions.hpp"
+#include "JLocationSettingsOptions.hpp"
+#include "GeolocationResponse.hpp"
+#include "JFunc_void_GeolocationResponse.hpp"
+#include "JGeolocationResponse.hpp"
+#include "GeolocationCoordinates.hpp"
+#include "JGeolocationCoordinates.hpp"
+#include <NitroModules/Null.hpp>
+#include <variant>
+#include "JNullableDouble.hpp"
+#include <NitroModules/JNull.hpp>
+#include "LocationProviderUsed.hpp"
+#include "JLocationProviderUsed.hpp"
 #include "LocationRequestOptions.hpp"
 #include "JLocationRequestOptions.hpp"
-#include "JFunc_void_GeolocationResponse.hpp"
 
 namespace margelo::nitro::nitrogeolocation {
 
@@ -114,6 +123,42 @@ namespace margelo::nitro::nitrogeolocation {
   void JHybridNitroGeolocationSpec::requestPermission(const std::function<void(PermissionStatus /* status */)>& success, const std::optional<std::function<void(const LocationError& /* error */)>>& error) {
     static const auto method = _javaPart->javaClassStatic()->getMethod<void(jni::alias_ref<JFunc_void_PermissionStatus::javaobject> /* success */, jni::alias_ref<JFunc_void_LocationError::javaobject> /* error */)>("requestPermission_cxx");
     method(_javaPart, JFunc_void_PermissionStatus_cxx::fromCpp(success), error.has_value() ? JFunc_void_LocationError_cxx::fromCpp(error.value()) : nullptr);
+  }
+  std::shared_ptr<Promise<bool>> JHybridNitroGeolocationSpec::hasServicesEnabled() {
+    static const auto method = _javaPart->javaClassStatic()->getMethod<jni::local_ref<JPromise::javaobject>()>("hasServicesEnabled");
+    auto __result = method(_javaPart);
+    return [&]() {
+      auto __promise = Promise<bool>::create();
+      __result->cthis()->addOnResolvedListener([=](const jni::alias_ref<jni::JObject>& __boxedResult) {
+        auto __result = jni::static_ref_cast<jni::JBoolean>(__boxedResult);
+        __promise->resolve(static_cast<bool>(__result->value()));
+      });
+      __result->cthis()->addOnRejectedListener([=](const jni::alias_ref<jni::JThrowable>& __throwable) {
+        jni::JniException __jniError(__throwable);
+        __promise->reject(std::make_exception_ptr(__jniError));
+      });
+      return __promise;
+    }();
+  }
+  std::shared_ptr<Promise<LocationProviderStatus>> JHybridNitroGeolocationSpec::getProviderStatus() {
+    static const auto method = _javaPart->javaClassStatic()->getMethod<jni::local_ref<JPromise::javaobject>()>("getProviderStatus");
+    auto __result = method(_javaPart);
+    return [&]() {
+      auto __promise = Promise<LocationProviderStatus>::create();
+      __result->cthis()->addOnResolvedListener([=](const jni::alias_ref<jni::JObject>& __boxedResult) {
+        auto __result = jni::static_ref_cast<JLocationProviderStatus>(__boxedResult);
+        __promise->resolve(__result->toCpp());
+      });
+      __result->cthis()->addOnRejectedListener([=](const jni::alias_ref<jni::JThrowable>& __throwable) {
+        jni::JniException __jniError(__throwable);
+        __promise->reject(std::make_exception_ptr(__jniError));
+      });
+      return __promise;
+    }();
+  }
+  void JHybridNitroGeolocationSpec::requestLocationSettings(const std::function<void(const LocationProviderStatus& /* status */)>& success, const std::optional<std::function<void(const LocationError& /* error */)>>& error, const std::optional<LocationSettingsOptions>& options) {
+    static const auto method = _javaPart->javaClassStatic()->getMethod<void(jni::alias_ref<JFunc_void_LocationProviderStatus::javaobject> /* success */, jni::alias_ref<JFunc_void_LocationError::javaobject> /* error */, jni::alias_ref<JLocationSettingsOptions> /* options */)>("requestLocationSettings_cxx");
+    method(_javaPart, JFunc_void_LocationProviderStatus_cxx::fromCpp(success), error.has_value() ? JFunc_void_LocationError_cxx::fromCpp(error.value()) : nullptr, options.has_value() ? JLocationSettingsOptions::fromCpp(options.value()) : nullptr);
   }
   void JHybridNitroGeolocationSpec::getCurrentPosition(const std::function<void(const GeolocationResponse& /* position */)>& success, const std::optional<std::function<void(const LocationError& /* error */)>>& error, const std::optional<LocationRequestOptions>& options) {
     static const auto method = _javaPart->javaClassStatic()->getMethod<void(jni::alias_ref<JFunc_void_GeolocationResponse::javaobject> /* success */, jni::alias_ref<JFunc_void_LocationError::javaobject> /* error */, jni::alias_ref<JLocationRequestOptions> /* options */)>("getCurrentPosition_cxx");

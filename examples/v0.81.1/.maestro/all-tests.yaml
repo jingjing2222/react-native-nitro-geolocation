@@ -13,6 +13,10 @@ appId: nitrogeolocation.example
 - runFlow:
     when:
       platform: Android
+    file: provider-settings.yaml
+- runFlow:
+    when:
+      platform: Android
     file: mocked-metadata-android-true.yaml
 - runFlow:
     when:

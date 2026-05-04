@@ -28,14 +28,14 @@
 #error NitroModules cannot be found! Are you sure you installed NitroModules properly?
 #endif
 
-// Forward declaration of `LocationProviderUsed` to properly resolve imports.
-namespace margelo::nitro::nitrogeolocation { enum class LocationProviderUsed; }
 // Forward declaration of `GeolocationCoordinates` to properly resolve imports.
 namespace margelo::nitro::nitrogeolocation { struct GeolocationCoordinates; }
+// Forward declaration of `LocationProviderUsed` to properly resolve imports.
+namespace margelo::nitro::nitrogeolocation { enum class LocationProviderUsed; }
 
+#include "GeolocationCoordinates.hpp"
 #include <optional>
 #include "LocationProviderUsed.hpp"
-#include "GeolocationCoordinates.hpp"
 
 namespace margelo::nitro::nitrogeolocation {
 
@@ -44,14 +44,14 @@ namespace margelo::nitro::nitrogeolocation {
    */
   struct GeolocationResponse final {
   public:
-    std::optional<bool> mocked     SWIFT_PRIVATE;
-    std::optional<LocationProviderUsed> provider     SWIFT_PRIVATE;
     GeolocationCoordinates coords     SWIFT_PRIVATE;
     double timestamp     SWIFT_PRIVATE;
+    std::optional<bool> mocked     SWIFT_PRIVATE;
+    std::optional<LocationProviderUsed> provider     SWIFT_PRIVATE;
 
   public:
     GeolocationResponse() = default;
-    explicit GeolocationResponse(std::optional<bool> mocked, std::optional<LocationProviderUsed> provider, GeolocationCoordinates coords, double timestamp): mocked(mocked), provider(provider), coords(coords), timestamp(timestamp) {}
+    explicit GeolocationResponse(GeolocationCoordinates coords, double timestamp, std::optional<bool> mocked, std::optional<LocationProviderUsed> provider): coords(coords), timestamp(timestamp), mocked(mocked), provider(provider) {}
 
   public:
     friend bool operator==(const GeolocationResponse& lhs, const GeolocationResponse& rhs) = default;
@@ -67,18 +67,18 @@ namespace margelo::nitro {
     static inline margelo::nitro::nitrogeolocation::GeolocationResponse fromJSI(jsi::Runtime& runtime, const jsi::Value& arg) {
       jsi::Object obj = arg.asObject(runtime);
       return margelo::nitro::nitrogeolocation::GeolocationResponse(
-        JSIConverter<std::optional<bool>>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "mocked"))),
-        JSIConverter<std::optional<margelo::nitro::nitrogeolocation::LocationProviderUsed>>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "provider"))),
         JSIConverter<margelo::nitro::nitrogeolocation::GeolocationCoordinates>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "coords"))),
-        JSIConverter<double>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "timestamp")))
+        JSIConverter<double>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "timestamp"))),
+        JSIConverter<std::optional<bool>>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "mocked"))),
+        JSIConverter<std::optional<margelo::nitro::nitrogeolocation::LocationProviderUsed>>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "provider")))
       );
     }
     static inline jsi::Value toJSI(jsi::Runtime& runtime, const margelo::nitro::nitrogeolocation::GeolocationResponse& arg) {
       jsi::Object obj(runtime);
-      obj.setProperty(runtime, PropNameIDCache::get(runtime, "mocked"), JSIConverter<std::optional<bool>>::toJSI(runtime, arg.mocked));
-      obj.setProperty(runtime, PropNameIDCache::get(runtime, "provider"), JSIConverter<std::optional<margelo::nitro::nitrogeolocation::LocationProviderUsed>>::toJSI(runtime, arg.provider));
       obj.setProperty(runtime, PropNameIDCache::get(runtime, "coords"), JSIConverter<margelo::nitro::nitrogeolocation::GeolocationCoordinates>::toJSI(runtime, arg.coords));
       obj.setProperty(runtime, PropNameIDCache::get(runtime, "timestamp"), JSIConverter<double>::toJSI(runtime, arg.timestamp));
+      obj.setProperty(runtime, PropNameIDCache::get(runtime, "mocked"), JSIConverter<std::optional<bool>>::toJSI(runtime, arg.mocked));
+      obj.setProperty(runtime, PropNameIDCache::get(runtime, "provider"), JSIConverter<std::optional<margelo::nitro::nitrogeolocation::LocationProviderUsed>>::toJSI(runtime, arg.provider));
       return obj;
     }
     static inline bool canConvert(jsi::Runtime& runtime, const jsi::Value& value) {
@@ -89,10 +89,10 @@ namespace margelo::nitro {
       if (!nitro::isPlainObject(runtime, obj)) {
         return false;
       }
-      if (!JSIConverter<std::optional<bool>>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "mocked")))) return false;
-      if (!JSIConverter<std::optional<margelo::nitro::nitrogeolocation::LocationProviderUsed>>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "provider")))) return false;
       if (!JSIConverter<margelo::nitro::nitrogeolocation::GeolocationCoordinates>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "coords")))) return false;
       if (!JSIConverter<double>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "timestamp")))) return false;
+      if (!JSIConverter<std::optional<bool>>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "mocked")))) return false;
+      if (!JSIConverter<std::optional<margelo::nitro::nitrogeolocation::LocationProviderUsed>>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "provider")))) return false;
       return true;
     }
   };

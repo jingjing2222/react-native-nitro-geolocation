@@ -104,6 +104,14 @@ class NitroGeolocation(
     private val locationManager: AndroidLocationManager by lazy {
         reactContext.getSystemService(Context.LOCATION_SERVICE) as AndroidLocationManager
     }
+    private val locationSettings: AndroidLocationSettings by lazy {
+        AndroidLocationSettings(
+            reactContext = reactContext,
+            locationManager = locationManager,
+            createLocationError = ::createLocationError,
+            createPlayServicesUnavailableError = ::createPlayServicesUnavailableError
+        )
+    }
 
     // Permission callbacks
     private val pendingPermissionResolvers = mutableListOf<(PermissionStatus) -> Unit>()
@@ -176,6 +184,28 @@ class NitroGeolocation(
             permissions,
             PERMISSION_REQUEST_CODE
         )
+    }
+
+    // MARK: - Provider/Settings API
+
+    override fun hasServicesEnabled(): Promise<Boolean> {
+        return Promise.async {
+            locationSettings.hasServicesEnabled()
+        }
+    }
+
+    override fun getProviderStatus(): Promise<LocationProviderStatus> {
+        return Promise.async {
+            locationSettings.getProviderStatus()
+        }
+    }
+
+    override fun requestLocationSettings(
+        success: (LocationProviderStatus) -> Unit,
+        error: ((LocationError) -> Unit)?,
+        options: LocationSettingsOptions?
+    ) {
+        locationSettings.requestLocationSettings(success, error, options)
     }
 
     // MARK: - Get Current Position

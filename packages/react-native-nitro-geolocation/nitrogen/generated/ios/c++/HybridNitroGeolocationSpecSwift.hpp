@@ -20,16 +20,20 @@ namespace margelo::nitro::nitrogeolocation { enum class AuthorizationLevel; }
 namespace margelo::nitro::nitrogeolocation { enum class LocationProvider; }
 // Forward declaration of `PermissionStatus` to properly resolve imports.
 namespace margelo::nitro::nitrogeolocation { enum class PermissionStatus; }
-// Forward declaration of `GeolocationResponse` to properly resolve imports.
-namespace margelo::nitro::nitrogeolocation { struct GeolocationResponse; }
-// Forward declaration of `LocationProviderUsed` to properly resolve imports.
-namespace margelo::nitro::nitrogeolocation { enum class LocationProviderUsed; }
-// Forward declaration of `GeolocationCoordinates` to properly resolve imports.
-namespace margelo::nitro::nitrogeolocation { struct GeolocationCoordinates; }
-// Forward declaration of `LocationRequestOptions` to properly resolve imports.
-namespace margelo::nitro::nitrogeolocation { struct LocationRequestOptions; }
 // Forward declaration of `LocationError` to properly resolve imports.
 namespace margelo::nitro::nitrogeolocation { struct LocationError; }
+// Forward declaration of `LocationProviderStatus` to properly resolve imports.
+namespace margelo::nitro::nitrogeolocation { struct LocationProviderStatus; }
+// Forward declaration of `LocationSettingsOptions` to properly resolve imports.
+namespace margelo::nitro::nitrogeolocation { struct LocationSettingsOptions; }
+// Forward declaration of `GeolocationResponse` to properly resolve imports.
+namespace margelo::nitro::nitrogeolocation { struct GeolocationResponse; }
+// Forward declaration of `GeolocationCoordinates` to properly resolve imports.
+namespace margelo::nitro::nitrogeolocation { struct GeolocationCoordinates; }
+// Forward declaration of `LocationProviderUsed` to properly resolve imports.
+namespace margelo::nitro::nitrogeolocation { enum class LocationProviderUsed; }
+// Forward declaration of `LocationRequestOptions` to properly resolve imports.
+namespace margelo::nitro::nitrogeolocation { struct LocationRequestOptions; }
 
 #include "GeolocationConfiguration.hpp"
 #include <optional>
@@ -37,15 +41,17 @@ namespace margelo::nitro::nitrogeolocation { struct LocationError; }
 #include "LocationProvider.hpp"
 #include "PermissionStatus.hpp"
 #include <NitroModules/Promise.hpp>
+#include <functional>
+#include "LocationError.hpp"
+#include <string>
+#include "LocationProviderStatus.hpp"
+#include "LocationSettingsOptions.hpp"
 #include "GeolocationResponse.hpp"
-#include "LocationProviderUsed.hpp"
 #include "GeolocationCoordinates.hpp"
 #include <NitroModules/Null.hpp>
 #include <variant>
+#include "LocationProviderUsed.hpp"
 #include "LocationRequestOptions.hpp"
-#include <string>
-#include <functional>
-#include "LocationError.hpp"
 
 #include "NitroGeolocation-Swift-Cxx-Umbrella.hpp"
 
@@ -113,6 +119,28 @@ namespace margelo::nitro::nitrogeolocation {
     }
     inline void requestPermission(const std::function<void(PermissionStatus /* status */)>& success, const std::optional<std::function<void(const LocationError& /* error */)>>& error) override {
       auto __result = _swiftPart.requestPermission(success, error);
+      if (__result.hasError()) [[unlikely]] {
+        std::rethrow_exception(__result.error());
+      }
+    }
+    inline std::shared_ptr<Promise<bool>> hasServicesEnabled() override {
+      auto __result = _swiftPart.hasServicesEnabled();
+      if (__result.hasError()) [[unlikely]] {
+        std::rethrow_exception(__result.error());
+      }
+      auto __value = std::move(__result.value());
+      return __value;
+    }
+    inline std::shared_ptr<Promise<LocationProviderStatus>> getProviderStatus() override {
+      auto __result = _swiftPart.getProviderStatus();
+      if (__result.hasError()) [[unlikely]] {
+        std::rethrow_exception(__result.error());
+      }
+      auto __value = std::move(__result.value());
+      return __value;
+    }
+    inline void requestLocationSettings(const std::function<void(const LocationProviderStatus& /* status */)>& success, const std::optional<std::function<void(const LocationError& /* error */)>>& error, const std::optional<LocationSettingsOptions>& options) override {
+      auto __result = _swiftPart.requestLocationSettings(success, error, options);
       if (__result.hasError()) [[unlikely]] {
         std::rethrow_exception(__result.error());
       }

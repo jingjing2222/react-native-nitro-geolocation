@@ -25,6 +25,15 @@ export interface GeolocationResponse {
   provider?: LocationProviderUsed;
 }
 
+export interface LocationProviderStatus {
+  locationServicesEnabled: boolean;
+  backgroundModeEnabled: boolean;
+  gpsAvailable?: boolean;
+  networkAvailable?: boolean;
+  passiveAvailable?: boolean;
+  googleLocationAccuracyEnabled?: boolean;
+}
+
 export interface CompatGeolocationResponse {
   coords: GeolocationCoordinates;
   timestamp: number;

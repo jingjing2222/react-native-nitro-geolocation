@@ -1,6 +1,9 @@
 export { setConfiguration } from "./setConfiguration";
 export { checkPermission } from "./checkPermission";
 export { requestPermission } from "./requestPermission";
+export { hasServicesEnabled } from "./hasServicesEnabled";
+export { getProviderStatus } from "./getProviderStatus";
+export { requestLocationSettings } from "./requestLocationSettings";
 export { getCurrentPosition } from "./getCurrentPosition";
 export { watchPosition } from "./watchPosition";
 export { unwatch } from "./unwatch";
