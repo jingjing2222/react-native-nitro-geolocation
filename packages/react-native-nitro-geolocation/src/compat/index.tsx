@@ -25,10 +25,10 @@ const Geolocation = {
 
 // Export types
 export type {
-  GeolocationConfiguration,
-  GeolocationResponse,
-  GeolocationError,
-  GeolocationOptions
-} from "../types";
+  CompatGeolocationConfiguration as GeolocationConfiguration,
+  CompatGeolocationResponse as GeolocationResponse,
+  CompatGeolocationError as GeolocationError,
+  CompatGeolocationOptions as GeolocationOptions
+} from "../publicTypes";
 
 export default Geolocation;

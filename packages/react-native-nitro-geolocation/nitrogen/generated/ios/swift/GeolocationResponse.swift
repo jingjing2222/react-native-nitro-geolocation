@@ -18,15 +18,44 @@ public extension GeolocationResponse {
   /**
    * Create a new instance of `GeolocationResponse`.
    */
-  init(coords: GeolocationCoordinates, timestamp: Double) {
-    self.init(coords, timestamp)
+  init(mocked: Bool?, provider: LocationProviderUsed?, coords: GeolocationCoordinates, timestamp: Double) {
+    self.init({ () -> bridge.std__optional_bool_ in
+      if let __unwrappedValue = mocked {
+        return bridge.create_std__optional_bool_(__unwrappedValue)
+      } else {
+        return .init()
+      }
+    }(), { () -> bridge.std__optional_LocationProviderUsed_ in
+      if let __unwrappedValue = provider {
+        return bridge.create_std__optional_LocationProviderUsed_(__unwrappedValue)
+      } else {
+        return .init()
+      }
+    }(), coords, timestamp)
+  }
+
+  @inline(__always)
+  var mocked: Bool? {
+    return { () -> Bool? in
+      if bridge.has_value_std__optional_bool_(self.__mocked) {
+        let __unwrapped = bridge.get_std__optional_bool_(self.__mocked)
+        return __unwrapped
+      } else {
+        return nil
+      }
+    }()
+  }
+
+  @inline(__always)
+  var provider: LocationProviderUsed? {
+    return self.__provider.value
   }
 
   @inline(__always)
   var coords: GeolocationCoordinates {
     return self.__coords
   }
-  
+
   @inline(__always)
   var timestamp: Double {
     return self.__timestamp

@@ -1,4 +1,5 @@
 import { useEffect } from "react";
+import { withMockMetadata } from "../../shared/position";
 import type { Position } from "../../shared/types";
 
 declare global {
@@ -23,11 +24,12 @@ function getDevtoolsState() {
 export function useInitialPosition(initialPosition?: Position) {
   useEffect(() => {
     if (initialPosition) {
+      const position = withMockMetadata(initialPosition);
       const devtools = getDevtoolsState();
-      devtools.initialPosition = initialPosition;
+      devtools.initialPosition = position;
       // Only set position if not already set
       if (!devtools.position) {
-        devtools.position = initialPosition;
+        devtools.position = position;
       }
     }
   }, [initialPosition]);

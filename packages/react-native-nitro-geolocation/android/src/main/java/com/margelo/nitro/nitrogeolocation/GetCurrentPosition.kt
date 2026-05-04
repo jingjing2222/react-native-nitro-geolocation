@@ -16,9 +16,9 @@ import com.facebook.react.bridge.ReactApplicationContext
 class GetCurrentPosition(private val reactContext: ReactApplicationContext) {
 
     fun execute(
-            success: (position: GeolocationResponse) -> Unit,
-            error: ((error: GeolocationError) -> Unit)?,
-            options: GeolocationOptions?
+            success: (position: CompatGeolocationResponse) -> Unit,
+            error: ((error: CompatGeolocationError) -> Unit)?,
+            options: CompatGeolocationOptions?
     ) {
         val locationManager =
                 reactContext.getSystemService(Context.LOCATION_SERVICE) as? LocationManager
@@ -64,7 +64,7 @@ class GetCurrentPosition(private val reactContext: ReactApplicationContext) {
 
     // ===== Helper Functions =====
 
-    private fun parseOptions(options: GeolocationOptions?): ParsedOptions {
+    private fun parseOptions(options: CompatGeolocationOptions?): ParsedOptions {
         return ParsedOptions(
                 timeout = options?.timeout ?: DEFAULT_TIMEOUT,
                 maximumAge = options?.maximumAge ?: DEFAULT_MAXIMUM_AGE,
@@ -106,8 +106,8 @@ class GetCurrentPosition(private val reactContext: ReactApplicationContext) {
             locationManager: LocationManager,
             provider: String,
             options: ParsedOptions,
-            success: (GeolocationResponse) -> Unit,
-            error: ((GeolocationError) -> Unit)?,
+            success: (CompatGeolocationResponse) -> Unit,
+            error: ((CompatGeolocationError) -> Unit)?,
             fallbackLocation: Location?
     ) {
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.R) {
@@ -138,8 +138,8 @@ class GetCurrentPosition(private val reactContext: ReactApplicationContext) {
             locationManager: LocationManager,
             provider: String,
             options: ParsedOptions,
-            success: (GeolocationResponse) -> Unit,
-            error: ((GeolocationError) -> Unit)?,
+            success: (CompatGeolocationResponse) -> Unit,
+            error: ((CompatGeolocationError) -> Unit)?,
             fallbackLocation: Location?
     ) {
         val handler = Handler(Looper.getMainLooper())
@@ -187,8 +187,8 @@ class GetCurrentPosition(private val reactContext: ReactApplicationContext) {
             locationManager: LocationManager,
             provider: String,
             options: ParsedOptions,
-            success: (GeolocationResponse) -> Unit,
-            error: ((GeolocationError) -> Unit)?,
+            success: (CompatGeolocationResponse) -> Unit,
+            error: ((CompatGeolocationError) -> Unit)?,
             fallbackLocation: Location?
     ) {
         val handler = Handler(Looper.getMainLooper())
@@ -285,32 +285,24 @@ class GetCurrentPosition(private val reactContext: ReactApplicationContext) {
 
     // ===== Data Conversion =====
 
-    private fun locationToPosition(location: Location): GeolocationResponse {
-        return GeolocationResponse(
+    private fun locationToPosition(location: Location): CompatGeolocationResponse {
+        return CompatGeolocationResponse(
                 coords =
                         GeolocationCoordinates(
                                 latitude = location.latitude,
                                 longitude = location.longitude,
-                                altitude = if (location.hasAltitude()) NullableDouble.create(location.altitude) else null,
+                                altitude = location.altitudeValue(),
                                 accuracy = location.accuracy.toDouble(),
-                                altitudeAccuracy =
-                                        if (android.os.Build.VERSION.SDK_INT >=
-                                                        android.os.Build.VERSION_CODES.O &&
-                                                        location.hasVerticalAccuracy()
-                                        )
-                                                NullableDouble.create(location.verticalAccuracyMeters.toDouble())
-                                        else null,
-                                heading =
-                                        if (location.hasBearing()) NullableDouble.create(location.bearing.toDouble())
-                                        else null,
-                                speed = if (location.hasSpeed()) NullableDouble.create(location.speed.toDouble()) else null
+                                altitudeAccuracy = location.altitudeAccuracyValue(),
+                                heading = location.headingValue(),
+                                speed = location.speedValue()
                         ),
                 timestamp = location.time.toDouble()
         )
     }
 
-    private fun createError(code: Int, message: String): GeolocationError {
-        return GeolocationError(
+    private fun createError(code: Int, message: String): CompatGeolocationError {
+        return CompatGeolocationError(
                 code = code.toDouble(),
                 message = message,
                 PERMISSION_DENIED = PERMISSION_DENIED.toDouble(),

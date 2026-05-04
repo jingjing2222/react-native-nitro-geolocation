@@ -12,8 +12,8 @@
 // Forward declaration of `HybridNitroGeolocationSpec_cxx` to properly resolve imports.
 namespace NitroGeolocation { class HybridNitroGeolocationSpec_cxx; }
 
-// Forward declaration of `ModernGeolocationConfiguration` to properly resolve imports.
-namespace margelo::nitro::nitrogeolocation { struct ModernGeolocationConfiguration; }
+// Forward declaration of `GeolocationConfiguration` to properly resolve imports.
+namespace margelo::nitro::nitrogeolocation { struct GeolocationConfiguration; }
 // Forward declaration of `AuthorizationLevel` to properly resolve imports.
 namespace margelo::nitro::nitrogeolocation { enum class AuthorizationLevel; }
 // Forward declaration of `LocationProvider` to properly resolve imports.
@@ -22,6 +22,8 @@ namespace margelo::nitro::nitrogeolocation { enum class LocationProvider; }
 namespace margelo::nitro::nitrogeolocation { enum class PermissionStatus; }
 // Forward declaration of `GeolocationResponse` to properly resolve imports.
 namespace margelo::nitro::nitrogeolocation { struct GeolocationResponse; }
+// Forward declaration of `LocationProviderUsed` to properly resolve imports.
+namespace margelo::nitro::nitrogeolocation { enum class LocationProviderUsed; }
 // Forward declaration of `GeolocationCoordinates` to properly resolve imports.
 namespace margelo::nitro::nitrogeolocation { struct GeolocationCoordinates; }
 // Forward declaration of `LocationRequestOptions` to properly resolve imports.
@@ -29,13 +31,14 @@ namespace margelo::nitro::nitrogeolocation { struct LocationRequestOptions; }
 // Forward declaration of `LocationError` to properly resolve imports.
 namespace margelo::nitro::nitrogeolocation { struct LocationError; }
 
-#include "ModernGeolocationConfiguration.hpp"
+#include "GeolocationConfiguration.hpp"
 #include <optional>
 #include "AuthorizationLevel.hpp"
 #include "LocationProvider.hpp"
 #include "PermissionStatus.hpp"
 #include <NitroModules/Promise.hpp>
 #include "GeolocationResponse.hpp"
+#include "LocationProviderUsed.hpp"
 #include "GeolocationCoordinates.hpp"
 #include <NitroModules/Null.hpp>
 #include <variant>
@@ -94,7 +97,7 @@ namespace margelo::nitro::nitrogeolocation {
 
   public:
     // Methods
-    inline void setConfiguration(const ModernGeolocationConfiguration& config) override {
+    inline void setConfiguration(const GeolocationConfiguration& config) override {
       auto __result = _swiftPart.setConfiguration(std::forward<decltype(config)>(config));
       if (__result.hasError()) [[unlikely]] {
         std::rethrow_exception(__result.error());

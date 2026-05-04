@@ -1,0 +1,53 @@
+appId: nitrogeolocation.example
+---
+# Android contract: mocked=false
+#
+# Run this on a device/provider that is not currently using a test location
+# provider. It is intentionally not included in all-tests.yaml because Maestro
+# setLocation() and emulator mock state can persist outside app state.
+#
+# Do not add setLocation() to this flow. For mocked=false, the contract is about
+# provider metadata from a real/non-test provider; injected coordinates must not
+# be part of the assertion logic.
+
+- launchApp:
+    clearState: true
+    permissions:
+      android.permission.ACCESS_COARSE_LOCATION: allow
+      android.permission.ACCESS_FINE_LOCATION: allow
+
+- stopApp
+
+- openLink:
+    link: nitrogeolocation://app/mocked-metadata
+- tapOn:
+    text: "열기|Open"
+    optional: true
+
+- extendedWaitUntil:
+    visible: "Mocked location metadata contract"
+    timeout: 10000
+
+- tapOn: "Request"
+- extendedWaitUntil:
+    visible: "granted ✅"
+    timeout: 10000
+
+- scrollUntilVisible:
+    element: "2. Get Current Position"
+    direction: DOWN
+
+- tapOn: "Get Position"
+
+- extendedWaitUntil:
+    visible: "Current Position"
+    timeout: 15000
+
+- assertVisible:
+    id: "position-info"
+- assertVisible:
+    id: "mocked-text"
+- assertVisible: "Mocked: false"
+- assertNotVisible: "Mocked: true"
+- assertVisible:
+    id: "provider-text"

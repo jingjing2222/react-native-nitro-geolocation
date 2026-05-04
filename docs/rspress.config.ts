@@ -46,13 +46,6 @@ export default defineConfig({
   llms: true,
   themeConfig: {
     llmsUI: true,
-    nav: [
-      {
-        text: "Guide",
-        link: "/guide/",
-        activeMatch: "/guide/"
-      }
-    ],
     socialLinks: [
       {
         icon: "github",
@@ -60,46 +53,6 @@ export default defineConfig({
         content:
           "https://github.com/jingjing2222/react-native-nitro-geolocation"
       }
-    ],
-    sidebar: {
-      "/guide/": [
-        {
-          text: "Getting Started",
-          items: [
-            { text: "Introduction", link: "/guide/" },
-            { text: "Quick Start", link: "/guide/quick-start" }
-          ]
-        },
-        {
-          text: "API Reference",
-          items: [
-            {
-              text: "Modern API (Recommended)",
-              link: "/guide/modern-api"
-            },
-            {
-              text: "Legacy API (Compat)",
-              link: "/guide/legacy-api"
-            }
-          ]
-        },
-        {
-          text: "Development Tools",
-          items: [
-            {
-              text: "DevTools Plugin (Rozenite)",
-              link: "/guide/devtools"
-            }
-          ]
-        },
-        {
-          text: "Learn More",
-          items: [
-            { text: "Why Nitro Module?", link: "/guide/why-nitro-module" },
-            { text: "Benchmark", link: "/guide/benchmark" }
-          ]
-        }
-      ]
-    }
+    ]
   }
 });

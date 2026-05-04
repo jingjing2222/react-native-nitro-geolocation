@@ -2,7 +2,7 @@
 
 [![NPM](https://img.shields.io/npm/v/react-native-nitro-geolocation)](https://www.npmjs.com/package/react-native-nitro-geolocation)
 
-**Simple and Modern Geolocation for React Native** — Powered by Nitro Modules with JSI
+**Simple Native Geolocation for React Native** — Powered by Nitro Modules with JSI
 
 A complete reimplementation of [`@react-native-community/geolocation`](https://github.com/michalchudziak/react-native-geolocation) for the React Native New Architecture, featuring:
 
@@ -75,7 +75,7 @@ function LocationTracker() {
 
 **Benefits**:
 
-### 2. Legacy API (Compatibility)
+### 2. Compat API (Compatibility)
 
 **Drop-in replacement** for `@react-native-community/geolocation`:
 
@@ -150,7 +150,7 @@ Optional (for background):
 
 > **Prerequisites**: Requires [Rozenite DevTools](https://github.com/rozenite/rozenite) to be installed.
 >
-> **API Compatibility**: Only works with the Modern API. Does not support the Legacy API (`/compat`).
+> **API Compatibility**: Only works with the Modern API. Does not support the Compat API (`/compat`).
 
 Mock geolocation data during development with an interactive map interface:
 
@@ -209,7 +209,7 @@ const { position, error } = useWatchPosition({
 });
 ```
 
-#### Legacy API (Compatibility)
+#### Compat API (Compatibility)
 
 ```tsx
 import Geolocation from "react-native-nitro-geolocation/compat";
@@ -238,7 +238,7 @@ Change the import to use `/compat` — 100% API compatible:
 - [Introduction](https://react-native-nitro-geolocation.pages.dev/guide/)
 - [Quick Start Guide](https://react-native-nitro-geolocation.pages.dev/guide/quick-start)
 - [Modern API Reference](https://react-native-nitro-geolocation.pages.dev/guide/modern-api)
-- [Legacy API Reference](https://react-native-nitro-geolocation.pages.dev/guide/legacy-api)
+- [Compat API Reference](https://react-native-nitro-geolocation.pages.dev/guide/compat-api)
 - [DevTools Plugin Guide](https://react-native-nitro-geolocation.pages.dev/guide/devtools)
 - [Why Nitro Module?](https://react-native-nitro-geolocation.pages.dev/guide/why-nitro-module)
 - [Benchmark Results](https://react-native-nitro-geolocation.pages.dev/guide/benchmark)

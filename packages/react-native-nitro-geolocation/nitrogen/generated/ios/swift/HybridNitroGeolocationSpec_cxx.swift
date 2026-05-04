@@ -125,7 +125,7 @@ open class HybridNitroGeolocationSpec_cxx {
 
   // Methods
   @inline(__always)
-  public final func setConfiguration(config: ModernGeolocationConfiguration) -> bridge.Result_void_ {
+  public final func setConfiguration(config: GeolocationConfiguration) -> bridge.Result_void_ {
     do {
       try self.__implementation.setConfiguration(config: config)
       return bridge.create_Result_void_()

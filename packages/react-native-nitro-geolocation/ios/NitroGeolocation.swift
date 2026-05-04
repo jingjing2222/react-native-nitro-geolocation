@@ -49,7 +49,7 @@ private class LocationManagerDelegate: NSObject, CLLocationManagerDelegate {
 }
 
 /**
- * Modern Geolocation implementation with Promise-based API.
+ * Geolocation implementation with Promise-based API.
  *
  * Key features:
  * - Promise-based permission and getCurrentPosition
@@ -100,7 +100,7 @@ class NitroGeolocation: HybridNitroGeolocationSpec {
 
     // MARK: - Properties
 
-    private var configuration: ModernGeolocationConfiguration?
+    private var configuration: GeolocationConfiguration?
     private var locationManager: CLLocationManager?
     private var locationManagerDelegate: LocationManagerDelegate?
     private var lastLocation: CLLocation?
@@ -129,7 +129,7 @@ class NitroGeolocation: HybridNitroGeolocationSpec {
 
     // MARK: - Configuration
 
-    func setConfiguration(config: ModernGeolocationConfiguration) {
+    func setConfiguration(config: GeolocationConfiguration) {
         self.configuration = config
     }
 
@@ -554,22 +554,19 @@ class NitroGeolocation: HybridNitroGeolocationSpec {
     }
 
     private func locationToPosition(_ location: CLLocation) -> GeolocationResponse {
-        let altitude = location.verticalAccuracy < 0 ? 0.0 : location.altitude
-        let altitudeAccuracy = location.verticalAccuracy < 0 ? 0.0 : location.verticalAccuracy
-        let heading = location.course >= 0 ? location.course : -1.0
-        let speed = location.speed >= 0 ? location.speed : 0.0
-
         let coords = GeolocationCoordinates(
             latitude: location.coordinate.latitude,
             longitude: location.coordinate.longitude,
-            altitude: .second(altitude),
+            altitude: location.nitroGeolocationAltitude,
             accuracy: location.horizontalAccuracy,
-            altitudeAccuracy: .second(altitudeAccuracy),
-            heading: .second(heading),
-            speed: .second(speed)
+            altitudeAccuracy: location.nitroGeolocationAltitudeAccuracy,
+            heading: location.nitroGeolocationHeading,
+            speed: location.nitroGeolocationSpeed
         )
 
         return GeolocationResponse(
+            mocked: location.nitroGeolocationMocked,
+            provider: location.nitroGeolocationProvider,
             coords: coords,
             timestamp: location.timestamp.timeIntervalSince1970 * 1000
         )

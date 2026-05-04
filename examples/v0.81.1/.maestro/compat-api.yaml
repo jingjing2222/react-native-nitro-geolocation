@@ -1,0 +1,49 @@
+appId: nitrogeolocation.example
+---
+# User flow: select the legacy Compat API tab, request authorization, then
+# fetch and inspect a current position through the callback API.
+
+- launchApp
+
+- extendedWaitUntil:
+    visible: "Geolocation API"
+    timeout: 10000
+
+- tapOn:
+    text: "Compat API, tab, 8 of 8"
+    optional: true
+- tapOn:
+    text: "Compat API"
+    optional: true
+
+- extendedWaitUntil:
+    visible: "Compat API"
+    timeout: 10000
+
+- tapOn: "Request Authorization"
+- tapOn:
+    text: "OK"
+    optional: true
+- extendedWaitUntil:
+    visible: "Granted ✅"
+    timeout: 10000
+
+- setLocation:
+    latitude: 37.5665
+    longitude: 126.978
+
+- tapOn: "GET CURRENT POSITION"
+
+- scrollUntilVisible:
+    element: "Current Position"
+    direction: DOWN
+    timeout: 15000
+
+- assertVisible:
+    id: "position-info"
+- assertVisible:
+    id: "latitude-text"
+- assertVisible:
+    id: "longitude-text"
+- assertVisible:
+    id: "accuracy-text"

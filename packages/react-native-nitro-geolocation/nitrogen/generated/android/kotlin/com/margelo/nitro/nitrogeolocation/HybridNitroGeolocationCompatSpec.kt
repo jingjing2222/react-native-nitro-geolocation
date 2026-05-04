@@ -30,31 +30,31 @@ abstract class HybridNitroGeolocationCompatSpec: HybridObject() {
   // Methods
   @DoNotStrip
   @Keep
-  abstract fun setRNConfiguration(config: RNConfigurationInternal): Unit
+  abstract fun setRNConfiguration(config: CompatGeolocationConfigurationInternal): Unit
   
-  abstract fun requestAuthorization(success: (() -> Unit)?, error: ((error: GeolocationError) -> Unit)?): Unit
+  abstract fun requestAuthorization(success: (() -> Unit)?, error: ((error: CompatGeolocationError) -> Unit)?): Unit
   
   @DoNotStrip
   @Keep
-  private fun requestAuthorization_cxx(success: Func_void?, error: Func_void_GeolocationError?): Unit {
+  private fun requestAuthorization_cxx(success: Func_void?, error: Func_void_CompatGeolocationError?): Unit {
     val __result = requestAuthorization(success?.let { it }, error?.let { it })
     return __result
   }
   
-  abstract fun getCurrentPosition(success: (position: GeolocationResponse) -> Unit, error: ((error: GeolocationError) -> Unit)?, options: GeolocationOptions?): Unit
+  abstract fun getCurrentPosition(success: (position: CompatGeolocationResponse) -> Unit, error: ((error: CompatGeolocationError) -> Unit)?, options: CompatGeolocationOptions?): Unit
   
   @DoNotStrip
   @Keep
-  private fun getCurrentPosition_cxx(success: Func_void_GeolocationResponse, error: Func_void_GeolocationError?, options: GeolocationOptions?): Unit {
+  private fun getCurrentPosition_cxx(success: Func_void_CompatGeolocationResponse, error: Func_void_CompatGeolocationError?, options: CompatGeolocationOptions?): Unit {
     val __result = getCurrentPosition(success, error?.let { it }, options)
     return __result
   }
   
-  abstract fun watchPosition(success: (position: GeolocationResponse) -> Unit, error: ((error: GeolocationError) -> Unit)?, options: GeolocationOptions?): Double
+  abstract fun watchPosition(success: (position: CompatGeolocationResponse) -> Unit, error: ((error: CompatGeolocationError) -> Unit)?, options: CompatGeolocationOptions?): Double
   
   @DoNotStrip
   @Keep
-  private fun watchPosition_cxx(success: Func_void_GeolocationResponse, error: Func_void_GeolocationError?, options: GeolocationOptions?): Double {
+  private fun watchPosition_cxx(success: Func_void_CompatGeolocationResponse, error: Func_void_CompatGeolocationError?, options: CompatGeolocationOptions?): Double {
     val __result = watchPosition(success, error?.let { it }, options)
     return __result
   }

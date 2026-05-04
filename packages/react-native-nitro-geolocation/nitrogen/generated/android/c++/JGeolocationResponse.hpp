@@ -12,7 +12,9 @@
 
 #include "GeolocationCoordinates.hpp"
 #include "JGeolocationCoordinates.hpp"
+#include "JLocationProviderUsed.hpp"
 #include "JNullableDouble.hpp"
+#include "LocationProviderUsed.hpp"
 #include <NitroModules/JNull.hpp>
 #include <NitroModules/Null.hpp>
 #include <optional>
@@ -37,11 +39,17 @@ namespace margelo::nitro::nitrogeolocation {
     [[nodiscard]]
     GeolocationResponse toCpp() const {
       static const auto clazz = javaClassStatic();
+      static const auto fieldMocked = clazz->getField<jni::JBoolean>("mocked");
+      jni::local_ref<jni::JBoolean> mocked = this->getFieldValue(fieldMocked);
+      static const auto fieldProvider = clazz->getField<JLocationProviderUsed>("provider");
+      jni::local_ref<JLocationProviderUsed> provider = this->getFieldValue(fieldProvider);
       static const auto fieldCoords = clazz->getField<JGeolocationCoordinates>("coords");
       jni::local_ref<JGeolocationCoordinates> coords = this->getFieldValue(fieldCoords);
       static const auto fieldTimestamp = clazz->getField<double>("timestamp");
       double timestamp = this->getFieldValue(fieldTimestamp);
       return GeolocationResponse(
+        mocked != nullptr ? std::make_optional(static_cast<bool>(mocked->value())) : std::nullopt,
+        provider != nullptr ? std::make_optional(provider->toCpp()) : std::nullopt,
         coords->toCpp(),
         timestamp
       );
@@ -53,11 +61,13 @@ namespace margelo::nitro::nitrogeolocation {
      */
     [[maybe_unused]]
     static jni::local_ref<JGeolocationResponse::javaobject> fromCpp(const GeolocationResponse& value) {
-      using JSignature = JGeolocationResponse(jni::alias_ref<JGeolocationCoordinates>, double);
+      using JSignature = JGeolocationResponse(jni::alias_ref<jni::JBoolean>, jni::alias_ref<JLocationProviderUsed>, jni::alias_ref<JGeolocationCoordinates>, double);
       static const auto clazz = javaClassStatic();
       static const auto create = clazz->getStaticMethod<JSignature>("fromCpp");
       return create(
         clazz,
+        value.mocked.has_value() ? jni::JBoolean::valueOf(value.mocked.value()) : nullptr,
+        value.provider.has_value() ? JLocationProviderUsed::fromCpp(value.provider.value()) : nullptr,
         JGeolocationCoordinates::fromCpp(value.coords),
         value.timestamp
       );

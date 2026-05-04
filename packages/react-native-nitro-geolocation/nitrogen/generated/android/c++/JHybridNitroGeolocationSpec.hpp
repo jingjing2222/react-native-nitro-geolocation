@@ -54,7 +54,7 @@ namespace margelo::nitro::nitrogeolocation {
 
   public:
     // Methods
-    void setConfiguration(const ModernGeolocationConfiguration& config) override;
+    void setConfiguration(const GeolocationConfiguration& config) override;
     std::shared_ptr<Promise<PermissionStatus>> checkPermission() override;
     std::shared_ptr<Promise<PermissionStatus>> requestPermission() override;
     std::shared_ptr<Promise<GeolocationResponse>> getCurrentPosition(const std::optional<LocationRequestOptions>& options) override;

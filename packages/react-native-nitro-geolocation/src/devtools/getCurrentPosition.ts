@@ -1,4 +1,4 @@
-import type { GeolocationResponse } from "../types";
+import type { GeolocationResponse } from "../publicTypes";
 import { getDevtoolsState } from "./index";
 
 export function getDevtoolsCurrentPosition(): Promise<GeolocationResponse> | null {

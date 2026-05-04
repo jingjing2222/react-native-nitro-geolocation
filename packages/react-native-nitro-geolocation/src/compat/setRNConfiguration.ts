@@ -1,11 +1,11 @@
-import type { RNConfigurationInternal } from "../NitroGeolocationCompat.nitro";
+import type { CompatGeolocationConfigurationInternal } from "../NitroGeolocationCompat.nitro";
 import { NitroGeolocationHybridCompatObject } from "../NitroGeolocationModule";
-import type { GeolocationConfiguration } from "../types";
+import type { CompatGeolocationConfiguration } from "../publicTypes";
 
 // Mapping layer: convert "android" to "android_platform" for C++
 function mapConfigToInternal(
-  config: GeolocationConfiguration
-): RNConfigurationInternal {
+  config: CompatGeolocationConfiguration
+): CompatGeolocationConfigurationInternal {
   return {
     skipPermissionRequests: config.skipPermissionRequests,
     authorizationLevel: config.authorizationLevel,
@@ -17,7 +17,9 @@ function mapConfigToInternal(
   };
 }
 
-export function setRNConfiguration(config: GeolocationConfiguration): void {
+export function setRNConfiguration(
+  config: CompatGeolocationConfiguration
+): void {
   NitroGeolocationHybridCompatObject.setRNConfiguration(
     mapConfigToInternal(config)
   );

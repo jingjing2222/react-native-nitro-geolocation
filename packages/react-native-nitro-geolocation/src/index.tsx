@@ -1,8 +1,8 @@
 /**
- * Modern Geolocation API for React Native.
+ * Geolocation API for React Native.
  *
- * This is the main entry point for the modern, functional API.
- * For legacy compatibility, use: import Geolocation from 'react-native-nitro-geolocation/compat'
+ * This is the main entry point for the functional API.
+ * For compat usage, use: import Geolocation from 'react-native-nitro-geolocation/compat'
  *
  * @example
  * ```tsx
@@ -72,8 +72,10 @@ export type {
   GeolocationCoordinates,
   AuthorizationLevel,
   LocationProvider,
+  LocationProviderUsed,
+  GeolocationConfiguration,
   ModernGeolocationConfiguration
-} from "./types";
+} from "./publicTypes";
 
 // Pure utility functions (advanced users only)
 export * from "./utils";

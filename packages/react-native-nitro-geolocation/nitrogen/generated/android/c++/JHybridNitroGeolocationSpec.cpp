@@ -11,10 +11,12 @@
 namespace margelo::nitro::nitrogeolocation { enum class PermissionStatus; }
 // Forward declaration of `GeolocationResponse` to properly resolve imports.
 namespace margelo::nitro::nitrogeolocation { struct GeolocationResponse; }
+// Forward declaration of `LocationProviderUsed` to properly resolve imports.
+namespace margelo::nitro::nitrogeolocation { enum class LocationProviderUsed; }
 // Forward declaration of `GeolocationCoordinates` to properly resolve imports.
 namespace margelo::nitro::nitrogeolocation { struct GeolocationCoordinates; }
-// Forward declaration of `ModernGeolocationConfiguration` to properly resolve imports.
-namespace margelo::nitro::nitrogeolocation { struct ModernGeolocationConfiguration; }
+// Forward declaration of `GeolocationConfiguration` to properly resolve imports.
+namespace margelo::nitro::nitrogeolocation { struct GeolocationConfiguration; }
 // Forward declaration of `AuthorizationLevel` to properly resolve imports.
 namespace margelo::nitro::nitrogeolocation { enum class AuthorizationLevel; }
 // Forward declaration of `LocationProvider` to properly resolve imports.
@@ -30,16 +32,18 @@ namespace margelo::nitro::nitrogeolocation { struct LocationError; }
 #include "JPermissionStatus.hpp"
 #include "GeolocationResponse.hpp"
 #include "JGeolocationResponse.hpp"
+#include <optional>
+#include "LocationProviderUsed.hpp"
+#include "JLocationProviderUsed.hpp"
 #include "GeolocationCoordinates.hpp"
 #include "JGeolocationCoordinates.hpp"
 #include <NitroModules/Null.hpp>
 #include <variant>
-#include <optional>
 #include "JNullableDouble.hpp"
 #include <NitroModules/JNull.hpp>
 #include <string>
-#include "ModernGeolocationConfiguration.hpp"
-#include "JModernGeolocationConfiguration.hpp"
+#include "GeolocationConfiguration.hpp"
+#include "JGeolocationConfiguration.hpp"
 #include "AuthorizationLevel.hpp"
 #include "JAuthorizationLevel.hpp"
 #include "LocationProvider.hpp"
@@ -86,9 +90,9 @@ namespace margelo::nitro::nitrogeolocation {
   
 
   // Methods
-  void JHybridNitroGeolocationSpec::setConfiguration(const ModernGeolocationConfiguration& config) {
-    static const auto method = _javaPart->javaClassStatic()->getMethod<void(jni::alias_ref<JModernGeolocationConfiguration> /* config */)>("setConfiguration");
-    method(_javaPart, JModernGeolocationConfiguration::fromCpp(config));
+  void JHybridNitroGeolocationSpec::setConfiguration(const GeolocationConfiguration& config) {
+    static const auto method = _javaPart->javaClassStatic()->getMethod<void(jni::alias_ref<JGeolocationConfiguration> /* config */)>("setConfiguration");
+    method(_javaPart, JGeolocationConfiguration::fromCpp(config));
   }
   std::shared_ptr<Promise<PermissionStatus>> JHybridNitroGeolocationSpec::checkPermission() {
     static const auto method = _javaPart->javaClassStatic()->getMethod<jni::local_ref<JPromise::javaobject>()>("checkPermission");

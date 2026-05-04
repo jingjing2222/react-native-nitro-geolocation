@@ -31,7 +31,7 @@ abstract class HybridNitroGeolocationSpec: HybridObject() {
   // Methods
   @DoNotStrip
   @Keep
-  abstract fun setConfiguration(config: ModernGeolocationConfiguration): Unit
+  abstract fun setConfiguration(config: GeolocationConfiguration): Unit
   
   @DoNotStrip
   @Keep

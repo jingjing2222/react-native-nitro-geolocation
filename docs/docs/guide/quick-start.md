@@ -223,7 +223,7 @@ function LiveTracker() {
 - ✅ Battery efficient - native subscription stops when disabled
 
 
-## 5. Usage with Legacy API (Compatibility)
+## 5. Usage with Compat API (Compatibility)
 
 For compatibility with `@react-native-community/geolocation`, use the `/compat` import:
 
@@ -274,11 +274,11 @@ or
 - Improved permission consistency
 - TypeScript definitions out of the box
 
-### From Legacy to Modern API (Recommended)
+### From Compat to Modern API (Recommended)
 
 Upgrade to the simpler functional API:
 
-**Before (Legacy API)**:
+**Before (Compat API)**:
 ```tsx
 import Geolocation from 'react-native-nitro-geolocation/compat';
 
@@ -369,6 +369,6 @@ The DevTools plugin requires [Rozenite DevTools](https://github.com/rozenite/roz
 
 - [DevTools Plugin Guide](/guide/devtools) — Mock locations in development
 - [Modern API Reference](/guide/modern-api) — Complete documentation
-- [Legacy API Reference](/guide/legacy-api) — Compatibility methods
+- [Compat API Reference](/guide/compat-api) — Compatibility methods
 - [Why Nitro Module?](/guide/why-nitro-module) — Architecture deep dive
 - [Benchmark Results](/guide/benchmark) — Performance comparison

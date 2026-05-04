@@ -1,1 +1,9 @@
-["index", "why-nitro-module", "quick-start", "methods", "benchmark"]
+[
+  "index",
+  "quick-start",
+  "modern-api",
+  "compat-api",
+  "devtools",
+  "why-nitro-module",
+  "benchmark"
+]

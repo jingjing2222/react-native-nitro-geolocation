@@ -37,7 +37,7 @@ User callback executed
 - Multiple listeners share one event stream
 - Requires JSON serialization on every update
 
-### Modern: Direct Callback Architecture (`React Native Nitro Geolocation`)
+### Modern API: Direct Callback Architecture (`React Native Nitro Geolocation`)
 
 ```
 JavaScript Layer
@@ -58,9 +58,9 @@ User callback executed immediately
 - Each watch has its own callback (no shared event stream)
 - Minimal serialization (C++ structs → JS objects)
 
-## Modern Hooks Layer
+## Hook Layer
 
-React Native Nitro Geolocation now provides a modern React-friendly layer on top of the JSI architecture:
+React Native Nitro Geolocation now provides a React-friendly layer on top of the JSI architecture:
 
 ```
 User Code (React Components)
@@ -76,7 +76,7 @@ Native Layer (Kotlin/Swift)
 Device GPS/Network
 ```
 
-**Benefits of Modern Hooks Layer**:
+**Benefits of Hook Layer**:
 - **TanStack Query-inspired**: Familiar patterns for React developers
 - **Declarative**: `{ enabled }` prop instead of imperative start/stop
 - **Auto-cleanup**: No manual `clearWatch()` required
@@ -123,5 +123,5 @@ Nitro Modules use **Nitrogen** code generation to create JSI bindings:
 This provides:
 - **Performance**: Native-level speed via JSI
 - **Developer Experience**: React-friendly hooks with TanStack Query patterns
-- **Flexibility**: Choose Modern API (hooks) or Legacy API (callbacks)
+- **Flexibility**: Choose Modern API (hooks) or Compat API (callbacks)
 - **Compatibility**: 100% backward compatible via `/compat`

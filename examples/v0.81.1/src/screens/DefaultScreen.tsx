@@ -31,7 +31,7 @@ const defaultSections: DefaultScreenSection[] = [
 
 export default function DefaultScreen({
   sections = defaultSections,
-  subtitle = "Simple and Modern API",
+  subtitle = "Root API",
   title = "Geolocation API"
 }: DefaultScreenProps) {
   // Permission state
@@ -150,24 +150,31 @@ export default function DefaultScreen({
         <Text style={styles.positionText} testID="accuracy-text">
           Accuracy: {position.coords.accuracy.toFixed(2)}m
         </Text>
-        {position.coords.altitude !== null &&
-          position.coords.altitude !== undefined && (
-            <Text style={styles.positionText}>
-              Altitude: {position.coords.altitude.toFixed(2)}m
-            </Text>
-          )}
-        {position.coords.speed !== null &&
-          position.coords.speed !== undefined && (
-            <Text style={styles.positionText}>
-              Speed: {position.coords.speed.toFixed(2)}m/s
-            </Text>
-          )}
-        {position.coords.heading !== null &&
-          position.coords.heading !== undefined && (
-            <Text style={styles.positionText}>
-              Heading: {position.coords.heading.toFixed(2)}°
-            </Text>
-          )}
+        {position.mocked !== undefined && (
+          <Text style={styles.positionText} testID="mocked-text">
+            Mocked: {position.mocked ? "true" : "false"}
+          </Text>
+        )}
+        {position.provider !== undefined && (
+          <Text style={styles.positionText} testID="provider-text">
+            Provider: {position.provider}
+          </Text>
+        )}
+        {position.coords.altitude !== null && (
+          <Text style={styles.positionText}>
+            Altitude: {position.coords.altitude.toFixed(2)}m
+          </Text>
+        )}
+        {position.coords.speed !== null && (
+          <Text style={styles.positionText}>
+            Speed: {position.coords.speed.toFixed(2)}m/s
+          </Text>
+        )}
+        {position.coords.heading !== null && (
+          <Text style={styles.positionText}>
+            Heading: {position.coords.heading.toFixed(2)}°
+          </Text>
+        )}
         <Text style={styles.positionText}>
           Time: {new Date(position.timestamp).toLocaleString()}
         </Text>

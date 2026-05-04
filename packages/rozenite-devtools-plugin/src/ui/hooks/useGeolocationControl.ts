@@ -1,5 +1,6 @@
 import { useRozeniteDevToolsClient } from "@rozenite/plugin-bridge";
 import { useCallback, useEffect, useState } from "react";
+import { withMockMetadata } from "../../shared/position";
 import {
   LOCATION_PRESETS,
   createPositionFromPreset
@@ -40,8 +41,9 @@ export function useGeolocationControl() {
     client,
     onInitialPosition: useCallback(
       (data: Position) => {
-        setPosition(data);
-        sendPosition(data);
+        const position = withMockMetadata(data);
+        setPosition(position);
+        sendPosition(position);
       },
       [sendPosition]
     )
@@ -59,10 +61,11 @@ export function useGeolocationControl() {
           prevPosition.timestamp,
           newTimestamp
         );
-        const newPosition: Position = {
+        const newPosition = withMockMetadata({
           coords: newCoords,
-          timestamp: newTimestamp
-        };
+          timestamp: newTimestamp,
+          provider: prevPosition.provider ?? "unknown"
+        });
         sendPosition(newPosition);
         return newPosition;
       });
@@ -120,10 +123,11 @@ export function useGeolocationControl() {
                   newTimestamp
                 );
 
-                const newPosition: Position = {
+                const newPosition = withMockMetadata({
                   coords: newCoords,
-                  timestamp: newTimestamp
-                };
+                  timestamp: newTimestamp,
+                  provider: prevPosition.provider ?? "unknown"
+                });
                 sendPosition(newPosition);
                 return newPosition;
               });
@@ -157,8 +161,9 @@ export function useGeolocationControl() {
   // Set position from preset
   const setPositionFromPreset = useCallback(
     (preset: Position) => {
-      setPosition(preset);
-      sendPosition(preset);
+      const position = withMockMetadata(preset);
+      setPosition(position);
+      sendPosition(position);
     },
     [sendPosition]
   );

@@ -20,18 +20,18 @@ class WatchPosition(private val reactContext: ReactApplicationContext) {
     private val watchIdGenerator = AtomicInteger(0)
     private var locationListener: LocationListener? = null
     private var watchedProvider: String? = null
-    private var currentOptions: GeolocationOptions? = null
+    private var currentOptions: CompatGeolocationOptions? = null
 
     data class WatchCallback(
-            val success: (GeolocationResponse) -> Unit,
-            val error: ((GeolocationError) -> Unit)?,
-            val options: GeolocationOptions?
+            val success: (CompatGeolocationResponse) -> Unit,
+            val error: ((CompatGeolocationError) -> Unit)?,
+            val options: CompatGeolocationOptions?
     )
 
     fun watch(
-            success: (GeolocationResponse) -> Unit,
-            error: ((GeolocationError) -> Unit)?,
-            options: GeolocationOptions?
+            success: (CompatGeolocationResponse) -> Unit,
+            error: ((CompatGeolocationError) -> Unit)?,
+            options: CompatGeolocationOptions?
     ): Int {
         val watchId = watchIdGenerator.incrementAndGet()
         watchCallbacks[watchId] = WatchCallback(success, error, options)
@@ -65,7 +65,7 @@ class WatchPosition(private val reactContext: ReactApplicationContext) {
         watchCallbacks.clear()
     }
 
-    private fun startObserving(options: GeolocationOptions?) {
+    private fun startObserving(options: CompatGeolocationOptions?) {
         val locationManager =
                 reactContext.getSystemService(Context.LOCATION_SERVICE) as? LocationManager
 
@@ -143,11 +143,11 @@ class WatchPosition(private val reactContext: ReactApplicationContext) {
         }
     }
 
-    private fun emitErrorToAll(error: GeolocationError) {
+    private fun emitErrorToAll(error: CompatGeolocationError) {
         watchCallbacks.values.forEach { callback -> callback.error?.invoke(error) }
     }
 
-    private fun parseOptions(options: GeolocationOptions?): ParsedOptions {
+    private fun parseOptions(options: CompatGeolocationOptions?): ParsedOptions {
         return ParsedOptions(
                 interval = options?.interval ?: DEFAULT_INTERVAL,
                 distanceFilter = options?.distanceFilter ?: DEFAULT_DISTANCE_FILTER,
@@ -180,32 +180,24 @@ class WatchPosition(private val reactContext: ReactApplicationContext) {
                 PackageManager.PERMISSION_GRANTED
     }
 
-    private fun locationToPosition(location: Location): GeolocationResponse {
-        return GeolocationResponse(
+    private fun locationToPosition(location: Location): CompatGeolocationResponse {
+        return CompatGeolocationResponse(
                 coords =
                         GeolocationCoordinates(
                                 latitude = location.latitude,
                                 longitude = location.longitude,
-                                altitude = if (location.hasAltitude()) NullableDouble.create(location.altitude) else null,
+                                altitude = location.altitudeValue(),
                                 accuracy = location.accuracy.toDouble(),
-                                altitudeAccuracy =
-                                        if (android.os.Build.VERSION.SDK_INT >=
-                                                        android.os.Build.VERSION_CODES.O &&
-                                                        location.hasVerticalAccuracy()
-                                        )
-                                                NullableDouble.create(location.verticalAccuracyMeters.toDouble())
-                                        else null,
-                                heading =
-                                        if (location.hasBearing()) NullableDouble.create(location.bearing.toDouble())
-                                        else null,
-                                speed = if (location.hasSpeed()) NullableDouble.create(location.speed.toDouble()) else null
+                                altitudeAccuracy = location.altitudeAccuracyValue(),
+                                heading = location.headingValue(),
+                                speed = location.speedValue()
                         ),
                 timestamp = location.time.toDouble()
         )
     }
 
-    private fun createError(code: Int, message: String): GeolocationError {
-        return GeolocationError(
+    private fun createError(code: Int, message: String): CompatGeolocationError {
+        return CompatGeolocationError(
                 code = code.toDouble(),
                 message = message,
                 PERMISSION_DENIED = GetCurrentPosition.PERMISSION_DENIED.toDouble(),

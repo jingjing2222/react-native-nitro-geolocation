@@ -3,6 +3,7 @@ import type {
   Subscription
 } from "@rozenite/plugin-bridge";
 import { useEffect } from "react";
+import { withMockMetadata } from "../../shared/position";
 import type { DevtoolsRNEvents, Position } from "../../shared/types";
 
 declare global {
@@ -51,7 +52,7 @@ export function useDevtoolsRN({ client }: UseDevtoolsRNOptions) {
 
     subscribe("position", (data) => {
       const devtools = getDevtoolsState();
-      devtools.position = data;
+      devtools.position = withMockMetadata(data);
     });
 
     return () => {

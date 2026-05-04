@@ -1,0 +1,59 @@
+appId: nitrogeolocation.example
+---
+# iOS contract: mocked=true
+#
+# This flow verifies the simulated-location branch. Maestro setLocation()
+# updates the simulator location, so iOS 15+ should expose mocked=true through
+# CLLocation sourceInformation. Coordinate injection is part of this true-case
+# fixture.
+
+- launchApp:
+    clearState: true
+
+- stopApp
+
+- openLink:
+    link: nitrogeolocation://app/mocked-metadata
+- tapOn:
+    text: "열기|Open"
+    optional: true
+
+- extendedWaitUntil:
+    visible: "Mocked location metadata contract"
+    timeout: 10000
+
+- tapOn: "Request"
+- tapOn:
+    text: "Allow While Using App|앱을 사용하는 동안 허용"
+    optional: true
+- extendedWaitUntil:
+    visible: "granted ✅"
+    timeout: 10000
+
+- setLocation:
+    latitude: 37.5665
+    longitude: 126.978
+
+- scrollUntilVisible:
+    element: "2. Get Current Position"
+    direction: DOWN
+
+- tapOn: "Get Position"
+
+- extendedWaitUntil:
+    visible: "Current Position"
+    timeout: 15000
+
+- assertVisible:
+    id: "position-info"
+- assertVisible:
+    id: "latitude-text"
+- assertVisible:
+    id: "longitude-text"
+- assertVisible:
+    id: "mocked-text"
+- assertVisible: "Mocked: true"
+- assertNotVisible: "Mocked: false"
+- assertVisible:
+    id: "provider-text"
+- assertVisible: "Provider: unknown"

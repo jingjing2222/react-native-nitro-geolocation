@@ -8,8 +8,8 @@ import com.margelo.nitro.NitroModules
 class NitroGeolocationCompat(
         private val reactContext: ReactApplicationContext = NitroModules.applicationContext!!
 ) : HybridNitroGeolocationCompatSpec() {
-    private var configuration: RNConfigurationInternal =
-            RNConfigurationInternal(
+    private var configuration: CompatGeolocationConfigurationInternal =
+            CompatGeolocationConfigurationInternal(
                     skipPermissionRequests = false,
                     authorizationLevel = null,
                     enableBackgroundLocationUpdates = null,
@@ -35,29 +35,29 @@ class NitroGeolocationCompat(
 
     private val watchPositionHandler by lazy { WatchPosition(reactContext) }
 
-    override fun setRNConfiguration(config: RNConfigurationInternal) {
+    override fun setRNConfiguration(config: CompatGeolocationConfigurationInternal) {
         configuration = config
     }
 
     override fun requestAuthorization(
             success: (() -> Unit)?,
-            error: ((error: GeolocationError) -> Unit)?
+            error: ((error: CompatGeolocationError) -> Unit)?
     ) {
         requestAuthorizationHandler.execute(success, error)
     }
 
     override fun getCurrentPosition(
-            success: (position: GeolocationResponse) -> Unit,
-            error: ((error: GeolocationError) -> Unit)?,
-            options: GeolocationOptions?
+            success: (position: CompatGeolocationResponse) -> Unit,
+            error: ((error: CompatGeolocationError) -> Unit)?,
+            options: CompatGeolocationOptions?
     ) {
         GetCurrentPosition(reactContext).execute(success, error, options)
     }
 
     override fun watchPosition(
-            success: (position: GeolocationResponse) -> Unit,
-            error: ((error: GeolocationError) -> Unit)?,
-            options: GeolocationOptions?
+            success: (position: CompatGeolocationResponse) -> Unit,
+            error: ((error: CompatGeolocationError) -> Unit)?,
+            options: CompatGeolocationOptions?
     ): Double {
         return watchPositionHandler.watch(success, error, options).toDouble()
     }
@@ -71,7 +71,7 @@ class NitroGeolocationCompat(
     }
 
     private fun createPermissionError(message: String) =
-            GeolocationError(
+            CompatGeolocationError(
                     code = RequestAuthorization.PERMISSION_DENIED.toDouble(),
                     message = message,
                     PERMISSION_DENIED = RequestAuthorization.PERMISSION_DENIED.toDouble(),

@@ -5,7 +5,7 @@ import type {
 import { NitroGeolocationHybridObject } from "../NitroGeolocationModule";
 import { isDevtoolsEnabled } from "../devtools";
 import { devtoolsWatchPosition } from "../devtools/watchPosition";
-import type { GeolocationResponse } from "../types";
+import type { GeolocationResponse } from "../publicTypes";
 
 /**
  * Start watching for continuous location updates.

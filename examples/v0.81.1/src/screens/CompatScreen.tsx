@@ -147,7 +147,7 @@ export default function CompatScreen() {
       <View style={styles.header}>
         <Text style={styles.title}>Compat API</Text>
         <Text style={styles.subtitle}>
-          Legacy callback-based API compatible with
+          Compat callback-based API compatible with
           @react-native-community/geolocation
         </Text>
       </View>

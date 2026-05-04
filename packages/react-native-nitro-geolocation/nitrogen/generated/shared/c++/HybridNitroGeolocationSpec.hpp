@@ -13,8 +13,8 @@
 #error NitroModules cannot be found! Are you sure you installed NitroModules properly?
 #endif
 
-// Forward declaration of `ModernGeolocationConfiguration` to properly resolve imports.
-namespace margelo::nitro::nitrogeolocation { struct ModernGeolocationConfiguration; }
+// Forward declaration of `GeolocationConfiguration` to properly resolve imports.
+namespace margelo::nitro::nitrogeolocation { struct GeolocationConfiguration; }
 // Forward declaration of `PermissionStatus` to properly resolve imports.
 namespace margelo::nitro::nitrogeolocation { enum class PermissionStatus; }
 // Forward declaration of `GeolocationResponse` to properly resolve imports.
@@ -24,7 +24,7 @@ namespace margelo::nitro::nitrogeolocation { struct LocationRequestOptions; }
 // Forward declaration of `LocationError` to properly resolve imports.
 namespace margelo::nitro::nitrogeolocation { struct LocationError; }
 
-#include "ModernGeolocationConfiguration.hpp"
+#include "GeolocationConfiguration.hpp"
 #include "PermissionStatus.hpp"
 #include <NitroModules/Promise.hpp>
 #include "GeolocationResponse.hpp"
@@ -65,7 +65,7 @@ namespace margelo::nitro::nitrogeolocation {
 
     public:
       // Methods
-      virtual void setConfiguration(const ModernGeolocationConfiguration& config) = 0;
+      virtual void setConfiguration(const GeolocationConfiguration& config) = 0;
       virtual std::shared_ptr<Promise<PermissionStatus>> checkPermission() = 0;
       virtual std::shared_ptr<Promise<PermissionStatus>> requestPermission() = 0;
       virtual std::shared_ptr<Promise<GeolocationResponse>> getCurrentPosition(const std::optional<LocationRequestOptions>& options) = 0;

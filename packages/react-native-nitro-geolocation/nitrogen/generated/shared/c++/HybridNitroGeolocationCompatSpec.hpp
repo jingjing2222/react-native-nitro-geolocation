@@ -13,21 +13,21 @@
 #error NitroModules cannot be found! Are you sure you installed NitroModules properly?
 #endif
 
-// Forward declaration of `RNConfigurationInternal` to properly resolve imports.
-namespace margelo::nitro::nitrogeolocation { struct RNConfigurationInternal; }
-// Forward declaration of `GeolocationError` to properly resolve imports.
-namespace margelo::nitro::nitrogeolocation { struct GeolocationError; }
-// Forward declaration of `GeolocationResponse` to properly resolve imports.
-namespace margelo::nitro::nitrogeolocation { struct GeolocationResponse; }
-// Forward declaration of `GeolocationOptions` to properly resolve imports.
-namespace margelo::nitro::nitrogeolocation { struct GeolocationOptions; }
+// Forward declaration of `CompatGeolocationConfigurationInternal` to properly resolve imports.
+namespace margelo::nitro::nitrogeolocation { struct CompatGeolocationConfigurationInternal; }
+// Forward declaration of `CompatGeolocationError` to properly resolve imports.
+namespace margelo::nitro::nitrogeolocation { struct CompatGeolocationError; }
+// Forward declaration of `CompatGeolocationResponse` to properly resolve imports.
+namespace margelo::nitro::nitrogeolocation { struct CompatGeolocationResponse; }
+// Forward declaration of `CompatGeolocationOptions` to properly resolve imports.
+namespace margelo::nitro::nitrogeolocation { struct CompatGeolocationOptions; }
 
-#include "RNConfigurationInternal.hpp"
+#include "CompatGeolocationConfigurationInternal.hpp"
 #include <functional>
 #include <optional>
-#include "GeolocationError.hpp"
-#include "GeolocationResponse.hpp"
-#include "GeolocationOptions.hpp"
+#include "CompatGeolocationError.hpp"
+#include "CompatGeolocationResponse.hpp"
+#include "CompatGeolocationOptions.hpp"
 
 namespace margelo::nitro::nitrogeolocation {
 
@@ -60,10 +60,10 @@ namespace margelo::nitro::nitrogeolocation {
 
     public:
       // Methods
-      virtual void setRNConfiguration(const RNConfigurationInternal& config) = 0;
-      virtual void requestAuthorization(const std::optional<std::function<void()>>& success, const std::optional<std::function<void(const GeolocationError& /* error */)>>& error) = 0;
-      virtual void getCurrentPosition(const std::function<void(const GeolocationResponse& /* position */)>& success, const std::optional<std::function<void(const GeolocationError& /* error */)>>& error, const std::optional<GeolocationOptions>& options) = 0;
-      virtual double watchPosition(const std::function<void(const GeolocationResponse& /* position */)>& success, const std::optional<std::function<void(const GeolocationError& /* error */)>>& error, const std::optional<GeolocationOptions>& options) = 0;
+      virtual void setRNConfiguration(const CompatGeolocationConfigurationInternal& config) = 0;
+      virtual void requestAuthorization(const std::optional<std::function<void()>>& success, const std::optional<std::function<void(const CompatGeolocationError& /* error */)>>& error) = 0;
+      virtual void getCurrentPosition(const std::function<void(const CompatGeolocationResponse& /* position */)>& success, const std::optional<std::function<void(const CompatGeolocationError& /* error */)>>& error, const std::optional<CompatGeolocationOptions>& options) = 0;
+      virtual double watchPosition(const std::function<void(const CompatGeolocationResponse& /* position */)>& success, const std::optional<std::function<void(const CompatGeolocationError& /* error */)>>& error, const std::optional<CompatGeolocationOptions>& options) = 0;
       virtual void clearWatch(double watchId) = 0;
       virtual void stopObserving() = 0;
 

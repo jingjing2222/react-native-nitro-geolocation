@@ -84,10 +84,66 @@ The Android and iOS package scripts install the Release build first (`yarn andro
 - Uses Maestro permissions to grant `ACCESS_COARSE_LOCATION` and deny `ACCESS_FINE_LOCATION`
 - Uses `setLocation` to provide deterministic coordinates, then verifies `enableHighAccuracy=false` returns a position instead of timing out
 
+### `mocked-metadata-android-true.yaml`
+- Android-only contract for `mocked=true` and `provider` response metadata
+- Opens the dedicated mocked metadata page
+- Uses Maestro `setLocation`, then verifies the public result surfaces `Mocked: true` and `Provider: gps`
+- Included in `all-tests.yaml` because Maestro controls the location fixture deterministically
+- Uses a cold deep-link open after `stopApp` so the hidden metadata route is the screen under test
+
+### `mocked-metadata-android-false.yaml`
+- Android-only contract for the non-mock provider branch, `mocked=false`
+- Opens the same mocked metadata page, but does not call Maestro `setLocation`
+- Run this separately on a physical Android device, or on an emulator whose location is not currently backed by a test provider
+- Not included in `all-tests.yaml` because emulator mock state can persist across flows and would make `Mocked: false` environment-dependent
+- Uses a cold deep-link open after `stopApp` so the hidden metadata route is the screen under test
+
+Run both metadata cases when you need to compare the visible contract:
+
+```bash
+maestro test --platform android examples/v0.81.1/.maestro/mocked-metadata-android-false.yaml
+maestro test --platform android examples/v0.81.1/.maestro/mocked-metadata-android-true.yaml
+```
+
+The two Android cases intentionally differ like this:
+
+| Case | Uses `setLocation` | Expected metadata | Coordinate assertions |
+| --- | --- | --- | --- |
+| `mocked-metadata-android-true.yaml` | Yes | `Mocked: true`, `Provider: gps` | Presence only |
+| `mocked-metadata-android-false.yaml` | No | `Mocked: false` | None |
+
+### `mocked-metadata-ios-true.yaml`
+- iOS-only contract for `mocked=true` and `provider` response metadata
+- Opens the dedicated mocked metadata page
+- Uses Maestro `setLocation`, then verifies the public result surfaces `Mocked: true` and `Provider: unknown`
+- Included in `all-tests.yaml` because Maestro controls the simulator location fixture deterministically
+- Uses a cold deep-link open after `stopApp` so the hidden metadata route is the screen under test
+
+### `mocked-metadata-ios-false.yaml`
+- iOS-only contract for the non-simulated provider branch, `mocked=false`
+- Opens the same mocked metadata page, but does not call Maestro `setLocation`
+- Run this separately on a physical iOS device using a real location provider
+- Not included in `all-tests.yaml` because simulator location state can persist across flows and would make `Mocked: false` environment-dependent
+- Uses a cold deep-link open after `stopApp` so the hidden metadata route is the screen under test
+
+Run both metadata cases when you need to compare the visible iOS contract:
+
+```bash
+maestro test --platform ios examples/v0.81.1/.maestro/mocked-metadata-ios-false.yaml
+maestro test --platform ios examples/v0.81.1/.maestro/mocked-metadata-ios-true.yaml
+```
+
+The two iOS cases intentionally differ like this:
+
+| Case | Uses `setLocation` | Expected metadata | Coordinate assertions |
+| --- | --- | --- | --- |
+| `mocked-metadata-ios-true.yaml` | Yes | `Mocked: true`, `Provider: unknown` | Presence only |
+| `mocked-metadata-ios-false.yaml` | No | `Mocked: false`, `Provider: unknown` | None |
+
 ### `compat-api.yaml`
 - Tests `@react-native-community/geolocation` compatibility API
-- **Currently minimal**: Due to Maestro bottom tab navigation limitations
-- Since Compat API uses the same native module as Default API, testing Default API provides sufficient coverage
+- Opens the real Compat API screen
+- Requests authorization, simulates a user location, then verifies the callback API renders a current position
 
 ### `all-tests.yaml`
 - Master flow that runs all platform-compatible tests sequentially
@@ -150,6 +206,8 @@ London: 51.5074, -0.1278
 ✅ Run watch-position.yaml
 ✅ Run location-simulation.yaml
 ✅ Run issue-67-android-coarse-location.yaml
+✅ Run mocked-metadata-android-true.yaml
+✅ Run mocked-metadata-ios-true.yaml
 
 **Platform tested:**
 - [x] Android 16

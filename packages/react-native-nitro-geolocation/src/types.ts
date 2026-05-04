@@ -1,41 +1,12 @@
-// Public API types (compatible with @react-native-community/geolocation)
-export type AuthorizationLevel = "always" | "whenInUse" | "auto";
-export type LocationProvider = "playServices" | "android" | "auto";
+// Shared Nitro schema structs. Public entry points re-export inferred aliases
+// from the Nitro/Compat specs in publicTypes.ts.
+export type LocationProviderUsed =
+  | "fused"
+  | "gps"
+  | "network"
+  | "passive"
+  | "unknown";
 export type NullableDouble = number | null;
-
-/**
- * User-facing geolocation configuration.
- * This uses "android" instead of "android_platform" for better DX.
- */
-export interface ModernGeolocationConfiguration {
-  /**
-   * Automatically request location permission when GeolocationProvider mounts.
-   * @default false
-   */
-  autoRequestPermission?: boolean;
-
-  /**
-   * iOS: Authorization level
-   */
-  authorizationLevel?: AuthorizationLevel;
-
-  /**
-   * iOS: Enable background location updates.
-   */
-  enableBackgroundLocationUpdates?: boolean;
-
-  /**
-   * Android: Location provider
-   */
-  locationProvider?: LocationProvider;
-}
-
-export interface GeolocationConfiguration {
-  skipPermissionRequests: boolean;
-  authorizationLevel?: AuthorizationLevel;
-  enableBackgroundLocationUpdates?: boolean;
-  locationProvider?: LocationProvider;
-}
 
 export interface GeolocationCoordinates {
   latitude: number;
@@ -50,9 +21,16 @@ export interface GeolocationCoordinates {
 export interface GeolocationResponse {
   coords: GeolocationCoordinates;
   timestamp: number;
+  mocked?: boolean;
+  provider?: LocationProviderUsed;
 }
 
-export interface GeolocationError {
+export interface CompatGeolocationResponse {
+  coords: GeolocationCoordinates;
+  timestamp: number;
+}
+
+export interface CompatGeolocationError {
   code: number;
   message: string;
   PERMISSION_DENIED: number;
@@ -60,7 +38,7 @@ export interface GeolocationError {
   TIMEOUT: number;
 }
 
-export interface GeolocationOptions {
+export interface CompatGeolocationOptions {
   timeout?: number;
   maximumAge?: number;
   enableHighAccuracy?: boolean;

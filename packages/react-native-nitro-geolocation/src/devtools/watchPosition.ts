@@ -1,9 +1,10 @@
-import type { GeolocationError, GeolocationResponse } from "../types";
+import type { LocationError } from "../NitroGeolocation.nitro";
+import type { GeolocationResponse } from "../publicTypes";
 import { getDevtoolsState } from "./index";
 
 export function devtoolsWatchPosition(
   success: (position: GeolocationResponse) => void,
-  error?: (error: GeolocationError) => void
+  error?: (error: LocationError) => void
 ): string {
   const devtools = getDevtoolsState();
 
@@ -14,10 +15,7 @@ export function devtoolsWatchPosition(
       error({
         code: 2, // POSITION_UNAVAILABLE
         message:
-          "Geolocation devtools not connected. Press 'j' in Metro to open devtools and enable the geolocation plugin.",
-        PERMISSION_DENIED: 1,
-        POSITION_UNAVAILABLE: 2,
-        TIMEOUT: 3
+          "Geolocation devtools not connected. Press 'j' in Metro to open devtools and enable the geolocation plugin."
       });
     }
     // Return a dummy token that does nothing

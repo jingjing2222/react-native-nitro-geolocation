@@ -1,9 +1,9 @@
 import { NitroGeolocationHybridCompatObject } from "../NitroGeolocationModule";
 import type {
-  GeolocationError,
-  GeolocationOptions,
-  GeolocationResponse
-} from "../types";
+  CompatGeolocationError,
+  CompatGeolocationOptions,
+  CompatGeolocationResponse
+} from "../publicTypes";
 
 /**
  * Invokes the success callback whenever the location changes.
@@ -15,9 +15,9 @@ import type {
  * @returns watchId - A number that identifies this watch session
  */
 export function watchPosition(
-  success: (position: GeolocationResponse) => void,
-  error?: (error: GeolocationError) => void,
-  options?: GeolocationOptions
+  success: (position: CompatGeolocationResponse) => void,
+  error?: (error: CompatGeolocationError) => void,
+  options?: CompatGeolocationOptions
 ): number {
   return NitroGeolocationHybridCompatObject.watchPosition(
     success,

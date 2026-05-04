@@ -1,14 +1,14 @@
 import { NitroGeolocationHybridCompatObject } from "../NitroGeolocationModule";
 import type {
-  GeolocationError,
-  GeolocationOptions,
-  GeolocationResponse
-} from "../types";
+  CompatGeolocationError,
+  CompatGeolocationOptions,
+  CompatGeolocationResponse
+} from "../publicTypes";
 
 export function getCurrentPosition(
-  success: (position: GeolocationResponse) => void,
-  error?: (error: GeolocationError) => void,
-  options?: GeolocationOptions
+  success: (position: CompatGeolocationResponse) => void,
+  error?: (error: CompatGeolocationError) => void,
+  options?: CompatGeolocationOptions
 ): void {
   NitroGeolocationHybridCompatObject.getCurrentPosition(
     success,

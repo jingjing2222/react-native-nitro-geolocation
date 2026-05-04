@@ -35,7 +35,7 @@ private const val NO_APPROXIMATE_LOCATION_PROVIDER_AVAILABLE_MESSAGE =
         "ACCESS_COARSE_LOCATION is granted, but no enabled coarse-compatible provider is available."
 
 /**
- * Modern Geolocation implementation for Android.
+ * Geolocation implementation for Android.
  *
  * Key features:
  * - Promise-based permission and getCurrentPosition
@@ -102,7 +102,7 @@ class NitroGeolocation(
 
     // MARK: - Properties
 
-    private var configuration: ModernGeolocationConfiguration? = null
+    private var configuration: GeolocationConfiguration? = null
     private val locationManager: AndroidLocationManager by lazy {
         reactContext.getSystemService(Context.LOCATION_SERVICE) as AndroidLocationManager
     }
@@ -127,7 +127,7 @@ class NitroGeolocation(
 
     // MARK: - Configuration
 
-    override fun setConfiguration(config: ModernGeolocationConfiguration) {
+    override fun setConfiguration(config: GeolocationConfiguration) {
         this.configuration = config
     }
 
@@ -446,7 +446,7 @@ class NitroGeolocation(
             return
         }
 
-        // Use modern API on Android 11+
+        // Use the Android 11+ platform API when available.
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
             requestCurrentLocationModern(provider, requestId, request.handler, remainingTimeoutMillis)
         } else {
@@ -734,40 +734,21 @@ class NitroGeolocation(
     // MARK: - Helper Functions - Conversion
 
     private fun locationToPosition(location: Location): GeolocationResponse {
-        val altitude = if (location.hasAltitude()) {
-            NullableDouble.create(location.altitude)
-        } else {
-            null
-        }
-        val altitudeAccuracy = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O && location.hasVerticalAccuracy()) {
-            NullableDouble.create(location.verticalAccuracyMeters.toDouble())
-        } else {
-            null
-        }
-        val heading = if (location.hasBearing()) {
-            NullableDouble.create(location.bearing.toDouble())
-        } else {
-            null
-        }
-        val speed = if (location.hasSpeed()) {
-            NullableDouble.create(location.speed.toDouble())
-        } else {
-            null
-        }
-
         val coords = GeolocationCoordinates(
             latitude = location.latitude,
             longitude = location.longitude,
-            altitude = altitude,
+            altitude = location.altitudeValue(),
             accuracy = location.accuracy.toDouble(),
-            altitudeAccuracy = altitudeAccuracy,
-            heading = heading,
-            speed = speed
+            altitudeAccuracy = location.altitudeAccuracyValue(),
+            heading = location.headingValue(),
+            speed = location.speedValue()
         )
 
         return GeolocationResponse(
             coords = coords,
-            timestamp = location.time.toDouble()
+            timestamp = location.time.toDouble(),
+            mocked = location.isMocked(),
+            provider = location.providerUsed()
         )
     }
 

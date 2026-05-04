@@ -42,9 +42,27 @@ setConfiguration({
 
 **Options**:
 
+- `autoRequestPermission?: boolean` - Automatically request permission when configured
 - `authorizationLevel?: 'whenInUse' | 'always' | 'auto'` - iOS: Authorization level
 - `enableBackgroundLocationUpdates?: boolean` - iOS: Enable background location
 - `locationProvider?: 'playServices' | 'android' | 'auto'` - Android: Location provider
+
+**Type**:
+
+```typescript
+export type GeolocationConfiguration = {
+  autoRequestPermission?: boolean;
+  authorizationLevel?: 'always' | 'whenInUse' | 'auto';
+  enableBackgroundLocationUpdates?: boolean;
+  locationProvider?: 'playServices' | 'android' | 'auto';
+};
+
+/**
+ * @deprecated Use `GeolocationConfiguration` instead.
+ * This alias is kept only for backward compatibility.
+ */
+export type ModernGeolocationConfiguration = GeolocationConfiguration;
+```
 
 **When to call**:
 
@@ -196,6 +214,13 @@ function LocationButton() {
 **Response**:
 
 ```typescript
+export type LocationProviderUsed =
+  | 'fused'
+  | 'gps'
+  | 'network'
+  | 'passive'
+  | 'unknown';
+
 interface GeolocationResponse {
   coords: {
     latitude: number;
@@ -207,8 +232,12 @@ interface GeolocationResponse {
     speed: number | null;
   };
   timestamp: number;
+  mocked?: boolean;
+  provider?: LocationProviderUsed;
 }
 ```
+
+`mocked` and `provider` are optional metadata fields added to the Modern API response in v1.2. The `/compat` API keeps the `@react-native-community/geolocation` response shape and does not include these fields.
 
 **Error Handling**:
 
@@ -449,9 +478,12 @@ import type {
   LocationError,
   GeolocationResponse,
   GeolocationCoordinates,
-  ModernGeolocationConfiguration
+  LocationProviderUsed,
+  GeolocationConfiguration
 } from 'react-native-nitro-geolocation';
 ```
+
+`ModernGeolocationConfiguration` is still exported as a deprecated compatibility alias.
 
 ### Type Inference
 
@@ -469,9 +501,9 @@ const status = await requestPermission();
 ```
 
 
-## Comparison with Legacy API
+## Comparison with Compat API
 
-| Feature          | Modern API                               | Legacy API                               |
+| Feature          | Modern API                               | Compat API                               |
 | ---------------- | ---------------------------------------- | ---------------------------------------- |
 | **Import**       | `react-native-nitro-geolocation`         | `react-native-nitro-geolocation/compat`  |
 | **Pattern**      | Functions + Hook                         | Callbacks                                |
@@ -485,9 +517,9 @@ const status = await requestPermission();
 | **React Friendly** | ✅ Yes                                  | ⚠️ Requires useEffect boilerplate       |
 
 
-## Migration from Legacy
+## Migration from Compat
 
-**Before (Legacy API)**:
+**Before (Compat API)**:
 
 ```tsx
 import Geolocation from 'react-native-nitro-geolocation/compat';
