@@ -51,6 +51,11 @@ export default function ProviderSettingsScreen() {
   const [position, setPosition] = useState<GeolocationResponse | null>(null);
   const [error, setError] = useState<CapturedLocationError | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const providerReady =
+    servicesEnabled === true &&
+    providerStatus?.locationServicesEnabled === true &&
+    providerStatus.gpsAvailable === true &&
+    providerStatus.networkAvailable === true;
 
   const refreshReadiness = async () => {
     const [permission, enabled, status] = await Promise.all([
@@ -173,6 +178,12 @@ export default function ProviderSettingsScreen() {
             testID="provider-settings-google-accuracy"
             value={formatBoolean(providerStatus?.googleLocationAccuracyEnabled)}
           />
+          <Text
+            style={styles.providerContract}
+            testID="provider-readiness-contract"
+          >
+            Provider readiness: {providerReady ? "ready" : "not ready"}
+          </Text>
         </View>
         <View style={styles.buttonContainer}>
           <Button
@@ -265,9 +276,9 @@ function StatusRow({
 }) {
   return (
     <View style={styles.statusRow}>
-      <Text style={styles.statusRowLabel}>{label}:</Text>
-      <Text style={styles.statusRowValue} testID={testID}>
-        {value}
+      <Text style={styles.statusRowText} testID={testID}>
+        <Text style={styles.statusRowLabel}>{label}: </Text>
+        <Text style={styles.statusRowValue}>{value}</Text>
       </Text>
     </View>
   );
@@ -318,9 +329,10 @@ const styles = StyleSheet.create({
     marginBottom: 16
   },
   statusRow: {
-    flexDirection: "row",
-    justifyContent: "space-between",
     marginBottom: 8
+  },
+  statusRowText: {
+    fontSize: 14
   },
   statusRowLabel: {
     fontSize: 14,
@@ -329,6 +341,12 @@ const styles = StyleSheet.create({
   },
   statusRowValue: {
     fontSize: 14,
+    color: "#1A202C"
+  },
+  providerContract: {
+    marginTop: 4,
+    fontSize: 14,
+    fontWeight: "600",
     color: "#1A202C"
   },
   statusValue: {

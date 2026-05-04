@@ -28,7 +28,7 @@ appId: nitrogeolocation.example
 
 - tapOn: "Check Device"
 - extendedWaitUntil:
-    visible: "Services:"
+    visible: "Services: enabled"
     timeout: 10000
 
 - assertVisible:
@@ -48,12 +48,17 @@ appId: nitrogeolocation.example
     visible: "Settings: ready"
     timeout: 15000
 
+- assertVisible: "Services: enabled"
+- assertVisible: "GPS: enabled"
+- assertVisible: "Network: enabled"
+- assertVisible: "Provider readiness: ready"
 - assertVisible:
     id: "provider-settings-result"
 
 - setLocation:
     latitude: 37.5665
     longitude: 126.978
+- waitForAnimationToEnd
 
 - tapOn: "Confirm Location"
 - scrollUntilVisible:
@@ -69,3 +74,5 @@ appId: nitrogeolocation.example
     id: "provider-longitude"
 - assertVisible:
     id: "provider-accuracy"
+- assertVisible:
+    id: "provider-used"
