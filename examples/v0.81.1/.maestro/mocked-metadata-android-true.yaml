@@ -1,0 +1,54 @@
+appId: nitrogeolocation.example
+---
+# Android contract: mocked=true
+#
+# This flow verifies the mocked-location branch only. Maestro setLocation()
+# injects a test-provider location, so Android should expose mocked=true and
+# the GPS provider through the modern metadata response.
+
+- launchApp:
+    clearState: true
+    permissions:
+      android.permission.ACCESS_COARSE_LOCATION: allow
+      android.permission.ACCESS_FINE_LOCATION: allow
+
+- stopApp
+
+- openLink:
+    link: nitrogeolocation://app/mocked-metadata
+- tapOn:
+    text: "열기|Open"
+    optional: true
+
+- extendedWaitUntil:
+    visible: "Mocked location metadata contract"
+    timeout: 10000
+
+- tapOn: "Request"
+- extendedWaitUntil:
+    visible: "granted ✅"
+    timeout: 10000
+
+- setLocation:
+    latitude: 37.5665
+    longitude: 126.978
+
+- scrollUntilVisible:
+    element: "2. Get Current Position"
+    direction: DOWN
+
+- tapOn: "Get Position"
+
+- extendedWaitUntil:
+    visible: "Current Position"
+    timeout: 15000
+
+- assertVisible:
+    id: "position-info"
+- assertVisible:
+    id: "mocked-text"
+- assertVisible: "Mocked: true"
+- assertNotVisible: "Mocked: false"
+- assertVisible:
+    id: "provider-text"
+- assertVisible: "Provider: gps"

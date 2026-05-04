@@ -1,17 +1,15 @@
 appId: nitrogeolocation.example
 ---
-# Android contract: mocked locations expose mocked/provider metadata on the
-# dedicated mocked metadata page.
+# iOS contract: mocked=true
+#
+# This flow verifies the simulated-location branch. Maestro setLocation()
+# updates the simulator location, so iOS 15+ should expose mocked=true through
+# CLLocation sourceInformation.
 
 - launchApp:
     clearState: true
-    permissions:
-      android.permission.ACCESS_COARSE_LOCATION: allow
-      android.permission.ACCESS_FINE_LOCATION: allow
 
-- extendedWaitUntil:
-    visible: "Geolocation API"
-    timeout: 10000
+- stopApp
 
 - openLink:
     link: nitrogeolocation://app/mocked-metadata
@@ -24,6 +22,9 @@ appId: nitrogeolocation.example
     timeout: 10000
 
 - tapOn: "Request"
+- tapOn:
+    text: "Allow While Using App|앱을 사용하는 동안 허용"
+    optional: true
 - extendedWaitUntil:
     visible: "granted ✅"
     timeout: 10000
@@ -47,6 +48,7 @@ appId: nitrogeolocation.example
 - assertVisible:
     id: "mocked-text"
 - assertVisible: "Mocked: true"
+- assertNotVisible: "Mocked: false"
 - assertVisible:
     id: "provider-text"
-- assertVisible: "Provider: gps"
+- assertVisible: "Provider: unknown"

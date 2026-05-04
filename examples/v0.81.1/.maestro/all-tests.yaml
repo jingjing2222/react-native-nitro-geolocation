@@ -13,5 +13,9 @@ appId: nitrogeolocation.example
 - runFlow:
     when:
       platform: Android
-    file: mocked-metadata-android.yaml
+    file: mocked-metadata-android-true.yaml
+- runFlow:
+    when:
+      platform: iOS
+    file: mocked-metadata-ios-true.yaml
 - runFlow: compat-api.yaml

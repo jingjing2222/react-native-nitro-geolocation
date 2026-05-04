@@ -1,0 +1,50 @@
+appId: nitrogeolocation.example
+---
+# iOS contract: mocked=false
+#
+# Run this on a physical iOS device/provider that is not using simulated
+# location. It is intentionally not included in all-tests.yaml because
+# simulator setLocation() state can persist outside app state.
+
+- launchApp:
+    clearState: true
+
+- stopApp
+
+- openLink:
+    link: nitrogeolocation://app/mocked-metadata
+- tapOn:
+    text: "열기|Open"
+    optional: true
+
+- extendedWaitUntil:
+    visible: "Mocked location metadata contract"
+    timeout: 10000
+
+- tapOn: "Request"
+- tapOn:
+    text: "Allow While Using App|앱을 사용하는 동안 허용"
+    optional: true
+- extendedWaitUntil:
+    visible: "granted ✅"
+    timeout: 10000
+
+- scrollUntilVisible:
+    element: "2. Get Current Position"
+    direction: DOWN
+
+- tapOn: "Get Position"
+
+- extendedWaitUntil:
+    visible: "Current Position"
+    timeout: 15000
+
+- assertVisible:
+    id: "position-info"
+- assertVisible:
+    id: "mocked-text"
+- assertVisible: "Mocked: false"
+- assertNotVisible: "Mocked: true"
+- assertVisible:
+    id: "provider-text"
+- assertVisible: "Provider: unknown"
