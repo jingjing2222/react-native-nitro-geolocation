@@ -84,7 +84,7 @@ open class HybridNitroGeolocationSpec_cxx {
     }
   }
 
-  
+
 
   /**
    * Get the memory size of the Swift class (plus size of any other allocations)
@@ -121,7 +121,7 @@ open class HybridNitroGeolocationSpec_cxx {
   }
 
   // Properties
-  
+
 
   // Methods
   @inline(__always)
@@ -134,7 +134,7 @@ open class HybridNitroGeolocationSpec_cxx {
       return bridge.create_Result_void_(__exceptionPtr)
     }
   }
-  
+
   @inline(__always)
   public final func checkPermission() -> bridge.Result_std__shared_ptr_Promise_PermissionStatus___ {
     do {
@@ -153,7 +153,7 @@ open class HybridNitroGeolocationSpec_cxx {
       return bridge.create_Result_std__shared_ptr_Promise_PermissionStatus___(__exceptionPtr)
     }
   }
-  
+
   @inline(__always)
   public final func requestPermission(success: bridge.Func_void_PermissionStatus, error: bridge.std__optional_std__function_void_const_LocationError_____error______) -> bridge.Result_void_ {
     do {
@@ -181,7 +181,7 @@ open class HybridNitroGeolocationSpec_cxx {
       return bridge.create_Result_void_(__exceptionPtr)
     }
   }
-  
+
   @inline(__always)
   public final func hasServicesEnabled() -> bridge.Result_std__shared_ptr_Promise_bool___ {
     do {
@@ -200,7 +200,7 @@ open class HybridNitroGeolocationSpec_cxx {
       return bridge.create_Result_std__shared_ptr_Promise_bool___(__exceptionPtr)
     }
   }
-  
+
   @inline(__always)
   public final func getProviderStatus() -> bridge.Result_std__shared_ptr_Promise_LocationProviderStatus___ {
     do {
@@ -219,7 +219,7 @@ open class HybridNitroGeolocationSpec_cxx {
       return bridge.create_Result_std__shared_ptr_Promise_LocationProviderStatus___(__exceptionPtr)
     }
   }
-  
+
   @inline(__always)
   public final func requestLocationSettings(success: bridge.Func_void_LocationProviderStatus, error: bridge.std__optional_std__function_void_const_LocationError_____error______, options: bridge.std__optional_LocationSettingsOptions_) -> bridge.Result_void_ {
     do {
@@ -247,7 +247,54 @@ open class HybridNitroGeolocationSpec_cxx {
       return bridge.create_Result_void_(__exceptionPtr)
     }
   }
-  
+
+  @inline(__always)
+  public final func getAccuracyAuthorization() -> bridge.Result_std__shared_ptr_Promise_AccuracyAuthorization___ {
+    do {
+      let __result = try self.__implementation.getAccuracyAuthorization()
+      let __resultCpp = { () -> bridge.std__shared_ptr_Promise_AccuracyAuthorization__ in
+        let __promise = bridge.create_std__shared_ptr_Promise_AccuracyAuthorization__()
+        let __promiseHolder = bridge.wrap_std__shared_ptr_Promise_AccuracyAuthorization__(__promise)
+        __result
+          .then({ __result in __promiseHolder.resolve(__result) })
+          .catch({ __error in __promiseHolder.reject(__error.toCpp()) })
+        return __promise
+      }()
+      return bridge.create_Result_std__shared_ptr_Promise_AccuracyAuthorization___(__resultCpp)
+    } catch (let __error) {
+      let __exceptionPtr = __error.toCpp()
+      return bridge.create_Result_std__shared_ptr_Promise_AccuracyAuthorization___(__exceptionPtr)
+    }
+  }
+
+  @inline(__always)
+  public final func requestTemporaryFullAccuracy(purposeKey: std.string, success: bridge.Func_void_AccuracyAuthorization, error: bridge.std__optional_std__function_void_const_LocationError_____error______) -> bridge.Result_void_ {
+    do {
+      try self.__implementation.requestTemporaryFullAccuracy(purposeKey: String(purposeKey), success: { () -> (AccuracyAuthorization) -> Void in
+        let __wrappedFunction = bridge.wrap_Func_void_AccuracyAuthorization(success)
+        return { (__authorization: AccuracyAuthorization) -> Void in
+          __wrappedFunction.call(__authorization.rawValue)
+        }
+      }(), error: { () -> ((_ error: LocationError) -> Void)? in
+        if bridge.has_value_std__optional_std__function_void_const_LocationError_____error______(error) {
+          let __unwrapped = bridge.get_std__optional_std__function_void_const_LocationError_____error______(error)
+          return { () -> (LocationError) -> Void in
+            let __wrappedFunction = bridge.wrap_Func_void_LocationError(__unwrapped)
+            return { (__error: LocationError) -> Void in
+              __wrappedFunction.call(__error)
+            }
+          }()
+        } else {
+          return nil
+        }
+      }())
+      return bridge.create_Result_void_()
+    } catch (let __error) {
+      let __exceptionPtr = __error.toCpp()
+      return bridge.create_Result_void_(__exceptionPtr)
+    }
+  }
+
   @inline(__always)
   public final func getCurrentPosition(success: bridge.Func_void_GeolocationResponse, error: bridge.std__optional_std__function_void_const_LocationError_____error______, options: bridge.std__optional_LocationRequestOptions_) -> bridge.Result_void_ {
     do {
@@ -275,7 +322,35 @@ open class HybridNitroGeolocationSpec_cxx {
       return bridge.create_Result_void_(__exceptionPtr)
     }
   }
-  
+
+  @inline(__always)
+  public final func getLastKnownPosition(success: bridge.Func_void_GeolocationResponse, error: bridge.std__optional_std__function_void_const_LocationError_____error______, options: bridge.std__optional_LocationRequestOptions_) -> bridge.Result_void_ {
+    do {
+      try self.__implementation.getLastKnownPosition(success: { () -> (GeolocationResponse) -> Void in
+        let __wrappedFunction = bridge.wrap_Func_void_GeolocationResponse(success)
+        return { (__position: GeolocationResponse) -> Void in
+          __wrappedFunction.call(__position)
+        }
+      }(), error: { () -> ((_ error: LocationError) -> Void)? in
+        if bridge.has_value_std__optional_std__function_void_const_LocationError_____error______(error) {
+          let __unwrapped = bridge.get_std__optional_std__function_void_const_LocationError_____error______(error)
+          return { () -> (LocationError) -> Void in
+            let __wrappedFunction = bridge.wrap_Func_void_LocationError(__unwrapped)
+            return { (__error: LocationError) -> Void in
+              __wrappedFunction.call(__error)
+            }
+          }()
+        } else {
+          return nil
+        }
+      }(), options: options.value)
+      return bridge.create_Result_void_()
+    } catch (let __error) {
+      let __exceptionPtr = __error.toCpp()
+      return bridge.create_Result_void_(__exceptionPtr)
+    }
+  }
+
   @inline(__always)
   public final func watchPosition(success: bridge.Func_void_GeolocationResponse, error: bridge.std__optional_std__function_void_const_LocationError_____error______, options: bridge.std__optional_LocationRequestOptions_) -> bridge.Result_std__string_ {
     do {
@@ -304,7 +379,7 @@ open class HybridNitroGeolocationSpec_cxx {
       return bridge.create_Result_std__string_(__exceptionPtr)
     }
   }
-  
+
   @inline(__always)
   public final func unwatch(token: std.string) -> bridge.Result_void_ {
     do {
@@ -315,7 +390,7 @@ open class HybridNitroGeolocationSpec_cxx {
       return bridge.create_Result_void_(__exceptionPtr)
     }
   }
-  
+
   @inline(__always)
   public final func stopObserving() -> bridge.Result_void_ {
     do {

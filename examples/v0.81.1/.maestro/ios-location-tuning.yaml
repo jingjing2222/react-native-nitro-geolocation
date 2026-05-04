@@ -1,0 +1,99 @@
+appId: nitrogeolocation.example
+---
+# iOS location tuning: current/watch success, invalid enum rejection, denied permission rejection.
+
+- launchApp:
+    clearState: true
+    permissions:
+      all: allow
+
+- extendedWaitUntil:
+    visible: "Geolocation API"
+    timeout: 10000
+
+- stopApp
+
+- openLink:
+    link: nitrogeolocation://app/ios-location-tuning
+- tapOn:
+    text: "열기|Open"
+    optional: true
+
+- extendedWaitUntil:
+    visible: "Native iOS manager configuration contract"
+    timeout: 10000
+
+- setLocation:
+    latitude: 37.5665
+    longitude: 126.978
+
+- tapOn:
+    id: "ios-location-tuning-run-tuned-button"
+
+- extendedWaitUntil:
+    visible: "Tuned requests: passed"
+    timeout: 60000
+
+- assertVisible:
+    id: "ios-location-tuning-tuned-result"
+- assertVisible:
+    text: ".*activityType=fitness.*pauses=false.*backgroundIndicator=false.*accuracy=kilometer.*"
+- assertVisible:
+    text: ".*current 37.566500, 126.978000.*watch 37.566500, 126.978000.*"
+
+- scrollUntilVisible:
+    element: "3. Invalid Activity Type"
+    direction: DOWN
+
+- tapOn:
+    id: "ios-location-tuning-run-invalid-button"
+
+- extendedWaitUntil:
+    visible: "Invalid activityType: passed"
+    timeout: 10000
+
+- assertVisible:
+    id: "ios-location-tuning-invalid-result"
+- assertVisible:
+    text: ".*(IOSActivityType|activityType|invalid value).*"
+
+- stopApp
+
+- launchApp:
+    clearState: true
+    permissions:
+      all: deny
+
+- extendedWaitUntil:
+    visible: "Geolocation API"
+    timeout: 10000
+
+- stopApp
+
+- openLink:
+    link: nitrogeolocation://app/ios-location-tuning
+- tapOn:
+    text: "열기|Open"
+    optional: true
+
+- extendedWaitUntil:
+    visible: "Native iOS manager configuration contract"
+    timeout: 10000
+
+- scrollUntilVisible:
+    element: "4. Permission Denied"
+    direction: DOWN
+
+- tapOn:
+    id: "ios-location-tuning-run-denied-button"
+
+- extendedWaitUntil:
+    visible: "Permission denied: passed"
+    timeout: 10000
+
+- assertVisible:
+    id: "ios-location-tuning-denied-result"
+- assertVisible:
+    text: ".*PERMISSION_DENIED.*"
+- assertVisible:
+    text: ".*did not bypass permission checks.*"

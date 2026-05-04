@@ -8,6 +8,8 @@
 #pragma once
 
 // Forward declarations of C++ defined types
+// Forward declaration of `AccuracyAuthorization` to properly resolve imports.
+namespace margelo::nitro::nitrogeolocation { enum class AccuracyAuthorization; }
 // Forward declaration of `AndroidAccuracyPreset` to properly resolve imports.
 namespace margelo::nitro::nitrogeolocation { enum class AndroidAccuracyPreset; }
 // Forward declaration of `AuthorizationLevelInternal` to properly resolve imports.
@@ -34,6 +36,8 @@ namespace margelo::nitro::nitrogeolocation { class HybridNitroGeolocationCompatS
 namespace margelo::nitro::nitrogeolocation { class HybridNitroGeolocationSpec; }
 // Forward declaration of `IOSAccuracyPreset` to properly resolve imports.
 namespace margelo::nitro::nitrogeolocation { enum class IOSAccuracyPreset; }
+// Forward declaration of `IOSActivityType` to properly resolve imports.
+namespace margelo::nitro::nitrogeolocation { enum class IOSActivityType; }
 // Forward declaration of `LocationAccuracyOptions` to properly resolve imports.
 namespace margelo::nitro::nitrogeolocation { struct LocationAccuracyOptions; }
 // Forward declaration of `LocationError` to properly resolve imports.
@@ -54,6 +58,7 @@ namespace margelo::nitro::nitrogeolocation { struct LocationSettingsOptions; }
 namespace margelo::nitro::nitrogeolocation { enum class PermissionStatus; }
 
 // Include C++ defined types
+#include "AccuracyAuthorization.hpp"
 #include "AndroidAccuracyPreset.hpp"
 #include "AuthorizationLevel.hpp"
 #include "AuthorizationLevelInternal.hpp"
@@ -67,6 +72,7 @@ namespace margelo::nitro::nitrogeolocation { enum class PermissionStatus; }
 #include "HybridNitroGeolocationCompatSpec.hpp"
 #include "HybridNitroGeolocationSpec.hpp"
 #include "IOSAccuracyPreset.hpp"
+#include "IOSActivityType.hpp"
 #include "LocationAccuracyOptions.hpp"
 #include "LocationError.hpp"
 #include "LocationProvider.hpp"

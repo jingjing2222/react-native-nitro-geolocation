@@ -1,0 +1,101 @@
+appId: nitrogeolocation.example
+---
+# getLastKnownPosition(): prove cached success plus stale-cache and permission-denied rejections.
+
+- launchApp:
+    clearState: true
+    permissions:
+      all: allow
+
+- extendedWaitUntil:
+    visible: "Geolocation API"
+    timeout: 10000
+
+- stopApp
+
+- openLink:
+    link: nitrogeolocation://app/last-known-position
+- tapOn:
+    text: "열기|Open"
+    optional: true
+
+- extendedWaitUntil:
+    visible: "Cached location API contract with rejection paths"
+    timeout: 10000
+
+- setLocation:
+    latitude: 37.5665
+    longitude: 126.978
+
+- tapOn:
+    id: "last-known-position-run-stale-button"
+
+- extendedWaitUntil:
+    visible: "Stale cache: passed"
+    timeout: 10000
+
+- assertVisible:
+    id: "last-known-position-stale-result"
+- assertVisible:
+    text: ".*POSITION_UNAVAILABLE.*"
+- assertVisible:
+    text: ".*without starting a fresh request.*"
+
+- scrollUntilVisible:
+    element: "3. Seeded Cache Read"
+    direction: DOWN
+
+- tapOn:
+    id: "last-known-position-run-cache-button"
+
+- extendedWaitUntil:
+    visible: "Seeded cache: passed"
+    timeout: 60000
+
+- assertVisible:
+    id: "last-known-position-cache-result"
+- assertVisible:
+    text: ".*37.566500, 126.978000.*"
+- assertVisible:
+    text: ".*timestamp delta.*cache read.*ms.*"
+
+- stopApp
+
+- launchApp:
+    clearState: true
+    permissions:
+      all: deny
+
+- extendedWaitUntil:
+    visible: "Geolocation API"
+    timeout: 10000
+
+- stopApp
+
+- openLink:
+    link: nitrogeolocation://app/last-known-position
+- tapOn:
+    text: "열기|Open"
+    optional: true
+
+- extendedWaitUntil:
+    visible: "Cached location API contract with rejection paths"
+    timeout: 10000
+
+- scrollUntilVisible:
+    element: "4. Permission Denied"
+    direction: DOWN
+
+- tapOn:
+    id: "last-known-position-run-denied-button"
+
+- extendedWaitUntil:
+    visible: "Permission denied: passed"
+    timeout: 10000
+
+- assertVisible:
+    id: "last-known-position-denied-result"
+- assertVisible:
+    text: ".*PERMISSION_DENIED.*"
+- assertVisible:
+    text: ".*did not bypass native permission checks.*"

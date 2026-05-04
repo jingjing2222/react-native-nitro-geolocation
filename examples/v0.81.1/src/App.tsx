@@ -11,7 +11,10 @@ import ApiErrorsScreen from "./screens/ApiErrorsScreen";
 import CompatScreen from "./screens/CompatScreen";
 import CurrentPositionScreen from "./screens/CurrentPositionScreen";
 import DefaultScreen from "./screens/DefaultScreen";
+import IOSAccuracyAuthorizationScreen from "./screens/IOSAccuracyAuthorizationScreen";
+import IOSLocationTuningScreen from "./screens/IOSLocationTuningScreen";
 import Issue67Screen from "./screens/Issue67Screen";
+import LastKnownPositionScreen from "./screens/LastKnownPositionScreen";
 import LocationSimulationScreen from "./screens/LocationSimulationScreen";
 import MockedMetadataScreen from "./screens/MockedMetadataScreen";
 import PermissionCheckScreen from "./screens/PermissionCheckScreen";
@@ -33,6 +36,9 @@ const linking = {
       ProviderSettings: "provider-settings",
       ApiErrors: "api-errors",
       AccuracyPresets: "accuracy-presets",
+      LastKnownPosition: "last-known-position",
+      IOSLocationTuning: "ios-location-tuning",
+      IOSAccuracyAuthorization: "ios-accuracy-authorization",
       Issue67: "issue-67"
     }
   }
@@ -121,6 +127,21 @@ export default function App() {
         <Tab.Screen
           name="AccuracyPresets"
           component={AccuracyPresetsScreen}
+          options={hiddenTabOptions}
+        />
+        <Tab.Screen
+          name="LastKnownPosition"
+          component={LastKnownPositionScreen}
+          options={hiddenTabOptions}
+        />
+        <Tab.Screen
+          name="IOSLocationTuning"
+          component={IOSLocationTuningScreen}
+          options={hiddenTabOptions}
+        />
+        <Tab.Screen
+          name="IOSAccuracyAuthorization"
+          component={IOSAccuracyAuthorizationScreen}
           options={hiddenTabOptions}
         />
         <Tab.Screen

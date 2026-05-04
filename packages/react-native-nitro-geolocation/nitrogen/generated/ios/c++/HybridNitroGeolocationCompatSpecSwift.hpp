@@ -32,6 +32,8 @@ namespace margelo::nitro::nitrogeolocation { struct LocationAccuracyOptions; }
 namespace margelo::nitro::nitrogeolocation { enum class AndroidAccuracyPreset; }
 // Forward declaration of `IOSAccuracyPreset` to properly resolve imports.
 namespace margelo::nitro::nitrogeolocation { enum class IOSAccuracyPreset; }
+// Forward declaration of `IOSActivityType` to properly resolve imports.
+namespace margelo::nitro::nitrogeolocation { enum class IOSActivityType; }
 
 #include "CompatGeolocationConfigurationInternal.hpp"
 #include "AuthorizationLevelInternal.hpp"
@@ -48,6 +50,7 @@ namespace margelo::nitro::nitrogeolocation { enum class IOSAccuracyPreset; }
 #include "LocationAccuracyOptions.hpp"
 #include "AndroidAccuracyPreset.hpp"
 #include "IOSAccuracyPreset.hpp"
+#include "IOSActivityType.hpp"
 
 #include "NitroGeolocation-Swift-Cxx-Umbrella.hpp"
 

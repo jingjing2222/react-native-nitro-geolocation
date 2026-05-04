@@ -32,6 +32,8 @@ namespace margelo::nitro::nitrogeolocation { struct LocationAccuracyOptions; }
 namespace margelo::nitro::nitrogeolocation { enum class AndroidAccuracyPreset; }
 // Forward declaration of `IOSAccuracyPreset` to properly resolve imports.
 namespace margelo::nitro::nitrogeolocation { enum class IOSAccuracyPreset; }
+// Forward declaration of `AccuracyAuthorization` to properly resolve imports.
+namespace margelo::nitro::nitrogeolocation { enum class AccuracyAuthorization; }
 // Forward declaration of `GeolocationResponse` to properly resolve imports.
 namespace margelo::nitro::nitrogeolocation { struct GeolocationResponse; }
 // Forward declaration of `GeolocationCoordinates` to properly resolve imports.
@@ -40,6 +42,8 @@ namespace margelo::nitro::nitrogeolocation { struct GeolocationCoordinates; }
 namespace margelo::nitro::nitrogeolocation { enum class LocationProviderUsed; }
 // Forward declaration of `LocationRequestOptions` to properly resolve imports.
 namespace margelo::nitro::nitrogeolocation { struct LocationRequestOptions; }
+// Forward declaration of `IOSActivityType` to properly resolve imports.
+namespace margelo::nitro::nitrogeolocation { enum class IOSActivityType; }
 
 #include "GeolocationConfiguration.hpp"
 #include <optional>
@@ -55,12 +59,14 @@ namespace margelo::nitro::nitrogeolocation { struct LocationRequestOptions; }
 #include "LocationAccuracyOptions.hpp"
 #include "AndroidAccuracyPreset.hpp"
 #include "IOSAccuracyPreset.hpp"
+#include "AccuracyAuthorization.hpp"
 #include "GeolocationResponse.hpp"
 #include "GeolocationCoordinates.hpp"
 #include <NitroModules/Null.hpp>
 #include <variant>
 #include "LocationProviderUsed.hpp"
 #include "LocationRequestOptions.hpp"
+#include "IOSActivityType.hpp"
 
 #include "NitroGeolocation-Swift-Cxx-Umbrella.hpp"
 
@@ -154,8 +160,28 @@ namespace margelo::nitro::nitrogeolocation {
         std::rethrow_exception(__result.error());
       }
     }
+    inline std::shared_ptr<Promise<AccuracyAuthorization>> getAccuracyAuthorization() override {
+      auto __result = _swiftPart.getAccuracyAuthorization();
+      if (__result.hasError()) [[unlikely]] {
+        std::rethrow_exception(__result.error());
+      }
+      auto __value = std::move(__result.value());
+      return __value;
+    }
+    inline void requestTemporaryFullAccuracy(const std::string& purposeKey, const std::function<void(AccuracyAuthorization /* authorization */)>& success, const std::optional<std::function<void(const LocationError& /* error */)>>& error) override {
+      auto __result = _swiftPart.requestTemporaryFullAccuracy(purposeKey, success, error);
+      if (__result.hasError()) [[unlikely]] {
+        std::rethrow_exception(__result.error());
+      }
+    }
     inline void getCurrentPosition(const std::function<void(const GeolocationResponse& /* position */)>& success, const std::optional<std::function<void(const LocationError& /* error */)>>& error, const std::optional<LocationRequestOptions>& options) override {
       auto __result = _swiftPart.getCurrentPosition(success, error, options);
+      if (__result.hasError()) [[unlikely]] {
+        std::rethrow_exception(__result.error());
+      }
+    }
+    inline void getLastKnownPosition(const std::function<void(const GeolocationResponse& /* position */)>& success, const std::optional<std::function<void(const LocationError& /* error */)>>& error, const std::optional<LocationRequestOptions>& options) override {
+      auto __result = _swiftPart.getLastKnownPosition(success, error, options);
       if (__result.hasError()) [[unlikely]] {
         std::rethrow_exception(__result.error());
       }

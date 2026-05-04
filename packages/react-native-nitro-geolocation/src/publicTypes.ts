@@ -4,9 +4,11 @@ import type {
   NitroGeolocationCompat
 } from "./NitroGeolocationCompat.nitro";
 import type {
+  AccuracyAuthorization as SchemaAccuracyAuthorization,
   AndroidAccuracyPreset as SchemaAndroidAccuracyPreset,
   GeolocationResponse as SchemaGeolocationResponse,
   IOSAccuracyPreset as SchemaIOSAccuracyPreset,
+  IOSActivityType as SchemaIOSActivityType,
   LocationAccuracyOptions as SchemaLocationAccuracyOptions,
   LocationProviderStatus as SchemaLocationProviderStatus,
   LocationProviderUsed as SchemaLocationProviderUsed
@@ -30,6 +32,8 @@ export type GeolocationResponse = SchemaGeolocationResponse;
 export type LocationProviderStatus = SchemaLocationProviderStatus;
 export type AndroidAccuracyPreset = SchemaAndroidAccuracyPreset;
 export type IOSAccuracyPreset = SchemaIOSAccuracyPreset;
+export type AccuracyAuthorization = SchemaAccuracyAuthorization;
+export type IOSActivityType = SchemaIOSActivityType;
 export type LocationAccuracyOptions = SchemaLocationAccuracyOptions;
 
 export type CompatGeolocationResponse = CallbackValue<CompatSuccessCallback>;

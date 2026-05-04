@@ -18,7 +18,7 @@ public extension CompatGeolocationOptions {
   /**
    * Create a new instance of `CompatGeolocationOptions`.
    */
-  init(timeout: Double?, maximumAge: Double?, enableHighAccuracy: Bool?, accuracy: LocationAccuracyOptions?, interval: Double?, fastestInterval: Double?, distanceFilter: Double?, useSignificantChanges: Bool?) {
+  init(timeout: Double?, maximumAge: Double?, enableHighAccuracy: Bool?, accuracy: LocationAccuracyOptions?, interval: Double?, fastestInterval: Double?, distanceFilter: Double?, useSignificantChanges: Bool?, activityType: IOSActivityType?, pausesLocationUpdatesAutomatically: Bool?, showsBackgroundLocationIndicator: Bool?) {
     self.init({ () -> bridge.std__optional_double_ in
       if let __unwrappedValue = timeout {
         return bridge.create_std__optional_double_(__unwrappedValue)
@@ -67,6 +67,24 @@ public extension CompatGeolocationOptions {
       } else {
         return .init()
       }
+    }(), { () -> bridge.std__optional_IOSActivityType_ in
+      if let __unwrappedValue = activityType {
+        return bridge.create_std__optional_IOSActivityType_(__unwrappedValue)
+      } else {
+        return .init()
+      }
+    }(), { () -> bridge.std__optional_bool_ in
+      if let __unwrappedValue = pausesLocationUpdatesAutomatically {
+        return bridge.create_std__optional_bool_(__unwrappedValue)
+      } else {
+        return .init()
+      }
+    }(), { () -> bridge.std__optional_bool_ in
+      if let __unwrappedValue = showsBackgroundLocationIndicator {
+        return bridge.create_std__optional_bool_(__unwrappedValue)
+      } else {
+        return .init()
+      }
     }())
   }
 
@@ -81,7 +99,7 @@ public extension CompatGeolocationOptions {
       }
     }()
   }
-  
+
   @inline(__always)
   var maximumAge: Double? {
     return { () -> Double? in
@@ -93,7 +111,7 @@ public extension CompatGeolocationOptions {
       }
     }()
   }
-  
+
   @inline(__always)
   var enableHighAccuracy: Bool? {
     return { () -> Bool? in
@@ -105,12 +123,12 @@ public extension CompatGeolocationOptions {
       }
     }()
   }
-  
+
   @inline(__always)
   var accuracy: LocationAccuracyOptions? {
     return self.__accuracy.value
   }
-  
+
   @inline(__always)
   var interval: Double? {
     return { () -> Double? in
@@ -122,7 +140,7 @@ public extension CompatGeolocationOptions {
       }
     }()
   }
-  
+
   @inline(__always)
   var fastestInterval: Double? {
     return { () -> Double? in
@@ -134,7 +152,7 @@ public extension CompatGeolocationOptions {
       }
     }()
   }
-  
+
   @inline(__always)
   var distanceFilter: Double? {
     return { () -> Double? in
@@ -146,12 +164,41 @@ public extension CompatGeolocationOptions {
       }
     }()
   }
-  
+
   @inline(__always)
   var useSignificantChanges: Bool? {
     return { () -> Bool? in
       if bridge.has_value_std__optional_bool_(self.__useSignificantChanges) {
         let __unwrapped = bridge.get_std__optional_bool_(self.__useSignificantChanges)
+        return __unwrapped
+      } else {
+        return nil
+      }
+    }()
+  }
+
+  @inline(__always)
+  var activityType: IOSActivityType? {
+    return self.__activityType.value
+  }
+
+  @inline(__always)
+  var pausesLocationUpdatesAutomatically: Bool? {
+    return { () -> Bool? in
+      if bridge.has_value_std__optional_bool_(self.__pausesLocationUpdatesAutomatically) {
+        let __unwrapped = bridge.get_std__optional_bool_(self.__pausesLocationUpdatesAutomatically)
+        return __unwrapped
+      } else {
+        return nil
+      }
+    }()
+  }
+
+  @inline(__always)
+  var showsBackgroundLocationIndicator: Bool? {
+    return { () -> Bool? in
+      if bridge.has_value_std__optional_bool_(self.__showsBackgroundLocationIndicator) {
+        let __unwrapped = bridge.get_std__optional_bool_(self.__showsBackgroundLocationIndicator)
         return __unwrapped
       } else {
         return nil

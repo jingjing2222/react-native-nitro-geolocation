@@ -1,6 +1,8 @@
 import type { HybridObject } from "react-native-nitro-modules";
 import type {
+  AccuracyAuthorization,
   GeolocationResponse,
+  IOSActivityType,
   LocationAccuracyOptions,
   LocationProviderStatus
 } from "./types";
@@ -103,6 +105,29 @@ export interface LocationRequestOptions {
 
   /** Use significant location changes mode (iOS watch only) */
   useSignificantChanges?: boolean;
+
+  /**
+   * iOS-only activity type used to tune Core Location behavior.
+   *
+   * Available since v1.2.
+   */
+  activityType?: IOSActivityType;
+
+  /**
+   * iOS-only setting for automatic pausing of location updates.
+   *
+   * Available since v1.2.
+   */
+  pausesLocationUpdatesAutomatically?: boolean;
+
+  /**
+   * iOS-only setting for the background location indicator.
+   *
+   * Requires background location capability and is ignored by Android.
+   *
+   * Available since v1.2.
+   */
+  showsBackgroundLocationIndicator?: boolean;
 }
 
 /**
@@ -238,6 +263,29 @@ export interface NitroGeolocation
   ): void;
 
   /**
+   * Get current platform location accuracy authorization.
+   *
+   * iOS: maps Core Location full/reduced accuracy authorization.
+   * Android: maps fine permission to `full` and coarse-only permission to
+   * `reduced`.
+   */
+  getAccuracyAuthorization(): Promise<AccuracyAuthorization>;
+
+  /**
+   * iOS-only temporary full accuracy request.
+   *
+   * iOS: calls Core Location temporary full accuracy authorization with the
+   * provided Info.plist purpose key.
+   * Android: resolves with the current accuracy authorization without showing
+   * a prompt.
+   */
+  requestTemporaryFullAccuracy(
+    purposeKey: string,
+    success: (authorization: AccuracyAuthorization) => void,
+    error?: (error: LocationError) => void
+  ): void;
+
+  /**
    * Get current location (one-time request).
    *
    * Strategy:
@@ -253,6 +301,17 @@ export interface NitroGeolocation
    * @param options - Location request options
    */
   getCurrentPosition(
+    success: (position: GeolocationResponse) => void,
+    error?: (error: LocationError) => void,
+    options?: LocationRequestOptions
+  ): void;
+
+  /**
+   * Get the best cached location without starting a fresh location request.
+   *
+   * Returns `POSITION_UNAVAILABLE` when no cached location satisfies `options`.
+   */
+  getLastKnownPosition(
     success: (position: GeolocationResponse) => void,
     error?: (error: LocationError) => void,
     options?: LocationRequestOptions

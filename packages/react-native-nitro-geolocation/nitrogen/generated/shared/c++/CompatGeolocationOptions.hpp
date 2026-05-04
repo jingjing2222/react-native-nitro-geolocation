@@ -30,9 +30,12 @@
 
 // Forward declaration of `LocationAccuracyOptions` to properly resolve imports.
 namespace margelo::nitro::nitrogeolocation { struct LocationAccuracyOptions; }
+// Forward declaration of `IOSActivityType` to properly resolve imports.
+namespace margelo::nitro::nitrogeolocation { enum class IOSActivityType; }
 
 #include <optional>
 #include "LocationAccuracyOptions.hpp"
+#include "IOSActivityType.hpp"
 
 namespace margelo::nitro::nitrogeolocation {
 
@@ -49,10 +52,13 @@ namespace margelo::nitro::nitrogeolocation {
     std::optional<double> fastestInterval     SWIFT_PRIVATE;
     std::optional<double> distanceFilter     SWIFT_PRIVATE;
     std::optional<bool> useSignificantChanges     SWIFT_PRIVATE;
+    std::optional<IOSActivityType> activityType     SWIFT_PRIVATE;
+    std::optional<bool> pausesLocationUpdatesAutomatically     SWIFT_PRIVATE;
+    std::optional<bool> showsBackgroundLocationIndicator     SWIFT_PRIVATE;
 
   public:
     CompatGeolocationOptions() = default;
-    explicit CompatGeolocationOptions(std::optional<double> timeout, std::optional<double> maximumAge, std::optional<bool> enableHighAccuracy, std::optional<LocationAccuracyOptions> accuracy, std::optional<double> interval, std::optional<double> fastestInterval, std::optional<double> distanceFilter, std::optional<bool> useSignificantChanges): timeout(timeout), maximumAge(maximumAge), enableHighAccuracy(enableHighAccuracy), accuracy(accuracy), interval(interval), fastestInterval(fastestInterval), distanceFilter(distanceFilter), useSignificantChanges(useSignificantChanges) {}
+    explicit CompatGeolocationOptions(std::optional<double> timeout, std::optional<double> maximumAge, std::optional<bool> enableHighAccuracy, std::optional<LocationAccuracyOptions> accuracy, std::optional<double> interval, std::optional<double> fastestInterval, std::optional<double> distanceFilter, std::optional<bool> useSignificantChanges, std::optional<IOSActivityType> activityType, std::optional<bool> pausesLocationUpdatesAutomatically, std::optional<bool> showsBackgroundLocationIndicator): timeout(timeout), maximumAge(maximumAge), enableHighAccuracy(enableHighAccuracy), accuracy(accuracy), interval(interval), fastestInterval(fastestInterval), distanceFilter(distanceFilter), useSignificantChanges(useSignificantChanges), activityType(activityType), pausesLocationUpdatesAutomatically(pausesLocationUpdatesAutomatically), showsBackgroundLocationIndicator(showsBackgroundLocationIndicator) {}
 
   public:
     friend bool operator==(const CompatGeolocationOptions& lhs, const CompatGeolocationOptions& rhs) = default;
@@ -75,7 +81,10 @@ namespace margelo::nitro {
         JSIConverter<std::optional<double>>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "interval"))),
         JSIConverter<std::optional<double>>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "fastestInterval"))),
         JSIConverter<std::optional<double>>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "distanceFilter"))),
-        JSIConverter<std::optional<bool>>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "useSignificantChanges")))
+        JSIConverter<std::optional<bool>>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "useSignificantChanges"))),
+        JSIConverter<std::optional<margelo::nitro::nitrogeolocation::IOSActivityType>>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "activityType"))),
+        JSIConverter<std::optional<bool>>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "pausesLocationUpdatesAutomatically"))),
+        JSIConverter<std::optional<bool>>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "showsBackgroundLocationIndicator")))
       );
     }
     static inline jsi::Value toJSI(jsi::Runtime& runtime, const margelo::nitro::nitrogeolocation::CompatGeolocationOptions& arg) {
@@ -88,6 +97,9 @@ namespace margelo::nitro {
       obj.setProperty(runtime, PropNameIDCache::get(runtime, "fastestInterval"), JSIConverter<std::optional<double>>::toJSI(runtime, arg.fastestInterval));
       obj.setProperty(runtime, PropNameIDCache::get(runtime, "distanceFilter"), JSIConverter<std::optional<double>>::toJSI(runtime, arg.distanceFilter));
       obj.setProperty(runtime, PropNameIDCache::get(runtime, "useSignificantChanges"), JSIConverter<std::optional<bool>>::toJSI(runtime, arg.useSignificantChanges));
+      obj.setProperty(runtime, PropNameIDCache::get(runtime, "activityType"), JSIConverter<std::optional<margelo::nitro::nitrogeolocation::IOSActivityType>>::toJSI(runtime, arg.activityType));
+      obj.setProperty(runtime, PropNameIDCache::get(runtime, "pausesLocationUpdatesAutomatically"), JSIConverter<std::optional<bool>>::toJSI(runtime, arg.pausesLocationUpdatesAutomatically));
+      obj.setProperty(runtime, PropNameIDCache::get(runtime, "showsBackgroundLocationIndicator"), JSIConverter<std::optional<bool>>::toJSI(runtime, arg.showsBackgroundLocationIndicator));
       return obj;
     }
     static inline bool canConvert(jsi::Runtime& runtime, const jsi::Value& value) {
@@ -106,6 +118,9 @@ namespace margelo::nitro {
       if (!JSIConverter<std::optional<double>>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "fastestInterval")))) return false;
       if (!JSIConverter<std::optional<double>>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "distanceFilter")))) return false;
       if (!JSIConverter<std::optional<bool>>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "useSignificantChanges")))) return false;
+      if (!JSIConverter<std::optional<margelo::nitro::nitrogeolocation::IOSActivityType>>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "activityType")))) return false;
+      if (!JSIConverter<std::optional<bool>>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "pausesLocationUpdatesAutomatically")))) return false;
+      if (!JSIConverter<std::optional<bool>>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "showsBackgroundLocationIndicator")))) return false;
       return true;
     }
   };

@@ -12,8 +12,10 @@
 
 #include "AndroidAccuracyPreset.hpp"
 #include "IOSAccuracyPreset.hpp"
+#include "IOSActivityType.hpp"
 #include "JAndroidAccuracyPreset.hpp"
 #include "JIOSAccuracyPreset.hpp"
+#include "JIOSActivityType.hpp"
 #include "JLocationAccuracyOptions.hpp"
 #include "LocationAccuracyOptions.hpp"
 #include <optional>
@@ -53,6 +55,12 @@ namespace margelo::nitro::nitrogeolocation {
       jni::local_ref<jni::JDouble> distanceFilter = this->getFieldValue(fieldDistanceFilter);
       static const auto fieldUseSignificantChanges = clazz->getField<jni::JBoolean>("useSignificantChanges");
       jni::local_ref<jni::JBoolean> useSignificantChanges = this->getFieldValue(fieldUseSignificantChanges);
+      static const auto fieldActivityType = clazz->getField<JIOSActivityType>("activityType");
+      jni::local_ref<JIOSActivityType> activityType = this->getFieldValue(fieldActivityType);
+      static const auto fieldPausesLocationUpdatesAutomatically = clazz->getField<jni::JBoolean>("pausesLocationUpdatesAutomatically");
+      jni::local_ref<jni::JBoolean> pausesLocationUpdatesAutomatically = this->getFieldValue(fieldPausesLocationUpdatesAutomatically);
+      static const auto fieldShowsBackgroundLocationIndicator = clazz->getField<jni::JBoolean>("showsBackgroundLocationIndicator");
+      jni::local_ref<jni::JBoolean> showsBackgroundLocationIndicator = this->getFieldValue(fieldShowsBackgroundLocationIndicator);
       return LocationRequestOptions(
         timeout != nullptr ? std::make_optional(timeout->value()) : std::nullopt,
         maximumAge != nullptr ? std::make_optional(maximumAge->value()) : std::nullopt,
@@ -61,7 +69,10 @@ namespace margelo::nitro::nitrogeolocation {
         interval != nullptr ? std::make_optional(interval->value()) : std::nullopt,
         fastestInterval != nullptr ? std::make_optional(fastestInterval->value()) : std::nullopt,
         distanceFilter != nullptr ? std::make_optional(distanceFilter->value()) : std::nullopt,
-        useSignificantChanges != nullptr ? std::make_optional(static_cast<bool>(useSignificantChanges->value())) : std::nullopt
+        useSignificantChanges != nullptr ? std::make_optional(static_cast<bool>(useSignificantChanges->value())) : std::nullopt,
+        activityType != nullptr ? std::make_optional(activityType->toCpp()) : std::nullopt,
+        pausesLocationUpdatesAutomatically != nullptr ? std::make_optional(static_cast<bool>(pausesLocationUpdatesAutomatically->value())) : std::nullopt,
+        showsBackgroundLocationIndicator != nullptr ? std::make_optional(static_cast<bool>(showsBackgroundLocationIndicator->value())) : std::nullopt
       );
     }
 
@@ -71,7 +82,7 @@ namespace margelo::nitro::nitrogeolocation {
      */
     [[maybe_unused]]
     static jni::local_ref<JLocationRequestOptions::javaobject> fromCpp(const LocationRequestOptions& value) {
-      using JSignature = JLocationRequestOptions(jni::alias_ref<jni::JDouble>, jni::alias_ref<jni::JDouble>, jni::alias_ref<jni::JBoolean>, jni::alias_ref<JLocationAccuracyOptions>, jni::alias_ref<jni::JDouble>, jni::alias_ref<jni::JDouble>, jni::alias_ref<jni::JDouble>, jni::alias_ref<jni::JBoolean>);
+      using JSignature = JLocationRequestOptions(jni::alias_ref<jni::JDouble>, jni::alias_ref<jni::JDouble>, jni::alias_ref<jni::JBoolean>, jni::alias_ref<JLocationAccuracyOptions>, jni::alias_ref<jni::JDouble>, jni::alias_ref<jni::JDouble>, jni::alias_ref<jni::JDouble>, jni::alias_ref<jni::JBoolean>, jni::alias_ref<JIOSActivityType>, jni::alias_ref<jni::JBoolean>, jni::alias_ref<jni::JBoolean>);
       static const auto clazz = javaClassStatic();
       static const auto create = clazz->getStaticMethod<JSignature>("fromCpp");
       return create(
@@ -83,7 +94,10 @@ namespace margelo::nitro::nitrogeolocation {
         value.interval.has_value() ? jni::JDouble::valueOf(value.interval.value()) : nullptr,
         value.fastestInterval.has_value() ? jni::JDouble::valueOf(value.fastestInterval.value()) : nullptr,
         value.distanceFilter.has_value() ? jni::JDouble::valueOf(value.distanceFilter.value()) : nullptr,
-        value.useSignificantChanges.has_value() ? jni::JBoolean::valueOf(value.useSignificantChanges.value()) : nullptr
+        value.useSignificantChanges.has_value() ? jni::JBoolean::valueOf(value.useSignificantChanges.value()) : nullptr,
+        value.activityType.has_value() ? JIOSActivityType::fromCpp(value.activityType.value()) : nullptr,
+        value.pausesLocationUpdatesAutomatically.has_value() ? jni::JBoolean::valueOf(value.pausesLocationUpdatesAutomatically.value()) : nullptr,
+        value.showsBackgroundLocationIndicator.has_value() ? jni::JBoolean::valueOf(value.showsBackgroundLocationIndicator.value()) : nullptr
       );
     }
   };

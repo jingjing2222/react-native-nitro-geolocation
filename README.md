@@ -38,6 +38,9 @@ import {
   requestPermission,
   requestLocationSettings,
   getCurrentPosition,
+  getLastKnownPosition,
+  getAccuracyAuthorization,
+  requestTemporaryFullAccuracy,
   useWatchPosition,
 } from "react-native-nitro-geolocation";
 
@@ -57,6 +60,18 @@ await requestLocationSettings({ accuracy: { android: "high" } });
 const position = await getCurrentPosition({
   accuracy: { android: "high", ios: "best" },
 });
+
+// v1.2+: read cached location explicitly without starting a fresh request
+const cached = await getLastKnownPosition({
+  maximumAge: 60_000,
+  accuracy: { android: "balanced", ios: "hundredMeters" },
+});
+
+// v1.2+: inspect precise/reduced accuracy authorization
+const accuracyAuthorization = await getAccuracyAuthorization();
+if (accuracyAuthorization === "reduced") {
+  await requestTemporaryFullAccuracy("TurnByTurnNavigation");
+}
 
 // Continuous tracking with hook
 function LocationTracker() {
@@ -217,6 +232,11 @@ const { position, error } = useWatchPosition({
 ```
 
 Accuracy presets are available since `v1.2`.
+
+`getLastKnownPosition(options?)`, iOS tuning options
+(`activityType`, `pausesLocationUpdatesAutomatically`, and
+`showsBackgroundLocationIndicator`), `getAccuracyAuthorization()`, and
+`requestTemporaryFullAccuracy(purposeKey)` are available since `v1.2`.
 
 `enableHighAccuracy` is deprecated in the Modern API and remains supported only
 for v1 compatibility. Prefer `accuracy`; when `accuracy.android` or

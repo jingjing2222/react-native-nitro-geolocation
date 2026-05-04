@@ -60,7 +60,10 @@ namespace margelo::nitro::nitrogeolocation {
     std::shared_ptr<Promise<bool>> hasServicesEnabled() override;
     std::shared_ptr<Promise<LocationProviderStatus>> getProviderStatus() override;
     void requestLocationSettings(const std::function<void(const LocationProviderStatus& /* status */)>& success, const std::optional<std::function<void(const LocationError& /* error */)>>& error, const std::optional<LocationSettingsOptions>& options) override;
+    std::shared_ptr<Promise<AccuracyAuthorization>> getAccuracyAuthorization() override;
+    void requestTemporaryFullAccuracy(const std::string& purposeKey, const std::function<void(AccuracyAuthorization /* authorization */)>& success, const std::optional<std::function<void(const LocationError& /* error */)>>& error) override;
     void getCurrentPosition(const std::function<void(const GeolocationResponse& /* position */)>& success, const std::optional<std::function<void(const LocationError& /* error */)>>& error, const std::optional<LocationRequestOptions>& options) override;
+    void getLastKnownPosition(const std::function<void(const GeolocationResponse& /* position */)>& success, const std::optional<std::function<void(const LocationError& /* error */)>>& error, const std::optional<LocationRequestOptions>& options) override;
     std::string watchPosition(const std::function<void(const GeolocationResponse& /* position */)>& success, const std::optional<std::function<void(const LocationError& /* error */)>>& error, const std::optional<LocationRequestOptions>& options) override;
     void unwatch(const std::string& token) override;
     void stopObserving() override;

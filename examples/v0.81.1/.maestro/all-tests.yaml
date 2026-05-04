@@ -7,6 +7,15 @@ appId: nitrogeolocation.example
 - runFlow: watch-position.yaml
 - runFlow: location-simulation.yaml
 - runFlow: accuracy-presets.yaml
+- runFlow: last-known-position.yaml
+- runFlow:
+    when:
+      platform: iOS
+    file: ios-location-tuning.yaml
+- runFlow:
+    when:
+      platform: iOS
+    file: ios-accuracy-authorization.yaml
 - runFlow:
     when:
       platform: Android

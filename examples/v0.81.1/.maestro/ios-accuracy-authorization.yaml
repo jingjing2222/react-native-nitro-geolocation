@@ -1,0 +1,110 @@
+appId: nitrogeolocation.example
+---
+# iOS accuracy authorization: read, temporary full accuracy, invalid purpose, denied-state read.
+
+- launchApp:
+    clearState: true
+    permissions:
+      all: allow
+
+- extendedWaitUntil:
+    visible: "Geolocation API"
+    timeout: 10000
+
+- stopApp
+
+- openLink:
+    link: nitrogeolocation://app/ios-accuracy-authorization
+- tapOn:
+    text: "열기|Open"
+    optional: true
+
+- extendedWaitUntil:
+    visible: "Precise and reduced accuracy API contract"
+    timeout: 10000
+
+- tapOn:
+    id: "ios-accuracy-authorization-run-read-button"
+
+- extendedWaitUntil:
+    visible: "Read authorization: passed"
+    timeout: 10000
+
+- assertVisible:
+    id: "ios-accuracy-authorization-read-result"
+- assertVisible:
+    text: ".*Authorization: (full|reduced); permission=granted.*"
+
+- scrollUntilVisible:
+    element: "3. Temporary Full Accuracy"
+    direction: DOWN
+
+- tapOn:
+    id: "ios-accuracy-authorization-run-temporary-button"
+- tapOn:
+    text: ".*(Allow|허용|Turn On|켜기).*"
+    optional: true
+
+- extendedWaitUntil:
+    visible: "Temporary full accuracy: passed"
+    timeout: 30000
+
+- assertVisible:
+    id: "ios-accuracy-authorization-temporary-result"
+- assertVisible:
+    text: ".*Purpose PreciseE2E resolved (full|reduced); current authorization (full|reduced).*"
+
+- scrollUntilVisible:
+    element: "4. Invalid Purpose Key"
+    direction: DOWN
+
+- tapOn:
+    id: "ios-accuracy-authorization-run-invalid-button"
+
+- extendedWaitUntil:
+    visible: "Invalid purposeKey: passed"
+    timeout: 10000
+
+- assertVisible:
+    id: "ios-accuracy-authorization-invalid-result"
+- assertVisible:
+    text: ".*INTERNAL_ERROR.*empty purposeKey.*"
+
+- stopApp
+
+- launchApp:
+    clearState: true
+    permissions:
+      all: deny
+
+- extendedWaitUntil:
+    visible: "Geolocation API"
+    timeout: 10000
+
+- stopApp
+
+- openLink:
+    link: nitrogeolocation://app/ios-accuracy-authorization
+- tapOn:
+    text: "열기|Open"
+    optional: true
+
+- extendedWaitUntil:
+    visible: "Precise and reduced accuracy API contract"
+    timeout: 10000
+
+- scrollUntilVisible:
+    element: "5. Permission Denied Read"
+    direction: DOWN
+
+- tapOn:
+    id: "ios-accuracy-authorization-run-denied-button"
+
+- extendedWaitUntil:
+    visible: "Denied read: passed"
+    timeout: 10000
+
+- assertVisible:
+    id: "ios-accuracy-authorization-denied-result"
+- assertVisible:
+    text: ".*Authorization: (full|reduced|unknown); permission=.*read API did not request permission.*"
