@@ -56,18 +56,6 @@ const ERROR_CODE_CONTRACT = [
   }
 ] as const;
 
-const runNativeLocationRequest = async <T,>(request: () => Promise<T>) => {
-  const previousDevtoolsEnabled = (globalThis as any)
-    .__geolocationDevToolsEnabled;
-
-  try {
-    (globalThis as any).__geolocationDevToolsEnabled = false;
-    return await request();
-  } finally {
-    (globalThis as any).__geolocationDevToolsEnabled = previousDevtoolsEnabled;
-  }
-};
-
 const captureLocationError = (error: unknown): CapturedLocationError => {
   const maybeError = error as { code?: unknown; message?: unknown };
   const code =
@@ -113,12 +101,10 @@ export default function ApiErrorsScreen() {
     setError(null);
 
     try {
-      const nextPosition = await runNativeLocationRequest(() =>
-        getCurrentPosition({
-          enableHighAccuracy: true,
-          timeout: 15000
-        })
-      );
+      const nextPosition = await getCurrentPosition({
+        enableHighAccuracy: true,
+        timeout: 15000
+      });
       setPosition(nextPosition);
     } catch (err) {
       setError(captureLocationError(err));
@@ -134,9 +120,7 @@ export default function ApiErrorsScreen() {
     setError(null);
 
     try {
-      await runNativeLocationRequest(() =>
-        getCurrentPosition(TIMEOUT_CONTRACT_OPTIONS)
-      );
+      await getCurrentPosition(TIMEOUT_CONTRACT_OPTIONS);
     } catch (err) {
       setError(captureLocationError(err));
     } finally {

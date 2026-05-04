@@ -85,19 +85,13 @@ export default function Issue67Screen() {
     setIsLoading(true);
     setPosition(null);
     setError(null);
-    const previousDevtoolsEnabled = (globalThis as any)
-      .__geolocationDevToolsEnabled;
 
     try {
-      // This contract must exercise native provider selection, not Rozenite mocks.
-      (globalThis as any).__geolocationDevToolsEnabled = false;
       const nextPosition = await getCurrentPosition(LOW_ACCURACY_OPTIONS);
       setPosition(nextPosition);
     } catch (err: any) {
       setError(getDisplayErrorMessage(err));
     } finally {
-      (globalThis as any).__geolocationDevToolsEnabled =
-        previousDevtoolsEnabled;
       setIsLoading(false);
       await refreshPermissions();
     }

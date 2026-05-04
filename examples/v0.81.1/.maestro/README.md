@@ -68,10 +68,12 @@ The Android and iOS package scripts install the Release build first (`yarn andro
 
 ### `current-position.yaml`
 - Tests `getCurrentPosition()` API
+- Uses Maestro `setLocation` before tapping the public Get Position button
 - Verifies one-time location fetch
 
 ### `watch-position.yaml`
 - Tests `useWatchPosition()` Hook
+- Uses Maestro `setLocation` before enabling the public watch toggle
 - Verifies continuous location tracking
 - Confirms position updates
 
@@ -142,6 +144,7 @@ The two iOS cases intentionally differ like this:
 
 ### `api-errors.yaml`
 - Opens the API Errors screen and triggers real native Modern API errors.
+- Uses the public screen buttons directly; the flow does not toggle devtools or inject JS-only errors.
 - Starts once with permissions denied and asserts the native `PERMISSION_DENIED` result rendered by the screen.
 - Starts again with permissions allowed, verifies a real position request, then forces a native `TIMEOUT` result and asserts its rendered `{ code, message }` shape.
 - The static Error Code Contract rows are documentation only; this flow asserts the native result panel, not just those rows.
