@@ -88,7 +88,9 @@ export interface LocationRequestOptions {
  * Location error structure.
  */
 export interface LocationError {
-  code: number; // 1: PERMISSION_DENIED, 2: POSITION_UNAVAILABLE, 3: TIMEOUT
+  // -1: INTERNAL_ERROR, 1: PERMISSION_DENIED, 2: POSITION_UNAVAILABLE,
+  // 3: TIMEOUT, 4: PLAY_SERVICE_NOT_AVAILABLE, 5: SETTINGS_NOT_SATISFIED
+  code: number;
   message: string;
 }
 

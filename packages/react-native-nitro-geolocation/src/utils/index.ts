@@ -7,8 +7,11 @@ export { isCachedLocationValid } from "./cache";
 export {
   LocationErrorCode,
   createLocationError,
+  encodeLocationErrorMessage,
+  getLocationErrorCodeName,
   mapCLErrorCode,
   mapAndroidException,
+  normalizeLocationError,
   type LocationError
 } from "./errors";
 export {

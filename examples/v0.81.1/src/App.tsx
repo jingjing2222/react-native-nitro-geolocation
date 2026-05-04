@@ -6,6 +6,7 @@ import {
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { NavigationContainer } from "@react-navigation/native";
 import React from "react";
+import ApiErrorsScreen from "./screens/ApiErrorsScreen";
 import CompatScreen from "./screens/CompatScreen";
 import CurrentPositionScreen from "./screens/CurrentPositionScreen";
 import DefaultScreen from "./screens/DefaultScreen";
@@ -27,6 +28,7 @@ const linking = {
       WatchPosition: "watch-position",
       LocationSimulation: "location-simulation",
       MockedMetadata: "mocked-metadata",
+      ApiErrors: "api-errors",
       Issue67: "issue-67"
     }
   }
@@ -100,6 +102,11 @@ export default function App() {
         <Tab.Screen
           name="MockedMetadata"
           component={MockedMetadataScreen}
+          options={hiddenTabOptions}
+        />
+        <Tab.Screen
+          name="ApiErrors"
+          component={ApiErrorsScreen}
           options={hiddenTabOptions}
         />
         <Tab.Screen

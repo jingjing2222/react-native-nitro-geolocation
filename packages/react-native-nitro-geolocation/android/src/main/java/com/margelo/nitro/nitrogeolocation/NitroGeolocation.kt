@@ -27,7 +27,11 @@ import java.util.concurrent.ConcurrentHashMap
  */
 private class GeolocationErrorException(
     val locationError: LocationError
-) : Exception(locationError.message)
+) : Exception(encodeLocationErrorMessage(locationError))
+
+private fun encodeLocationErrorMessage(error: LocationError): String {
+    return "NitroGeolocationError(code=${error.code.toInt()}): ${error.message}"
+}
 
 private const val NO_LOCATION_PROVIDER_AVAILABLE_MESSAGE = "No location provider available"
 private const val NO_APPROXIMATE_LOCATION_PROVIDER_AVAILABLE_MESSAGE =
@@ -121,9 +125,12 @@ class NitroGeolocation(
     private var currentWatchProvider: String? = null
 
     // Error codes
+    private val INTERNAL_ERROR = -1.0
     private val PERMISSION_DENIED = 1.0
     private val POSITION_UNAVAILABLE = 2.0
     private val TIMEOUT = 3.0
+    private val PLAY_SERVICE_NOT_AVAILABLE = 4.0
+    private val SETTINGS_NOT_SATISFIED = 5.0
 
     // MARK: - Configuration
 
@@ -153,7 +160,10 @@ class NitroGeolocation(
         // Check if we have an activity
         val activity = reactContext.currentActivity
         if (activity == null) {
-            promise.reject(Exception("No activity available"))
+            promise.reject(createLocationError(
+                INTERNAL_ERROR,
+                "No activity available"
+            ))
             return promise
         }
 
@@ -195,6 +205,13 @@ class NitroGeolocation(
         }
 
         val parsedOptions = ParsedOptions.parse(options)
+        if (configuration?.locationProvider == LocationProvider.PLAYSERVICES) {
+            promise.reject(createLocationError(
+                PLAY_SERVICE_NOT_AVAILABLE,
+                "Google Play Services location provider is not available."
+            ))
+            return promise
+        }
 
         val providers = getValidProviders(parsedOptions.enableHighAccuracy)
         if (providers.isEmpty()) {
@@ -358,7 +375,7 @@ class NitroGeolocation(
 
     private fun createNoLocationProviderError(options: ParsedOptions): Exception {
         return createLocationError(
-            POSITION_UNAVAILABLE,
+            SETTINGS_NOT_SATISFIED,
             getNoLocationProviderMessage(options)
         )
     }
@@ -642,6 +659,11 @@ class NitroGeolocation(
     // MARK: - Helper Functions - Watch Position
 
     private fun startWatchingLocation() {
+        if (configuration?.locationProvider == LocationProvider.PLAYSERVICES) {
+            notifyWatchPlayServicesUnavailable()
+            return
+        }
+
         // Determine best provider and options from all subscriptions
         var useHighAccuracy = false
         var smallestInterval = Double.MAX_VALUE
@@ -674,7 +696,7 @@ class NitroGeolocation(
 
             override fun onProviderDisabled(provider: String) {
                 val error = LocationError(
-                    code = POSITION_UNAVAILABLE,
+                    code = SETTINGS_NOT_SATISFIED,
                     message = "Provider disabled: $provider"
                 )
 
@@ -713,8 +735,17 @@ class NitroGeolocation(
     private fun notifyWatchProviderUnavailable() {
         for ((_, subscription) in watchSubscriptions) {
             subscription.error?.invoke(LocationError(
-                code = POSITION_UNAVAILABLE,
+                code = SETTINGS_NOT_SATISFIED,
                 message = getNoLocationProviderMessage(subscription.options)
+            ))
+        }
+    }
+
+    private fun notifyWatchPlayServicesUnavailable() {
+        for ((_, subscription) in watchSubscriptions) {
+            subscription.error?.invoke(LocationError(
+                code = PLAY_SERVICE_NOT_AVAILABLE,
+                message = "Google Play Services location provider is not available."
             ))
         }
     }

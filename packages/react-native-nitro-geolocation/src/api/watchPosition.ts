@@ -6,6 +6,7 @@ import { NitroGeolocationHybridObject } from "../NitroGeolocationModule";
 import { isDevtoolsEnabled } from "../devtools";
 import { devtoolsWatchPosition } from "../devtools/watchPosition";
 import type { GeolocationResponse } from "../publicTypes";
+import { normalizeLocationError } from "../utils/errors";
 
 /**
  * Start watching for continuous location updates.
@@ -36,8 +37,18 @@ export function watchPosition(
   error?: (error: LocationError) => void,
   options?: LocationRequestOptions
 ): string {
+  const normalizedError = error
+    ? (err: LocationError) => {
+        error(normalizeLocationError(err));
+      }
+    : undefined;
+
   if (isDevtoolsEnabled()) {
-    return devtoolsWatchPosition(success, error);
+    return devtoolsWatchPosition(success, normalizedError);
   }
-  return NitroGeolocationHybridObject.watchPosition(success, error, options);
+  return NitroGeolocationHybridObject.watchPosition(
+    success,
+    normalizedError,
+    options
+  );
 }

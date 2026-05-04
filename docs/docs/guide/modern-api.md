@@ -242,13 +242,30 @@ interface GeolocationResponse {
 **Error Handling**:
 
 ```tsx
+import { LocationErrorCode } from 'react-native-nitro-geolocation';
+
 try {
   const position = await getCurrentPosition();
 } catch (error) {
-  // error.code: 1 (PERMISSION_DENIED), 2 (POSITION_UNAVAILABLE), 3 (TIMEOUT)
+  if (error.code === LocationErrorCode.TIMEOUT) {
+    // The request exceeded the configured timeout.
+  }
   // error.message: Human-readable error
 }
 ```
+
+Modern API errors use the following codes:
+
+| Code | Name                         | Meaning                                      |
+| ---- | ---------------------------- | -------------------------------------------- |
+| -1   | `INTERNAL_ERROR`             | Unexpected module/native failure             |
+| 1    | `PERMISSION_DENIED`          | Location permission was denied               |
+| 2    | `POSITION_UNAVAILABLE`       | A position fix is unavailable                |
+| 3    | `TIMEOUT`                    | The request timed out                        |
+| 4    | `PLAY_SERVICE_NOT_AVAILABLE` | Android Google Play Services is unavailable  |
+| 5    | `SETTINGS_NOT_SATISFIED`     | Device/provider settings do not satisfy the request |
+
+The `/compat` API keeps the legacy browser-style error contract with only `PERMISSION_DENIED`, `POSITION_UNAVAILABLE`, and `TIMEOUT`.
 
 
 ## React Hook
@@ -475,6 +492,7 @@ All Modern API exports are fully typed:
 import type {
   PermissionStatus,
   LocationRequestOptions,
+  LocationErrorCode,
   LocationError,
   GeolocationResponse,
   GeolocationCoordinates,

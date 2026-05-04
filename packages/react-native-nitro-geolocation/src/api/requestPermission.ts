@@ -1,5 +1,6 @@
 import type { PermissionStatus } from "../NitroGeolocation.nitro";
 import { NitroGeolocationHybridObject } from "../NitroGeolocationModule";
+import { normalizeLocationError } from "../utils/errors";
 
 /**
  * Request location permission from the user.
@@ -16,6 +17,10 @@ import { NitroGeolocationHybridObject } from "../NitroGeolocationModule";
  * }
  * ```
  */
-export function requestPermission(): Promise<PermissionStatus> {
-  return NitroGeolocationHybridObject.requestPermission();
+export async function requestPermission(): Promise<PermissionStatus> {
+  try {
+    return await NitroGeolocationHybridObject.requestPermission();
+  } catch (error) {
+    throw normalizeLocationError(error);
+  }
 }

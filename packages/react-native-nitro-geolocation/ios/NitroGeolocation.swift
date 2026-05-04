@@ -5,7 +5,7 @@ import NitroModules
 /**
  * Swift Error wrapper for LocationError struct.
  */
-private struct GeolocationErrorWrapper: Error, LocalizedError {
+private struct GeolocationErrorWrapper: Error, LocalizedError, CustomStringConvertible {
     let locationError: LocationError
 
     var errorDescription: String? {
@@ -14,6 +14,10 @@ private struct GeolocationErrorWrapper: Error, LocalizedError {
 
     var localizedDescription: String {
         return locationError.message
+    }
+
+    var description: String {
+        return "NitroGeolocationError(code=\(Int(locationError.code))): \(locationError.message)"
     }
 
     init(code: Int, message: String) {
@@ -123,9 +127,12 @@ class NitroGeolocation: HybridNitroGeolocationSpec {
     private var watchSubscriptions: [String: WatchSubscription] = [:]
 
     // Error codes
+    private let INTERNAL_ERROR = -1
     private let PERMISSION_DENIED = 1
     private let POSITION_UNAVAILABLE = 2
     private let TIMEOUT = 3
+    private let PLAY_SERVICE_NOT_AVAILABLE = 4
+    private let SETTINGS_NOT_SATISFIED = 5
 
     // MARK: - Configuration
 
@@ -194,7 +201,7 @@ class NitroGeolocation: HybridNitroGeolocationSpec {
 
         if !CLLocationManager.locationServicesEnabled() {
             let error = GeolocationErrorWrapper(
-                code: self.POSITION_UNAVAILABLE,
+                code: self.SETTINGS_NOT_SATISFIED,
                 message: "Location services disabled."
             )
             promise.reject(withError: error)
