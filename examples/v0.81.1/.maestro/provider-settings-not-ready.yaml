@@ -1,0 +1,56 @@
+appId: nitrogeolocation.example
+---
+# User flow: a field worker opens the check-in screen while Android location
+# services are disabled, sees the device is not ready, asks Android for the
+# required settings, then declines the system resolution dialog.
+#
+# This flow requires the Android master location switch to be disabled before
+# it starts. Use scripts/test-e2e-android.sh so the device state is restored.
+
+- launchApp:
+    clearState: true
+    permissions:
+      android.permission.ACCESS_COARSE_LOCATION: allow
+      android.permission.ACCESS_FINE_LOCATION: allow
+
+- extendedWaitUntil:
+    visible: "Geolocation API"
+    timeout: 10000
+
+- stopApp
+
+- openLink:
+    link: nitrogeolocation://app/provider-settings
+- tapOn:
+    text: "열기|Open"
+    optional: true
+
+- extendedWaitUntil:
+    visible: "Accurate Check-In"
+    timeout: 10000
+
+- tapOn: "Check Device"
+- extendedWaitUntil:
+    visible: "Services: disabled"
+    timeout: 10000
+
+- assertVisible: "GPS: disabled"
+- assertVisible: "Network: disabled"
+- assertVisible: "Provider readiness: not ready"
+
+- tapOn: "Prepare Check-In"
+
+- tapOn:
+    text: "No thanks|Cancel|취소|아니요|거부"
+
+- extendedWaitUntil:
+    visible: "Settings: blocked"
+    timeout: 10000
+
+- scrollUntilVisible:
+    element: "Name: SETTINGS_NOT_SATISFIED"
+    direction: DOWN
+    timeout: 10000
+
+- assertVisible: "Name: SETTINGS_NOT_SATISFIED"
+- assertVisible: "Provider readiness: not ready"

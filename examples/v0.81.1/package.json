@@ -15,7 +15,7 @@
     "build:ios": "react-native build-ios --mode Debug",
     "build:ios:release": "react-native build-ios --mode Release",
     "typecheck": "tsc --noEmit",
-    "test:e2e:android": "maestro test --platform android .maestro/all-tests.yaml",
+    "test:e2e:android": "bash ./scripts/test-e2e-android.sh",
     "test:e2e:ios": "maestro test --platform ios .maestro/all-tests.yaml"
   },
   "dependencies": {
