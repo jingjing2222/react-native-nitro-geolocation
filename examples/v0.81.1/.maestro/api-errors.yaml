@@ -5,6 +5,8 @@ appId: nitrogeolocation.example
 
 - launchApp
 
+- stopApp
+
 - openLink:
     link: nitrogeolocation://app/api-errors
 - tapOn:
@@ -65,15 +67,33 @@ appId: nitrogeolocation.example
 
 - assertVisible:
     id: "api-error-code-contract"
+- scrollUntilVisible:
+    element: "INTERNAL_ERROR"
+    direction: DOWN
 - assertVisible:
     id: "api-error-contract-INTERNAL_ERROR"
+- scrollUntilVisible:
+    element: "PERMISSION_DENIED"
+    direction: DOWN
 - assertVisible:
     id: "api-error-contract-PERMISSION_DENIED"
+- scrollUntilVisible:
+    element: "POSITION_UNAVAILABLE"
+    direction: DOWN
 - assertVisible:
     id: "api-error-contract-POSITION_UNAVAILABLE"
+- scrollUntilVisible:
+    element: "TIMEOUT"
+    direction: DOWN
 - assertVisible:
     id: "api-error-contract-TIMEOUT"
+- scrollUntilVisible:
+    element: "PLAY_SERVICE_NOT_AVAILABLE"
+    direction: DOWN
 - assertVisible:
     id: "api-error-contract-PLAY_SERVICE_NOT_AVAILABLE"
+- scrollUntilVisible:
+    element: "SETTINGS_NOT_SATISFIED"
+    direction: DOWN
 - assertVisible:
     id: "api-error-contract-SETTINGS_NOT_SATISFIED"
