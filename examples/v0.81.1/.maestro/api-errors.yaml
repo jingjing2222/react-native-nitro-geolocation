@@ -1,9 +1,55 @@
 appId: nitrogeolocation.example
 ---
-# Modern API error contract: request permission, exercise the native position
-# path, then force a deterministic timeout error.
+# Modern API error contract: trigger real native errors, display their
+# structured { code, message } shape, then assert the rendered result.
 
-- launchApp
+- launchApp:
+    clearState: true
+    permissions:
+      all: deny
+
+- extendedWaitUntil:
+    visible: "Geolocation API"
+    timeout: 10000
+
+- stopApp
+
+- openLink:
+    link: nitrogeolocation://app/api-errors
+- tapOn:
+    text: "열기|Open"
+    optional: true
+
+- extendedWaitUntil:
+    visible: "Modern API error contract"
+    timeout: 10000
+
+- scrollUntilVisible:
+    element: "2. Position Request"
+    direction: DOWN
+
+- tapOn: "Get Position"
+- extendedWaitUntil:
+    visible: "Result: error"
+    timeout: 10000
+
+- assertVisible:
+    id: "api-error-details"
+- assertVisible:
+    text: "Code: 1"
+- assertVisible:
+    text: "Name: PERMISSION_DENIED"
+- assertVisible:
+    id: "api-error-message"
+
+- launchApp:
+    clearState: true
+    permissions:
+      all: allow
+
+- extendedWaitUntil:
+    visible: "Geolocation API"
+    timeout: 10000
 
 - stopApp
 

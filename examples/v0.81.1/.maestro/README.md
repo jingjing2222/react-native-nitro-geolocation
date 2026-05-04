@@ -140,6 +140,12 @@ The two iOS cases intentionally differ like this:
 | `mocked-metadata-ios-true.yaml` | Yes | `Mocked: true`, `Provider: unknown` | Presence only |
 | `mocked-metadata-ios-false.yaml` | No | `Mocked: false`, `Provider: unknown` | None |
 
+### `api-errors.yaml`
+- Opens the API Errors screen and triggers real native Modern API errors.
+- Starts once with permissions denied and asserts the native `PERMISSION_DENIED` result rendered by the screen.
+- Starts again with permissions allowed, verifies a real position request, then forces a native `TIMEOUT` result and asserts its rendered `{ code, message }` shape.
+- The static Error Code Contract rows are documentation only; this flow asserts the native result panel, not just those rows.
+
 ### `compat-api.yaml`
 - Tests `@react-native-community/geolocation` compatibility API
 - Opens the real Compat API screen
