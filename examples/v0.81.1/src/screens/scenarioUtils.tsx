@@ -22,6 +22,12 @@ export type CapturedLocationError = {
   message: string;
 };
 
+declare global {
+  // The example app enables Rozenite geolocation devtools in debug builds.
+  // Native E2E contract screens temporarily disable the JS fixture override.
+  var __geolocationDevToolsEnabled: boolean | undefined;
+}
+
 export const SEOUL_FIXTURE = {
   latitude: 37.5665,
   longitude: 126.978
@@ -33,6 +39,19 @@ export const createIdleResult = (): ScenarioResult => ({
   status: "idle",
   message: "Not run"
 });
+
+export const runWithNativeGeolocation = async <T,>(
+  operation: () => Promise<T>
+): Promise<T> => {
+  const previousDevtoolsEnabled = globalThis.__geolocationDevToolsEnabled;
+  globalThis.__geolocationDevToolsEnabled = false;
+
+  try {
+    return await operation();
+  } finally {
+    globalThis.__geolocationDevToolsEnabled = previousDevtoolsEnabled;
+  }
+};
 
 export const captureLocationError = (error: unknown): CapturedLocationError => {
   const maybeError = error as { code?: unknown; message?: unknown };

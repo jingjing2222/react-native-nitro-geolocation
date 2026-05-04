@@ -100,11 +100,19 @@ appId: nitrogeolocation.example
 - tapOn:
     id: "ios-accuracy-authorization-run-denied-button"
 
+- scrollUntilVisible:
+    element: "Denied read: passed"
+    direction: DOWN
+
 - extendedWaitUntil:
     visible: "Denied read: passed"
     timeout: 10000
 
 - assertVisible:
     id: "ios-accuracy-authorization-denied-result"
+- scrollUntilVisible:
+    element:
+      text: ".*Authorization: (full|reduced|unknown); permission=.*read API did not request permission.*"
+    direction: DOWN
 - assertVisible:
     text: ".*Authorization: (full|reduced|unknown); permission=.*read API did not request permission.*"

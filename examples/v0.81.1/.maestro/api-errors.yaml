@@ -29,9 +29,10 @@ appId: nitrogeolocation.example
     direction: DOWN
 
 - tapOn: "Get Position"
-- extendedWaitUntil:
-    visible: "Result: error"
-    timeout: 10000
+- scrollUntilVisible:
+    element: "Result: error"
+    direction: DOWN
+    timeout: 15000
 
 - assertVisible:
     id: "api-error-details"

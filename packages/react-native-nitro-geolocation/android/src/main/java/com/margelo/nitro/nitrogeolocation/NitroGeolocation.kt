@@ -489,8 +489,10 @@ class NitroGeolocation(
     // MARK: - Helper Functions - Cache Validation
 
     private fun isCachedLocationValid(location: Location, options: ParsedOptions): Boolean {
+        if (options.maximumAge <= 0.0) return false
+
         val locationAge = SystemClock.elapsedRealtime() - location.elapsedRealtimeNanos / 1_000_000
-        return locationAge < options.maximumAge
+        return locationAge.coerceAtLeast(0L) < options.maximumAge
     }
 
     private fun getBestCachedLocation(providers: List<String>, options: ParsedOptions): Location? {
@@ -557,8 +559,9 @@ class NitroGeolocation(
             return
         }
 
-        // Use the Android 11+ platform API when available.
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+        // Android's getCurrentLocation may resolve a recent historical fix. A maximumAge of 0
+        // means callers explicitly asked us to wait for a fresh provider update.
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R && request.options.maximumAge > 0.0) {
             requestCurrentLocationModern(provider, requestId, request.handler, remainingTimeoutMillis)
         } else {
             requestCurrentLocationLegacy(provider, requestId, request.handler, remainingTimeoutMillis)

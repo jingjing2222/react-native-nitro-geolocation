@@ -18,6 +18,7 @@ import {
   assertLocationErrorCode,
   createIdleResult,
   getDisplayErrorMessage,
+  runWithNativeGeolocation,
   sharedStyles
 } from "./scenarioUtils";
 import type { ScenarioResult } from "./scenarioUtils";
@@ -115,12 +116,16 @@ export default function IOSLocationTuningScreen() {
         throw new Error(`Permission was not granted: ${status}`);
       }
 
-      const current = await getCurrentPosition(tunedOptions);
+      const current = await runWithNativeGeolocation(() =>
+        getCurrentPosition(tunedOptions)
+      );
       const currentCoordinates = assertFixtureCoordinates(current);
-      const watched = await waitForWatchPosition({
-        ...tunedOptions,
-        distanceFilter: 0
-      });
+      const watched = await runWithNativeGeolocation(() =>
+        waitForWatchPosition({
+          ...tunedOptions,
+          distanceFilter: 0
+        })
+      );
       const watchedCoordinates = assertFixtureCoordinates(watched);
 
       setResult("tuned", {
@@ -150,7 +155,7 @@ export default function IOSLocationTuningScreen() {
 
     try {
       ensureIOS();
-      await getCurrentPosition(invalidOptions);
+      await runWithNativeGeolocation(() => getCurrentPosition(invalidOptions));
       setResult("invalid", {
         status: "failed",
         message: "Invalid iOS activityType unexpectedly resolved."
@@ -177,7 +182,7 @@ export default function IOSLocationTuningScreen() {
 
     try {
       ensureIOS();
-      await getCurrentPosition(tunedOptions);
+      await runWithNativeGeolocation(() => getCurrentPosition(tunedOptions));
       setResult("denied", {
         status: "failed",
         message: "Permission-denied tuned request unexpectedly resolved."

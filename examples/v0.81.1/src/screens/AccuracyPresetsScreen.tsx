@@ -18,6 +18,7 @@ import type {
   GeolocationResponse,
   LocationRequestOptions
 } from "react-native-nitro-geolocation";
+import { runWithNativeGeolocation } from "./scenarioUtils";
 
 type ScenarioStatus = "idle" | "running" | "passed" | "failed";
 
@@ -40,12 +41,22 @@ type PositiveScenarioMessage = {
   message: string;
 };
 
+class FixtureMismatchError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = "FixtureMismatchError";
+    Object.setPrototypeOf(this, FixtureMismatchError.prototype);
+  }
+}
+
 const SEOUL_FIXTURE = {
   latitude: 37.5665,
   longitude: 126.978
 };
 
 const COORDINATE_TOLERANCE = 0.02;
+const FIXTURE_RETRY_TIMEOUT_MS = 25000;
+const FIXTURE_RETRY_INTERVAL_MS = 1000;
 
 const initialResults: Record<string, ScenarioResult> = {
   positive: {
@@ -91,7 +102,7 @@ const assertFixtureCoordinates = (position: GeolocationResponse) => {
     latitudeDelta > COORDINATE_TOLERANCE ||
     longitudeDelta > COORDINATE_TOLERANCE
   ) {
-    throw new Error(
+    throw new FixtureMismatchError(
       `Position did not match fixture: ${position.coords.latitude.toFixed(
         6
       )}, ${position.coords.longitude.toFixed(6)}.`
@@ -124,6 +135,52 @@ const isNoGpsFallbackRejection = (error: unknown) => {
     LocationErrorCode.TIMEOUT,
     LocationErrorCode.SETTINGS_NOT_SATISFIED
   ].includes(maybeError.code);
+};
+
+const isFixtureMismatchError = (
+  error: unknown
+): error is FixtureMismatchError => {
+  return error instanceof Error && error.name === "FixtureMismatchError";
+};
+
+const sleep = (durationMs: number) =>
+  new Promise<void>((resolve) => {
+    setTimeout(() => resolve(), durationMs);
+  });
+
+const runScenarioWithSettledFixture = async (
+  scenario: AccuracyScenario
+): Promise<string> => {
+  const deadline = Date.now() + FIXTURE_RETRY_TIMEOUT_MS;
+  let lastFixtureMismatch: FixtureMismatchError | null = null;
+  let attempt = 0;
+
+  while (Date.now() <= deadline) {
+    attempt += 1;
+    const position = await runWithNativeGeolocation(() =>
+      getCurrentPosition(scenario.options)
+    );
+
+    try {
+      return scenario.assertPosition
+        ? scenario.assertPosition(position)
+        : assertFixtureCoordinates(position);
+    } catch (error) {
+      if (!isFixtureMismatchError(error)) {
+        throw error;
+      }
+
+      lastFixtureMismatch = new FixtureMismatchError(
+        `${error.message} Attempt ${attempt}.`
+      );
+      await sleep(FIXTURE_RETRY_INTERVAL_MS);
+    }
+  }
+
+  throw (
+    lastFixtureMismatch ??
+    new FixtureMismatchError("Injected fixture location was not observed.")
+  );
 };
 
 const getPositiveScenarios = (): AccuracyScenario[] => {
@@ -262,10 +319,7 @@ export default function AccuracyPresetsScreen() {
       const messages: PositiveScenarioMessage[] = [];
       for (const scenario of getPositiveScenarios()) {
         try {
-          const position = await getCurrentPosition(scenario.options);
-          const summary = scenario.assertPosition
-            ? scenario.assertPosition(position)
-            : assertFixtureCoordinates(position);
+          const summary = await runScenarioWithSettledFixture(scenario);
           messages.push({
             id: scenario.id,
             title: scenario.title,
@@ -317,7 +371,7 @@ export default function AccuracyPresetsScreen() {
     } as unknown as LocationRequestOptions;
 
     try {
-      await getCurrentPosition(invalidOptions);
+      await runWithNativeGeolocation(() => getCurrentPosition(invalidOptions));
       setResult("invalid", {
         status: "failed",
         message: "Invalid preset unexpectedly resolved."
@@ -352,7 +406,7 @@ export default function AccuracyPresetsScreen() {
           };
 
     try {
-      await getCurrentPosition(options);
+      await runWithNativeGeolocation(() => getCurrentPosition(options));
       setResult("denied", {
         status: "failed",
         message: "Permission-denied request unexpectedly resolved."

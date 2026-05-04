@@ -13,6 +13,7 @@ import {
   assertLocationErrorCode,
   createIdleResult,
   getDisplayErrorMessage,
+  runWithNativeGeolocation,
   sharedStyles
 } from "./scenarioUtils";
 import type { ScenarioResult } from "./scenarioUtils";
@@ -58,7 +59,9 @@ export default function LastKnownPositionScreen() {
     });
 
     try {
-      await getLastKnownPosition({ maximumAge: -1 });
+      await runWithNativeGeolocation(() =>
+        getLastKnownPosition({ maximumAge: -1 })
+      );
       setResult("stale", {
         status: "failed",
         message: "Stale cache filter unexpectedly resolved."
@@ -94,17 +97,21 @@ export default function LastKnownPositionScreen() {
         throw new Error(`Permission was not granted: ${status}`);
       }
 
-      const fresh = await getCurrentPosition({
-        accuracy: {
-          android: "high",
-          ios: "best"
-        },
-        maximumAge: 0,
-        timeout: 15000
-      });
+      const fresh = await runWithNativeGeolocation(() =>
+        getCurrentPosition({
+          accuracy: {
+            android: "high",
+            ios: "best"
+          },
+          maximumAge: 0,
+          timeout: 15000
+        })
+      );
       const freshCoordinates = assertFixtureCoordinates(fresh);
       const startedAt = Date.now();
-      const cached = await getLastKnownPosition();
+      const cached = await runWithNativeGeolocation(() =>
+        getLastKnownPosition()
+      );
       const elapsedMs = Date.now() - startedAt;
       const cachedCoordinates = assertFixtureCoordinates(cached);
       const timestampDelta = Math.abs(cached.timestamp - fresh.timestamp);
@@ -142,7 +149,7 @@ export default function LastKnownPositionScreen() {
     });
 
     try {
-      await getLastKnownPosition();
+      await runWithNativeGeolocation(() => getLastKnownPosition());
       setResult("denied", {
         status: "failed",
         message: "Permission-denied cached read unexpectedly resolved."

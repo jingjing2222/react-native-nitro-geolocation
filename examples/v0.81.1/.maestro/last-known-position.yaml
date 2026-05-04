@@ -89,12 +89,20 @@ appId: nitrogeolocation.example
 - tapOn:
     id: "last-known-position-run-denied-button"
 
+- scrollUntilVisible:
+    element: "Permission denied: passed"
+    direction: DOWN
+
 - extendedWaitUntil:
     visible: "Permission denied: passed"
     timeout: 10000
 
 - assertVisible:
     id: "last-known-position-denied-result"
+- scrollUntilVisible:
+    element:
+      text: ".*PERMISSION_DENIED.*"
+    direction: DOWN
 - assertVisible:
     text: ".*PERMISSION_DENIED.*"
 - assertVisible:

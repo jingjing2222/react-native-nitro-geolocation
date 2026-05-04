@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Button,
   ScrollView,
@@ -14,10 +14,12 @@ import {
   useWatchPosition
 } from "react-native-nitro-geolocation";
 import type { GeolocationResponse } from "react-native-nitro-geolocation";
+import { runWithNativeGeolocation } from "./scenarioUtils";
 
 type DefaultScreenSection = "permission" | "currentPosition" | "watchPosition";
 
 interface DefaultScreenProps {
+  nativeGeolocation?: boolean;
   sections?: DefaultScreenSection[];
   subtitle?: string;
   title?: string;
@@ -30,6 +32,7 @@ const defaultSections: DefaultScreenSection[] = [
 ];
 
 export default function DefaultScreen({
+  nativeGeolocation = false,
   sections = defaultSections,
   subtitle = "Root API",
   title = "Geolocation API"
@@ -49,6 +52,17 @@ export default function DefaultScreen({
 
   // Watch position hook (continuous)
   const [watchEnabled, setWatchEnabled] = useState(false);
+  useEffect(() => {
+    if (!nativeGeolocation) return;
+
+    const previousDevtoolsEnabled = globalThis.__geolocationDevToolsEnabled;
+    globalThis.__geolocationDevToolsEnabled = false;
+
+    return () => {
+      globalThis.__geolocationDevToolsEnabled = previousDevtoolsEnabled;
+    };
+  }, [nativeGeolocation]);
+
   const {
     position: watchedPosition,
     error: watchError,
@@ -86,10 +100,17 @@ export default function DefaultScreen({
     setIsCurrentPositionLoading(true);
     setCurrentPositionError(null);
     try {
-      const position = await getCurrentPosition({
-        enableHighAccuracy: true,
-        timeout: 15000
-      });
+      const position = await (nativeGeolocation
+        ? runWithNativeGeolocation(() =>
+            getCurrentPosition({
+              enableHighAccuracy: true,
+              timeout: 15000
+            })
+          )
+        : getCurrentPosition({
+            enableHighAccuracy: true,
+            timeout: 15000
+          }));
       setCurrentPosition(position);
     } catch (err: any) {
       setCurrentPositionError(err?.message || "Unknown error");

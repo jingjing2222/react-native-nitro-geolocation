@@ -87,12 +87,20 @@ appId: nitrogeolocation.example
 - tapOn:
     id: "ios-location-tuning-run-denied-button"
 
+- scrollUntilVisible:
+    element: "Permission denied: passed"
+    direction: DOWN
+
 - extendedWaitUntil:
     visible: "Permission denied: passed"
     timeout: 10000
 
 - assertVisible:
     id: "ios-location-tuning-denied-result"
+- scrollUntilVisible:
+    element:
+      text: ".*PERMISSION_DENIED.*"
+    direction: DOWN
 - assertVisible:
     text: ".*PERMISSION_DENIED.*"
 - assertVisible:
