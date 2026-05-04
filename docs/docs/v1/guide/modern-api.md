@@ -449,7 +449,7 @@ import type {
   LocationError,
   GeolocationResponse,
   GeolocationCoordinates,
-  GeolocationConfiguration
+  ModernGeolocationConfiguration
 } from 'react-native-nitro-geolocation';
 ```
 

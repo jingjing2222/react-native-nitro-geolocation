@@ -8,10 +8,10 @@ hero:
   actions:
     - theme: brand
       text: Introduction
-      link: /guide/
+      link: /v2.0/guide/
     - theme: alt
       text: Quick Start
-      link: /guide/quick-start/
+      link: /v2.0/guide/quick-start/
   image:
     src: /logo.png
     alt: Nitro Geolocation Logo
