@@ -195,9 +195,11 @@ class NitroGeolocation(
     }
 
     override fun getProviderStatus(): Promise<LocationProviderStatus> {
-        return Promise.async {
-            locationSettings.getProviderStatus()
+        val promise = Promise<LocationProviderStatus>()
+        locationSettings.getProviderStatus { status ->
+            promise.resolve(status)
         }
+        return promise
     }
 
     override fun requestLocationSettings(
