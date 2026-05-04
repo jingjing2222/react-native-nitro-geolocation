@@ -1,5 +1,11 @@
 # react-native-nitro-geolocation
 
+## 1.1.4
+
+### Patch Changes
+
+- f1ec8fb: Add README to the npm package.
+
 ## 1.1.3
 
 ### Patch Changes
