@@ -3,11 +3,18 @@ import { NitroGeolocationHybridObject } from "../NitroGeolocationModule";
 import type { LocationProviderStatus } from "../publicTypes";
 
 /**
- * Android: request native location settings that satisfy the provided
- * requirements, showing Android's system resolution dialog when available.
+ * Android-only settings resolution API.
  *
- * iOS resolves with the current provider status without showing a settings
- * dialog.
+ * Android: checks whether current device settings satisfy the requested
+ * location requirements and shows Android's native settings resolution dialog
+ * when available.
+ *
+ * iOS: does not show a settings dialog and ignores `options`. It resolves with
+ * the current Core Location status:
+ * - `locationServicesEnabled`: `CLLocationManager.locationServicesEnabled()`
+ * - `backgroundModeEnabled`: whether `UIBackgroundModes` contains `location`
+ * - `gpsAvailable`, `networkAvailable`, `passiveAvailable`, and
+ *   `googleLocationAccuracyEnabled`: `undefined`
  */
 export function requestLocationSettings(
   options?: LocationSettingsOptions

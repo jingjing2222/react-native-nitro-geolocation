@@ -25,12 +25,38 @@ export interface GeolocationResponse {
   provider?: LocationProviderUsed;
 }
 
+/**
+ * Native provider/settings status.
+ *
+ * Android includes device-level location services, provider availability, and
+ * Google Location Accuracy when Google Play Services exposes it.
+ *
+ * iOS includes only Core Location service availability and app background
+ * location mode. Android-specific provider fields are `undefined` on iOS.
+ */
 export interface LocationProviderStatus {
+  /** Android system location switch, or iOS Core Location services state. */
   locationServicesEnabled: boolean;
+
+  /**
+   * iOS: whether `UIBackgroundModes` contains `location`.
+   * Android: whether background location permission is granted.
+   */
   backgroundModeEnabled: boolean;
+
+  /** Android-only GPS provider availability. Undefined on iOS. */
   gpsAvailable?: boolean;
+
+  /** Android-only network provider availability. Undefined on iOS. */
   networkAvailable?: boolean;
+
+  /** Android-only passive provider availability. Undefined on iOS. */
   passiveAvailable?: boolean;
+
+  /**
+   * Android-only Google Location Accuracy state when Google Play Services
+   * exposes it. Undefined on iOS or when unavailable.
+   */
   googleLocationAccuracyEnabled?: boolean;
 }
 
