@@ -3,7 +3,6 @@ import { NitroGeolocationHybridObject } from "../NitroGeolocationModule";
 import { isDevtoolsEnabled } from "../devtools";
 import { getDevtoolsCurrentPosition } from "../devtools/getCurrentPosition";
 import type { GeolocationResponse } from "../publicTypes";
-import { normalizeLocationError } from "../utils/errors";
 
 /**
  * Get current location (one-time request).
@@ -31,19 +30,14 @@ import { normalizeLocationError } from "../utils/errors";
  * }
  * ```
  */
-export async function getCurrentPosition(
+export function getCurrentPosition(
   options?: LocationRequestOptions
 ): Promise<GeolocationResponse> {
-  try {
-    if (isDevtoolsEnabled()) {
-      const devtoolsResult = getDevtoolsCurrentPosition();
-      if (devtoolsResult) {
-        return await devtoolsResult;
-      }
+  if (isDevtoolsEnabled()) {
+    const devtoolsResult = getDevtoolsCurrentPosition();
+    if (devtoolsResult) {
+      return devtoolsResult;
     }
-
-    return await NitroGeolocationHybridObject.getCurrentPosition(options);
-  } catch (error) {
-    throw normalizeLocationError(error);
   }
+  return NitroGeolocationHybridObject.getCurrentPosition(options);
 }

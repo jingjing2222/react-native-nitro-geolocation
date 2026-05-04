@@ -10,7 +10,6 @@ export {
   getLocationErrorCodeName,
   mapCLErrorCode,
   mapAndroidException,
-  normalizeLocationError,
   type LocationError
 } from "./errors";
 export {

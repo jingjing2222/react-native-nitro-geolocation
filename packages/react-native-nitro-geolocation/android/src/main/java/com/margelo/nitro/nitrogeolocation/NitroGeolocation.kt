@@ -27,11 +27,7 @@ import java.util.concurrent.ConcurrentHashMap
  */
 private class GeolocationErrorException(
     val locationError: LocationError
-) : Exception(encodeLocationErrorMessage(locationError))
-
-private fun encodeLocationErrorMessage(error: LocationError): String {
-    return "NitroGeolocationError(code=${error.code.toInt()}): ${error.message}"
-}
+) : Exception(locationError.message)
 
 private const val NO_LOCATION_PROVIDER_AVAILABLE_MESSAGE = "No location provider available"
 private const val NO_APPROXIMATE_LOCATION_PROVIDER_AVAILABLE_MESSAGE =

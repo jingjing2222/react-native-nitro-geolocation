@@ -242,22 +242,35 @@ interface GeolocationResponse {
 **Error Handling**:
 
 ```tsx
-import { LocationErrorCode } from 'react-native-nitro-geolocation';
+import {
+  LocationErrorCode,
+  watchPosition,
+  unwatch,
+} from 'react-native-nitro-geolocation';
 
-try {
-  const position = await getCurrentPosition();
-} catch (error) {
-  if (error.code === LocationErrorCode.TIMEOUT) {
-    // The request exceeded the configured timeout.
+const token = watchPosition(
+  (position) => {
+    console.log(position.coords.latitude, position.coords.longitude);
+  },
+  (error) => {
+    if (error.code === LocationErrorCode.SETTINGS_NOT_SATISFIED) {
+      // Device/provider settings do not satisfy the request.
+    }
+    // error.message: Human-readable error
   }
-  // error.message: Human-readable error
-}
+);
+
+unwatch(token);
 ```
 
 Modern API errors use the following codes. The expanded modern-only native
 setup/provider codes (`INTERNAL_ERROR`, `PLAY_SERVICE_NOT_AVAILABLE`, and
 `SETTINGS_NOT_SATISFIED`) were added in v1.2; codes 1-3 remain aligned with the
 legacy browser-style contract.
+
+The code is committed by the native layer before a `LocationError` callback is
+sent to JS. Promise rejections still use Nitro's native `Error` transport and
+are not parsed or reclassified in JS.
 
 | Code | Name                         | Meaning                                      |
 | ---- | ---------------------------- | -------------------------------------------- |

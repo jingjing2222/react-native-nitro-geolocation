@@ -33,8 +33,6 @@ export interface LocationError extends Error {
   INTERNAL_ERROR: LocationErrorCode.INTERNAL_ERROR;
 }
 
-const LOCATION_ERROR_PREFIX = "NitroGeolocationError";
-
 const locationErrorCodeNames: Record<LocationErrorCode, string> = {
   [LocationErrorCode.INTERNAL_ERROR]: "INTERNAL_ERROR",
   [LocationErrorCode.PERMISSION_DENIED]: "PERMISSION_DENIED",
@@ -43,55 +41,6 @@ const locationErrorCodeNames: Record<LocationErrorCode, string> = {
   [LocationErrorCode.PLAY_SERVICE_NOT_AVAILABLE]: "PLAY_SERVICE_NOT_AVAILABLE",
   [LocationErrorCode.SETTINGS_NOT_SATISFIED]: "SETTINGS_NOT_SATISFIED"
 };
-
-const knownLocationErrorCodes = new Set<number>(
-  Object.values(LocationErrorCode).filter(
-    (value): value is number => typeof value === "number"
-  )
-);
-
-function normalizeCode(code: unknown): LocationErrorCode | null {
-  if (typeof code !== "number" || !knownLocationErrorCodes.has(code)) {
-    return null;
-  }
-  return code as LocationErrorCode;
-}
-
-function getRawMessage(error: unknown): string {
-  if (error instanceof Error) {
-    return error.message;
-  }
-  if (
-    typeof error === "object" &&
-    error !== null &&
-    "message" in error &&
-    typeof error.message === "string"
-  ) {
-    return error.message;
-  }
-  return String(error);
-}
-
-function parseEncodedLocationError(message: string): {
-  code: LocationErrorCode | null;
-  message: string;
-} {
-  const match = message.match(
-    new RegExp(`${LOCATION_ERROR_PREFIX}\\(code=(-?\\d+)\\):\\s*([\\s\\S]*)$`)
-  );
-
-  if (!match) {
-    return {
-      code: null,
-      message
-    };
-  }
-
-  return {
-    code: normalizeCode(Number(match[1])),
-    message: match[2] || message
-  };
-}
 
 /**
  * Creates a standardized LocationError object.
@@ -130,33 +79,6 @@ export function getLocationErrorCodeName(code: number): string {
     locationErrorCodeNames[code as LocationErrorCode] ??
     "UNKNOWN_LOCATION_ERROR"
   );
-}
-
-export function normalizeLocationError(error: unknown): LocationError {
-  const rawCode = normalizeCode(
-    typeof error === "object" && error !== null && "code" in error
-      ? error.code
-      : null
-  );
-  const nestedCode = normalizeCode(
-    typeof error === "object" &&
-      error !== null &&
-      "locationError" in error &&
-      typeof error.locationError === "object" &&
-      error.locationError !== null &&
-      "code" in error.locationError
-      ? error.locationError.code
-      : null
-  );
-  const rawMessage = getRawMessage(error);
-  const encoded = parseEncodedLocationError(rawMessage);
-  const message = encoded.message;
-  // Native owns the semantic code. JS only preserves structured callback errors
-  // and decodes native promise errors flattened by the bridge.
-  const code =
-    rawCode ?? nestedCode ?? encoded.code ?? LocationErrorCode.INTERNAL_ERROR;
-
-  return createLocationError(code, message);
 }
 
 /**

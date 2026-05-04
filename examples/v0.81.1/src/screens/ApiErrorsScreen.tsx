@@ -10,7 +10,7 @@ import {
 import type { GeolocationResponse } from "react-native-nitro-geolocation";
 
 type CapturedLocationError = {
-  code: number;
+  code: number | null;
   name: string;
   message: string;
 };
@@ -70,16 +70,14 @@ const runNativeLocationRequest = async <T,>(request: () => Promise<T>) => {
 
 const captureLocationError = (error: unknown): CapturedLocationError => {
   const maybeError = error as { code?: unknown; message?: unknown };
-  const code =
-    typeof maybeError.code === "number"
-      ? maybeError.code
-      : LocationErrorCode.INTERNAL_ERROR;
+  const code = typeof maybeError.code === "number" ? maybeError.code : null;
   const message =
     typeof maybeError.message === "string" ? maybeError.message : String(error);
 
   return {
     code,
-    name: getLocationErrorCodeName(code),
+    name:
+      code === null ? "NATIVE_PROMISE_ERROR" : getLocationErrorCodeName(code),
     message
   };
 };
@@ -223,8 +221,8 @@ export default function ApiErrorsScreen() {
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>3. Error Handling</Text>
         <Text style={styles.description}>
-          Trigger a native timeout to verify the Modern API returns structured
-          error codes.
+          Trigger a native timeout and compare it with the Modern API error code
+          contract below.
         </Text>
         <View style={styles.buttonContainer}>
           <Button
@@ -240,7 +238,7 @@ export default function ApiErrorsScreen() {
         {error && (
           <View style={styles.errorContainer} testID="api-error-details">
             <Text style={styles.errorText} testID="api-error-code">
-              Code: {error.code}
+              Code: {error.code === null ? "native promise error" : error.code}
             </Text>
             <Text style={styles.errorText} testID="api-error-name">
               Name: {error.name}

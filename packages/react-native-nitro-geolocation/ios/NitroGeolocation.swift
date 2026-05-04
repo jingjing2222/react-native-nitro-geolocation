@@ -17,7 +17,7 @@ private struct GeolocationErrorWrapper: Error, LocalizedError, CustomStringConve
     }
 
     var description: String {
-        return "NitroGeolocationError(code=\(Int(locationError.code))): \(locationError.message)"
+        return locationError.message
     }
 
     init(code: Int, message: String) {
