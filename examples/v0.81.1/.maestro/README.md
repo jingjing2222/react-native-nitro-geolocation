@@ -360,17 +360,28 @@ Error: App not found
 **Problem:** `tapOn: "Compat API"` doesn't switch tabs
 
 **Solutions:**
-1. Use coordinate-based tapping:
+1. Prefer direct deep linking for hidden or truncated tab targets:
+   ```yaml
+   - launchApp:
+       clearState: true
+   - extendedWaitUntil:
+       visible: "Geolocation API"
+       timeout: 10000
+   - stopApp
+   - openLink:
+       link: nitrogeolocation://app/compat
+   ```
+2. Use coordinate-based tapping:
    ```yaml
    - tapOn:
        point: 540,1560
    ```
-2. Use swipe gesture:
+3. Use swipe gesture:
    ```yaml
    - swipe:
        direction: LEFT
    ```
-3. Add `testID` to tabs (may not work with all React Navigation versions)
+4. Add `testID` to tabs (may not work with all React Navigation versions)
 
 ### Permission Dialog
 
