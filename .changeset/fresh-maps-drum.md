@@ -1,6 +1,6 @@
 ---
-"react-native-nitro-geolocation": patch
-"@react-native-nitro-geolocation/rozenite-plugin": patch
+"react-native-nitro-geolocation": minor
+"@react-native-nitro-geolocation/rozenite-plugin": minor
 ---
 
 Add `mocked` and `provider` metadata to modern location responses with Android and iOS native mappings.
