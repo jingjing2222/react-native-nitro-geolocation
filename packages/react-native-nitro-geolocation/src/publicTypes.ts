@@ -3,6 +3,10 @@ import type {
   CompatGeolocationConfigurationInternal,
   NitroGeolocationCompat
 } from "./NitroGeolocationCompat.nitro";
+import type {
+  GeolocationResponse as SchemaGeolocationResponse,
+  LocationProviderUsed as SchemaLocationProviderUsed
+} from "./types";
 
 type CallbackValue<TCallback> = TCallback extends (value: infer Value) => void
   ? Value
@@ -18,14 +22,12 @@ type NativeLocationProvider = NonNullable<
   NativeGeolocationConfiguration["locationProvider"]
 >;
 
-export type GeolocationResponse = Awaited<
-  ReturnType<NitroGeolocation["getCurrentPosition"]>
->;
+export type GeolocationResponse = SchemaGeolocationResponse;
 
 export type CompatGeolocationResponse = CallbackValue<CompatSuccessCallback>;
 
 export type GeolocationCoordinates = GeolocationResponse["coords"];
-export type LocationProviderUsed = NonNullable<GeolocationResponse["provider"]>;
+export type LocationProviderUsed = SchemaLocationProviderUsed;
 export type CompatGeolocationError = CallbackValue<CompatErrorCallback>;
 export type CompatGeolocationOptions = NonNullable<
   Parameters<CompatGetCurrentPosition>[2]

@@ -39,11 +39,25 @@ abstract class HybridNitroGeolocationSpec: HybridObject() {
   
   @DoNotStrip
   @Keep
-  abstract fun requestPermission(): Promise<PermissionStatus>
+  abstract fun requestPermission(success: (status: PermissionStatus) -> Unit, error: ((error: LocationError) -> Unit)?): Unit
   
   @DoNotStrip
   @Keep
-  abstract fun getCurrentPosition(options: LocationRequestOptions?): Promise<GeolocationResponse>
+  private fun requestPermission_cxx(success: Func_void_PermissionStatus, error: Func_void_LocationError?): Unit {
+    val __result = requestPermission(success, error?.let { it })
+    return __result
+  }
+
+  @DoNotStrip
+  @Keep
+  abstract fun getCurrentPosition(success: (position: GeolocationResponse) -> Unit, error: ((error: LocationError) -> Unit)?, options: LocationRequestOptions?): Unit
+
+  @DoNotStrip
+  @Keep
+  private fun getCurrentPosition_cxx(success: Func_void_GeolocationResponse, error: Func_void_LocationError?, options: LocationRequestOptions?): Unit {
+    val __result = getCurrentPosition(success, error?.let { it }, options)
+    return __result
+  }
   
   abstract fun watchPosition(success: (position: GeolocationResponse) -> Unit, error: ((error: LocationError) -> Unit)?, options: LocationRequestOptions?): String
   

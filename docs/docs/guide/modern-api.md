@@ -242,13 +242,48 @@ interface GeolocationResponse {
 **Error Handling**:
 
 ```tsx
-try {
-  const position = await getCurrentPosition();
-} catch (error) {
-  // error.code: 1 (PERMISSION_DENIED), 2 (POSITION_UNAVAILABLE), 3 (TIMEOUT)
-  // error.message: Human-readable error
-}
+import {
+  LocationErrorCode,
+  watchPosition,
+  unwatch,
+} from 'react-native-nitro-geolocation';
+
+const token = watchPosition(
+  (position) => {
+    console.log(position.coords.latitude, position.coords.longitude);
+  },
+  (error) => {
+    if (error.code === LocationErrorCode.SETTINGS_NOT_SATISFIED) {
+      // Device/provider settings do not satisfy the request.
+    }
+    // error.message: Human-readable error
+  }
+);
+
+unwatch(token);
 ```
+
+Modern API errors use the following codes. The expanded modern-only native
+setup/provider codes (`INTERNAL_ERROR`, `PLAY_SERVICE_NOT_AVAILABLE`, and
+`SETTINGS_NOT_SATISFIED`) were added in v1.2; codes 1-3 remain aligned with the
+legacy browser-style contract.
+
+The code is committed by the native layer before a `LocationError` is sent to
+JS. Both `watchPosition` error callbacks and public Promise rejections from
+`getCurrentPosition`/`requestPermission` receive the same `{ code, message }`
+shape; JS only relays that object and does not parse or reclassify native
+messages.
+
+| Code | Name                         | Meaning                                      |
+| ---- | ---------------------------- | -------------------------------------------- |
+| -1   | `INTERNAL_ERROR`             | Unexpected module/native failure             |
+| 1    | `PERMISSION_DENIED`          | Location permission was denied               |
+| 2    | `POSITION_UNAVAILABLE`       | A position fix is unavailable                |
+| 3    | `TIMEOUT`                    | The request timed out                        |
+| 4    | `PLAY_SERVICE_NOT_AVAILABLE` | Android Google Play Services is unavailable  |
+| 5    | `SETTINGS_NOT_SATISFIED`     | Device/provider settings do not satisfy the request |
+
+The `/compat` API keeps the legacy browser-style error contract with only `PERMISSION_DENIED`, `POSITION_UNAVAILABLE`, and `TIMEOUT`.
 
 
 ## React Hook
@@ -475,6 +510,7 @@ All Modern API exports are fully typed:
 import type {
   PermissionStatus,
   LocationRequestOptions,
+  LocationErrorCode,
   LocationError,
   GeolocationResponse,
   GeolocationCoordinates,

@@ -7,9 +7,9 @@ export { isCachedLocationValid } from "./cache";
 export {
   LocationErrorCode,
   createLocationError,
+  getLocationErrorCodeName,
   mapCLErrorCode,
-  mapAndroidException,
-  type LocationError
+  mapAndroidException
 } from "./errors";
 export {
   isBetterLocation,

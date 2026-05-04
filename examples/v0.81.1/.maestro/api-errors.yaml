@@ -1,0 +1,145 @@
+appId: nitrogeolocation.example
+---
+# Modern API error contract: trigger real native errors, display their
+# structured { code, message } shape, then assert the rendered result.
+
+- launchApp:
+    clearState: true
+    permissions:
+      all: deny
+
+- extendedWaitUntil:
+    visible: "Geolocation API"
+    timeout: 10000
+
+- stopApp
+
+- openLink:
+    link: nitrogeolocation://app/api-errors
+- tapOn:
+    text: "열기|Open"
+    optional: true
+
+- extendedWaitUntil:
+    visible: "Modern API error contract"
+    timeout: 10000
+
+- scrollUntilVisible:
+    element: "2. Position Request"
+    direction: DOWN
+
+- tapOn: "Get Position"
+- extendedWaitUntil:
+    visible: "Result: error"
+    timeout: 10000
+
+- assertVisible:
+    id: "api-error-details"
+- assertVisible:
+    text: "Code: 1"
+- assertVisible:
+    text: "Name: PERMISSION_DENIED"
+- assertVisible:
+    id: "api-error-message"
+
+- launchApp:
+    clearState: true
+    permissions:
+      all: allow
+
+- extendedWaitUntil:
+    visible: "Geolocation API"
+    timeout: 10000
+
+- stopApp
+
+- openLink:
+    link: nitrogeolocation://app/api-errors
+- tapOn:
+    text: "열기|Open"
+    optional: true
+
+- extendedWaitUntil:
+    visible: "Modern API error contract"
+    timeout: 10000
+
+- tapOn: "Request Permission"
+- tapOn:
+    text: "Allow While Using App|앱을 사용하는 동안 허용|OK"
+    optional: true
+- extendedWaitUntil:
+    visible: "granted"
+    timeout: 10000
+
+- setLocation:
+    latitude: 37.5665
+    longitude: 126.978
+
+- tapOn: "Get Position"
+- extendedWaitUntil:
+    visible: "Current Position"
+    timeout: 15000
+
+- assertVisible:
+    id: "api-error-position"
+- assertVisible:
+    id: "api-error-latitude"
+- assertVisible:
+    id: "api-error-longitude"
+- assertVisible:
+    id: "api-error-accuracy"
+
+- scrollUntilVisible:
+    element: "3. Error Handling"
+    direction: DOWN
+
+- tapOn: "Force Timeout"
+- extendedWaitUntil:
+    visible: "Result: error"
+    timeout: 10000
+
+- assertVisible:
+    id: "api-error-details"
+- assertVisible:
+    text: "Code: 3"
+- assertVisible:
+    text: "Name: TIMEOUT"
+- assertVisible:
+    id: "api-error-message"
+
+- scrollUntilVisible:
+    element: "Error Code Contract"
+    direction: DOWN
+
+- assertVisible:
+    id: "api-error-code-contract"
+- scrollUntilVisible:
+    element: "INTERNAL_ERROR"
+    direction: DOWN
+- assertVisible:
+    id: "api-error-contract-INTERNAL_ERROR"
+- scrollUntilVisible:
+    element: "PERMISSION_DENIED"
+    direction: DOWN
+- assertVisible:
+    id: "api-error-contract-PERMISSION_DENIED"
+- scrollUntilVisible:
+    element: "POSITION_UNAVAILABLE"
+    direction: DOWN
+- assertVisible:
+    id: "api-error-contract-POSITION_UNAVAILABLE"
+- scrollUntilVisible:
+    element: "TIMEOUT"
+    direction: DOWN
+- assertVisible:
+    id: "api-error-contract-TIMEOUT"
+- scrollUntilVisible:
+    element: "PLAY_SERVICE_NOT_AVAILABLE"
+    direction: DOWN
+- assertVisible:
+    id: "api-error-contract-PLAY_SERVICE_NOT_AVAILABLE"
+- scrollUntilVisible:
+    element: "SETTINGS_NOT_SATISFIED"
+    direction: DOWN
+- assertVisible:
+    id: "api-error-contract-SETTINGS_NOT_SATISFIED"

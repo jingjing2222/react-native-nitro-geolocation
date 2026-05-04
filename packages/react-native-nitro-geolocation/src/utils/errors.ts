@@ -1,26 +1,39 @@
+import type { LocationError as NativeLocationError } from "../NitroGeolocation.nitro";
+
 /**
  * Error codes for geolocation errors.
- * These codes match the W3C Geolocation API specification.
+ * Codes 1-3 match the W3C Geolocation API specification. Modern API also
+ * exposes native location-provider/setup failures that cannot be represented
+ * by the legacy browser contract.
  */
 export enum LocationErrorCode {
+  /** Unexpected module/native failure */
+  INTERNAL_ERROR = -1,
   /** User denied the request for Geolocation */
   PERMISSION_DENIED = 1,
   /** Location provider is unavailable */
   POSITION_UNAVAILABLE = 2,
   /** The request to get location timed out */
-  TIMEOUT = 3
+  TIMEOUT = 3,
+  /** Android Google Play Services provider is unavailable */
+  PLAY_SERVICE_NOT_AVAILABLE = 4,
+  /** Device/provider settings do not satisfy the request */
+  SETTINGS_NOT_SATISFIED = 5
 }
 
 /**
  * Geolocation error object.
  */
-export interface LocationError extends Error {
-  code: LocationErrorCode;
-  message: string;
-  PERMISSION_DENIED: LocationErrorCode.PERMISSION_DENIED;
-  POSITION_UNAVAILABLE: LocationErrorCode.POSITION_UNAVAILABLE;
-  TIMEOUT: LocationErrorCode.TIMEOUT;
-}
+export type LocationError = NativeLocationError;
+
+const locationErrorCodeNames: Record<LocationErrorCode, string> = {
+  [LocationErrorCode.INTERNAL_ERROR]: "INTERNAL_ERROR",
+  [LocationErrorCode.PERMISSION_DENIED]: "PERMISSION_DENIED",
+  [LocationErrorCode.POSITION_UNAVAILABLE]: "POSITION_UNAVAILABLE",
+  [LocationErrorCode.TIMEOUT]: "TIMEOUT",
+  [LocationErrorCode.PLAY_SERVICE_NOT_AVAILABLE]: "PLAY_SERVICE_NOT_AVAILABLE",
+  [LocationErrorCode.SETTINGS_NOT_SATISFIED]: "SETTINGS_NOT_SATISFIED"
+};
 
 /**
  * Creates a standardized LocationError object.
@@ -41,12 +54,14 @@ export function createLocationError(
   code: LocationErrorCode,
   message: string
 ): LocationError {
-  const error = new Error(message) as LocationError;
-  error.code = code;
-  error.PERMISSION_DENIED = LocationErrorCode.PERMISSION_DENIED;
-  error.POSITION_UNAVAILABLE = LocationErrorCode.POSITION_UNAVAILABLE;
-  error.TIMEOUT = LocationErrorCode.TIMEOUT;
-  return error;
+  return { code, message };
+}
+
+export function getLocationErrorCodeName(code: number): string {
+  return (
+    locationErrorCodeNames[code as LocationErrorCode] ??
+    "UNKNOWN_LOCATION_ERROR"
+  );
 }
 
 /**
@@ -59,10 +74,10 @@ export function createLocationError(
  */
 export function mapCLErrorCode(clErrorCode: number): LocationErrorCode {
   switch (clErrorCode) {
-    case 0: // kCLErrorDenied
-      return LocationErrorCode.PERMISSION_DENIED;
-    case 1: // kCLErrorLocationUnknown
+    case 0: // kCLErrorLocationUnknown
       return LocationErrorCode.POSITION_UNAVAILABLE;
+    case 1: // kCLErrorDenied
+      return LocationErrorCode.PERMISSION_DENIED;
     default:
       return LocationErrorCode.POSITION_UNAVAILABLE;
   }
@@ -77,6 +92,18 @@ export function mapCLErrorCode(clErrorCode: number): LocationErrorCode {
 export function mapAndroidException(exceptionType: string): LocationErrorCode {
   if (exceptionType === "SecurityException") {
     return LocationErrorCode.PERMISSION_DENIED;
+  }
+  if (
+    exceptionType === "GooglePlayServicesNotAvailableException" ||
+    exceptionType === "GooglePlayServicesRepairableException"
+  ) {
+    return LocationErrorCode.PLAY_SERVICE_NOT_AVAILABLE;
+  }
+  if (
+    exceptionType === "ResolvableApiException" ||
+    exceptionType === "LocationSettingsException"
+  ) {
+    return LocationErrorCode.SETTINGS_NOT_SATISFIED;
   }
   return LocationErrorCode.POSITION_UNAVAILABLE;
 }

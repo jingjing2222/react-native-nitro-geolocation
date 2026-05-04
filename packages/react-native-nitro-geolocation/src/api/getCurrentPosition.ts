@@ -39,5 +39,7 @@ export function getCurrentPosition(
       return devtoolsResult;
     }
   }
-  return NitroGeolocationHybridObject.getCurrentPosition(options);
+  return new Promise((resolve, reject) => {
+    NitroGeolocationHybridObject.getCurrentPosition(resolve, reject, options);
+  });
 }

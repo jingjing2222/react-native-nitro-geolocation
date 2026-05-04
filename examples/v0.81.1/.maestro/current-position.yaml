@@ -19,6 +19,11 @@ appId: nitrogeolocation.example
     element: "2. Get Current Position"
     direction: DOWN
 
+# Provide a real device location before exercising the native request.
+- setLocation:
+    latitude: 37.5665
+    longitude: 126.9780
+
 # Get current position
 - tapOn: "Get Position"
 

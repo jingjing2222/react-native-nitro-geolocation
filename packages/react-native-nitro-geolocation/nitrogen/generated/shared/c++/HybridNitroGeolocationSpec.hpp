@@ -67,8 +67,8 @@ namespace margelo::nitro::nitrogeolocation {
       // Methods
       virtual void setConfiguration(const GeolocationConfiguration& config) = 0;
       virtual std::shared_ptr<Promise<PermissionStatus>> checkPermission() = 0;
-      virtual std::shared_ptr<Promise<PermissionStatus>> requestPermission() = 0;
-      virtual std::shared_ptr<Promise<GeolocationResponse>> getCurrentPosition(const std::optional<LocationRequestOptions>& options) = 0;
+      virtual void requestPermission(const std::function<void(PermissionStatus /* status */)>& success, const std::optional<std::function<void(const LocationError& /* error */)>>& error) = 0;
+      virtual void getCurrentPosition(const std::function<void(const GeolocationResponse& /* position */)>& success, const std::optional<std::function<void(const LocationError& /* error */)>>& error, const std::optional<LocationRequestOptions>& options) = 0;
       virtual std::string watchPosition(const std::function<void(const GeolocationResponse& /* position */)>& success, const std::optional<std::function<void(const LocationError& /* error */)>>& error, const std::optional<LocationRequestOptions>& options) = 0;
       virtual void unwatch(const std::string& token) = 0;
       virtual void stopObserving() = 0;

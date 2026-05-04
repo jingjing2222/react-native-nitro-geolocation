@@ -68,10 +68,12 @@ The Android and iOS package scripts install the Release build first (`yarn andro
 
 ### `current-position.yaml`
 - Tests `getCurrentPosition()` API
+- Uses Maestro `setLocation` before tapping the public Get Position button
 - Verifies one-time location fetch
 
 ### `watch-position.yaml`
 - Tests `useWatchPosition()` Hook
+- Uses Maestro `setLocation` before enabling the public watch toggle
 - Verifies continuous location tracking
 - Confirms position updates
 
@@ -139,6 +141,13 @@ The two iOS cases intentionally differ like this:
 | --- | --- | --- | --- |
 | `mocked-metadata-ios-true.yaml` | Yes | `Mocked: true`, `Provider: unknown` | Presence only |
 | `mocked-metadata-ios-false.yaml` | No | `Mocked: false`, `Provider: unknown` | None |
+
+### `api-errors.yaml`
+- Opens the API Errors screen and triggers real native Modern API errors.
+- Uses the public screen buttons directly; the flow does not toggle devtools or inject JS-only errors.
+- Starts once with permissions denied and asserts the native `PERMISSION_DENIED` result rendered by the screen.
+- Starts again with permissions allowed, verifies a real position request, then forces a native `TIMEOUT` result and asserts its rendered `{ code, message }` shape.
+- The static Error Code Contract rows are documentation only; this flow asserts the native result panel, not just those rows.
 
 ### `compat-api.yaml`
 - Tests `@react-native-community/geolocation` compatibility API
@@ -360,17 +369,28 @@ Error: App not found
 **Problem:** `tapOn: "Compat API"` doesn't switch tabs
 
 **Solutions:**
-1. Use coordinate-based tapping:
+1. Prefer direct deep linking for hidden or truncated tab targets:
+   ```yaml
+   - launchApp:
+       clearState: true
+   - extendedWaitUntil:
+       visible: "Geolocation API"
+       timeout: 10000
+   - stopApp
+   - openLink:
+       link: nitrogeolocation://app/compat
+   ```
+2. Use coordinate-based tapping:
    ```yaml
    - tapOn:
        point: 540,1560
    ```
-2. Use swipe gesture:
+3. Use swipe gesture:
    ```yaml
    - swipe:
        direction: LEFT
    ```
-3. Add `testID` to tabs (may not work with all React Navigation versions)
+4. Add `testID` to tabs (may not work with all React Navigation versions)
 
 ### Permission Dialog
 
