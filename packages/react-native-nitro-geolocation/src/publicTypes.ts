@@ -1,5 +1,5 @@
 import type {
-  ModernGeolocationConfiguration as NativeModernGeolocationConfiguration,
+  ModernGeolocationConfiguration as NativeGeolocationConfiguration,
   NitroGeolocation
 } from "./NitroGeolocation.nitro";
 import type {
@@ -15,39 +15,37 @@ type CompatGetCurrentPosition = NitroGeolocationCompat["getCurrentPosition"];
 type CompatSuccessCallback = Parameters<CompatGetCurrentPosition>[0];
 type CompatErrorCallback = NonNullable<Parameters<CompatGetCurrentPosition>[1]>;
 type NativeLocationProvider = NonNullable<
-  NativeModernGeolocationConfiguration["locationProvider"]
+  NativeGeolocationConfiguration["locationProvider"]
 >;
 
-export type ModernGeolocationResponse = Awaited<
+export type GeolocationResponse = Awaited<
   ReturnType<NitroGeolocation["getCurrentPosition"]>
 >;
 
 export type CompatGeolocationResponse = CallbackValue<CompatSuccessCallback>;
 
-export type GeolocationCoordinates = ModernGeolocationResponse["coords"];
-export type LocationProviderUsed = NonNullable<
-  ModernGeolocationResponse["provider"]
->;
-export type GeolocationError = CallbackValue<CompatErrorCallback>;
-export type GeolocationOptions = NonNullable<
+export type GeolocationCoordinates = GeolocationResponse["coords"];
+export type LocationProviderUsed = NonNullable<GeolocationResponse["provider"]>;
+export type CompatGeolocationError = CallbackValue<CompatErrorCallback>;
+export type CompatGeolocationOptions = NonNullable<
   Parameters<CompatGetCurrentPosition>[2]
 >;
 
 export type AuthorizationLevel = NonNullable<
-  NativeModernGeolocationConfiguration["authorizationLevel"]
+  NativeGeolocationConfiguration["authorizationLevel"]
 >;
 export type LocationProvider =
   | Exclude<NativeLocationProvider, "android_platform">
   | "android";
 
-export type ModernGeolocationConfiguration = Omit<
-  NativeModernGeolocationConfiguration,
+export type GeolocationConfiguration = Omit<
+  NativeGeolocationConfiguration,
   "locationProvider"
 > & {
   locationProvider?: LocationProvider;
 };
 
-export type GeolocationConfiguration = Omit<
+export type CompatGeolocationConfiguration = Omit<
   RNConfigurationInternal,
   "locationProvider"
 > & {

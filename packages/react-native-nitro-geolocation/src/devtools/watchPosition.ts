@@ -1,9 +1,9 @@
 import type { LocationError } from "../NitroGeolocation.nitro";
-import type { ModernGeolocationResponse } from "../publicTypes";
+import type { GeolocationResponse } from "../publicTypes";
 import { getDevtoolsState } from "./index";
 
 export function devtoolsWatchPosition(
-  success: (position: ModernGeolocationResponse) => void,
+  success: (position: GeolocationResponse) => void,
   error?: (error: LocationError) => void
 ): string {
   const devtools = getDevtoolsState();

@@ -457,7 +457,7 @@ import type {
   LocationError,
   GeolocationResponse,
   GeolocationCoordinates,
-  ModernGeolocationConfiguration
+  GeolocationConfiguration
 } from 'react-native-nitro-geolocation';
 ```
 

@@ -1,9 +1,9 @@
 import { NitroGeolocationHybridCompatObject } from "../NitroGeolocationModule";
-import type { GeolocationError } from "../publicTypes";
+import type { CompatGeolocationError } from "../publicTypes";
 
 export function requestAuthorization(
   success?: () => void,
-  error?: (error: GeolocationError) => void
+  error?: (error: CompatGeolocationError) => void
 ): void {
   NitroGeolocationHybridCompatObject.requestAuthorization(success, error);
 }

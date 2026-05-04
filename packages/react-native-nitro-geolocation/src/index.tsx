@@ -68,13 +68,12 @@ export type {
 } from "./NitroGeolocation.nitro";
 
 export type {
-  ModernGeolocationResponse,
-  ModernGeolocationResponse as GeolocationResponse,
+  GeolocationResponse,
   GeolocationCoordinates,
   AuthorizationLevel,
   LocationProvider,
   LocationProviderUsed,
-  ModernGeolocationConfiguration
+  GeolocationConfiguration
 } from "./publicTypes";
 
 // Pure utility functions (advanced users only)

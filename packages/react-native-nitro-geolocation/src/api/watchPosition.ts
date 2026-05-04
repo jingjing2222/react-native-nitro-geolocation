@@ -5,7 +5,7 @@ import type {
 import { NitroGeolocationHybridObject } from "../NitroGeolocationModule";
 import { isDevtoolsEnabled } from "../devtools";
 import { devtoolsWatchPosition } from "../devtools/watchPosition";
-import type { ModernGeolocationResponse } from "../publicTypes";
+import type { GeolocationResponse } from "../publicTypes";
 
 /**
  * Start watching for continuous location updates.
@@ -32,7 +32,7 @@ import type { ModernGeolocationResponse } from "../publicTypes";
  * ```
  */
 export function watchPosition(
-  success: (position: ModernGeolocationResponse) => void,
+  success: (position: GeolocationResponse) => void,
   error?: (error: LocationError) => void,
   options?: LocationRequestOptions
 ): string {

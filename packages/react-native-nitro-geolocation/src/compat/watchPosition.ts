@@ -1,8 +1,8 @@
 import { NitroGeolocationHybridCompatObject } from "../NitroGeolocationModule";
 import type {
-  CompatGeolocationResponse,
-  GeolocationError,
-  GeolocationOptions
+  CompatGeolocationError,
+  CompatGeolocationOptions,
+  CompatGeolocationResponse
 } from "../publicTypes";
 
 /**
@@ -16,8 +16,8 @@ import type {
  */
 export function watchPosition(
   success: (position: CompatGeolocationResponse) => void,
-  error?: (error: GeolocationError) => void,
-  options?: GeolocationOptions
+  error?: (error: CompatGeolocationError) => void,
+  options?: CompatGeolocationOptions
 ): number {
   return NitroGeolocationHybridCompatObject.watchPosition(
     success,

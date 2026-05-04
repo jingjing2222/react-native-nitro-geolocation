@@ -1,6 +1,6 @@
-import type { ModernGeolocationConfiguration as NitroModernGeolocationConfiguration } from "../NitroGeolocation.nitro";
+import type { ModernGeolocationConfiguration as NitroGeolocationConfiguration } from "../NitroGeolocation.nitro";
 import { NitroGeolocationHybridObject } from "../NitroGeolocationModule";
-import type { ModernGeolocationConfiguration } from "../publicTypes";
+import type { GeolocationConfiguration } from "../publicTypes";
 
 /**
  * Set global geolocation configuration.
@@ -18,8 +18,8 @@ import type { ModernGeolocationConfiguration } from "../publicTypes";
  * });
  * ```
  */
-export function setConfiguration(config: ModernGeolocationConfiguration): void {
-  const nativeConfig: NitroModernGeolocationConfiguration = {
+export function setConfiguration(config: GeolocationConfiguration): void {
+  const nativeConfig: NitroGeolocationConfiguration = {
     ...config,
     locationProvider:
       config.locationProvider === "android"
