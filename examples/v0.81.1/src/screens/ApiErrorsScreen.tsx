@@ -8,6 +8,7 @@ import {
   requestPermission
 } from "react-native-nitro-geolocation";
 import type { GeolocationResponse } from "react-native-nitro-geolocation";
+import { runWithNativeGeolocation } from "./scenarioUtils";
 
 type CapturedLocationError = {
   code: number;
@@ -101,10 +102,12 @@ export default function ApiErrorsScreen() {
     setError(null);
 
     try {
-      const nextPosition = await getCurrentPosition({
-        enableHighAccuracy: true,
-        timeout: 15000
-      });
+      const nextPosition = await runWithNativeGeolocation(() =>
+        getCurrentPosition({
+          enableHighAccuracy: true,
+          timeout: 15000
+        })
+      );
       setPosition(nextPosition);
     } catch (err) {
       setError(captureLocationError(err));
@@ -120,7 +123,9 @@ export default function ApiErrorsScreen() {
     setError(null);
 
     try {
-      await getCurrentPosition(TIMEOUT_CONTRACT_OPTIONS);
+      await runWithNativeGeolocation(() =>
+        getCurrentPosition(TIMEOUT_CONTRACT_OPTIONS)
+      );
     } catch (err) {
       setError(captureLocationError(err));
     } finally {

@@ -101,6 +101,10 @@ appId: nitrogeolocation.example
 - tapOn:
     id: "accuracy-presets-run-denied-button"
 
+- scrollUntilVisible:
+    element: "Permission denied: passed"
+    direction: DOWN
+
 - extendedWaitUntil:
     visible: "Permission denied: passed"
     timeout: 10000

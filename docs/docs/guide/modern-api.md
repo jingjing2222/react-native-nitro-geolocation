@@ -259,6 +259,9 @@ function LocationButton() {
 - `maximumAge?: number` - Max age of cached location in ms (default: 0)
 - `enableHighAccuracy?: boolean` - Deprecated since `v1.2`. Kept for v1 compatibility only; prefer `accuracy`. It is expected to be removed from the Modern API in v2.
 - `accuracy?: { android?: 'high' | 'balanced' | 'low' | 'passive'; ios?: 'bestForNavigation' | 'best' | 'nearestTenMeters' | 'hundredMeters' | 'kilometer' | 'threeKilometers' | 'reduced' }` - Platform-specific accuracy preset, available since `v1.2`. When a preset is provided for the current platform, it takes precedence over `enableHighAccuracy`.
+- `activityType?: 'other' | 'automotiveNavigation' | 'fitness' | 'otherNavigation' | 'airborne'` - iOS Core Location activity type, available since `v1.2`.
+- `pausesLocationUpdatesAutomatically?: boolean` - iOS automatic pause behavior, available since `v1.2`.
+- `showsBackgroundLocationIndicator?: boolean` - iOS background location indicator, available since `v1.2`. This only has a visible effect when the app has background location capability and permission.
 
 Use `accuracy` when you need explicit platform-native behavior:
 
@@ -276,6 +279,23 @@ Android maps the presets to native provider/priority intent: `high` prefers
 GPS with a network fallback, `balanced` uses the network provider, `low` uses
 network/passive providers, and `passive` only listens through the passive
 provider. iOS maps the presets to Core Location `desiredAccuracy` constants.
+
+iOS tuning options are applied to both one-time requests and watches through
+the shared Core Location manager configuration:
+
+```tsx
+await getCurrentPosition({
+  accuracy: { ios: 'kilometer' },
+  activityType: 'fitness',
+  pausesLocationUpdatesAutomatically: false,
+  showsBackgroundLocationIndicator: false,
+  timeout: 15000
+});
+```
+
+Use `showsBackgroundLocationIndicator` only after configuring background
+location in the app target, including the `location` background mode and the
+required Info.plist location usage descriptions.
 
 **Returns**: `Promise<GeolocationResponse>`
 
@@ -353,6 +373,66 @@ messages.
 
 The `/compat` API keeps the legacy browser-style error contract with only `PERMISSION_DENIED`, `POSITION_UNAVAILABLE`, and `TIMEOUT`.
 
+### getLastKnownPosition()
+
+Available since `v1.2`.
+
+Read the best cached native location explicitly without starting a fresh
+location request. This is useful for fast app startup, stale-while-refresh UI,
+and cache-only flows where a fresh GPS/network request would be too expensive.
+
+```tsx
+import { getLastKnownPosition } from 'react-native-nitro-geolocation';
+
+const cached = await getLastKnownPosition({
+  maximumAge: 60_000,
+  accuracy: { android: 'balanced', ios: 'hundredMeters' }
+});
+```
+
+`getLastKnownPosition(options?)` uses the same provider and cache-filtering
+options as `getCurrentPosition()`, but it never falls through to a fresh native
+request. If no cached location satisfies `maximumAge` or permission is denied,
+it rejects with the native `LocationError` contract, usually
+`POSITION_UNAVAILABLE` or `PERMISSION_DENIED`.
+
+### iOS Accuracy Authorization
+
+Available since `v1.2`.
+
+Use `getAccuracyAuthorization()` to read whether iOS currently grants full or
+reduced location accuracy. Android maps fine permission to `full`, coarse-only
+permission to `reduced`, and no location permission to `unknown`.
+
+```tsx
+import {
+  getAccuracyAuthorization,
+  requestTemporaryFullAccuracy
+} from 'react-native-nitro-geolocation';
+
+const authorization = await getAccuracyAuthorization();
+
+if (authorization === 'reduced') {
+  await requestTemporaryFullAccuracy('TurnByTurnNavigation');
+}
+```
+
+For iOS, `requestTemporaryFullAccuracy(purposeKey)` calls Core Location's
+temporary full accuracy API. The `purposeKey` must exist in
+`NSLocationTemporaryUsageDescriptionDictionary` in Info.plist, for example:
+
+```xml
+<key>NSLocationTemporaryUsageDescriptionDictionary</key>
+<dict>
+  <key>TurnByTurnNavigation</key>
+  <string>Precise location improves turn-by-turn navigation.</string>
+</dict>
+```
+
+Passing an empty `purposeKey` rejects with `INTERNAL_ERROR`. Android does not
+show a temporary accuracy prompt and resolves with the current mapped accuracy
+authorization.
+
 
 ## React Hook
 
@@ -415,6 +495,9 @@ function LiveTracker() {
 - `timeout?: number` - Request timeout
 - `maximumAge?: number` - Max cached location age
 - `useSignificantChanges?: boolean` - Use significant changes mode (iOS)
+- `activityType?: 'other' | 'automotiveNavigation' | 'fitness' | 'otherNavigation' | 'airborne'` - iOS Core Location activity type, available since `v1.2`
+- `pausesLocationUpdatesAutomatically?: boolean` - iOS automatic pause behavior, available since `v1.2`
+- `showsBackgroundLocationIndicator?: boolean` - iOS background location indicator, available since `v1.2`
 
 **Returns**:
 

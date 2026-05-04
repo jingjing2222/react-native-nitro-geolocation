@@ -10,10 +10,6 @@ appId: nitrogeolocation.example
       android.permission.ACCESS_COARSE_LOCATION: allow
       android.permission.ACCESS_FINE_LOCATION: allow
 
-- extendedWaitUntil:
-    visible: "Geolocation API"
-    timeout: 10000
-
 - stopApp
 
 - openLink:

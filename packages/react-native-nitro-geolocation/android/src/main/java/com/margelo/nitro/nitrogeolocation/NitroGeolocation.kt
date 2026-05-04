@@ -58,11 +58,14 @@ class NitroGeolocation(
             private const val DEFAULT_FASTEST_INTERVAL = 100.0
             private const val DEFAULT_DISTANCE_FILTER = 0.0
 
-            fun parse(options: LocationRequestOptions?): ParsedOptions {
+            fun parse(
+                options: LocationRequestOptions?,
+                defaultMaximumAge: Double = DEFAULT_MAXIMUM_AGE
+            ): ParsedOptions {
                 val enableHighAccuracy = options?.enableHighAccuracy ?: false
                 return ParsedOptions(
                     timeout = options?.timeout ?: DEFAULT_TIMEOUT,
-                    maximumAge = options?.maximumAge ?: DEFAULT_MAXIMUM_AGE,
+                    maximumAge = options?.maximumAge ?: defaultMaximumAge,
                     androidAccuracy = resolveAndroidAccuracy(
                         options?.accuracy,
                         enableHighAccuracy
@@ -71,6 +74,10 @@ class NitroGeolocation(
                     fastestInterval = options?.fastestInterval ?: DEFAULT_FASTEST_INTERVAL,
                     distanceFilter = options?.distanceFilter ?: DEFAULT_DISTANCE_FILTER
                 )
+            }
+
+            fun parseLastKnown(options: LocationRequestOptions?): ParsedOptions {
+                return parse(options, defaultMaximumAge = Double.POSITIVE_INFINITY)
             }
         }
     }
@@ -214,6 +221,28 @@ class NitroGeolocation(
         locationSettings.requestLocationSettings(success, error, options)
     }
 
+    override fun getAccuracyAuthorization(): Promise<AccuracyAuthorization> {
+        return Promise.async {
+            getCurrentAccuracyAuthorization()
+        }
+    }
+
+    override fun requestTemporaryFullAccuracy(
+        purposeKey: String,
+        success: (AccuracyAuthorization) -> Unit,
+        error: ((LocationError) -> Unit)?
+    ) {
+        if (purposeKey.isBlank()) {
+            error?.invoke(createLocationError(
+                INTERNAL_ERROR,
+                "purposeKey must not be empty."
+            ))
+            return
+        }
+
+        success(getCurrentAccuracyAuthorization())
+    }
+
     // MARK: - Get Current Position
 
     override fun getCurrentPosition(
@@ -255,6 +284,43 @@ class NitroGeolocation(
                 is PositionResult.Failure -> error?.invoke(result.error)
             }
         }
+    }
+
+    override fun getLastKnownPosition(
+        success: (GeolocationResponse) -> Unit,
+        error: ((LocationError) -> Unit)?,
+        options: LocationRequestOptions?
+    ) {
+        if (!hasLocationPermission()) {
+            error?.invoke(createLocationError(
+                PERMISSION_DENIED,
+                "Location permission not granted"
+            ))
+            return
+        }
+
+        val parsedOptions = ParsedOptions.parseLastKnown(options)
+        if (requiresPlayServices() && !isGooglePlayServicesAvailable()) {
+            error?.invoke(createPlayServicesUnavailableError())
+            return
+        }
+
+        val providers = getValidProviders(parsedOptions.androidAccuracy)
+        if (providers.isEmpty()) {
+            error?.invoke(createNoLocationProviderError(parsedOptions))
+            return
+        }
+
+        val cachedLocation = getBestCachedLocation(providers, parsedOptions)
+        if (cachedLocation != null) {
+            success(locationToPosition(cachedLocation))
+            return
+        }
+
+        error?.invoke(createLocationError(
+            POSITION_UNAVAILABLE,
+            "No cached location available"
+        ))
     }
 
     // MARK: - Watch Position (Callback-based with tokens)
@@ -348,6 +414,14 @@ class NitroGeolocation(
         ) == PackageManager.PERMISSION_GRANTED
     }
 
+    private fun getCurrentAccuracyAuthorization(): AccuracyAuthorization {
+        return when {
+            hasFineLocationPermission() -> AccuracyAuthorization.FULL
+            hasCoarseLocationPermission() -> AccuracyAuthorization.REDUCED
+            else -> AccuracyAuthorization.UNKNOWN
+        }
+    }
+
     // Handle permission request result (called from Activity)
     fun onPermissionResult(requestCode: Int, grantResults: IntArray) {
         if (requestCode != PERMISSION_REQUEST_CODE) return
@@ -420,8 +494,10 @@ class NitroGeolocation(
     // MARK: - Helper Functions - Cache Validation
 
     private fun isCachedLocationValid(location: Location, options: ParsedOptions): Boolean {
+        if (options.maximumAge <= 0.0) return false
+
         val locationAge = SystemClock.elapsedRealtime() - location.elapsedRealtimeNanos / 1_000_000
-        return locationAge < options.maximumAge
+        return locationAge.coerceAtLeast(0L) < options.maximumAge
     }
 
     private fun getBestCachedLocation(providers: List<String>, options: ParsedOptions): Location? {
@@ -488,8 +564,9 @@ class NitroGeolocation(
             return
         }
 
-        // Use the Android 11+ platform API when available.
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+        // Android's getCurrentLocation may resolve a recent historical fix. A maximumAge of 0
+        // means callers explicitly asked us to wait for a fresh provider update.
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R && request.options.maximumAge > 0.0) {
             requestCurrentLocationModern(provider, requestId, request.handler, remainingTimeoutMillis)
         } else {
             requestCurrentLocationLegacy(provider, requestId, request.handler, remainingTimeoutMillis)

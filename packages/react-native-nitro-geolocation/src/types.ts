@@ -16,6 +16,13 @@ export type IOSAccuracyPreset =
   | "kilometer"
   | "threeKilometers"
   | "reduced";
+export type AccuracyAuthorization = "full" | "reduced" | "unknown";
+export type IOSActivityType =
+  | "other"
+  | "automotiveNavigation"
+  | "fitness"
+  | "otherNavigation"
+  | "airborne";
 
 export interface LocationAccuracyOptions {
   android?: AndroidAccuracyPreset;
@@ -96,4 +103,7 @@ export interface CompatGeolocationOptions {
   fastestInterval?: number;
   distanceFilter?: number;
   useSignificantChanges?: boolean;
+  activityType?: IOSActivityType;
+  pausesLocationUpdatesAutomatically?: boolean;
+  showsBackgroundLocationIndicator?: boolean;
 }

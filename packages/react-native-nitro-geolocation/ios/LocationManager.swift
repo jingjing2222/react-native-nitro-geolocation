@@ -29,6 +29,9 @@ class LocationManager: NSObject, CLLocationManagerDelegate {
         let accuracy: CLLocationAccuracy
         let distanceFilter: CLLocationDistance
         let useSignificantChanges: Bool
+        let activityType: CLActivityType?
+        let pausesLocationUpdatesAutomatically: Bool?
+        let showsBackgroundLocationIndicator: Bool?
 
         static func parse(from options: CompatGeolocationOptions?) -> ParsedOptions {
             let timeout = options?.timeout ?? DEFAULT_TIMEOUT
@@ -46,7 +49,10 @@ class LocationManager: NSObject, CLLocationManagerDelegate {
                 maximumAge: maximumAge,
                 accuracy: accuracy,
                 distanceFilter: distanceFilter,
-                useSignificantChanges: useSignificantChanges
+                useSignificantChanges: useSignificantChanges,
+                activityType: resolveActivityType(options?.activityType),
+                pausesLocationUpdatesAutomatically: options?.pausesLocationUpdatesAutomatically,
+                showsBackgroundLocationIndicator: options?.showsBackgroundLocationIndicator
             )
         }
 
@@ -75,6 +81,25 @@ class LocationManager: NSObject, CLLocationManagerDelegate {
                 return kCLLocationAccuracyThreeKilometers
             case .reduced:
                 return kCLLocationAccuracyReduced
+            }
+        }
+
+        private static func resolveActivityType(_ activityType: IOSActivityType?) -> CLActivityType? {
+            guard let activityType else {
+                return nil
+            }
+
+            switch activityType {
+            case .other:
+                return .other
+            case .automotivenavigation:
+                return .automotiveNavigation
+            case .fitness:
+                return .fitness
+            case .othernavigation:
+                return .otherNavigation
+            case .airborne:
+                return .airborne
             }
         }
     }
@@ -377,6 +402,9 @@ class LocationManager: NSObject, CLLocationManagerDelegate {
         // Find the best (most accurate) settings from all pending requests and active watches
         var bestAccuracy: CLLocationAccuracy?
         var smallestDistanceFilter: CLLocationDistance?
+        var activityType: CLActivityType?
+        var pausesLocationUpdatesAutomatically: Bool?
+        var showsBackgroundLocationIndicator = false
         var shouldUseSignificantChanges = false
 
         for request in pendingRequests {
@@ -385,6 +413,13 @@ class LocationManager: NSObject, CLLocationManagerDelegate {
                 smallestDistanceFilter,
                 request.options.distanceFilter
             )
+            activityType = mergeActivityType(activityType, request.options.activityType)
+            pausesLocationUpdatesAutomatically = mergePausesLocationUpdatesAutomatically(
+                pausesLocationUpdatesAutomatically,
+                request.options.pausesLocationUpdatesAutomatically
+            )
+            showsBackgroundLocationIndicator = showsBackgroundLocationIndicator ||
+                (request.options.showsBackgroundLocationIndicator ?? false)
             shouldUseSignificantChanges =
                 shouldUseSignificantChanges || request.options.useSignificantChanges
         }
@@ -395,12 +430,25 @@ class LocationManager: NSObject, CLLocationManagerDelegate {
                 smallestDistanceFilter,
                 watch.options.distanceFilter
             )
+            activityType = mergeActivityType(activityType, watch.options.activityType)
+            pausesLocationUpdatesAutomatically = mergePausesLocationUpdatesAutomatically(
+                pausesLocationUpdatesAutomatically,
+                watch.options.pausesLocationUpdatesAutomatically
+            )
+            showsBackgroundLocationIndicator = showsBackgroundLocationIndicator ||
+                (watch.options.showsBackgroundLocationIndicator ?? false)
             shouldUseSignificantChanges =
                 shouldUseSignificantChanges || watch.options.useSignificantChanges
         }
 
         manager.desiredAccuracy = bestAccuracy ?? kCLLocationAccuracyHundredMeters
         manager.distanceFilter = smallestDistanceFilter ?? kCLDistanceFilterNone
+        manager.activityType = activityType ?? .other
+        manager.pausesLocationUpdatesAutomatically = pausesLocationUpdatesAutomatically ?? true
+
+        if #available(iOS 11.0, *) {
+            manager.showsBackgroundLocationIndicator = showsBackgroundLocationIndicator
+        }
 
         // Update significant changes mode if changed
         if shouldUseSignificantChanges != usingSignificantChanges {
@@ -419,6 +467,53 @@ class LocationManager: NSObject, CLLocationManagerDelegate {
         }
 
         return min(current, next)
+    }
+
+    private func mergeActivityType(
+        _ current: CLActivityType?,
+        _ next: CLActivityType?
+    ) -> CLActivityType? {
+        guard let next else {
+            return current
+        }
+
+        guard let current else {
+            return next
+        }
+
+        return activityTypeRank(next) > activityTypeRank(current) ? next : current
+    }
+
+    private func activityTypeRank(_ activityType: CLActivityType) -> Int {
+        switch activityType {
+        case .other:
+            return 0
+        case .otherNavigation:
+            return 1
+        case .automotiveNavigation:
+            return 2
+        case .fitness:
+            return 3
+        case .airborne:
+            return 4
+        @unknown default:
+            return 0
+        }
+    }
+
+    private func mergePausesLocationUpdatesAutomatically(
+        _ current: Bool?,
+        _ next: Bool?
+    ) -> Bool? {
+        guard let next else {
+            return current
+        }
+
+        guard let current else {
+            return next
+        }
+
+        return current && next
     }
 
     private func mergeDistanceFilter(

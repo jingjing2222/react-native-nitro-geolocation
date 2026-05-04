@@ -44,13 +44,19 @@ class NitroGeolocation: HybridNitroGeolocationSpec {
         let accuracy: CLLocationAccuracy
         let distanceFilter: CLLocationDistance
         let useSignificantChanges: Bool
+        let activityType: CLActivityType?
+        let pausesLocationUpdatesAutomatically: Bool?
+        let showsBackgroundLocationIndicator: Bool?
 
         static let DEFAULT_TIMEOUT: Double = 10 * 60 * 1000  // 10 minutes in ms
         static let DEFAULT_MAXIMUM_AGE: Double = 0
 
-        static func parse(from options: LocationRequestOptions?) -> ParsedOptions {
+        static func parse(
+            from options: LocationRequestOptions?,
+            defaultMaximumAge: Double = DEFAULT_MAXIMUM_AGE
+        ) -> ParsedOptions {
             let timeout = options?.timeout ?? DEFAULT_TIMEOUT
-            let maximumAge = options?.maximumAge ?? DEFAULT_MAXIMUM_AGE
+            let maximumAge = options?.maximumAge ?? defaultMaximumAge
             let enableHighAccuracy = options?.enableHighAccuracy ?? false
             let accuracy = resolveAccuracy(
                 preset: options?.accuracy?.ios,
@@ -64,8 +70,15 @@ class NitroGeolocation: HybridNitroGeolocationSpec {
                 maximumAge: maximumAge,
                 accuracy: accuracy,
                 distanceFilter: distanceFilter,
-                useSignificantChanges: useSignificantChanges
+                useSignificantChanges: useSignificantChanges,
+                activityType: resolveActivityType(options?.activityType),
+                pausesLocationUpdatesAutomatically: options?.pausesLocationUpdatesAutomatically,
+                showsBackgroundLocationIndicator: options?.showsBackgroundLocationIndicator
             )
+        }
+
+        static func parseLastKnown(from options: LocationRequestOptions?) -> ParsedOptions {
+            return parse(from: options, defaultMaximumAge: Double.infinity)
         }
 
         private static func resolveAccuracy(
@@ -93,6 +106,25 @@ class NitroGeolocation: HybridNitroGeolocationSpec {
                 return kCLLocationAccuracyThreeKilometers
             case .reduced:
                 return kCLLocationAccuracyReduced
+            }
+        }
+
+        private static func resolveActivityType(_ activityType: IOSActivityType?) -> CLActivityType? {
+            guard let activityType else {
+                return nil
+            }
+
+            switch activityType {
+            case .other:
+                return .other
+            case .automotivenavigation:
+                return .automotiveNavigation
+            case .fitness:
+                return .fitness
+            case .othernavigation:
+                return .otherNavigation
+            case .airborne:
+                return .airborne
             }
         }
     }
@@ -198,6 +230,55 @@ class NitroGeolocation: HybridNitroGeolocationSpec {
         success(createLocationProviderStatus())
     }
 
+    func getAccuracyAuthorization() throws -> Promise<AccuracyAuthorization> {
+        return Promise.async {
+            return self.getCurrentAccuracyAuthorizationOnMain()
+        }
+    }
+
+    func requestTemporaryFullAccuracy(
+        purposeKey: String,
+        success: @escaping (AccuracyAuthorization) -> Void,
+        error: ((LocationError) -> Void)?
+    ) throws -> Void {
+        let trimmedPurposeKey = purposeKey.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmedPurposeKey.isEmpty else {
+            error?(createLocationError(
+                code: INTERNAL_ERROR,
+                message: "purposeKey must not be empty."
+            ))
+            return
+        }
+
+        initializeLocationManagerIfNeeded()
+
+        DispatchQueue.main.async {
+            guard #available(iOS 14.0, *), let manager = self.locationManager else {
+                success(.unknown)
+                return
+            }
+
+            if manager.accuracyAuthorization == .fullAccuracy {
+                success(.full)
+                return
+            }
+
+            manager.requestTemporaryFullAccuracyAuthorization(
+                withPurposeKey: trimmedPurposeKey
+            ) { requestError in
+                if let requestError {
+                    error?(self.createLocationError(
+                        code: self.INTERNAL_ERROR,
+                        message: "Unable to request temporary full accuracy: \(requestError.localizedDescription)"
+                    ))
+                    return
+                }
+
+                success(self.getCurrentAccuracyAuthorization())
+            }
+        }
+    }
+
     // MARK: - Get Current Position
 
     func getCurrentPosition(
@@ -231,8 +312,8 @@ class NitroGeolocation: HybridNitroGeolocationSpec {
         let parsedOptions = ParsedOptions.parse(from: options)
 
         // Check cached location
-        if let cached = self.lastLocation,
-           self.isCachedLocationValid(cached, options: parsedOptions) {
+        if let cached = self.getBestCachedLocation(options: parsedOptions) {
+            self.lastLocation = cached
             let position = self.locationToPosition(cached)
             success(position)
             return
@@ -264,6 +345,36 @@ class NitroGeolocation: HybridNitroGeolocationSpec {
         // Update configuration and start monitoring
         self.updateLocationManagerConfiguration()
         self.startMonitoring()
+    }
+
+    func getLastKnownPosition(
+        success: @escaping (GeolocationResponse) -> Void,
+        error: ((LocationError) -> Void)?,
+        options: LocationRequestOptions?
+    ) throws -> Void {
+        let status = CLLocationManager.authorizationStatus()
+        if status == .denied || status == .restricted {
+            let message = status == .restricted
+                ? "This application is not authorized to use location services"
+                : "User denied access to location services."
+            error?(createLocationError(
+                code: self.PERMISSION_DENIED,
+                message: message
+            ))
+            return
+        }
+
+        let parsedOptions = ParsedOptions.parseLastKnown(from: options)
+        guard let cached = self.getBestCachedLocation(options: parsedOptions) else {
+            error?(createLocationError(
+                code: self.POSITION_UNAVAILABLE,
+                message: "No cached location available."
+            ))
+            return
+        }
+
+        self.lastLocation = cached
+        success(self.locationToPosition(cached))
     }
 
     // MARK: - Watch Position (Callback-based with tokens)
@@ -425,6 +536,9 @@ class NitroGeolocation: HybridNitroGeolocationSpec {
         // Merge configurations from all pending requests and watches
         var bestAccuracy: CLLocationAccuracy?
         var smallestDistanceFilter: CLLocationDistance?
+        var activityType: CLActivityType?
+        var pausesLocationUpdatesAutomatically: Bool?
+        var showsBackgroundLocationIndicator = false
         var shouldUseSignificantChanges = false
 
         for (_, request) in pendingPositionRequests {
@@ -433,6 +547,13 @@ class NitroGeolocation: HybridNitroGeolocationSpec {
                 smallestDistanceFilter,
                 request.options.distanceFilter
             )
+            activityType = mergeActivityType(activityType, request.options.activityType)
+            pausesLocationUpdatesAutomatically = mergePausesLocationUpdatesAutomatically(
+                pausesLocationUpdatesAutomatically,
+                request.options.pausesLocationUpdatesAutomatically
+            )
+            showsBackgroundLocationIndicator = showsBackgroundLocationIndicator ||
+                (request.options.showsBackgroundLocationIndicator ?? false)
             shouldUseSignificantChanges = shouldUseSignificantChanges || request.options.useSignificantChanges
         }
 
@@ -442,11 +563,24 @@ class NitroGeolocation: HybridNitroGeolocationSpec {
                 smallestDistanceFilter,
                 subscription.options.distanceFilter
             )
+            activityType = mergeActivityType(activityType, subscription.options.activityType)
+            pausesLocationUpdatesAutomatically = mergePausesLocationUpdatesAutomatically(
+                pausesLocationUpdatesAutomatically,
+                subscription.options.pausesLocationUpdatesAutomatically
+            )
+            showsBackgroundLocationIndicator = showsBackgroundLocationIndicator ||
+                (subscription.options.showsBackgroundLocationIndicator ?? false)
             shouldUseSignificantChanges = shouldUseSignificantChanges || subscription.options.useSignificantChanges
         }
 
         manager.desiredAccuracy = bestAccuracy ?? kCLLocationAccuracyHundredMeters
         manager.distanceFilter = smallestDistanceFilter ?? kCLDistanceFilterNone
+        manager.activityType = activityType ?? .other
+        manager.pausesLocationUpdatesAutomatically = pausesLocationUpdatesAutomatically ?? true
+
+        if #available(iOS 11.0, *) {
+            manager.showsBackgroundLocationIndicator = showsBackgroundLocationIndicator
+        }
 
         // Update significant changes mode if changed
         if shouldUseSignificantChanges != usingSignificantChanges {
@@ -465,6 +599,53 @@ class NitroGeolocation: HybridNitroGeolocationSpec {
         }
 
         return min(current, next)
+    }
+
+    private func mergeActivityType(
+        _ current: CLActivityType?,
+        _ next: CLActivityType?
+    ) -> CLActivityType? {
+        guard let next else {
+            return current
+        }
+
+        guard let current else {
+            return next
+        }
+
+        return activityTypeRank(next) > activityTypeRank(current) ? next : current
+    }
+
+    private func activityTypeRank(_ activityType: CLActivityType) -> Int {
+        switch activityType {
+        case .other:
+            return 0
+        case .otherNavigation:
+            return 1
+        case .automotiveNavigation:
+            return 2
+        case .fitness:
+            return 3
+        case .airborne:
+            return 4
+        @unknown default:
+            return 0
+        }
+    }
+
+    private func mergePausesLocationUpdatesAutomatically(
+        _ current: Bool?,
+        _ next: Bool?
+    ) -> Bool? {
+        guard let next else {
+            return current
+        }
+
+        guard let current else {
+            return next
+        }
+
+        return current && next
     }
 
     private func mergeDistanceFilter(
@@ -507,6 +688,15 @@ class NitroGeolocation: HybridNitroGeolocationSpec {
         // Check age
         let age = Date().timeIntervalSince(location.timestamp) * 1000  // ms
         return age < options.maximumAge
+    }
+
+    private func getBestCachedLocation(options: ParsedOptions) -> CLLocation? {
+        initializeLocationManagerIfNeeded()
+
+        return [lastLocation, locationManager?.location]
+            .compactMap { $0 }
+            .filter { isCachedLocationValid($0, options: options) }
+            .max { $0.timestamp < $1.timestamp }
     }
 
     private func handlePositionTimeout(requestId: UUID) {
@@ -596,6 +786,32 @@ class NitroGeolocation: HybridNitroGeolocationSpec {
             return .undetermined
         @unknown default:
             return .undetermined
+        }
+    }
+
+    private func getCurrentAccuracyAuthorization() -> AccuracyAuthorization {
+        guard #available(iOS 14.0, *) else {
+            return .unknown
+        }
+
+        let manager = locationManager ?? CLLocationManager()
+        switch manager.accuracyAuthorization {
+        case .fullAccuracy:
+            return .full
+        case .reducedAccuracy:
+            return .reduced
+        @unknown default:
+            return .unknown
+        }
+    }
+
+    private func getCurrentAccuracyAuthorizationOnMain() -> AccuracyAuthorization {
+        if Thread.isMainThread {
+            return getCurrentAccuracyAuthorization()
+        }
+
+        return DispatchQueue.main.sync {
+            getCurrentAccuracyAuthorization()
         }
     }
 
