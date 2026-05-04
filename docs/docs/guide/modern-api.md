@@ -254,7 +254,10 @@ try {
 }
 ```
 
-Modern API errors use the following codes:
+Modern API errors use the following codes. The expanded modern-only native
+setup/provider codes (`INTERNAL_ERROR`, `PLAY_SERVICE_NOT_AVAILABLE`, and
+`SETTINGS_NOT_SATISFIED`) were added in v1.2; codes 1-3 remain aligned with the
+legacy browser-style contract.
 
 | Code | Name                         | Meaning                                      |
 | ---- | ---------------------------- | -------------------------------------------- |
