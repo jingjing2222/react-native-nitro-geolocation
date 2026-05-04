@@ -1,7 +1,4 @@
-import type {
-  ModernGeolocationConfiguration as NativeGeolocationConfiguration,
-  NitroGeolocation
-} from "./NitroGeolocation.nitro";
+import type { NitroGeolocation } from "./NitroGeolocation.nitro";
 import type {
   NitroGeolocationCompat,
   RNConfigurationInternal
@@ -14,6 +11,9 @@ type CallbackValue<TCallback> = TCallback extends (value: infer Value) => void
 type CompatGetCurrentPosition = NitroGeolocationCompat["getCurrentPosition"];
 type CompatSuccessCallback = Parameters<CompatGetCurrentPosition>[0];
 type CompatErrorCallback = NonNullable<Parameters<CompatGetCurrentPosition>[1]>;
+type NativeGeolocationConfiguration = Parameters<
+  NitroGeolocation["setConfiguration"]
+>[0];
 type NativeLocationProvider = NonNullable<
   NativeGeolocationConfiguration["locationProvider"]
 >;

@@ -1,6 +1,10 @@
-import type { ModernGeolocationConfiguration as NitroGeolocationConfiguration } from "../NitroGeolocation.nitro";
+import type { NitroGeolocation } from "../NitroGeolocation.nitro";
 import { NitroGeolocationHybridObject } from "../NitroGeolocationModule";
 import type { GeolocationConfiguration } from "../publicTypes";
+
+type NitroGeolocationConfiguration = Parameters<
+  NitroGeolocation["setConfiguration"]
+>[0];
 
 /**
  * Set global geolocation configuration.
