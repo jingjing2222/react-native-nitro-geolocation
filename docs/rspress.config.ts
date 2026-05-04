@@ -9,8 +9,8 @@ export default defineConfig({
   logo: "/logo.png",
   logoText: "React Native Nitro Geolocation",
   multiVersion: {
-    default: "v1.2",
-    versions: ["v1.2"]
+    default: "v1.1",
+    versions: ["v1.1", "v1.2"]
   },
   head: [
     [
