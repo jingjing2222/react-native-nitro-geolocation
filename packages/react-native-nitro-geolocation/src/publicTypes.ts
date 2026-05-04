@@ -45,6 +45,9 @@ export type GeolocationConfiguration = Omit<
   locationProvider?: LocationProvider;
 };
 
+/** @deprecated Use GeolocationConfiguration instead. */
+export type ModernGeolocationConfiguration = GeolocationConfiguration;
+
 export type CompatGeolocationConfiguration = Omit<
   CompatGeolocationConfigurationInternal,
   "locationProvider"

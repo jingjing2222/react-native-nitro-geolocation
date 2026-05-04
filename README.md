@@ -190,7 +190,7 @@ function App() {
 - 📊 Real-time heading, speed, and accuracy calculation
 - 🌓 Dark mode support
 
-[See full DevTools guide →](https://react-native-nitro-geolocation.pages.dev/v2.0/guide/devtools)
+[See full DevTools guide →](https://react-native-nitro-geolocation.pages.dev/guide/devtools)
 
 ---
 
@@ -235,14 +235,13 @@ Change the import to use `/compat` — 100% API compatible:
 
 ## 📖 Learn More
 
-- [Introduction](https://react-native-nitro-geolocation.pages.dev/v2.0/guide/)
-- [Quick Start Guide](https://react-native-nitro-geolocation.pages.dev/v2.0/guide/quick-start)
-- [Modern API Reference](https://react-native-nitro-geolocation.pages.dev/v2.0/guide/modern-api)
-- [Compat API Reference](https://react-native-nitro-geolocation.pages.dev/v2.0/guide/compat-api)
-- [v2 Migration Guide](https://react-native-nitro-geolocation.pages.dev/v2.0/guide/migration-v2)
-- [DevTools Plugin Guide](https://react-native-nitro-geolocation.pages.dev/v2.0/guide/devtools)
-- [Why Nitro Module?](https://react-native-nitro-geolocation.pages.dev/v2.0/guide/why-nitro-module)
-- [Benchmark Results](https://react-native-nitro-geolocation.pages.dev/v2.0/guide/benchmark)
+- [Introduction](https://react-native-nitro-geolocation.pages.dev/guide/)
+- [Quick Start Guide](https://react-native-nitro-geolocation.pages.dev/guide/quick-start)
+- [Modern API Reference](https://react-native-nitro-geolocation.pages.dev/guide/modern-api)
+- [Compat API Reference](https://react-native-nitro-geolocation.pages.dev/guide/compat-api)
+- [DevTools Plugin Guide](https://react-native-nitro-geolocation.pages.dev/guide/devtools)
+- [Why Nitro Module?](https://react-native-nitro-geolocation.pages.dev/guide/why-nitro-module)
+- [Benchmark Results](https://react-native-nitro-geolocation.pages.dev/guide/benchmark)
 
 ---
 

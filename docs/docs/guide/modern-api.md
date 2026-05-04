@@ -207,6 +207,8 @@ interface GeolocationResponse {
     speed: number | null;
   };
   timestamp: number;
+  mocked?: boolean;
+  provider?: 'fused' | 'gps' | 'network' | 'passive' | 'unknown';
 }
 ```
 
@@ -449,9 +451,12 @@ import type {
   LocationError,
   GeolocationResponse,
   GeolocationCoordinates,
-  ModernGeolocationConfiguration
+  LocationProviderUsed,
+  GeolocationConfiguration
 } from 'react-native-nitro-geolocation';
 ```
+
+`ModernGeolocationConfiguration` is still exported as a deprecated compatibility alias.
 
 ### Type Inference
 

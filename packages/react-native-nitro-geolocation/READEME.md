@@ -240,7 +240,6 @@ Change the import to use `/compat` — 100% API compatible:
 - [Quick Start Guide](https://react-native-nitro-geolocation.pages.dev/guide/quick-start)
 - [Modern API Reference](https://react-native-nitro-geolocation.pages.dev/guide/modern-api)
 - [Compat API Reference](https://react-native-nitro-geolocation.pages.dev/guide/compat-api)
-- [v2 Migration Guide](https://react-native-nitro-geolocation.pages.dev/v2.0/guide/migration-v2)
 - [DevTools Plugin Guide](https://react-native-nitro-geolocation.pages.dev/guide/devtools)
 - [Why Nitro Module?](https://react-native-nitro-geolocation.pages.dev/guide/why-nitro-module)
 - [Benchmark Results](https://react-native-nitro-geolocation.pages.dev/guide/benchmark)
