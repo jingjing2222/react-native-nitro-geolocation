@@ -6,14 +6,14 @@ title: v2 Migration Guide
 
 Version 2.0 keeps the package split simple:
 
-- Root import: `react-native-nitro-geolocation`
+- Modern import: `react-native-nitro-geolocation`
 - Compat import: `react-native-nitro-geolocation/compat`
 
-Use the root API for Promise functions and `useWatchPosition`. Use `/compat` when you need a drop-in replacement for `@react-native-community/geolocation`.
+Use the modern API for Promise functions and `useWatchPosition`. Use `/compat` when you need a drop-in replacement for `@react-native-community/geolocation`.
 
 ## Breaking Change
 
-The root API configuration type was renamed:
+The modern API configuration type was renamed:
 
 ```diff
 - import type { ModernGeolocationConfiguration } from 'react-native-nitro-geolocation';
@@ -28,11 +28,11 @@ The root API configuration type was renamed:
   };
 ```
 
-No runtime configuration behavior changed. The rename only removes the root API naming prefix from the public type surface.
+No runtime configuration behavior changed. The rename only removes the modern API naming prefix from the public type surface.
 
 ## Root Response Metadata
 
-Root API responses now include optional metadata when the native platform exposes it:
+Modern API responses now include optional metadata when the native platform exposes it:
 
 ```ts
 type LocationProviderUsed =
@@ -73,11 +73,11 @@ type GeolocationResponse = {
 };
 ```
 
-Do not add `mocked` or `provider` handling to compat-only code unless you are intentionally migrating that code to the root API.
+Do not add `mocked` or `provider` handling to compat-only code unless you are intentionally migrating that code to the modern API.
 
 ## Rozenite DevTools
 
-The Rozenite plugin now returns the same root response metadata when mock location data is active. This lets app logic distinguish development mocks from real native locations through `position.mocked === true`.
+The Rozenite plugin now returns the same modern response metadata when mock location data is active. This lets app logic distinguish development mocks from real native locations through `position.mocked === true`.
 
 When `mocked` is `false` or omitted, DevTools location updates should not be treated as active mock input for production-facing logic.
 

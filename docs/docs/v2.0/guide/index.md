@@ -6,7 +6,7 @@ With the React Native ecosystem moving toward **TurboModules**, **Fabric**, and 
 
 This project — **React Native Nitro Geolocation** — is a complete reimplementation designed for the **Nitro Module** system, providing **two APIs** to fit your needs:
 
-## 1. Root API (Recommended)
+## 1. Modern API (Recommended)
 
 **Simple functional API** with direct calls and minimal abstractions.
 
@@ -77,9 +77,9 @@ Geolocation.getCurrentPosition(
 - Callback-based API preference
 
 
-## Why Root API?
+## Why Modern API?
 
-The Root API brings simplicity and React hook patterns to geolocation:
+The Modern API brings simplicity and React hook patterns to geolocation:
 
 ### Declarative vs Imperative
 
@@ -149,7 +149,7 @@ We created a geolocation API that:
 
 Instead of complex provider patterns or class-based APIs, we provide:
 
-| Concept | Root API |
+| Concept | Modern API |
 |---------|------------|
 | **Configuration** | `setConfiguration()` |
 | **Permission** | `checkPermission()`, `requestPermission()` |
@@ -168,7 +168,7 @@ Instead of complex provider patterns or class-based APIs, we provide:
 
 ## What You Get
 
-Whether you choose Root or Compat API, you get:
+Whether you choose Modern or Compat API, you get:
 
 - 🚀 **Faster performance** through direct JSI bindings (22.95x faster on average)
 - 📱 **Improved native consistency** across Android and iOS
@@ -176,14 +176,14 @@ Whether you choose Root or Compat API, you get:
 - 🧩 **TypeScript-first** developer experience
 - 🔄 **100% API compatibility** (via `/compat`) — can be used as a **drop-in replacement**
 
-Whether you're upgrading an existing app or building a new one using the latest React Native architecture, **React Native Nitro Geolocation** gives you the Root API with proven performance.
+Whether you're upgrading an existing app or building a new one using the latest React Native architecture, **React Native Nitro Geolocation** gives you the Modern API with proven performance.
 
 
 ## Next Steps
 
 - [Quick Start Guide](/guide/quick-start) — Get up and running in minutes
 - [v2 Migration Guide](/guide/migration-v2) — Update from v1.x to v2.0
-- [Root API Reference](/guide/root-api) — Explore functions and hooks
+- [Modern API Reference](/guide/modern-api) — Explore functions and hooks
 - [Compat API Reference](/guide/compat-api) — Compatibility documentation
 - [Why Nitro Module?](/guide/why-nitro-module) — Architecture deep dive
 - [Benchmark Results](/guide/benchmark) — Performance comparison

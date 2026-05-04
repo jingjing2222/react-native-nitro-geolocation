@@ -79,8 +79,8 @@ export default defineConfig({
           text: "API Reference",
           items: [
             {
-              text: "Root API (Recommended)",
-              link: "/guide/root-api"
+              text: "Modern API (Recommended)",
+              link: "/guide/modern-api"
             },
             {
               text: "Compat API",

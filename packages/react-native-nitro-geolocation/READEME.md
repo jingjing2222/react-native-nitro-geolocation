@@ -28,7 +28,7 @@ Full documentation available at:
 
 React Native Nitro Geolocation provides **two APIs** to fit your needs:
 
-### 1. Root API (Recommended)
+### 1. Modern API (Recommended)
 
 **Simple functional API** with direct calls and a single hook for tracking:
 
@@ -150,7 +150,7 @@ Optional (for background):
 
 > **Prerequisites**: Requires [Rozenite DevTools](https://github.com/rozenite/rozenite) to be installed.
 >
-> **API Compatibility**: Only works with the Root API. Does not support the Compat API (`/compat`).
+> **API Compatibility**: Only works with the Modern API. Does not support the Compat API (`/compat`).
 
 Mock geolocation data during development with an interactive map interface:
 
@@ -196,7 +196,7 @@ function App() {
 
 ### 5. Usage
 
-#### Root API (Recommended)
+#### Modern API (Recommended)
 
 ```tsx
 // Get current location
@@ -238,7 +238,7 @@ Change the import to use `/compat` — 100% API compatible:
 
 - [Introduction](https://react-native-nitro-geolocation.pages.dev/guide/)
 - [Quick Start Guide](https://react-native-nitro-geolocation.pages.dev/guide/quick-start)
-- [Root API Reference](https://react-native-nitro-geolocation.pages.dev/guide/root-api)
+- [Modern API Reference](https://react-native-nitro-geolocation.pages.dev/guide/modern-api)
 - [Compat API Reference](https://react-native-nitro-geolocation.pages.dev/guide/compat-api)
 - [v2 Migration Guide](https://react-native-nitro-geolocation.pages.dev/v2.0/guide/migration-v2)
 - [DevTools Plugin Guide](https://react-native-nitro-geolocation.pages.dev/guide/devtools)

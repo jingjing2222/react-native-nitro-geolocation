@@ -51,9 +51,9 @@ Optional (for background access):
 ```
 
 
-## 4. Usage with Root API (Recommended)
+## 4. Usage with Modern API (Recommended)
 
-The Root API provides **simple functional calls** with direct functions and a single hook for tracking.
+The Modern API provides **simple functional calls** with direct functions and a single hook for tracking.
 
 ### Setup Configuration
 
@@ -276,7 +276,7 @@ or
 - Improved permission consistency
 - TypeScript definitions out of the box
 
-### From Compat to Root API (Recommended)
+### From Compat to Modern API (Recommended)
 
 Upgrade to the simpler functional API:
 
@@ -306,7 +306,7 @@ function LocationTracker() {
 }
 ```
 
-**After (Root API)**:
+**After (Modern API)**:
 ```tsx
 import { useWatchPosition } from 'react-native-nitro-geolocation';
 
@@ -371,7 +371,7 @@ The DevTools plugin requires [Rozenite DevTools](https://github.com/rozenite/roz
 
 - [v2 Migration Guide](/guide/migration-v2) — Major release changes
 - [DevTools Plugin Guide](/guide/devtools) — Mock locations in development
-- [Root API Reference](/guide/root-api) — Complete documentation
+- [Modern API Reference](/guide/modern-api) — Complete documentation
 - [Compat API Reference](/guide/compat-api) — Compatibility methods
 - [Why Nitro Module?](/guide/why-nitro-module) — Architecture deep dive
 - [Benchmark Results](/guide/benchmark) — Performance comparison
