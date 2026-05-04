@@ -50,7 +50,7 @@ setConfiguration({
 // Request permission
 const status = await requestPermission();
 
-// Android: ask the user to enable settings required for accurate location
+// Android, v1.2+: ask the user to enable settings required for accurate location
 await requestLocationSettings({ enableHighAccuracy: true });
 
 // Get current location

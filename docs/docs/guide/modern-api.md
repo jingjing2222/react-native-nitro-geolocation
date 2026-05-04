@@ -150,6 +150,8 @@ function PermissionButton() {
 
 ### Android Provider and Settings
 
+Available since `v1.2`.
+
 Use these helpers before user-facing precise-location flows where the app needs
 to know whether Android device settings can satisfy the request.
 
