@@ -10,7 +10,7 @@ export default defineConfig({
   logoText: "React Native Nitro Geolocation",
   multiVersion: {
     default: "v1.1",
-    versions: ["v1.1", "v1.2"]
+    versions: ["v1.1", "v2.0"]
   },
   head: [
     [
@@ -71,19 +71,20 @@ export default defineConfig({
           text: "Getting Started",
           items: [
             { text: "Introduction", link: "/guide/" },
-            { text: "Quick Start", link: "/guide/quick-start" }
+            { text: "Quick Start", link: "/guide/quick-start" },
+            { text: "Migration to v2", link: "/guide/migration-v2" }
           ]
         },
         {
           text: "API Reference",
           items: [
             {
-              text: "Modern API (Recommended)",
-              link: "/guide/modern-api"
+              text: "Root API (Recommended)",
+              link: "/guide/root-api"
             },
             {
-              text: "Legacy API (Compat)",
-              link: "/guide/legacy-api"
+              text: "Compat API",
+              link: "/guide/compat-api"
             }
           ]
         },

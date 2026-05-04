@@ -31,7 +31,7 @@ const defaultSections: DefaultScreenSection[] = [
 
 export default function DefaultScreen({
   sections = defaultSections,
-  subtitle = "Simple and Modern API",
+  subtitle = "Root API",
   title = "Geolocation API"
 }: DefaultScreenProps) {
   // Permission state

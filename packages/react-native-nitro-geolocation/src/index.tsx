@@ -2,7 +2,7 @@
  * Geolocation API for React Native.
  *
  * This is the main entry point for the functional API.
- * For legacy compatibility, use: import Geolocation from 'react-native-nitro-geolocation/compat'
+ * For compat usage, use: import Geolocation from 'react-native-nitro-geolocation/compat'
  *
  * @example
  * ```tsx

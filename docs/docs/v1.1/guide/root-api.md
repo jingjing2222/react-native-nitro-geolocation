@@ -1,10 +1,10 @@
 ---
-title: Modern API (Recommended)
+title: Root API (Recommended)
 ---
 
 > Simple functional API with direct calls and minimal abstractions
 
-The Modern API provides a straightforward approach to geolocation with direct function calls and a single hook for continuous tracking.
+The Root API provides a straightforward approach to geolocation with direct function calls and a single hook for continuous tracking.
 
 ## Design Philosophy
 
@@ -440,7 +440,7 @@ function BackgroundTracker() {
 
 ## TypeScript Support
 
-All Modern API exports are fully typed:
+All Root API exports are fully typed:
 
 ```typescript
 import type {
@@ -469,9 +469,9 @@ const status = await requestPermission();
 ```
 
 
-## Comparison with Legacy API
+## Comparison with Compat API
 
-| Feature          | Modern API                               | Legacy API                               |
+| Feature          | Root API                               | Compat API                               |
 | ---------------- | ---------------------------------------- | ---------------------------------------- |
 | **Import**       | `react-native-nitro-geolocation`         | `react-native-nitro-geolocation/compat`  |
 | **Pattern**      | Functions + Hook                         | Callbacks                                |
@@ -485,9 +485,9 @@ const status = await requestPermission();
 | **React Friendly** | ✅ Yes                                  | ⚠️ Requires useEffect boilerplate       |
 
 
-## Migration from Legacy
+## Migration from Compat
 
-**Before (Legacy API)**:
+**Before (Compat API)**:
 
 ```tsx
 import Geolocation from 'react-native-nitro-geolocation/compat';
@@ -514,7 +514,7 @@ function LocationTracker() {
 }
 ```
 
-**After (Modern API)**:
+**After (Root API)**:
 
 ```tsx
 import { useWatchPosition } from 'react-native-nitro-geolocation';

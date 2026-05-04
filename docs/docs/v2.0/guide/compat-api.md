@@ -1,9 +1,9 @@
 ---
-title: Legacy API (Compatibility)
+title: Compat API (Compatibility)
 ---
 
-> ⚠️ **This is the legacy callback-based API for compatibility with @react-native-community/geolocation.**
-> For new projects, we recommend using the [Modern API](./modern-api.md) with Hooks and Provider.
+> ⚠️ **This is the compat callback-based API for compatibility with @react-native-community/geolocation.**
+> For new projects, we recommend using the [Root API](./root-api.md) with functions and the `useWatchPosition` hook.
 
 ## Import Path
 

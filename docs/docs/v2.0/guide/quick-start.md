@@ -51,9 +51,9 @@ Optional (for background access):
 ```
 
 
-## 4. Usage with Modern API (Recommended)
+## 4. Usage with Root API (Recommended)
 
-The Modern API provides **simple functional calls** with direct functions and a single hook for tracking.
+The Root API provides **simple functional calls** with direct functions and a single hook for tracking.
 
 ### Setup Configuration
 
@@ -223,7 +223,7 @@ function LiveTracker() {
 - ✅ Battery efficient - native subscription stops when disabled
 
 
-## 5. Usage with Legacy API (Compatibility)
+## 5. Usage with Compat API (Compatibility)
 
 For compatibility with `@react-native-community/geolocation`, use the `/compat` import:
 
@@ -252,6 +252,8 @@ Geolocation.clearWatch(watchId);
 
 ## 6. Migration Guides
 
+For the v1.x to v2.0 major release checklist, see the [v2 Migration Guide](/guide/migration-v2).
+
 ### From `@react-native-community/geolocation`
 
 Simply change the import path:
@@ -274,11 +276,11 @@ or
 - Improved permission consistency
 - TypeScript definitions out of the box
 
-### From Legacy to Modern API (Recommended)
+### From Compat to Root API (Recommended)
 
 Upgrade to the simpler functional API:
 
-**Before (Legacy API)**:
+**Before (Compat API)**:
 ```tsx
 import Geolocation from 'react-native-nitro-geolocation/compat';
 
@@ -304,7 +306,7 @@ function LocationTracker() {
 }
 ```
 
-**After (Modern API)**:
+**After (Root API)**:
 ```tsx
 import { useWatchPosition } from 'react-native-nitro-geolocation';
 
@@ -367,8 +369,9 @@ The DevTools plugin requires [Rozenite DevTools](https://github.com/rozenite/roz
 
 ## Next Steps
 
+- [v2 Migration Guide](/guide/migration-v2) — Major release changes
 - [DevTools Plugin Guide](/guide/devtools) — Mock locations in development
-- [Modern API Reference](/guide/modern-api) — Complete documentation
-- [Legacy API Reference](/guide/legacy-api) — Compatibility methods
+- [Root API Reference](/guide/root-api) — Complete documentation
+- [Compat API Reference](/guide/compat-api) — Compatibility methods
 - [Why Nitro Module?](/guide/why-nitro-module) — Architecture deep dive
 - [Benchmark Results](/guide/benchmark) — Performance comparison
