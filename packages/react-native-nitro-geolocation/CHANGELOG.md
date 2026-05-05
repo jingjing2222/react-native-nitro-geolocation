@@ -1,5 +1,27 @@
 # react-native-nitro-geolocation
 
+## 1.2.0
+
+### Minor Changes
+
+- efc25f1: Add platform-specific accuracy presets to the Modern API while preserving `enableHighAccuracy`.
+  Android now supports `high`, `balanced`, `low`, and `passive` presets, and iOS supports Core Location accuracy presets including `bestForNavigation`, `nearestTenMeters`, and `reduced`.
+  `enableHighAccuracy` is now deprecated for the Modern API in favor of explicit accuracy presets.
+- 93c2ce2: Add Android provider/settings APIs to the Modern API: `hasServicesEnabled()`, `getProviderStatus()`, and `requestLocationSettings(options?)`. Android now checks native provider state and uses Google Play Services `SettingsClient` to show the system settings resolution dialog when high-accuracy location requirements are not satisfied.
+- d54aa44: Add optional `mocked` and `provider` metadata to root location responses with Android and iOS native mappings.
+  Add `GeolocationConfiguration` as the preferred root API configuration type while preserving `ModernGeolocationConfiguration` as a deprecated compatibility alias.
+  Keep the Compat API response shape unchanged for the drop-in replacement contract.
+  Normalize missing native coordinate values to explicit `null` unions and include the same metadata in Rozenite DevTools mock responses.
+- 5bd6b3e: Add `geocode(address)` and `reverseGeocode(coords)` to the Modern API, backed by Android `Geocoder` and iOS `CLGeocoder` in the same package.
+- cca38f3: Add explicit cached-position access with `getLastKnownPosition(options?)`, iOS location tuning options, and precise/reduced accuracy authorization APIs.
+- 48e70a6: Add `getLocationAvailability()`, heading APIs (`getHeading()` and `watchHeading()`), and selected Android request controls for granularity, accurate initial updates, update age/delay, and maximum watch updates.
+- b5efa00: Extend the Modern API location error contract with `INTERNAL_ERROR`, `PLAY_SERVICE_NOT_AVAILABLE`, and `SETTINGS_NOT_SATISFIED`. Native code now sends structured `{ code, message }` error classification directly to both callbacks and public Promise rejections, while preserving the `/compat` legacy error shape.
+- a27ca39: Avoid blocking the UI thread when Android resolves provider status after a successful location settings request by checking Google Location Accuracy asynchronously.
+
+### Patch Changes
+
+- dd45dda: Align release validation documentation with the v1.2 native geolocation flows and use a deterministic geocoding fixture in examples.
+
 ## 1.1.4
 
 ### Patch Changes
