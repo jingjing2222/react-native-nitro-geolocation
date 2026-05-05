@@ -26,6 +26,7 @@ For documentation-only changes, you can skip this section.
 Run the following command in the example app:
 ```bash
 cd examples/v0.81.1
+yarn ios:release  # or yarn android:release
 yarn test:e2e:ios  # or yarn test:e2e:android
 ```
 -->

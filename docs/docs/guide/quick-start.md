@@ -178,7 +178,7 @@ import {
   reverseGeocode
 } from 'react-native-nitro-geolocation';
 
-const locations = await geocode('Seoul City Hall');
+const locations = await geocode('City Hall, Seoul, South Korea');
 const firstLocation = locations[0];
 
 const addresses = await reverseGeocode({
