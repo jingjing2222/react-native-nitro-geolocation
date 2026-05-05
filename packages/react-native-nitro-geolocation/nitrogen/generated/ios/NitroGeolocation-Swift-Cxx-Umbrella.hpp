@@ -26,6 +26,10 @@ namespace margelo::nitro::nitrogeolocation { struct CompatGeolocationError; }
 namespace margelo::nitro::nitrogeolocation { struct CompatGeolocationOptions; }
 // Forward declaration of `CompatGeolocationResponse` to properly resolve imports.
 namespace margelo::nitro::nitrogeolocation { struct CompatGeolocationResponse; }
+// Forward declaration of `GeocodedLocation` to properly resolve imports.
+namespace margelo::nitro::nitrogeolocation { struct GeocodedLocation; }
+// Forward declaration of `GeocodingCoordinates` to properly resolve imports.
+namespace margelo::nitro::nitrogeolocation { struct GeocodingCoordinates; }
 // Forward declaration of `GeolocationConfiguration` to properly resolve imports.
 namespace margelo::nitro::nitrogeolocation { struct GeolocationConfiguration; }
 // Forward declaration of `GeolocationCoordinates` to properly resolve imports.
@@ -64,6 +68,8 @@ namespace margelo::nitro::nitrogeolocation { struct LocationRequestOptions; }
 namespace margelo::nitro::nitrogeolocation { struct LocationSettingsOptions; }
 // Forward declaration of `PermissionStatus` to properly resolve imports.
 namespace margelo::nitro::nitrogeolocation { enum class PermissionStatus; }
+// Forward declaration of `ReverseGeocodedAddress` to properly resolve imports.
+namespace margelo::nitro::nitrogeolocation { struct ReverseGeocodedAddress; }
 
 // Include C++ defined types
 #include "AccuracyAuthorization.hpp"
@@ -75,6 +81,8 @@ namespace margelo::nitro::nitrogeolocation { enum class PermissionStatus; }
 #include "CompatGeolocationError.hpp"
 #include "CompatGeolocationOptions.hpp"
 #include "CompatGeolocationResponse.hpp"
+#include "GeocodedLocation.hpp"
+#include "GeocodingCoordinates.hpp"
 #include "GeolocationConfiguration.hpp"
 #include "GeolocationCoordinates.hpp"
 #include "GeolocationResponse.hpp"
@@ -94,6 +102,7 @@ namespace margelo::nitro::nitrogeolocation { enum class PermissionStatus; }
 #include "LocationRequestOptions.hpp"
 #include "LocationSettingsOptions.hpp"
 #include "PermissionStatus.hpp"
+#include "ReverseGeocodedAddress.hpp"
 #include <NitroModules/Null.hpp>
 #include <NitroModules/Promise.hpp>
 #include <NitroModules/Result.hpp>
@@ -103,6 +112,7 @@ namespace margelo::nitro::nitrogeolocation { enum class PermissionStatus; }
 #include <optional>
 #include <string>
 #include <variant>
+#include <vector>
 
 // C++ helpers for Swift
 #include "NitroGeolocation-Swift-Cxx-Bridge.hpp"

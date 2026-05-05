@@ -43,6 +43,12 @@ namespace margelo::nitro::nitrogeolocation { struct LocationRequestOptions; }
 namespace margelo::nitro::nitrogeolocation { enum class AndroidGranularity; }
 // Forward declaration of `IOSActivityType` to properly resolve imports.
 namespace margelo::nitro::nitrogeolocation { enum class IOSActivityType; }
+// Forward declaration of `GeocodedLocation` to properly resolve imports.
+namespace margelo::nitro::nitrogeolocation { struct GeocodedLocation; }
+// Forward declaration of `GeocodingCoordinates` to properly resolve imports.
+namespace margelo::nitro::nitrogeolocation { struct GeocodingCoordinates; }
+// Forward declaration of `ReverseGeocodedAddress` to properly resolve imports.
+namespace margelo::nitro::nitrogeolocation { struct ReverseGeocodedAddress; }
 // Forward declaration of `Heading` to properly resolve imports.
 namespace margelo::nitro::nitrogeolocation { struct Heading; }
 // Forward declaration of `HeadingOptions` to properly resolve imports.
@@ -99,6 +105,15 @@ namespace margelo::nitro::nitrogeolocation { struct HeadingOptions; }
 #include "JAndroidGranularity.hpp"
 #include "IOSActivityType.hpp"
 #include "JIOSActivityType.hpp"
+#include "GeocodedLocation.hpp"
+#include <vector>
+#include "JFunc_void_std__vector_GeocodedLocation_.hpp"
+#include "JGeocodedLocation.hpp"
+#include "GeocodingCoordinates.hpp"
+#include "JGeocodingCoordinates.hpp"
+#include "ReverseGeocodedAddress.hpp"
+#include "JFunc_void_std__vector_ReverseGeocodedAddress_.hpp"
+#include "JReverseGeocodedAddress.hpp"
 #include "Heading.hpp"
 #include "JFunc_void_Heading.hpp"
 #include "JHeading.hpp"
@@ -135,7 +150,7 @@ namespace margelo::nitro::nitrogeolocation {
   }
 
   // Properties
-
+  
 
   // Methods
   void JHybridNitroGeolocationSpec::setConfiguration(const GeolocationConfiguration& config) {
@@ -241,6 +256,14 @@ namespace margelo::nitro::nitrogeolocation {
   void JHybridNitroGeolocationSpec::getLastKnownPosition(const std::function<void(const GeolocationResponse& /* position */)>& success, const std::optional<std::function<void(const LocationError& /* error */)>>& error, const std::optional<LocationRequestOptions>& options) {
     static const auto method = _javaPart->javaClassStatic()->getMethod<void(jni::alias_ref<JFunc_void_GeolocationResponse::javaobject> /* success */, jni::alias_ref<JFunc_void_LocationError::javaobject> /* error */, jni::alias_ref<JLocationRequestOptions> /* options */)>("getLastKnownPosition_cxx");
     method(_javaPart, JFunc_void_GeolocationResponse_cxx::fromCpp(success), error.has_value() ? JFunc_void_LocationError_cxx::fromCpp(error.value()) : nullptr, options.has_value() ? JLocationRequestOptions::fromCpp(options.value()) : nullptr);
+  }
+  void JHybridNitroGeolocationSpec::geocode(const std::string& address, const std::function<void(const std::vector<GeocodedLocation>& /* locations */)>& success, const std::optional<std::function<void(const LocationError& /* error */)>>& error) {
+    static const auto method = _javaPart->javaClassStatic()->getMethod<void(jni::alias_ref<jni::JString> /* address */, jni::alias_ref<JFunc_void_std__vector_GeocodedLocation_::javaobject> /* success */, jni::alias_ref<JFunc_void_LocationError::javaobject> /* error */)>("geocode_cxx");
+    method(_javaPart, jni::make_jstring(address), JFunc_void_std__vector_GeocodedLocation__cxx::fromCpp(success), error.has_value() ? JFunc_void_LocationError_cxx::fromCpp(error.value()) : nullptr);
+  }
+  void JHybridNitroGeolocationSpec::reverseGeocode(const GeocodingCoordinates& coords, const std::function<void(const std::vector<ReverseGeocodedAddress>& /* addresses */)>& success, const std::optional<std::function<void(const LocationError& /* error */)>>& error) {
+    static const auto method = _javaPart->javaClassStatic()->getMethod<void(jni::alias_ref<JGeocodingCoordinates> /* coords */, jni::alias_ref<JFunc_void_std__vector_ReverseGeocodedAddress_::javaobject> /* success */, jni::alias_ref<JFunc_void_LocationError::javaobject> /* error */)>("reverseGeocode_cxx");
+    method(_javaPart, JGeocodingCoordinates::fromCpp(coords), JFunc_void_std__vector_ReverseGeocodedAddress__cxx::fromCpp(success), error.has_value() ? JFunc_void_LocationError_cxx::fromCpp(error.value()) : nullptr);
   }
   void JHybridNitroGeolocationSpec::getHeading(const std::function<void(const Heading& /* heading */)>& success, const std::optional<std::function<void(const LocationError& /* error */)>>& error) {
     static const auto method = _javaPart->javaClassStatic()->getMethod<void(jni::alias_ref<JFunc_void_Heading::javaobject> /* success */, jni::alias_ref<JFunc_void_LocationError::javaobject> /* error */)>("getHeading_cxx");

@@ -1,0 +1,65 @@
+appId: nitrogeolocation.example
+---
+# Geocoding contract: run real native geocoder success and validation failure
+# paths, then assert the rendered scenario states.
+
+- launchApp:
+    clearState: true
+    permissions:
+      all: allow
+
+- extendedWaitUntil:
+    visible: "Geolocation API"
+    timeout: 10000
+
+- stopApp
+
+- openLink:
+    link: nitrogeolocation://app/geocoding
+- tapOn:
+    text: "열기|Open"
+    optional: true
+
+- extendedWaitUntil:
+    visible: "Native address and coordinate conversion"
+    timeout: 10000
+
+- tapOn:
+    id: "geocoding-run-positive-button"
+
+- extendedWaitUntil:
+    visible: "Geocode: passed"
+    timeout: 60000
+
+- extendedWaitUntil:
+    visible: "Reverse geocode: passed"
+    timeout: 60000
+
+- assertVisible:
+    id: "geocoding-geocode-result"
+- assertVisible:
+    id: "geocoding-reverse-result"
+- assertVisible:
+    text: ".*candidate\\(s\\).*"
+
+- scrollUntilVisible:
+    element: "Run Negative Geocoding"
+    direction: DOWN
+
+- tapOn:
+    id: "geocoding-run-negative-button"
+
+- extendedWaitUntil:
+    visible: "Empty address: passed"
+    timeout: 10000
+
+- extendedWaitUntil:
+    visible: "Invalid coordinates: passed"
+    timeout: 10000
+
+- assertVisible:
+    id: "geocoding-empty-address-result"
+- assertVisible:
+    id: "geocoding-invalid-coords-result"
+- assertVisible:
+    text: ".*INTERNAL_ERROR.*"

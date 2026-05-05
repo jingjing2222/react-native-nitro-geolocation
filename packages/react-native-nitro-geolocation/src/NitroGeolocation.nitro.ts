@@ -2,13 +2,16 @@ import type { HybridObject } from "react-native-nitro-modules";
 import type {
   AccuracyAuthorization,
   AndroidGranularity,
+  GeocodedLocation,
+  GeocodingCoordinates,
   GeolocationResponse,
   Heading,
   HeadingOptions,
   IOSActivityType,
   LocationAccuracyOptions,
   LocationAvailability,
-  LocationProviderStatus
+  LocationProviderStatus,
+  ReverseGeocodedAddress
 } from "./types";
 
 /**
@@ -34,13 +37,14 @@ export type LocationProvider = "playServices" | "android_platform" | "auto";
 
 /**
  * Global configuration for geolocation services.
- * Set once via GeolocationProvider.
+ * Apply once at app startup with `setConfiguration()`.
  */
 export interface GeolocationConfiguration {
   /**
-   * Automatically request location permission when GeolocationProvider mounts.
-   * When true, permission is requested immediately on app start.
-   * When false, you must manually call useRequestPermission().
+   * @deprecated This option is accepted for backward compatibility only.
+   * `setConfiguration()` does not request permission. Call
+   * `requestPermission()` explicitly when your app is ready to show the native
+   * permission prompt.
    * @default false
    */
   autoRequestPermission?: boolean;
@@ -243,7 +247,7 @@ export interface NitroGeolocation
   extends HybridObject<{ ios: "swift"; android: "kotlin" }> {
   /**
    * Set global geolocation configuration.
-   * Should be called once at app startup via GeolocationProvider.
+   * Should be called once at app startup before location requests.
    *
    * @param config - Platform-specific configuration
    */
@@ -368,6 +372,30 @@ export interface NitroGeolocation
     success: (position: GeolocationResponse) => void,
     error?: (error: LocationError) => void,
     options?: LocationRequestOptions
+  ): void;
+
+  /**
+   * Convert a human-readable address into candidate coordinates.
+   *
+   * Uses the platform geocoder: Android `Geocoder` and iOS `CLGeocoder`.
+   * Results and availability depend on platform networking/geocoder services.
+   */
+  geocode(
+    address: string,
+    success: (locations: GeocodedLocation[]) => void,
+    error?: (error: LocationError) => void
+  ): void;
+
+  /**
+   * Convert coordinates into candidate human-readable addresses.
+   *
+   * Uses the platform geocoder: Android `Geocoder` and iOS `CLGeocoder`.
+   * Results and availability depend on platform networking/geocoder services.
+   */
+  reverseGeocode(
+    coords: GeocodingCoordinates,
+    success: (addresses: ReverseGeocodedAddress[]) => void,
+    error?: (error: LocationError) => void
   ): void;
 
   /**

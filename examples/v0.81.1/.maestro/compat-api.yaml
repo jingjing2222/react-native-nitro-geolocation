@@ -49,6 +49,10 @@ appId: nitrogeolocation.example
 - assertVisible:
     id: "latitude-text"
 - assertVisible:
+    text: "Latitude: 37\\.566500"
+- assertVisible:
     id: "longitude-text"
+- assertVisible:
+    text: "Longitude: 126\\.978000"
 - assertVisible:
     id: "accuracy-text"

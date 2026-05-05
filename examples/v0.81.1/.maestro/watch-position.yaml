@@ -1,7 +1,19 @@
 appId: nitrogeolocation.example
 ---
-# Test 3: Watch Position (Continuous Tracking)
-- launchApp
+# Watch position contract: successful native watcher plus denied permission
+# rejection, with assertions on actual coordinate text.
+
+- launchApp:
+    clearState: true
+    permissions:
+      all: allow
+
+- extendedWaitUntil:
+    visible: "Geolocation API"
+    timeout: 10000
+
+- stopApp
+
 - openLink:
     link: nitrogeolocation://app/watch-position
 - tapOn:
@@ -47,7 +59,11 @@ appId: nitrogeolocation.example
 - assertVisible:
     id: "latitude-text"
 - assertVisible:
+    text: "Latitude: 37\\.566500"
+- assertVisible:
     id: "longitude-text"
+- assertVisible:
+    text: "Longitude: 126\\.978000"
 
 # Wait 5 seconds to see if position updates
 - waitForAnimationToEnd
@@ -58,3 +74,34 @@ appId: nitrogeolocation.example
 
 # Verify watching stopped
 - assertVisible: "Not Watching 🔴"
+
+- launchApp:
+    clearState: true
+    permissions:
+      all: deny
+
+- extendedWaitUntil:
+    visible: "Geolocation API"
+    timeout: 10000
+
+- stopApp
+
+- openLink:
+    link: nitrogeolocation://app/watch-position
+- tapOn:
+    text: "열기|Open"
+    optional: true
+
+- scrollUntilVisible:
+    element: "3. Watch Position (Hook)"
+    direction: DOWN
+
+- tapOn:
+    id: "watch-toggle-switch"
+
+- extendedWaitUntil:
+    visible: "Error: .*(Location permission|denied access).*"
+    timeout: 10000
+
+- assertVisible:
+    id: "watch-position-error"

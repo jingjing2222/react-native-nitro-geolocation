@@ -198,6 +198,7 @@ class NitroGeolocation: HybridNitroGeolocationSpec {
     // Heading requests/subscriptions
     private var pendingHeadingRequests: [UUID: HeadingRequest] = [:]
     private var headingSubscriptions: [String: HeadingSubscription] = [:]
+    private var activeGeocoders: [UUID: CLGeocoder] = [:]
 
     // Error codes
     private let INTERNAL_ERROR = -1
@@ -450,6 +451,103 @@ class NitroGeolocation: HybridNitroGeolocationSpec {
 
         self.lastLocation = cached
         success(self.locationToPosition(cached))
+    }
+
+    // MARK: - Geocoding
+
+    func geocode(
+        address: String,
+        success: @escaping ([GeocodedLocation]) -> Void,
+        error: ((LocationError) -> Void)?
+    ) throws -> Void {
+        let query = address.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !query.isEmpty else {
+            error?(createLocationError(
+                code: INTERNAL_ERROR,
+                message: "address must not be empty."
+            ))
+            return
+        }
+
+        DispatchQueue.main.async {
+            let id = UUID()
+            let geocoder = CLGeocoder()
+            self.activeGeocoders[id] = geocoder
+
+            geocoder.geocodeAddressString(query) { [weak self] placemarks, geocodeError in
+                guard let self else { return }
+
+                DispatchQueue.main.async {
+                    self.activeGeocoders.removeValue(forKey: id)
+
+                    if let geocodeError {
+                        if self.isNoGeocoderResult(geocodeError) {
+                            success([])
+                            return
+                        }
+
+                        error?(self.createGeocoderError(
+                            geocodeError,
+                            messagePrefix: "Unable to geocode address"
+                        ))
+                        return
+                    }
+
+                    let locations = (placemarks ?? []).compactMap {
+                        self.placemarkToGeocodedLocation($0)
+                    }
+                    success(locations)
+                }
+            }
+        }
+    }
+
+    func reverseGeocode(
+        coords: GeocodingCoordinates,
+        success: @escaping ([ReverseGeocodedAddress]) -> Void,
+        error: ((LocationError) -> Void)?
+    ) throws -> Void {
+        if let validationError = validateGeocodingCoordinates(coords) {
+            error?(validationError)
+            return
+        }
+
+        DispatchQueue.main.async {
+            let id = UUID()
+            let geocoder = CLGeocoder()
+            self.activeGeocoders[id] = geocoder
+
+            let location = CLLocation(
+                latitude: coords.latitude,
+                longitude: coords.longitude
+            )
+
+            geocoder.reverseGeocodeLocation(location) { [weak self] placemarks, geocodeError in
+                guard let self else { return }
+
+                DispatchQueue.main.async {
+                    self.activeGeocoders.removeValue(forKey: id)
+
+                    if let geocodeError {
+                        if self.isNoGeocoderResult(geocodeError) {
+                            success([])
+                            return
+                        }
+
+                        error?(self.createGeocoderError(
+                            geocodeError,
+                            messagePrefix: "Unable to reverse geocode coordinates"
+                        ))
+                        return
+                    }
+
+                    let addresses = (placemarks ?? []).map {
+                        self.placemarkToReverseGeocodedAddress($0)
+                    }
+                    success(addresses)
+                }
+            }
+        }
     }
 
     // MARK: - Heading
@@ -1162,6 +1260,119 @@ class NitroGeolocation: HybridNitroGeolocationSpec {
         )
     }
 
+    private func placemarkToGeocodedLocation(_ placemark: CLPlacemark) -> GeocodedLocation? {
+        guard let location = placemark.location else {
+            return nil
+        }
+
+        let accuracy = location.horizontalAccuracy >= 0
+            ? location.horizontalAccuracy
+            : nil
+
+        return GeocodedLocation(
+            latitude: location.coordinate.latitude,
+            longitude: location.coordinate.longitude,
+            accuracy: accuracy
+        )
+    }
+
+    private func placemarkToReverseGeocodedAddress(_ placemark: CLPlacemark) -> ReverseGeocodedAddress {
+        return ReverseGeocodedAddress(
+            country: placemark.country.nonEmptyTrimmed,
+            region: placemark.administrativeArea.nonEmptyTrimmed,
+            city: placemark.locality.nonEmptyTrimmed,
+            district: placemark.subLocality.nonEmptyTrimmed,
+            street: formatStreet(placemark),
+            postalCode: placemark.postalCode.nonEmptyTrimmed,
+            formattedAddress: formatAddress(placemark)
+        )
+    }
+
+    private func formatStreet(_ placemark: CLPlacemark) -> String? {
+        return [
+            placemark.subThoroughfare.nonEmptyTrimmed,
+            placemark.thoroughfare.nonEmptyTrimmed
+        ]
+            .compactMap { $0 }
+            .joined(separator: " ")
+            .nonEmptyTrimmed
+    }
+
+    private func formatAddress(_ placemark: CLPlacemark) -> String? {
+        var parts: [String] = []
+
+        appendDistinct(placemark.name.nonEmptyTrimmed, to: &parts)
+        appendDistinct(formatStreet(placemark), to: &parts)
+        appendDistinct(placemark.subLocality.nonEmptyTrimmed, to: &parts)
+        appendDistinct(placemark.locality.nonEmptyTrimmed, to: &parts)
+        appendDistinct(placemark.administrativeArea.nonEmptyTrimmed, to: &parts)
+        appendDistinct(placemark.postalCode.nonEmptyTrimmed, to: &parts)
+        appendDistinct(placemark.country.nonEmptyTrimmed, to: &parts)
+
+        return parts.joined(separator: ", ").nonEmptyTrimmed
+    }
+
+    private func appendDistinct(_ value: String?, to parts: inout [String]) {
+        guard let value, !parts.contains(value) else {
+            return
+        }
+
+        parts.append(value)
+    }
+
+    private func validateGeocodingCoordinates(_ coords: GeocodingCoordinates) -> LocationError? {
+        if !coords.latitude.isFinite || coords.latitude < -90 || coords.latitude > 90 {
+            return createLocationError(
+                code: INTERNAL_ERROR,
+                message: "latitude must be a finite number between -90 and 90."
+            )
+        }
+
+        if !coords.longitude.isFinite || coords.longitude < -180 || coords.longitude > 180 {
+            return createLocationError(
+                code: INTERNAL_ERROR,
+                message: "longitude must be a finite number between -180 and 180."
+            )
+        }
+
+        return nil
+    }
+
+    private func isNoGeocoderResult(_ error: Error) -> Bool {
+        guard let clError = error as? CLError else {
+            return false
+        }
+
+        return clError.code == .geocodeFoundNoResult
+    }
+
+    private func createGeocoderError(_ error: Error, messagePrefix: String) -> LocationError {
+        if let clError = error as? CLError {
+            switch clError.code {
+            case .denied:
+                return createLocationError(
+                    code: PERMISSION_DENIED,
+                    message: "\(messagePrefix): geocoder access denied."
+                )
+            case .network:
+                return createLocationError(
+                    code: POSITION_UNAVAILABLE,
+                    message: "\(messagePrefix): network unavailable."
+                )
+            default:
+                return createLocationError(
+                    code: POSITION_UNAVAILABLE,
+                    message: "\(messagePrefix): \(error.localizedDescription)"
+                )
+            }
+        }
+
+        return createLocationError(
+            code: POSITION_UNAVAILABLE,
+            message: "\(messagePrefix): \(error.localizedDescription)"
+        )
+    }
+
     private func createLocationError(code: Int, message: String) -> LocationError {
         return LocationError(
             code: Double(code),
@@ -1188,5 +1399,25 @@ class NitroGeolocation: HybridNitroGeolocationSpec {
         }
 
         return backgroundModes.contains("location")
+    }
+}
+
+private extension Optional where Wrapped == String {
+    var nonEmptyTrimmed: String? {
+        guard let trimmed = self?.trimmingCharacters(in: .whitespacesAndNewlines) else {
+            return nil
+        }
+
+        return trimmed.isEmpty ? nil : trimmed
+    }
+}
+
+private extension String {
+    var nonEmptyTrimmed: String? {
+        return trimmingCharacters(in: .whitespacesAndNewlines).nilIfEmpty
+    }
+
+    var nilIfEmpty: String? {
+        return isEmpty ? nil : self
     }
 }

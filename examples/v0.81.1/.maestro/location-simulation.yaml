@@ -1,9 +1,19 @@
 appId: nitrogeolocation.example
 ---
-# Test 5: Location Simulation
-# This test simulates different locations to verify position updates
+# Location simulation contract: each request must render the newly simulated
+# coordinates rather than any previous display-only position block.
 
-- launchApp
+- launchApp:
+    clearState: true
+    permissions:
+      all: allow
+
+- extendedWaitUntil:
+    visible: "Geolocation API"
+    timeout: 10000
+
+- stopApp
+
 - openLink:
     link: nitrogeolocation://app/location-simulation
 - tapOn:
@@ -34,6 +44,10 @@ appId: nitrogeolocation.example
 # Verify position loaded
 - assertVisible:
     id: "position-info"
+- assertVisible:
+    text: "Latitude: 37\\.774900"
+- assertVisible:
+    text: "Longitude: -122\\.419400"
 
 # Simulate location: New York
 - setLocation:
@@ -48,6 +62,10 @@ appId: nitrogeolocation.example
 # Verify position loaded
 - assertVisible:
     id: "position-info"
+- assertVisible:
+    text: "Latitude: 40\\.712800"
+- assertVisible:
+    text: "Longitude: -74\\.006000"
 
 # Simulate location: Seoul
 - setLocation:
@@ -62,3 +80,7 @@ appId: nitrogeolocation.example
 # Verify position loaded
 - assertVisible:
     id: "position-info"
+- assertVisible:
+    text: "Latitude: 37\\.566500"
+- assertVisible:
+    text: "Longitude: 126\\.978000"

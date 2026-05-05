@@ -8,6 +8,7 @@ appId: nitrogeolocation.example
 - runFlow: location-simulation.yaml
 - runFlow: accuracy-presets.yaml
 - runFlow: last-known-position.yaml
+- runFlow: geocoding.yaml
 - runFlow: location-availability.yaml
 - runFlow: heading.yaml
 - runFlow:

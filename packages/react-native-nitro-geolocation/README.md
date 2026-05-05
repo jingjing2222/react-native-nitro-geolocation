@@ -37,8 +37,14 @@ import {
   setConfiguration,
   requestPermission,
   requestLocationSettings,
+  getLocationAvailability,
   getCurrentPosition,
   getLastKnownPosition,
+  geocode,
+  reverseGeocode,
+  getHeading,
+  watchHeading,
+  unwatch,
   getAccuracyAuthorization,
   requestTemporaryFullAccuracy,
   useWatchPosition,
@@ -56,9 +62,14 @@ const status = await requestPermission();
 // Android, v1.2+: ask the user to enable settings required for accurate location
 await requestLocationSettings({ accuracy: { android: "high" } });
 
+// v1.2+: check whether the platform can currently provide locations
+const availability = await getLocationAvailability();
+
 // Get current location
 const position = await getCurrentPosition({
   accuracy: { android: "high", ios: "best" },
+  granularity: "permission",
+  waitForAccurateLocation: true,
 });
 
 // v1.2+: read cached location explicitly without starting a fresh request
@@ -67,11 +78,25 @@ const cached = await getLastKnownPosition({
   accuracy: { android: "balanced", ios: "hundredMeters" },
 });
 
+// v1.2+: convert between addresses and coordinates with native geocoders
+const locations = await geocode("Seoul City Hall");
+const addresses = await reverseGeocode({
+  latitude: 37.5665,
+  longitude: 126.978,
+});
+
 // v1.2+: inspect precise/reduced accuracy authorization
 const accuracyAuthorization = await getAccuracyAuthorization();
 if (accuracyAuthorization === "reduced") {
   await requestTemporaryFullAccuracy("TurnByTurnNavigation");
 }
+
+// v1.2+: read and watch compass heading
+const heading = await getHeading();
+const headingToken = watchHeading((nextHeading) => {
+  console.log(nextHeading.magneticHeading);
+});
+unwatch(headingToken);
 
 // Continuous tracking with hook
 function LocationTracker() {
@@ -233,7 +258,10 @@ const { position, error } = useWatchPosition({
 
 Accuracy presets are available since `v1.2`.
 
-`getLastKnownPosition(options?)`, iOS tuning options
+`getLastKnownPosition(options?)`, `getLocationAvailability()`, `getHeading()`,
+`watchHeading()`, `geocode(address)`, `reverseGeocode(coords)`, selected
+Android request options (`granularity`, `waitForAccurateLocation`,
+`maxUpdateAge`, `maxUpdateDelay`, and `maxUpdates`), iOS tuning options
 (`activityType`, `pausesLocationUpdatesAutomatically`, and
 `showsBackgroundLocationIndicator`), `getAccuracyAuthorization()`, and
 `requestTemporaryFullAccuracy(purposeKey)` are available since `v1.2`.

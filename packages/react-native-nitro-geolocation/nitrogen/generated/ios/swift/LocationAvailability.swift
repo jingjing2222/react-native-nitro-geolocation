@@ -32,7 +32,7 @@ public extension LocationAvailability {
   var available: Bool {
     return self.__available
   }
-
+  
   @inline(__always)
   var reason: String? {
     return { () -> String? in

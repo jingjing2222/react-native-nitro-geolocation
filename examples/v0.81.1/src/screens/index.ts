@@ -3,6 +3,7 @@ export { default as AccuracyPresetsScreen } from "./AccuracyPresetsScreen";
 export { default as DefaultScreen } from "./DefaultScreen";
 export { default as CompatScreen } from "./CompatScreen";
 export { default as CurrentPositionScreen } from "./CurrentPositionScreen";
+export { default as GeocodingScreen } from "./GeocodingScreen";
 export { default as IOSAccuracyAuthorizationScreen } from "./IOSAccuracyAuthorizationScreen";
 export { default as IOSLocationTuningScreen } from "./IOSLocationTuningScreen";
 export { default as Issue67Screen } from "./Issue67Screen";

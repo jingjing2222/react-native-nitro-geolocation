@@ -31,6 +31,12 @@ namespace margelo::nitro::nitrogeolocation { enum class AccuracyAuthorization; }
 namespace margelo::nitro::nitrogeolocation { struct GeolocationResponse; }
 // Forward declaration of `LocationRequestOptions` to properly resolve imports.
 namespace margelo::nitro::nitrogeolocation { struct LocationRequestOptions; }
+// Forward declaration of `GeocodedLocation` to properly resolve imports.
+namespace margelo::nitro::nitrogeolocation { struct GeocodedLocation; }
+// Forward declaration of `GeocodingCoordinates` to properly resolve imports.
+namespace margelo::nitro::nitrogeolocation { struct GeocodingCoordinates; }
+// Forward declaration of `ReverseGeocodedAddress` to properly resolve imports.
+namespace margelo::nitro::nitrogeolocation { struct ReverseGeocodedAddress; }
 // Forward declaration of `Heading` to properly resolve imports.
 namespace margelo::nitro::nitrogeolocation { struct Heading; }
 // Forward declaration of `HeadingOptions` to properly resolve imports.
@@ -49,6 +55,10 @@ namespace margelo::nitro::nitrogeolocation { struct HeadingOptions; }
 #include <string>
 #include "GeolocationResponse.hpp"
 #include "LocationRequestOptions.hpp"
+#include "GeocodedLocation.hpp"
+#include <vector>
+#include "GeocodingCoordinates.hpp"
+#include "ReverseGeocodedAddress.hpp"
 #include "Heading.hpp"
 #include "HeadingOptions.hpp"
 
@@ -79,7 +89,7 @@ namespace margelo::nitro::nitrogeolocation {
 
     public:
       // Properties
-
+      
 
     public:
       // Methods
@@ -94,6 +104,8 @@ namespace margelo::nitro::nitrogeolocation {
       virtual void requestTemporaryFullAccuracy(const std::string& purposeKey, const std::function<void(AccuracyAuthorization /* authorization */)>& success, const std::optional<std::function<void(const LocationError& /* error */)>>& error) = 0;
       virtual void getCurrentPosition(const std::function<void(const GeolocationResponse& /* position */)>& success, const std::optional<std::function<void(const LocationError& /* error */)>>& error, const std::optional<LocationRequestOptions>& options) = 0;
       virtual void getLastKnownPosition(const std::function<void(const GeolocationResponse& /* position */)>& success, const std::optional<std::function<void(const LocationError& /* error */)>>& error, const std::optional<LocationRequestOptions>& options) = 0;
+      virtual void geocode(const std::string& address, const std::function<void(const std::vector<GeocodedLocation>& /* locations */)>& success, const std::optional<std::function<void(const LocationError& /* error */)>>& error) = 0;
+      virtual void reverseGeocode(const GeocodingCoordinates& coords, const std::function<void(const std::vector<ReverseGeocodedAddress>& /* addresses */)>& success, const std::optional<std::function<void(const LocationError& /* error */)>>& error) = 0;
       virtual void getHeading(const std::function<void(const Heading& /* heading */)>& success, const std::optional<std::function<void(const LocationError& /* error */)>>& error) = 0;
       virtual std::string watchHeading(const std::function<void(const Heading& /* heading */)>& success, const std::optional<std::function<void(const LocationError& /* error */)>>& error, const std::optional<HeadingOptions>& options) = 0;
       virtual std::string watchPosition(const std::function<void(const GeolocationResponse& /* position */)>& success, const std::optional<std::function<void(const LocationError& /* error */)>>& error, const std::optional<LocationRequestOptions>& options) = 0;

@@ -50,7 +50,7 @@ namespace margelo::nitro::nitrogeolocation {
 
   public:
     // Properties
-
+    
 
   public:
     // Methods
@@ -65,6 +65,8 @@ namespace margelo::nitro::nitrogeolocation {
     void requestTemporaryFullAccuracy(const std::string& purposeKey, const std::function<void(AccuracyAuthorization /* authorization */)>& success, const std::optional<std::function<void(const LocationError& /* error */)>>& error) override;
     void getCurrentPosition(const std::function<void(const GeolocationResponse& /* position */)>& success, const std::optional<std::function<void(const LocationError& /* error */)>>& error, const std::optional<LocationRequestOptions>& options) override;
     void getLastKnownPosition(const std::function<void(const GeolocationResponse& /* position */)>& success, const std::optional<std::function<void(const LocationError& /* error */)>>& error, const std::optional<LocationRequestOptions>& options) override;
+    void geocode(const std::string& address, const std::function<void(const std::vector<GeocodedLocation>& /* locations */)>& success, const std::optional<std::function<void(const LocationError& /* error */)>>& error) override;
+    void reverseGeocode(const GeocodingCoordinates& coords, const std::function<void(const std::vector<ReverseGeocodedAddress>& /* addresses */)>& success, const std::optional<std::function<void(const LocationError& /* error */)>>& error) override;
     void getHeading(const std::function<void(const Heading& /* heading */)>& success, const std::optional<std::function<void(const LocationError& /* error */)>>& error) override;
     std::string watchHeading(const std::function<void(const Heading& /* heading */)>& success, const std::optional<std::function<void(const LocationError& /* error */)>>& error, const std::optional<HeadingOptions>& options) override;
     std::string watchPosition(const std::function<void(const GeolocationResponse& /* position */)>& success, const std::optional<std::function<void(const LocationError& /* error */)>>& error, const std::optional<LocationRequestOptions>& options) override;

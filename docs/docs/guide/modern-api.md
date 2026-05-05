@@ -42,7 +42,7 @@ setConfiguration({
 
 **Options**:
 
-- `autoRequestPermission?: boolean` - Automatically request permission when configured
+- `autoRequestPermission?: boolean` - Deprecated compatibility option. `setConfiguration()` does not request permission; call `requestPermission()` explicitly when the app is ready to show the native prompt.
 - `authorizationLevel?: 'whenInUse' | 'always' | 'auto'` - iOS: Authorization level
 - `enableBackgroundLocationUpdates?: boolean` - iOS: Enable background location
 - `locationProvider?: 'playServices' | 'android' | 'auto'` - Android: Location provider
@@ -51,6 +51,7 @@ setConfiguration({
 
 ```typescript
 export type GeolocationConfiguration = {
+  /** @deprecated Call `requestPermission()` explicitly. */
   autoRequestPermission?: boolean;
   authorizationLevel?: 'always' | 'whenInUse' | 'auto';
   enableBackgroundLocationUpdates?: boolean;
@@ -409,6 +410,46 @@ options as `getCurrentPosition()`, but it never falls through to a fresh native
 request. If no cached location satisfies `maximumAge` or permission is denied,
 it rejects with the native `LocationError` contract, usually
 `POSITION_UNAVAILABLE` or `PERMISSION_DENIED`.
+
+### Geocoding APIs
+
+Available since `v1.2`.
+
+Use `geocode()` to convert a human-readable address into candidate coordinates,
+and `reverseGeocode()` to convert coordinates into candidate address fields.
+Both APIs use the platform geocoder, so result quality, language, network
+behavior, and availability can differ between Android `Geocoder` and iOS
+`CLGeocoder`.
+
+```tsx
+import {
+  geocode,
+  reverseGeocode
+} from 'react-native-nitro-geolocation';
+
+const locations = await geocode('Seoul City Hall');
+// locations: Array<{ latitude: number; longitude: number; accuracy?: number }>
+
+const addresses = await reverseGeocode({
+  latitude: 37.5665,
+  longitude: 126.978
+});
+// addresses: Array<{
+//   country?: string;
+//   region?: string;
+//   city?: string;
+//   district?: string;
+//   street?: string;
+//   postalCode?: string;
+//   formattedAddress?: string;
+// }>
+```
+
+`geocode(address)` rejects with `INTERNAL_ERROR` when `address` is blank.
+`reverseGeocode(coords)` rejects with `INTERNAL_ERROR` when latitude or
+longitude is non-finite or outside the valid coordinate range. Platform
+geocoder service failures reject with the same `{ code, message }`
+`LocationError` shape as the rest of the Modern API.
 
 ### Heading APIs
 
