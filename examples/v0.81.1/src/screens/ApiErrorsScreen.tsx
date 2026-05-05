@@ -18,7 +18,7 @@ type CapturedLocationError = {
 
 const TIMEOUT_CONTRACT_OPTIONS = {
   enableHighAccuracy: true,
-  maximumAge: -1,
+  maximumAge: 0,
   timeout: 0
 };
 

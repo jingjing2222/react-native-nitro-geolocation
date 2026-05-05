@@ -1,0 +1,13 @@
+appId: nitrogeolocation.example
+---
+# Heading contracts are platform-specific: Android emulators expose a real
+# heading sensor, while iOS simulators report Core Location heading unavailable.
+
+- runFlow:
+    when:
+      platform: Android
+    file: heading-android.yaml
+- runFlow:
+    when:
+      platform: iOS
+    file: heading-ios.yaml

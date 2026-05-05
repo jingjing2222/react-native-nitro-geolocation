@@ -8,6 +8,7 @@ export type LocationProviderUsed =
   | "unknown";
 export type NullableDouble = number | null;
 export type AndroidAccuracyPreset = "high" | "balanced" | "low" | "passive";
+export type AndroidGranularity = "permission" | "coarse" | "fine";
 export type IOSAccuracyPreset =
   | "bestForNavigation"
   | "best"
@@ -44,6 +45,22 @@ export interface GeolocationResponse {
   timestamp: number;
   mocked?: boolean;
   provider?: LocationProviderUsed;
+}
+
+export interface LocationAvailability {
+  available: boolean;
+  reason?: string;
+}
+
+export interface Heading {
+  magneticHeading: number;
+  trueHeading?: number;
+  accuracy?: number;
+  timestamp: number;
+}
+
+export interface HeadingOptions {
+  headingFilter?: number;
 }
 
 /**

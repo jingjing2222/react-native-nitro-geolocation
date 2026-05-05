@@ -7,6 +7,9 @@ export { default as IOSAccuracyAuthorizationScreen } from "./IOSAccuracyAuthoriz
 export { default as IOSLocationTuningScreen } from "./IOSLocationTuningScreen";
 export { default as Issue67Screen } from "./Issue67Screen";
 export { default as LastKnownPositionScreen } from "./LastKnownPositionScreen";
+export { default as LocationAvailabilityScreen } from "./LocationAvailabilityScreen";
+export { default as HeadingScreen } from "./HeadingScreen";
+export { default as AndroidRequestOptionsScreen } from "./AndroidRequestOptionsScreen";
 export { default as LocationSimulationScreen } from "./LocationSimulationScreen";
 export { default as MockedMetadataScreen } from "./MockedMetadataScreen";
 export { default as PermissionCheckScreen } from "./PermissionCheckScreen";

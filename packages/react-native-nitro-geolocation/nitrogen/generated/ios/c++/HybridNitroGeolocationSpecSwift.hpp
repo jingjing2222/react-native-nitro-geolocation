@@ -24,6 +24,8 @@ namespace margelo::nitro::nitrogeolocation { enum class PermissionStatus; }
 namespace margelo::nitro::nitrogeolocation { struct LocationError; }
 // Forward declaration of `LocationProviderStatus` to properly resolve imports.
 namespace margelo::nitro::nitrogeolocation { struct LocationProviderStatus; }
+// Forward declaration of `LocationAvailability` to properly resolve imports.
+namespace margelo::nitro::nitrogeolocation { struct LocationAvailability; }
 // Forward declaration of `LocationSettingsOptions` to properly resolve imports.
 namespace margelo::nitro::nitrogeolocation { struct LocationSettingsOptions; }
 // Forward declaration of `LocationAccuracyOptions` to properly resolve imports.
@@ -42,8 +44,14 @@ namespace margelo::nitro::nitrogeolocation { struct GeolocationCoordinates; }
 namespace margelo::nitro::nitrogeolocation { enum class LocationProviderUsed; }
 // Forward declaration of `LocationRequestOptions` to properly resolve imports.
 namespace margelo::nitro::nitrogeolocation { struct LocationRequestOptions; }
+// Forward declaration of `AndroidGranularity` to properly resolve imports.
+namespace margelo::nitro::nitrogeolocation { enum class AndroidGranularity; }
 // Forward declaration of `IOSActivityType` to properly resolve imports.
 namespace margelo::nitro::nitrogeolocation { enum class IOSActivityType; }
+// Forward declaration of `Heading` to properly resolve imports.
+namespace margelo::nitro::nitrogeolocation { struct Heading; }
+// Forward declaration of `HeadingOptions` to properly resolve imports.
+namespace margelo::nitro::nitrogeolocation { struct HeadingOptions; }
 
 #include "GeolocationConfiguration.hpp"
 #include <optional>
@@ -55,6 +63,7 @@ namespace margelo::nitro::nitrogeolocation { enum class IOSActivityType; }
 #include "LocationError.hpp"
 #include <string>
 #include "LocationProviderStatus.hpp"
+#include "LocationAvailability.hpp"
 #include "LocationSettingsOptions.hpp"
 #include "LocationAccuracyOptions.hpp"
 #include "AndroidAccuracyPreset.hpp"
@@ -66,7 +75,10 @@ namespace margelo::nitro::nitrogeolocation { enum class IOSActivityType; }
 #include <variant>
 #include "LocationProviderUsed.hpp"
 #include "LocationRequestOptions.hpp"
+#include "AndroidGranularity.hpp"
 #include "IOSActivityType.hpp"
+#include "Heading.hpp"
+#include "HeadingOptions.hpp"
 
 #include "NitroGeolocation-Swift-Cxx-Umbrella.hpp"
 
@@ -114,7 +126,7 @@ namespace margelo::nitro::nitrogeolocation {
 
   public:
     // Properties
-    
+
 
   public:
     // Methods
@@ -154,6 +166,14 @@ namespace margelo::nitro::nitrogeolocation {
       auto __value = std::move(__result.value());
       return __value;
     }
+    inline std::shared_ptr<Promise<LocationAvailability>> getLocationAvailability() override {
+      auto __result = _swiftPart.getLocationAvailability();
+      if (__result.hasError()) [[unlikely]] {
+        std::rethrow_exception(__result.error());
+      }
+      auto __value = std::move(__result.value());
+      return __value;
+    }
     inline void requestLocationSettings(const std::function<void(const LocationProviderStatus& /* status */)>& success, const std::optional<std::function<void(const LocationError& /* error */)>>& error, const std::optional<LocationSettingsOptions>& options) override {
       auto __result = _swiftPart.requestLocationSettings(success, error, options);
       if (__result.hasError()) [[unlikely]] {
@@ -185,6 +205,20 @@ namespace margelo::nitro::nitrogeolocation {
       if (__result.hasError()) [[unlikely]] {
         std::rethrow_exception(__result.error());
       }
+    }
+    inline void getHeading(const std::function<void(const Heading& /* heading */)>& success, const std::optional<std::function<void(const LocationError& /* error */)>>& error) override {
+      auto __result = _swiftPart.getHeading(success, error);
+      if (__result.hasError()) [[unlikely]] {
+        std::rethrow_exception(__result.error());
+      }
+    }
+    inline std::string watchHeading(const std::function<void(const Heading& /* heading */)>& success, const std::optional<std::function<void(const LocationError& /* error */)>>& error, const std::optional<HeadingOptions>& options) override {
+      auto __result = _swiftPart.watchHeading(success, error, options);
+      if (__result.hasError()) [[unlikely]] {
+        std::rethrow_exception(__result.error());
+      }
+      auto __value = std::move(__result.value());
+      return __value;
     }
     inline std::string watchPosition(const std::function<void(const GeolocationResponse& /* position */)>& success, const std::optional<std::function<void(const LocationError& /* error */)>>& error, const std::optional<LocationRequestOptions>& options) override {
       auto __result = _swiftPart.watchPosition(success, error, options);

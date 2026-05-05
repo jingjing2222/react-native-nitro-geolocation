@@ -6,10 +6,14 @@ import type {
 import type {
   AccuracyAuthorization as SchemaAccuracyAuthorization,
   AndroidAccuracyPreset as SchemaAndroidAccuracyPreset,
+  AndroidGranularity as SchemaAndroidGranularity,
   GeolocationResponse as SchemaGeolocationResponse,
+  Heading as SchemaHeading,
+  HeadingOptions as SchemaHeadingOptions,
   IOSAccuracyPreset as SchemaIOSAccuracyPreset,
   IOSActivityType as SchemaIOSActivityType,
   LocationAccuracyOptions as SchemaLocationAccuracyOptions,
+  LocationAvailability as SchemaLocationAvailability,
   LocationProviderStatus as SchemaLocationProviderStatus,
   LocationProviderUsed as SchemaLocationProviderUsed
 } from "./types";
@@ -30,11 +34,15 @@ type NativeLocationProvider = NonNullable<
 
 export type GeolocationResponse = SchemaGeolocationResponse;
 export type LocationProviderStatus = SchemaLocationProviderStatus;
+export type LocationAvailability = SchemaLocationAvailability;
 export type AndroidAccuracyPreset = SchemaAndroidAccuracyPreset;
+export type AndroidGranularity = SchemaAndroidGranularity;
 export type IOSAccuracyPreset = SchemaIOSAccuracyPreset;
 export type AccuracyAuthorization = SchemaAccuracyAuthorization;
 export type IOSActivityType = SchemaIOSActivityType;
 export type LocationAccuracyOptions = SchemaLocationAccuracyOptions;
+export type Heading = SchemaHeading;
+export type HeadingOptions = SchemaHeadingOptions;
 
 export type CompatGeolocationResponse = CallbackValue<CompatSuccessCallback>;
 

@@ -11,9 +11,11 @@
 #include "LocationRequestOptions.hpp"
 
 #include "AndroidAccuracyPreset.hpp"
+#include "AndroidGranularity.hpp"
 #include "IOSAccuracyPreset.hpp"
 #include "IOSActivityType.hpp"
 #include "JAndroidAccuracyPreset.hpp"
+#include "JAndroidGranularity.hpp"
 #include "JIOSAccuracyPreset.hpp"
 #include "JIOSActivityType.hpp"
 #include "JLocationAccuracyOptions.hpp"
@@ -53,6 +55,16 @@ namespace margelo::nitro::nitrogeolocation {
       jni::local_ref<jni::JDouble> fastestInterval = this->getFieldValue(fieldFastestInterval);
       static const auto fieldDistanceFilter = clazz->getField<jni::JDouble>("distanceFilter");
       jni::local_ref<jni::JDouble> distanceFilter = this->getFieldValue(fieldDistanceFilter);
+      static const auto fieldGranularity = clazz->getField<JAndroidGranularity>("granularity");
+      jni::local_ref<JAndroidGranularity> granularity = this->getFieldValue(fieldGranularity);
+      static const auto fieldWaitForAccurateLocation = clazz->getField<jni::JBoolean>("waitForAccurateLocation");
+      jni::local_ref<jni::JBoolean> waitForAccurateLocation = this->getFieldValue(fieldWaitForAccurateLocation);
+      static const auto fieldMaxUpdateAge = clazz->getField<jni::JDouble>("maxUpdateAge");
+      jni::local_ref<jni::JDouble> maxUpdateAge = this->getFieldValue(fieldMaxUpdateAge);
+      static const auto fieldMaxUpdateDelay = clazz->getField<jni::JDouble>("maxUpdateDelay");
+      jni::local_ref<jni::JDouble> maxUpdateDelay = this->getFieldValue(fieldMaxUpdateDelay);
+      static const auto fieldMaxUpdates = clazz->getField<jni::JDouble>("maxUpdates");
+      jni::local_ref<jni::JDouble> maxUpdates = this->getFieldValue(fieldMaxUpdates);
       static const auto fieldUseSignificantChanges = clazz->getField<jni::JBoolean>("useSignificantChanges");
       jni::local_ref<jni::JBoolean> useSignificantChanges = this->getFieldValue(fieldUseSignificantChanges);
       static const auto fieldActivityType = clazz->getField<JIOSActivityType>("activityType");
@@ -69,6 +81,11 @@ namespace margelo::nitro::nitrogeolocation {
         interval != nullptr ? std::make_optional(interval->value()) : std::nullopt,
         fastestInterval != nullptr ? std::make_optional(fastestInterval->value()) : std::nullopt,
         distanceFilter != nullptr ? std::make_optional(distanceFilter->value()) : std::nullopt,
+        granularity != nullptr ? std::make_optional(granularity->toCpp()) : std::nullopt,
+        waitForAccurateLocation != nullptr ? std::make_optional(static_cast<bool>(waitForAccurateLocation->value())) : std::nullopt,
+        maxUpdateAge != nullptr ? std::make_optional(maxUpdateAge->value()) : std::nullopt,
+        maxUpdateDelay != nullptr ? std::make_optional(maxUpdateDelay->value()) : std::nullopt,
+        maxUpdates != nullptr ? std::make_optional(maxUpdates->value()) : std::nullopt,
         useSignificantChanges != nullptr ? std::make_optional(static_cast<bool>(useSignificantChanges->value())) : std::nullopt,
         activityType != nullptr ? std::make_optional(activityType->toCpp()) : std::nullopt,
         pausesLocationUpdatesAutomatically != nullptr ? std::make_optional(static_cast<bool>(pausesLocationUpdatesAutomatically->value())) : std::nullopt,
@@ -82,7 +99,7 @@ namespace margelo::nitro::nitrogeolocation {
      */
     [[maybe_unused]]
     static jni::local_ref<JLocationRequestOptions::javaobject> fromCpp(const LocationRequestOptions& value) {
-      using JSignature = JLocationRequestOptions(jni::alias_ref<jni::JDouble>, jni::alias_ref<jni::JDouble>, jni::alias_ref<jni::JBoolean>, jni::alias_ref<JLocationAccuracyOptions>, jni::alias_ref<jni::JDouble>, jni::alias_ref<jni::JDouble>, jni::alias_ref<jni::JDouble>, jni::alias_ref<jni::JBoolean>, jni::alias_ref<JIOSActivityType>, jni::alias_ref<jni::JBoolean>, jni::alias_ref<jni::JBoolean>);
+      using JSignature = JLocationRequestOptions(jni::alias_ref<jni::JDouble>, jni::alias_ref<jni::JDouble>, jni::alias_ref<jni::JBoolean>, jni::alias_ref<JLocationAccuracyOptions>, jni::alias_ref<jni::JDouble>, jni::alias_ref<jni::JDouble>, jni::alias_ref<jni::JDouble>, jni::alias_ref<JAndroidGranularity>, jni::alias_ref<jni::JBoolean>, jni::alias_ref<jni::JDouble>, jni::alias_ref<jni::JDouble>, jni::alias_ref<jni::JDouble>, jni::alias_ref<jni::JBoolean>, jni::alias_ref<JIOSActivityType>, jni::alias_ref<jni::JBoolean>, jni::alias_ref<jni::JBoolean>);
       static const auto clazz = javaClassStatic();
       static const auto create = clazz->getStaticMethod<JSignature>("fromCpp");
       return create(
@@ -94,6 +111,11 @@ namespace margelo::nitro::nitrogeolocation {
         value.interval.has_value() ? jni::JDouble::valueOf(value.interval.value()) : nullptr,
         value.fastestInterval.has_value() ? jni::JDouble::valueOf(value.fastestInterval.value()) : nullptr,
         value.distanceFilter.has_value() ? jni::JDouble::valueOf(value.distanceFilter.value()) : nullptr,
+        value.granularity.has_value() ? JAndroidGranularity::fromCpp(value.granularity.value()) : nullptr,
+        value.waitForAccurateLocation.has_value() ? jni::JBoolean::valueOf(value.waitForAccurateLocation.value()) : nullptr,
+        value.maxUpdateAge.has_value() ? jni::JDouble::valueOf(value.maxUpdateAge.value()) : nullptr,
+        value.maxUpdateDelay.has_value() ? jni::JDouble::valueOf(value.maxUpdateDelay.value()) : nullptr,
+        value.maxUpdates.has_value() ? jni::JDouble::valueOf(value.maxUpdates.value()) : nullptr,
         value.useSignificantChanges.has_value() ? jni::JBoolean::valueOf(value.useSignificantChanges.value()) : nullptr,
         value.activityType.has_value() ? JIOSActivityType::fromCpp(value.activityType.value()) : nullptr,
         value.pausesLocationUpdatesAutomatically.has_value() ? jni::JBoolean::valueOf(value.pausesLocationUpdatesAutomatically.value()) : nullptr,

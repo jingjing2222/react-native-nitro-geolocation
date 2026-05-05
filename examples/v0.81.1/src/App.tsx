@@ -7,14 +7,17 @@ import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { NavigationContainer } from "@react-navigation/native";
 import React from "react";
 import AccuracyPresetsScreen from "./screens/AccuracyPresetsScreen";
+import AndroidRequestOptionsScreen from "./screens/AndroidRequestOptionsScreen";
 import ApiErrorsScreen from "./screens/ApiErrorsScreen";
 import CompatScreen from "./screens/CompatScreen";
 import CurrentPositionScreen from "./screens/CurrentPositionScreen";
 import DefaultScreen from "./screens/DefaultScreen";
+import HeadingScreen from "./screens/HeadingScreen";
 import IOSAccuracyAuthorizationScreen from "./screens/IOSAccuracyAuthorizationScreen";
 import IOSLocationTuningScreen from "./screens/IOSLocationTuningScreen";
 import Issue67Screen from "./screens/Issue67Screen";
 import LastKnownPositionScreen from "./screens/LastKnownPositionScreen";
+import LocationAvailabilityScreen from "./screens/LocationAvailabilityScreen";
 import LocationSimulationScreen from "./screens/LocationSimulationScreen";
 import MockedMetadataScreen from "./screens/MockedMetadataScreen";
 import PermissionCheckScreen from "./screens/PermissionCheckScreen";
@@ -37,6 +40,9 @@ const linking = {
       ApiErrors: "api-errors",
       AccuracyPresets: "accuracy-presets",
       LastKnownPosition: "last-known-position",
+      LocationAvailability: "location-availability",
+      Heading: "heading",
+      AndroidRequestOptions: "android-request-options",
       IOSLocationTuning: "ios-location-tuning",
       IOSAccuracyAuthorization: "ios-accuracy-authorization",
       Issue67: "issue-67"
@@ -132,6 +138,21 @@ export default function App() {
         <Tab.Screen
           name="LastKnownPosition"
           component={LastKnownPositionScreen}
+          options={hiddenTabOptions}
+        />
+        <Tab.Screen
+          name="LocationAvailability"
+          component={LocationAvailabilityScreen}
+          options={hiddenTabOptions}
+        />
+        <Tab.Screen
+          name="Heading"
+          component={HeadingScreen}
+          options={hiddenTabOptions}
+        />
+        <Tab.Screen
+          name="AndroidRequestOptions"
+          component={AndroidRequestOptionsScreen}
           options={hiddenTabOptions}
         />
         <Tab.Screen

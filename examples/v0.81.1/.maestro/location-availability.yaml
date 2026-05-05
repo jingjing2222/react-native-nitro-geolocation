@@ -1,0 +1,83 @@
+appId: nitrogeolocation.example
+---
+# getLocationAvailability(): prove a real native fix makes availability true,
+# and permission denied availability agrees with getCurrentPosition rejection.
+
+- launchApp:
+    clearState: true
+    permissions:
+      all: allow
+
+- extendedWaitUntil:
+    visible: "Geolocation API"
+    timeout: 10000
+
+- stopApp
+
+- openLink:
+    link: nitrogeolocation://app/location-availability
+- tapOn:
+    text: "열기|Open"
+    optional: true
+
+- extendedWaitUntil:
+    visible: "Availability contract tied to native fixes and permission failures"
+    timeout: 10000
+
+- setLocation:
+    latitude: 37.5665
+    longitude: 126.978
+
+- tapOn:
+    id: "location-availability-run-available-button"
+
+- extendedWaitUntil:
+    visible: "Availability: passed"
+    timeout: 60000
+
+- assertVisible:
+    id: "location-availability-available-result"
+- assertVisible:
+    text: ".*37.566500, 126.978000.*"
+- assertVisible:
+    text: ".*Availability was true after native fix.*"
+
+- stopApp
+
+- launchApp:
+    clearState: true
+    permissions:
+      all: deny
+
+- extendedWaitUntil:
+    visible: "Geolocation API"
+    timeout: 10000
+
+- stopApp
+
+- openLink:
+    link: nitrogeolocation://app/location-availability
+- tapOn:
+    text: "열기|Open"
+    optional: true
+
+- extendedWaitUntil:
+    visible: "Availability contract tied to native fixes and permission failures"
+    timeout: 10000
+
+- scrollUntilVisible:
+    element: "3. Permission Denied"
+    direction: DOWN
+
+- tapOn:
+    id: "location-availability-run-denied-button"
+
+- scrollUntilVisible:
+    element: "Permission denied: passed"
+    direction: DOWN
+    timeout: 15000
+
+- assertVisible:
+    id: "location-availability-denied-result"
+- assertVisible:
+    text: ".*permissionDenied availability matched.*"

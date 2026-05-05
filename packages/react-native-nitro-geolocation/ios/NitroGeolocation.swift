@@ -24,6 +24,14 @@ private class LocationManagerDelegate: NSObject, CLLocationManagerDelegate {
     func locationManager(_ manager: CLLocationManager, didFailWithError error: Error) {
         geolocation?.handleLocationError(error)
     }
+
+    func locationManager(_ manager: CLLocationManager, didUpdateHeading newHeading: CLHeading) {
+        geolocation?.handleHeadingUpdate(newHeading)
+    }
+
+    func locationManagerShouldDisplayHeadingCalibration(_ manager: CLLocationManager) -> Bool {
+        return false
+    }
 }
 
 /**
@@ -137,6 +145,31 @@ class NitroGeolocation: HybridNitroGeolocationSpec {
         let options: ParsedOptions
     }
 
+    private struct ParsedHeadingOptions {
+        let headingFilter: CLLocationDegrees
+
+        static func parse(from options: HeadingOptions?) -> ParsedHeadingOptions {
+            return ParsedHeadingOptions(
+                headingFilter: options?.headingFilter ?? 0
+            )
+        }
+    }
+
+    private struct HeadingRequest {
+        let id: UUID
+        let success: (Heading) -> Void
+        let error: (LocationError) -> Void
+        var timer: DispatchSourceTimer?
+    }
+
+    private struct HeadingSubscription {
+        let token: String
+        let success: (Heading) -> Void
+        let error: ((LocationError) -> Void)?
+        let options: ParsedHeadingOptions
+        var lastDeliveredHeading: Double?
+    }
+
     // MARK: - Properties
 
     private var configuration: GeolocationConfiguration?
@@ -162,6 +195,10 @@ class NitroGeolocation: HybridNitroGeolocationSpec {
     // Watch subscriptions (token -> callback)
     private var watchSubscriptions: [String: WatchSubscription] = [:]
 
+    // Heading requests/subscriptions
+    private var pendingHeadingRequests: [UUID: HeadingRequest] = [:]
+    private var headingSubscriptions: [String: HeadingSubscription] = [:]
+
     // Error codes
     private let INTERNAL_ERROR = -1
     private let PERMISSION_DENIED = 1
@@ -169,6 +206,7 @@ class NitroGeolocation: HybridNitroGeolocationSpec {
     private let TIMEOUT = 3
     private let PLAY_SERVICE_NOT_AVAILABLE = 4
     private let SETTINGS_NOT_SATISFIED = 5
+    private let DEFAULT_HEADING_TIMEOUT_MS: Double = 10_000
 
     // MARK: - Configuration
 
@@ -219,6 +257,43 @@ class NitroGeolocation: HybridNitroGeolocationSpec {
     func getProviderStatus() throws -> Promise<LocationProviderStatus> {
         return Promise.async {
             return self.createLocationProviderStatus()
+        }
+    }
+
+    func getLocationAvailability() throws -> Promise<LocationAvailability> {
+        return Promise.async {
+            guard CLLocationManager.locationServicesEnabled() else {
+                return LocationAvailability(
+                    available: false,
+                    reason: "locationServicesDisabled"
+                )
+            }
+
+            let status = CLLocationManager.authorizationStatus()
+            switch status {
+            case .authorizedAlways, .authorizedWhenInUse:
+                return LocationAvailability(available: true, reason: nil)
+            case .notDetermined:
+                return LocationAvailability(
+                    available: false,
+                    reason: "permissionUndetermined"
+                )
+            case .denied:
+                return LocationAvailability(
+                    available: false,
+                    reason: "permissionDenied"
+                )
+            case .restricted:
+                return LocationAvailability(
+                    available: false,
+                    reason: "permissionRestricted"
+                )
+            @unknown default:
+                return LocationAvailability(
+                    available: false,
+                    reason: "authorizationUnknown"
+                )
+            }
         }
     }
 
@@ -377,6 +452,76 @@ class NitroGeolocation: HybridNitroGeolocationSpec {
         success(self.locationToPosition(cached))
     }
 
+    // MARK: - Heading
+
+    func getHeading(
+        success: @escaping (Heading) -> Void,
+        error: ((LocationError) -> Void)?
+    ) throws -> Void {
+        guard validateHeadingAvailability(error: error) else { return }
+
+        initializeLocationManagerIfNeeded()
+
+        let id = UUID()
+        var request = HeadingRequest(
+            id: id,
+            success: success,
+            error: { headingError in
+                error?(headingError)
+            },
+            timer: nil
+        )
+
+        let timer = DispatchSource.makeTimerSource(queue: .main)
+        timer.schedule(deadline: .now() + DEFAULT_HEADING_TIMEOUT_MS / 1000.0)
+        timer.setEventHandler { [weak self] in
+            self?.handleHeadingTimeout(requestId: id)
+        }
+        timer.resume()
+        request.timer = timer
+
+        pendingHeadingRequests[id] = request
+        updateHeadingConfiguration()
+        startHeadingMonitoring()
+    }
+
+    func watchHeading(
+        success: @escaping (Heading) -> Void,
+        error: ((LocationError) -> Void)?,
+        options: HeadingOptions?
+    ) throws -> String {
+        let token = UUID().uuidString
+        let parsedOptions = ParsedHeadingOptions.parse(from: options)
+
+        if !parsedOptions.headingFilter.isFinite || parsedOptions.headingFilter < 0 {
+            error?(createLocationError(
+                code: INTERNAL_ERROR,
+                message: "headingFilter must be a finite number greater than or equal to 0."
+            ))
+            return token
+        }
+
+        guard validateHeadingAvailability(error: error) else {
+            return token
+        }
+
+        let subscription = HeadingSubscription(
+            token: token,
+            success: success,
+            error: error,
+            options: parsedOptions,
+            lastDeliveredHeading: nil
+        )
+
+        headingSubscriptions[token] = subscription
+
+        initializeLocationManagerIfNeeded()
+        updateHeadingConfiguration()
+        startHeadingMonitoring()
+
+        return token
+    }
+
     // MARK: - Watch Position (Callback-based with tokens)
 
     func watchPosition(
@@ -405,6 +550,7 @@ class NitroGeolocation: HybridNitroGeolocationSpec {
 
     func unwatch(token: String) {
         watchSubscriptions.removeValue(forKey: token)
+        headingSubscriptions.removeValue(forKey: token)
 
         // Stop monitoring if no more subscriptions or pending requests
         if watchSubscriptions.isEmpty && pendingPositionRequests.isEmpty {
@@ -412,16 +558,29 @@ class NitroGeolocation: HybridNitroGeolocationSpec {
         } else {
             updateLocationManagerConfiguration()
         }
+
+        if headingSubscriptions.isEmpty && pendingHeadingRequests.isEmpty {
+            stopHeadingMonitoring()
+        } else {
+            updateHeadingConfiguration()
+        }
     }
 
     func stopObserving() {
         watchSubscriptions.removeAll()
+        headingSubscriptions.removeAll()
 
         // Stop monitoring if no pending requests
         if pendingPositionRequests.isEmpty {
             stopMonitoring()
         } else {
             updateLocationManagerConfiguration()
+        }
+
+        if pendingHeadingRequests.isEmpty {
+            stopHeadingMonitoring()
+        } else {
+            updateHeadingConfiguration()
         }
     }
 
@@ -509,7 +668,43 @@ class NitroGeolocation: HybridNitroGeolocationSpec {
             subscription.error?(locationError)
         }
 
+        notifyHeadingConsumersOfLocationError(locationError)
         stopMonitoring()
+    }
+
+    fileprivate func handleHeadingUpdate(_ clHeading: CLHeading) {
+        let heading = headingToResponse(clHeading)
+
+        for (id, request) in Array(pendingHeadingRequests) {
+            request.timer?.cancel()
+            request.success(heading)
+            pendingHeadingRequests.removeValue(forKey: id)
+        }
+
+        for (token, subscription) in Array(headingSubscriptions) {
+            let shouldDeliver: Bool
+            if let lastDeliveredHeading = subscription.lastDeliveredHeading {
+                shouldDeliver = angularDistance(
+                    lastDeliveredHeading,
+                    heading.magneticHeading
+                ) >= subscription.options.headingFilter
+            } else {
+                shouldDeliver = true
+            }
+
+            if shouldDeliver {
+                var nextSubscription = subscription
+                nextSubscription.lastDeliveredHeading = heading.magneticHeading
+                headingSubscriptions[token] = nextSubscription
+                nextSubscription.success(heading)
+            }
+        }
+
+        if pendingHeadingRequests.isEmpty && headingSubscriptions.isEmpty {
+            stopHeadingMonitoring()
+        } else {
+            updateHeadingConfiguration()
+        }
     }
 
     // MARK: - Helper Functions
@@ -528,6 +723,139 @@ class NitroGeolocation: HybridNitroGeolocationSpec {
                 locationManager?.delegate = locationManagerDelegate
             }
         }
+    }
+
+    private func validateHeadingAvailability(
+        error: ((LocationError) -> Void)?
+    ) -> Bool {
+        let status = CLLocationManager.authorizationStatus()
+        if status == .denied || status == .restricted {
+            let message = status == .restricted
+                ? "This application is not authorized to use location services"
+                : "User denied access to location services."
+            error?(createLocationError(
+                code: PERMISSION_DENIED,
+                message: message
+            ))
+            return false
+        }
+
+        if !CLLocationManager.locationServicesEnabled() {
+            error?(createLocationError(
+                code: SETTINGS_NOT_SATISFIED,
+                message: "Location services disabled."
+            ))
+            return false
+        }
+
+        if !CLLocationManager.headingAvailable() {
+            error?(createLocationError(
+                code: POSITION_UNAVAILABLE,
+                message: "Heading is not available on this device."
+            ))
+            return false
+        }
+
+        return true
+    }
+
+    private func updateHeadingConfiguration() {
+        guard let manager = locationManager else { return }
+
+        var smallestHeadingFilter: CLLocationDegrees?
+        for (_, subscription) in headingSubscriptions {
+            smallestHeadingFilter = mergeHeadingFilter(
+                smallestHeadingFilter,
+                subscription.options.headingFilter
+            )
+        }
+
+        manager.headingFilter = smallestHeadingFilter ?? kCLHeadingFilterNone
+    }
+
+    private func startHeadingMonitoring() {
+        locationManager?.startUpdatingHeading()
+    }
+
+    private func stopHeadingMonitoring() {
+        locationManager?.stopUpdatingHeading()
+    }
+
+    private func mergeHeadingFilter(
+        _ current: CLLocationDegrees?,
+        _ next: CLLocationDegrees
+    ) -> CLLocationDegrees {
+        guard let current else {
+            return next
+        }
+
+        if current == kCLHeadingFilterNone || next == kCLHeadingFilterNone {
+            return kCLHeadingFilterNone
+        }
+
+        return min(current, next)
+    }
+
+    private func handleHeadingTimeout(requestId: UUID) {
+        guard let request = pendingHeadingRequests.removeValue(forKey: requestId) else {
+            return
+        }
+
+        request.timer?.cancel()
+        let timeoutSeconds = DEFAULT_HEADING_TIMEOUT_MS / 1000.0
+        let message = String(format: "Unable to fetch heading within %.1fs.", timeoutSeconds)
+        request.error(createLocationError(code: TIMEOUT, message: message))
+
+        if pendingHeadingRequests.isEmpty && headingSubscriptions.isEmpty {
+            stopHeadingMonitoring()
+        } else {
+            updateHeadingConfiguration()
+        }
+    }
+
+    private func notifyHeadingConsumersOfLocationError(_ locationError: LocationError) {
+        guard !pendingHeadingRequests.isEmpty || !headingSubscriptions.isEmpty else {
+            return
+        }
+
+        for (_, request) in pendingHeadingRequests {
+            request.timer?.cancel()
+            request.error(locationError)
+        }
+        pendingHeadingRequests.removeAll()
+
+        for (_, subscription) in headingSubscriptions {
+            subscription.error?(locationError)
+        }
+        headingSubscriptions.removeAll()
+
+        stopHeadingMonitoring()
+    }
+
+    private func headingToResponse(_ clHeading: CLHeading) -> Heading {
+        let trueHeading = clHeading.trueHeading >= 0
+            ? clHeading.trueHeading
+            : nil
+        let accuracy = clHeading.headingAccuracy >= 0
+            ? clHeading.headingAccuracy
+            : nil
+
+        return Heading(
+            magneticHeading: normalizeHeading(clHeading.magneticHeading),
+            trueHeading: trueHeading.map(normalizeHeading),
+            accuracy: accuracy,
+            timestamp: clHeading.timestamp.timeIntervalSince1970 * 1000
+        )
+    }
+
+    private func angularDistance(_ first: Double, _ second: Double) -> Double {
+        let distance = abs(first - second).truncatingRemainder(dividingBy: 360)
+        return distance > 180 ? 360 - distance : distance
+    }
+
+    private func normalizeHeading(_ value: Double) -> Double {
+        let normalized = value.truncatingRemainder(dividingBy: 360)
+        return normalized < 0 ? normalized + 360 : normalized
     }
 
     private func updateLocationManagerConfiguration() {

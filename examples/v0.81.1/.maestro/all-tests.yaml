@@ -8,6 +8,8 @@ appId: nitrogeolocation.example
 - runFlow: location-simulation.yaml
 - runFlow: accuracy-presets.yaml
 - runFlow: last-known-position.yaml
+- runFlow: location-availability.yaml
+- runFlow: heading.yaml
 - runFlow:
     when:
       platform: iOS
@@ -20,6 +22,10 @@ appId: nitrogeolocation.example
     when:
       platform: Android
     file: issue-67-android-coarse-location.yaml
+- runFlow:
+    when:
+      platform: Android
+    file: android-request-options.yaml
 - runFlow:
     when:
       platform: Android

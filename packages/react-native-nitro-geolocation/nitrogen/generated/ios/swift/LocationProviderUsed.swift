@@ -19,14 +19,14 @@ public extension LocationProviderUsed {
     switch string {
       case "passive":
         self = .passive
+      case "unknown":
+        self = .unknown
       case "fused":
         self = .fused
       case "gps":
         self = .gps
       case "network":
         self = .network
-      case "unknown":
-        self = .unknown
       default:
         return nil
     }
@@ -39,14 +39,14 @@ public extension LocationProviderUsed {
     switch self {
       case .passive:
         return "passive"
+      case .unknown:
+        return "unknown"
       case .fused:
         return "fused"
       case .gps:
         return "gps"
       case .network:
         return "network"
-      case .unknown:
-        return "unknown"
     }
   }
 }

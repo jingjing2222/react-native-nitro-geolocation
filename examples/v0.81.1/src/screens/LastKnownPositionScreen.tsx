@@ -96,7 +96,7 @@ export default function LastKnownPositionScreen() {
 
     try {
       await runWithNativeGeolocation(() =>
-        getLastKnownPosition({ maximumAge: -1 })
+        getLastKnownPosition({ maximumAge: 0 })
       );
       setResult("stale", {
         status: "failed",

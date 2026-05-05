@@ -18,7 +18,7 @@ public extension LocationRequestOptions {
   /**
    * Create a new instance of `LocationRequestOptions`.
    */
-  init(timeout: Double?, maximumAge: Double?, enableHighAccuracy: Bool?, accuracy: LocationAccuracyOptions?, interval: Double?, fastestInterval: Double?, distanceFilter: Double?, useSignificantChanges: Bool?, activityType: IOSActivityType?, pausesLocationUpdatesAutomatically: Bool?, showsBackgroundLocationIndicator: Bool?) {
+  init(timeout: Double?, maximumAge: Double?, enableHighAccuracy: Bool?, accuracy: LocationAccuracyOptions?, interval: Double?, fastestInterval: Double?, distanceFilter: Double?, granularity: AndroidGranularity?, waitForAccurateLocation: Bool?, maxUpdateAge: Double?, maxUpdateDelay: Double?, maxUpdates: Double?, useSignificantChanges: Bool?, activityType: IOSActivityType?, pausesLocationUpdatesAutomatically: Bool?, showsBackgroundLocationIndicator: Bool?) {
     self.init({ () -> bridge.std__optional_double_ in
       if let __unwrappedValue = timeout {
         return bridge.create_std__optional_double_(__unwrappedValue)
@@ -57,6 +57,36 @@ public extension LocationRequestOptions {
       }
     }(), { () -> bridge.std__optional_double_ in
       if let __unwrappedValue = distanceFilter {
+        return bridge.create_std__optional_double_(__unwrappedValue)
+      } else {
+        return .init()
+      }
+    }(), { () -> bridge.std__optional_AndroidGranularity_ in
+      if let __unwrappedValue = granularity {
+        return bridge.create_std__optional_AndroidGranularity_(__unwrappedValue)
+      } else {
+        return .init()
+      }
+    }(), { () -> bridge.std__optional_bool_ in
+      if let __unwrappedValue = waitForAccurateLocation {
+        return bridge.create_std__optional_bool_(__unwrappedValue)
+      } else {
+        return .init()
+      }
+    }(), { () -> bridge.std__optional_double_ in
+      if let __unwrappedValue = maxUpdateAge {
+        return bridge.create_std__optional_double_(__unwrappedValue)
+      } else {
+        return .init()
+      }
+    }(), { () -> bridge.std__optional_double_ in
+      if let __unwrappedValue = maxUpdateDelay {
+        return bridge.create_std__optional_double_(__unwrappedValue)
+      } else {
+        return .init()
+      }
+    }(), { () -> bridge.std__optional_double_ in
+      if let __unwrappedValue = maxUpdates {
         return bridge.create_std__optional_double_(__unwrappedValue)
       } else {
         return .init()
@@ -158,6 +188,59 @@ public extension LocationRequestOptions {
     return { () -> Double? in
       if bridge.has_value_std__optional_double_(self.__distanceFilter) {
         let __unwrapped = bridge.get_std__optional_double_(self.__distanceFilter)
+        return __unwrapped
+      } else {
+        return nil
+      }
+    }()
+  }
+
+  @inline(__always)
+  var granularity: AndroidGranularity? {
+    return self.__granularity.value
+  }
+
+  @inline(__always)
+  var waitForAccurateLocation: Bool? {
+    return { () -> Bool? in
+      if bridge.has_value_std__optional_bool_(self.__waitForAccurateLocation) {
+        let __unwrapped = bridge.get_std__optional_bool_(self.__waitForAccurateLocation)
+        return __unwrapped
+      } else {
+        return nil
+      }
+    }()
+  }
+
+  @inline(__always)
+  var maxUpdateAge: Double? {
+    return { () -> Double? in
+      if bridge.has_value_std__optional_double_(self.__maxUpdateAge) {
+        let __unwrapped = bridge.get_std__optional_double_(self.__maxUpdateAge)
+        return __unwrapped
+      } else {
+        return nil
+      }
+    }()
+  }
+
+  @inline(__always)
+  var maxUpdateDelay: Double? {
+    return { () -> Double? in
+      if bridge.has_value_std__optional_double_(self.__maxUpdateDelay) {
+        let __unwrapped = bridge.get_std__optional_double_(self.__maxUpdateDelay)
+        return __unwrapped
+      } else {
+        return nil
+      }
+    }()
+  }
+
+  @inline(__always)
+  var maxUpdates: Double? {
+    return { () -> Double? in
+      if bridge.has_value_std__optional_double_(self.__maxUpdates) {
+        let __unwrapped = bridge.get_std__optional_double_(self.__maxUpdates)
         return __unwrapped
       } else {
         return nil

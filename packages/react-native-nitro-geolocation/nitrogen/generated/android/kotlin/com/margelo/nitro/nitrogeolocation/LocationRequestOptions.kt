@@ -40,6 +40,21 @@ data class LocationRequestOptions(
   val distanceFilter: Double?,
   @DoNotStrip
   @Keep
+  val granularity: AndroidGranularity?,
+  @DoNotStrip
+  @Keep
+  val waitForAccurateLocation: Boolean?,
+  @DoNotStrip
+  @Keep
+  val maxUpdateAge: Double?,
+  @DoNotStrip
+  @Keep
+  val maxUpdateDelay: Double?,
+  @DoNotStrip
+  @Keep
+  val maxUpdates: Double?,
+  @DoNotStrip
+  @Keep
   val useSignificantChanges: Boolean?,
   @DoNotStrip
   @Keep
@@ -61,8 +76,8 @@ data class LocationRequestOptions(
     @Keep
     @Suppress("unused")
     @JvmStatic
-    private fun fromCpp(timeout: Double?, maximumAge: Double?, enableHighAccuracy: Boolean?, accuracy: LocationAccuracyOptions?, interval: Double?, fastestInterval: Double?, distanceFilter: Double?, useSignificantChanges: Boolean?, activityType: IOSActivityType?, pausesLocationUpdatesAutomatically: Boolean?, showsBackgroundLocationIndicator: Boolean?): LocationRequestOptions {
-      return LocationRequestOptions(timeout, maximumAge, enableHighAccuracy, accuracy, interval, fastestInterval, distanceFilter, useSignificantChanges, activityType, pausesLocationUpdatesAutomatically, showsBackgroundLocationIndicator)
+    private fun fromCpp(timeout: Double?, maximumAge: Double?, enableHighAccuracy: Boolean?, accuracy: LocationAccuracyOptions?, interval: Double?, fastestInterval: Double?, distanceFilter: Double?, granularity: AndroidGranularity?, waitForAccurateLocation: Boolean?, maxUpdateAge: Double?, maxUpdateDelay: Double?, maxUpdates: Double?, useSignificantChanges: Boolean?, activityType: IOSActivityType?, pausesLocationUpdatesAutomatically: Boolean?, showsBackgroundLocationIndicator: Boolean?): LocationRequestOptions {
+      return LocationRequestOptions(timeout, maximumAge, enableHighAccuracy, accuracy, interval, fastestInterval, distanceFilter, granularity, waitForAccurateLocation, maxUpdateAge, maxUpdateDelay, maxUpdates, useSignificantChanges, activityType, pausesLocationUpdatesAutomatically, showsBackgroundLocationIndicator)
     }
   }
 }

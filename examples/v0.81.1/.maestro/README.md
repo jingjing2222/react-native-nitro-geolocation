@@ -88,6 +88,27 @@ The Android and iOS package scripts install the Release build first (`yarn andro
 - Checks invalid preset rejection by crossing the Nitro native boundary with a deliberately unsupported preset
 - Relaunches with location permission denied and verifies the native `PERMISSION_DENIED` result
 
+### `location-availability.yaml`
+- Tests `getLocationAvailability()` after a real native position fix, not by rendering a static status string
+- Verifies denied permission returns `available=false` with `permissionDenied` and matches a native request rejection
+
+### `heading.yaml`
+- Dispatches to `heading-android.yaml` or `heading-ios.yaml` based on platform
+- Android verifies `getHeading()` and `watchHeading()` with real heading sensor updates
+- Android verifies invalid `headingFilter` rejects before emitting updates
+- iOS simulator verifies Core Location reports heading unavailable through `POSITION_UNAVAILABLE`
+- Both platform contracts relaunch with location permission denied and verify `PERMISSION_DENIED`
+
+### `android-request-options.yaml`
+- Android-only contract for `granularity`, `waitForAccurateLocation`, `maxUpdateAge`, `maxUpdateDelay`, and `maxUpdates`
+- Uses Play Services configuration for a real Fused request and asserts coarse granularity does not return GPS
+- Verifies one-shot Fused requests ignore watch-only `distanceFilter` instead of waiting for movement
+- Seeds a fine Fused fix, then verifies a coarse cache-only read does not reuse an ungranular `lastLocation`
+- Starts simultaneous coarse and fine watches and verifies the coarse watcher does not receive exact fine coordinates
+- Verifies `maxUpdates=1` stops a native watch after the first update even when more locations are injected
+- Verifies removing a heading watch token does not restart a stopped `maxUpdates=1` location watch
+- Verifies invalid `maxUpdates=0` and coarse-only `granularity="fine"` reject
+
 ### `issue-67-android-coarse-location.yaml`
 - Android-only contract for approximate/coarse permission handling
 - Uses Maestro permissions to grant `ACCESS_COARSE_LOCATION` and deny `ACCESS_FINE_LOCATION`

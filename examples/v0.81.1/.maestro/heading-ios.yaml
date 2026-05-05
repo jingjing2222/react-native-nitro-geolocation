@@ -1,0 +1,94 @@
+appId: nitrogeolocation.example
+---
+# iOS simulator heading contract: Core Location reports heading unavailable,
+# while invalid input and permission denial still reject through native errors.
+
+- launchApp:
+    clearState: true
+    permissions:
+      all: allow
+
+- extendedWaitUntil:
+    visible: "Geolocation API"
+    timeout: 10000
+
+- stopApp
+
+- openLink:
+    link: nitrogeolocation://app/heading
+- tapOn:
+    text: "열기|Open"
+    optional: true
+
+- extendedWaitUntil:
+    visible: "Compass-style heading contract with watch and rejection paths"
+    timeout: 10000
+
+- tapOn:
+    id: "heading-run-current-button"
+
+- extendedWaitUntil:
+    visible: "Single heading: failed"
+    timeout: 20000
+
+- assertVisible:
+    id: "heading-current-result"
+- assertVisible:
+    text: ".*POSITION_UNAVAILABLE.*Heading is not available on this device.*"
+
+- scrollUntilVisible:
+    element: "3. Heading Watch"
+    direction: DOWN
+
+- tapOn:
+    id: "heading-run-watch-button"
+
+- scrollUntilVisible:
+    element: "Heading watch: failed"
+    direction: DOWN
+    timeout: 10000
+
+- assertVisible:
+    id: "heading-watch-result"
+- assertVisible:
+    text: ".*POSITION_UNAVAILABLE.*Heading is not available on this device.*"
+
+- stopApp
+
+- launchApp:
+    clearState: true
+    permissions:
+      all: deny
+
+- extendedWaitUntil:
+    visible: "Geolocation API"
+    timeout: 10000
+
+- stopApp
+
+- openLink:
+    link: nitrogeolocation://app/heading
+- tapOn:
+    text: "열기|Open"
+    optional: true
+
+- extendedWaitUntil:
+    visible: "Compass-style heading contract with watch and rejection paths"
+    timeout: 10000
+
+- scrollUntilVisible:
+    element: "5. Permission Denied"
+    direction: DOWN
+
+- tapOn:
+    id: "heading-run-denied-button"
+
+- scrollUntilVisible:
+    element: "Permission denied: passed"
+    direction: DOWN
+    timeout: 15000
+
+- assertVisible:
+    id: "heading-denied-result"
+- assertVisible:
+    text: ".*PERMISSION_DENIED.*heading follows native permission checks.*"

@@ -17,10 +17,15 @@ import com.facebook.proguard.annotations.DoNotStrip
 import com.facebook.react.bridge.ReactApplicationContext
 import com.google.android.gms.common.ConnectionResult
 import com.google.android.gms.common.GoogleApiAvailability
+import com.google.android.gms.location.LocationCallback
+import com.google.android.gms.location.LocationRequest as GmsLocationRequest
+import com.google.android.gms.location.LocationResult
+import com.google.android.gms.location.LocationServices
 import com.margelo.nitro.NitroModules
 import com.margelo.nitro.core.Promise
 import java.util.UUID
 import java.util.concurrent.ConcurrentHashMap
+import java.util.concurrent.atomic.AtomicBoolean
 
 private const val NO_LOCATION_PROVIDER_AVAILABLE_MESSAGE = "No location provider available"
 private const val NO_APPROXIMATE_LOCATION_PROVIDER_AVAILABLE_MESSAGE =
@@ -49,7 +54,12 @@ class NitroGeolocation(
         val androidAccuracy: AndroidAccuracyResolution,
         val interval: Double,
         val fastestInterval: Double,
-        val distanceFilter: Double
+        val distanceFilter: Double,
+        val granularity: AndroidGranularity,
+        val waitForAccurateLocation: Boolean,
+        val maxUpdateAge: Double?,
+        val maxUpdateDelay: Double,
+        val maxUpdates: Int?
     ) {
         companion object {
             private const val DEFAULT_TIMEOUT = 10.0 * 60 * 1000 // 10 minutes in ms
@@ -57,12 +67,21 @@ class NitroGeolocation(
             private const val DEFAULT_INTERVAL = 1000.0
             private const val DEFAULT_FASTEST_INTERVAL = 100.0
             private const val DEFAULT_DISTANCE_FILTER = 0.0
+            private const val DEFAULT_MAX_UPDATE_DELAY = 0.0
 
             fun parse(
                 options: LocationRequestOptions?,
                 defaultMaximumAge: Double = DEFAULT_MAXIMUM_AGE
             ): ParsedOptions {
                 val enableHighAccuracy = options?.enableHighAccuracy ?: false
+                val maxUpdates = options?.maxUpdates?.let { value ->
+                    if (!value.isFinite()) {
+                        0
+                    } else {
+                        value.toInt()
+                    }
+                }
+
                 return ParsedOptions(
                     timeout = options?.timeout ?: DEFAULT_TIMEOUT,
                     maximumAge = options?.maximumAge ?: defaultMaximumAge,
@@ -72,7 +91,12 @@ class NitroGeolocation(
                     ),
                     interval = options?.interval ?: DEFAULT_INTERVAL,
                     fastestInterval = options?.fastestInterval ?: DEFAULT_FASTEST_INTERVAL,
-                    distanceFilter = options?.distanceFilter ?: DEFAULT_DISTANCE_FILTER
+                    distanceFilter = options?.distanceFilter ?: DEFAULT_DISTANCE_FILTER,
+                    granularity = options?.granularity ?: AndroidGranularity.PERMISSION,
+                    waitForAccurateLocation = options?.waitForAccurateLocation ?: false,
+                    maxUpdateAge = options?.maxUpdateAge,
+                    maxUpdateDelay = options?.maxUpdateDelay ?: DEFAULT_MAX_UPDATE_DELAY,
+                    maxUpdates = maxUpdates
                 )
             }
 
@@ -86,7 +110,8 @@ class NitroGeolocation(
         val token: String,
         val success: (GeolocationResponse) -> Unit,
         val error: ((LocationError) -> Unit)?,
-        val options: ParsedOptions
+        val options: ParsedOptions,
+        var deliveredUpdates: Int = 0
     )
 
     private sealed interface PositionResult {
@@ -123,6 +148,22 @@ class NitroGeolocation(
             createPlayServicesUnavailableError = ::createPlayServicesUnavailableError
         )
     }
+    private val fusedLocationClient by lazy {
+        LocationServices.getFusedLocationProviderClient(reactContext)
+    }
+    private val headingManager: AndroidHeadingManager by lazy {
+        AndroidHeadingManager(
+            context = reactContext,
+            createLocationError = ::createLocationError,
+            getReferenceLocation = {
+                lastLocation ?: getBestCachedLocation(
+                    getValidProviders(resolveAndroidAccuracy(null, enableHighAccuracy = false)),
+                    ParsedOptions.parseLastKnown(null)
+                )
+            }
+        )
+    }
+    private var lastLocation: Location? = null
 
     // Permission callbacks
     private val pendingPermissionResolvers = mutableListOf<(PermissionStatus) -> Unit>()
@@ -135,6 +176,7 @@ class NitroGeolocation(
 
     // Location listener for watch subscriptions
     private var watchLocationListener: LocationListener? = null
+    private var fusedWatchLocationCallback: LocationCallback? = null
     private var currentWatchProvider: String? = null
 
     // Error codes
@@ -213,6 +255,52 @@ class NitroGeolocation(
         return promise
     }
 
+    override fun getLocationAvailability(): Promise<LocationAvailability> {
+        val promise = Promise<LocationAvailability>()
+
+        if (!hasLocationPermission()) {
+            promise.resolve(createLocationAvailability(false, "permissionDenied"))
+            return promise
+        }
+
+        if (!locationSettings.hasServicesEnabled()) {
+            promise.resolve(createLocationAvailability(false, "locationServicesDisabled"))
+            return promise
+        }
+
+        if (requiresPlayServices()) {
+            if (!isGooglePlayServicesAvailable()) {
+                promise.resolve(createLocationAvailability(false, "playServicesUnavailable"))
+                return promise
+            }
+
+            fusedLocationClient.locationAvailability
+                .addOnSuccessListener { availability ->
+                    promise.resolve(
+                        createLocationAvailability(
+                            availability.isLocationAvailable,
+                            if (availability.isLocationAvailable) null else "fusedLocationUnavailable"
+                        )
+                    )
+                }
+                .addOnFailureListener { exception ->
+                    promise.resolve(createLocationAvailability(
+                        false,
+                        "fusedLocationUnavailable: ${exception.message ?: "unknown error"}"
+                    ))
+                }
+                .addOnCanceledListener {
+                    promise.resolve(createLocationAvailability(false, "fusedLocationUnavailable"))
+                }
+            return promise
+        }
+
+        val providers = getValidProviders(resolveAndroidAccuracy(null, enableHighAccuracy = false))
+        val reason = if (providers.isEmpty()) "noLocationProvider" else null
+        promise.resolve(createLocationAvailability(providers.isNotEmpty(), reason))
+        return promise
+    }
+
     override fun requestLocationSettings(
         success: (LocationProviderStatus) -> Unit,
         error: ((LocationError) -> Unit)?,
@@ -260,12 +348,27 @@ class NitroGeolocation(
         }
 
         val parsedOptions = ParsedOptions.parse(options)
+        val validationError = validateParsedOptions(parsedOptions)
+        if (validationError != null) {
+            error?.invoke(validationError)
+            return
+        }
+        val permissionError = validateRequestPermission(parsedOptions)
+        if (permissionError != null) {
+            error?.invoke(permissionError)
+            return
+        }
         if (requiresPlayServices() && !isGooglePlayServicesAvailable()) {
             error?.invoke(createPlayServicesUnavailableError())
             return
         }
 
-        val providers = getValidProviders(parsedOptions.androidAccuracy)
+        if (requiresPlayServices()) {
+            getCurrentPositionWithFused(success, error, parsedOptions)
+            return
+        }
+
+        val providers = getValidProviders(parsedOptions)
         if (providers.isEmpty()) {
             error?.invoke(createNoLocationProviderError(parsedOptions))
             return
@@ -300,12 +403,27 @@ class NitroGeolocation(
         }
 
         val parsedOptions = ParsedOptions.parseLastKnown(options)
+        val validationError = validateParsedOptions(parsedOptions)
+        if (validationError != null) {
+            error?.invoke(validationError)
+            return
+        }
+        val permissionError = validateRequestPermission(parsedOptions)
+        if (permissionError != null) {
+            error?.invoke(permissionError)
+            return
+        }
         if (requiresPlayServices() && !isGooglePlayServicesAvailable()) {
             error?.invoke(createPlayServicesUnavailableError())
             return
         }
 
-        val providers = getValidProviders(parsedOptions.androidAccuracy)
+        if (requiresPlayServices()) {
+            getLastKnownPositionWithFused(success, error, parsedOptions)
+            return
+        }
+
+        val providers = getValidProviders(parsedOptions)
         if (providers.isEmpty()) {
             error?.invoke(createNoLocationProviderError(parsedOptions))
             return
@@ -332,6 +450,23 @@ class NitroGeolocation(
     ): String {
         val token = UUID.randomUUID().toString()
         val parsedOptions = ParsedOptions.parse(options)
+        val validationError = validateParsedOptions(parsedOptions)
+        if (validationError != null) {
+            error?.invoke(validationError)
+            return token
+        }
+        val permissionError = if (!hasLocationPermission()) {
+            createLocationError(
+                PERMISSION_DENIED,
+                "Location permission not granted"
+            )
+        } else {
+            validateRequestPermission(parsedOptions)
+        }
+        if (permissionError != null) {
+            error?.invoke(permissionError)
+            return token
+        }
 
         val subscription = WatchSubscription(
             token = token,
@@ -352,8 +487,45 @@ class NitroGeolocation(
         return token
     }
 
+    override fun getHeading(
+        success: (Heading) -> Unit,
+        error: ((LocationError) -> Unit)?
+    ) {
+        if (!hasLocationPermission()) {
+            error?.invoke(createLocationError(
+                PERMISSION_DENIED,
+                "Location permission not granted"
+            ))
+            return
+        }
+
+        headingManager.getHeading(success, error)
+    }
+
+    override fun watchHeading(
+        success: (Heading) -> Unit,
+        error: ((LocationError) -> Unit)?,
+        options: HeadingOptions?
+    ): String {
+        if (!hasLocationPermission()) {
+            val token = UUID.randomUUID().toString()
+            error?.invoke(createLocationError(
+                PERMISSION_DENIED,
+                "Location permission not granted"
+            ))
+            return token
+        }
+
+        return headingManager.watchHeading(success, error, options)
+    }
+
     override fun unwatch(token: String) {
-        watchSubscriptions.remove(token)
+        val didRemoveLocationSubscription = watchSubscriptions.remove(token) != null
+        headingManager.unwatch(token)
+
+        if (!didRemoveLocationSubscription) {
+            return
+        }
 
         // Stop watching if no more subscribers
         if (watchSubscriptions.isEmpty()) {
@@ -365,6 +537,7 @@ class NitroGeolocation(
 
     override fun stopObserving() {
         watchSubscriptions.clear()
+        headingManager.stopObserving()
         stopWatchingLocation()
     }
 
@@ -422,6 +595,86 @@ class NitroGeolocation(
         }
     }
 
+    private fun validateParsedOptions(options: ParsedOptions): LocationError? {
+        if (!options.timeout.isFinite() || options.timeout < 0.0) {
+            return createLocationError(
+                INTERNAL_ERROR,
+                "timeout must be a finite number greater than or equal to 0."
+            )
+        }
+
+        if (!options.maximumAge.isFinite() && options.maximumAge != Double.POSITIVE_INFINITY) {
+            return createLocationError(
+                INTERNAL_ERROR,
+                "maximumAge must be a finite number greater than or equal to 0."
+            )
+        }
+
+        if (options.maximumAge < 0.0) {
+            return createLocationError(
+                INTERNAL_ERROR,
+                "maximumAge must be greater than or equal to 0."
+            )
+        }
+
+        if (!options.interval.isFinite() || options.interval <= 0.0) {
+            return createLocationError(
+                INTERNAL_ERROR,
+                "interval must be a finite number greater than 0."
+            )
+        }
+
+        if (!options.fastestInterval.isFinite() || options.fastestInterval <= 0.0) {
+            return createLocationError(
+                INTERNAL_ERROR,
+                "fastestInterval must be a finite number greater than 0."
+            )
+        }
+
+        if (!options.distanceFilter.isFinite() || options.distanceFilter < 0.0) {
+            return createLocationError(
+                INTERNAL_ERROR,
+                "distanceFilter must be a finite number greater than or equal to 0."
+            )
+        }
+
+        val maxUpdateAge = options.maxUpdateAge
+        if (maxUpdateAge != null && (!maxUpdateAge.isFinite() || maxUpdateAge < 0.0)) {
+            return createLocationError(
+                INTERNAL_ERROR,
+                "maxUpdateAge must be a finite number greater than or equal to 0."
+            )
+        }
+
+        if (!options.maxUpdateDelay.isFinite() || options.maxUpdateDelay < 0.0) {
+            return createLocationError(
+                INTERNAL_ERROR,
+                "maxUpdateDelay must be a finite number greater than or equal to 0."
+            )
+        }
+
+        val maxUpdates = options.maxUpdates
+        if (maxUpdates != null && maxUpdates < 1) {
+            return createLocationError(
+                INTERNAL_ERROR,
+                "maxUpdates must be greater than or equal to 1."
+            )
+        }
+
+        return null
+    }
+
+    private fun validateRequestPermission(options: ParsedOptions): LocationError? {
+        if (options.granularity == AndroidGranularity.FINE && !hasFineLocationPermission()) {
+            return createLocationError(
+                PERMISSION_DENIED,
+                "Fine location permission is required for granularity=fine."
+            )
+        }
+
+        return null
+    }
+
     // Handle permission request result (called from Activity)
     fun onPermissionResult(requestCode: Int, grantResults: IntArray) {
         if (requestCode != PERMISSION_REQUEST_CODE) return
@@ -449,6 +702,15 @@ class NitroGeolocation(
 
     private fun getValidProvider(accuracy: AndroidAccuracyResolution): String? {
         return getValidProviders(accuracy).firstOrNull()
+    }
+
+    private fun getValidProvider(options: ParsedOptions): String? {
+        return getValidProviders(options).firstOrNull()
+    }
+
+    private fun getValidProviders(options: ParsedOptions): List<String> {
+        return getValidProviders(options.androidAccuracy)
+            .filter { provider -> options.granularity.allowsProvider(provider) }
     }
 
     private fun getValidProviders(accuracy: AndroidAccuracyResolution): List<String> {
@@ -494,10 +756,37 @@ class NitroGeolocation(
     // MARK: - Helper Functions - Cache Validation
 
     private fun isCachedLocationValid(location: Location, options: ParsedOptions): Boolean {
-        if (options.maximumAge <= 0.0) return false
+        val maximumAge = effectiveMaximumAge(options)
+        if (maximumAge <= 0.0) return false
 
         val locationAge = SystemClock.elapsedRealtime() - location.elapsedRealtimeNanos / 1_000_000
-        return locationAge.coerceAtLeast(0L) < options.maximumAge
+        if (locationAge.coerceAtLeast(0L) >= maximumAge) {
+            return false
+        }
+
+        if (options.waitForAccurateLocation && !isLocationAccurateEnough(location, options)) {
+            return false
+        }
+
+        return true
+    }
+
+    private fun effectiveMaximumAge(options: ParsedOptions): Double {
+        val maxUpdateAge = options.maxUpdateAge ?: return options.maximumAge
+        return minOf(options.maximumAge, maxUpdateAge)
+    }
+
+    private fun isLocationAccurateEnough(location: Location, options: ParsedOptions): Boolean {
+        if (!location.hasAccuracy()) return false
+
+        val requiredAccuracy = when (options.androidAccuracy.mode) {
+            AndroidAccuracyMode.HIGH -> 25f
+            AndroidAccuracyMode.BALANCED -> 100f
+            AndroidAccuracyMode.LOW -> 500f
+            AndroidAccuracyMode.PASSIVE -> Float.MAX_VALUE
+        }
+
+        return location.accuracy <= requiredAccuracy
     }
 
     private fun getBestCachedLocation(providers: List<String>, options: ParsedOptions): Location? {
@@ -513,13 +802,140 @@ class NitroGeolocation(
             if (
                 lastKnownLocation != null &&
                 (isCachedLocationValid(lastKnownLocation, options) ||
-                    options.maximumAge == Double.POSITIVE_INFINITY)
+                    (options.maximumAge == Double.POSITIVE_INFINITY && options.maxUpdateAge == null))
             ) {
                 bestLocation = selectBestLocation(lastKnownLocation, bestLocation)
             }
         }
 
         return bestLocation
+    }
+
+    private fun getCurrentPositionWithFused(
+        success: (GeolocationResponse) -> Unit,
+        error: ((LocationError) -> Unit)?,
+        options: ParsedOptions
+    ) {
+        if (effectiveMaximumAge(options) > 0.0) {
+            getFusedCachedLocation(options) { cachedLocation ->
+                if (cachedLocation != null) {
+                    success(locationToPosition(cachedLocation))
+                    return@getFusedCachedLocation
+                }
+
+                requestFusedFreshLocation(success, error, options)
+            }
+            return
+        }
+
+        requestFusedFreshLocation(success, error, options)
+    }
+
+    private fun getLastKnownPositionWithFused(
+        success: (GeolocationResponse) -> Unit,
+        error: ((LocationError) -> Unit)?,
+        options: ParsedOptions
+    ) {
+        getFusedCachedLocation(options) { cachedLocation ->
+            if (cachedLocation != null) {
+                success(locationToPosition(cachedLocation))
+                return@getFusedCachedLocation
+            }
+
+            error?.invoke(createLocationError(
+                POSITION_UNAVAILABLE,
+                "No cached location available"
+            ))
+        }
+    }
+
+    private fun getFusedCachedLocation(
+        options: ParsedOptions,
+        completion: (Location?) -> Unit
+    ) {
+        // Fused lastLocation is not requested with LocationRequest granularity,
+        // so it cannot prove that a cached fix satisfies coarse-only callers.
+        if (options.granularity == AndroidGranularity.COARSE) {
+            completion(null)
+            return
+        }
+
+        try {
+            fusedLocationClient.lastLocation
+                .addOnSuccessListener { location ->
+                    completion(location?.takeIf { isCachedLocationValid(it, options) })
+                }
+                .addOnFailureListener {
+                    completion(null)
+                }
+                .addOnCanceledListener {
+                    completion(null)
+                }
+        } catch (e: SecurityException) {
+            completion(null)
+        }
+    }
+
+    private fun requestFusedFreshLocation(
+        success: (GeolocationResponse) -> Unit,
+        error: ((LocationError) -> Unit)?,
+        options: ParsedOptions
+    ) {
+        val handler = Handler(Looper.getMainLooper())
+        val didComplete = AtomicBoolean(false)
+        lateinit var callback: LocationCallback
+
+        fun complete(result: PositionResult) {
+            if (!didComplete.compareAndSet(false, true)) return
+
+            handler.removeCallbacksAndMessages(null)
+            try {
+                fusedLocationClient.removeLocationUpdates(callback)
+            } catch (_: Exception) {
+                // Ignore cleanup races.
+            }
+
+            when (result) {
+                is PositionResult.Success -> success(result.position)
+                is PositionResult.Failure -> error?.invoke(result.error)
+            }
+        }
+
+        callback = object : LocationCallback() {
+            override fun onLocationResult(result: LocationResult) {
+                val location = result.lastLocation
+                if (location != null) {
+                    complete(PositionResult.Success(locationToPosition(location)))
+                }
+            }
+        }
+
+        val timeoutRunnable = Runnable {
+            complete(PositionResult.Failure(createPositionTimeoutError(options)))
+        }
+
+        try {
+            fusedLocationClient.requestLocationUpdates(
+                buildFusedLocationRequest(
+                    options,
+                    maxUpdatesOverride = 1,
+                    includeDistanceFilter = false
+                ),
+                callback,
+                Looper.getMainLooper()
+            )
+            handler.postDelayed(timeoutRunnable, coerceTimeoutMillis(options.timeout))
+        } catch (e: SecurityException) {
+            complete(PositionResult.Failure(createLocationError(
+                PERMISSION_DENIED,
+                "Security exception: ${e.message}"
+            )))
+        } catch (e: Exception) {
+            complete(PositionResult.Failure(createLocationError(
+                POSITION_UNAVAILABLE,
+                "Unable to request fused location: ${e.message}"
+            )))
+        }
     }
 
     // MARK: - Helper Functions - Request Fresh Location
@@ -766,23 +1182,13 @@ class NitroGeolocation(
             return
         }
 
-        // Determine best provider and options from all subscriptions
-        var androidAccuracy: AndroidAccuracyResolution? = null
-        var smallestInterval = Double.MAX_VALUE
-        var smallestDistanceFilter = Float.MAX_VALUE
-
-        for ((_, subscription) in watchSubscriptions) {
-            androidAccuracy = mostDemandingAndroidAccuracy(
-                androidAccuracy,
-                subscription.options.androidAccuracy
-            )
-            smallestInterval = minOf(smallestInterval, subscription.options.interval)
-            smallestDistanceFilter = minOf(smallestDistanceFilter, subscription.options.distanceFilter.toFloat())
+        if (requiresPlayServices()) {
+            startWatchingFusedLocation()
+            return
         }
 
-        val provider = getValidProvider(
-            androidAccuracy ?: resolveAndroidAccuracy(null, enableHighAccuracy = false)
-        )
+        val mergedOptions = mergeWatchOptions()
+        val provider = getValidProvider(mergedOptions)
         if (provider == null) {
             notifyWatchProviderUnavailable()
             return
@@ -792,11 +1198,7 @@ class NitroGeolocation(
         val listener = object : LocationListener {
             override fun onLocationChanged(location: Location) {
                 val position = locationToPosition(location)
-
-                // Notify all subscribers
-                for ((_, subscription) in watchSubscriptions) {
-                    subscription.success(position)
-                }
+                deliverWatchPosition(position)
             }
 
             override fun onProviderDisabled(provider: String) {
@@ -820,8 +1222,8 @@ class NitroGeolocation(
         try {
             locationManager.requestLocationUpdates(
                 provider,
-                smallestInterval.toLong(),
-                smallestDistanceFilter,
+                mergedOptions.interval.toLong(),
+                mergedOptions.distanceFilter.toFloat(),
                 listener,
                 Looper.getMainLooper()
             )
@@ -833,6 +1235,119 @@ class NitroGeolocation(
 
             for ((_, subscription) in watchSubscriptions) {
                 subscription.error?.invoke(error)
+            }
+        }
+    }
+
+    private fun startWatchingFusedLocation() {
+        val mergedOptions = mergeWatchOptions()
+        val callback = object : LocationCallback() {
+            override fun onLocationResult(result: LocationResult) {
+                val location = result.lastLocation ?: return
+                deliverWatchPosition(locationToPosition(location))
+            }
+        }
+
+        fusedWatchLocationCallback = callback
+
+        try {
+            fusedLocationClient.requestLocationUpdates(
+                buildFusedLocationRequest(mergedOptions),
+                callback,
+                Looper.getMainLooper()
+            )
+        } catch (e: SecurityException) {
+            val error = LocationError(
+                code = PERMISSION_DENIED,
+                message = "Permission denied: ${e.message}"
+            )
+
+            for ((_, subscription) in watchSubscriptions) {
+                subscription.error?.invoke(error)
+            }
+        } catch (e: Exception) {
+            val error = LocationError(
+                code = POSITION_UNAVAILABLE,
+                message = "Unable to request fused location updates: ${e.message}"
+            )
+
+            for ((_, subscription) in watchSubscriptions) {
+                subscription.error?.invoke(error)
+            }
+        }
+    }
+
+    private fun mergeWatchOptions(): ParsedOptions {
+        var androidAccuracy: AndroidAccuracyResolution? = null
+        var smallestInterval = Double.MAX_VALUE
+        var smallestFastestInterval = Double.MAX_VALUE
+        var smallestDistanceFilter = Double.MAX_VALUE
+        var granularity = AndroidGranularity.PERMISSION
+        var waitForAccurateLocation = false
+        var maxUpdateAge: Double? = null
+        var smallestMaxUpdateDelay = Double.MAX_VALUE
+
+        for ((_, subscription) in watchSubscriptions) {
+            androidAccuracy = mostDemandingAndroidAccuracy(
+                androidAccuracy,
+                subscription.options.androidAccuracy
+            )
+            smallestInterval = minOf(smallestInterval, subscription.options.interval)
+            smallestFastestInterval = minOf(
+                smallestFastestInterval,
+                subscription.options.fastestInterval
+            )
+            smallestDistanceFilter = minOf(
+                smallestDistanceFilter,
+                subscription.options.distanceFilter
+            )
+            granularity = mergeWatchGranularity(granularity, subscription.options.granularity)
+            waitForAccurateLocation = waitForAccurateLocation ||
+                subscription.options.waitForAccurateLocation
+            maxUpdateAge = mergeNullableMinimum(maxUpdateAge, subscription.options.maxUpdateAge)
+            smallestMaxUpdateDelay = minOf(
+                smallestMaxUpdateDelay,
+                subscription.options.maxUpdateDelay
+            )
+        }
+
+        return ParsedOptions(
+            timeout = Double.POSITIVE_INFINITY,
+            maximumAge = 0.0,
+            androidAccuracy = androidAccuracy ?: resolveAndroidAccuracy(null, enableHighAccuracy = false),
+            interval = smallestInterval,
+            fastestInterval = smallestFastestInterval,
+            distanceFilter = smallestDistanceFilter,
+            granularity = granularity,
+            waitForAccurateLocation = waitForAccurateLocation,
+            maxUpdateAge = maxUpdateAge,
+            maxUpdateDelay = if (smallestMaxUpdateDelay == Double.MAX_VALUE) 0.0 else smallestMaxUpdateDelay,
+            maxUpdates = null
+        )
+    }
+
+    private fun deliverWatchPosition(position: GeolocationResponse) {
+        val tokensToRemove = mutableListOf<String>()
+
+        for ((token, subscription) in watchSubscriptions) {
+            subscription.success(position)
+            subscription.deliveredUpdates += 1
+
+            val maxUpdates = subscription.options.maxUpdates
+            if (maxUpdates != null && subscription.deliveredUpdates >= maxUpdates) {
+                tokensToRemove.add(token)
+            }
+        }
+
+        for (token in tokensToRemove) {
+            watchSubscriptions.remove(token)
+        }
+
+        if (tokensToRemove.isNotEmpty()) {
+            if (watchSubscriptions.isEmpty()) {
+                stopWatchingLocation()
+            } else {
+                restartWatchingLocation()
             }
         }
     }
@@ -852,6 +1367,29 @@ class NitroGeolocation(
         }
     }
 
+    private fun mergeWatchGranularity(
+        current: AndroidGranularity,
+        next: AndroidGranularity
+    ): AndroidGranularity {
+        return when {
+            current == AndroidGranularity.COARSE || next == AndroidGranularity.COARSE -> {
+                AndroidGranularity.COARSE
+            }
+            current == AndroidGranularity.FINE || next == AndroidGranularity.FINE -> {
+                AndroidGranularity.FINE
+            }
+            else -> AndroidGranularity.PERMISSION
+        }
+    }
+
+    private fun mergeNullableMinimum(current: Double?, next: Double?): Double? {
+        return when {
+            current == null -> next
+            next == null -> current
+            else -> minOf(current, next)
+        }
+    }
+
     private fun stopWatchingLocation() {
         watchLocationListener?.let { listener ->
             try {
@@ -860,7 +1398,15 @@ class NitroGeolocation(
                 // Ignore
             }
         }
+        fusedWatchLocationCallback?.let { callback ->
+            try {
+                fusedLocationClient.removeLocationUpdates(callback)
+            } catch (e: Exception) {
+                // Ignore
+            }
+        }
         watchLocationListener = null
+        fusedWatchLocationCallback = null
         currentWatchProvider = null
     }
 
@@ -872,6 +1418,8 @@ class NitroGeolocation(
     // MARK: - Helper Functions - Conversion
 
     private fun locationToPosition(location: Location): GeolocationResponse {
+        lastLocation = location
+
         val coords = GeolocationCoordinates(
             latitude = location.latitude,
             longitude = location.longitude,
@@ -887,6 +1435,16 @@ class NitroGeolocation(
             timestamp = location.time.toDouble(),
             mocked = location.isMocked(),
             provider = location.providerUsed()
+        )
+    }
+
+    private fun createLocationAvailability(
+        available: Boolean,
+        reason: String?
+    ): LocationAvailability {
+        return LocationAvailability(
+            available = available,
+            reason = reason
         )
     }
 
@@ -927,6 +1485,50 @@ class NitroGeolocation(
             timeout.isNaN() || timeout <= 0.0 -> 0L
             timeout.isInfinite() || timeout >= Long.MAX_VALUE.toDouble() -> Long.MAX_VALUE
             else -> timeout.toLong()
+        }
+    }
+
+    private fun buildFusedLocationRequest(
+        options: ParsedOptions,
+        maxUpdatesOverride: Int? = null,
+        includeDistanceFilter: Boolean = true
+    ): GmsLocationRequest {
+        val builder = GmsLocationRequest
+            .Builder(options.androidAccuracy.gmsPriority(), coercePositiveMillis(options.interval))
+            .setMinUpdateIntervalMillis(coercePositiveMillis(options.fastestInterval))
+            .setGranularity(options.granularity.gmsGranularity())
+            .setWaitForAccurateLocation(options.waitForAccurateLocation)
+            .setMaxUpdateDelayMillis(coerceNonNegativeMillis(options.maxUpdateDelay))
+
+        if (includeDistanceFilter) {
+            builder.setMinUpdateDistanceMeters(options.distanceFilter.toFloat())
+        }
+
+        options.maxUpdateAge?.let { value ->
+            builder.setMaxUpdateAgeMillis(coerceNonNegativeMillis(value))
+        }
+
+        val maxUpdates = maxUpdatesOverride ?: options.maxUpdates
+        if (maxUpdates != null) {
+            builder.setMaxUpdates(maxUpdates)
+        }
+
+        return builder.build()
+    }
+
+    private fun coercePositiveMillis(value: Double): Long {
+        return when {
+            value.isNaN() || value <= 0.0 -> 1L
+            value.isInfinite() || value >= Long.MAX_VALUE.toDouble() -> Long.MAX_VALUE
+            else -> value.toLong()
+        }
+    }
+
+    private fun coerceNonNegativeMillis(value: Double): Long {
+        return when {
+            value.isNaN() || value <= 0.0 -> 0L
+            value.isInfinite() || value >= Long.MAX_VALUE.toDouble() -> Long.MAX_VALUE
+            else -> value.toLong()
         }
     }
 

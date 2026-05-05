@@ -158,16 +158,18 @@ to know whether Android device settings can satisfy the request.
 ```tsx
 import {
   getCurrentPosition,
+  getLocationAvailability,
   getProviderStatus,
   hasServicesEnabled,
   requestLocationSettings
 } from 'react-native-nitro-geolocation';
 
 async function prepareAccurateLocation() {
+  const availability = await getLocationAvailability();
   const servicesEnabled = await hasServicesEnabled();
   const providerStatus = await getProviderStatus();
 
-  if (!servicesEnabled || providerStatus.googleLocationAccuracyEnabled === false) {
+  if (!availability.available || !servicesEnabled || providerStatus.googleLocationAccuracyEnabled === false) {
     await requestLocationSettings({
       accuracy: { android: 'high' },
       interval: 5000,
@@ -190,6 +192,11 @@ async function prepareAccurateLocation() {
   state such as `locationServicesEnabled`, `gpsAvailable`,
   `networkAvailable`, `passiveAvailable`, and Android Google Location Accuracy
   when Google Play Services exposes it.
+- `getLocationAvailability(): Promise<{ available: boolean; reason?: string }>` -
+  Available since `v1.2`. Android reads Fused Location availability when
+  `locationProvider: 'playServices'` is configured and otherwise falls back to
+  platform provider/service checks. iOS maps Core Location service and
+  authorization state.
 - `requestLocationSettings(options?): Promise<LocationProviderStatus>` -
   Checks the requested Android location settings and shows Android's native
   resolution dialog when available. It resolves with the updated provider
@@ -259,6 +266,11 @@ function LocationButton() {
 - `maximumAge?: number` - Max age of cached location in ms (default: 0)
 - `enableHighAccuracy?: boolean` - Deprecated since `v1.2`. Kept for v1 compatibility only; prefer `accuracy`. It is expected to be removed from the Modern API in v2.
 - `accuracy?: { android?: 'high' | 'balanced' | 'low' | 'passive'; ios?: 'bestForNavigation' | 'best' | 'nearestTenMeters' | 'hundredMeters' | 'kilometer' | 'threeKilometers' | 'reduced' }` - Platform-specific accuracy preset, available since `v1.2`. When a preset is provided for the current platform, it takes precedence over `enableHighAccuracy`.
+- `granularity?: 'permission' | 'coarse' | 'fine'` - Android-only request granularity, available since `v1.2`. `permission` follows the granted permission level, `coarse` avoids fine GPS-only requests, and `fine` requires fine location permission.
+- `waitForAccurateLocation?: boolean` - Android-only Fused request tuning, available since `v1.2`.
+- `maxUpdateAge?: number` - Android-only maximum age for an initial update in ms, available since `v1.2`.
+- `maxUpdateDelay?: number` - Android-only maximum batching delay in ms, available since `v1.2`.
+- `maxUpdates?: number` - Android-only maximum watch updates before native cleanup, available since `v1.2`.
 - `activityType?: 'other' | 'automotiveNavigation' | 'fitness' | 'otherNavigation' | 'airborne'` - iOS Core Location activity type, available since `v1.2`.
 - `pausesLocationUpdatesAutomatically?: boolean` - iOS automatic pause behavior, available since `v1.2`.
 - `showsBackgroundLocationIndicator?: boolean` - iOS background location indicator, available since `v1.2`. This only has a visible effect when the app has background location capability and permission.
@@ -271,6 +283,8 @@ await getCurrentPosition({
     android: 'high',
     ios: 'bestForNavigation'
   },
+  granularity: 'permission',
+  waitForAccurateLocation: true,
   timeout: 15000
 });
 ```
@@ -396,6 +410,45 @@ request. If no cached location satisfies `maximumAge` or permission is denied,
 it rejects with the native `LocationError` contract, usually
 `POSITION_UNAVAILABLE` or `PERMISSION_DENIED`.
 
+### Heading APIs
+
+Available since `v1.2`.
+
+Use `getHeading()` for a single compass heading and `watchHeading()` for
+continuous heading updates. Stop heading watches with the same `unwatch(token)`
+API used by `watchPosition()`.
+
+```tsx
+import { getHeading, watchHeading, unwatch } from 'react-native-nitro-geolocation';
+
+const heading = await getHeading();
+
+const token = watchHeading(
+  (nextHeading) => {
+    console.log(nextHeading.magneticHeading);
+  },
+  (error) => {
+    console.error(error.message);
+  },
+  { headingFilter: 5 }
+);
+
+unwatch(token);
+```
+
+```typescript
+type Heading = {
+  magneticHeading: number;
+  trueHeading?: number;
+  accuracy?: number;
+  timestamp: number;
+};
+```
+
+Heading APIs require location permission and reject with the same
+`LocationError` contract when permission is denied or heading sensors are not
+available.
+
 ### iOS Accuracy Authorization
 
 Available since `v1.2`.
@@ -489,6 +542,11 @@ function LiveTracker() {
 - `enabled?: boolean` - Start/stop watching (default: `false`)
 - `enableHighAccuracy?: boolean` - Deprecated since `v1.2`. Kept for v1 compatibility only; prefer `accuracy`. It is expected to be removed from the Modern API in v2.
 - `accuracy?: { android?: 'high' | 'balanced' | 'low' | 'passive'; ios?: 'bestForNavigation' | 'best' | 'nearestTenMeters' | 'hundredMeters' | 'kilometer' | 'threeKilometers' | 'reduced' }` - Platform-specific accuracy preset, available since `v1.2`.
+- `granularity?: 'permission' | 'coarse' | 'fine'` - Android-only request granularity, available since `v1.2`
+- `waitForAccurateLocation?: boolean` - Android-only high-accuracy initial update tuning, available since `v1.2`
+- `maxUpdateAge?: number` - Android-only maximum age for an initial update, available since `v1.2`
+- `maxUpdateDelay?: number` - Android-only batching delay, available since `v1.2`
+- `maxUpdates?: number` - Android-only watch update limit, available since `v1.2`
 - `distanceFilter?: number` - Minimum distance change in meters
 - `interval?: number` - Update interval in ms (Android)
 - `fastestInterval?: number` - Fastest interval in ms (Android)

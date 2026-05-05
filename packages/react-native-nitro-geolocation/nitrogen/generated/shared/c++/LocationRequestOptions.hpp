@@ -30,11 +30,14 @@
 
 // Forward declaration of `LocationAccuracyOptions` to properly resolve imports.
 namespace margelo::nitro::nitrogeolocation { struct LocationAccuracyOptions; }
+// Forward declaration of `AndroidGranularity` to properly resolve imports.
+namespace margelo::nitro::nitrogeolocation { enum class AndroidGranularity; }
 // Forward declaration of `IOSActivityType` to properly resolve imports.
 namespace margelo::nitro::nitrogeolocation { enum class IOSActivityType; }
 
 #include <optional>
 #include "LocationAccuracyOptions.hpp"
+#include "AndroidGranularity.hpp"
 #include "IOSActivityType.hpp"
 
 namespace margelo::nitro::nitrogeolocation {
@@ -51,6 +54,11 @@ namespace margelo::nitro::nitrogeolocation {
     std::optional<double> interval     SWIFT_PRIVATE;
     std::optional<double> fastestInterval     SWIFT_PRIVATE;
     std::optional<double> distanceFilter     SWIFT_PRIVATE;
+    std::optional<AndroidGranularity> granularity     SWIFT_PRIVATE;
+    std::optional<bool> waitForAccurateLocation     SWIFT_PRIVATE;
+    std::optional<double> maxUpdateAge     SWIFT_PRIVATE;
+    std::optional<double> maxUpdateDelay     SWIFT_PRIVATE;
+    std::optional<double> maxUpdates     SWIFT_PRIVATE;
     std::optional<bool> useSignificantChanges     SWIFT_PRIVATE;
     std::optional<IOSActivityType> activityType     SWIFT_PRIVATE;
     std::optional<bool> pausesLocationUpdatesAutomatically     SWIFT_PRIVATE;
@@ -58,7 +66,7 @@ namespace margelo::nitro::nitrogeolocation {
 
   public:
     LocationRequestOptions() = default;
-    explicit LocationRequestOptions(std::optional<double> timeout, std::optional<double> maximumAge, std::optional<bool> enableHighAccuracy, std::optional<LocationAccuracyOptions> accuracy, std::optional<double> interval, std::optional<double> fastestInterval, std::optional<double> distanceFilter, std::optional<bool> useSignificantChanges, std::optional<IOSActivityType> activityType, std::optional<bool> pausesLocationUpdatesAutomatically, std::optional<bool> showsBackgroundLocationIndicator): timeout(timeout), maximumAge(maximumAge), enableHighAccuracy(enableHighAccuracy), accuracy(accuracy), interval(interval), fastestInterval(fastestInterval), distanceFilter(distanceFilter), useSignificantChanges(useSignificantChanges), activityType(activityType), pausesLocationUpdatesAutomatically(pausesLocationUpdatesAutomatically), showsBackgroundLocationIndicator(showsBackgroundLocationIndicator) {}
+    explicit LocationRequestOptions(std::optional<double> timeout, std::optional<double> maximumAge, std::optional<bool> enableHighAccuracy, std::optional<LocationAccuracyOptions> accuracy, std::optional<double> interval, std::optional<double> fastestInterval, std::optional<double> distanceFilter, std::optional<AndroidGranularity> granularity, std::optional<bool> waitForAccurateLocation, std::optional<double> maxUpdateAge, std::optional<double> maxUpdateDelay, std::optional<double> maxUpdates, std::optional<bool> useSignificantChanges, std::optional<IOSActivityType> activityType, std::optional<bool> pausesLocationUpdatesAutomatically, std::optional<bool> showsBackgroundLocationIndicator): timeout(timeout), maximumAge(maximumAge), enableHighAccuracy(enableHighAccuracy), accuracy(accuracy), interval(interval), fastestInterval(fastestInterval), distanceFilter(distanceFilter), granularity(granularity), waitForAccurateLocation(waitForAccurateLocation), maxUpdateAge(maxUpdateAge), maxUpdateDelay(maxUpdateDelay), maxUpdates(maxUpdates), useSignificantChanges(useSignificantChanges), activityType(activityType), pausesLocationUpdatesAutomatically(pausesLocationUpdatesAutomatically), showsBackgroundLocationIndicator(showsBackgroundLocationIndicator) {}
 
   public:
     friend bool operator==(const LocationRequestOptions& lhs, const LocationRequestOptions& rhs) = default;
@@ -81,6 +89,11 @@ namespace margelo::nitro {
         JSIConverter<std::optional<double>>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "interval"))),
         JSIConverter<std::optional<double>>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "fastestInterval"))),
         JSIConverter<std::optional<double>>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "distanceFilter"))),
+        JSIConverter<std::optional<margelo::nitro::nitrogeolocation::AndroidGranularity>>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "granularity"))),
+        JSIConverter<std::optional<bool>>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "waitForAccurateLocation"))),
+        JSIConverter<std::optional<double>>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "maxUpdateAge"))),
+        JSIConverter<std::optional<double>>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "maxUpdateDelay"))),
+        JSIConverter<std::optional<double>>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "maxUpdates"))),
         JSIConverter<std::optional<bool>>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "useSignificantChanges"))),
         JSIConverter<std::optional<margelo::nitro::nitrogeolocation::IOSActivityType>>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "activityType"))),
         JSIConverter<std::optional<bool>>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "pausesLocationUpdatesAutomatically"))),
@@ -96,6 +109,11 @@ namespace margelo::nitro {
       obj.setProperty(runtime, PropNameIDCache::get(runtime, "interval"), JSIConverter<std::optional<double>>::toJSI(runtime, arg.interval));
       obj.setProperty(runtime, PropNameIDCache::get(runtime, "fastestInterval"), JSIConverter<std::optional<double>>::toJSI(runtime, arg.fastestInterval));
       obj.setProperty(runtime, PropNameIDCache::get(runtime, "distanceFilter"), JSIConverter<std::optional<double>>::toJSI(runtime, arg.distanceFilter));
+      obj.setProperty(runtime, PropNameIDCache::get(runtime, "granularity"), JSIConverter<std::optional<margelo::nitro::nitrogeolocation::AndroidGranularity>>::toJSI(runtime, arg.granularity));
+      obj.setProperty(runtime, PropNameIDCache::get(runtime, "waitForAccurateLocation"), JSIConverter<std::optional<bool>>::toJSI(runtime, arg.waitForAccurateLocation));
+      obj.setProperty(runtime, PropNameIDCache::get(runtime, "maxUpdateAge"), JSIConverter<std::optional<double>>::toJSI(runtime, arg.maxUpdateAge));
+      obj.setProperty(runtime, PropNameIDCache::get(runtime, "maxUpdateDelay"), JSIConverter<std::optional<double>>::toJSI(runtime, arg.maxUpdateDelay));
+      obj.setProperty(runtime, PropNameIDCache::get(runtime, "maxUpdates"), JSIConverter<std::optional<double>>::toJSI(runtime, arg.maxUpdates));
       obj.setProperty(runtime, PropNameIDCache::get(runtime, "useSignificantChanges"), JSIConverter<std::optional<bool>>::toJSI(runtime, arg.useSignificantChanges));
       obj.setProperty(runtime, PropNameIDCache::get(runtime, "activityType"), JSIConverter<std::optional<margelo::nitro::nitrogeolocation::IOSActivityType>>::toJSI(runtime, arg.activityType));
       obj.setProperty(runtime, PropNameIDCache::get(runtime, "pausesLocationUpdatesAutomatically"), JSIConverter<std::optional<bool>>::toJSI(runtime, arg.pausesLocationUpdatesAutomatically));
@@ -117,6 +135,11 @@ namespace margelo::nitro {
       if (!JSIConverter<std::optional<double>>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "interval")))) return false;
       if (!JSIConverter<std::optional<double>>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "fastestInterval")))) return false;
       if (!JSIConverter<std::optional<double>>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "distanceFilter")))) return false;
+      if (!JSIConverter<std::optional<margelo::nitro::nitrogeolocation::AndroidGranularity>>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "granularity")))) return false;
+      if (!JSIConverter<std::optional<bool>>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "waitForAccurateLocation")))) return false;
+      if (!JSIConverter<std::optional<double>>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "maxUpdateAge")))) return false;
+      if (!JSIConverter<std::optional<double>>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "maxUpdateDelay")))) return false;
+      if (!JSIConverter<std::optional<double>>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "maxUpdates")))) return false;
       if (!JSIConverter<std::optional<bool>>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "useSignificantChanges")))) return false;
       if (!JSIConverter<std::optional<margelo::nitro::nitrogeolocation::IOSActivityType>>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "activityType")))) return false;
       if (!JSIConverter<std::optional<bool>>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "pausesLocationUpdatesAutomatically")))) return false;

@@ -12,6 +12,8 @@
 namespace margelo::nitro::nitrogeolocation { enum class AccuracyAuthorization; }
 // Forward declaration of `AndroidAccuracyPreset` to properly resolve imports.
 namespace margelo::nitro::nitrogeolocation { enum class AndroidAccuracyPreset; }
+// Forward declaration of `AndroidGranularity` to properly resolve imports.
+namespace margelo::nitro::nitrogeolocation { enum class AndroidGranularity; }
 // Forward declaration of `AuthorizationLevelInternal` to properly resolve imports.
 namespace margelo::nitro::nitrogeolocation { enum class AuthorizationLevelInternal; }
 // Forward declaration of `AuthorizationLevel` to properly resolve imports.
@@ -30,6 +32,10 @@ namespace margelo::nitro::nitrogeolocation { struct GeolocationConfiguration; }
 namespace margelo::nitro::nitrogeolocation { struct GeolocationCoordinates; }
 // Forward declaration of `GeolocationResponse` to properly resolve imports.
 namespace margelo::nitro::nitrogeolocation { struct GeolocationResponse; }
+// Forward declaration of `HeadingOptions` to properly resolve imports.
+namespace margelo::nitro::nitrogeolocation { struct HeadingOptions; }
+// Forward declaration of `Heading` to properly resolve imports.
+namespace margelo::nitro::nitrogeolocation { struct Heading; }
 // Forward declaration of `HybridNitroGeolocationCompatSpec` to properly resolve imports.
 namespace margelo::nitro::nitrogeolocation { class HybridNitroGeolocationCompatSpec; }
 // Forward declaration of `HybridNitroGeolocationSpec` to properly resolve imports.
@@ -40,6 +46,8 @@ namespace margelo::nitro::nitrogeolocation { enum class IOSAccuracyPreset; }
 namespace margelo::nitro::nitrogeolocation { enum class IOSActivityType; }
 // Forward declaration of `LocationAccuracyOptions` to properly resolve imports.
 namespace margelo::nitro::nitrogeolocation { struct LocationAccuracyOptions; }
+// Forward declaration of `LocationAvailability` to properly resolve imports.
+namespace margelo::nitro::nitrogeolocation { struct LocationAvailability; }
 // Forward declaration of `LocationError` to properly resolve imports.
 namespace margelo::nitro::nitrogeolocation { struct LocationError; }
 // Forward declaration of `LocationProviderInternal` to properly resolve imports.
@@ -60,6 +68,7 @@ namespace margelo::nitro::nitrogeolocation { enum class PermissionStatus; }
 // Include C++ defined types
 #include "AccuracyAuthorization.hpp"
 #include "AndroidAccuracyPreset.hpp"
+#include "AndroidGranularity.hpp"
 #include "AuthorizationLevel.hpp"
 #include "AuthorizationLevelInternal.hpp"
 #include "CompatGeolocationConfigurationInternal.hpp"
@@ -69,11 +78,14 @@ namespace margelo::nitro::nitrogeolocation { enum class PermissionStatus; }
 #include "GeolocationConfiguration.hpp"
 #include "GeolocationCoordinates.hpp"
 #include "GeolocationResponse.hpp"
+#include "Heading.hpp"
+#include "HeadingOptions.hpp"
 #include "HybridNitroGeolocationCompatSpec.hpp"
 #include "HybridNitroGeolocationSpec.hpp"
 #include "IOSAccuracyPreset.hpp"
 #include "IOSActivityType.hpp"
 #include "LocationAccuracyOptions.hpp"
+#include "LocationAvailability.hpp"
 #include "LocationError.hpp"
 #include "LocationProvider.hpp"
 #include "LocationProviderInternal.hpp"

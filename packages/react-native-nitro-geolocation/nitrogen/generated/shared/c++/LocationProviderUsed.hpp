@@ -30,10 +30,10 @@ namespace margelo::nitro::nitrogeolocation {
    */
   enum class LocationProviderUsed {
     PASSIVE      SWIFT_NAME(passive) = 0,
-    FUSED      SWIFT_NAME(fused) = 1,
-    GPS      SWIFT_NAME(gps) = 2,
-    NETWORK      SWIFT_NAME(network) = 3,
-    UNKNOWN      SWIFT_NAME(unknown) = 4,
+    UNKNOWN      SWIFT_NAME(unknown) = 1,
+    FUSED      SWIFT_NAME(fused) = 2,
+    GPS      SWIFT_NAME(gps) = 3,
+    NETWORK      SWIFT_NAME(network) = 4,
   } CLOSED_ENUM;
 
 } // namespace margelo::nitro::nitrogeolocation
@@ -47,10 +47,10 @@ namespace margelo::nitro {
       std::string unionValue = JSIConverter<std::string>::fromJSI(runtime, arg);
       switch (hashString(unionValue.c_str(), unionValue.size())) {
         case hashString("passive"): return margelo::nitro::nitrogeolocation::LocationProviderUsed::PASSIVE;
+        case hashString("unknown"): return margelo::nitro::nitrogeolocation::LocationProviderUsed::UNKNOWN;
         case hashString("fused"): return margelo::nitro::nitrogeolocation::LocationProviderUsed::FUSED;
         case hashString("gps"): return margelo::nitro::nitrogeolocation::LocationProviderUsed::GPS;
         case hashString("network"): return margelo::nitro::nitrogeolocation::LocationProviderUsed::NETWORK;
-        case hashString("unknown"): return margelo::nitro::nitrogeolocation::LocationProviderUsed::UNKNOWN;
         default: [[unlikely]]
           throw std::invalid_argument("Cannot convert \"" + unionValue + "\" to enum LocationProviderUsed - invalid value!");
       }
@@ -58,10 +58,10 @@ namespace margelo::nitro {
     static inline jsi::Value toJSI(jsi::Runtime& runtime, margelo::nitro::nitrogeolocation::LocationProviderUsed arg) {
       switch (arg) {
         case margelo::nitro::nitrogeolocation::LocationProviderUsed::PASSIVE: return JSIConverter<std::string>::toJSI(runtime, "passive");
+        case margelo::nitro::nitrogeolocation::LocationProviderUsed::UNKNOWN: return JSIConverter<std::string>::toJSI(runtime, "unknown");
         case margelo::nitro::nitrogeolocation::LocationProviderUsed::FUSED: return JSIConverter<std::string>::toJSI(runtime, "fused");
         case margelo::nitro::nitrogeolocation::LocationProviderUsed::GPS: return JSIConverter<std::string>::toJSI(runtime, "gps");
         case margelo::nitro::nitrogeolocation::LocationProviderUsed::NETWORK: return JSIConverter<std::string>::toJSI(runtime, "network");
-        case margelo::nitro::nitrogeolocation::LocationProviderUsed::UNKNOWN: return JSIConverter<std::string>::toJSI(runtime, "unknown");
         default: [[unlikely]]
           throw std::invalid_argument("Cannot convert LocationProviderUsed to JS - invalid value: "
                                     + std::to_string(static_cast<int>(arg)) + "!");
@@ -74,10 +74,10 @@ namespace margelo::nitro {
       std::string unionValue = JSIConverter<std::string>::fromJSI(runtime, value);
       switch (hashString(unionValue.c_str(), unionValue.size())) {
         case hashString("passive"):
+        case hashString("unknown"):
         case hashString("fused"):
         case hashString("gps"):
         case hashString("network"):
-        case hashString("unknown"):
           return true;
         default:
           return false;

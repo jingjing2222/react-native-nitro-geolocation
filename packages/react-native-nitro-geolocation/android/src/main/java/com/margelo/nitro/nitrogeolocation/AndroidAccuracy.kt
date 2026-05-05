@@ -1,6 +1,8 @@
 package com.margelo.nitro.nitrogeolocation
 
 import android.location.LocationManager
+import com.google.android.gms.location.Granularity
+import com.google.android.gms.location.Priority
 
 internal enum class AndroidAccuracyMode {
     HIGH,
@@ -46,6 +48,33 @@ internal fun AndroidAccuracyResolution.providerOrder(): List<String> {
             LocationManager.PASSIVE_PROVIDER
         )
         AndroidAccuracyMode.PASSIVE -> listOf(LocationManager.PASSIVE_PROVIDER)
+    }
+}
+
+internal fun AndroidAccuracyResolution.gmsPriority(): Int {
+    return when (mode) {
+        AndroidAccuracyMode.HIGH -> Priority.PRIORITY_HIGH_ACCURACY
+        AndroidAccuracyMode.BALANCED -> Priority.PRIORITY_BALANCED_POWER_ACCURACY
+        AndroidAccuracyMode.LOW -> Priority.PRIORITY_LOW_POWER
+        AndroidAccuracyMode.PASSIVE -> Priority.PRIORITY_PASSIVE
+    }
+}
+
+internal fun AndroidGranularity?.gmsGranularity(): Int {
+    return when (this) {
+        AndroidGranularity.COARSE -> Granularity.GRANULARITY_COARSE
+        AndroidGranularity.FINE -> Granularity.GRANULARITY_FINE
+        AndroidGranularity.PERMISSION,
+        null -> Granularity.GRANULARITY_PERMISSION_LEVEL
+    }
+}
+
+internal fun AndroidGranularity?.allowsProvider(provider: String): Boolean {
+    return when (this) {
+        AndroidGranularity.COARSE -> provider != LocationManager.GPS_PROVIDER
+        AndroidGranularity.FINE,
+        AndroidGranularity.PERMISSION,
+        null -> true
     }
 }
 
