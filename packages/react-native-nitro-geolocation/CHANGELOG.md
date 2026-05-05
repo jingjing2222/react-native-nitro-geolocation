@@ -1,5 +1,12 @@
 # react-native-nitro-geolocation
 
+## 1.2.1
+
+### Patch Changes
+
+- 043e788: Clarify that Android `locationProvider: "auto"` currently uses the platform `LocationManager` by default, while `playServices` explicitly opts into Google Play Services fused location.
+- 3842d7a: Add an Agent Skills-compatible Modern API migration playbook with a package-manager-aware compat bootstrap script for migrations from legacy geolocation APIs.
+
 ## 1.2.0
 
 ### Minor Changes
