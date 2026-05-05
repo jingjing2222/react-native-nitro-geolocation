@@ -67,7 +67,7 @@ export interface GeolocationConfiguration {
    * Android: Location provider
    * - 'playServices': Use Google Play Services (fused location)
    * - 'android_platform': Use Android platform LocationManager
-   * - 'auto': Auto-select (prefer Play Services if available)
+   * - 'auto': Use Android platform LocationManager by default
    */
   locationProvider?: LocationProvider;
 }

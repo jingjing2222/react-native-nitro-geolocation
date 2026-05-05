@@ -747,6 +747,8 @@ class NitroGeolocation(
     // MARK: - Helper Functions - Provider Selection
 
     private fun requiresPlayServices(): Boolean {
+        // TODO: Switch auto/default Android provider selection to prefer
+        // Google Play Services when available.
         return configuration?.locationProvider == LocationProvider.PLAYSERVICES
     }
 

@@ -45,7 +45,7 @@ setConfiguration({
 - `autoRequestPermission?: boolean` - Deprecated compatibility option. `setConfiguration()` does not request permission; call `requestPermission()` explicitly when the app is ready to show the native prompt.
 - `authorizationLevel?: 'whenInUse' | 'always' | 'auto'` - iOS: Authorization level
 - `enableBackgroundLocationUpdates?: boolean` - iOS: Enable background location
-- `locationProvider?: 'playServices' | 'android' | 'auto'` - Android: Location provider
+- `locationProvider?: 'playServices' | 'android' | 'auto'` - Android: Location provider. `auto` currently uses Android's platform `LocationManager`; set `playServices` explicitly to use Google Play Services fused location.
 
 **Type**:
 
@@ -55,6 +55,7 @@ export type GeolocationConfiguration = {
   autoRequestPermission?: boolean;
   authorizationLevel?: 'always' | 'whenInUse' | 'auto';
   enableBackgroundLocationUpdates?: boolean;
+  /** `auto` currently uses Android's platform LocationManager. */
   locationProvider?: 'playServices' | 'android' | 'auto';
 };
 

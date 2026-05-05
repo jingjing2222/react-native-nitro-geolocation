@@ -53,7 +53,7 @@ Supported options:
 - `skipPermissionRequests` (boolean) - Defaults to `false`. If `true`, you must request permissions before using Geolocation APIs.
 - `authorizationLevel` (string, iOS-only) - Either `"whenInUse"`, `"always"`, or `"auto"`. Changes whether the user will be asked to give "always" or "when in use" location services permission. Any other value or `auto` will use the default behaviour, where the permission level is based on the contents of your `Info.plist`.
 - `enableBackgroundLocationUpdates` (boolean, iOS-only) - When using `skipPermissionRequests`, toggle wether to automatically enableBackgroundLocationUpdates. Defaults to true.
-- `locationProvider` (string, Android-only) - Either `"playServices"`, `"android"`, or `"auto"`.  Determines wether to use `Google’s Location Services API` or `Android’s Location API`. The `"auto"` mode defaults to `android`, and falls back to Android's Location API if play services aren't available.
+- `locationProvider` (string, Android-only) - Either `"playServices"`, `"android"`, or `"auto"`. Determines whether to use Google Play Services location APIs or Android's platform `LocationManager`. The `"auto"` mode currently defaults to Android's platform provider; set `"playServices"` explicitly to use Google Play Services when available.
 
 ### `requestAuthorization()`
 
