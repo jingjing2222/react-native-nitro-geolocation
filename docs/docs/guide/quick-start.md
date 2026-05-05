@@ -170,6 +170,28 @@ function LocationButton() {
 }
 ```
 
+### Geocode and Reverse Geocode
+
+```tsx
+import {
+  geocode,
+  reverseGeocode
+} from 'react-native-nitro-geolocation';
+
+const locations = await geocode('Seoul City Hall');
+const firstLocation = locations[0];
+
+const addresses = await reverseGeocode({
+  latitude: 37.5665,
+  longitude: 126.978
+});
+const firstAddress = addresses[0];
+```
+
+`geocode(address)` and `reverseGeocode(coords)` use Android `Geocoder` and iOS
+`CLGeocoder`. Result quality, language, and availability depend on the platform
+geocoder service and network state.
+
 ### Watch Position (Real-time Tracking)
 
 ```tsx

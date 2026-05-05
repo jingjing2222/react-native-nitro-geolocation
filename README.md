@@ -40,6 +40,8 @@ import {
   getLocationAvailability,
   getCurrentPosition,
   getLastKnownPosition,
+  geocode,
+  reverseGeocode,
   getHeading,
   watchHeading,
   unwatch,
@@ -74,6 +76,13 @@ const position = await getCurrentPosition({
 const cached = await getLastKnownPosition({
   maximumAge: 60_000,
   accuracy: { android: "balanced", ios: "hundredMeters" },
+});
+
+// v1.2+: convert between addresses and coordinates with native geocoders
+const locations = await geocode("Seoul City Hall");
+const addresses = await reverseGeocode({
+  latitude: 37.5665,
+  longitude: 126.978,
 });
 
 // v1.2+: inspect precise/reduced accuracy authorization
@@ -250,9 +259,9 @@ const { position, error } = useWatchPosition({
 Accuracy presets are available since `v1.2`.
 
 `getLastKnownPosition(options?)`, `getLocationAvailability()`, `getHeading()`,
-`watchHeading()`, selected Android request options (`granularity`,
-`waitForAccurateLocation`, `maxUpdateAge`, `maxUpdateDelay`, and `maxUpdates`),
-iOS tuning options
+`watchHeading()`, `geocode(address)`, `reverseGeocode(coords)`, selected
+Android request options (`granularity`, `waitForAccurateLocation`,
+`maxUpdateAge`, `maxUpdateDelay`, and `maxUpdates`), iOS tuning options
 (`activityType`, `pausesLocationUpdatesAutomatically`, and
 `showsBackgroundLocationIndicator`), `getAccuracyAuthorization()`, and
 `requestTemporaryFullAccuracy(purposeKey)` are available since `v1.2`.

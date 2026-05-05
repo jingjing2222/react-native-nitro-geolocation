@@ -15,6 +15,8 @@ import {
   setConfiguration,
   requestPermission,
   getCurrentPosition,
+  geocode,
+  reverseGeocode,
   useWatchPosition
 } from 'react-native-nitro-geolocation';
 
@@ -30,6 +32,13 @@ const status = await requestPermission();
 // Get current location
 const position = await getCurrentPosition({
   enableHighAccuracy: true
+});
+
+// Convert between addresses and coordinates
+const locations = await geocode('Seoul City Hall');
+const addresses = await reverseGeocode({
+  latitude: 37.5665,
+  longitude: 126.978
 });
 
 // Continuous tracking with hook
@@ -154,6 +163,7 @@ Instead of complex provider patterns or class-based APIs, we provide:
 | **Configuration** | `setConfiguration()` |
 | **Permission** | `checkPermission()`, `requestPermission()` |
 | **Location** | `getCurrentPosition()`, `useWatchPosition()` |
+| **Geocoding** | `geocode()`, `reverseGeocode()` |
 | **Cleanup** | Automatic (in hook) |
 
 ### Core Principles
