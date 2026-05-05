@@ -19,10 +19,27 @@ import {
 } from 'react-native-nitro-geolocation/compat';
 ```
 
-## 100% API Compatibility
+## Compatibility Scope
 
-This API is a **drop-in replacement** for `@react-native-community/geolocation`.
-All methods work identically.
+This API is drop-in compatible with the core native
+`@react-native-community/geolocation` surface. It preserves the callback-based
+shape for existing iOS and Android apps while the Modern API gives new code a
+Promise/function API.
+
+| Community API | Nitro `/compat` | Notes |
+| --- | ---: | --- |
+| `setRNConfiguration` | Supported | Android `auto` currently maps to the platform provider; set `playServices` explicitly for fused location. |
+| `requestAuthorization` | Supported | iOS authorization follows configured `Info.plist` keys and `authorizationLevel`. |
+| `getCurrentPosition` | Supported | Keeps the legacy callback and error shape. |
+| `watchPosition` | Supported | Returns a numeric watch id. |
+| `clearWatch` | Supported | Clears a watch id from `watchPosition`. |
+| `stopObserving` | Supported | Preserved for legacy cleanup compatibility. |
+| `navigator.geolocation` polyfill | Not supported in `v1.2.x` | Planned for `v1.3`. |
+| Web | Not supported in `v1.2.x` | Planned as a `/compat` browser fallback in `v1.3`. |
+
+The community package supports web by delegating to the browser
+`navigator.geolocation` API. `react-native-nitro-geolocation` currently targets
+native Nitro bindings and does not include that browser fallback in `v1.2.x`.
 
 ## Summary
 

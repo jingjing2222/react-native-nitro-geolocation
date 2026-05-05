@@ -20,6 +20,10 @@ After installation, rebuild your native app to ensure the new module is linked.
 cd ios && pod install
 ```
 
+This package requires native Nitro bindings. Expo Go is not supported. For Expo
+apps, use prebuild, a development build, or another custom native build flow;
+see the [Expo development build guide](/guide/expo-development-build).
+
 
 ## 2. iOS Setup
 
@@ -50,8 +54,58 @@ Optional (for background access):
 <uses-permission android:name="android.permission.ACCESS_BACKGROUND_LOCATION" />
 ```
 
+## 4. Android Reliability
 
-## 4. Usage with Modern API (Recommended)
+Use the Android provider and settings APIs when your flow depends on accurate
+location or when you are migrating from packages that rely on fused location.
+
+```tsx
+import {
+  getCurrentPosition,
+  getLastKnownPosition,
+  requestLocationSettings,
+  setConfiguration
+} from 'react-native-nitro-geolocation';
+
+setConfiguration({
+  authorizationLevel: 'whenInUse',
+  locationProvider: 'playServices'
+});
+
+await requestLocationSettings({
+  accuracy: { android: 'high' },
+  interval: 5000,
+  fastestInterval: 1000
+});
+
+const cached = await getLastKnownPosition({
+  maximumAge: 60_000,
+  accuracy: { android: 'balanced', ios: 'hundredMeters' }
+});
+
+const fresh = await getCurrentPosition({
+  accuracy: { android: 'high', ios: 'best' },
+  granularity: 'permission',
+  waitForAccurateLocation: true,
+  timeout: 15000
+});
+```
+
+- `locationProvider: 'playServices'` uses Google Play Services fused location.
+- `locationProvider: 'auto'` currently uses Android's platform
+  `LocationManager`; set `playServices` explicitly when you want fused
+  behavior.
+- `requestLocationSettings()` can show Android's native settings resolution
+  dialog when settings do not satisfy the request.
+- `granularity` and Android permission state support approximate/coarse
+  location handling.
+- `getLastKnownPosition()` makes cached reads explicit instead of hiding them
+  inside a fresh request.
+- Modern API errors include `PLAY_SERVICE_NOT_AVAILABLE`,
+  `SETTINGS_NOT_SATISFIED`, and `TIMEOUT`.
+
+
+## 5. Usage with Modern API (Recommended)
 
 The Modern API provides **simple functional calls** with direct functions and a single hook for tracking.
 
@@ -245,7 +299,7 @@ function LiveTracker() {
 - ✅ Battery efficient - native subscription stops when disabled
 
 
-## 5. Usage with Compat API (Compatibility)
+## 6. Usage with Compat API (Compatibility)
 
 For compatibility with `@react-native-community/geolocation`, use the `/compat` import:
 
@@ -272,7 +326,7 @@ Geolocation.clearWatch(watchId);
 ```
 
 
-## 6. Migration Guides
+## 7. Migration Guides
 
 ### From `@react-native-community/geolocation`
 
@@ -290,11 +344,15 @@ or
 + import { getCurrentPosition, watchPosition } from 'react-native-nitro-geolocation/compat';
 ```
 
-**All methods work identically** — 100% API compatible! You'll get:
+The `/compat` path is drop-in compatible with the core native community
+geolocation API. You'll get:
 - Better performance via JSI
 - Reduced bridge serialization overhead
 - Improved permission consistency
 - TypeScript definitions out of the box
+
+Web and `navigator.geolocation` polyfill behavior are not supported in `v1.2.x`.
+They are planned for a `/compat` browser fallback in `v1.3`.
 
 ### From Compat to Modern API (Recommended)
 
@@ -348,7 +406,7 @@ function LocationTracker() {
 - Better TypeScript support
 
 
-## 7. Development Tools (Optional)
+## 8. Development Tools (Optional)
 
 For an enhanced development experience, install the Rozenite DevTools plugin to mock locations:
 

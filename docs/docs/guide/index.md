@@ -4,7 +4,29 @@ The [`@react-native-community/geolocation`](https://github.com/michalchudziak/re
 
 With the React Native ecosystem moving toward **TurboModules**, **Fabric**, and **JSI-based architecture**, we saw an opportunity to bring geolocation to the new architecture while improving the developer experience.
 
-This project — **React Native Nitro Geolocation** — is a complete reimplementation designed for the **Nitro Module** system, providing **two APIs** to fit your needs:
+This project — **React Native Nitro Geolocation** — is a native iOS/Android
+module designed for the **Nitro Module** system. It is best positioned as a
+React Native 0.75+ / New Architecture path for replacing the core native
+`@react-native-community/geolocation` API with `/compat`, then gradually moving
+to a typed Modern API.
+
+## When should I use this?
+
+| Use case | Recommendation |
+| --- | --- |
+| Bare React Native 0.75+ app | Use Nitro Geolocation |
+| Migrating from `@react-native-community/geolocation` | Start with `/compat` |
+| New Architecture / Nitro-based app | Recommended |
+| Expo development build or custom native build | Supported with native setup |
+| Expo managed app without native rebuild | Use `expo-location` |
+| Web support required | Use `@react-native-community/geolocation` or `expo-location` for now |
+| Full background tracking / geofencing | Use a dedicated background-location library |
+
+Web is not supported in `v1.2.x`. The community package handles web by
+delegating to the browser `navigator.geolocation` API; this package currently
+targets native Nitro bindings. A `/compat` web fallback is planned for `v1.3`.
+
+React Native Nitro Geolocation provides **two APIs** to fit your needs:
 
 ## 1. Modern API (Recommended)
 
@@ -68,7 +90,8 @@ function LocationTracker() {
 
 ## 2. Compat API (Compatibility)
 
-**100% compatible** with `@react-native-community/geolocation` via `/compat` subpath.
+Drop-in compatible with the core native `@react-native-community/geolocation`
+API via the `/compat` subpath.
 
 ```tsx
 import Geolocation from 'react-native-nitro-geolocation/compat';
@@ -180,18 +203,23 @@ Instead of complex provider patterns or class-based APIs, we provide:
 
 Whether you choose Modern or Compat API, you get:
 
-- 🚀 **Faster performance** through direct JSI bindings (22.95x faster on average)
+- 🚀 **Lower cached-read overhead** through direct JSI bindings
 - 📱 **Improved native consistency** across Android and iOS
 - 🔁 **Seamless migration** from `@react-native-community/geolocation`
 - 🧩 **TypeScript-first** developer experience
-- 🔄 **100% API compatibility** (via `/compat`) — can be used as a **drop-in replacement**
+- 🔄 **Compat API** (via `/compat`) for the core native community geolocation surface
 
-Whether you're upgrading an existing app or building a new one using the latest React Native architecture, **React Native Nitro Geolocation** gives you the Modern API with proven performance.
+The benchmark measures cached location reads and the JS-to-native call path. It
+does not make cold GPS acquisition itself 22x faster.
+
+Whether you're upgrading an existing app or building a new one using the latest React Native architecture, **React Native Nitro Geolocation** gives you the Modern API with a migration-friendly compat path.
 
 
 ## Next Steps
 
 - [Quick Start Guide](/guide/quick-start) — Get up and running in minutes
+- [Migration Demo](/guide/migration-demo) — Move from community imports to `/compat` and Modern API
+- [Expo Development Build Guide](/guide/expo-development-build) — Use the package in Expo custom native builds
 - [Modern API Reference](/guide/modern-api) — Explore functions and hooks
 - [Compat API Reference](/guide/compat-api) — Compatibility documentation
 - [Why Nitro Module?](/guide/why-nitro-module) — Architecture deep dive

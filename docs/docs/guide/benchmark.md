@@ -1,6 +1,7 @@
 # Benchmark
 
-This app benchmarks the performance difference between `react-native-nitro-geolocation` and `@react-native-community/geolocation`.
+This app benchmarks cached location read overhead between
+`react-native-nitro-geolocation` and `@react-native-community/geolocation`.
 
 ![react-native-nitro-geolocation](https://raw.githubusercontent.com/jingjing2222/react-native-nitro-geolocation/main/benchmark.gif)
 
@@ -10,6 +11,13 @@ This app benchmarks the performance difference between `react-native-nitro-geolo
 - Device: iPhone 14 Pro
 - React Native: 0.81.4
 - Test: 1000 iterations × 5 runs of `getCurrentPosition` with cached location (measuring pure bridge/JSI latency)
+
+:::warning Benchmark scope
+This benchmark measures cached location reads and the JS-to-native call path. It
+does not measure cold GPS acquisition, permission dialogs, provider
+availability, or OS throttling. Nitro does not make GPS acquisition itself 22x
+faster; it makes cached reads and the JS-to-native path cheaper.
+:::
 
 ### Results
 
@@ -24,7 +32,7 @@ This app benchmarks the performance difference between `react-native-nitro-geolo
 | **Std Dev** | 0.032ms | 1.545ms | 98.0% more stable |
 | **Samples** | 1000 | 1000 | - |
 
-### Why is Nitro faster?
+### Why is Nitro faster for cached reads?
 
 1. **Zero Queue Overhead**: Cached location responses return immediately without any dispatch queue overhead
 2. **Direct JSI Calls**: No JSON serialization or async bridge crossing
