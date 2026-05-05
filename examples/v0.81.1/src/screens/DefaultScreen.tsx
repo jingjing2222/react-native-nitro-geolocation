@@ -98,6 +98,7 @@ export default function DefaultScreen({
 
   const handleFetchPosition = async () => {
     setIsCurrentPositionLoading(true);
+    setCurrentPosition(null);
     setCurrentPositionError(null);
     try {
       const position = await (nativeGeolocation
@@ -210,8 +211,10 @@ export default function DefaultScreen({
         One-time location request using getCurrentPosition()
       </Text>
       {currentPositionError && (
-        <View style={styles.errorContainer}>
-          <Text style={styles.errorText}>Error: {currentPositionError}</Text>
+        <View style={styles.errorContainer} testID="current-position-error">
+          <Text style={styles.errorText} testID="current-position-error-text">
+            Error: {currentPositionError}
+          </Text>
         </View>
       )}
       <View style={styles.buttonContainer}>
@@ -247,8 +250,10 @@ export default function DefaultScreen({
         </Text>
       </View>
       {watchError && (
-        <View style={styles.errorContainer}>
-          <Text style={styles.errorText}>Error: {watchError.message}</Text>
+        <View style={styles.errorContainer} testID="watch-position-error">
+          <Text style={styles.errorText} testID="watch-position-error-text">
+            Error: {watchError.message}
+          </Text>
         </View>
       )}
       {renderPositionInfo(watchedPosition, "Watched Position (Live)")}

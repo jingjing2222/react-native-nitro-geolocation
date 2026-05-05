@@ -12,6 +12,7 @@ import ApiErrorsScreen from "./screens/ApiErrorsScreen";
 import CompatScreen from "./screens/CompatScreen";
 import CurrentPositionScreen from "./screens/CurrentPositionScreen";
 import DefaultScreen from "./screens/DefaultScreen";
+import GeocodingScreen from "./screens/GeocodingScreen";
 import HeadingScreen from "./screens/HeadingScreen";
 import IOSAccuracyAuthorizationScreen from "./screens/IOSAccuracyAuthorizationScreen";
 import IOSLocationTuningScreen from "./screens/IOSLocationTuningScreen";
@@ -40,6 +41,7 @@ const linking = {
       ApiErrors: "api-errors",
       AccuracyPresets: "accuracy-presets",
       LastKnownPosition: "last-known-position",
+      Geocoding: "geocoding",
       LocationAvailability: "location-availability",
       Heading: "heading",
       AndroidRequestOptions: "android-request-options",
@@ -138,6 +140,11 @@ export default function App() {
         <Tab.Screen
           name="LastKnownPosition"
           component={LastKnownPositionScreen}
+          options={hiddenTabOptions}
+        />
+        <Tab.Screen
+          name="Geocoding"
+          component={GeocodingScreen}
           options={hiddenTabOptions}
         />
         <Tab.Screen

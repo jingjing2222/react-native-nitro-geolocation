@@ -1,7 +1,19 @@
 appId: nitrogeolocation.example
 ---
-# Test 2: Get Current Position
-- launchApp
+# Current position contract: successful native request plus denied permission
+# rejection, without accepting stale display-only state.
+
+- launchApp:
+    clearState: true
+    permissions:
+      all: allow
+
+- extendedWaitUntil:
+    visible: "Geolocation API"
+    timeout: 10000
+
+- stopApp
+
 - openLink:
     link: nitrogeolocation://app/current-position
 - tapOn:
@@ -38,6 +50,40 @@ appId: nitrogeolocation.example
 - assertVisible:
     id: "latitude-text"
 - assertVisible:
+    text: "Latitude: 37\\.566500"
+- assertVisible:
     id: "longitude-text"
 - assertVisible:
+    text: "Longitude: 126\\.978000"
+- assertVisible:
     id: "accuracy-text"
+
+- launchApp:
+    clearState: true
+    permissions:
+      all: deny
+
+- extendedWaitUntil:
+    visible: "Geolocation API"
+    timeout: 10000
+
+- stopApp
+
+- openLink:
+    link: nitrogeolocation://app/current-position
+- tapOn:
+    text: "열기|Open"
+    optional: true
+
+- scrollUntilVisible:
+    element: "2. Get Current Position"
+    direction: DOWN
+
+- tapOn: "Get Position"
+
+- extendedWaitUntil:
+    visible: "Error: .*(Location permission|denied access).*"
+    timeout: 10000
+
+- assertVisible:
+    id: "current-position-error"
