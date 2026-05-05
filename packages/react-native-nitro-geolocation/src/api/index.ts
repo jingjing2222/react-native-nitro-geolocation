@@ -9,6 +9,8 @@ export { getAccuracyAuthorization } from "./getAccuracyAuthorization";
 export { requestTemporaryFullAccuracy } from "./requestTemporaryFullAccuracy";
 export { getCurrentPosition } from "./getCurrentPosition";
 export { getLastKnownPosition } from "./getLastKnownPosition";
+export { geocode } from "./geocode";
+export { reverseGeocode } from "./reverseGeocode";
 export { getHeading } from "./getHeading";
 export { watchHeading } from "./watchHeading";
 export { watchPosition } from "./watchPosition";

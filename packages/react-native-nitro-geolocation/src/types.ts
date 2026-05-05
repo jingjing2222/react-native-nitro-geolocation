@@ -63,6 +63,27 @@ export interface HeadingOptions {
   headingFilter?: number;
 }
 
+export interface GeocodingCoordinates {
+  latitude: number;
+  longitude: number;
+}
+
+export interface GeocodedLocation {
+  latitude: number;
+  longitude: number;
+  accuracy?: number;
+}
+
+export interface ReverseGeocodedAddress {
+  country?: string;
+  region?: string;
+  city?: string;
+  district?: string;
+  street?: string;
+  postalCode?: string;
+  formattedAddress?: string;
+}
+
 /**
  * Native provider/settings status.
  *

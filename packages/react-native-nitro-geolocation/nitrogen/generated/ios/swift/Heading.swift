@@ -38,7 +38,7 @@ public extension Heading {
   var magneticHeading: Double {
     return self.__magneticHeading
   }
-
+  
   @inline(__always)
   var trueHeading: Double? {
     return { () -> Double? in
@@ -50,7 +50,7 @@ public extension Heading {
       }
     }()
   }
-
+  
   @inline(__always)
   var accuracy: Double? {
     return { () -> Double? in
@@ -62,7 +62,7 @@ public extension Heading {
       }
     }()
   }
-
+  
   @inline(__always)
   var timestamp: Double {
     return self.__timestamp

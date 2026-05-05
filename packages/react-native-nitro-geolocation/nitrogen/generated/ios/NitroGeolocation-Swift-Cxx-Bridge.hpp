@@ -24,6 +24,8 @@ namespace margelo::nitro::nitrogeolocation { struct CompatGeolocationError; }
 namespace margelo::nitro::nitrogeolocation { struct CompatGeolocationOptions; }
 // Forward declaration of `CompatGeolocationResponse` to properly resolve imports.
 namespace margelo::nitro::nitrogeolocation { struct CompatGeolocationResponse; }
+// Forward declaration of `GeocodedLocation` to properly resolve imports.
+namespace margelo::nitro::nitrogeolocation { struct GeocodedLocation; }
 // Forward declaration of `GeolocationCoordinates` to properly resolve imports.
 namespace margelo::nitro::nitrogeolocation { struct GeolocationCoordinates; }
 // Forward declaration of `GeolocationResponse` to properly resolve imports.
@@ -60,6 +62,8 @@ namespace margelo::nitro::nitrogeolocation { struct LocationRequestOptions; }
 namespace margelo::nitro::nitrogeolocation { struct LocationSettingsOptions; }
 // Forward declaration of `PermissionStatus` to properly resolve imports.
 namespace margelo::nitro::nitrogeolocation { enum class PermissionStatus; }
+// Forward declaration of `ReverseGeocodedAddress` to properly resolve imports.
+namespace margelo::nitro::nitrogeolocation { struct ReverseGeocodedAddress; }
 
 // Forward declarations of Swift defined types
 // Forward declaration of `HybridNitroGeolocationCompatSpec_cxx` to properly resolve imports.
@@ -76,6 +80,7 @@ namespace NitroGeolocation { class HybridNitroGeolocationSpec_cxx; }
 #include "CompatGeolocationError.hpp"
 #include "CompatGeolocationOptions.hpp"
 #include "CompatGeolocationResponse.hpp"
+#include "GeocodedLocation.hpp"
 #include "GeolocationCoordinates.hpp"
 #include "GeolocationResponse.hpp"
 #include "Heading.hpp"
@@ -94,6 +99,7 @@ namespace NitroGeolocation { class HybridNitroGeolocationSpec_cxx; }
 #include "LocationRequestOptions.hpp"
 #include "LocationSettingsOptions.hpp"
 #include "PermissionStatus.hpp"
+#include "ReverseGeocodedAddress.hpp"
 #include <NitroModules/Null.hpp>
 #include <NitroModules/Promise.hpp>
 #include <NitroModules/PromiseHolder.hpp>
@@ -104,6 +110,7 @@ namespace NitroGeolocation { class HybridNitroGeolocationSpec_cxx; }
 #include <optional>
 #include <string>
 #include <variant>
+#include <vector>
 
 /**
  * Contains specialized versions of C++ templated types so they can be accessed from Swift,
@@ -125,7 +132,7 @@ namespace margelo::nitro::nitrogeolocation::bridge::swift {
   inline bool get_std__optional_bool_(const std::optional<bool>& optional) noexcept {
     return optional.value();
   }
-
+  
   // pragma MARK: std::optional<AuthorizationLevel>
   /**
    * Specialized version of `std::optional<AuthorizationLevel>`.
@@ -140,7 +147,7 @@ namespace margelo::nitro::nitrogeolocation::bridge::swift {
   inline AuthorizationLevel get_std__optional_AuthorizationLevel_(const std::optional<AuthorizationLevel>& optional) noexcept {
     return optional.value();
   }
-
+  
   // pragma MARK: std::optional<LocationProvider>
   /**
    * Specialized version of `std::optional<LocationProvider>`.
@@ -155,7 +162,7 @@ namespace margelo::nitro::nitrogeolocation::bridge::swift {
   inline LocationProvider get_std__optional_LocationProvider_(const std::optional<LocationProvider>& optional) noexcept {
     return optional.value();
   }
-
+  
   // pragma MARK: std::shared_ptr<Promise<PermissionStatus>>
   /**
    * Specialized version of `std::shared_ptr<Promise<PermissionStatus>>`.
@@ -167,7 +174,7 @@ namespace margelo::nitro::nitrogeolocation::bridge::swift {
   inline PromiseHolder<PermissionStatus> wrap_std__shared_ptr_Promise_PermissionStatus__(std::shared_ptr<Promise<PermissionStatus>> promise) noexcept {
     return PromiseHolder<PermissionStatus>(std::move(promise));
   }
-
+  
   // pragma MARK: std::function<void(PermissionStatus /* result */)>
   /**
    * Specialized version of `std::function<void(PermissionStatus)>`.
@@ -189,7 +196,7 @@ namespace margelo::nitro::nitrogeolocation::bridge::swift {
   inline Func_void_PermissionStatus_Wrapper wrap_Func_void_PermissionStatus(Func_void_PermissionStatus value) noexcept {
     return Func_void_PermissionStatus_Wrapper(std::move(value));
   }
-
+  
   // pragma MARK: std::function<void(const std::exception_ptr& /* error */)>
   /**
    * Specialized version of `std::function<void(const std::exception_ptr&)>`.
@@ -211,7 +218,7 @@ namespace margelo::nitro::nitrogeolocation::bridge::swift {
   inline Func_void_std__exception_ptr_Wrapper wrap_Func_void_std__exception_ptr(Func_void_std__exception_ptr value) noexcept {
     return Func_void_std__exception_ptr_Wrapper(std::move(value));
   }
-
+  
   // pragma MARK: std::function<void(const LocationError& /* error */)>
   /**
    * Specialized version of `std::function<void(const LocationError&)>`.
@@ -233,7 +240,7 @@ namespace margelo::nitro::nitrogeolocation::bridge::swift {
   inline Func_void_LocationError_Wrapper wrap_Func_void_LocationError(Func_void_LocationError value) noexcept {
     return Func_void_LocationError_Wrapper(std::move(value));
   }
-
+  
   // pragma MARK: std::optional<std::function<void(const LocationError& /* error */)>>
   /**
    * Specialized version of `std::optional<std::function<void(const LocationError& / * error * /)>>`.
@@ -248,7 +255,7 @@ namespace margelo::nitro::nitrogeolocation::bridge::swift {
   inline std::function<void(const LocationError& /* error */)> get_std__optional_std__function_void_const_LocationError_____error______(const std::optional<std::function<void(const LocationError& /* error */)>>& optional) noexcept {
     return optional.value();
   }
-
+  
   // pragma MARK: std::shared_ptr<Promise<bool>>
   /**
    * Specialized version of `std::shared_ptr<Promise<bool>>`.
@@ -260,7 +267,7 @@ namespace margelo::nitro::nitrogeolocation::bridge::swift {
   inline PromiseHolder<bool> wrap_std__shared_ptr_Promise_bool__(std::shared_ptr<Promise<bool>> promise) noexcept {
     return PromiseHolder<bool>(std::move(promise));
   }
-
+  
   // pragma MARK: std::function<void(bool /* result */)>
   /**
    * Specialized version of `std::function<void(bool)>`.
@@ -282,7 +289,7 @@ namespace margelo::nitro::nitrogeolocation::bridge::swift {
   inline Func_void_bool_Wrapper wrap_Func_void_bool(Func_void_bool value) noexcept {
     return Func_void_bool_Wrapper(std::move(value));
   }
-
+  
   // pragma MARK: std::shared_ptr<Promise<LocationProviderStatus>>
   /**
    * Specialized version of `std::shared_ptr<Promise<LocationProviderStatus>>`.
@@ -294,7 +301,7 @@ namespace margelo::nitro::nitrogeolocation::bridge::swift {
   inline PromiseHolder<LocationProviderStatus> wrap_std__shared_ptr_Promise_LocationProviderStatus__(std::shared_ptr<Promise<LocationProviderStatus>> promise) noexcept {
     return PromiseHolder<LocationProviderStatus>(std::move(promise));
   }
-
+  
   // pragma MARK: std::function<void(const LocationProviderStatus& /* result */)>
   /**
    * Specialized version of `std::function<void(const LocationProviderStatus&)>`.
@@ -316,7 +323,7 @@ namespace margelo::nitro::nitrogeolocation::bridge::swift {
   inline Func_void_LocationProviderStatus_Wrapper wrap_Func_void_LocationProviderStatus(Func_void_LocationProviderStatus value) noexcept {
     return Func_void_LocationProviderStatus_Wrapper(std::move(value));
   }
-
+  
   // pragma MARK: std::optional<std::string>
   /**
    * Specialized version of `std::optional<std::string>`.
@@ -331,7 +338,7 @@ namespace margelo::nitro::nitrogeolocation::bridge::swift {
   inline std::string get_std__optional_std__string_(const std::optional<std::string>& optional) noexcept {
     return optional.value();
   }
-
+  
   // pragma MARK: std::shared_ptr<Promise<LocationAvailability>>
   /**
    * Specialized version of `std::shared_ptr<Promise<LocationAvailability>>`.
@@ -343,7 +350,7 @@ namespace margelo::nitro::nitrogeolocation::bridge::swift {
   inline PromiseHolder<LocationAvailability> wrap_std__shared_ptr_Promise_LocationAvailability__(std::shared_ptr<Promise<LocationAvailability>> promise) noexcept {
     return PromiseHolder<LocationAvailability>(std::move(promise));
   }
-
+  
   // pragma MARK: std::function<void(const LocationAvailability& /* result */)>
   /**
    * Specialized version of `std::function<void(const LocationAvailability&)>`.
@@ -365,7 +372,7 @@ namespace margelo::nitro::nitrogeolocation::bridge::swift {
   inline Func_void_LocationAvailability_Wrapper wrap_Func_void_LocationAvailability(Func_void_LocationAvailability value) noexcept {
     return Func_void_LocationAvailability_Wrapper(std::move(value));
   }
-
+  
   // pragma MARK: std::optional<AndroidAccuracyPreset>
   /**
    * Specialized version of `std::optional<AndroidAccuracyPreset>`.
@@ -380,7 +387,7 @@ namespace margelo::nitro::nitrogeolocation::bridge::swift {
   inline AndroidAccuracyPreset get_std__optional_AndroidAccuracyPreset_(const std::optional<AndroidAccuracyPreset>& optional) noexcept {
     return optional.value();
   }
-
+  
   // pragma MARK: std::optional<IOSAccuracyPreset>
   /**
    * Specialized version of `std::optional<IOSAccuracyPreset>`.
@@ -395,7 +402,7 @@ namespace margelo::nitro::nitrogeolocation::bridge::swift {
   inline IOSAccuracyPreset get_std__optional_IOSAccuracyPreset_(const std::optional<IOSAccuracyPreset>& optional) noexcept {
     return optional.value();
   }
-
+  
   // pragma MARK: std::optional<LocationAccuracyOptions>
   /**
    * Specialized version of `std::optional<LocationAccuracyOptions>`.
@@ -410,7 +417,7 @@ namespace margelo::nitro::nitrogeolocation::bridge::swift {
   inline LocationAccuracyOptions get_std__optional_LocationAccuracyOptions_(const std::optional<LocationAccuracyOptions>& optional) noexcept {
     return optional.value();
   }
-
+  
   // pragma MARK: std::optional<double>
   /**
    * Specialized version of `std::optional<double>`.
@@ -425,7 +432,7 @@ namespace margelo::nitro::nitrogeolocation::bridge::swift {
   inline double get_std__optional_double_(const std::optional<double>& optional) noexcept {
     return optional.value();
   }
-
+  
   // pragma MARK: std::optional<LocationSettingsOptions>
   /**
    * Specialized version of `std::optional<LocationSettingsOptions>`.
@@ -440,7 +447,7 @@ namespace margelo::nitro::nitrogeolocation::bridge::swift {
   inline LocationSettingsOptions get_std__optional_LocationSettingsOptions_(const std::optional<LocationSettingsOptions>& optional) noexcept {
     return optional.value();
   }
-
+  
   // pragma MARK: std::shared_ptr<Promise<AccuracyAuthorization>>
   /**
    * Specialized version of `std::shared_ptr<Promise<AccuracyAuthorization>>`.
@@ -452,7 +459,7 @@ namespace margelo::nitro::nitrogeolocation::bridge::swift {
   inline PromiseHolder<AccuracyAuthorization> wrap_std__shared_ptr_Promise_AccuracyAuthorization__(std::shared_ptr<Promise<AccuracyAuthorization>> promise) noexcept {
     return PromiseHolder<AccuracyAuthorization>(std::move(promise));
   }
-
+  
   // pragma MARK: std::function<void(AccuracyAuthorization /* result */)>
   /**
    * Specialized version of `std::function<void(AccuracyAuthorization)>`.
@@ -474,7 +481,7 @@ namespace margelo::nitro::nitrogeolocation::bridge::swift {
   inline Func_void_AccuracyAuthorization_Wrapper wrap_Func_void_AccuracyAuthorization(Func_void_AccuracyAuthorization value) noexcept {
     return Func_void_AccuracyAuthorization_Wrapper(std::move(value));
   }
-
+  
   // pragma MARK: std::variant<nitro::NullType, double>
   /**
    * Wrapper struct for `std::variant<nitro::NullType, double>`.
@@ -503,7 +510,7 @@ namespace margelo::nitro::nitrogeolocation::bridge::swift {
   inline std__variant_nitro__NullType__double_ create_std__variant_nitro__NullType__double_(double value) noexcept {
     return std__variant_nitro__NullType__double_(value);
   }
-
+  
   // pragma MARK: std::optional<std::variant<nitro::NullType, double>>
   /**
    * Specialized version of `std::optional<std::variant<nitro::NullType, double>>`.
@@ -518,7 +525,7 @@ namespace margelo::nitro::nitrogeolocation::bridge::swift {
   inline std::variant<nitro::NullType, double> get_std__optional_std__variant_nitro__NullType__double__(const std::optional<std::variant<nitro::NullType, double>>& optional) noexcept {
     return optional.value();
   }
-
+  
   // pragma MARK: std::optional<LocationProviderUsed>
   /**
    * Specialized version of `std::optional<LocationProviderUsed>`.
@@ -533,7 +540,7 @@ namespace margelo::nitro::nitrogeolocation::bridge::swift {
   inline LocationProviderUsed get_std__optional_LocationProviderUsed_(const std::optional<LocationProviderUsed>& optional) noexcept {
     return optional.value();
   }
-
+  
   // pragma MARK: std::function<void(const GeolocationResponse& /* position */)>
   /**
    * Specialized version of `std::function<void(const GeolocationResponse&)>`.
@@ -555,7 +562,7 @@ namespace margelo::nitro::nitrogeolocation::bridge::swift {
   inline Func_void_GeolocationResponse_Wrapper wrap_Func_void_GeolocationResponse(Func_void_GeolocationResponse value) noexcept {
     return Func_void_GeolocationResponse_Wrapper(std::move(value));
   }
-
+  
   // pragma MARK: std::optional<AndroidGranularity>
   /**
    * Specialized version of `std::optional<AndroidGranularity>`.
@@ -570,7 +577,7 @@ namespace margelo::nitro::nitrogeolocation::bridge::swift {
   inline AndroidGranularity get_std__optional_AndroidGranularity_(const std::optional<AndroidGranularity>& optional) noexcept {
     return optional.value();
   }
-
+  
   // pragma MARK: std::optional<IOSActivityType>
   /**
    * Specialized version of `std::optional<IOSActivityType>`.
@@ -585,7 +592,7 @@ namespace margelo::nitro::nitrogeolocation::bridge::swift {
   inline IOSActivityType get_std__optional_IOSActivityType_(const std::optional<IOSActivityType>& optional) noexcept {
     return optional.value();
   }
-
+  
   // pragma MARK: std::optional<LocationRequestOptions>
   /**
    * Specialized version of `std::optional<LocationRequestOptions>`.
@@ -600,7 +607,73 @@ namespace margelo::nitro::nitrogeolocation::bridge::swift {
   inline LocationRequestOptions get_std__optional_LocationRequestOptions_(const std::optional<LocationRequestOptions>& optional) noexcept {
     return optional.value();
   }
-
+  
+  // pragma MARK: std::vector<GeocodedLocation>
+  /**
+   * Specialized version of `std::vector<GeocodedLocation>`.
+   */
+  using std__vector_GeocodedLocation_ = std::vector<GeocodedLocation>;
+  inline std::vector<GeocodedLocation> create_std__vector_GeocodedLocation_(size_t size) noexcept {
+    std::vector<GeocodedLocation> vector;
+    vector.reserve(size);
+    return vector;
+  }
+  
+  // pragma MARK: std::function<void(const std::vector<GeocodedLocation>& /* locations */)>
+  /**
+   * Specialized version of `std::function<void(const std::vector<GeocodedLocation>&)>`.
+   */
+  using Func_void_std__vector_GeocodedLocation_ = std::function<void(const std::vector<GeocodedLocation>& /* locations */)>;
+  /**
+   * Wrapper class for a `std::function<void(const std::vector<GeocodedLocation>& / * locations * /)>`, this can be used from Swift.
+   */
+  class Func_void_std__vector_GeocodedLocation__Wrapper final {
+  public:
+    explicit Func_void_std__vector_GeocodedLocation__Wrapper(std::function<void(const std::vector<GeocodedLocation>& /* locations */)>&& func): _function(std::make_unique<std::function<void(const std::vector<GeocodedLocation>& /* locations */)>>(std::move(func))) {}
+    inline void call(std::vector<GeocodedLocation> locations) const noexcept {
+      _function->operator()(locations);
+    }
+  private:
+    std::unique_ptr<std::function<void(const std::vector<GeocodedLocation>& /* locations */)>> _function;
+  } SWIFT_NONCOPYABLE;
+  Func_void_std__vector_GeocodedLocation_ create_Func_void_std__vector_GeocodedLocation_(void* NON_NULL swiftClosureWrapper) noexcept;
+  inline Func_void_std__vector_GeocodedLocation__Wrapper wrap_Func_void_std__vector_GeocodedLocation_(Func_void_std__vector_GeocodedLocation_ value) noexcept {
+    return Func_void_std__vector_GeocodedLocation__Wrapper(std::move(value));
+  }
+  
+  // pragma MARK: std::vector<ReverseGeocodedAddress>
+  /**
+   * Specialized version of `std::vector<ReverseGeocodedAddress>`.
+   */
+  using std__vector_ReverseGeocodedAddress_ = std::vector<ReverseGeocodedAddress>;
+  inline std::vector<ReverseGeocodedAddress> create_std__vector_ReverseGeocodedAddress_(size_t size) noexcept {
+    std::vector<ReverseGeocodedAddress> vector;
+    vector.reserve(size);
+    return vector;
+  }
+  
+  // pragma MARK: std::function<void(const std::vector<ReverseGeocodedAddress>& /* addresses */)>
+  /**
+   * Specialized version of `std::function<void(const std::vector<ReverseGeocodedAddress>&)>`.
+   */
+  using Func_void_std__vector_ReverseGeocodedAddress_ = std::function<void(const std::vector<ReverseGeocodedAddress>& /* addresses */)>;
+  /**
+   * Wrapper class for a `std::function<void(const std::vector<ReverseGeocodedAddress>& / * addresses * /)>`, this can be used from Swift.
+   */
+  class Func_void_std__vector_ReverseGeocodedAddress__Wrapper final {
+  public:
+    explicit Func_void_std__vector_ReverseGeocodedAddress__Wrapper(std::function<void(const std::vector<ReverseGeocodedAddress>& /* addresses */)>&& func): _function(std::make_unique<std::function<void(const std::vector<ReverseGeocodedAddress>& /* addresses */)>>(std::move(func))) {}
+    inline void call(std::vector<ReverseGeocodedAddress> addresses) const noexcept {
+      _function->operator()(addresses);
+    }
+  private:
+    std::unique_ptr<std::function<void(const std::vector<ReverseGeocodedAddress>& /* addresses */)>> _function;
+  } SWIFT_NONCOPYABLE;
+  Func_void_std__vector_ReverseGeocodedAddress_ create_Func_void_std__vector_ReverseGeocodedAddress_(void* NON_NULL swiftClosureWrapper) noexcept;
+  inline Func_void_std__vector_ReverseGeocodedAddress__Wrapper wrap_Func_void_std__vector_ReverseGeocodedAddress_(Func_void_std__vector_ReverseGeocodedAddress_ value) noexcept {
+    return Func_void_std__vector_ReverseGeocodedAddress__Wrapper(std::move(value));
+  }
+  
   // pragma MARK: std::function<void(const Heading& /* heading */)>
   /**
    * Specialized version of `std::function<void(const Heading&)>`.
@@ -622,7 +695,7 @@ namespace margelo::nitro::nitrogeolocation::bridge::swift {
   inline Func_void_Heading_Wrapper wrap_Func_void_Heading(Func_void_Heading value) noexcept {
     return Func_void_Heading_Wrapper(std::move(value));
   }
-
+  
   // pragma MARK: std::optional<HeadingOptions>
   /**
    * Specialized version of `std::optional<HeadingOptions>`.
@@ -637,7 +710,7 @@ namespace margelo::nitro::nitrogeolocation::bridge::swift {
   inline HeadingOptions get_std__optional_HeadingOptions_(const std::optional<HeadingOptions>& optional) noexcept {
     return optional.value();
   }
-
+  
   // pragma MARK: std::shared_ptr<HybridNitroGeolocationSpec>
   /**
    * Specialized version of `std::shared_ptr<HybridNitroGeolocationSpec>`.
@@ -645,11 +718,11 @@ namespace margelo::nitro::nitrogeolocation::bridge::swift {
   using std__shared_ptr_HybridNitroGeolocationSpec_ = std::shared_ptr<HybridNitroGeolocationSpec>;
   std::shared_ptr<HybridNitroGeolocationSpec> create_std__shared_ptr_HybridNitroGeolocationSpec_(void* NON_NULL swiftUnsafePointer) noexcept;
   void* NON_NULL get_std__shared_ptr_HybridNitroGeolocationSpec_(std__shared_ptr_HybridNitroGeolocationSpec_ cppType);
-
+  
   // pragma MARK: std::weak_ptr<HybridNitroGeolocationSpec>
   using std__weak_ptr_HybridNitroGeolocationSpec_ = std::weak_ptr<HybridNitroGeolocationSpec>;
   inline std__weak_ptr_HybridNitroGeolocationSpec_ weakify_std__shared_ptr_HybridNitroGeolocationSpec_(const std::shared_ptr<HybridNitroGeolocationSpec>& strong) noexcept { return strong; }
-
+  
   // pragma MARK: Result<void>
   using Result_void_ = Result<void>;
   inline Result_void_ create_Result_void_() noexcept {
@@ -658,7 +731,7 @@ namespace margelo::nitro::nitrogeolocation::bridge::swift {
   inline Result_void_ create_Result_void_(const std::exception_ptr& error) noexcept {
     return Result<void>::withError(error);
   }
-
+  
   // pragma MARK: Result<std::shared_ptr<Promise<PermissionStatus>>>
   using Result_std__shared_ptr_Promise_PermissionStatus___ = Result<std::shared_ptr<Promise<PermissionStatus>>>;
   inline Result_std__shared_ptr_Promise_PermissionStatus___ create_Result_std__shared_ptr_Promise_PermissionStatus___(const std::shared_ptr<Promise<PermissionStatus>>& value) noexcept {
@@ -667,7 +740,7 @@ namespace margelo::nitro::nitrogeolocation::bridge::swift {
   inline Result_std__shared_ptr_Promise_PermissionStatus___ create_Result_std__shared_ptr_Promise_PermissionStatus___(const std::exception_ptr& error) noexcept {
     return Result<std::shared_ptr<Promise<PermissionStatus>>>::withError(error);
   }
-
+  
   // pragma MARK: Result<std::shared_ptr<Promise<bool>>>
   using Result_std__shared_ptr_Promise_bool___ = Result<std::shared_ptr<Promise<bool>>>;
   inline Result_std__shared_ptr_Promise_bool___ create_Result_std__shared_ptr_Promise_bool___(const std::shared_ptr<Promise<bool>>& value) noexcept {
@@ -676,7 +749,7 @@ namespace margelo::nitro::nitrogeolocation::bridge::swift {
   inline Result_std__shared_ptr_Promise_bool___ create_Result_std__shared_ptr_Promise_bool___(const std::exception_ptr& error) noexcept {
     return Result<std::shared_ptr<Promise<bool>>>::withError(error);
   }
-
+  
   // pragma MARK: Result<std::shared_ptr<Promise<LocationProviderStatus>>>
   using Result_std__shared_ptr_Promise_LocationProviderStatus___ = Result<std::shared_ptr<Promise<LocationProviderStatus>>>;
   inline Result_std__shared_ptr_Promise_LocationProviderStatus___ create_Result_std__shared_ptr_Promise_LocationProviderStatus___(const std::shared_ptr<Promise<LocationProviderStatus>>& value) noexcept {
@@ -685,7 +758,7 @@ namespace margelo::nitro::nitrogeolocation::bridge::swift {
   inline Result_std__shared_ptr_Promise_LocationProviderStatus___ create_Result_std__shared_ptr_Promise_LocationProviderStatus___(const std::exception_ptr& error) noexcept {
     return Result<std::shared_ptr<Promise<LocationProviderStatus>>>::withError(error);
   }
-
+  
   // pragma MARK: Result<std::shared_ptr<Promise<LocationAvailability>>>
   using Result_std__shared_ptr_Promise_LocationAvailability___ = Result<std::shared_ptr<Promise<LocationAvailability>>>;
   inline Result_std__shared_ptr_Promise_LocationAvailability___ create_Result_std__shared_ptr_Promise_LocationAvailability___(const std::shared_ptr<Promise<LocationAvailability>>& value) noexcept {
@@ -694,7 +767,7 @@ namespace margelo::nitro::nitrogeolocation::bridge::swift {
   inline Result_std__shared_ptr_Promise_LocationAvailability___ create_Result_std__shared_ptr_Promise_LocationAvailability___(const std::exception_ptr& error) noexcept {
     return Result<std::shared_ptr<Promise<LocationAvailability>>>::withError(error);
   }
-
+  
   // pragma MARK: Result<std::shared_ptr<Promise<AccuracyAuthorization>>>
   using Result_std__shared_ptr_Promise_AccuracyAuthorization___ = Result<std::shared_ptr<Promise<AccuracyAuthorization>>>;
   inline Result_std__shared_ptr_Promise_AccuracyAuthorization___ create_Result_std__shared_ptr_Promise_AccuracyAuthorization___(const std::shared_ptr<Promise<AccuracyAuthorization>>& value) noexcept {
@@ -703,7 +776,7 @@ namespace margelo::nitro::nitrogeolocation::bridge::swift {
   inline Result_std__shared_ptr_Promise_AccuracyAuthorization___ create_Result_std__shared_ptr_Promise_AccuracyAuthorization___(const std::exception_ptr& error) noexcept {
     return Result<std::shared_ptr<Promise<AccuracyAuthorization>>>::withError(error);
   }
-
+  
   // pragma MARK: Result<std::string>
   using Result_std__string_ = Result<std::string>;
   inline Result_std__string_ create_Result_std__string_(const std::string& value) noexcept {
@@ -712,7 +785,7 @@ namespace margelo::nitro::nitrogeolocation::bridge::swift {
   inline Result_std__string_ create_Result_std__string_(const std::exception_ptr& error) noexcept {
     return Result<std::string>::withError(error);
   }
-
+  
   // pragma MARK: std::optional<AuthorizationLevelInternal>
   /**
    * Specialized version of `std::optional<AuthorizationLevelInternal>`.
@@ -727,7 +800,7 @@ namespace margelo::nitro::nitrogeolocation::bridge::swift {
   inline AuthorizationLevelInternal get_std__optional_AuthorizationLevelInternal_(const std::optional<AuthorizationLevelInternal>& optional) noexcept {
     return optional.value();
   }
-
+  
   // pragma MARK: std::optional<LocationProviderInternal>
   /**
    * Specialized version of `std::optional<LocationProviderInternal>`.
@@ -742,7 +815,7 @@ namespace margelo::nitro::nitrogeolocation::bridge::swift {
   inline LocationProviderInternal get_std__optional_LocationProviderInternal_(const std::optional<LocationProviderInternal>& optional) noexcept {
     return optional.value();
   }
-
+  
   // pragma MARK: std::function<void()>
   /**
    * Specialized version of `std::function<void()>`.
@@ -764,7 +837,7 @@ namespace margelo::nitro::nitrogeolocation::bridge::swift {
   inline Func_void_Wrapper wrap_Func_void(Func_void value) noexcept {
     return Func_void_Wrapper(std::move(value));
   }
-
+  
   // pragma MARK: std::optional<std::function<void()>>
   /**
    * Specialized version of `std::optional<std::function<void()>>`.
@@ -779,7 +852,7 @@ namespace margelo::nitro::nitrogeolocation::bridge::swift {
   inline std::function<void()> get_std__optional_std__function_void____(const std::optional<std::function<void()>>& optional) noexcept {
     return optional.value();
   }
-
+  
   // pragma MARK: std::function<void(const CompatGeolocationError& /* error */)>
   /**
    * Specialized version of `std::function<void(const CompatGeolocationError&)>`.
@@ -801,7 +874,7 @@ namespace margelo::nitro::nitrogeolocation::bridge::swift {
   inline Func_void_CompatGeolocationError_Wrapper wrap_Func_void_CompatGeolocationError(Func_void_CompatGeolocationError value) noexcept {
     return Func_void_CompatGeolocationError_Wrapper(std::move(value));
   }
-
+  
   // pragma MARK: std::optional<std::function<void(const CompatGeolocationError& /* error */)>>
   /**
    * Specialized version of `std::optional<std::function<void(const CompatGeolocationError& / * error * /)>>`.
@@ -816,7 +889,7 @@ namespace margelo::nitro::nitrogeolocation::bridge::swift {
   inline std::function<void(const CompatGeolocationError& /* error */)> get_std__optional_std__function_void_const_CompatGeolocationError_____error______(const std::optional<std::function<void(const CompatGeolocationError& /* error */)>>& optional) noexcept {
     return optional.value();
   }
-
+  
   // pragma MARK: std::function<void(const CompatGeolocationResponse& /* position */)>
   /**
    * Specialized version of `std::function<void(const CompatGeolocationResponse&)>`.
@@ -838,7 +911,7 @@ namespace margelo::nitro::nitrogeolocation::bridge::swift {
   inline Func_void_CompatGeolocationResponse_Wrapper wrap_Func_void_CompatGeolocationResponse(Func_void_CompatGeolocationResponse value) noexcept {
     return Func_void_CompatGeolocationResponse_Wrapper(std::move(value));
   }
-
+  
   // pragma MARK: std::optional<CompatGeolocationOptions>
   /**
    * Specialized version of `std::optional<CompatGeolocationOptions>`.
@@ -853,7 +926,7 @@ namespace margelo::nitro::nitrogeolocation::bridge::swift {
   inline CompatGeolocationOptions get_std__optional_CompatGeolocationOptions_(const std::optional<CompatGeolocationOptions>& optional) noexcept {
     return optional.value();
   }
-
+  
   // pragma MARK: std::shared_ptr<HybridNitroGeolocationCompatSpec>
   /**
    * Specialized version of `std::shared_ptr<HybridNitroGeolocationCompatSpec>`.
@@ -861,11 +934,11 @@ namespace margelo::nitro::nitrogeolocation::bridge::swift {
   using std__shared_ptr_HybridNitroGeolocationCompatSpec_ = std::shared_ptr<HybridNitroGeolocationCompatSpec>;
   std::shared_ptr<HybridNitroGeolocationCompatSpec> create_std__shared_ptr_HybridNitroGeolocationCompatSpec_(void* NON_NULL swiftUnsafePointer) noexcept;
   void* NON_NULL get_std__shared_ptr_HybridNitroGeolocationCompatSpec_(std__shared_ptr_HybridNitroGeolocationCompatSpec_ cppType);
-
+  
   // pragma MARK: std::weak_ptr<HybridNitroGeolocationCompatSpec>
   using std__weak_ptr_HybridNitroGeolocationCompatSpec_ = std::weak_ptr<HybridNitroGeolocationCompatSpec>;
   inline std__weak_ptr_HybridNitroGeolocationCompatSpec_ weakify_std__shared_ptr_HybridNitroGeolocationCompatSpec_(const std::shared_ptr<HybridNitroGeolocationCompatSpec>& strong) noexcept { return strong; }
-
+  
   // pragma MARK: Result<double>
   using Result_double_ = Result<double>;
   inline Result_double_ create_Result_double_(double value) noexcept {

@@ -26,109 +26,127 @@ import com.margelo.nitro.core.HybridObject
 )
 abstract class HybridNitroGeolocationSpec: HybridObject() {
   // Properties
-
+  
 
   // Methods
   @DoNotStrip
   @Keep
   abstract fun setConfiguration(config: GeolocationConfiguration): Unit
-
+  
   @DoNotStrip
   @Keep
   abstract fun checkPermission(): Promise<PermissionStatus>
-
+  
   abstract fun requestPermission(success: (status: PermissionStatus) -> Unit, error: ((error: LocationError) -> Unit)?): Unit
-
+  
   @DoNotStrip
   @Keep
   private fun requestPermission_cxx(success: Func_void_PermissionStatus, error: Func_void_LocationError?): Unit {
     val __result = requestPermission(success, error?.let { it })
     return __result
   }
-
+  
   @DoNotStrip
   @Keep
   abstract fun hasServicesEnabled(): Promise<Boolean>
-
+  
   @DoNotStrip
   @Keep
   abstract fun getProviderStatus(): Promise<LocationProviderStatus>
-
+  
   @DoNotStrip
   @Keep
   abstract fun getLocationAvailability(): Promise<LocationAvailability>
-
+  
   abstract fun requestLocationSettings(success: (status: LocationProviderStatus) -> Unit, error: ((error: LocationError) -> Unit)?, options: LocationSettingsOptions?): Unit
-
+  
   @DoNotStrip
   @Keep
   private fun requestLocationSettings_cxx(success: Func_void_LocationProviderStatus, error: Func_void_LocationError?, options: LocationSettingsOptions?): Unit {
     val __result = requestLocationSettings(success, error?.let { it }, options)
     return __result
   }
-
+  
   @DoNotStrip
   @Keep
   abstract fun getAccuracyAuthorization(): Promise<AccuracyAuthorization>
-
+  
   abstract fun requestTemporaryFullAccuracy(purposeKey: String, success: (authorization: AccuracyAuthorization) -> Unit, error: ((error: LocationError) -> Unit)?): Unit
-
+  
   @DoNotStrip
   @Keep
   private fun requestTemporaryFullAccuracy_cxx(purposeKey: String, success: Func_void_AccuracyAuthorization, error: Func_void_LocationError?): Unit {
     val __result = requestTemporaryFullAccuracy(purposeKey, success, error?.let { it })
     return __result
   }
-
+  
   abstract fun getCurrentPosition(success: (position: GeolocationResponse) -> Unit, error: ((error: LocationError) -> Unit)?, options: LocationRequestOptions?): Unit
-
+  
   @DoNotStrip
   @Keep
   private fun getCurrentPosition_cxx(success: Func_void_GeolocationResponse, error: Func_void_LocationError?, options: LocationRequestOptions?): Unit {
     val __result = getCurrentPosition(success, error?.let { it }, options)
     return __result
   }
-
+  
   abstract fun getLastKnownPosition(success: (position: GeolocationResponse) -> Unit, error: ((error: LocationError) -> Unit)?, options: LocationRequestOptions?): Unit
-
+  
   @DoNotStrip
   @Keep
   private fun getLastKnownPosition_cxx(success: Func_void_GeolocationResponse, error: Func_void_LocationError?, options: LocationRequestOptions?): Unit {
     val __result = getLastKnownPosition(success, error?.let { it }, options)
     return __result
   }
-
+  
+  abstract fun geocode(address: String, success: (locations: Array<GeocodedLocation>) -> Unit, error: ((error: LocationError) -> Unit)?): Unit
+  
+  @DoNotStrip
+  @Keep
+  private fun geocode_cxx(address: String, success: Func_void_std__vector_GeocodedLocation_, error: Func_void_LocationError?): Unit {
+    val __result = geocode(address, success, error?.let { it })
+    return __result
+  }
+  
+  abstract fun reverseGeocode(coords: GeocodingCoordinates, success: (addresses: Array<ReverseGeocodedAddress>) -> Unit, error: ((error: LocationError) -> Unit)?): Unit
+  
+  @DoNotStrip
+  @Keep
+  private fun reverseGeocode_cxx(coords: GeocodingCoordinates, success: Func_void_std__vector_ReverseGeocodedAddress_, error: Func_void_LocationError?): Unit {
+    val __result = reverseGeocode(coords, success, error?.let { it })
+    return __result
+  }
+  
   abstract fun getHeading(success: (heading: Heading) -> Unit, error: ((error: LocationError) -> Unit)?): Unit
-
+  
   @DoNotStrip
   @Keep
   private fun getHeading_cxx(success: Func_void_Heading, error: Func_void_LocationError?): Unit {
     val __result = getHeading(success, error?.let { it })
     return __result
   }
-
+  
   abstract fun watchHeading(success: (heading: Heading) -> Unit, error: ((error: LocationError) -> Unit)?, options: HeadingOptions?): String
-
+  
   @DoNotStrip
   @Keep
   private fun watchHeading_cxx(success: Func_void_Heading, error: Func_void_LocationError?, options: HeadingOptions?): String {
     val __result = watchHeading(success, error?.let { it }, options)
     return __result
   }
-
+  
   abstract fun watchPosition(success: (position: GeolocationResponse) -> Unit, error: ((error: LocationError) -> Unit)?, options: LocationRequestOptions?): String
-
+  
   @DoNotStrip
   @Keep
   private fun watchPosition_cxx(success: Func_void_GeolocationResponse, error: Func_void_LocationError?, options: LocationRequestOptions?): String {
     val __result = watchPosition(success, error?.let { it }, options)
     return __result
   }
-
+  
   @DoNotStrip
   @Keep
   abstract fun unwatch(token: String): Unit
-
+  
   @DoNotStrip
   @Keep
   abstract fun stopObserving(): Unit

@@ -7,6 +7,8 @@ import type {
   AccuracyAuthorization as SchemaAccuracyAuthorization,
   AndroidAccuracyPreset as SchemaAndroidAccuracyPreset,
   AndroidGranularity as SchemaAndroidGranularity,
+  GeocodedLocation as SchemaGeocodedLocation,
+  GeocodingCoordinates as SchemaGeocodingCoordinates,
   GeolocationResponse as SchemaGeolocationResponse,
   Heading as SchemaHeading,
   HeadingOptions as SchemaHeadingOptions,
@@ -15,7 +17,8 @@ import type {
   LocationAccuracyOptions as SchemaLocationAccuracyOptions,
   LocationAvailability as SchemaLocationAvailability,
   LocationProviderStatus as SchemaLocationProviderStatus,
-  LocationProviderUsed as SchemaLocationProviderUsed
+  LocationProviderUsed as SchemaLocationProviderUsed,
+  ReverseGeocodedAddress as SchemaReverseGeocodedAddress
 } from "./types";
 
 type CallbackValue<TCallback> = TCallback extends (value: infer Value) => void
@@ -35,6 +38,9 @@ type NativeLocationProvider = NonNullable<
 export type GeolocationResponse = SchemaGeolocationResponse;
 export type LocationProviderStatus = SchemaLocationProviderStatus;
 export type LocationAvailability = SchemaLocationAvailability;
+export type GeocodingCoordinates = SchemaGeocodingCoordinates;
+export type GeocodedLocation = SchemaGeocodedLocation;
+export type ReverseGeocodedAddress = SchemaReverseGeocodedAddress;
 export type AndroidAccuracyPreset = SchemaAndroidAccuracyPreset;
 export type AndroidGranularity = SchemaAndroidGranularity;
 export type IOSAccuracyPreset = SchemaIOSAccuracyPreset;

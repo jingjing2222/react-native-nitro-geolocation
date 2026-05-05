@@ -48,6 +48,12 @@ namespace margelo::nitro::nitrogeolocation { struct LocationRequestOptions; }
 namespace margelo::nitro::nitrogeolocation { enum class AndroidGranularity; }
 // Forward declaration of `IOSActivityType` to properly resolve imports.
 namespace margelo::nitro::nitrogeolocation { enum class IOSActivityType; }
+// Forward declaration of `GeocodedLocation` to properly resolve imports.
+namespace margelo::nitro::nitrogeolocation { struct GeocodedLocation; }
+// Forward declaration of `GeocodingCoordinates` to properly resolve imports.
+namespace margelo::nitro::nitrogeolocation { struct GeocodingCoordinates; }
+// Forward declaration of `ReverseGeocodedAddress` to properly resolve imports.
+namespace margelo::nitro::nitrogeolocation { struct ReverseGeocodedAddress; }
 // Forward declaration of `Heading` to properly resolve imports.
 namespace margelo::nitro::nitrogeolocation { struct Heading; }
 // Forward declaration of `HeadingOptions` to properly resolve imports.
@@ -77,6 +83,10 @@ namespace margelo::nitro::nitrogeolocation { struct HeadingOptions; }
 #include "LocationRequestOptions.hpp"
 #include "AndroidGranularity.hpp"
 #include "IOSActivityType.hpp"
+#include "GeocodedLocation.hpp"
+#include <vector>
+#include "GeocodingCoordinates.hpp"
+#include "ReverseGeocodedAddress.hpp"
 #include "Heading.hpp"
 #include "HeadingOptions.hpp"
 
@@ -126,7 +136,7 @@ namespace margelo::nitro::nitrogeolocation {
 
   public:
     // Properties
-
+    
 
   public:
     // Methods
@@ -202,6 +212,18 @@ namespace margelo::nitro::nitrogeolocation {
     }
     inline void getLastKnownPosition(const std::function<void(const GeolocationResponse& /* position */)>& success, const std::optional<std::function<void(const LocationError& /* error */)>>& error, const std::optional<LocationRequestOptions>& options) override {
       auto __result = _swiftPart.getLastKnownPosition(success, error, options);
+      if (__result.hasError()) [[unlikely]] {
+        std::rethrow_exception(__result.error());
+      }
+    }
+    inline void geocode(const std::string& address, const std::function<void(const std::vector<GeocodedLocation>& /* locations */)>& success, const std::optional<std::function<void(const LocationError& /* error */)>>& error) override {
+      auto __result = _swiftPart.geocode(address, success, error);
+      if (__result.hasError()) [[unlikely]] {
+        std::rethrow_exception(__result.error());
+      }
+    }
+    inline void reverseGeocode(const GeocodingCoordinates& coords, const std::function<void(const std::vector<ReverseGeocodedAddress>& /* addresses */)>& success, const std::optional<std::function<void(const LocationError& /* error */)>>& error) override {
+      auto __result = _swiftPart.reverseGeocode(std::forward<decltype(coords)>(coords), success, error);
       if (__result.hasError()) [[unlikely]] {
         std::rethrow_exception(__result.error());
       }
