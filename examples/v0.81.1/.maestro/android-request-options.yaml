@@ -65,6 +65,32 @@ appId: nitrogeolocation.example
     text: ".*POSITION_UNAVAILABLE.*coarse cache-only read did not reuse.*"
 
 - scrollUntilVisible:
+    element: "Run Mixed Watch Granularity"
+    direction: DOWN
+    centerElement: true
+
+- setLocation:
+    latitude: 37.5665
+    longitude: 126.978
+
+- tapOn:
+    text: "Run Mixed Watch Granularity"
+
+- setLocation:
+    latitude: 37.5665
+    longitude: 126.978
+
+- scrollUntilVisible:
+    element: "Mixed watch: passed"
+    direction: DOWN
+    timeout: 30000
+
+- assertVisible:
+    id: "android-request-options-mixed-watch-result"
+- assertVisible:
+    text: ".*Coarse watcher stayed coarse.*fine watcher received.*"
+
+- scrollUntilVisible:
     element: "Run Max Updates Watch"
     direction: DOWN
     centerElement: true

@@ -1293,7 +1293,7 @@ class NitroGeolocation(
                 smallestDistanceFilter,
                 subscription.options.distanceFilter
             )
-            granularity = mostDemandingGranularity(granularity, subscription.options.granularity)
+            granularity = mergeWatchGranularity(granularity, subscription.options.granularity)
             waitForAccurateLocation = waitForAccurateLocation ||
                 subscription.options.waitForAccurateLocation
             maxUpdateAge = mergeNullableMinimum(maxUpdateAge, subscription.options.maxUpdateAge)
@@ -1359,18 +1359,18 @@ class NitroGeolocation(
         }
     }
 
-    private fun mostDemandingGranularity(
+    private fun mergeWatchGranularity(
         current: AndroidGranularity,
         next: AndroidGranularity
     ): AndroidGranularity {
-        return if (granularityRank(next) > granularityRank(current)) next else current
-    }
-
-    private fun granularityRank(granularity: AndroidGranularity): Int {
-        return when (granularity) {
-            AndroidGranularity.COARSE -> 0
-            AndroidGranularity.PERMISSION -> 1
-            AndroidGranularity.FINE -> 2
+        return when {
+            current == AndroidGranularity.COARSE || next == AndroidGranularity.COARSE -> {
+                AndroidGranularity.COARSE
+            }
+            current == AndroidGranularity.FINE || next == AndroidGranularity.FINE -> {
+                AndroidGranularity.FINE
+            }
+            else -> AndroidGranularity.PERMISSION
         }
     }
 

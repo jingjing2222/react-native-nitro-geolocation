@@ -26,11 +26,14 @@ import {
 import type { ScenarioResult } from "./scenarioUtils";
 
 const PREFIX = "android-request-options";
+const FIXTURE_LATITUDE = 37.5665;
+const FIXTURE_LONGITUDE = 126.978;
 const WATCH_TIMEOUT_MS = 20000;
 
 const initialResults = {
   fused: createIdleResult(),
   coarseCache: createIdleResult(),
+  mixedWatch: createIdleResult(),
   maxUpdates: createIdleResult(),
   invalid: createIdleResult(),
   fineDenied: createIdleResult()
@@ -42,6 +45,19 @@ const assertFinitePosition = (position: GeolocationResponse) => {
     !Number.isFinite(position.coords.longitude)
   ) {
     throw new Error("Watch position contained non-finite coordinates.");
+  }
+};
+
+const assertNotExactFixtureCoordinates = (position: GeolocationResponse) => {
+  const latitudeDelta = Math.abs(position.coords.latitude - FIXTURE_LATITUDE);
+  const longitudeDelta = Math.abs(
+    position.coords.longitude - FIXTURE_LONGITUDE
+  );
+
+  if (latitudeDelta < 0.00001 && longitudeDelta < 0.00001) {
+    throw new Error(
+      "Coarse watcher received the exact injected fine coordinates."
+    );
   }
 };
 
@@ -272,6 +288,134 @@ export default function AndroidRequestOptionsScreen() {
     }
   };
 
+  const runMixedWatchScenario = async () => {
+    setResult("mixedWatch", {
+      status: "running",
+      message: "Starting simultaneous coarse and fine Fused watches"
+    });
+
+    try {
+      await ensurePermission();
+      configurePlayServices();
+
+      let coarseReading: GeolocationResponse | undefined;
+      let fineReading: GeolocationResponse | undefined;
+
+      await runWithNativeGeolocation(
+        () =>
+          new Promise<void>((resolve, reject) => {
+            let coarseToken = "";
+            let fineToken = "";
+            let didFinish = false;
+
+            const cleanup = () => {
+              if (coarseToken) {
+                unwatch(coarseToken);
+              }
+              if (fineToken) {
+                unwatch(fineToken);
+              }
+            };
+
+            const timeout = setTimeout(() => {
+              if (didFinish) return;
+              didFinish = true;
+              cleanup();
+              reject(
+                new Error(
+                  `Expected mixed watch readings; coarse=${Boolean(coarseReading)} fine=${Boolean(fineReading)}.`
+                )
+              );
+            }, WATCH_TIMEOUT_MS);
+
+            const finishIfReady = () => {
+              if (!coarseReading || !fineReading || didFinish) return;
+              didFinish = true;
+              clearTimeout(timeout);
+              cleanup();
+              resolve();
+            };
+
+            const fail = (error: unknown) => {
+              if (didFinish) return;
+              didFinish = true;
+              clearTimeout(timeout);
+              cleanup();
+              reject(error);
+            };
+
+            coarseToken = watchPosition(
+              (position) => {
+                try {
+                  assertFinitePosition(position);
+                  coarseReading = position;
+                  finishIfReady();
+                } catch (error) {
+                  fail(error);
+                }
+              },
+              fail,
+              {
+                accuracy: {
+                  android: "high"
+                },
+                granularity: "coarse",
+                interval: 500,
+                fastestInterval: 100,
+                maxUpdateDelay: 0
+              }
+            );
+
+            fineToken = watchPosition(
+              (position) => {
+                try {
+                  assertFinitePosition(position);
+                  fineReading = position;
+                  finishIfReady();
+                } catch (error) {
+                  fail(error);
+                }
+              },
+              fail,
+              {
+                accuracy: {
+                  android: "high"
+                },
+                granularity: "fine",
+                interval: 500,
+                fastestInterval: 100,
+                maxUpdateDelay: 0
+              }
+            );
+          })
+      );
+
+      if (!coarseReading || !fineReading) {
+        throw new Error("Mixed watch did not deliver both subscriptions.");
+      }
+
+      const coarseCoordinates = assertFixtureCoordinates(coarseReading);
+      const fineCoordinates = assertFixtureCoordinates(fineReading);
+      assertNotExactFixtureCoordinates(coarseReading);
+
+      if (coarseReading.provider === "gps") {
+        throw new Error("Coarse watcher unexpectedly received GPS.");
+      }
+
+      setResult("mixedWatch", {
+        status: "passed",
+        message: `Coarse watcher stayed coarse at ${coarseCoordinates}; fine watcher received ${fineCoordinates}.`
+      });
+    } catch (error) {
+      setResult("mixedWatch", {
+        status: "failed",
+        message: getDisplayErrorMessage(error)
+      });
+    } finally {
+      await refreshPermission();
+    }
+  };
+
   const runInvalidMaxUpdatesScenario = async () => {
     setResult("invalid", {
       status: "running",
@@ -438,7 +582,29 @@ export default function AndroidRequestOptionsScreen() {
       <View style={sharedStyles.divider} />
 
       <View style={sharedStyles.section}>
-        <Text style={sharedStyles.sectionTitle}>4. Max Updates Watch</Text>
+        <Text style={sharedStyles.sectionTitle}>
+          4. Mixed Watch Granularity
+        </Text>
+        <View style={sharedStyles.buttonContainer}>
+          <Button
+            title="Run Mixed Watch Granularity"
+            onPress={runMixedWatchScenario}
+            color="#455A64"
+            testID={`${PREFIX}-run-mixed-watch-button`}
+          />
+        </View>
+        <ResultBlock
+          prefix={PREFIX}
+          id="mixed-watch"
+          label="Mixed watch"
+          result={results.mixedWatch}
+        />
+      </View>
+
+      <View style={sharedStyles.divider} />
+
+      <View style={sharedStyles.section}>
+        <Text style={sharedStyles.sectionTitle}>5. Max Updates Watch</Text>
         <View style={sharedStyles.buttonContainer}>
           <Button
             title="Run Max Updates Watch"
@@ -458,7 +624,7 @@ export default function AndroidRequestOptionsScreen() {
       <View style={sharedStyles.divider} />
 
       <View style={sharedStyles.section}>
-        <Text style={sharedStyles.sectionTitle}>5. Invalid Max Updates</Text>
+        <Text style={sharedStyles.sectionTitle}>6. Invalid Max Updates</Text>
         <View style={sharedStyles.buttonContainer}>
           <Button
             title="Run Invalid Max Updates"
@@ -478,7 +644,7 @@ export default function AndroidRequestOptionsScreen() {
       <View style={sharedStyles.divider} />
 
       <View style={sharedStyles.section}>
-        <Text style={sharedStyles.sectionTitle}>6. Fine Permission Gate</Text>
+        <Text style={sharedStyles.sectionTitle}>7. Fine Permission Gate</Text>
         <View style={sharedStyles.buttonContainer}>
           <Button
             title="Run Fine Permission Gate"
