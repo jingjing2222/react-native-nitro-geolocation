@@ -68,8 +68,17 @@ export type LocationProvider =
 
 export type GeolocationConfiguration = Omit<
   NativeGeolocationConfiguration,
-  "locationProvider"
+  "autoRequestPermission" | "locationProvider"
 > & {
+  /**
+   * @deprecated This option is accepted for backward compatibility only.
+   * `setConfiguration()` does not request permission. Call
+   * `requestPermission()` explicitly when your app is ready to show the native
+   * permission prompt.
+   * @default false
+   */
+  autoRequestPermission?: boolean;
+
   locationProvider?: LocationProvider;
 };
 
