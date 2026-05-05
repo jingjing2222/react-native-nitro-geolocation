@@ -8,6 +8,7 @@ import {
   requestPermission,
   setConfiguration,
   unwatch,
+  watchHeading,
   watchPosition
 } from "react-native-nitro-geolocation";
 import type {
@@ -32,9 +33,11 @@ const WATCH_TIMEOUT_MS = 20000;
 
 const initialResults = {
   fused: createIdleResult(),
+  oneShotDistance: createIdleResult(),
   coarseCache: createIdleResult(),
   mixedWatch: createIdleResult(),
   maxUpdates: createIdleResult(),
+  headingUnwatch: createIdleResult(),
   invalid: createIdleResult(),
   fineDenied: createIdleResult()
 };
@@ -236,6 +239,46 @@ export default function AndroidRequestOptionsScreen() {
     }
   };
 
+  const runOneShotDistanceFilterScenario = async () => {
+    setResult("oneShotDistance", {
+      status: "running",
+      message: "Requesting one Fused fix with a watch-only distanceFilter"
+    });
+
+    try {
+      await ensurePermission();
+      configurePlayServices();
+
+      const startedAt = Date.now();
+      const position = await runWithNativeGeolocation(() =>
+        getCurrentPosition({
+          accuracy: {
+            android: "high"
+          },
+          distanceFilter: 1_000_000,
+          maximumAge: 0,
+          maxUpdateAge: 0,
+          maxUpdateDelay: 0,
+          timeout: 7000
+        })
+      );
+      const coordinates = assertFixtureCoordinates(position);
+      const elapsedMs = Date.now() - startedAt;
+
+      setResult("oneShotDistance", {
+        status: "passed",
+        message: `One-shot request ignored watch-only distanceFilter=1000000m and returned ${coordinates} in ${elapsedMs}ms.`
+      });
+    } catch (error) {
+      setResult("oneShotDistance", {
+        status: "failed",
+        message: getDisplayErrorMessage(error)
+      });
+    } finally {
+      await refreshPermission();
+    }
+  };
+
   const runCoarseCacheScenario = async () => {
     setResult("coarseCache", {
       status: "running",
@@ -416,6 +459,122 @@ export default function AndroidRequestOptionsScreen() {
     }
   };
 
+  const runHeadingUnwatchScenario = async () => {
+    setResult("headingUnwatch", {
+      status: "running",
+      message:
+        "Unwatching a heading token while a maxUpdates location watch is idle"
+    });
+
+    try {
+      await ensurePermission();
+      configurePlayServices();
+      const readings: GeolocationResponse[] = [];
+
+      await runWithNativeGeolocation(
+        () =>
+          new Promise<void>((resolve, reject) => {
+            let locationToken = "";
+            let headingToken = "";
+            let didFinish = false;
+
+            const cleanup = () => {
+              if (locationToken) {
+                unwatch(locationToken);
+              }
+              if (headingToken) {
+                unwatch(headingToken);
+              }
+            };
+
+            const finish = () => {
+              if (didFinish) return;
+              didFinish = true;
+              cleanup();
+              resolve();
+            };
+
+            const fail = (error: unknown) => {
+              if (didFinish) return;
+              didFinish = true;
+              cleanup();
+              reject(error);
+            };
+
+            const timeout = setTimeout(() => {
+              fail(
+                new Error(
+                  `Expected a maxUpdates=1 location reading, received ${readings.length}.`
+                )
+              );
+            }, WATCH_TIMEOUT_MS);
+
+            locationToken = watchPosition(
+              (position) => {
+                try {
+                  assertFinitePosition(position);
+                  readings.push(position);
+
+                  if (readings.length === 1) {
+                    const nextHeadingToken = watchHeading(() => {}, fail, {
+                      headingFilter: 0
+                    });
+                    if (didFinish) return;
+                    headingToken = nextHeadingToken;
+                    unwatch(headingToken);
+                    headingToken = "";
+
+                    setTimeout(() => {
+                      clearTimeout(timeout);
+                      finish();
+                    }, 2500);
+                    return;
+                  }
+
+                  clearTimeout(timeout);
+                  fail(
+                    new Error(
+                      "Heading unwatch restarted a maxUpdates=1 location watch."
+                    )
+                  );
+                } catch (error) {
+                  clearTimeout(timeout);
+                  fail(error);
+                }
+              },
+              (error) => {
+                clearTimeout(timeout);
+                fail(error);
+              },
+              {
+                accuracy: {
+                  android: "high"
+                },
+                granularity: "permission",
+                interval: 500,
+                fastestInterval: 100,
+                maxUpdateDelay: 0,
+                maxUpdates: 1
+              }
+            );
+          })
+      );
+
+      const coordinates = assertFixtureCoordinates(readings[0]);
+      setResult("headingUnwatch", {
+        status: "passed",
+        message: `Heading unwatch left maxUpdates=1 location watch stopped after ${readings.length} reading at ${coordinates}.`
+      });
+    } catch (error) {
+      setResult("headingUnwatch", {
+        status: "failed",
+        message: getDisplayErrorMessage(error)
+      });
+    } finally {
+      await refreshPermission();
+    }
+  };
+
   const runInvalidMaxUpdatesScenario = async () => {
     setResult("invalid", {
       status: "running",
@@ -562,7 +721,29 @@ export default function AndroidRequestOptionsScreen() {
       <View style={sharedStyles.divider} />
 
       <View style={sharedStyles.section}>
-        <Text style={sharedStyles.sectionTitle}>3. Coarse Cache Isolation</Text>
+        <Text style={sharedStyles.sectionTitle}>
+          3. One-Shot Distance Filter
+        </Text>
+        <View style={sharedStyles.buttonContainer}>
+          <Button
+            title="Run One-Shot Distance Filter"
+            onPress={runOneShotDistanceFilterScenario}
+            color="#00695C"
+            testID={`${PREFIX}-run-one-shot-distance-button`}
+          />
+        </View>
+        <ResultBlock
+          prefix={PREFIX}
+          id="one-shot-distance"
+          label="One-shot distance"
+          result={results.oneShotDistance}
+        />
+      </View>
+
+      <View style={sharedStyles.divider} />
+
+      <View style={sharedStyles.section}>
+        <Text style={sharedStyles.sectionTitle}>4. Coarse Cache Isolation</Text>
         <View style={sharedStyles.buttonContainer}>
           <Button
             title="Run Coarse Cache Isolation"
@@ -583,7 +764,7 @@ export default function AndroidRequestOptionsScreen() {
 
       <View style={sharedStyles.section}>
         <Text style={sharedStyles.sectionTitle}>
-          4. Mixed Watch Granularity
+          5. Mixed Watch Granularity
         </Text>
         <View style={sharedStyles.buttonContainer}>
           <Button
@@ -604,7 +785,7 @@ export default function AndroidRequestOptionsScreen() {
       <View style={sharedStyles.divider} />
 
       <View style={sharedStyles.section}>
-        <Text style={sharedStyles.sectionTitle}>5. Max Updates Watch</Text>
+        <Text style={sharedStyles.sectionTitle}>6. Max Updates Watch</Text>
         <View style={sharedStyles.buttonContainer}>
           <Button
             title="Run Max Updates Watch"
@@ -624,7 +805,29 @@ export default function AndroidRequestOptionsScreen() {
       <View style={sharedStyles.divider} />
 
       <View style={sharedStyles.section}>
-        <Text style={sharedStyles.sectionTitle}>6. Invalid Max Updates</Text>
+        <Text style={sharedStyles.sectionTitle}>
+          7. Heading Unwatch Isolation
+        </Text>
+        <View style={sharedStyles.buttonContainer}>
+          <Button
+            title="Run Heading Unwatch Isolation"
+            onPress={runHeadingUnwatchScenario}
+            color="#6D4C41"
+            testID={`${PREFIX}-run-heading-unwatch-button`}
+          />
+        </View>
+        <ResultBlock
+          prefix={PREFIX}
+          id="heading-unwatch"
+          label="Heading unwatch"
+          result={results.headingUnwatch}
+        />
+      </View>
+
+      <View style={sharedStyles.divider} />
+
+      <View style={sharedStyles.section}>
+        <Text style={sharedStyles.sectionTitle}>8. Invalid Max Updates</Text>
         <View style={sharedStyles.buttonContainer}>
           <Button
             title="Run Invalid Max Updates"
@@ -644,7 +847,7 @@ export default function AndroidRequestOptionsScreen() {
       <View style={sharedStyles.divider} />
 
       <View style={sharedStyles.section}>
-        <Text style={sharedStyles.sectionTitle}>7. Fine Permission Gate</Text>
+        <Text style={sharedStyles.sectionTitle}>9. Fine Permission Gate</Text>
         <View style={sharedStyles.buttonContainer}>
           <Button
             title="Run Fine Permission Gate"

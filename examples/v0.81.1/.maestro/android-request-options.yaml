@@ -1,7 +1,7 @@
 appId: nitrogeolocation.example
 ---
-# Android request options: exercise Fused request controls, watch auto-stop via
-# maxUpdates, invalid numeric options, and fine-granularity permission gating.
+# Android request options: exercise Fused request controls, cache isolation,
+# watch auto-stop, heading-token cleanup, invalid options, and permission gates.
 
 - launchApp:
     clearState: true
@@ -44,15 +44,38 @@ appId: nitrogeolocation.example
     text: ".*provider=.*"
 
 - scrollUntilVisible:
-    element: "3. Coarse Cache Isolation"
+    element: "Run One-Shot Distance Filter"
     direction: DOWN
+    centerElement: true
 
 - setLocation:
     latitude: 37.5665
     longitude: 126.978
 
 - tapOn:
-    id: "android-request-options-run-coarse-cache-button"
+    text: "Run One-Shot Distance Filter"
+
+- scrollUntilVisible:
+    element: "One-shot distance: passed"
+    direction: DOWN
+    timeout: 15000
+
+- assertVisible:
+    id: "android-request-options-one-shot-distance-result"
+- assertVisible:
+    text: ".*ignored watch-only distanceFilter=1000000m.*"
+
+- scrollUntilVisible:
+    element: "Run Coarse Cache Isolation"
+    direction: DOWN
+    centerElement: true
+
+- setLocation:
+    latitude: 37.5665
+    longitude: 126.978
+
+- tapOn:
+    text: "Run Coarse Cache Isolation"
 
 - scrollUntilVisible:
     element: "Coarse cache: passed"
@@ -118,6 +141,36 @@ appId: nitrogeolocation.example
     id: "android-request-options-max-updates-result"
 - assertVisible:
     text: ".*Watch stopped after 1 update with maxUpdates=1.*"
+
+- scrollUntilVisible:
+    element: "Run Heading Unwatch Isolation"
+    direction: DOWN
+    centerElement: true
+
+- setLocation:
+    latitude: 37.5665
+    longitude: 126.978
+
+- tapOn:
+    text: "Run Heading Unwatch Isolation"
+
+- setLocation:
+    latitude: 37.5667
+    longitude: 126.9782
+- waitForAnimationToEnd
+- setLocation:
+    latitude: 37.5669
+    longitude: 126.9784
+
+- scrollUntilVisible:
+    element: "Heading unwatch: passed"
+    direction: DOWN
+    timeout: 30000
+
+- assertVisible:
+    id: "android-request-options-heading-unwatch-result"
+- assertVisible:
+    text: ".*Heading unwatch left maxUpdates=1 location watch stopped.*"
 
 - scrollUntilVisible:
     element: "Run Invalid Max Updates"

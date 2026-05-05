@@ -520,8 +520,12 @@ class NitroGeolocation(
     }
 
     override fun unwatch(token: String) {
-        watchSubscriptions.remove(token)
+        val didRemoveLocationSubscription = watchSubscriptions.remove(token) != null
         headingManager.unwatch(token)
+
+        if (!didRemoveLocationSubscription) {
+            return
+        }
 
         // Stop watching if no more subscribers
         if (watchSubscriptions.isEmpty()) {
@@ -912,7 +916,11 @@ class NitroGeolocation(
 
         try {
             fusedLocationClient.requestLocationUpdates(
-                buildFusedLocationRequest(options, maxUpdatesOverride = 1),
+                buildFusedLocationRequest(
+                    options,
+                    maxUpdatesOverride = 1,
+                    includeDistanceFilter = false
+                ),
                 callback,
                 Looper.getMainLooper()
             )
@@ -1482,15 +1490,19 @@ class NitroGeolocation(
 
     private fun buildFusedLocationRequest(
         options: ParsedOptions,
-        maxUpdatesOverride: Int? = null
+        maxUpdatesOverride: Int? = null,
+        includeDistanceFilter: Boolean = true
     ): GmsLocationRequest {
         val builder = GmsLocationRequest
             .Builder(options.androidAccuracy.gmsPriority(), coercePositiveMillis(options.interval))
             .setMinUpdateIntervalMillis(coercePositiveMillis(options.fastestInterval))
-            .setMinUpdateDistanceMeters(options.distanceFilter.toFloat())
             .setGranularity(options.granularity.gmsGranularity())
             .setWaitForAccurateLocation(options.waitForAccurateLocation)
             .setMaxUpdateDelayMillis(coerceNonNegativeMillis(options.maxUpdateDelay))
+
+        if (includeDistanceFilter) {
+            builder.setMinUpdateDistanceMeters(options.distanceFilter.toFloat())
+        }
 
         options.maxUpdateAge?.let { value ->
             builder.setMaxUpdateAgeMillis(coerceNonNegativeMillis(value))
