@@ -79,6 +79,12 @@ export type GeolocationConfiguration = Omit<
    */
   autoRequestPermission?: boolean;
 
+  /**
+   * Android location provider.
+   *
+   * `auto` currently uses Android's platform `LocationManager` by default.
+   * Set `playServices` explicitly to use Google Play Services fused location.
+   */
   locationProvider?: LocationProvider;
 };
 
@@ -92,5 +98,11 @@ export type CompatGeolocationConfiguration = Omit<
   CompatGeolocationConfigurationInternal,
   "locationProvider"
 > & {
+  /**
+   * Android location provider.
+   *
+   * `auto` currently uses Android's platform `LocationManager` by default.
+   * Set `playServices` explicitly to use Google Play Services fused location.
+   */
   locationProvider?: LocationProvider;
 };
