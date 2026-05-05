@@ -807,6 +807,29 @@ const status = await requestPermission();
 
 ## Migration from Compat
 
+### Modern API Migration Assistance
+
+This repository publishes an Agent Skills-compatible migration playbook for
+coding agents:
+[`react-native-nitro-geolocation-modern-migration`](https://github.com/jingjing2222/react-native-nitro-geolocation/tree/main/skills/react-native-nitro-geolocation-modern-migration).
+
+It is not a fully automatic migration. The skill first runs a
+package-manager-aware compat bootstrap script that installs the Nitro packages,
+rewrites `@react-native-community/geolocation` import sources to `/compat`, and
+removes the legacy package. After that safe mechanical step, it guides an agent
+to inspect `navigator.geolocation` and `/compat` usage; convert callback APIs
+to Promises; replace `requestAuthorization` with `requestPermission`; replace
+`setRNConfiguration` with `setConfiguration`; and choose `useWatchPosition` or
+the low-level `watchPosition`/`unwatch` APIs based on explicit criteria for
+permission timing, React lifecycle ownership, cache-vs-fresh reads, accuracy,
+and Android provider/settings handling.
+
+Install it with the Vercel Labs `skills` CLI:
+
+```bash
+npx skills add jingjing2222/react-native-nitro-geolocation --skill react-native-nitro-geolocation-modern-migration
+```
+
 **Before (Compat API)**:
 
 ```tsx
