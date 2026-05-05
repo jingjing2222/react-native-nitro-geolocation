@@ -79,7 +79,7 @@ const cached = await getLastKnownPosition({
 });
 
 // v1.2+: convert between addresses and coordinates with native geocoders
-const locations = await geocode("Seoul City Hall");
+const locations = await geocode("City Hall, Seoul, South Korea");
 const addresses = await reverseGeocode({
   latitude: 37.5665,
   longitude: 126.978,

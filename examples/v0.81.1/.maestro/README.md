@@ -58,7 +58,24 @@ yarn test:e2e:android
 yarn test:e2e:ios
 ```
 
-The Android and iOS package scripts install the Release build first (`yarn android:release` or `yarn ios:release`), then run `.maestro/all-tests.yaml` with the matching Maestro platform flag. Android-only flows are selected inside the master flow with `when.platform`.
+Build and install the Release app before running Maestro when validating a
+release candidate:
+
+```bash
+# iOS release candidate
+yarn ios:release
+yarn test:e2e:ios
+
+# Android release candidate
+yarn android:release
+yarn test:e2e:android
+```
+
+`test:e2e:ios` runs `.maestro/all-tests.yaml` with the iOS platform flag.
+`test:e2e:android` runs the same master flow with the Android platform flag,
+then runs `provider-settings-not-ready.yaml` after disabling Android location
+services and restores the device state afterward. Platform-only flows are
+selected inside the master flow with `when.platform`.
 
 ## Test Files
 
@@ -80,6 +97,12 @@ The Android and iOS package scripts install the Release build first (`yarn andro
 ### `location-simulation.yaml`
 - Tests behavior at different locations
 - Simulates locations: San Francisco, New York, Seoul
+
+### `geocoding.yaml`
+- Tests `geocode(address)` and `reverseGeocode(coords)` through native platform geocoders
+- Uses a specific Seoul address query and validates the returned coordinate candidate is near the Seoul fixture
+- Reverse geocodes deterministic Seoul fixture coordinates and verifies a readable address is returned
+- Verifies invalid inputs reject through the Modern API structured `INTERNAL_ERROR` contract
 
 ### `accuracy-presets.yaml`
 - Tests `accuracy.android` and `accuracy.ios` through real Modern API native requests
@@ -224,7 +247,7 @@ London: 51.5074, -0.1278
 1. Run tests locally:
    ```bash
    cd examples/v0.81.1
-   yarn ios  # or yarn android
+   yarn ios:release  # or yarn android:release
    yarn test:e2e:ios  # or yarn test:e2e:android
    ```
 
@@ -242,37 +265,30 @@ London: 51.5074, -0.1278
 ✅ Run current-position.yaml
 ✅ Run watch-position.yaml
 ✅ Run location-simulation.yaml
+✅ Run accuracy-presets.yaml
+✅ Run last-known-position.yaml
+✅ Run geocoding.yaml
+✅ Run location-availability.yaml
+✅ Run heading.yaml
 ✅ Run issue-67-android-coarse-location.yaml
+✅ Run android-request-options.yaml
+✅ Run provider-settings.yaml
 ✅ Run mocked-metadata-android-true.yaml
-✅ Run mocked-metadata-ios-true.yaml
+✅ Run api-errors.yaml
+✅ Run compat-api.yaml
+✅ Run provider-settings-not-ready.yaml
 
 **Platform tested:**
 - [x] Android 16
 ```
 
-For iOS results, omit Android-only flows from the list.
+For iOS results, include the iOS-only flows and omit Android-only flows.
 
-### Automated CI (Main Branch Only)
+### Automated CI
 
-A GitHub Actions workflow runs E2E tests automatically on the `main` branch.
-
-- **Manual trigger**: Actions → E2E Tests → Run workflow
-- **Automatic**: Runs on push to `main` branch
-- **Not for PRs**: To save time and costs
-
-### Quick CI Setup
-
-The workflow file is at `.github/workflows/e2e-tests.yml`.
-
-To enable CI tests on PRs (not recommended due to cost):
-
-```yaml
-on:
-  push:
-    branches: [main]
-  pull_request:  # Add this
-    branches: [main]
-```
+There is no checked-in GitHub Actions workflow for Maestro E2E tests at the
+moment. Run E2E locally on the target simulator/device and paste the release
+build results into the PR.
 
 ## Writing Tests - Best Practices
 

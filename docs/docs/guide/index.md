@@ -35,7 +35,7 @@ const position = await getCurrentPosition({
 });
 
 // Convert between addresses and coordinates
-const locations = await geocode('Seoul City Hall');
+const locations = await geocode('City Hall, Seoul, South Korea');
 const addresses = await reverseGeocode({
   latitude: 37.5665,
   longitude: 126.978
