@@ -1,5 +1,14 @@
 # @react-native-nitro-geolocation/rozenite-plugin
 
+## 1.1.0
+
+### Minor Changes
+
+- d54aa44: Add optional `mocked` and `provider` metadata to root location responses with Android and iOS native mappings.
+  Add `GeolocationConfiguration` as the preferred root API configuration type while preserving `ModernGeolocationConfiguration` as a deprecated compatibility alias.
+  Keep the Compat API response shape unchanged for the drop-in replacement contract.
+  Normalize missing native coordinate values to explicit `null` unions and include the same metadata in Rozenite DevTools mock responses.
+
 ## 1.0.3
 
 ### Patch Changes
