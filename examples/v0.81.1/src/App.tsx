@@ -6,8 +6,8 @@ import {
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { NavigationContainer } from "@react-navigation/native";
 import React from "react";
-import AndroidRequestOptionsScreen from "./screens/AndroidRequestOptionsScreen";
 import AccuracyPresetsScreen from "./screens/AccuracyPresetsScreen";
+import AndroidRequestOptionsScreen from "./screens/AndroidRequestOptionsScreen";
 import ApiErrorsScreen from "./screens/ApiErrorsScreen";
 import CompatScreen from "./screens/CompatScreen";
 import CurrentPositionScreen from "./screens/CurrentPositionScreen";

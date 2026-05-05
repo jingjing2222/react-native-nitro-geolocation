@@ -9,6 +9,10 @@ import {
   unwatch,
   watchPosition
 } from "react-native-nitro-geolocation";
+import type {
+  GeolocationResponse,
+  LocationRequestOptions
+} from "react-native-nitro-geolocation";
 import {
   ResultBlock,
   assertFixtureCoordinates,
@@ -18,10 +22,6 @@ import {
   runWithNativeGeolocation,
   sharedStyles
 } from "./scenarioUtils";
-import type {
-  GeolocationResponse,
-  LocationRequestOptions
-} from "react-native-nitro-geolocation";
 import type { ScenarioResult } from "./scenarioUtils";
 
 const PREFIX = "android-request-options";

@@ -8,6 +8,7 @@ import {
   unwatch,
   watchHeading
 } from "react-native-nitro-geolocation";
+import type { Heading } from "react-native-nitro-geolocation";
 import {
   ResultBlock,
   assertLocationErrorCode,
@@ -15,7 +16,6 @@ import {
   getDisplayErrorMessage,
   sharedStyles
 } from "./scenarioUtils";
-import type { Heading } from "react-native-nitro-geolocation";
 import type { ScenarioResult } from "./scenarioUtils";
 
 const PREFIX = "heading";
@@ -46,10 +46,7 @@ const assertHeading = (heading: Heading) => {
     throw new Error(`Invalid true heading: ${heading.trueHeading}`);
   }
 
-  if (
-    heading.accuracy !== undefined &&
-    !Number.isFinite(heading.accuracy)
-  ) {
+  if (heading.accuracy !== undefined && !Number.isFinite(heading.accuracy)) {
     throw new Error(`Invalid heading accuracy: ${heading.accuracy}`);
   }
 
