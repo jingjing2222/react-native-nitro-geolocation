@@ -10,7 +10,10 @@ This enables:
 - 🔧 **Better integration** with the new Fabric renderer
 - 🧩 **Cross-platform consistency** and simpler maintenance
 
-In short, Nitro Geolocation builds on the proven API design of `@react-native-community/geolocation` while leveraging the new React Native architecture, providing a **forward-compatible foundation** with **100% API compatibility**.
+In short, Nitro Geolocation builds on the proven API design of
+`@react-native-community/geolocation` while leveraging the new React Native
+architecture, providing a **forward-compatible foundation** with a
+migration-friendly `/compat` API.
 
 ## Architecture Comparison
 
@@ -66,9 +69,8 @@ React Native Nitro Geolocation now provides a React-friendly layer on top of the
 User Code (React Components)
   ↓ useWatchPosition({ enabled: true })
   ↓ Declarative, auto-cleanup
-Modern API Layer (GeolocationClient + Hooks)
-  ↓ client.watchPosition(callback)
-  ↓ Provider context
+Modern API Layer (direct functions + hooks)
+  ↓ watchPosition(callback)
 JSI Layer (Nitro Modules)
   ↓ Direct callbacks, no Bridge
 Native Layer (Kotlin/Swift)
@@ -84,8 +86,8 @@ Device GPS/Network
 - **Best practices**: Encourages proper React patterns
 
 **Architecture Layers**:
-1. **Presentation** (Hooks): `useWatchPosition`, `useGetCurrentPosition`
-2. **Business Logic** (Client): `GeolocationClient` manages state
+1. **Presentation** (Hooks): `useWatchPosition`
+2. **Modern API** (Functions): `getCurrentPosition`, `watchPosition`, `unwatch`
 3. **JSI Bridge** (Nitro): Direct native communication
 4. **Native** (Platform): iOS/Android location APIs
 
@@ -124,4 +126,4 @@ This provides:
 - **Performance**: Native-level speed via JSI
 - **Developer Experience**: React-friendly hooks with TanStack Query patterns
 - **Flexibility**: Choose Modern API (hooks) or Compat API (callbacks)
-- **Compatibility**: 100% backward compatible via `/compat`
+- **Compatibility**: Drop-in compatible with the core native community API via `/compat`

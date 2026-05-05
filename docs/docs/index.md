@@ -3,8 +3,8 @@ pageType: home
 
 hero:
   name: React Native Nitro Geolocation
-  text: A React Native Geolocation module
-  tagline: Native geolocation with simple API and React Hook, powered by Nitro.
+  text: Nitro-powered native geolocation
+  tagline: Replace community geolocation with /compat, then move to a typed Modern API.
   actions:
     - theme: brand
       text: Introduction
@@ -24,7 +24,7 @@ features:
     details: Access device geolocation data through JSI and Nitro Modules for maximum performance.
     icon: 📡
   - title: Drop-in replacement (via /compat)
-    details: Compat API provides 100% compatibility with @react-native-community/geolocation for easy migration.
+    details: Compat API is drop-in compatible with the core native @react-native-community/geolocation API for easy migration.
     icon: 🔁
   - title: Consistent Android & iOS behavior
     details: Unified permission handling, background location consistency, and improved accuracy tuning.
@@ -42,6 +42,6 @@ features:
     details: Full type definitions for all APIs with complete type inference for functions and hooks.
     icon: 📘
   - title: Easy integration
-    details: Compatible with Expo modules, RN CLI, and custom native builds out of the box.
+    details: Works in bare React Native, RN CLI, Expo development builds, and other custom native builds.
     icon: 🧩
 ---

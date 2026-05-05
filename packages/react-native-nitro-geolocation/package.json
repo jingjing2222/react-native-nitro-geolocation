@@ -1,7 +1,7 @@
 {
   "name": "react-native-nitro-geolocation",
   "version": "1.2.1",
-  "description": "⚡🚀Blazing-fast geolocation for React Native powered by Nitro Modules",
+  "description": "Nitro-powered native geolocation for modern React Native apps",
   "main": "src/index",
   "source": "src/index",
   "exports": {
@@ -26,6 +26,22 @@
   },
   "author": "jingjing2222",
   "license": "MIT",
+  "keywords": [
+    "react-native",
+    "geolocation",
+    "location",
+    "gps",
+    "ios",
+    "android",
+    "nitro",
+    "nitro-modules",
+    "jsi",
+    "new-architecture",
+    "fused-location",
+    "geocoding",
+    "heading",
+    "expo-dev-client"
+  ],
   "homepage": "https://react-native-nitro-geolocation.pages.dev",
   "repository": {
     "type": "git",

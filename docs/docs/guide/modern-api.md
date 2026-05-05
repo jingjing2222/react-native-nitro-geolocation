@@ -207,6 +207,19 @@ async function prepareAccurateLocation() {
 `requestLocationSettings()` is Android-focused. On iOS it resolves with the
 current Core Location service status and does not show a settings dialog.
 
+### Android Reliability Notes
+
+- `locationProvider: 'playServices'` uses Google Play Services fused location.
+- `locationProvider: 'auto'` currently uses Android's platform
+  `LocationManager`; set `playServices` explicitly when you need fused
+  behavior.
+- Approximate/coarse location flows are supported through permissions and
+  Android `granularity`.
+- Use `getLastKnownPosition()` when you want an explicit cached read without
+  starting a fresh native request.
+- Modern API errors include `PLAY_SERVICE_NOT_AVAILABLE`,
+  `SETTINGS_NOT_SATISFIED`, and `TIMEOUT`.
+
 ### getCurrentPosition()
 
 Get current location (one-time request).

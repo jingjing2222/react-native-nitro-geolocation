@@ -4,7 +4,7 @@ import { defineConfig } from "@rspress/core";
 export default defineConfig({
   root: path.join(__dirname, "docs"),
   title: "React Native Nitro Geolocation",
-  description: "A React Native Geolocation module Using Nitro",
+  description: "Nitro-powered native geolocation for modern React Native apps",
   icon: "/logo.png",
   logo: "/logo.png",
   logoText: "React Native Nitro Geolocation",
@@ -13,7 +13,8 @@ export default defineConfig({
       "meta",
       {
         name: "keywords",
-        content: "react-native, geolocation, nitro, mobile, location"
+        content:
+          "react-native, geolocation, location, gps, ios, android, nitro, nitro-modules, jsi, new-architecture, fused-location, geocoding, heading"
       }
     ],
     [
@@ -24,7 +25,7 @@ export default defineConfig({
       "meta",
       {
         property: "og:description",
-        content: "A React Native Geolocation module Using Nitro"
+        content: "Nitro-powered native geolocation for modern React Native apps"
       }
     ],
     ["meta", { property: "og:image", content: "/logo.png" }],
@@ -38,7 +39,7 @@ export default defineConfig({
       "meta",
       {
         name: "twitter:description",
-        content: "A React Native Geolocation module Using Nitro"
+        content: "Nitro-powered native geolocation for modern React Native apps"
       }
     ],
     ["meta", { name: "twitter:image", content: "/logo.png" }]
