@@ -1,5 +1,13 @@
 # react-native-nitro-geolocation
 
+## 1.2.2
+
+### Patch Changes
+
+- a1f42d6: Improve launch-readiness docs and npm metadata with clearer positioning,
+  compatibility coverage, Android reliability guidance, Expo development build
+  notes, benchmark scope, and migration/Directory preparation guides.
+
 ## 1.2.1
 
 ### Patch Changes
