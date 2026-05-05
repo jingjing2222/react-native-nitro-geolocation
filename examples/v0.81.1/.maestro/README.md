@@ -102,6 +102,7 @@ The Android and iOS package scripts install the Release build first (`yarn andro
 ### `android-request-options.yaml`
 - Android-only contract for `granularity`, `waitForAccurateLocation`, `maxUpdateAge`, `maxUpdateDelay`, and `maxUpdates`
 - Uses Play Services configuration for a real Fused request and asserts coarse granularity does not return GPS
+- Seeds a fine Fused fix, then verifies a coarse cache-only read does not reuse an ungranular `lastLocation`
 - Verifies `maxUpdates=1` stops a native watch after the first update even when more locations are injected
 - Verifies invalid `maxUpdates=0` and coarse-only `granularity="fine"` reject
 

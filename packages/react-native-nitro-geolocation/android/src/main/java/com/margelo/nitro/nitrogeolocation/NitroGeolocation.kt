@@ -849,6 +849,13 @@ class NitroGeolocation(
         options: ParsedOptions,
         completion: (Location?) -> Unit
     ) {
+        // Fused lastLocation is not requested with LocationRequest granularity,
+        // so it cannot prove that a cached fix satisfies coarse-only callers.
+        if (options.granularity == AndroidGranularity.COARSE) {
+            completion(null)
+            return
+        }
+
         try {
             fusedLocationClient.lastLocation
                 .addOnSuccessListener { location ->

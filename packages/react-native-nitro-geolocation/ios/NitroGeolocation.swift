@@ -668,6 +668,7 @@ class NitroGeolocation: HybridNitroGeolocationSpec {
             subscription.error?(locationError)
         }
 
+        notifyHeadingConsumersOfLocationError(locationError)
         stopMonitoring()
     }
 
@@ -810,6 +811,25 @@ class NitroGeolocation: HybridNitroGeolocationSpec {
         } else {
             updateHeadingConfiguration()
         }
+    }
+
+    private func notifyHeadingConsumersOfLocationError(_ locationError: LocationError) {
+        guard !pendingHeadingRequests.isEmpty || !headingSubscriptions.isEmpty else {
+            return
+        }
+
+        for (_, request) in pendingHeadingRequests {
+            request.timer?.cancel()
+            request.error(locationError)
+        }
+        pendingHeadingRequests.removeAll()
+
+        for (_, subscription) in headingSubscriptions {
+            subscription.error?(locationError)
+        }
+        headingSubscriptions.removeAll()
+
+        stopHeadingMonitoring()
     }
 
     private func headingToResponse(_ clHeading: CLHeading) -> Heading {

@@ -44,7 +44,7 @@ appId: nitrogeolocation.example
     text: ".*provider=.*"
 
 - scrollUntilVisible:
-    element: "3. Max Updates Watch"
+    element: "3. Coarse Cache Isolation"
     direction: DOWN
 
 - setLocation:
@@ -52,7 +52,29 @@ appId: nitrogeolocation.example
     longitude: 126.978
 
 - tapOn:
-    id: "android-request-options-run-max-updates-button"
+    id: "android-request-options-run-coarse-cache-button"
+
+- scrollUntilVisible:
+    element: "Coarse cache: passed"
+    direction: DOWN
+    timeout: 30000
+
+- assertVisible:
+    id: "android-request-options-coarse-cache-result"
+- assertVisible:
+    text: ".*POSITION_UNAVAILABLE.*coarse cache-only read did not reuse.*"
+
+- scrollUntilVisible:
+    element: "Run Max Updates Watch"
+    direction: DOWN
+    centerElement: true
+
+- setLocation:
+    latitude: 37.5665
+    longitude: 126.978
+
+- tapOn:
+    text: "Run Max Updates Watch"
 
 - setLocation:
     latitude: 37.5667
@@ -72,11 +94,12 @@ appId: nitrogeolocation.example
     text: ".*Watch stopped after 1 update with maxUpdates=1.*"
 
 - scrollUntilVisible:
-    element: "4. Invalid Max Updates"
+    element: "Run Invalid Max Updates"
     direction: DOWN
+    centerElement: true
 
 - tapOn:
-    id: "android-request-options-run-invalid-button"
+    text: "Run Invalid Max Updates"
 
 - scrollUntilVisible:
     element: "Invalid maxUpdates: passed"
@@ -114,11 +137,12 @@ appId: nitrogeolocation.example
     timeout: 10000
 
 - scrollUntilVisible:
-    element: "5. Fine Permission Gate"
+    element: "Run Fine Permission Gate"
     direction: DOWN
+    centerElement: true
 
 - tapOn:
-    id: "android-request-options-run-fine-denied-button"
+    text: "Run Fine Permission Gate"
 
 - scrollUntilVisible:
     element: "Fine permission: passed"

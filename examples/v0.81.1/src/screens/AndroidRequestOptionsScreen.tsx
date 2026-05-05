@@ -4,6 +4,7 @@ import {
   LocationErrorCode,
   checkPermission,
   getCurrentPosition,
+  getLastKnownPosition,
   requestPermission,
   setConfiguration,
   unwatch,
@@ -29,6 +30,7 @@ const WATCH_TIMEOUT_MS = 20000;
 
 const initialResults = {
   fused: createIdleResult(),
+  coarseCache: createIdleResult(),
   maxUpdates: createIdleResult(),
   invalid: createIdleResult(),
   fineDenied: createIdleResult()
@@ -218,6 +220,58 @@ export default function AndroidRequestOptionsScreen() {
     }
   };
 
+  const runCoarseCacheScenario = async () => {
+    setResult("coarseCache", {
+      status: "running",
+      message: "Seeding a fine fused fix before a coarse cache-only read"
+    });
+
+    try {
+      await ensurePermission();
+      configurePlayServices();
+
+      await runWithNativeGeolocation(() =>
+        getCurrentPosition({
+          accuracy: {
+            android: "high"
+          },
+          granularity: "fine",
+          maximumAge: 0,
+          timeout: 15000
+        })
+      );
+
+      await runWithNativeGeolocation(() =>
+        getLastKnownPosition({
+          granularity: "coarse"
+        })
+      );
+
+      setResult("coarseCache", {
+        status: "failed",
+        message: "Coarse cache read unexpectedly returned a fused fine fix."
+      });
+    } catch (error) {
+      try {
+        const locationError = assertLocationErrorCode(
+          error,
+          LocationErrorCode.POSITION_UNAVAILABLE
+        );
+        setResult("coarseCache", {
+          status: "passed",
+          message: `${locationError.name}: coarse cache-only read did not reuse an ungranular fused lastLocation.`
+        });
+      } catch (assertionError) {
+        setResult("coarseCache", {
+          status: "failed",
+          message: getDisplayErrorMessage(assertionError)
+        });
+      }
+    } finally {
+      await refreshPermission();
+    }
+  };
+
   const runInvalidMaxUpdatesScenario = async () => {
     setResult("invalid", {
       status: "running",
@@ -364,7 +418,27 @@ export default function AndroidRequestOptionsScreen() {
       <View style={sharedStyles.divider} />
 
       <View style={sharedStyles.section}>
-        <Text style={sharedStyles.sectionTitle}>3. Max Updates Watch</Text>
+        <Text style={sharedStyles.sectionTitle}>3. Coarse Cache Isolation</Text>
+        <View style={sharedStyles.buttonContainer}>
+          <Button
+            title="Run Coarse Cache Isolation"
+            onPress={runCoarseCacheScenario}
+            color="#5E35B1"
+            testID={`${PREFIX}-run-coarse-cache-button`}
+          />
+        </View>
+        <ResultBlock
+          prefix={PREFIX}
+          id="coarse-cache"
+          label="Coarse cache"
+          result={results.coarseCache}
+        />
+      </View>
+
+      <View style={sharedStyles.divider} />
+
+      <View style={sharedStyles.section}>
+        <Text style={sharedStyles.sectionTitle}>4. Max Updates Watch</Text>
         <View style={sharedStyles.buttonContainer}>
           <Button
             title="Run Max Updates Watch"
@@ -384,7 +458,7 @@ export default function AndroidRequestOptionsScreen() {
       <View style={sharedStyles.divider} />
 
       <View style={sharedStyles.section}>
-        <Text style={sharedStyles.sectionTitle}>4. Invalid Max Updates</Text>
+        <Text style={sharedStyles.sectionTitle}>5. Invalid Max Updates</Text>
         <View style={sharedStyles.buttonContainer}>
           <Button
             title="Run Invalid Max Updates"
@@ -404,7 +478,7 @@ export default function AndroidRequestOptionsScreen() {
       <View style={sharedStyles.divider} />
 
       <View style={sharedStyles.section}>
-        <Text style={sharedStyles.sectionTitle}>5. Fine Permission Gate</Text>
+        <Text style={sharedStyles.sectionTitle}>6. Fine Permission Gate</Text>
         <View style={sharedStyles.buttonContainer}>
           <Button
             title="Run Fine Permission Gate"
