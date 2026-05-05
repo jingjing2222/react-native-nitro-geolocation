@@ -291,7 +291,29 @@ Geolocation.clearWatch(watchId);
 
 ## 🔄 Migration from `@react-native-community/geolocation`
 
-Change the import to use `/compat` — 100% API compatible:
+For Modern API migration, install the Agent Skills-compatible migration
+playbook from this repository. It is migration assistance for coding agents, not
+a fully automatic migration. The skill first runs a package-manager-aware
+compat bootstrap script that installs the Nitro packages, rewrites legacy import
+sources to `/compat`, and removes `@react-native-community/geolocation`. After
+that safe mechanical step, it guides the agent to refactor compat call sites to
+Modern API best practices using explicit criteria for permission timing, React
+lifecycle ownership, watch cleanup, cache-vs-fresh location reads, accuracy, and
+Android provider/settings handling.
+
+With the Vercel Labs `skills` CLI:
+
+```bash
+npx skills add jingjing2222/react-native-nitro-geolocation --skill react-native-nitro-geolocation-modern-migration
+```
+
+The skill source is
+[`skills/react-native-nitro-geolocation-modern-migration/SKILL.md`](https://github.com/jingjing2222/react-native-nitro-geolocation/tree/main/skills/react-native-nitro-geolocation-modern-migration).
+The bundled bootstrap script is
+[`skills/react-native-nitro-geolocation-modern-migration/scripts/migrate-to-compat.mjs`](https://github.com/jingjing2222/react-native-nitro-geolocation/tree/main/skills/react-native-nitro-geolocation-modern-migration/scripts/migrate-to-compat.mjs).
+
+For a drop-in compatibility migration, change the import to use `/compat`:
+
 ```diff
 - import Geolocation from '@react-native-community/geolocation';
 + import Geolocation from 'react-native-nitro-geolocation/compat';
