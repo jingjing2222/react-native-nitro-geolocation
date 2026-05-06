@@ -947,7 +947,7 @@ class NitroGeolocation: HybridNitroGeolocationSpec {
     }
 
     private func angularDistance(_ first: Double, _ second: Double) -> Double {
-        let distance = abs(first - second).truncatingRemainder(dividingBy: 360)
+        let distance = Swift.abs(first - second).truncatingRemainder(dividingBy: 360)
         return distance > 180 ? 360 - distance : distance
     }
 
