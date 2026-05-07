@@ -148,9 +148,15 @@ class NitroGeolocation: HybridNitroGeolocationSpec {
     private struct ParsedHeadingOptions {
         let headingFilter: CLLocationDegrees
 
+        // Apple's documented `CLLocationManager.headingFilter` default is 1°.
+        // Defaulting to `0` here propagates through `mergeHeadingFilter` into
+        // `kCLHeadingFilterNone` (-1), which fires the delegate on every
+        // CLHeading tick (sub-degree firehose for stationary users). 1° matches
+        // CL's documented behavior and lets the delegate fire only on
+        // perceptible changes.
         static func parse(from options: HeadingOptions?) -> ParsedHeadingOptions {
             return ParsedHeadingOptions(
-                headingFilter: options?.headingFilter ?? 0
+                headingFilter: options?.headingFilter ?? 1
             )
         }
     }
