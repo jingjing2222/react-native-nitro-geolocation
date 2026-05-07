@@ -148,9 +148,15 @@ class NitroGeolocation: HybridNitroGeolocationSpec {
     private struct ParsedHeadingOptions {
         let headingFilter: CLLocationDegrees
 
+        // Apple's documented `CLLocationManager.headingFilter` default is 1°.
+        // Defaulting to `0` here propagates through `mergeHeadingFilter` into
+        // `kCLHeadingFilterNone` (-1), which fires the delegate on every
+        // CLHeading tick (sub-degree firehose for stationary users). 1° matches
+        // CL's documented behavior and lets the delegate fire only on
+        // perceptible changes.
         static func parse(from options: HeadingOptions?) -> ParsedHeadingOptions {
             return ParsedHeadingOptions(
-                headingFilter: options?.headingFilter ?? 0
+                headingFilter: options?.headingFilter ?? 1
             )
         }
     }
@@ -772,6 +778,14 @@ class NitroGeolocation: HybridNitroGeolocationSpec {
 
     fileprivate func handleHeadingUpdate(_ clHeading: CLHeading) {
         let heading = headingToResponse(clHeading)
+        // Filter on the same value JS consumers see. The `Heading` payload
+        // exposes both `magneticHeading` and `trueHeading`, and idiomatic
+        // consumers prefer `trueHeading` when available. Comparing only on
+        // magneticHeading meant `headingFilter` could pass the magnetic
+        // delta gate while the JS-visible trueHeading delta was tiny — a
+        // user-visible firehose. Using `trueHeading ?? magneticHeading`
+        // here aligns the gate with what callers actually receive.
+        let deliveredHeading = heading.trueHeading ?? heading.magneticHeading
 
         for (id, request) in Array(pendingHeadingRequests) {
             request.timer?.cancel()
@@ -784,7 +798,7 @@ class NitroGeolocation: HybridNitroGeolocationSpec {
             if let lastDeliveredHeading = subscription.lastDeliveredHeading {
                 shouldDeliver = angularDistance(
                     lastDeliveredHeading,
-                    heading.magneticHeading
+                    deliveredHeading
                 ) >= subscription.options.headingFilter
             } else {
                 shouldDeliver = true
@@ -792,7 +806,7 @@ class NitroGeolocation: HybridNitroGeolocationSpec {
 
             if shouldDeliver {
                 var nextSubscription = subscription
-                nextSubscription.lastDeliveredHeading = heading.magneticHeading
+                nextSubscription.lastDeliveredHeading = deliveredHeading
                 headingSubscriptions[token] = nextSubscription
                 nextSubscription.success(heading)
             }
