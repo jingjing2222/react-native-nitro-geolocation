@@ -778,14 +778,6 @@ class NitroGeolocation: HybridNitroGeolocationSpec {
 
     fileprivate func handleHeadingUpdate(_ clHeading: CLHeading) {
         let heading = headingToResponse(clHeading)
-        // Filter on the same value JS consumers see. The `Heading` payload
-        // exposes both `magneticHeading` and `trueHeading`, and idiomatic
-        // consumers prefer `trueHeading` when available. Comparing only on
-        // magneticHeading meant `headingFilter` could pass the magnetic
-        // delta gate while the JS-visible trueHeading delta was tiny — a
-        // user-visible firehose. Using `trueHeading ?? magneticHeading`
-        // here aligns the gate with what callers actually receive.
-        let deliveredHeading = heading.trueHeading ?? heading.magneticHeading
 
         for (id, request) in Array(pendingHeadingRequests) {
             request.timer?.cancel()
@@ -798,7 +790,7 @@ class NitroGeolocation: HybridNitroGeolocationSpec {
             if let lastDeliveredHeading = subscription.lastDeliveredHeading {
                 shouldDeliver = angularDistance(
                     lastDeliveredHeading,
-                    deliveredHeading
+                    heading.magneticHeading
                 ) >= subscription.options.headingFilter
             } else {
                 shouldDeliver = true
@@ -806,7 +798,7 @@ class NitroGeolocation: HybridNitroGeolocationSpec {
 
             if shouldDeliver {
                 var nextSubscription = subscription
-                nextSubscription.lastDeliveredHeading = deliveredHeading
+                nextSubscription.lastDeliveredHeading = heading.magneticHeading
                 headingSubscriptions[token] = nextSubscription
                 nextSubscription.success(heading)
             }
