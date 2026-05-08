@@ -39,5 +39,9 @@ export function watchPosition(
   if (isDevtoolsEnabled()) {
     return devtoolsWatchPosition(success, error);
   }
-  return NitroGeolocationHybridObject.watchPosition(success, error, options);
+  return NitroGeolocationHybridObject.watchPosition(
+    success,
+    options ?? {},
+    error
+  );
 }

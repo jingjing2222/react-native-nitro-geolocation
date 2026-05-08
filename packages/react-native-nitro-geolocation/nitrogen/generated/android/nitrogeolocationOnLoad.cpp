@@ -39,17 +39,17 @@ int initialize(JavaVM* vm) {
 }
 
 struct JHybridNitroGeolocationSpecImpl: public jni::JavaClass<JHybridNitroGeolocationSpecImpl, JHybridNitroGeolocationSpec::JavaPart> {
-  static auto constexpr kJavaDescriptor = "Lcom/margelo/nitro/nitrogeolocation/NitroGeolocation;";
+  static constexpr auto kJavaDescriptor = "Lcom/margelo/nitro/nitrogeolocation/NitroGeolocation;";
   static std::shared_ptr<JHybridNitroGeolocationSpec> create() {
-    static auto constructorFn = javaClassStatic()->getConstructor<JHybridNitroGeolocationSpecImpl::javaobject()>();
+    static const auto constructorFn = javaClassStatic()->getConstructor<JHybridNitroGeolocationSpecImpl::javaobject()>();
     jni::local_ref<JHybridNitroGeolocationSpec::JavaPart> javaPart = javaClassStatic()->newObject(constructorFn);
     return javaPart->getJHybridNitroGeolocationSpec();
   }
 };
 struct JHybridNitroGeolocationCompatSpecImpl: public jni::JavaClass<JHybridNitroGeolocationCompatSpecImpl, JHybridNitroGeolocationCompatSpec::JavaPart> {
-  static auto constexpr kJavaDescriptor = "Lcom/margelo/nitro/nitrogeolocation/NitroGeolocationCompat;";
+  static constexpr auto kJavaDescriptor = "Lcom/margelo/nitro/nitrogeolocation/NitroGeolocationCompat;";
   static std::shared_ptr<JHybridNitroGeolocationCompatSpec> create() {
-    static auto constructorFn = javaClassStatic()->getConstructor<JHybridNitroGeolocationCompatSpecImpl::javaobject()>();
+    static const auto constructorFn = javaClassStatic()->getConstructor<JHybridNitroGeolocationCompatSpecImpl::javaobject()>();
     jni::local_ref<JHybridNitroGeolocationCompatSpec::JavaPart> javaPart = javaClassStatic()->newObject(constructorFn);
     return javaPart->getJHybridNitroGeolocationCompatSpec();
   }

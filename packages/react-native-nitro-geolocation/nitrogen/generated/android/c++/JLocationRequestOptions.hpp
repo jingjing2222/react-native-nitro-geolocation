@@ -31,7 +31,7 @@ namespace margelo::nitro::nitrogeolocation {
    */
   struct JLocationRequestOptions final: public jni::JavaClass<JLocationRequestOptions> {
   public:
-    static auto constexpr kJavaDescriptor = "Lcom/margelo/nitro/nitrogeolocation/LocationRequestOptions;";
+    static constexpr auto kJavaDescriptor = "Lcom/margelo/nitro/nitrogeolocation/LocationRequestOptions;";
 
   public:
     /**

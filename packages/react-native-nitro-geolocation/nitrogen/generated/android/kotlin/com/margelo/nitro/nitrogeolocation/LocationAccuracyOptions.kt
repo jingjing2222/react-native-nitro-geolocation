@@ -9,6 +9,7 @@ package com.margelo.nitro.nitrogeolocation
 
 import androidx.annotation.Keep
 import com.facebook.proguard.annotations.DoNotStrip
+import java.util.Objects
 
 
 /**
@@ -25,6 +26,20 @@ data class LocationAccuracyOptions(
   val ios: IOSAccuracyPreset?
 ) {
   /* primary constructor */
+
+  override fun equals(other: Any?): Boolean {
+    if (this === other) return true
+    if (other !is LocationAccuracyOptions) return false
+    return Objects.deepEquals(this.android, other.android)
+      && Objects.deepEquals(this.ios, other.ios)
+  }
+
+  override fun hashCode(): Int {
+    return arrayOf(
+      android,
+      ios
+    ).contentDeepHashCode()
+  }
 
   companion object {
     /**

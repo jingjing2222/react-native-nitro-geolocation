@@ -9,6 +9,7 @@ package com.margelo.nitro.nitrogeolocation
 
 import androidx.annotation.Keep
 import com.facebook.proguard.annotations.DoNotStrip
+import java.util.Objects
 
 
 /**
@@ -40,6 +41,30 @@ data class LocationSettingsOptions(
   val needBle: Boolean?
 ) {
   /* primary constructor */
+
+  override fun equals(other: Any?): Boolean {
+    if (this === other) return true
+    if (other !is LocationSettingsOptions) return false
+    return Objects.deepEquals(this.enableHighAccuracy, other.enableHighAccuracy)
+      && Objects.deepEquals(this.accuracy, other.accuracy)
+      && Objects.deepEquals(this.interval, other.interval)
+      && Objects.deepEquals(this.fastestInterval, other.fastestInterval)
+      && Objects.deepEquals(this.distanceFilter, other.distanceFilter)
+      && Objects.deepEquals(this.alwaysShow, other.alwaysShow)
+      && Objects.deepEquals(this.needBle, other.needBle)
+  }
+
+  override fun hashCode(): Int {
+    return arrayOf(
+      enableHighAccuracy,
+      accuracy,
+      interval,
+      fastestInterval,
+      distanceFilter,
+      alwaysShow,
+      needBle
+    ).contentDeepHashCode()
+  }
 
   companion object {
     /**

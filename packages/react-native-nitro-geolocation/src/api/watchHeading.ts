@@ -15,5 +15,9 @@ export function watchHeading(
   error?: (error: LocationError) => void,
   options?: HeadingOptions
 ): string {
-  return NitroGeolocationHybridObject.watchHeading(success, error, options);
+  return NitroGeolocationHybridObject.watchHeading(
+    success,
+    options ?? {},
+    error
+  );
 }

@@ -9,6 +9,7 @@ package com.margelo.nitro.nitrogeolocation
 
 import androidx.annotation.Keep
 import com.facebook.proguard.annotations.DoNotStrip
+import java.util.Objects
 
 
 /**
@@ -22,6 +23,18 @@ data class HeadingOptions(
   val headingFilter: Double?
 ) {
   /* primary constructor */
+
+  override fun equals(other: Any?): Boolean {
+    if (this === other) return true
+    if (other !is HeadingOptions) return false
+    return Objects.deepEquals(this.headingFilter, other.headingFilter)
+  }
+
+  override fun hashCode(): Int {
+    return arrayOf(
+      headingFilter
+    ).contentDeepHashCode()
+  }
 
   companion object {
     /**

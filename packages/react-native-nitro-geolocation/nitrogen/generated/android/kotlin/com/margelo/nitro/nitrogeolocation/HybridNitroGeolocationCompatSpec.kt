@@ -41,21 +41,21 @@ abstract class HybridNitroGeolocationCompatSpec: HybridObject() {
     return __result
   }
   
-  abstract fun getCurrentPosition(success: (position: CompatGeolocationResponse) -> Unit, error: ((error: CompatGeolocationError) -> Unit)?, options: CompatGeolocationOptions?): Unit
+  abstract fun getCurrentPosition(success: (position: CompatGeolocationResponse) -> Unit, options: CompatGeolocationOptions, error: ((error: CompatGeolocationError) -> Unit)?): Unit
   
   @DoNotStrip
   @Keep
-  private fun getCurrentPosition_cxx(success: Func_void_CompatGeolocationResponse, error: Func_void_CompatGeolocationError?, options: CompatGeolocationOptions?): Unit {
-    val __result = getCurrentPosition(success, error?.let { it }, options)
+  private fun getCurrentPosition_cxx(success: Func_void_CompatGeolocationResponse, options: CompatGeolocationOptions, error: Func_void_CompatGeolocationError?): Unit {
+    val __result = getCurrentPosition(success, options, error?.let { it })
     return __result
   }
   
-  abstract fun watchPosition(success: (position: CompatGeolocationResponse) -> Unit, error: ((error: CompatGeolocationError) -> Unit)?, options: CompatGeolocationOptions?): Double
+  abstract fun watchPosition(success: (position: CompatGeolocationResponse) -> Unit, options: CompatGeolocationOptions, error: ((error: CompatGeolocationError) -> Unit)?): Double
   
   @DoNotStrip
   @Keep
-  private fun watchPosition_cxx(success: Func_void_CompatGeolocationResponse, error: Func_void_CompatGeolocationError?, options: CompatGeolocationOptions?): Double {
-    val __result = watchPosition(success, error?.let { it }, options)
+  private fun watchPosition_cxx(success: Func_void_CompatGeolocationResponse, options: CompatGeolocationOptions, error: Func_void_CompatGeolocationError?): Double {
+    val __result = watchPosition(success, options, error?.let { it })
     return __result
   }
   

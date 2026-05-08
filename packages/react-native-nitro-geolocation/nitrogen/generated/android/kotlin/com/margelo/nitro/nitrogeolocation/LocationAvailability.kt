@@ -9,6 +9,7 @@ package com.margelo.nitro.nitrogeolocation
 
 import androidx.annotation.Keep
 import com.facebook.proguard.annotations.DoNotStrip
+import java.util.Objects
 
 
 /**
@@ -25,6 +26,20 @@ data class LocationAvailability(
   val reason: String?
 ) {
   /* primary constructor */
+
+  override fun equals(other: Any?): Boolean {
+    if (this === other) return true
+    if (other !is LocationAvailability) return false
+    return Objects.deepEquals(this.available, other.available)
+      && Objects.deepEquals(this.reason, other.reason)
+  }
+
+  override fun hashCode(): Int {
+    return arrayOf(
+      available,
+      reason
+    ).contentDeepHashCode()
+  }
 
   companion object {
     /**

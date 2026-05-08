@@ -48,16 +48,16 @@ class NitroGeolocationCompat(
 
     override fun getCurrentPosition(
             success: (position: CompatGeolocationResponse) -> Unit,
-            error: ((error: CompatGeolocationError) -> Unit)?,
-            options: CompatGeolocationOptions?
+            options: CompatGeolocationOptions,
+            error: ((error: CompatGeolocationError) -> Unit)?
     ) {
         GetCurrentPosition(reactContext).execute(success, error, options)
     }
 
     override fun watchPosition(
             success: (position: CompatGeolocationResponse) -> Unit,
-            error: ((error: CompatGeolocationError) -> Unit)?,
-            options: CompatGeolocationOptions?
+            options: CompatGeolocationOptions,
+            error: ((error: CompatGeolocationError) -> Unit)?
     ): Double {
         return watchPositionHandler.watch(success, error, options).toDouble()
     }

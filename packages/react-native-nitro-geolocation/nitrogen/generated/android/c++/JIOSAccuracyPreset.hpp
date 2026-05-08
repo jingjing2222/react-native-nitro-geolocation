@@ -19,7 +19,7 @@ namespace margelo::nitro::nitrogeolocation {
    */
   struct JIOSAccuracyPreset final: public jni::JavaClass<JIOSAccuracyPreset> {
   public:
-    static auto constexpr kJavaDescriptor = "Lcom/margelo/nitro/nitrogeolocation/IOSAccuracyPreset;";
+    static constexpr auto kJavaDescriptor = "Lcom/margelo/nitro/nitrogeolocation/IOSAccuracyPreset;";
 
   public:
     /**

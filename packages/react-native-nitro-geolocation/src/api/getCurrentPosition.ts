@@ -40,6 +40,10 @@ export function getCurrentPosition(
     }
   }
   return new Promise((resolve, reject) => {
-    NitroGeolocationHybridObject.getCurrentPosition(resolve, reject, options);
+    NitroGeolocationHybridObject.getCurrentPosition(
+      resolve,
+      options ?? {},
+      reject
+    );
   });
 }

@@ -19,16 +19,16 @@ public protocol HybridNitroGeolocationSpec_protocol: HybridObject {
   func hasServicesEnabled() throws -> Promise<Bool>
   func getProviderStatus() throws -> Promise<LocationProviderStatus>
   func getLocationAvailability() throws -> Promise<LocationAvailability>
-  func requestLocationSettings(success: @escaping (_ status: LocationProviderStatus) -> Void, error: ((_ error: LocationError) -> Void)?, options: LocationSettingsOptions?) throws -> Void
+  func requestLocationSettings(success: @escaping (_ status: LocationProviderStatus) -> Void, options: LocationSettingsOptions, error: ((_ error: LocationError) -> Void)?) throws -> Void
   func getAccuracyAuthorization() throws -> Promise<AccuracyAuthorization>
   func requestTemporaryFullAccuracy(purposeKey: String, success: @escaping (_ authorization: AccuracyAuthorization) -> Void, error: ((_ error: LocationError) -> Void)?) throws -> Void
-  func getCurrentPosition(success: @escaping (_ position: GeolocationResponse) -> Void, error: ((_ error: LocationError) -> Void)?, options: LocationRequestOptions?) throws -> Void
-  func getLastKnownPosition(success: @escaping (_ position: GeolocationResponse) -> Void, error: ((_ error: LocationError) -> Void)?, options: LocationRequestOptions?) throws -> Void
+  func getCurrentPosition(success: @escaping (_ position: GeolocationResponse) -> Void, options: LocationRequestOptions, error: ((_ error: LocationError) -> Void)?) throws -> Void
+  func getLastKnownPosition(success: @escaping (_ position: GeolocationResponse) -> Void, options: LocationRequestOptions, error: ((_ error: LocationError) -> Void)?) throws -> Void
   func geocode(address: String, success: @escaping (_ locations: [GeocodedLocation]) -> Void, error: ((_ error: LocationError) -> Void)?) throws -> Void
   func reverseGeocode(coords: GeocodingCoordinates, success: @escaping (_ addresses: [ReverseGeocodedAddress]) -> Void, error: ((_ error: LocationError) -> Void)?) throws -> Void
   func getHeading(success: @escaping (_ heading: Heading) -> Void, error: ((_ error: LocationError) -> Void)?) throws -> Void
-  func watchHeading(success: @escaping (_ heading: Heading) -> Void, error: ((_ error: LocationError) -> Void)?, options: HeadingOptions?) throws -> String
-  func watchPosition(success: @escaping (_ position: GeolocationResponse) -> Void, error: ((_ error: LocationError) -> Void)?, options: LocationRequestOptions?) throws -> String
+  func watchHeading(success: @escaping (_ heading: Heading) -> Void, options: HeadingOptions, error: ((_ error: LocationError) -> Void)?) throws -> String
+  func watchPosition(success: @escaping (_ position: GeolocationResponse) -> Void, options: LocationRequestOptions, error: ((_ error: LocationError) -> Void)?) throws -> String
   func unwatch(token: String) throws -> Void
   func stopObserving() throws -> Void
 }

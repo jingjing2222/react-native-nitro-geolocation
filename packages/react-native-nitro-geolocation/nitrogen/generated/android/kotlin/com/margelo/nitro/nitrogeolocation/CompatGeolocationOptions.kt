@@ -9,6 +9,7 @@ package com.margelo.nitro.nitrogeolocation
 
 import androidx.annotation.Keep
 import com.facebook.proguard.annotations.DoNotStrip
+import java.util.Objects
 
 
 /**
@@ -52,6 +53,38 @@ data class CompatGeolocationOptions(
   val showsBackgroundLocationIndicator: Boolean?
 ) {
   /* primary constructor */
+
+  override fun equals(other: Any?): Boolean {
+    if (this === other) return true
+    if (other !is CompatGeolocationOptions) return false
+    return Objects.deepEquals(this.timeout, other.timeout)
+      && Objects.deepEquals(this.maximumAge, other.maximumAge)
+      && Objects.deepEquals(this.enableHighAccuracy, other.enableHighAccuracy)
+      && Objects.deepEquals(this.accuracy, other.accuracy)
+      && Objects.deepEquals(this.interval, other.interval)
+      && Objects.deepEquals(this.fastestInterval, other.fastestInterval)
+      && Objects.deepEquals(this.distanceFilter, other.distanceFilter)
+      && Objects.deepEquals(this.useSignificantChanges, other.useSignificantChanges)
+      && Objects.deepEquals(this.activityType, other.activityType)
+      && Objects.deepEquals(this.pausesLocationUpdatesAutomatically, other.pausesLocationUpdatesAutomatically)
+      && Objects.deepEquals(this.showsBackgroundLocationIndicator, other.showsBackgroundLocationIndicator)
+  }
+
+  override fun hashCode(): Int {
+    return arrayOf(
+      timeout,
+      maximumAge,
+      enableHighAccuracy,
+      accuracy,
+      interval,
+      fastestInterval,
+      distanceFilter,
+      useSignificantChanges,
+      activityType,
+      pausesLocationUpdatesAutomatically,
+      showsBackgroundLocationIndicator
+    ).contentDeepHashCode()
+  }
 
   companion object {
     /**

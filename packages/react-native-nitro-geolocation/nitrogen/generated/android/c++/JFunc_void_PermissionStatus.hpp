@@ -25,7 +25,7 @@ namespace margelo::nitro::nitrogeolocation {
    */
   struct JFunc_void_PermissionStatus: public jni::JavaClass<JFunc_void_PermissionStatus> {
   public:
-    static auto constexpr kJavaDescriptor = "Lcom/margelo/nitro/nitrogeolocation/Func_void_PermissionStatus;";
+    static constexpr auto kJavaDescriptor = "Lcom/margelo/nitro/nitrogeolocation/Func_void_PermissionStatus;";
 
   public:
     /**
@@ -61,7 +61,7 @@ namespace margelo::nitro::nitrogeolocation {
     }
 
   public:
-    static auto constexpr kJavaDescriptor = "Lcom/margelo/nitro/nitrogeolocation/Func_void_PermissionStatus_cxx;";
+    static constexpr auto kJavaDescriptor = "Lcom/margelo/nitro/nitrogeolocation/Func_void_PermissionStatus_cxx;";
     static void registerNatives() {
       registerHybrid({makeNativeMethod("invoke_cxx", JFunc_void_PermissionStatus_cxx::invoke_cxx)});
     }

@@ -21,6 +21,10 @@ appId: nitrogeolocation.example
     file: ios-accuracy-authorization.yaml
 - runFlow:
     when:
+      platform: iOS
+    file: ios-release-options-bridge.yaml
+- runFlow:
+    when:
       platform: Android
     file: issue-67-android-coarse-location.yaml
 - runFlow:

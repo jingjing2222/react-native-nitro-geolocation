@@ -19,7 +19,7 @@ namespace margelo::nitro::nitrogeolocation {
    */
   struct JLocationProviderInternal final: public jni::JavaClass<JLocationProviderInternal> {
   public:
-    static auto constexpr kJavaDescriptor = "Lcom/margelo/nitro/nitrogeolocation/LocationProviderInternal;";
+    static constexpr auto kJavaDescriptor = "Lcom/margelo/nitro/nitrogeolocation/LocationProviderInternal;";
 
   public:
     /**

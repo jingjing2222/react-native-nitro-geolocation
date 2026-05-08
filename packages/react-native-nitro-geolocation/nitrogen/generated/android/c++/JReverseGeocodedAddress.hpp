@@ -22,7 +22,7 @@ namespace margelo::nitro::nitrogeolocation {
    */
   struct JReverseGeocodedAddress final: public jni::JavaClass<JReverseGeocodedAddress> {
   public:
-    static auto constexpr kJavaDescriptor = "Lcom/margelo/nitro/nitrogeolocation/ReverseGeocodedAddress;";
+    static constexpr auto kJavaDescriptor = "Lcom/margelo/nitro/nitrogeolocation/ReverseGeocodedAddress;";
 
   public:
     /**

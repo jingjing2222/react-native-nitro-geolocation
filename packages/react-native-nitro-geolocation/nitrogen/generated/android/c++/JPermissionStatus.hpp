@@ -19,7 +19,7 @@ namespace margelo::nitro::nitrogeolocation {
    */
   struct JPermissionStatus final: public jni::JavaClass<JPermissionStatus> {
   public:
-    static auto constexpr kJavaDescriptor = "Lcom/margelo/nitro/nitrogeolocation/PermissionStatus;";
+    static constexpr auto kJavaDescriptor = "Lcom/margelo/nitro/nitrogeolocation/PermissionStatus;";
 
   public:
     /**

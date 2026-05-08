@@ -307,8 +307,8 @@ class NitroGeolocation(
 
     override fun requestLocationSettings(
         success: (LocationProviderStatus) -> Unit,
-        error: ((LocationError) -> Unit)?,
-        options: LocationSettingsOptions?
+        options: LocationSettingsOptions,
+        error: ((LocationError) -> Unit)?
     ) {
         locationSettings.requestLocationSettings(success, error, options)
     }
@@ -339,8 +339,8 @@ class NitroGeolocation(
 
     override fun getCurrentPosition(
         success: (GeolocationResponse) -> Unit,
-        error: ((LocationError) -> Unit)?,
-        options: LocationRequestOptions?
+        options: LocationRequestOptions,
+        error: ((LocationError) -> Unit)?
     ): Unit {
         // Check permission
         if (!hasLocationPermission()) {
@@ -395,8 +395,8 @@ class NitroGeolocation(
 
     override fun getLastKnownPosition(
         success: (GeolocationResponse) -> Unit,
-        error: ((LocationError) -> Unit)?,
-        options: LocationRequestOptions?
+        options: LocationRequestOptions,
+        error: ((LocationError) -> Unit)?
     ) {
         if (!hasLocationPermission()) {
             error?.invoke(createLocationError(
@@ -500,8 +500,8 @@ class NitroGeolocation(
 
     override fun watchPosition(
         success: (GeolocationResponse) -> Unit,
-        error: ((LocationError) -> Unit)?,
-        options: LocationRequestOptions?
+        options: LocationRequestOptions,
+        error: ((LocationError) -> Unit)?
     ): String {
         val token = UUID.randomUUID().toString()
         val parsedOptions = ParsedOptions.parse(options)
@@ -559,8 +559,8 @@ class NitroGeolocation(
 
     override fun watchHeading(
         success: (Heading) -> Unit,
-        error: ((LocationError) -> Unit)?,
-        options: HeadingOptions?
+        options: HeadingOptions,
+        error: ((LocationError) -> Unit)?
     ): String {
         if (!hasLocationPermission()) {
             val token = UUID.randomUUID().toString()

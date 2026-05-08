@@ -25,7 +25,7 @@ namespace margelo::nitro::nitrogeolocation {
    */
   struct JFunc_void_AccuracyAuthorization: public jni::JavaClass<JFunc_void_AccuracyAuthorization> {
   public:
-    static auto constexpr kJavaDescriptor = "Lcom/margelo/nitro/nitrogeolocation/Func_void_AccuracyAuthorization;";
+    static constexpr auto kJavaDescriptor = "Lcom/margelo/nitro/nitrogeolocation/Func_void_AccuracyAuthorization;";
 
   public:
     /**
@@ -61,7 +61,7 @@ namespace margelo::nitro::nitrogeolocation {
     }
 
   public:
-    static auto constexpr kJavaDescriptor = "Lcom/margelo/nitro/nitrogeolocation/Func_void_AccuracyAuthorization_cxx;";
+    static constexpr auto kJavaDescriptor = "Lcom/margelo/nitro/nitrogeolocation/Func_void_AccuracyAuthorization_cxx;";
     static void registerNatives() {
       registerHybrid({makeNativeMethod("invoke_cxx", JFunc_void_AccuracyAuthorization_cxx::invoke_cxx)});
     }

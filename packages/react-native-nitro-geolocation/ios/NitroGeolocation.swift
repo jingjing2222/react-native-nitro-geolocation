@@ -306,8 +306,8 @@ class NitroGeolocation: HybridNitroGeolocationSpec {
 
     func requestLocationSettings(
         success: @escaping (LocationProviderStatus) -> Void,
-        error: ((LocationError) -> Void)?,
-        options: LocationSettingsOptions?
+        options: LocationSettingsOptions,
+        error: ((LocationError) -> Void)?
     ) throws -> Void {
         success(createLocationProviderStatus())
     }
@@ -365,8 +365,8 @@ class NitroGeolocation: HybridNitroGeolocationSpec {
 
     func getCurrentPosition(
         success: @escaping (GeolocationResponse) -> Void,
-        error: ((LocationError) -> Void)?,
-        options: LocationRequestOptions?
+        options: LocationRequestOptions,
+        error: ((LocationError) -> Void)?
     ) throws -> Void {
         // Check permission
         let status = CLLocationManager.authorizationStatus()
@@ -431,8 +431,8 @@ class NitroGeolocation: HybridNitroGeolocationSpec {
 
     func getLastKnownPosition(
         success: @escaping (GeolocationResponse) -> Void,
-        error: ((LocationError) -> Void)?,
-        options: LocationRequestOptions?
+        options: LocationRequestOptions,
+        error: ((LocationError) -> Void)?
     ) throws -> Void {
         let status = CLLocationManager.authorizationStatus()
         if status == .denied || status == .restricted {
@@ -591,8 +591,8 @@ class NitroGeolocation: HybridNitroGeolocationSpec {
 
     func watchHeading(
         success: @escaping (Heading) -> Void,
-        error: ((LocationError) -> Void)?,
-        options: HeadingOptions?
+        options: HeadingOptions,
+        error: ((LocationError) -> Void)?
     ) throws -> String {
         let token = UUID().uuidString
         let parsedOptions = ParsedHeadingOptions.parse(from: options)
@@ -630,8 +630,8 @@ class NitroGeolocation: HybridNitroGeolocationSpec {
 
     func watchPosition(
         success: @escaping (GeolocationResponse) -> Void,
-        error: ((LocationError) -> Void)?,
-        options: LocationRequestOptions?
+        options: LocationRequestOptions,
+        error: ((LocationError) -> Void)?
     ) -> String {
         let token = UUID().uuidString
         let parsedOptions = ParsedOptions.parse(from: options)

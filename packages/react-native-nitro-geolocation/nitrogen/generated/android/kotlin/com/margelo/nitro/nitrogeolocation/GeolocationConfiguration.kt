@@ -9,6 +9,7 @@ package com.margelo.nitro.nitrogeolocation
 
 import androidx.annotation.Keep
 import com.facebook.proguard.annotations.DoNotStrip
+import java.util.Objects
 
 
 /**
@@ -31,6 +32,24 @@ data class GeolocationConfiguration(
   val locationProvider: LocationProvider?
 ) {
   /* primary constructor */
+
+  override fun equals(other: Any?): Boolean {
+    if (this === other) return true
+    if (other !is GeolocationConfiguration) return false
+    return Objects.deepEquals(this.autoRequestPermission, other.autoRequestPermission)
+      && Objects.deepEquals(this.authorizationLevel, other.authorizationLevel)
+      && Objects.deepEquals(this.enableBackgroundLocationUpdates, other.enableBackgroundLocationUpdates)
+      && Objects.deepEquals(this.locationProvider, other.locationProvider)
+  }
+
+  override fun hashCode(): Int {
+    return arrayOf(
+      autoRequestPermission,
+      authorizationLevel,
+      enableBackgroundLocationUpdates,
+      locationProvider
+    ).contentDeepHashCode()
+  }
 
   companion object {
     /**

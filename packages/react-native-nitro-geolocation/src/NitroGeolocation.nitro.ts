@@ -315,8 +315,8 @@ export interface NitroGeolocation
    */
   requestLocationSettings(
     success: (status: LocationProviderStatus) => void,
-    error?: (error: LocationError) => void,
-    options?: LocationSettingsOptions
+    options: LocationSettingsOptions,
+    error?: (error: LocationError) => void
   ): void;
 
   /**
@@ -359,8 +359,8 @@ export interface NitroGeolocation
    */
   getCurrentPosition(
     success: (position: GeolocationResponse) => void,
-    error?: (error: LocationError) => void,
-    options?: LocationRequestOptions
+    options: LocationRequestOptions,
+    error?: (error: LocationError) => void
   ): void;
 
   /**
@@ -370,8 +370,8 @@ export interface NitroGeolocation
    */
   getLastKnownPosition(
     success: (position: GeolocationResponse) => void,
-    error?: (error: LocationError) => void,
-    options?: LocationRequestOptions
+    options: LocationRequestOptions,
+    error?: (error: LocationError) => void
   ): void;
 
   /**
@@ -413,8 +413,8 @@ export interface NitroGeolocation
    */
   watchHeading(
     success: (heading: Heading) => void,
-    error?: (error: LocationError) => void,
-    options?: HeadingOptions
+    options: HeadingOptions,
+    error?: (error: LocationError) => void
   ): string;
 
   /**
@@ -434,8 +434,8 @@ export interface NitroGeolocation
    */
   watchPosition(
     success: (position: GeolocationResponse) => void,
-    error?: (error: LocationError) => void,
-    options?: LocationRequestOptions
+    options: LocationRequestOptions,
+    error?: (error: LocationError) => void
   ): string;
 
   /**

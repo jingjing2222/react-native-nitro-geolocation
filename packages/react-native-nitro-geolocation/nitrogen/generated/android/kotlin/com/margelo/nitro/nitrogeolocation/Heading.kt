@@ -9,6 +9,7 @@ package com.margelo.nitro.nitrogeolocation
 
 import androidx.annotation.Keep
 import com.facebook.proguard.annotations.DoNotStrip
+import java.util.Objects
 
 
 /**
@@ -31,6 +32,24 @@ data class Heading(
   val timestamp: Double
 ) {
   /* primary constructor */
+
+  override fun equals(other: Any?): Boolean {
+    if (this === other) return true
+    if (other !is Heading) return false
+    return Objects.deepEquals(this.magneticHeading, other.magneticHeading)
+      && Objects.deepEquals(this.trueHeading, other.trueHeading)
+      && Objects.deepEquals(this.accuracy, other.accuracy)
+      && Objects.deepEquals(this.timestamp, other.timestamp)
+  }
+
+  override fun hashCode(): Int {
+    return arrayOf(
+      magneticHeading,
+      trueHeading,
+      accuracy,
+      timestamp
+    ).contentDeepHashCode()
+  }
 
   companion object {
     /**

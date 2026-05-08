@@ -19,7 +19,7 @@ namespace margelo::nitro::nitrogeolocation {
    */
   struct JAuthorizationLevel final: public jni::JavaClass<JAuthorizationLevel> {
   public:
-    static auto constexpr kJavaDescriptor = "Lcom/margelo/nitro/nitrogeolocation/AuthorizationLevel;";
+    static constexpr auto kJavaDescriptor = "Lcom/margelo/nitro/nitrogeolocation/AuthorizationLevel;";
 
   public:
     /**

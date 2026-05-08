@@ -25,7 +25,7 @@ namespace margelo::nitro::nitrogeolocation {
    */
   struct JLocationAccuracyOptions final: public jni::JavaClass<JLocationAccuracyOptions> {
   public:
-    static auto constexpr kJavaDescriptor = "Lcom/margelo/nitro/nitrogeolocation/LocationAccuracyOptions;";
+    static constexpr auto kJavaDescriptor = "Lcom/margelo/nitro/nitrogeolocation/LocationAccuracyOptions;";
 
   public:
     /**

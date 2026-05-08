@@ -21,7 +21,7 @@ namespace margelo::nitro::nitrogeolocation {
    */
   struct JLocationError final: public jni::JavaClass<JLocationError> {
   public:
-    static auto constexpr kJavaDescriptor = "Lcom/margelo/nitro/nitrogeolocation/LocationError;";
+    static constexpr auto kJavaDescriptor = "Lcom/margelo/nitro/nitrogeolocation/LocationError;";
 
   public:
     /**

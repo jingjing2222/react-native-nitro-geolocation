@@ -23,7 +23,7 @@ namespace margelo::nitro::nitrogeolocation {
    */
   class JNullableDouble: public jni::JavaClass<JNullableDouble> {
   public:
-    static auto constexpr kJavaDescriptor = "Lcom/margelo/nitro/nitrogeolocation/NullableDouble;";
+    static constexpr auto kJavaDescriptor = "Lcom/margelo/nitro/nitrogeolocation/NullableDouble;";
 
     static jni::local_ref<JNullableDouble> create_0(jni::alias_ref<JNull> value) {
       static const auto method = javaClassStatic()->getStaticMethod<JNullableDouble(jni::alias_ref<JNull>)>("create");
@@ -48,7 +48,7 @@ namespace margelo::nitro::nitrogeolocation {
   namespace JNullableDouble_impl {
     class First final: public jni::JavaClass<First, JNullableDouble> {
     public:
-      static auto constexpr kJavaDescriptor = "Lcom/margelo/nitro/nitrogeolocation/NullableDouble$First;";
+      static constexpr auto kJavaDescriptor = "Lcom/margelo/nitro/nitrogeolocation/NullableDouble$First;";
     
       [[nodiscard]] jni::local_ref<JNull> getValue() const {
         static const auto field = javaClassStatic()->getField<JNull>("value");
@@ -58,7 +58,7 @@ namespace margelo::nitro::nitrogeolocation {
     
     class Second final: public jni::JavaClass<Second, JNullableDouble> {
     public:
-      static auto constexpr kJavaDescriptor = "Lcom/margelo/nitro/nitrogeolocation/NullableDouble$Second;";
+      static constexpr auto kJavaDescriptor = "Lcom/margelo/nitro/nitrogeolocation/NullableDouble$Second;";
     
       [[nodiscard]] double getValue() const {
         static const auto field = javaClassStatic()->getField<double>("value");

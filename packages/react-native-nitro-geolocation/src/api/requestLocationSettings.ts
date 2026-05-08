@@ -22,8 +22,8 @@ export function requestLocationSettings(
   return new Promise((resolve, reject) => {
     NitroGeolocationHybridObject.requestLocationSettings(
       resolve,
-      reject,
-      options
+      options ?? {},
+      reject
     );
   });
 }
