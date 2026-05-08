@@ -225,9 +225,9 @@ namespace margelo::nitro::nitrogeolocation {
       return __promise;
     }();
   }
-  void JHybridNitroGeolocationSpec::requestLocationSettings(const std::function<void(const LocationProviderStatus& /* status */)>& success, const std::optional<std::function<void(const LocationError& /* error */)>>& error, const std::optional<LocationSettingsOptions>& options) {
-    static const auto method = _javaPart->javaClassStatic()->getMethod<void(jni::alias_ref<JFunc_void_LocationProviderStatus::javaobject> /* success */, jni::alias_ref<JFunc_void_LocationError::javaobject> /* error */, jni::alias_ref<JLocationSettingsOptions> /* options */)>("requestLocationSettings_cxx");
-    method(_javaPart, JFunc_void_LocationProviderStatus_cxx::fromCpp(success), error.has_value() ? JFunc_void_LocationError_cxx::fromCpp(error.value()) : nullptr, options.has_value() ? JLocationSettingsOptions::fromCpp(options.value()) : nullptr);
+  void JHybridNitroGeolocationSpec::requestLocationSettings(const std::function<void(const LocationProviderStatus& /* status */)>& success, const LocationSettingsOptions& options, const std::optional<std::function<void(const LocationError& /* error */)>>& error) {
+    static const auto method = _javaPart->javaClassStatic()->getMethod<void(jni::alias_ref<JFunc_void_LocationProviderStatus::javaobject> /* success */, jni::alias_ref<JLocationSettingsOptions> /* options */, jni::alias_ref<JFunc_void_LocationError::javaobject> /* error */)>("requestLocationSettings_cxx");
+    method(_javaPart, JFunc_void_LocationProviderStatus_cxx::fromCpp(success), JLocationSettingsOptions::fromCpp(options), error.has_value() ? JFunc_void_LocationError_cxx::fromCpp(error.value()) : nullptr);
   }
   std::shared_ptr<Promise<AccuracyAuthorization>> JHybridNitroGeolocationSpec::getAccuracyAuthorization() {
     static const auto method = _javaPart->javaClassStatic()->getMethod<jni::local_ref<JPromise::javaobject>()>("getAccuracyAuthorization");
@@ -249,13 +249,13 @@ namespace margelo::nitro::nitrogeolocation {
     static const auto method = _javaPart->javaClassStatic()->getMethod<void(jni::alias_ref<jni::JString> /* purposeKey */, jni::alias_ref<JFunc_void_AccuracyAuthorization::javaobject> /* success */, jni::alias_ref<JFunc_void_LocationError::javaobject> /* error */)>("requestTemporaryFullAccuracy_cxx");
     method(_javaPart, jni::make_jstring(purposeKey), JFunc_void_AccuracyAuthorization_cxx::fromCpp(success), error.has_value() ? JFunc_void_LocationError_cxx::fromCpp(error.value()) : nullptr);
   }
-  void JHybridNitroGeolocationSpec::getCurrentPosition(const std::function<void(const GeolocationResponse& /* position */)>& success, const std::optional<std::function<void(const LocationError& /* error */)>>& error, const std::optional<LocationRequestOptions>& options) {
-    static const auto method = _javaPart->javaClassStatic()->getMethod<void(jni::alias_ref<JFunc_void_GeolocationResponse::javaobject> /* success */, jni::alias_ref<JFunc_void_LocationError::javaobject> /* error */, jni::alias_ref<JLocationRequestOptions> /* options */)>("getCurrentPosition_cxx");
-    method(_javaPart, JFunc_void_GeolocationResponse_cxx::fromCpp(success), error.has_value() ? JFunc_void_LocationError_cxx::fromCpp(error.value()) : nullptr, options.has_value() ? JLocationRequestOptions::fromCpp(options.value()) : nullptr);
+  void JHybridNitroGeolocationSpec::getCurrentPosition(const std::function<void(const GeolocationResponse& /* position */)>& success, const LocationRequestOptions& options, const std::optional<std::function<void(const LocationError& /* error */)>>& error) {
+    static const auto method = _javaPart->javaClassStatic()->getMethod<void(jni::alias_ref<JFunc_void_GeolocationResponse::javaobject> /* success */, jni::alias_ref<JLocationRequestOptions> /* options */, jni::alias_ref<JFunc_void_LocationError::javaobject> /* error */)>("getCurrentPosition_cxx");
+    method(_javaPart, JFunc_void_GeolocationResponse_cxx::fromCpp(success), JLocationRequestOptions::fromCpp(options), error.has_value() ? JFunc_void_LocationError_cxx::fromCpp(error.value()) : nullptr);
   }
-  void JHybridNitroGeolocationSpec::getLastKnownPosition(const std::function<void(const GeolocationResponse& /* position */)>& success, const std::optional<std::function<void(const LocationError& /* error */)>>& error, const std::optional<LocationRequestOptions>& options) {
-    static const auto method = _javaPart->javaClassStatic()->getMethod<void(jni::alias_ref<JFunc_void_GeolocationResponse::javaobject> /* success */, jni::alias_ref<JFunc_void_LocationError::javaobject> /* error */, jni::alias_ref<JLocationRequestOptions> /* options */)>("getLastKnownPosition_cxx");
-    method(_javaPart, JFunc_void_GeolocationResponse_cxx::fromCpp(success), error.has_value() ? JFunc_void_LocationError_cxx::fromCpp(error.value()) : nullptr, options.has_value() ? JLocationRequestOptions::fromCpp(options.value()) : nullptr);
+  void JHybridNitroGeolocationSpec::getLastKnownPosition(const std::function<void(const GeolocationResponse& /* position */)>& success, const LocationRequestOptions& options, const std::optional<std::function<void(const LocationError& /* error */)>>& error) {
+    static const auto method = _javaPart->javaClassStatic()->getMethod<void(jni::alias_ref<JFunc_void_GeolocationResponse::javaobject> /* success */, jni::alias_ref<JLocationRequestOptions> /* options */, jni::alias_ref<JFunc_void_LocationError::javaobject> /* error */)>("getLastKnownPosition_cxx");
+    method(_javaPart, JFunc_void_GeolocationResponse_cxx::fromCpp(success), JLocationRequestOptions::fromCpp(options), error.has_value() ? JFunc_void_LocationError_cxx::fromCpp(error.value()) : nullptr);
   }
   void JHybridNitroGeolocationSpec::geocode(const std::string& address, const std::function<void(const std::vector<GeocodedLocation>& /* locations */)>& success, const std::optional<std::function<void(const LocationError& /* error */)>>& error) {
     static const auto method = _javaPart->javaClassStatic()->getMethod<void(jni::alias_ref<jni::JString> /* address */, jni::alias_ref<JFunc_void_std__vector_GeocodedLocation_::javaobject> /* success */, jni::alias_ref<JFunc_void_LocationError::javaobject> /* error */)>("geocode_cxx");
@@ -269,14 +269,14 @@ namespace margelo::nitro::nitrogeolocation {
     static const auto method = _javaPart->javaClassStatic()->getMethod<void(jni::alias_ref<JFunc_void_Heading::javaobject> /* success */, jni::alias_ref<JFunc_void_LocationError::javaobject> /* error */)>("getHeading_cxx");
     method(_javaPart, JFunc_void_Heading_cxx::fromCpp(success), error.has_value() ? JFunc_void_LocationError_cxx::fromCpp(error.value()) : nullptr);
   }
-  std::string JHybridNitroGeolocationSpec::watchHeading(const std::function<void(const Heading& /* heading */)>& success, const std::optional<std::function<void(const LocationError& /* error */)>>& error, const std::optional<HeadingOptions>& options) {
-    static const auto method = _javaPart->javaClassStatic()->getMethod<jni::local_ref<jni::JString>(jni::alias_ref<JFunc_void_Heading::javaobject> /* success */, jni::alias_ref<JFunc_void_LocationError::javaobject> /* error */, jni::alias_ref<JHeadingOptions> /* options */)>("watchHeading_cxx");
-    auto __result = method(_javaPart, JFunc_void_Heading_cxx::fromCpp(success), error.has_value() ? JFunc_void_LocationError_cxx::fromCpp(error.value()) : nullptr, options.has_value() ? JHeadingOptions::fromCpp(options.value()) : nullptr);
+  std::string JHybridNitroGeolocationSpec::watchHeading(const std::function<void(const Heading& /* heading */)>& success, const HeadingOptions& options, const std::optional<std::function<void(const LocationError& /* error */)>>& error) {
+    static const auto method = _javaPart->javaClassStatic()->getMethod<jni::local_ref<jni::JString>(jni::alias_ref<JFunc_void_Heading::javaobject> /* success */, jni::alias_ref<JHeadingOptions> /* options */, jni::alias_ref<JFunc_void_LocationError::javaobject> /* error */)>("watchHeading_cxx");
+    auto __result = method(_javaPart, JFunc_void_Heading_cxx::fromCpp(success), JHeadingOptions::fromCpp(options), error.has_value() ? JFunc_void_LocationError_cxx::fromCpp(error.value()) : nullptr);
     return __result->toStdString();
   }
-  std::string JHybridNitroGeolocationSpec::watchPosition(const std::function<void(const GeolocationResponse& /* position */)>& success, const std::optional<std::function<void(const LocationError& /* error */)>>& error, const std::optional<LocationRequestOptions>& options) {
-    static const auto method = _javaPart->javaClassStatic()->getMethod<jni::local_ref<jni::JString>(jni::alias_ref<JFunc_void_GeolocationResponse::javaobject> /* success */, jni::alias_ref<JFunc_void_LocationError::javaobject> /* error */, jni::alias_ref<JLocationRequestOptions> /* options */)>("watchPosition_cxx");
-    auto __result = method(_javaPart, JFunc_void_GeolocationResponse_cxx::fromCpp(success), error.has_value() ? JFunc_void_LocationError_cxx::fromCpp(error.value()) : nullptr, options.has_value() ? JLocationRequestOptions::fromCpp(options.value()) : nullptr);
+  std::string JHybridNitroGeolocationSpec::watchPosition(const std::function<void(const GeolocationResponse& /* position */)>& success, const LocationRequestOptions& options, const std::optional<std::function<void(const LocationError& /* error */)>>& error) {
+    static const auto method = _javaPart->javaClassStatic()->getMethod<jni::local_ref<jni::JString>(jni::alias_ref<JFunc_void_GeolocationResponse::javaobject> /* success */, jni::alias_ref<JLocationRequestOptions> /* options */, jni::alias_ref<JFunc_void_LocationError::javaobject> /* error */)>("watchPosition_cxx");
+    auto __result = method(_javaPart, JFunc_void_GeolocationResponse_cxx::fromCpp(success), JLocationRequestOptions::fromCpp(options), error.has_value() ? JFunc_void_LocationError_cxx::fromCpp(error.value()) : nullptr);
     return __result->toStdString();
   }
   void JHybridNitroGeolocationSpec::unwatch(const std::string& token) {

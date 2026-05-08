@@ -21,7 +21,7 @@ namespace margelo::nitro::nitrogeolocation {
    */
   struct JHeadingOptions final: public jni::JavaClass<JHeadingOptions> {
   public:
-    static auto constexpr kJavaDescriptor = "Lcom/margelo/nitro/nitrogeolocation/HeadingOptions;";
+    static constexpr auto kJavaDescriptor = "Lcom/margelo/nitro/nitrogeolocation/HeadingOptions;";
 
   public:
     /**

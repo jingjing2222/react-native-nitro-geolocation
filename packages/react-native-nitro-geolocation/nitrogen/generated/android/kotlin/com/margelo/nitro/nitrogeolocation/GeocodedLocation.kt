@@ -9,6 +9,7 @@ package com.margelo.nitro.nitrogeolocation
 
 import androidx.annotation.Keep
 import com.facebook.proguard.annotations.DoNotStrip
+import java.util.Objects
 
 
 /**
@@ -28,6 +29,22 @@ data class GeocodedLocation(
   val accuracy: Double?
 ) {
   /* primary constructor */
+
+  override fun equals(other: Any?): Boolean {
+    if (this === other) return true
+    if (other !is GeocodedLocation) return false
+    return Objects.deepEquals(this.latitude, other.latitude)
+      && Objects.deepEquals(this.longitude, other.longitude)
+      && Objects.deepEquals(this.accuracy, other.accuracy)
+  }
+
+  override fun hashCode(): Int {
+    return arrayOf(
+      latitude,
+      longitude,
+      accuracy
+    ).contentDeepHashCode()
+  }
 
   companion object {
     /**

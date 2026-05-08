@@ -26,7 +26,7 @@ namespace margelo::nitro::nitrogeolocation {
    */
   struct JFunc_void_LocationError: public jni::JavaClass<JFunc_void_LocationError> {
   public:
-    static auto constexpr kJavaDescriptor = "Lcom/margelo/nitro/nitrogeolocation/Func_void_LocationError;";
+    static constexpr auto kJavaDescriptor = "Lcom/margelo/nitro/nitrogeolocation/Func_void_LocationError;";
 
   public:
     /**
@@ -62,7 +62,7 @@ namespace margelo::nitro::nitrogeolocation {
     }
 
   public:
-    static auto constexpr kJavaDescriptor = "Lcom/margelo/nitro/nitrogeolocation/Func_void_LocationError_cxx;";
+    static constexpr auto kJavaDescriptor = "Lcom/margelo/nitro/nitrogeolocation/Func_void_LocationError_cxx;";
     static void registerNatives() {
       registerHybrid({makeNativeMethod("invoke_cxx", JFunc_void_LocationError_cxx::invoke_cxx)});
     }

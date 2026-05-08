@@ -35,8 +35,9 @@ class NitroGeolocationCompat: HybridNitroGeolocationCompatSpec {
     }
 
     public func getCurrentPosition(
-        success: @escaping (CompatGeolocationResponse) -> Void, error: ((CompatGeolocationError) -> Void)?,
-        options: CompatGeolocationOptions?
+        success: @escaping (CompatGeolocationResponse) -> Void,
+        options: CompatGeolocationOptions,
+        error: ((CompatGeolocationError) -> Void)?
     ) throws {
         // Fast path: check cached location immediately (no dispatch overhead!)
         let parsedOptions = LocationManager.ParsedOptions.parse(from: options)
@@ -52,8 +53,9 @@ class NitroGeolocationCompat: HybridNitroGeolocationCompatSpec {
     }
 
     public func watchPosition(
-        success: @escaping (CompatGeolocationResponse) -> Void, error: ((CompatGeolocationError) -> Void)?,
-        options: CompatGeolocationOptions?
+        success: @escaping (CompatGeolocationResponse) -> Void,
+        options: CompatGeolocationOptions,
+        error: ((CompatGeolocationError) -> Void)?
     ) throws -> Double {
         return locationManager.watchPosition(success: success, error: error, options: options)
     }

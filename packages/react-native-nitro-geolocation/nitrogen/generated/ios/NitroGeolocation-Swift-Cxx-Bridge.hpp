@@ -20,8 +20,6 @@ namespace margelo::nitro::nitrogeolocation { enum class AuthorizationLevelIntern
 namespace margelo::nitro::nitrogeolocation { enum class AuthorizationLevel; }
 // Forward declaration of `CompatGeolocationError` to properly resolve imports.
 namespace margelo::nitro::nitrogeolocation { struct CompatGeolocationError; }
-// Forward declaration of `CompatGeolocationOptions` to properly resolve imports.
-namespace margelo::nitro::nitrogeolocation { struct CompatGeolocationOptions; }
 // Forward declaration of `CompatGeolocationResponse` to properly resolve imports.
 namespace margelo::nitro::nitrogeolocation { struct CompatGeolocationResponse; }
 // Forward declaration of `GeocodedLocation` to properly resolve imports.
@@ -30,8 +28,6 @@ namespace margelo::nitro::nitrogeolocation { struct GeocodedLocation; }
 namespace margelo::nitro::nitrogeolocation { struct GeolocationCoordinates; }
 // Forward declaration of `GeolocationResponse` to properly resolve imports.
 namespace margelo::nitro::nitrogeolocation { struct GeolocationResponse; }
-// Forward declaration of `HeadingOptions` to properly resolve imports.
-namespace margelo::nitro::nitrogeolocation { struct HeadingOptions; }
 // Forward declaration of `Heading` to properly resolve imports.
 namespace margelo::nitro::nitrogeolocation { struct Heading; }
 // Forward declaration of `HybridNitroGeolocationCompatSpec` to properly resolve imports.
@@ -56,10 +52,6 @@ namespace margelo::nitro::nitrogeolocation { struct LocationProviderStatus; }
 namespace margelo::nitro::nitrogeolocation { enum class LocationProviderUsed; }
 // Forward declaration of `LocationProvider` to properly resolve imports.
 namespace margelo::nitro::nitrogeolocation { enum class LocationProvider; }
-// Forward declaration of `LocationRequestOptions` to properly resolve imports.
-namespace margelo::nitro::nitrogeolocation { struct LocationRequestOptions; }
-// Forward declaration of `LocationSettingsOptions` to properly resolve imports.
-namespace margelo::nitro::nitrogeolocation { struct LocationSettingsOptions; }
 // Forward declaration of `PermissionStatus` to properly resolve imports.
 namespace margelo::nitro::nitrogeolocation { enum class PermissionStatus; }
 // Forward declaration of `ReverseGeocodedAddress` to properly resolve imports.
@@ -78,13 +70,11 @@ namespace NitroGeolocation { class HybridNitroGeolocationSpec_cxx; }
 #include "AuthorizationLevel.hpp"
 #include "AuthorizationLevelInternal.hpp"
 #include "CompatGeolocationError.hpp"
-#include "CompatGeolocationOptions.hpp"
 #include "CompatGeolocationResponse.hpp"
 #include "GeocodedLocation.hpp"
 #include "GeolocationCoordinates.hpp"
 #include "GeolocationResponse.hpp"
 #include "Heading.hpp"
-#include "HeadingOptions.hpp"
 #include "HybridNitroGeolocationCompatSpec.hpp"
 #include "HybridNitroGeolocationSpec.hpp"
 #include "IOSAccuracyPreset.hpp"
@@ -96,8 +86,6 @@ namespace NitroGeolocation { class HybridNitroGeolocationSpec_cxx; }
 #include "LocationProviderInternal.hpp"
 #include "LocationProviderStatus.hpp"
 #include "LocationProviderUsed.hpp"
-#include "LocationRequestOptions.hpp"
-#include "LocationSettingsOptions.hpp"
 #include "PermissionStatus.hpp"
 #include "ReverseGeocodedAddress.hpp"
 #include <NitroModules/Null.hpp>
@@ -433,21 +421,6 @@ namespace margelo::nitro::nitrogeolocation::bridge::swift {
     return optional.value();
   }
   
-  // pragma MARK: std::optional<LocationSettingsOptions>
-  /**
-   * Specialized version of `std::optional<LocationSettingsOptions>`.
-   */
-  using std__optional_LocationSettingsOptions_ = std::optional<LocationSettingsOptions>;
-  inline std::optional<LocationSettingsOptions> create_std__optional_LocationSettingsOptions_(const LocationSettingsOptions& value) noexcept {
-    return std::optional<LocationSettingsOptions>(value);
-  }
-  inline bool has_value_std__optional_LocationSettingsOptions_(const std::optional<LocationSettingsOptions>& optional) noexcept {
-    return optional.has_value();
-  }
-  inline LocationSettingsOptions get_std__optional_LocationSettingsOptions_(const std::optional<LocationSettingsOptions>& optional) noexcept {
-    return optional.value();
-  }
-  
   // pragma MARK: std::shared_ptr<Promise<AccuracyAuthorization>>
   /**
    * Specialized version of `std::shared_ptr<Promise<AccuracyAuthorization>>`.
@@ -593,21 +566,6 @@ namespace margelo::nitro::nitrogeolocation::bridge::swift {
     return optional.value();
   }
   
-  // pragma MARK: std::optional<LocationRequestOptions>
-  /**
-   * Specialized version of `std::optional<LocationRequestOptions>`.
-   */
-  using std__optional_LocationRequestOptions_ = std::optional<LocationRequestOptions>;
-  inline std::optional<LocationRequestOptions> create_std__optional_LocationRequestOptions_(const LocationRequestOptions& value) noexcept {
-    return std::optional<LocationRequestOptions>(value);
-  }
-  inline bool has_value_std__optional_LocationRequestOptions_(const std::optional<LocationRequestOptions>& optional) noexcept {
-    return optional.has_value();
-  }
-  inline LocationRequestOptions get_std__optional_LocationRequestOptions_(const std::optional<LocationRequestOptions>& optional) noexcept {
-    return optional.value();
-  }
-  
   // pragma MARK: std::vector<GeocodedLocation>
   /**
    * Specialized version of `std::vector<GeocodedLocation>`.
@@ -694,21 +652,6 @@ namespace margelo::nitro::nitrogeolocation::bridge::swift {
   Func_void_Heading create_Func_void_Heading(void* NON_NULL swiftClosureWrapper) noexcept;
   inline Func_void_Heading_Wrapper wrap_Func_void_Heading(Func_void_Heading value) noexcept {
     return Func_void_Heading_Wrapper(std::move(value));
-  }
-  
-  // pragma MARK: std::optional<HeadingOptions>
-  /**
-   * Specialized version of `std::optional<HeadingOptions>`.
-   */
-  using std__optional_HeadingOptions_ = std::optional<HeadingOptions>;
-  inline std::optional<HeadingOptions> create_std__optional_HeadingOptions_(const HeadingOptions& value) noexcept {
-    return std::optional<HeadingOptions>(value);
-  }
-  inline bool has_value_std__optional_HeadingOptions_(const std::optional<HeadingOptions>& optional) noexcept {
-    return optional.has_value();
-  }
-  inline HeadingOptions get_std__optional_HeadingOptions_(const std::optional<HeadingOptions>& optional) noexcept {
-    return optional.value();
   }
   
   // pragma MARK: std::shared_ptr<HybridNitroGeolocationSpec>
@@ -910,21 +853,6 @@ namespace margelo::nitro::nitrogeolocation::bridge::swift {
   Func_void_CompatGeolocationResponse create_Func_void_CompatGeolocationResponse(void* NON_NULL swiftClosureWrapper) noexcept;
   inline Func_void_CompatGeolocationResponse_Wrapper wrap_Func_void_CompatGeolocationResponse(Func_void_CompatGeolocationResponse value) noexcept {
     return Func_void_CompatGeolocationResponse_Wrapper(std::move(value));
-  }
-  
-  // pragma MARK: std::optional<CompatGeolocationOptions>
-  /**
-   * Specialized version of `std::optional<CompatGeolocationOptions>`.
-   */
-  using std__optional_CompatGeolocationOptions_ = std::optional<CompatGeolocationOptions>;
-  inline std::optional<CompatGeolocationOptions> create_std__optional_CompatGeolocationOptions_(const CompatGeolocationOptions& value) noexcept {
-    return std::optional<CompatGeolocationOptions>(value);
-  }
-  inline bool has_value_std__optional_CompatGeolocationOptions_(const std::optional<CompatGeolocationOptions>& optional) noexcept {
-    return optional.has_value();
-  }
-  inline CompatGeolocationOptions get_std__optional_CompatGeolocationOptions_(const std::optional<CompatGeolocationOptions>& optional) noexcept {
-    return optional.value();
   }
   
   // pragma MARK: std::shared_ptr<HybridNitroGeolocationCompatSpec>

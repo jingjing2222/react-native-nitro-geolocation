@@ -9,6 +9,7 @@ package com.margelo.nitro.nitrogeolocation
 
 import androidx.annotation.Keep
 import com.facebook.proguard.annotations.DoNotStrip
+import java.util.Objects
 
 
 /**
@@ -25,6 +26,20 @@ data class LocationError(
   val message: String
 ) {
   /* primary constructor */
+
+  override fun equals(other: Any?): Boolean {
+    if (this === other) return true
+    if (other !is LocationError) return false
+    return Objects.deepEquals(this.code, other.code)
+      && Objects.deepEquals(this.message, other.message)
+  }
+
+  override fun hashCode(): Int {
+    return arrayOf(
+      code,
+      message
+    ).contentDeepHashCode()
+  }
 
   companion object {
     /**

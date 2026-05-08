@@ -28,13 +28,13 @@ export interface NitroGeolocationCompat
   ): void;
   getCurrentPosition(
     success: (position: CompatGeolocationResponse) => void,
-    error?: (error: CompatGeolocationError) => void,
-    options?: CompatGeolocationOptions
+    options: CompatGeolocationOptions,
+    error?: (error: CompatGeolocationError) => void
   ): void;
   watchPosition(
     success: (position: CompatGeolocationResponse) => void,
-    error?: (error: CompatGeolocationError) => void,
-    options?: CompatGeolocationOptions
+    options: CompatGeolocationOptions,
+    error?: (error: CompatGeolocationError) => void
   ): number;
   clearWatch(watchId: number): void;
   stopObserving(): void;

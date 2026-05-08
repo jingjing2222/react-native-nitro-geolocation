@@ -184,8 +184,8 @@ namespace margelo::nitro::nitrogeolocation {
       auto __value = std::move(__result.value());
       return __value;
     }
-    inline void requestLocationSettings(const std::function<void(const LocationProviderStatus& /* status */)>& success, const std::optional<std::function<void(const LocationError& /* error */)>>& error, const std::optional<LocationSettingsOptions>& options) override {
-      auto __result = _swiftPart.requestLocationSettings(success, error, options);
+    inline void requestLocationSettings(const std::function<void(const LocationProviderStatus& /* status */)>& success, const LocationSettingsOptions& options, const std::optional<std::function<void(const LocationError& /* error */)>>& error) override {
+      auto __result = _swiftPart.requestLocationSettings(success, std::forward<decltype(options)>(options), error);
       if (__result.hasError()) [[unlikely]] {
         std::rethrow_exception(__result.error());
       }
@@ -204,14 +204,14 @@ namespace margelo::nitro::nitrogeolocation {
         std::rethrow_exception(__result.error());
       }
     }
-    inline void getCurrentPosition(const std::function<void(const GeolocationResponse& /* position */)>& success, const std::optional<std::function<void(const LocationError& /* error */)>>& error, const std::optional<LocationRequestOptions>& options) override {
-      auto __result = _swiftPart.getCurrentPosition(success, error, options);
+    inline void getCurrentPosition(const std::function<void(const GeolocationResponse& /* position */)>& success, const LocationRequestOptions& options, const std::optional<std::function<void(const LocationError& /* error */)>>& error) override {
+      auto __result = _swiftPart.getCurrentPosition(success, std::forward<decltype(options)>(options), error);
       if (__result.hasError()) [[unlikely]] {
         std::rethrow_exception(__result.error());
       }
     }
-    inline void getLastKnownPosition(const std::function<void(const GeolocationResponse& /* position */)>& success, const std::optional<std::function<void(const LocationError& /* error */)>>& error, const std::optional<LocationRequestOptions>& options) override {
-      auto __result = _swiftPart.getLastKnownPosition(success, error, options);
+    inline void getLastKnownPosition(const std::function<void(const GeolocationResponse& /* position */)>& success, const LocationRequestOptions& options, const std::optional<std::function<void(const LocationError& /* error */)>>& error) override {
+      auto __result = _swiftPart.getLastKnownPosition(success, std::forward<decltype(options)>(options), error);
       if (__result.hasError()) [[unlikely]] {
         std::rethrow_exception(__result.error());
       }
@@ -234,16 +234,16 @@ namespace margelo::nitro::nitrogeolocation {
         std::rethrow_exception(__result.error());
       }
     }
-    inline std::string watchHeading(const std::function<void(const Heading& /* heading */)>& success, const std::optional<std::function<void(const LocationError& /* error */)>>& error, const std::optional<HeadingOptions>& options) override {
-      auto __result = _swiftPart.watchHeading(success, error, options);
+    inline std::string watchHeading(const std::function<void(const Heading& /* heading */)>& success, const HeadingOptions& options, const std::optional<std::function<void(const LocationError& /* error */)>>& error) override {
+      auto __result = _swiftPart.watchHeading(success, std::forward<decltype(options)>(options), error);
       if (__result.hasError()) [[unlikely]] {
         std::rethrow_exception(__result.error());
       }
       auto __value = std::move(__result.value());
       return __value;
     }
-    inline std::string watchPosition(const std::function<void(const GeolocationResponse& /* position */)>& success, const std::optional<std::function<void(const LocationError& /* error */)>>& error, const std::optional<LocationRequestOptions>& options) override {
-      auto __result = _swiftPart.watchPosition(success, error, options);
+    inline std::string watchPosition(const std::function<void(const GeolocationResponse& /* position */)>& success, const LocationRequestOptions& options, const std::optional<std::function<void(const LocationError& /* error */)>>& error) override {
+      auto __result = _swiftPart.watchPosition(success, std::forward<decltype(options)>(options), error);
       if (__result.hasError()) [[unlikely]] {
         std::rethrow_exception(__result.error());
       }

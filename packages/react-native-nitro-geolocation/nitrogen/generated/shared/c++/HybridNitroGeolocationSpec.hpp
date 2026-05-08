@@ -99,16 +99,16 @@ namespace margelo::nitro::nitrogeolocation {
       virtual std::shared_ptr<Promise<bool>> hasServicesEnabled() = 0;
       virtual std::shared_ptr<Promise<LocationProviderStatus>> getProviderStatus() = 0;
       virtual std::shared_ptr<Promise<LocationAvailability>> getLocationAvailability() = 0;
-      virtual void requestLocationSettings(const std::function<void(const LocationProviderStatus& /* status */)>& success, const std::optional<std::function<void(const LocationError& /* error */)>>& error, const std::optional<LocationSettingsOptions>& options) = 0;
+      virtual void requestLocationSettings(const std::function<void(const LocationProviderStatus& /* status */)>& success, const LocationSettingsOptions& options, const std::optional<std::function<void(const LocationError& /* error */)>>& error) = 0;
       virtual std::shared_ptr<Promise<AccuracyAuthorization>> getAccuracyAuthorization() = 0;
       virtual void requestTemporaryFullAccuracy(const std::string& purposeKey, const std::function<void(AccuracyAuthorization /* authorization */)>& success, const std::optional<std::function<void(const LocationError& /* error */)>>& error) = 0;
-      virtual void getCurrentPosition(const std::function<void(const GeolocationResponse& /* position */)>& success, const std::optional<std::function<void(const LocationError& /* error */)>>& error, const std::optional<LocationRequestOptions>& options) = 0;
-      virtual void getLastKnownPosition(const std::function<void(const GeolocationResponse& /* position */)>& success, const std::optional<std::function<void(const LocationError& /* error */)>>& error, const std::optional<LocationRequestOptions>& options) = 0;
+      virtual void getCurrentPosition(const std::function<void(const GeolocationResponse& /* position */)>& success, const LocationRequestOptions& options, const std::optional<std::function<void(const LocationError& /* error */)>>& error) = 0;
+      virtual void getLastKnownPosition(const std::function<void(const GeolocationResponse& /* position */)>& success, const LocationRequestOptions& options, const std::optional<std::function<void(const LocationError& /* error */)>>& error) = 0;
       virtual void geocode(const std::string& address, const std::function<void(const std::vector<GeocodedLocation>& /* locations */)>& success, const std::optional<std::function<void(const LocationError& /* error */)>>& error) = 0;
       virtual void reverseGeocode(const GeocodingCoordinates& coords, const std::function<void(const std::vector<ReverseGeocodedAddress>& /* addresses */)>& success, const std::optional<std::function<void(const LocationError& /* error */)>>& error) = 0;
       virtual void getHeading(const std::function<void(const Heading& /* heading */)>& success, const std::optional<std::function<void(const LocationError& /* error */)>>& error) = 0;
-      virtual std::string watchHeading(const std::function<void(const Heading& /* heading */)>& success, const std::optional<std::function<void(const LocationError& /* error */)>>& error, const std::optional<HeadingOptions>& options) = 0;
-      virtual std::string watchPosition(const std::function<void(const GeolocationResponse& /* position */)>& success, const std::optional<std::function<void(const LocationError& /* error */)>>& error, const std::optional<LocationRequestOptions>& options) = 0;
+      virtual std::string watchHeading(const std::function<void(const Heading& /* heading */)>& success, const HeadingOptions& options, const std::optional<std::function<void(const LocationError& /* error */)>>& error) = 0;
+      virtual std::string watchPosition(const std::function<void(const GeolocationResponse& /* position */)>& success, const LocationRequestOptions& options, const std::optional<std::function<void(const LocationError& /* error */)>>& error) = 0;
       virtual void unwatch(const std::string& token) = 0;
       virtual void stopObserving() = 0;
 

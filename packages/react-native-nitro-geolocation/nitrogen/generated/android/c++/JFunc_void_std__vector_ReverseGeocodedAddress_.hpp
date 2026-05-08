@@ -28,7 +28,7 @@ namespace margelo::nitro::nitrogeolocation {
    */
   struct JFunc_void_std__vector_ReverseGeocodedAddress_: public jni::JavaClass<JFunc_void_std__vector_ReverseGeocodedAddress_> {
   public:
-    static auto constexpr kJavaDescriptor = "Lcom/margelo/nitro/nitrogeolocation/Func_void_std__vector_ReverseGeocodedAddress_;";
+    static constexpr auto kJavaDescriptor = "Lcom/margelo/nitro/nitrogeolocation/Func_void_std__vector_ReverseGeocodedAddress_;";
 
   public:
     /**
@@ -36,16 +36,16 @@ namespace margelo::nitro::nitrogeolocation {
      */
     void invoke(const std::vector<ReverseGeocodedAddress>& addresses) const {
       static const auto method = javaClassStatic()->getMethod<void(jni::alias_ref<jni::JArrayClass<JReverseGeocodedAddress>> /* addresses */)>("invoke");
-      method(self(), [&]() {
-        size_t __size = addresses.size();
+      method(self(), [&](auto&& __input) {
+        size_t __size = __input.size();
         jni::local_ref<jni::JArrayClass<JReverseGeocodedAddress>> __array = jni::JArrayClass<JReverseGeocodedAddress>::newArray(__size);
         for (size_t __i = 0; __i < __size; __i++) {
-          const auto& __element = addresses[__i];
+          const auto& __element = __input[__i];
           auto __elementJni = JReverseGeocodedAddress::fromCpp(__element);
           __array->setElement(__i, *__elementJni);
         }
         return __array;
-      }());
+      }(addresses));
     }
   };
 
@@ -63,16 +63,16 @@ namespace margelo::nitro::nitrogeolocation {
      * Invokes the C++ `std::function<...>` this `JFunc_void_std__vector_ReverseGeocodedAddress__cxx` instance holds.
      */
     void invoke_cxx(jni::alias_ref<jni::JArrayClass<JReverseGeocodedAddress>> addresses) {
-      _func([&]() {
-              size_t __size = addresses->size();
-              std::vector<ReverseGeocodedAddress> __vector;
-              __vector.reserve(__size);
-              for (size_t __i = 0; __i < __size; __i++) {
-                auto __element = addresses->getElement(__i);
-                __vector.push_back(__element->toCpp());
-              }
-              return __vector;
-            }());
+      _func([&](auto&& __input) {
+        size_t __size = __input->size();
+        std::vector<ReverseGeocodedAddress> __vector;
+        __vector.reserve(__size);
+        for (size_t __i = 0; __i < __size; __i++) {
+          auto __element = __input->getElement(__i);
+          __vector.push_back(__element->toCpp());
+        }
+        return __vector;
+      }(addresses));
     }
 
   public:
@@ -82,7 +82,7 @@ namespace margelo::nitro::nitrogeolocation {
     }
 
   public:
-    static auto constexpr kJavaDescriptor = "Lcom/margelo/nitro/nitrogeolocation/Func_void_std__vector_ReverseGeocodedAddress__cxx;";
+    static constexpr auto kJavaDescriptor = "Lcom/margelo/nitro/nitrogeolocation/Func_void_std__vector_ReverseGeocodedAddress__cxx;";
     static void registerNatives() {
       registerHybrid({makeNativeMethod("invoke_cxx", JFunc_void_std__vector_ReverseGeocodedAddress__cxx::invoke_cxx)});
     }

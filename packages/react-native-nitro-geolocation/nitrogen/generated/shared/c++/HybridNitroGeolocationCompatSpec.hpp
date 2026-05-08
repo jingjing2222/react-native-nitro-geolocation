@@ -62,8 +62,8 @@ namespace margelo::nitro::nitrogeolocation {
       // Methods
       virtual void setRNConfiguration(const CompatGeolocationConfigurationInternal& config) = 0;
       virtual void requestAuthorization(const std::optional<std::function<void()>>& success, const std::optional<std::function<void(const CompatGeolocationError& /* error */)>>& error) = 0;
-      virtual void getCurrentPosition(const std::function<void(const CompatGeolocationResponse& /* position */)>& success, const std::optional<std::function<void(const CompatGeolocationError& /* error */)>>& error, const std::optional<CompatGeolocationOptions>& options) = 0;
-      virtual double watchPosition(const std::function<void(const CompatGeolocationResponse& /* position */)>& success, const std::optional<std::function<void(const CompatGeolocationError& /* error */)>>& error, const std::optional<CompatGeolocationOptions>& options) = 0;
+      virtual void getCurrentPosition(const std::function<void(const CompatGeolocationResponse& /* position */)>& success, const CompatGeolocationOptions& options, const std::optional<std::function<void(const CompatGeolocationError& /* error */)>>& error) = 0;
+      virtual double watchPosition(const std::function<void(const CompatGeolocationResponse& /* position */)>& success, const CompatGeolocationOptions& options, const std::optional<std::function<void(const CompatGeolocationError& /* error */)>>& error) = 0;
       virtual void clearWatch(double watchId) = 0;
       virtual void stopObserving() = 0;
 

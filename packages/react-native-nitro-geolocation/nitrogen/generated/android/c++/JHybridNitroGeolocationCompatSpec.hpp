@@ -21,11 +21,11 @@ namespace margelo::nitro::nitrogeolocation {
   class JHybridNitroGeolocationCompatSpec: public virtual HybridNitroGeolocationCompatSpec, public virtual JHybridObject {
   public:
     struct JavaPart: public jni::JavaClass<JavaPart, JHybridObject::JavaPart> {
-      static auto constexpr kJavaDescriptor = "Lcom/margelo/nitro/nitrogeolocation/HybridNitroGeolocationCompatSpec;";
+      static constexpr auto kJavaDescriptor = "Lcom/margelo/nitro/nitrogeolocation/HybridNitroGeolocationCompatSpec;";
       std::shared_ptr<JHybridNitroGeolocationCompatSpec> getJHybridNitroGeolocationCompatSpec();
     };
     struct CxxPart: public jni::HybridClass<CxxPart, JHybridObject::CxxPart> {
-      static auto constexpr kJavaDescriptor = "Lcom/margelo/nitro/nitrogeolocation/HybridNitroGeolocationCompatSpec$CxxPart;";
+      static constexpr auto kJavaDescriptor = "Lcom/margelo/nitro/nitrogeolocation/HybridNitroGeolocationCompatSpec$CxxPart;";
       static jni::local_ref<jhybriddata> initHybrid(jni::alias_ref<jhybridobject> jThis);
       static void registerNatives();
       using HybridBase::HybridBase;
@@ -56,8 +56,8 @@ namespace margelo::nitro::nitrogeolocation {
     // Methods
     void setRNConfiguration(const CompatGeolocationConfigurationInternal& config) override;
     void requestAuthorization(const std::optional<std::function<void()>>& success, const std::optional<std::function<void(const CompatGeolocationError& /* error */)>>& error) override;
-    void getCurrentPosition(const std::function<void(const CompatGeolocationResponse& /* position */)>& success, const std::optional<std::function<void(const CompatGeolocationError& /* error */)>>& error, const std::optional<CompatGeolocationOptions>& options) override;
-    double watchPosition(const std::function<void(const CompatGeolocationResponse& /* position */)>& success, const std::optional<std::function<void(const CompatGeolocationError& /* error */)>>& error, const std::optional<CompatGeolocationOptions>& options) override;
+    void getCurrentPosition(const std::function<void(const CompatGeolocationResponse& /* position */)>& success, const CompatGeolocationOptions& options, const std::optional<std::function<void(const CompatGeolocationError& /* error */)>>& error) override;
+    double watchPosition(const std::function<void(const CompatGeolocationResponse& /* position */)>& success, const CompatGeolocationOptions& options, const std::optional<std::function<void(const CompatGeolocationError& /* error */)>>& error) override;
     void clearWatch(double watchId) override;
     void stopObserving() override;
 

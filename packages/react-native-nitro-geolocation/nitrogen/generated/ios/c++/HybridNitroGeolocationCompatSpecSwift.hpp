@@ -114,14 +114,14 @@ namespace margelo::nitro::nitrogeolocation {
         std::rethrow_exception(__result.error());
       }
     }
-    inline void getCurrentPosition(const std::function<void(const CompatGeolocationResponse& /* position */)>& success, const std::optional<std::function<void(const CompatGeolocationError& /* error */)>>& error, const std::optional<CompatGeolocationOptions>& options) override {
-      auto __result = _swiftPart.getCurrentPosition(success, error, options);
+    inline void getCurrentPosition(const std::function<void(const CompatGeolocationResponse& /* position */)>& success, const CompatGeolocationOptions& options, const std::optional<std::function<void(const CompatGeolocationError& /* error */)>>& error) override {
+      auto __result = _swiftPart.getCurrentPosition(success, std::forward<decltype(options)>(options), error);
       if (__result.hasError()) [[unlikely]] {
         std::rethrow_exception(__result.error());
       }
     }
-    inline double watchPosition(const std::function<void(const CompatGeolocationResponse& /* position */)>& success, const std::optional<std::function<void(const CompatGeolocationError& /* error */)>>& error, const std::optional<CompatGeolocationOptions>& options) override {
-      auto __result = _swiftPart.watchPosition(success, error, options);
+    inline double watchPosition(const std::function<void(const CompatGeolocationResponse& /* position */)>& success, const CompatGeolocationOptions& options, const std::optional<std::function<void(const CompatGeolocationError& /* error */)>>& error) override {
+      auto __result = _swiftPart.watchPosition(success, std::forward<decltype(options)>(options), error);
       if (__result.hasError()) [[unlikely]] {
         std::rethrow_exception(__result.error());
       }

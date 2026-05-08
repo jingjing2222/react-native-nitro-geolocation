@@ -9,6 +9,7 @@ package com.margelo.nitro.nitrogeolocation
 
 import androidx.annotation.Keep
 import com.facebook.proguard.annotations.DoNotStrip
+import java.util.Objects
 import com.margelo.nitro.core.NullType
 
 /**
@@ -40,6 +41,30 @@ data class GeolocationCoordinates(
   val speed: NullableDouble?
 ) {
   /* primary constructor */
+
+  override fun equals(other: Any?): Boolean {
+    if (this === other) return true
+    if (other !is GeolocationCoordinates) return false
+    return Objects.deepEquals(this.latitude, other.latitude)
+      && Objects.deepEquals(this.longitude, other.longitude)
+      && Objects.deepEquals(this.altitude, other.altitude)
+      && Objects.deepEquals(this.accuracy, other.accuracy)
+      && Objects.deepEquals(this.altitudeAccuracy, other.altitudeAccuracy)
+      && Objects.deepEquals(this.heading, other.heading)
+      && Objects.deepEquals(this.speed, other.speed)
+  }
+
+  override fun hashCode(): Int {
+    return arrayOf(
+      latitude,
+      longitude,
+      altitude,
+      accuracy,
+      altitudeAccuracy,
+      heading,
+      speed
+    ).contentDeepHashCode()
+  }
 
   companion object {
     /**

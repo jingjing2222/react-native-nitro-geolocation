@@ -21,11 +21,11 @@ namespace margelo::nitro::nitrogeolocation {
   class JHybridNitroGeolocationSpec: public virtual HybridNitroGeolocationSpec, public virtual JHybridObject {
   public:
     struct JavaPart: public jni::JavaClass<JavaPart, JHybridObject::JavaPart> {
-      static auto constexpr kJavaDescriptor = "Lcom/margelo/nitro/nitrogeolocation/HybridNitroGeolocationSpec;";
+      static constexpr auto kJavaDescriptor = "Lcom/margelo/nitro/nitrogeolocation/HybridNitroGeolocationSpec;";
       std::shared_ptr<JHybridNitroGeolocationSpec> getJHybridNitroGeolocationSpec();
     };
     struct CxxPart: public jni::HybridClass<CxxPart, JHybridObject::CxxPart> {
-      static auto constexpr kJavaDescriptor = "Lcom/margelo/nitro/nitrogeolocation/HybridNitroGeolocationSpec$CxxPart;";
+      static constexpr auto kJavaDescriptor = "Lcom/margelo/nitro/nitrogeolocation/HybridNitroGeolocationSpec$CxxPart;";
       static jni::local_ref<jhybriddata> initHybrid(jni::alias_ref<jhybridobject> jThis);
       static void registerNatives();
       using HybridBase::HybridBase;
@@ -60,16 +60,16 @@ namespace margelo::nitro::nitrogeolocation {
     std::shared_ptr<Promise<bool>> hasServicesEnabled() override;
     std::shared_ptr<Promise<LocationProviderStatus>> getProviderStatus() override;
     std::shared_ptr<Promise<LocationAvailability>> getLocationAvailability() override;
-    void requestLocationSettings(const std::function<void(const LocationProviderStatus& /* status */)>& success, const std::optional<std::function<void(const LocationError& /* error */)>>& error, const std::optional<LocationSettingsOptions>& options) override;
+    void requestLocationSettings(const std::function<void(const LocationProviderStatus& /* status */)>& success, const LocationSettingsOptions& options, const std::optional<std::function<void(const LocationError& /* error */)>>& error) override;
     std::shared_ptr<Promise<AccuracyAuthorization>> getAccuracyAuthorization() override;
     void requestTemporaryFullAccuracy(const std::string& purposeKey, const std::function<void(AccuracyAuthorization /* authorization */)>& success, const std::optional<std::function<void(const LocationError& /* error */)>>& error) override;
-    void getCurrentPosition(const std::function<void(const GeolocationResponse& /* position */)>& success, const std::optional<std::function<void(const LocationError& /* error */)>>& error, const std::optional<LocationRequestOptions>& options) override;
-    void getLastKnownPosition(const std::function<void(const GeolocationResponse& /* position */)>& success, const std::optional<std::function<void(const LocationError& /* error */)>>& error, const std::optional<LocationRequestOptions>& options) override;
+    void getCurrentPosition(const std::function<void(const GeolocationResponse& /* position */)>& success, const LocationRequestOptions& options, const std::optional<std::function<void(const LocationError& /* error */)>>& error) override;
+    void getLastKnownPosition(const std::function<void(const GeolocationResponse& /* position */)>& success, const LocationRequestOptions& options, const std::optional<std::function<void(const LocationError& /* error */)>>& error) override;
     void geocode(const std::string& address, const std::function<void(const std::vector<GeocodedLocation>& /* locations */)>& success, const std::optional<std::function<void(const LocationError& /* error */)>>& error) override;
     void reverseGeocode(const GeocodingCoordinates& coords, const std::function<void(const std::vector<ReverseGeocodedAddress>& /* addresses */)>& success, const std::optional<std::function<void(const LocationError& /* error */)>>& error) override;
     void getHeading(const std::function<void(const Heading& /* heading */)>& success, const std::optional<std::function<void(const LocationError& /* error */)>>& error) override;
-    std::string watchHeading(const std::function<void(const Heading& /* heading */)>& success, const std::optional<std::function<void(const LocationError& /* error */)>>& error, const std::optional<HeadingOptions>& options) override;
-    std::string watchPosition(const std::function<void(const GeolocationResponse& /* position */)>& success, const std::optional<std::function<void(const LocationError& /* error */)>>& error, const std::optional<LocationRequestOptions>& options) override;
+    std::string watchHeading(const std::function<void(const Heading& /* heading */)>& success, const HeadingOptions& options, const std::optional<std::function<void(const LocationError& /* error */)>>& error) override;
+    std::string watchPosition(const std::function<void(const GeolocationResponse& /* position */)>& success, const LocationRequestOptions& options, const std::optional<std::function<void(const LocationError& /* error */)>>& error) override;
     void unwatch(const std::string& token) override;
     void stopObserving() override;
 

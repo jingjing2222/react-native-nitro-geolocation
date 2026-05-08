@@ -21,7 +21,7 @@ export function watchPosition(
 ): number {
   return NitroGeolocationHybridCompatObject.watchPosition(
     success,
-    error,
-    options
+    options ?? {},
+    error
   );
 }

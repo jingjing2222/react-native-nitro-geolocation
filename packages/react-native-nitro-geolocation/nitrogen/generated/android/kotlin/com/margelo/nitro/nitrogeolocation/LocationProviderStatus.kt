@@ -9,6 +9,7 @@ package com.margelo.nitro.nitrogeolocation
 
 import androidx.annotation.Keep
 import com.facebook.proguard.annotations.DoNotStrip
+import java.util.Objects
 
 
 /**
@@ -37,6 +38,28 @@ data class LocationProviderStatus(
   val googleLocationAccuracyEnabled: Boolean?
 ) {
   /* primary constructor */
+
+  override fun equals(other: Any?): Boolean {
+    if (this === other) return true
+    if (other !is LocationProviderStatus) return false
+    return Objects.deepEquals(this.locationServicesEnabled, other.locationServicesEnabled)
+      && Objects.deepEquals(this.backgroundModeEnabled, other.backgroundModeEnabled)
+      && Objects.deepEquals(this.gpsAvailable, other.gpsAvailable)
+      && Objects.deepEquals(this.networkAvailable, other.networkAvailable)
+      && Objects.deepEquals(this.passiveAvailable, other.passiveAvailable)
+      && Objects.deepEquals(this.googleLocationAccuracyEnabled, other.googleLocationAccuracyEnabled)
+  }
+
+  override fun hashCode(): Int {
+    return arrayOf(
+      locationServicesEnabled,
+      backgroundModeEnabled,
+      gpsAvailable,
+      networkAvailable,
+      passiveAvailable,
+      googleLocationAccuracyEnabled
+    ).contentDeepHashCode()
+  }
 
   companion object {
     /**

@@ -9,6 +9,7 @@ package com.margelo.nitro.nitrogeolocation
 
 import androidx.annotation.Keep
 import com.facebook.proguard.annotations.DoNotStrip
+import java.util.Objects
 
 
 /**
@@ -40,6 +41,30 @@ data class ReverseGeocodedAddress(
   val formattedAddress: String?
 ) {
   /* primary constructor */
+
+  override fun equals(other: Any?): Boolean {
+    if (this === other) return true
+    if (other !is ReverseGeocodedAddress) return false
+    return Objects.deepEquals(this.country, other.country)
+      && Objects.deepEquals(this.region, other.region)
+      && Objects.deepEquals(this.city, other.city)
+      && Objects.deepEquals(this.district, other.district)
+      && Objects.deepEquals(this.street, other.street)
+      && Objects.deepEquals(this.postalCode, other.postalCode)
+      && Objects.deepEquals(this.formattedAddress, other.formattedAddress)
+  }
+
+  override fun hashCode(): Int {
+    return arrayOf(
+      country,
+      region,
+      city,
+      district,
+      street,
+      postalCode,
+      formattedAddress
+    ).contentDeepHashCode()
+  }
 
   companion object {
     /**

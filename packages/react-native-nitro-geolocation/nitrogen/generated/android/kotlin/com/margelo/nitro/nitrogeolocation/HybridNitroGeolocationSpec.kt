@@ -58,12 +58,12 @@ abstract class HybridNitroGeolocationSpec: HybridObject() {
   @Keep
   abstract fun getLocationAvailability(): Promise<LocationAvailability>
   
-  abstract fun requestLocationSettings(success: (status: LocationProviderStatus) -> Unit, error: ((error: LocationError) -> Unit)?, options: LocationSettingsOptions?): Unit
+  abstract fun requestLocationSettings(success: (status: LocationProviderStatus) -> Unit, options: LocationSettingsOptions, error: ((error: LocationError) -> Unit)?): Unit
   
   @DoNotStrip
   @Keep
-  private fun requestLocationSettings_cxx(success: Func_void_LocationProviderStatus, error: Func_void_LocationError?, options: LocationSettingsOptions?): Unit {
-    val __result = requestLocationSettings(success, error?.let { it }, options)
+  private fun requestLocationSettings_cxx(success: Func_void_LocationProviderStatus, options: LocationSettingsOptions, error: Func_void_LocationError?): Unit {
+    val __result = requestLocationSettings(success, options, error?.let { it })
     return __result
   }
   
@@ -80,21 +80,21 @@ abstract class HybridNitroGeolocationSpec: HybridObject() {
     return __result
   }
   
-  abstract fun getCurrentPosition(success: (position: GeolocationResponse) -> Unit, error: ((error: LocationError) -> Unit)?, options: LocationRequestOptions?): Unit
+  abstract fun getCurrentPosition(success: (position: GeolocationResponse) -> Unit, options: LocationRequestOptions, error: ((error: LocationError) -> Unit)?): Unit
   
   @DoNotStrip
   @Keep
-  private fun getCurrentPosition_cxx(success: Func_void_GeolocationResponse, error: Func_void_LocationError?, options: LocationRequestOptions?): Unit {
-    val __result = getCurrentPosition(success, error?.let { it }, options)
+  private fun getCurrentPosition_cxx(success: Func_void_GeolocationResponse, options: LocationRequestOptions, error: Func_void_LocationError?): Unit {
+    val __result = getCurrentPosition(success, options, error?.let { it })
     return __result
   }
   
-  abstract fun getLastKnownPosition(success: (position: GeolocationResponse) -> Unit, error: ((error: LocationError) -> Unit)?, options: LocationRequestOptions?): Unit
+  abstract fun getLastKnownPosition(success: (position: GeolocationResponse) -> Unit, options: LocationRequestOptions, error: ((error: LocationError) -> Unit)?): Unit
   
   @DoNotStrip
   @Keep
-  private fun getLastKnownPosition_cxx(success: Func_void_GeolocationResponse, error: Func_void_LocationError?, options: LocationRequestOptions?): Unit {
-    val __result = getLastKnownPosition(success, error?.let { it }, options)
+  private fun getLastKnownPosition_cxx(success: Func_void_GeolocationResponse, options: LocationRequestOptions, error: Func_void_LocationError?): Unit {
+    val __result = getLastKnownPosition(success, options, error?.let { it })
     return __result
   }
   
@@ -125,21 +125,21 @@ abstract class HybridNitroGeolocationSpec: HybridObject() {
     return __result
   }
   
-  abstract fun watchHeading(success: (heading: Heading) -> Unit, error: ((error: LocationError) -> Unit)?, options: HeadingOptions?): String
+  abstract fun watchHeading(success: (heading: Heading) -> Unit, options: HeadingOptions, error: ((error: LocationError) -> Unit)?): String
   
   @DoNotStrip
   @Keep
-  private fun watchHeading_cxx(success: Func_void_Heading, error: Func_void_LocationError?, options: HeadingOptions?): String {
-    val __result = watchHeading(success, error?.let { it }, options)
+  private fun watchHeading_cxx(success: Func_void_Heading, options: HeadingOptions, error: Func_void_LocationError?): String {
+    val __result = watchHeading(success, options, error?.let { it })
     return __result
   }
   
-  abstract fun watchPosition(success: (position: GeolocationResponse) -> Unit, error: ((error: LocationError) -> Unit)?, options: LocationRequestOptions?): String
+  abstract fun watchPosition(success: (position: GeolocationResponse) -> Unit, options: LocationRequestOptions, error: ((error: LocationError) -> Unit)?): String
   
   @DoNotStrip
   @Keep
-  private fun watchPosition_cxx(success: Func_void_GeolocationResponse, error: Func_void_LocationError?, options: LocationRequestOptions?): String {
-    val __result = watchPosition(success, error?.let { it }, options)
+  private fun watchPosition_cxx(success: Func_void_GeolocationResponse, options: LocationRequestOptions, error: Func_void_LocationError?): String {
+    val __result = watchPosition(success, options, error?.let { it })
     return __result
   }
   

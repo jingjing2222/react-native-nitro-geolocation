@@ -29,7 +29,7 @@ namespace margelo::nitro::nitrogeolocation {
    */
   struct JGeolocationResponse final: public jni::JavaClass<JGeolocationResponse> {
   public:
-    static auto constexpr kJavaDescriptor = "Lcom/margelo/nitro/nitrogeolocation/GeolocationResponse;";
+    static constexpr auto kJavaDescriptor = "Lcom/margelo/nitro/nitrogeolocation/GeolocationResponse;";
 
   public:
     /**

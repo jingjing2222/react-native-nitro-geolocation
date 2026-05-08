@@ -9,6 +9,7 @@ package com.margelo.nitro.nitrogeolocation
 
 import androidx.annotation.Keep
 import com.facebook.proguard.annotations.DoNotStrip
+import java.util.Objects
 
 
 /**
@@ -34,6 +35,26 @@ data class CompatGeolocationError(
   val TIMEOUT: Double
 ) {
   /* primary constructor */
+
+  override fun equals(other: Any?): Boolean {
+    if (this === other) return true
+    if (other !is CompatGeolocationError) return false
+    return Objects.deepEquals(this.code, other.code)
+      && Objects.deepEquals(this.message, other.message)
+      && Objects.deepEquals(this.PERMISSION_DENIED, other.PERMISSION_DENIED)
+      && Objects.deepEquals(this.POSITION_UNAVAILABLE, other.POSITION_UNAVAILABLE)
+      && Objects.deepEquals(this.TIMEOUT, other.TIMEOUT)
+  }
+
+  override fun hashCode(): Int {
+    return arrayOf(
+      code,
+      message,
+      PERMISSION_DENIED,
+      POSITION_UNAVAILABLE,
+      TIMEOUT
+    ).contentDeepHashCode()
+  }
 
   companion object {
     /**

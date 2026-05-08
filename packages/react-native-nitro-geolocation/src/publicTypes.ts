@@ -1,12 +1,12 @@
 import type { NitroGeolocation } from "./NitroGeolocation.nitro";
-import type {
-  CompatGeolocationConfigurationInternal,
-  NitroGeolocationCompat
-} from "./NitroGeolocationCompat.nitro";
+import type { CompatGeolocationConfigurationInternal } from "./NitroGeolocationCompat.nitro";
 import type {
   AccuracyAuthorization as SchemaAccuracyAuthorization,
   AndroidAccuracyPreset as SchemaAndroidAccuracyPreset,
   AndroidGranularity as SchemaAndroidGranularity,
+  CompatGeolocationError as SchemaCompatGeolocationError,
+  CompatGeolocationOptions as SchemaCompatGeolocationOptions,
+  CompatGeolocationResponse as SchemaCompatGeolocationResponse,
   GeocodedLocation as SchemaGeocodedLocation,
   GeocodingCoordinates as SchemaGeocodingCoordinates,
   GeolocationResponse as SchemaGeolocationResponse,
@@ -21,13 +21,6 @@ import type {
   ReverseGeocodedAddress as SchemaReverseGeocodedAddress
 } from "./types";
 
-type CallbackValue<TCallback> = TCallback extends (value: infer Value) => void
-  ? Value
-  : never;
-
-type CompatGetCurrentPosition = NitroGeolocationCompat["getCurrentPosition"];
-type CompatSuccessCallback = Parameters<CompatGetCurrentPosition>[0];
-type CompatErrorCallback = NonNullable<Parameters<CompatGetCurrentPosition>[1]>;
 type NativeGeolocationConfiguration = Parameters<
   NitroGeolocation["setConfiguration"]
 >[0];
@@ -50,14 +43,12 @@ export type LocationAccuracyOptions = SchemaLocationAccuracyOptions;
 export type Heading = SchemaHeading;
 export type HeadingOptions = SchemaHeadingOptions;
 
-export type CompatGeolocationResponse = CallbackValue<CompatSuccessCallback>;
+export type CompatGeolocationResponse = SchemaCompatGeolocationResponse;
 
 export type GeolocationCoordinates = GeolocationResponse["coords"];
 export type LocationProviderUsed = SchemaLocationProviderUsed;
-export type CompatGeolocationError = CallbackValue<CompatErrorCallback>;
-export type CompatGeolocationOptions = NonNullable<
-  Parameters<CompatGetCurrentPosition>[2]
->;
+export type CompatGeolocationError = SchemaCompatGeolocationError;
+export type CompatGeolocationOptions = SchemaCompatGeolocationOptions;
 
 export type AuthorizationLevel = NonNullable<
   NativeGeolocationConfiguration["authorizationLevel"]

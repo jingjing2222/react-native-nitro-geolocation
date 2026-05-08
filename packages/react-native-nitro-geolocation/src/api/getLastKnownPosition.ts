@@ -23,6 +23,10 @@ export function getLastKnownPosition(
   }
 
   return new Promise((resolve, reject) => {
-    NitroGeolocationHybridObject.getLastKnownPosition(resolve, reject, options);
+    NitroGeolocationHybridObject.getLastKnownPosition(
+      resolve,
+      options ?? {},
+      reject
+    );
   });
 }

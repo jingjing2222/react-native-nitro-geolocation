@@ -12,7 +12,7 @@ export function getCurrentPosition(
 ): void {
   NitroGeolocationHybridCompatObject.getCurrentPosition(
     success,
-    error,
-    options
+    options ?? {},
+    error
   );
 }

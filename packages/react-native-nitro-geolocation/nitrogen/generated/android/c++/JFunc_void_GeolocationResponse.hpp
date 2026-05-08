@@ -34,7 +34,7 @@ namespace margelo::nitro::nitrogeolocation {
    */
   struct JFunc_void_GeolocationResponse: public jni::JavaClass<JFunc_void_GeolocationResponse> {
   public:
-    static auto constexpr kJavaDescriptor = "Lcom/margelo/nitro/nitrogeolocation/Func_void_GeolocationResponse;";
+    static constexpr auto kJavaDescriptor = "Lcom/margelo/nitro/nitrogeolocation/Func_void_GeolocationResponse;";
 
   public:
     /**
@@ -70,7 +70,7 @@ namespace margelo::nitro::nitrogeolocation {
     }
 
   public:
-    static auto constexpr kJavaDescriptor = "Lcom/margelo/nitro/nitrogeolocation/Func_void_GeolocationResponse_cxx;";
+    static constexpr auto kJavaDescriptor = "Lcom/margelo/nitro/nitrogeolocation/Func_void_GeolocationResponse_cxx;";
     static void registerNatives() {
       registerHybrid({makeNativeMethod("invoke_cxx", JFunc_void_GeolocationResponse_cxx::invoke_cxx)});
     }

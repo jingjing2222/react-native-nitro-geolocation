@@ -21,7 +21,7 @@ namespace margelo::nitro::nitrogeolocation {
    */
   struct JGeocodingCoordinates final: public jni::JavaClass<JGeocodingCoordinates> {
   public:
-    static auto constexpr kJavaDescriptor = "Lcom/margelo/nitro/nitrogeolocation/GeocodingCoordinates;";
+    static constexpr auto kJavaDescriptor = "Lcom/margelo/nitro/nitrogeolocation/GeocodingCoordinates;";
 
   public:
     /**

@@ -9,6 +9,7 @@ package com.margelo.nitro.nitrogeolocation
 
 import androidx.annotation.Keep
 import com.facebook.proguard.annotations.DoNotStrip
+import java.util.Objects
 
 
 /**
@@ -31,6 +32,24 @@ data class GeolocationResponse(
   val provider: LocationProviderUsed?
 ) {
   /* primary constructor */
+
+  override fun equals(other: Any?): Boolean {
+    if (this === other) return true
+    if (other !is GeolocationResponse) return false
+    return Objects.deepEquals(this.coords, other.coords)
+      && Objects.deepEquals(this.timestamp, other.timestamp)
+      && Objects.deepEquals(this.mocked, other.mocked)
+      && Objects.deepEquals(this.provider, other.provider)
+  }
+
+  override fun hashCode(): Int {
+    return arrayOf(
+      coords,
+      timestamp,
+      mocked,
+      provider
+    ).contentDeepHashCode()
+  }
 
   companion object {
     /**
