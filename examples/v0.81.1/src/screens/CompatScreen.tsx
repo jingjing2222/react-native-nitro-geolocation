@@ -1,15 +1,18 @@
 import React, { useEffect, useState } from "react";
-import {
-  Alert,
-  Button,
-  ScrollView,
-  StyleSheet,
-  Text,
-  View
-} from "react-native";
+import { Alert, Text } from "react-native";
 import GeolocationCompat, {
   type GeolocationResponse
 } from "react-native-nitro-geolocation/compat";
+import {
+  ButtonRow,
+  KeyValueBlock,
+  PositionInfo,
+  ScenarioButton,
+  ScenarioScreen,
+  ScenarioSection,
+  StatusBlock,
+  sharedStyles
+} from "./scenario";
 
 export default function CompatScreen() {
   const [permissionStatus, setPermissionStatus] = useState<string>("Unknown");
@@ -105,226 +108,108 @@ export default function CompatScreen() {
   const renderPositionInfo = (
     position: GeolocationResponse | null,
     title: string
-  ) => {
-    if (!position) return null;
-
-    return (
-      <View style={styles.positionContainer} testID="position-info">
-        <Text style={styles.positionTitle}>{title}</Text>
-        <Text style={styles.positionText} testID="latitude-text">
-          Latitude: {position.coords.latitude.toFixed(6)}
-        </Text>
-        <Text style={styles.positionText} testID="longitude-text">
-          Longitude: {position.coords.longitude.toFixed(6)}
-        </Text>
-        <Text style={styles.positionText} testID="accuracy-text">
-          Accuracy: {position.coords.accuracy.toFixed(2)}m
-        </Text>
-        {position.coords.altitude !== null && (
-          <Text style={styles.positionText}>
-            Altitude: {position.coords.altitude.toFixed(2)}m
-          </Text>
-        )}
-        {position.coords.speed !== null && (
-          <Text style={styles.positionText}>
-            Speed: {position.coords.speed.toFixed(2)}m/s
-          </Text>
-        )}
-        {position.coords.heading !== null && (
-          <Text style={styles.positionText}>
-            Heading: {position.coords.heading.toFixed(2)}°
-          </Text>
-        )}
-        <Text style={styles.positionText}>
-          Time: {new Date(position.timestamp).toLocaleString()}
-        </Text>
-      </View>
-    );
-  };
+  ) => (
+    <PositionInfo
+      title={title}
+      position={position}
+      testIDs={{
+        container: "position-info",
+        latitude: "latitude-text",
+        longitude: "longitude-text",
+        accuracy: "accuracy-text"
+      }}
+    />
+  );
 
   return (
-    <ScrollView style={styles.container}>
-      <View style={styles.header}>
-        <Text style={styles.title}>Compat API</Text>
-        <Text style={styles.subtitle}>
-          Compat callback-based API compatible with
-          @react-native-community/geolocation
-        </Text>
-      </View>
+    <ScenarioScreen
+      prefix="compat"
+      title="Compat API"
+      subtitle="Compat callback-based API compatible with @react-native-community/geolocation"
+    >
+      <ScenarioSection index={1} title="Permission Status">
+        <StatusBlock
+          rows={[
+            {
+              label: "Permission Status:",
+              value: permissionStatus
+            }
+          ]}
+        />
+        <ScenarioButton
+          title="Request Authorization"
+          onPress={handleRequestAuthorization}
+          color="#2196F3"
+        />
+      </ScenarioSection>
 
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Permission Status</Text>
-        <View style={styles.statusContainer}>
-          <Text style={styles.statusLabel}>Permission Status:</Text>
-          <Text style={styles.statusValue}>{permissionStatus}</Text>
-        </View>
-        <View style={styles.buttonContainer}>
-          <Button
-            title="Request Authorization"
-            onPress={handleRequestAuthorization}
-            color="#2196F3"
-          />
-        </View>
-      </View>
-
-      <View style={styles.divider} />
-
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Get Current Position (One-time)</Text>
-        <View style={styles.buttonContainer}>
-          <Button
-            title={isLoadingPosition ? "Loading..." : "Get Current Position"}
-            onPress={handleGetCurrentPosition}
-            disabled={isLoadingPosition}
-            color="#4CAF50"
-          />
-        </View>
+      <ScenarioSection
+        index={2}
+        title="Get Current Position (One-time)"
+        divided
+      >
+        <ScenarioButton
+          title={isLoadingPosition ? "Loading..." : "Get Current Position"}
+          onPress={handleGetCurrentPosition}
+          disabled={isLoadingPosition}
+          color="#4CAF50"
+        />
         {renderPositionInfo(currentPosition, "Current Position")}
-      </View>
+      </ScenarioSection>
 
-      <View style={styles.divider} />
-
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>Watch Position (Continuous)</Text>
-        <View style={styles.statusContainer}>
-          <Text style={styles.statusLabel}>Watch Status:</Text>
-          <Text style={styles.statusValue}>
-            {watchId !== null
-              ? `Watching 🟢 (ID: ${watchId})`
-              : "Not Watching 🔴"}
-          </Text>
-          {watchId !== null && (
-            <Text style={styles.statusLabel}>Updates: {watchUpdateCount}</Text>
-          )}
-        </View>
-        <View style={styles.buttonRow}>
-          <View style={styles.button}>
-            <Button
-              title="Start Watching"
-              onPress={handleStartWatching}
-              disabled={watchId !== null}
-              color="#FF9800"
-            />
-          </View>
-          <View style={styles.button}>
-            <Button
-              title="Stop Watching"
-              onPress={handleStopWatching}
-              disabled={watchId === null}
-              color="#F44336"
-            />
-          </View>
-        </View>
+      <ScenarioSection index={3} title="Watch Position (Continuous)" divided>
+        <StatusBlock
+          rows={[
+            {
+              label: "Watch Status:",
+              value:
+                watchId !== null
+                  ? `Watching 🟢 (ID: ${watchId})`
+                  : "Not Watching 🔴"
+            },
+            ...(watchId !== null
+              ? [
+                  {
+                    label: "Updates:",
+                    value: watchUpdateCount
+                  }
+                ]
+              : [])
+          ]}
+        />
+        <ButtonRow>
+          <ScenarioButton
+            title="Start Watching"
+            onPress={handleStartWatching}
+            disabled={watchId !== null}
+            color="#FF9800"
+            containerStyle={sharedStyles.button}
+          />
+          <ScenarioButton
+            title="Stop Watching"
+            onPress={handleStopWatching}
+            disabled={watchId === null}
+            color="#F44336"
+            containerStyle={sharedStyles.button}
+          />
+        </ButtonRow>
         {renderPositionInfo(watchedPosition, "Watched Position (Live)")}
-      </View>
+      </ScenarioSection>
 
-      <View style={styles.footer}>
-        <Text style={styles.footerTitle}>Features:</Text>
-        <Text style={styles.footerText}>✅ setRNConfiguration</Text>
-        <Text style={styles.footerText}>✅ requestAuthorization</Text>
-        <Text style={styles.footerText}>✅ getCurrentPosition</Text>
-        <Text style={styles.footerText}>✅ watchPosition / clearWatch</Text>
-        <Text style={styles.footerText}>✅ stopObserving</Text>
-        <Text style={styles.footerText}>
+      <ScenarioSection index={4} title="Features" divided>
+        <KeyValueBlock
+          rows={[
+            { label: "setRNConfiguration", value: "supported" },
+            { label: "requestAuthorization", value: "supported" },
+            { label: "getCurrentPosition", value: "supported" },
+            { label: "watchPosition / clearWatch", value: "supported" },
+            { label: "stopObserving", value: "supported" }
+          ]}
+        />
+        <Text style={sharedStyles.resultMessage}>
           ⚠️ Manual subscription management required
         </Text>
-      </View>
-    </ScrollView>
+      </ScenarioSection>
+    </ScenarioScreen>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#fff"
-  },
-  header: {
-    padding: 20,
-    backgroundColor: "#FF9800"
-  },
-  title: {
-    fontSize: 24,
-    fontWeight: "700",
-    color: "#fff",
-    marginBottom: 8
-  },
-  subtitle: {
-    fontSize: 14,
-    color: "#FFF3E0"
-  },
-  section: {
-    padding: 20
-  },
-  sectionTitle: {
-    fontSize: 18,
-    fontWeight: "600",
-    color: "#000",
-    marginBottom: 12
-  },
-  statusContainer: {
-    backgroundColor: "#FFF3E0",
-    padding: 12,
-    borderRadius: 8,
-    marginBottom: 12
-  },
-  statusLabel: {
-    fontSize: 14,
-    color: "#E65100",
-    fontWeight: "600"
-  },
-  statusValue: {
-    fontSize: 16,
-    color: "#000",
-    fontWeight: "700",
-    marginTop: 4
-  },
-  buttonContainer: {
-    marginVertical: 8
-  },
-  buttonRow: {
-    flexDirection: "row",
-    gap: 12
-  },
-  button: {
-    flex: 1
-  },
-  positionContainer: {
-    marginTop: 12,
-    padding: 16,
-    backgroundColor: "#FFF3E0",
-    borderRadius: 8,
-    borderWidth: 1,
-    borderColor: "#FF9800"
-  },
-  positionTitle: {
-    fontSize: 16,
-    fontWeight: "600",
-    color: "#E65100",
-    marginBottom: 8
-  },
-  positionText: {
-    fontSize: 14,
-    color: "#BF360C",
-    marginVertical: 2
-  },
-  divider: {
-    height: 1,
-    backgroundColor: "#E0E0E0"
-  },
-  footer: {
-    padding: 20,
-    backgroundColor: "#F5F5F5",
-    marginTop: 20
-  },
-  footerTitle: {
-    fontSize: 16,
-    fontWeight: "600",
-    color: "#000",
-    marginBottom: 8
-  },
-  footerText: {
-    fontSize: 14,
-    color: "#333",
-    marginVertical: 3
-  }
-});

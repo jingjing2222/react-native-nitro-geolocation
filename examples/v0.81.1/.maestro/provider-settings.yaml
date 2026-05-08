@@ -56,6 +56,11 @@ appId: nitrogeolocation.example
     longitude: 126.978
 - waitForAnimationToEnd
 
+- scrollUntilVisible:
+    element: "Confirm Location"
+    direction: DOWN
+    centerElement: true
+
 - tapOn: "Confirm Location"
 - scrollUntilVisible:
     element: "Ready to check in"

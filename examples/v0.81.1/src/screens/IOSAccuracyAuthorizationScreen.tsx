@@ -1,58 +1,39 @@
-import React, { useEffect, useState } from "react";
-import { Button, Platform, ScrollView, Text, View } from "react-native";
+import React from "react";
+import { Platform } from "react-native";
 import {
   LocationErrorCode,
-  checkPermission,
   getAccuracyAuthorization,
-  requestPermission,
   requestTemporaryFullAccuracy
 } from "react-native-nitro-geolocation";
 import {
+  PermissionStatusBlock,
   ResultBlock,
+  ScenarioButton,
+  ScenarioScreen,
+  ScenarioSection,
   assertGrantedAccuracyAuthorization,
   assertKnownAccuracyAuthorization,
   assertLocationErrorCode,
-  createIdleResult,
+  createScenarioResults,
   getDisplayErrorMessage,
-  sharedStyles
-} from "./scenarioUtils";
-import type { ScenarioResult } from "./scenarioUtils";
+  usePermissionStatus,
+  useScenarioResults
+} from "./scenario";
 
 const PREFIX = "ios-accuracy-authorization";
 const TEMPORARY_PURPOSE_KEY = "PreciseE2E";
 
-const initialResults = {
-  read: createIdleResult(),
-  temporary: createIdleResult(),
-  invalid: createIdleResult(),
-  denied: createIdleResult()
-};
+const initialResults = createScenarioResults([
+  "read",
+  "temporary",
+  "invalid",
+  "denied"
+] as const);
 
 export default function IOSAccuracyAuthorizationScreen() {
-  const [permissionStatus, setPermissionStatus] = useState("unknown");
-  const [results, setResults] = useState(initialResults);
-
-  const setResult = (
-    key: keyof typeof initialResults,
-    result: ScenarioResult
-  ) => {
-    setResults((previous) => ({
-      ...previous,
-      [key]: result
-    }));
-  };
-
-  const refreshPermission = async () => {
-    const status = await checkPermission();
-    setPermissionStatus(status);
-    return status;
-  };
-
-  const requestLocationPermission = async () => {
-    const status = await requestPermission();
-    setPermissionStatus(status);
-    return status;
-  };
+  const { permissionStatus, refreshPermission, requestLocationPermission } =
+    usePermissionStatus();
+  const { results, setResult } = useScenarioResults(initialResults);
 
   const ensureIOS = () => {
     if (Platform.OS !== "ios") {
@@ -186,113 +167,74 @@ export default function IOSAccuracyAuthorizationScreen() {
     }
   };
 
-  useEffect(() => {
-    refreshPermission();
-  }, []);
-
   return (
-    <ScrollView style={sharedStyles.container} testID={`${PREFIX}-screen`}>
-      <View style={sharedStyles.header}>
-        <Text style={sharedStyles.title}>iOS Accuracy Authorization</Text>
-        <Text style={sharedStyles.subtitle}>
-          Precise and reduced accuracy API contract
-        </Text>
-      </View>
+    <ScenarioScreen
+      prefix={PREFIX}
+      title="iOS Accuracy Authorization"
+      subtitle="Precise and reduced accuracy API contract"
+    >
+      <ScenarioSection index={1} title="Permission">
+        <PermissionStatusBlock prefix={PREFIX} status={permissionStatus} />
+      </ScenarioSection>
 
-      <View style={sharedStyles.section}>
-        <Text style={sharedStyles.sectionTitle}>1. Permission</Text>
-        <View style={sharedStyles.statusContainer}>
-          <Text style={sharedStyles.statusLabel}>Permission:</Text>
-          <Text
-            style={sharedStyles.statusValue}
-            testID={`${PREFIX}-permission`}
-          >
-            {permissionStatus}
-          </Text>
-        </View>
-      </View>
-
-      <View style={sharedStyles.divider} />
-
-      <View style={sharedStyles.section}>
-        <Text style={sharedStyles.sectionTitle}>2. Read Authorization</Text>
-        <View style={sharedStyles.buttonContainer}>
-          <Button
-            title="Read Authorization"
-            onPress={runReadScenario}
-            color="#1976D2"
-            testID={`${PREFIX}-run-read-button`}
-          />
-        </View>
+      <ScenarioSection index={2} title="Read Authorization" divided>
+        <ScenarioButton
+          title="Read Authorization"
+          onPress={runReadScenario}
+          testID={`${PREFIX}-run-read-button`}
+        />
         <ResultBlock
           prefix={PREFIX}
           id="read"
           label="Read authorization"
           result={results.read}
         />
-      </View>
+      </ScenarioSection>
 
-      <View style={sharedStyles.divider} />
-
-      <View style={sharedStyles.section}>
-        <Text style={sharedStyles.sectionTitle}>
-          3. Temporary Full Accuracy
-        </Text>
-        <View style={sharedStyles.buttonContainer}>
-          <Button
-            title="Request Temporary Full Accuracy"
-            onPress={runTemporaryScenario}
-            color="#047857"
-            testID={`${PREFIX}-run-temporary-button`}
-          />
-        </View>
+      <ScenarioSection index={3} title="Temporary Full Accuracy" divided>
+        <ScenarioButton
+          title="Request Temporary Full Accuracy"
+          onPress={runTemporaryScenario}
+          color="#047857"
+          testID={`${PREFIX}-run-temporary-button`}
+        />
         <ResultBlock
           prefix={PREFIX}
           id="temporary"
           label="Temporary full accuracy"
           result={results.temporary}
         />
-      </View>
+      </ScenarioSection>
 
-      <View style={sharedStyles.divider} />
-
-      <View style={sharedStyles.section}>
-        <Text style={sharedStyles.sectionTitle}>4. Invalid Purpose Key</Text>
-        <View style={sharedStyles.buttonContainer}>
-          <Button
-            title="Run Invalid Purpose Key"
-            onPress={runInvalidPurposeScenario}
-            color="#D84315"
-            testID={`${PREFIX}-run-invalid-button`}
-          />
-        </View>
+      <ScenarioSection index={4} title="Invalid Purpose Key" divided>
+        <ScenarioButton
+          title="Run Invalid Purpose Key"
+          onPress={runInvalidPurposeScenario}
+          color="#D84315"
+          testID={`${PREFIX}-run-invalid-button`}
+        />
         <ResultBlock
           prefix={PREFIX}
           id="invalid"
           label="Invalid purposeKey"
           result={results.invalid}
         />
-      </View>
+      </ScenarioSection>
 
-      <View style={sharedStyles.divider} />
-
-      <View style={sharedStyles.section}>
-        <Text style={sharedStyles.sectionTitle}>5. Permission Denied Read</Text>
-        <View style={sharedStyles.buttonContainer}>
-          <Button
-            title="Run Denied Authorization Read"
-            onPress={runDeniedReadScenario}
-            color="#7B1FA2"
-            testID={`${PREFIX}-run-denied-button`}
-          />
-        </View>
+      <ScenarioSection index={5} title="Permission Denied Read" divided>
+        <ScenarioButton
+          title="Run Denied Authorization Read"
+          onPress={runDeniedReadScenario}
+          color="#7B1FA2"
+          testID={`${PREFIX}-run-denied-button`}
+        />
         <ResultBlock
           prefix={PREFIX}
           id="denied"
           label="Denied read"
           result={results.denied}
         />
-      </View>
-    </ScrollView>
+      </ScenarioSection>
+    </ScenarioScreen>
   );
 }

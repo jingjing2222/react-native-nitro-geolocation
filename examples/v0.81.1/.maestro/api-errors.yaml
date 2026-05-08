@@ -40,6 +40,11 @@ appId: nitrogeolocation.example
     text: "Code: 1"
 - assertVisible:
     text: "Name: PERMISSION_DENIED"
+- scrollUntilVisible:
+    element:
+      id: "api-error-message"
+    direction: DOWN
+    centerElement: true
 - assertVisible:
     id: "api-error-message"
 
@@ -91,8 +96,9 @@ appId: nitrogeolocation.example
     id: "api-error-accuracy"
 
 - scrollUntilVisible:
-    element: "3. Error Handling"
+    element: "Force Timeout"
     direction: DOWN
+    centerElement: true
 
 - tapOn: "Force Timeout"
 - extendedWaitUntil:
@@ -105,6 +111,11 @@ appId: nitrogeolocation.example
     text: "Code: 3"
 - assertVisible:
     text: "Name: TIMEOUT"
+- scrollUntilVisible:
+    element:
+      id: "api-error-message"
+    direction: DOWN
+    centerElement: true
 - assertVisible:
     id: "api-error-message"
 

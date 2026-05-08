@@ -1,11 +1,9 @@
 import React, { useEffect, useRef, useState } from "react";
-import { Button, Platform, ScrollView, Text, View } from "react-native";
+import { Platform } from "react-native";
 import {
   LocationErrorCode,
-  checkPermission,
   getCurrentPosition,
   getLastKnownPosition,
-  requestPermission,
   unwatch,
   watchHeading,
   watchPosition
@@ -16,15 +14,21 @@ import type {
   LocationRequestOptions
 } from "react-native-nitro-geolocation";
 import {
+  PermissionStatusBlock,
   ResultBlock,
   SEOUL_FIXTURE,
+  ScenarioButton,
+  ScenarioScreen,
+  ScenarioSection,
+  StatusBlock,
   captureLocationError,
-  createIdleResult,
+  createScenarioResult,
+  createScenarioResults,
   getDisplayErrorMessage,
   runWithNativeGeolocation,
-  sharedStyles
-} from "./scenarioUtils";
-import type { ScenarioResult } from "./scenarioUtils";
+  usePermissionStatus,
+  useScenarioResults
+} from "./scenario";
 
 const PREFIX = "ios-release-options-bridge";
 const DISTANCE_FILTER_METERS = 1_000_000;
@@ -39,6 +43,12 @@ const guardedWatchOptions: LocationRequestOptions = {
   enableHighAccuracy: true,
   maximumAge: 0
 };
+
+const initialResults = createScenarioResults([
+  "distanceFilter",
+  "maximumAgeZero",
+  "headingFilter"
+] as const);
 
 const formatCoordinates = (position: GeolocationResponse) =>
   `${position.coords.latitude.toFixed(6)}, ${position.coords.longitude.toFixed(
@@ -72,25 +82,14 @@ const getFixtureDistance = (position: GeolocationResponse) =>
   distanceInMeters(position.coords, SEOUL_FIXTURE);
 
 export default function IOSReleaseOptionsBridgeScreen() {
-  const [permissionStatus, setPermissionStatus] = useState("unknown");
+  const { permissionStatus, refreshPermission, ensurePermission } =
+    usePermissionStatus();
   const [updateCount, setUpdateCount] = useState(0);
-  const [result, setResult] = useState<ScenarioResult>(createIdleResult());
-  const [maximumAgeResult, setMaximumAgeResult] = useState<ScenarioResult>(
-    createIdleResult()
-  );
-  const [headingResult, setHeadingResult] = useState<ScenarioResult>(
-    createIdleResult()
-  );
+  const { results, setResult } = useScenarioResults(initialResults);
   const watchTokenRef = useRef<string | null>(null);
   const guardTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const updateCountRef = useRef(0);
   const baselineRef = useRef<GeolocationResponse | null>(null);
-
-  const refreshPermission = async () => {
-    const status = await checkPermission();
-    setPermissionStatus(status);
-    return status;
-  };
 
   const cleanupWatch = () => {
     if (guardTimerRef.current) {
@@ -106,10 +105,10 @@ export default function IOSReleaseOptionsBridgeScreen() {
 
   const failWithError = (error: unknown) => {
     cleanupWatch();
-    setResult({
-      status: "failed",
-      message: getDisplayErrorMessage(error)
-    });
+    setResult(
+      "distanceFilter",
+      createScenarioResult("failed", getDisplayErrorMessage(error))
+    );
   };
 
   const handleWatchUpdate = (position: GeolocationResponse) => {
@@ -122,57 +121,75 @@ export default function IOSReleaseOptionsBridgeScreen() {
     const baseline = baselineRef.current;
     if (!baseline) {
       if (fixtureDistance > EXPECTED_BASELINE_TOLERANCE_METERS) {
-        setResult({
-          status: "running",
-          message: `Waiting for simulator fixture, received ${coordinates} (${Math.round(
-            fixtureDistance
-          )}m away).`
-        });
+        setResult(
+          "distanceFilter",
+          createScenarioResult(
+            "running",
+            `Waiting for simulator fixture, received ${coordinates} (${Math.round(
+              fixtureDistance
+            )}m away).`
+          )
+        );
         return;
       }
 
       baselineRef.current = position;
-      setResult({
-        status: "running",
-        message: `First fixture update captured at ${coordinates}; waiting ${SECOND_UPDATE_WINDOW_MS}ms for distanceFilter=${DISTANCE_FILTER_METERS}m to suppress nearby movement.`
-      });
+      setResult(
+        "distanceFilter",
+        createScenarioResult(
+          "running",
+          `First fixture update captured at ${coordinates}; waiting ${SECOND_UPDATE_WINDOW_MS}ms for distanceFilter=${DISTANCE_FILTER_METERS}m to suppress nearby movement.`
+        )
+      );
 
       guardTimerRef.current = setTimeout(() => {
         cleanupWatch();
-        setResult({
-          status: "passed",
-          message: `distanceFilter=${DISTANCE_FILTER_METERS}m did not emit a nearby movement update.`
-        });
+        setResult(
+          "distanceFilter",
+          createScenarioResult(
+            "passed",
+            `distanceFilter=${DISTANCE_FILTER_METERS}m did not emit a nearby movement update.`
+          )
+        );
       }, SECOND_UPDATE_WINDOW_MS);
       return;
     }
 
     const movedMeters = distanceInMeters(baseline.coords, position.coords);
     if (movedMeters < NEARBY_MOVE_MIN_METERS) {
-      setResult({
-        status: "running",
-        message: `Ignoring duplicate fixture update at ${coordinates}; waiting for distanceFilter=${DISTANCE_FILTER_METERS}m to suppress nearby movement.`
-      });
+      setResult(
+        "distanceFilter",
+        createScenarioResult(
+          "running",
+          `Ignoring duplicate fixture update at ${coordinates}; waiting for distanceFilter=${DISTANCE_FILTER_METERS}m to suppress nearby movement.`
+        )
+      );
       return;
     }
 
     if (movedMeters > NEARBY_MOVE_MAX_METERS) {
-      setResult({
-        status: "running",
-        message: `Ignoring far simulator reset at ${coordinates} (${Math.round(
-          movedMeters
-        )}m from baseline).`
-      });
+      setResult(
+        "distanceFilter",
+        createScenarioResult(
+          "running",
+          `Ignoring far simulator reset at ${coordinates} (${Math.round(
+            movedMeters
+          )}m from baseline).`
+        )
+      );
       return;
     }
 
     cleanupWatch();
-    setResult({
-      status: "failed",
-      message: `Unexpected nearby update #${nextCount} at ${coordinates} (${Math.round(
-        movedMeters
-      )}m from baseline); distanceFilter=${DISTANCE_FILTER_METERS}m was not honored.`
-    });
+    setResult(
+      "distanceFilter",
+      createScenarioResult(
+        "failed",
+        `Unexpected nearby update #${nextCount} at ${coordinates} (${Math.round(
+          movedMeters
+        )}m from baseline); distanceFilter=${DISTANCE_FILTER_METERS}m was not honored.`
+      )
+    );
   };
 
   const runDistanceFilterGuard = async () => {
@@ -180,21 +197,20 @@ export default function IOSReleaseOptionsBridgeScreen() {
     updateCountRef.current = 0;
     baselineRef.current = null;
     setUpdateCount(0);
-    setResult({
-      status: "running",
-      message: "Starting iOS Release distanceFilter guard"
-    });
+    setResult(
+      "distanceFilter",
+      createScenarioResult(
+        "running",
+        "Starting iOS Release distanceFilter guard"
+      )
+    );
 
     try {
       if (Platform.OS !== "ios") {
         throw new Error("This contract is iOS-only.");
       }
 
-      const status = await requestPermission();
-      setPermissionStatus(status);
-      if (status !== "granted") {
-        throw new Error(`Permission was not granted: ${status}`);
-      }
+      await ensurePermission();
 
       watchTokenRef.current = await runWithNativeGeolocation(() =>
         Promise.resolve(
@@ -213,21 +229,20 @@ export default function IOSReleaseOptionsBridgeScreen() {
   };
 
   const runMaximumAgeZeroGuard = async () => {
-    setMaximumAgeResult({
-      status: "running",
-      message: "Seeding native cache, then reading with maximumAge=0"
-    });
+    setResult(
+      "maximumAgeZero",
+      createScenarioResult(
+        "running",
+        "Seeding native cache, then reading with maximumAge=0"
+      )
+    );
 
     try {
       if (Platform.OS !== "ios") {
         throw new Error("This contract is iOS-only.");
       }
 
-      const status = await requestPermission();
-      setPermissionStatus(status);
-      if (status !== "granted") {
-        throw new Error(`Permission was not granted: ${status}`);
-      }
+      await ensurePermission();
 
       await runWithNativeGeolocation(() =>
         getCurrentPosition({
@@ -240,47 +255,50 @@ export default function IOSReleaseOptionsBridgeScreen() {
         await runWithNativeGeolocation(() =>
           getLastKnownPosition({ maximumAge: 0 })
         );
-        setMaximumAgeResult({
-          status: "failed",
-          message:
+        setResult(
+          "maximumAgeZero",
+          createScenarioResult(
+            "failed",
             "maximumAge=0 unexpectedly resolved cached data; caller options were dropped before reaching Swift."
-        });
+          )
+        );
       } catch (error) {
         const locationError = captureLocationError(error);
-        setMaximumAgeResult({
-          status:
+        setResult(
+          "maximumAgeZero",
+          createScenarioResult(
             locationError.code === LocationErrorCode.POSITION_UNAVAILABLE
               ? "passed"
               : "failed",
-          message: `${locationError.name}: ${locationError.message}`
-        });
+            `${locationError.name}: ${locationError.message}`
+          )
+        );
       }
     } catch (error) {
-      setMaximumAgeResult({
-        status: "failed",
-        message: getDisplayErrorMessage(error)
-      });
+      setResult(
+        "maximumAgeZero",
+        createScenarioResult("failed", getDisplayErrorMessage(error))
+      );
     } finally {
       await refreshPermission();
     }
   };
 
   const runHeadingFilterGuard = async () => {
-    setHeadingResult({
-      status: "running",
-      message: "Starting heading watch with headingFilter=-1"
-    });
+    setResult(
+      "headingFilter",
+      createScenarioResult(
+        "running",
+        "Starting heading watch with headingFilter=-1"
+      )
+    );
 
     try {
       if (Platform.OS !== "ios") {
         throw new Error("This contract is iOS-only.");
       }
 
-      const status = await requestPermission();
-      setPermissionStatus(status);
-      if (status !== "granted") {
-        throw new Error(`Permission was not granted: ${status}`);
-      }
+      await ensurePermission();
 
       const outcome = await runWithNativeGeolocation(
         () =>
@@ -322,148 +340,125 @@ export default function IOSReleaseOptionsBridgeScreen() {
       );
 
       if (outcome.type === "watchdog") {
-        setHeadingResult({
-          status: "failed",
-          message: `headingFilter=-1 did not reject within ${HEADING_FILTER_WATCHDOG_MS}ms; caller options were dropped before reaching Swift.`
-        });
+        setResult(
+          "headingFilter",
+          createScenarioResult(
+            "failed",
+            `headingFilter=-1 did not reject within ${HEADING_FILTER_WATCHDOG_MS}ms; caller options were dropped before reaching Swift.`
+          )
+        );
         return;
       }
 
       if (outcome.type === "resolved") {
-        setHeadingResult({
-          status: "failed",
-          message:
+        setResult(
+          "headingFilter",
+          createScenarioResult(
+            "failed",
             "headingFilter=-1 unexpectedly emitted a heading; caller options were dropped before reaching Swift."
-        });
+          )
+        );
         return;
       }
 
       const locationError = captureLocationError(outcome.error);
-      setHeadingResult({
-        status:
+      setResult(
+        "headingFilter",
+        createScenarioResult(
           locationError.code === LocationErrorCode.INTERNAL_ERROR &&
-          locationError.message.includes("headingFilter")
+            locationError.message.includes("headingFilter")
             ? "passed"
             : "failed",
-        message: `${locationError.name}: ${locationError.message}`
-      });
+          `${locationError.name}: ${locationError.message}`
+        )
+      );
     } catch (error) {
-      setHeadingResult({
-        status: "failed",
-        message: getDisplayErrorMessage(error)
-      });
+      setResult(
+        "headingFilter",
+        createScenarioResult("failed", getDisplayErrorMessage(error))
+      );
     } finally {
       await refreshPermission();
     }
   };
 
-  useEffect(() => {
-    refreshPermission();
-    return cleanupWatch;
-  }, []);
+  useEffect(() => cleanupWatch, []);
 
   return (
-    <ScrollView style={sharedStyles.container} testID={`${PREFIX}-screen`}>
-      <View style={sharedStyles.header}>
-        <Text style={sharedStyles.title}>iOS Release Options Bridge</Text>
-        <Text style={sharedStyles.subtitle}>
-          Native Swift optional struct bridge contract
-        </Text>
-      </View>
+    <ScenarioScreen
+      prefix={PREFIX}
+      title="iOS Release Options Bridge"
+      subtitle="Native Swift optional struct bridge contract"
+    >
+      <ScenarioSection index={1} title="Permission">
+        <PermissionStatusBlock prefix={PREFIX} status={permissionStatus} />
+      </ScenarioSection>
 
-      <View style={sharedStyles.section}>
-        <Text style={sharedStyles.sectionTitle}>1. Permission</Text>
-        <View style={sharedStyles.statusContainer}>
-          <Text style={sharedStyles.statusLabel}>Permission:</Text>
-          <Text
-            style={sharedStyles.statusValue}
-            testID={`${PREFIX}-permission`}
-          >
-            {permissionStatus}
-          </Text>
-        </View>
-      </View>
-
-      <View style={sharedStyles.divider} />
-
-      <View style={sharedStyles.section}>
-        <Text style={sharedStyles.sectionTitle}>2. Distance Filter Guard</Text>
-        <Text style={sharedStyles.description}>
-          Release bridge regression check for caller options on watchPosition.
-        </Text>
-        <View style={sharedStyles.statusContainer}>
-          <Text style={sharedStyles.statusLabel}>Updates:</Text>
-          <Text
-            style={sharedStyles.statusValue}
-            testID={`${PREFIX}-update-count`}
-          >
-            {updateCount}
-          </Text>
-        </View>
-        <View style={sharedStyles.buttonContainer}>
-          <Button
-            title="Run Distance Filter Guard"
-            onPress={runDistanceFilterGuard}
-            testID={`${PREFIX}-run-distance-filter-button`}
-          />
-        </View>
+      <ScenarioSection
+        index={2}
+        title="Distance Filter Guard"
+        description="Release bridge regression check for caller options on watchPosition."
+        divided
+      >
+        <StatusBlock
+          rows={[
+            {
+              label: "Updates:",
+              value: updateCount,
+              testID: `${PREFIX}-update-count`
+            }
+          ]}
+        />
+        <ScenarioButton
+          title="Run Distance Filter Guard"
+          onPress={runDistanceFilterGuard}
+          testID={`${PREFIX}-run-distance-filter-button`}
+        />
         <ResultBlock
           prefix={PREFIX}
           id="distance-filter"
           label="Distance filter guard"
-          result={result}
+          result={results.distanceFilter}
         />
-      </View>
+      </ScenarioSection>
 
-      <View style={sharedStyles.divider} />
-
-      <View style={sharedStyles.section}>
-        <Text style={sharedStyles.sectionTitle}>
-          3. Maximum Age Option Guard
-        </Text>
-        <Text style={sharedStyles.description}>
-          Release bridge regression check that maximumAge=0 filters cached
-          locations in native Swift.
-        </Text>
-        <View style={sharedStyles.buttonContainer}>
-          <Button
-            title="Run Maximum Age Option Guard"
-            onPress={runMaximumAgeZeroGuard}
-            testID={`${PREFIX}-run-maximum-age-zero-button`}
-          />
-        </View>
+      <ScenarioSection
+        index={3}
+        title="Maximum Age Option Guard"
+        description="Release bridge regression check that maximumAge=0 filters cached locations in native Swift."
+        divided
+      >
+        <ScenarioButton
+          title="Run Maximum Age Option Guard"
+          onPress={runMaximumAgeZeroGuard}
+          testID={`${PREFIX}-run-maximum-age-zero-button`}
+        />
         <ResultBlock
           prefix={PREFIX}
           id="maximum-age-zero"
           label="Maximum age option guard"
-          result={maximumAgeResult}
+          result={results.maximumAgeZero}
         />
-      </View>
+      </ScenarioSection>
 
-      <View style={sharedStyles.divider} />
-
-      <View style={sharedStyles.section}>
-        <Text style={sharedStyles.sectionTitle}>
-          4. Heading Filter Option Guard
-        </Text>
-        <Text style={sharedStyles.description}>
-          Release bridge regression check that headingFilter=-1 reaches native
-          Swift validation.
-        </Text>
-        <View style={sharedStyles.buttonContainer}>
-          <Button
-            title="Run Heading Filter Option Guard"
-            onPress={runHeadingFilterGuard}
-            testID={`${PREFIX}-run-heading-filter-button`}
-          />
-        </View>
+      <ScenarioSection
+        index={4}
+        title="Heading Filter Option Guard"
+        description="Release bridge regression check that headingFilter=-1 reaches native Swift validation."
+        divided
+      >
+        <ScenarioButton
+          title="Run Heading Filter Option Guard"
+          onPress={runHeadingFilterGuard}
+          testID={`${PREFIX}-run-heading-filter-button`}
+        />
         <ResultBlock
           prefix={PREFIX}
           id="heading-filter"
           label="Heading filter option guard"
-          result={headingResult}
+          result={results.headingFilter}
         />
-      </View>
-    </ScrollView>
+      </ScenarioSection>
+    </ScenarioScreen>
   );
 }

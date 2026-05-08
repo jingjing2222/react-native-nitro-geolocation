@@ -1,10 +1,8 @@
-import React, { useEffect, useState } from "react";
-import { Button, Platform, ScrollView, Text, View } from "react-native";
+import React from "react";
+import { Platform } from "react-native";
 import {
   LocationErrorCode,
-  checkPermission,
   getCurrentPosition,
-  requestPermission,
   unwatch,
   watchPosition
 } from "react-native-nitro-geolocation";
@@ -13,15 +11,19 @@ import type {
   LocationRequestOptions
 } from "react-native-nitro-geolocation";
 import {
+  PermissionStatusBlock,
   ResultBlock,
+  ScenarioButton,
+  ScenarioScreen,
+  ScenarioSection,
   assertFixtureCoordinates,
   assertLocationErrorCode,
-  createIdleResult,
+  createScenarioResults,
   getDisplayErrorMessage,
   runWithNativeGeolocation,
-  sharedStyles
-} from "./scenarioUtils";
-import type { ScenarioResult } from "./scenarioUtils";
+  usePermissionStatus,
+  useScenarioResults
+} from "./scenario";
 
 const PREFIX = "ios-location-tuning";
 
@@ -36,11 +38,11 @@ const tunedOptions: LocationRequestOptions = {
   timeout: 15000
 };
 
-const initialResults = {
-  tuned: createIdleResult(),
-  invalid: createIdleResult(),
-  denied: createIdleResult()
-};
+const initialResults = createScenarioResults([
+  "tuned",
+  "invalid",
+  "denied"
+] as const);
 
 const waitForWatchPosition = (options: LocationRequestOptions) =>
   new Promise<GeolocationResponse>((resolve, reject) => {
@@ -72,30 +74,9 @@ const waitForWatchPosition = (options: LocationRequestOptions) =>
   });
 
 export default function IOSLocationTuningScreen() {
-  const [permissionStatus, setPermissionStatus] = useState("unknown");
-  const [results, setResults] = useState(initialResults);
-
-  const setResult = (
-    key: keyof typeof initialResults,
-    result: ScenarioResult
-  ) => {
-    setResults((previous) => ({
-      ...previous,
-      [key]: result
-    }));
-  };
-
-  const refreshPermission = async () => {
-    const status = await checkPermission();
-    setPermissionStatus(status);
-    return status;
-  };
-
-  const requestLocationPermission = async () => {
-    const status = await requestPermission();
-    setPermissionStatus(status);
-    return status;
-  };
+  const { permissionStatus, refreshPermission, requestLocationPermission } =
+    usePermissionStatus();
+  const { results, setResult } = useScenarioResults(initialResults);
 
   const ensureIOS = () => {
     if (Platform.OS !== "ios") {
@@ -208,91 +189,59 @@ export default function IOSLocationTuningScreen() {
     }
   };
 
-  useEffect(() => {
-    refreshPermission();
-  }, []);
-
   return (
-    <ScrollView style={sharedStyles.container} testID={`${PREFIX}-screen`}>
-      <View style={sharedStyles.header}>
-        <Text style={sharedStyles.title}>iOS Location Tuning</Text>
-        <Text style={sharedStyles.subtitle}>
-          Native iOS manager configuration contract
-        </Text>
-      </View>
+    <ScenarioScreen
+      prefix={PREFIX}
+      title="iOS Location Tuning"
+      subtitle="Native iOS manager configuration contract"
+    >
+      <ScenarioSection index={1} title="Permission">
+        <PermissionStatusBlock prefix={PREFIX} status={permissionStatus} />
+      </ScenarioSection>
 
-      <View style={sharedStyles.section}>
-        <Text style={sharedStyles.sectionTitle}>1. Permission</Text>
-        <View style={sharedStyles.statusContainer}>
-          <Text style={sharedStyles.statusLabel}>Permission:</Text>
-          <Text
-            style={sharedStyles.statusValue}
-            testID={`${PREFIX}-permission`}
-          >
-            {permissionStatus}
-          </Text>
-        </View>
-      </View>
-
-      <View style={sharedStyles.divider} />
-
-      <View style={sharedStyles.section}>
-        <Text style={sharedStyles.sectionTitle}>2. Tuned Requests</Text>
-        <View style={sharedStyles.buttonContainer}>
-          <Button
-            title="Run Tuned Requests"
-            onPress={runTunedRequestScenario}
-            color="#1976D2"
-            testID={`${PREFIX}-run-tuned-button`}
-          />
-        </View>
+      <ScenarioSection index={2} title="Tuned Requests" divided>
+        <ScenarioButton
+          title="Run Tuned Requests"
+          onPress={runTunedRequestScenario}
+          testID={`${PREFIX}-run-tuned-button`}
+        />
         <ResultBlock
           prefix={PREFIX}
           id="tuned"
           label="Tuned requests"
           result={results.tuned}
         />
-      </View>
+      </ScenarioSection>
 
-      <View style={sharedStyles.divider} />
-
-      <View style={sharedStyles.section}>
-        <Text style={sharedStyles.sectionTitle}>3. Invalid Activity Type</Text>
-        <View style={sharedStyles.buttonContainer}>
-          <Button
-            title="Run Invalid Activity Type"
-            onPress={runInvalidActivityTypeScenario}
-            color="#D84315"
-            testID={`${PREFIX}-run-invalid-button`}
-          />
-        </View>
+      <ScenarioSection index={3} title="Invalid Activity Type" divided>
+        <ScenarioButton
+          title="Run Invalid Activity Type"
+          onPress={runInvalidActivityTypeScenario}
+          color="#D84315"
+          testID={`${PREFIX}-run-invalid-button`}
+        />
         <ResultBlock
           prefix={PREFIX}
           id="invalid"
           label="Invalid activityType"
           result={results.invalid}
         />
-      </View>
+      </ScenarioSection>
 
-      <View style={sharedStyles.divider} />
-
-      <View style={sharedStyles.section}>
-        <Text style={sharedStyles.sectionTitle}>4. Permission Denied</Text>
-        <View style={sharedStyles.buttonContainer}>
-          <Button
-            title="Run Denied Tuned Request"
-            onPress={runPermissionDeniedScenario}
-            color="#7B1FA2"
-            testID={`${PREFIX}-run-denied-button`}
-          />
-        </View>
+      <ScenarioSection index={4} title="Permission Denied" divided>
+        <ScenarioButton
+          title="Run Denied Tuned Request"
+          onPress={runPermissionDeniedScenario}
+          color="#7B1FA2"
+          testID={`${PREFIX}-run-denied-button`}
+        />
         <ResultBlock
           prefix={PREFIX}
           id="denied"
           label="Permission denied"
           result={results.denied}
         />
-      </View>
-    </ScrollView>
+      </ScenarioSection>
+    </ScenarioScreen>
   );
 }

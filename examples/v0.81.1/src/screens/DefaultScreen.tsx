@@ -1,20 +1,22 @@
 import React, { useEffect, useState } from "react";
+import { Switch, Text, View } from "react-native";
 import {
-  Button,
-  ScrollView,
-  StyleSheet,
-  Switch,
-  Text,
-  View
-} from "react-native";
-import {
-  checkPermission,
   getCurrentPosition,
-  requestPermission,
   useWatchPosition
 } from "react-native-nitro-geolocation";
 import type { GeolocationResponse } from "react-native-nitro-geolocation";
-import { runWithNativeGeolocation } from "./scenarioUtils";
+import {
+  ButtonRow,
+  ErrorBlock,
+  PositionInfo,
+  ScenarioButton,
+  ScenarioScreen,
+  ScenarioSection,
+  StatusBlock,
+  runWithNativeGeolocation,
+  sharedStyles,
+  usePermissionStatus
+} from "./scenario";
 
 type DefaultScreenSection = "permission" | "currentPosition" | "watchPosition";
 
@@ -38,7 +40,12 @@ export default function DefaultScreen({
   title = "Geolocation API"
 }: DefaultScreenProps) {
   // Permission state
-  const [permissionStatus, setPermissionStatus] = useState<string>("unknown");
+  const {
+    permissionStatus,
+    refreshPermission,
+    requestLocationPermission,
+    setPermissionStatus
+  } = usePermissionStatus();
   const [isPermissionLoading, setIsPermissionLoading] = useState(false);
 
   // Current position state
@@ -76,8 +83,7 @@ export default function DefaultScreen({
 
   const handleCheckPermission = async () => {
     try {
-      const status = await checkPermission();
-      setPermissionStatus(status);
+      await refreshPermission();
     } catch (err) {
       setPermissionStatus("error");
     }
@@ -86,8 +92,7 @@ export default function DefaultScreen({
   const handleRequestPermission = async () => {
     setIsPermissionLoading(true);
     try {
-      const status = await requestPermission();
-      setPermissionStatus(status);
+      await requestLocationPermission();
     } catch (err) {
       console.error("Permission request failed:", err);
       setPermissionStatus("error");
@@ -120,281 +125,140 @@ export default function DefaultScreen({
     }
   };
 
-  const renderPermissionSection = () => (
-    <View style={styles.section}>
-      <Text style={styles.sectionTitle}>1. Permission Management</Text>
-      <Text style={styles.description}>
-        Check and request location permissions
-      </Text>
-      <View style={styles.statusContainer}>
-        <Text style={styles.statusLabel}>Status:</Text>
-        <Text style={styles.statusValue}>
-          {permissionStatus}
-          {permissionStatus === "granted" && " ✅"}
-          {permissionStatus === "denied" && " ❌"}
-        </Text>
-      </View>
-      <View style={styles.buttonRow}>
-        <View style={styles.button}>
-          <Button
-            title="Check"
-            onPress={handleCheckPermission}
-            color="#2196F3"
-          />
-        </View>
-        <View style={styles.button}>
-          <Button
-            title={isPermissionLoading ? "Requesting..." : "Request"}
-            onPress={handleRequestPermission}
-            disabled={isPermissionLoading}
-            color="#4CAF50"
-          />
-        </View>
-      </View>
-    </View>
+  const renderPermissionSection = (divided: boolean) => (
+    <ScenarioSection
+      index={1}
+      title="Permission Management"
+      description="Check and request location permissions"
+      divided={divided}
+    >
+      <StatusBlock
+        rows={[
+          {
+            label: "Status:",
+            value: `${permissionStatus}${
+              permissionStatus === "granted"
+                ? " ✅"
+                : permissionStatus === "denied"
+                  ? " ❌"
+                  : ""
+            }`
+          }
+        ]}
+      />
+      <ButtonRow>
+        <ScenarioButton
+          title="Check"
+          onPress={handleCheckPermission}
+          color="#2196F3"
+          containerStyle={sharedStyles.button}
+        />
+        <ScenarioButton
+          title={isPermissionLoading ? "Requesting..." : "Request"}
+          onPress={handleRequestPermission}
+          disabled={isPermissionLoading}
+          color="#4CAF50"
+          containerStyle={sharedStyles.button}
+        />
+      </ButtonRow>
+    </ScenarioSection>
   );
 
   const renderPositionInfo = (
     position: GeolocationResponse | null,
     title: string
-  ) => {
-    if (!position) return null;
-
-    return (
-      <View style={styles.positionContainer} testID="position-info">
-        <Text style={styles.positionTitle}>{title}</Text>
-        <Text style={styles.positionText} testID="latitude-text">
-          Latitude: {position.coords.latitude.toFixed(6)}
-        </Text>
-        <Text style={styles.positionText} testID="longitude-text">
-          Longitude: {position.coords.longitude.toFixed(6)}
-        </Text>
-        <Text style={styles.positionText} testID="accuracy-text">
-          Accuracy: {position.coords.accuracy.toFixed(2)}m
-        </Text>
-        {position.mocked !== undefined && (
-          <Text style={styles.positionText} testID="mocked-text">
-            Mocked: {position.mocked ? "true" : "false"}
-          </Text>
-        )}
-        {position.provider !== undefined && (
-          <Text style={styles.positionText} testID="provider-text">
-            Provider: {position.provider}
-          </Text>
-        )}
-        {position.coords.altitude !== null && (
-          <Text style={styles.positionText}>
-            Altitude: {position.coords.altitude.toFixed(2)}m
-          </Text>
-        )}
-        {position.coords.speed !== null && (
-          <Text style={styles.positionText}>
-            Speed: {position.coords.speed.toFixed(2)}m/s
-          </Text>
-        )}
-        {position.coords.heading !== null && (
-          <Text style={styles.positionText}>
-            Heading: {position.coords.heading.toFixed(2)}°
-          </Text>
-        )}
-        <Text style={styles.positionText}>
-          Time: {new Date(position.timestamp).toLocaleString()}
-        </Text>
-      </View>
-    );
-  };
-
-  const renderCurrentPositionSection = () => (
-    <View style={styles.section}>
-      <Text style={styles.sectionTitle}>2. Get Current Position</Text>
-      <Text style={styles.description}>
-        One-time location request using getCurrentPosition()
-      </Text>
-      {currentPositionError && (
-        <View style={styles.errorContainer} testID="current-position-error">
-          <Text style={styles.errorText} testID="current-position-error-text">
-            Error: {currentPositionError}
-          </Text>
-        </View>
-      )}
-      <View style={styles.buttonContainer}>
-        <Button
-          title={isCurrentPositionLoading ? "Loading..." : "Get Position"}
-          onPress={handleFetchPosition}
-          disabled={isCurrentPositionLoading}
-          color="#4CAF50"
-        />
-      </View>
-      {renderPositionInfo(currentPosition, "Current Position")}
-    </View>
+  ) => (
+    <PositionInfo
+      title={title}
+      position={position}
+      testIDs={{
+        container: "position-info",
+        latitude: "latitude-text",
+        longitude: "longitude-text",
+        accuracy: "accuracy-text",
+        mocked: "mocked-text",
+        provider: "provider-text"
+      }}
+    />
   );
 
-  const renderWatchPositionSection = () => (
-    <View style={styles.section}>
-      <Text style={styles.sectionTitle}>3. Watch Position (Hook)</Text>
-      <Text style={styles.description}>
-        Continuous location tracking with useWatchPosition()
-      </Text>
-      <View style={styles.toggleContainer}>
-        <Text style={styles.toggleLabel}>Enable Watching:</Text>
+  const renderCurrentPositionSection = (divided: boolean) => (
+    <ScenarioSection
+      index={2}
+      title="Get Current Position"
+      description="One-time location request using getCurrentPosition()"
+      divided={divided}
+    >
+      {currentPositionError && (
+        <ErrorBlock
+          message={currentPositionError}
+          testID="current-position-error"
+          textTestID="current-position-error-text"
+        />
+      )}
+      <ScenarioButton
+        title={isCurrentPositionLoading ? "Loading..." : "Get Position"}
+        onPress={handleFetchPosition}
+        disabled={isCurrentPositionLoading}
+        color="#4CAF50"
+      />
+      {renderPositionInfo(currentPosition, "Current Position")}
+    </ScenarioSection>
+  );
+
+  const renderWatchPositionSection = (divided: boolean) => (
+    <ScenarioSection
+      index={3}
+      title="Watch Position (Hook)"
+      description="Continuous location tracking with useWatchPosition()"
+      divided={divided}
+    >
+      <View style={sharedStyles.toggleContainer}>
+        <Text style={sharedStyles.toggleLabel}>Enable Watching:</Text>
         <Switch
           testID="watch-toggle-switch"
           value={watchEnabled}
           onValueChange={setWatchEnabled}
         />
       </View>
-      <View style={styles.statusContainer}>
-        <Text style={styles.statusLabel}>Status:</Text>
-        <Text style={styles.statusValue} testID="watch-status">
-          {isWatching ? "Watching 🟢" : "Not Watching 🔴"}
-        </Text>
-      </View>
+      <StatusBlock
+        rows={[
+          {
+            label: "Status:",
+            value: isWatching ? "Watching 🟢" : "Not Watching 🔴",
+            testID: "watch-status"
+          }
+        ]}
+      />
       {watchError && (
-        <View style={styles.errorContainer} testID="watch-position-error">
-          <Text style={styles.errorText} testID="watch-position-error-text">
-            Error: {watchError.message}
-          </Text>
-        </View>
+        <ErrorBlock
+          message={watchError.message}
+          testID="watch-position-error"
+          textTestID="watch-position-error-text"
+        />
       )}
       {renderPositionInfo(watchedPosition, "Watched Position (Live)")}
-    </View>
+    </ScenarioSection>
   );
 
-  const renderSection = (section: DefaultScreenSection) => {
+  const renderSection = (section: DefaultScreenSection, divided: boolean) => {
     switch (section) {
       case "permission":
-        return renderPermissionSection();
+        return renderPermissionSection(divided);
       case "currentPosition":
-        return renderCurrentPositionSection();
+        return renderCurrentPositionSection(divided);
       case "watchPosition":
-        return renderWatchPositionSection();
+        return renderWatchPositionSection(divided);
     }
   };
 
   return (
-    <ScrollView style={styles.container}>
-      <View style={styles.header}>
-        <Text style={styles.title}>{title}</Text>
-        <Text style={styles.subtitle}>{subtitle}</Text>
-      </View>
-
+    <ScenarioScreen prefix="default" title={title} subtitle={subtitle}>
       {sections.map((section, index) => (
         <React.Fragment key={section}>
-          {index > 0 && <View style={styles.divider} />}
-          {renderSection(section)}
+          {renderSection(section, index > 0)}
         </React.Fragment>
       ))}
-    </ScrollView>
+    </ScenarioScreen>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#fff"
-  },
-  header: {
-    padding: 20,
-    backgroundColor: "#2196F3"
-  },
-  title: {
-    fontSize: 24,
-    fontWeight: "700",
-    color: "#fff",
-    marginBottom: 8
-  },
-  subtitle: {
-    fontSize: 14,
-    color: "#E3F2FD"
-  },
-  section: {
-    padding: 20
-  },
-  sectionTitle: {
-    fontSize: 18,
-    fontWeight: "600",
-    color: "#000",
-    marginBottom: 4
-  },
-  description: {
-    fontSize: 13,
-    color: "#666",
-    marginBottom: 12,
-    fontStyle: "italic"
-  },
-  statusContainer: {
-    backgroundColor: "#E3F2FD",
-    padding: 12,
-    borderRadius: 8,
-    marginBottom: 12
-  },
-  statusLabel: {
-    fontSize: 14,
-    color: "#1976D2",
-    fontWeight: "600"
-  },
-  statusValue: {
-    fontSize: 16,
-    color: "#000",
-    fontWeight: "700",
-    marginTop: 4
-  },
-  errorContainer: {
-    backgroundColor: "#FFEBEE",
-    padding: 12,
-    borderRadius: 8,
-    marginBottom: 12
-  },
-  errorText: {
-    fontSize: 14,
-    color: "#C62828"
-  },
-  buttonRow: {
-    flexDirection: "row",
-    gap: 12,
-    marginVertical: 8
-  },
-  button: {
-    flex: 1
-  },
-  buttonContainer: {
-    marginVertical: 8
-  },
-  toggleContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    backgroundColor: "#F5F5F5",
-    padding: 12,
-    borderRadius: 8,
-    marginBottom: 12
-  },
-  toggleLabel: {
-    fontSize: 16,
-    color: "#000",
-    fontWeight: "600"
-  },
-  positionContainer: {
-    marginTop: 12,
-    padding: 16,
-    backgroundColor: "#E8F5E9",
-    borderRadius: 8,
-    borderWidth: 1,
-    borderColor: "#4CAF50"
-  },
-  positionTitle: {
-    fontSize: 16,
-    fontWeight: "600",
-    color: "#2E7D32",
-    marginBottom: 8
-  },
-  positionText: {
-    fontSize: 14,
-    color: "#1B5E20",
-    marginVertical: 2
-  },
-  divider: {
-    height: 1,
-    backgroundColor: "#E0E0E0"
-  }
-});

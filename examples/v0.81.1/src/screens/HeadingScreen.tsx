@@ -1,32 +1,34 @@
-import React, { useEffect, useState } from "react";
-import { Button, ScrollView, Text, View } from "react-native";
+import React from "react";
 import {
   LocationErrorCode,
-  checkPermission,
   getHeading,
-  requestPermission,
   unwatch,
   watchHeading
 } from "react-native-nitro-geolocation";
 import type { Heading } from "react-native-nitro-geolocation";
 import {
+  PermissionStatusBlock,
   ResultBlock,
+  ScenarioButton,
+  ScenarioScreen,
+  ScenarioSection,
   assertLocationErrorCode,
-  createIdleResult,
+  createScenarioResult,
+  createScenarioResults,
   getDisplayErrorMessage,
-  sharedStyles
-} from "./scenarioUtils";
-import type { ScenarioResult } from "./scenarioUtils";
+  usePermissionStatus,
+  useScenarioResults
+} from "./scenario";
 
 const PREFIX = "heading";
 const WATCH_TIMEOUT_MS = 15000;
 
-const initialResults = {
-  current: createIdleResult(),
-  watch: createIdleResult(),
-  invalid: createIdleResult(),
-  denied: createIdleResult()
-};
+const initialResults = createScenarioResults([
+  "current",
+  "watch",
+  "invalid",
+  "denied"
+] as const);
 
 const assertHeading = (heading: Heading) => {
   if (
@@ -58,38 +60,15 @@ const assertHeading = (heading: Heading) => {
 };
 
 export default function HeadingScreen() {
-  const [permissionStatus, setPermissionStatus] = useState("unknown");
-  const [results, setResults] = useState(initialResults);
-
-  const setResult = (
-    key: keyof typeof initialResults,
-    result: ScenarioResult
-  ) => {
-    setResults((previous) => ({
-      ...previous,
-      [key]: result
-    }));
-  };
-
-  const refreshPermission = async () => {
-    const status = await checkPermission();
-    setPermissionStatus(status);
-    return status;
-  };
-
-  const ensurePermission = async () => {
-    const status = await requestPermission();
-    setPermissionStatus(status);
-    if (status !== "granted") {
-      throw new Error(`Permission was not granted: ${status}`);
-    }
-  };
+  const { permissionStatus, refreshPermission, ensurePermission } =
+    usePermissionStatus();
+  const { results, setResult } = useScenarioResults(initialResults);
 
   const runGetHeadingScenario = async () => {
-    setResult("current", {
-      status: "running",
-      message: "Requesting one native heading reading"
-    });
+    setResult(
+      "current",
+      createScenarioResult("running", "Requesting one native heading reading")
+    );
 
     try {
       await ensurePermission();
@@ -102,25 +81,31 @@ export default function HeadingScreen() {
         throw new Error(`Heading took ${elapsedMs}ms.`);
       }
 
-      setResult("current", {
-        status: "passed",
-        message: `Single heading ${summary}; resolved in ${elapsedMs}ms.`
-      });
+      setResult(
+        "current",
+        createScenarioResult(
+          "passed",
+          `Single heading ${summary}; resolved in ${elapsedMs}ms.`
+        )
+      );
     } catch (error) {
-      setResult("current", {
-        status: "failed",
-        message: getDisplayErrorMessage(error)
-      });
+      setResult(
+        "current",
+        createScenarioResult("failed", getDisplayErrorMessage(error))
+      );
     } finally {
       await refreshPermission();
     }
   };
 
   const runWatchHeadingScenario = async () => {
-    setResult("watch", {
-      status: "running",
-      message: "Watching native heading until two sensor updates arrive"
-    });
+    setResult(
+      "watch",
+      createScenarioResult(
+        "running",
+        "Watching native heading until two sensor updates arrive"
+      )
+    );
 
     try {
       await ensurePermission();
@@ -175,28 +160,34 @@ export default function HeadingScreen() {
         throw new Error("Heading watch timestamps moved backwards.");
       }
 
-      setResult("watch", {
-        status: "passed",
-        message: `Watch delivered ${readings.length} real heading updates and cleaned up token ${token.slice(
-          0,
-          8
-        )}.`
-      });
+      setResult(
+        "watch",
+        createScenarioResult(
+          "passed",
+          `Watch delivered ${readings.length} real heading updates and cleaned up token ${token.slice(
+            0,
+            8
+          )}.`
+        )
+      );
     } catch (error) {
-      setResult("watch", {
-        status: "failed",
-        message: getDisplayErrorMessage(error)
-      });
+      setResult(
+        "watch",
+        createScenarioResult("failed", getDisplayErrorMessage(error))
+      );
     } finally {
       await refreshPermission();
     }
   };
 
   const runInvalidFilterScenario = async () => {
-    setResult("invalid", {
-      status: "running",
-      message: "Starting a watch with an invalid headingFilter"
-    });
+    setResult(
+      "invalid",
+      createScenarioResult(
+        "running",
+        "Starting a watch with an invalid headingFilter"
+      )
+    );
 
     try {
       await new Promise<void>((resolve, reject) => {
@@ -230,156 +221,131 @@ export default function HeadingScreen() {
         );
       });
 
-      setResult("invalid", {
-        status: "passed",
-        message: "Invalid headingFilter rejected before heading watch updates."
-      });
+      setResult(
+        "invalid",
+        createScenarioResult(
+          "passed",
+          "Invalid headingFilter rejected before heading watch updates."
+        )
+      );
     } catch (error) {
-      setResult("invalid", {
-        status: "failed",
-        message: getDisplayErrorMessage(error)
-      });
+      setResult(
+        "invalid",
+        createScenarioResult("failed", getDisplayErrorMessage(error))
+      );
     }
   };
 
   const runDeniedScenario = async () => {
-    setResult("denied", {
-      status: "running",
-      message: "Requesting heading without location permission"
-    });
+    setResult(
+      "denied",
+      createScenarioResult(
+        "running",
+        "Requesting heading without location permission"
+      )
+    );
 
     try {
       await getHeading();
-      setResult("denied", {
-        status: "failed",
-        message: "Permission-denied heading unexpectedly resolved."
-      });
+      setResult(
+        "denied",
+        createScenarioResult(
+          "failed",
+          "Permission-denied heading unexpectedly resolved."
+        )
+      );
     } catch (error) {
       try {
         const locationError = assertLocationErrorCode(
           error,
           LocationErrorCode.PERMISSION_DENIED
         );
-        setResult("denied", {
-          status: "passed",
-          message: `${locationError.name}: heading follows native permission checks.`
-        });
+        setResult(
+          "denied",
+          createScenarioResult(
+            "passed",
+            `${locationError.name}: heading follows native permission checks.`
+          )
+        );
       } catch (assertionError) {
-        setResult("denied", {
-          status: "failed",
-          message: getDisplayErrorMessage(assertionError)
-        });
+        setResult(
+          "denied",
+          createScenarioResult("failed", getDisplayErrorMessage(assertionError))
+        );
       }
     } finally {
       await refreshPermission();
     }
   };
 
-  useEffect(() => {
-    refreshPermission();
-  }, []);
-
   return (
-    <ScrollView style={sharedStyles.container} testID={`${PREFIX}-screen`}>
-      <View style={sharedStyles.header}>
-        <Text style={sharedStyles.title}>Heading</Text>
-        <Text style={sharedStyles.subtitle}>
-          Compass-style heading contract with watch and rejection paths
-        </Text>
-      </View>
+    <ScenarioScreen
+      prefix={PREFIX}
+      title="Heading"
+      subtitle="Compass-style heading contract with watch and rejection paths"
+    >
+      <ScenarioSection index={1} title="Permission">
+        <PermissionStatusBlock prefix={PREFIX} status={permissionStatus} />
+      </ScenarioSection>
 
-      <View style={sharedStyles.section}>
-        <Text style={sharedStyles.sectionTitle}>1. Permission</Text>
-        <View style={sharedStyles.statusContainer}>
-          <Text style={sharedStyles.statusLabel}>Permission:</Text>
-          <Text
-            style={sharedStyles.statusValue}
-            testID={`${PREFIX}-permission`}
-          >
-            {permissionStatus}
-          </Text>
-        </View>
-      </View>
-
-      <View style={sharedStyles.divider} />
-
-      <View style={sharedStyles.section}>
-        <Text style={sharedStyles.sectionTitle}>2. Single Heading</Text>
-        <View style={sharedStyles.buttonContainer}>
-          <Button
-            title="Get Heading"
-            onPress={runGetHeadingScenario}
-            color="#1976D2"
-            testID={`${PREFIX}-run-current-button`}
-          />
-        </View>
+      <ScenarioSection index={2} title="Single Heading" divided>
+        <ScenarioButton
+          title="Get Heading"
+          onPress={runGetHeadingScenario}
+          testID={`${PREFIX}-run-current-button`}
+        />
         <ResultBlock
           prefix={PREFIX}
           id="current"
           label="Single heading"
           result={results.current}
         />
-      </View>
+      </ScenarioSection>
 
-      <View style={sharedStyles.divider} />
-
-      <View style={sharedStyles.section}>
-        <Text style={sharedStyles.sectionTitle}>3. Heading Watch</Text>
-        <View style={sharedStyles.buttonContainer}>
-          <Button
-            title="Watch Heading"
-            onPress={runWatchHeadingScenario}
-            color="#00897B"
-            testID={`${PREFIX}-run-watch-button`}
-          />
-        </View>
+      <ScenarioSection index={3} title="Heading Watch" divided>
+        <ScenarioButton
+          title="Watch Heading"
+          onPress={runWatchHeadingScenario}
+          color="#00897B"
+          testID={`${PREFIX}-run-watch-button`}
+        />
         <ResultBlock
           prefix={PREFIX}
           id="watch"
           label="Heading watch"
           result={results.watch}
         />
-      </View>
+      </ScenarioSection>
 
-      <View style={sharedStyles.divider} />
-
-      <View style={sharedStyles.section}>
-        <Text style={sharedStyles.sectionTitle}>4. Invalid Filter</Text>
-        <View style={sharedStyles.buttonContainer}>
-          <Button
-            title="Run Invalid Filter"
-            onPress={runInvalidFilterScenario}
-            color="#D84315"
-            testID={`${PREFIX}-run-invalid-button`}
-          />
-        </View>
+      <ScenarioSection index={4} title="Invalid Filter" divided>
+        <ScenarioButton
+          title="Run Invalid Filter"
+          onPress={runInvalidFilterScenario}
+          color="#D84315"
+          testID={`${PREFIX}-run-invalid-button`}
+        />
         <ResultBlock
           prefix={PREFIX}
           id="invalid"
           label="Invalid filter"
           result={results.invalid}
         />
-      </View>
+      </ScenarioSection>
 
-      <View style={sharedStyles.divider} />
-
-      <View style={sharedStyles.section}>
-        <Text style={sharedStyles.sectionTitle}>5. Permission Denied</Text>
-        <View style={sharedStyles.buttonContainer}>
-          <Button
-            title="Run Denied Heading"
-            onPress={runDeniedScenario}
-            color="#7B1FA2"
-            testID={`${PREFIX}-run-denied-button`}
-          />
-        </View>
+      <ScenarioSection index={5} title="Permission Denied" divided>
+        <ScenarioButton
+          title="Run Denied Heading"
+          onPress={runDeniedScenario}
+          color="#7B1FA2"
+          testID={`${PREFIX}-run-denied-button`}
+        />
         <ResultBlock
           prefix={PREFIX}
           id="denied"
           label="Permission denied"
           result={results.denied}
         />
-      </View>
-    </ScrollView>
+      </ScenarioSection>
+    </ScenarioScreen>
   );
 }

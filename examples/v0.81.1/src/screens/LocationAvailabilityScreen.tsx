@@ -1,50 +1,34 @@
-import React, { useEffect, useState } from "react";
-import { Button, Platform, ScrollView, Text, View } from "react-native";
+import React from "react";
+import { Platform } from "react-native";
 import {
   LocationErrorCode,
-  checkPermission,
   getCurrentPosition,
   getLocationAvailability,
-  requestPermission,
   setConfiguration
 } from "react-native-nitro-geolocation";
 import {
+  PermissionStatusBlock,
   ResultBlock,
+  ScenarioButton,
+  ScenarioScreen,
+  ScenarioSection,
   assertFixtureCoordinates,
   assertLocationErrorCode,
-  createIdleResult,
+  createScenarioResults,
   getDisplayErrorMessage,
   runWithNativeGeolocation,
-  sharedStyles
-} from "./scenarioUtils";
-import type { ScenarioResult } from "./scenarioUtils";
+  usePermissionStatus,
+  useScenarioResults
+} from "./scenario";
 
 const PREFIX = "location-availability";
 
-const initialResults = {
-  available: createIdleResult(),
-  denied: createIdleResult()
-};
+const initialResults = createScenarioResults(["available", "denied"] as const);
 
 export default function LocationAvailabilityScreen() {
-  const [permissionStatus, setPermissionStatus] = useState("unknown");
-  const [results, setResults] = useState(initialResults);
-
-  const setResult = (
-    key: keyof typeof initialResults,
-    result: ScenarioResult
-  ) => {
-    setResults((previous) => ({
-      ...previous,
-      [key]: result
-    }));
-  };
-
-  const refreshPermission = async () => {
-    const status = await checkPermission();
-    setPermissionStatus(status);
-    return status;
-  };
+  const { permissionStatus, refreshPermission, requestLocationPermission } =
+    usePermissionStatus();
+  const { results, setResult } = useScenarioResults(initialResults);
 
   const runAvailableScenario = async () => {
     setResult("available", {
@@ -53,8 +37,7 @@ export default function LocationAvailabilityScreen() {
     });
 
     try {
-      const permission = await requestPermission();
-      setPermissionStatus(permission);
+      const permission = await requestLocationPermission();
       if (permission !== "granted") {
         throw new Error(`Permission was not granted: ${permission}`);
       }
@@ -138,71 +121,44 @@ export default function LocationAvailabilityScreen() {
     }
   };
 
-  useEffect(() => {
-    refreshPermission();
-  }, []);
-
   return (
-    <ScrollView style={sharedStyles.container} testID={`${PREFIX}-screen`}>
-      <View style={sharedStyles.header}>
-        <Text style={sharedStyles.title}>Location Availability</Text>
-        <Text style={sharedStyles.subtitle}>
-          Availability contract tied to native fixes and permission failures
-        </Text>
-      </View>
+    <ScenarioScreen
+      prefix={PREFIX}
+      title="Location Availability"
+      subtitle="Availability contract tied to native fixes and permission failures"
+    >
+      <ScenarioSection index={1} title="Permission">
+        <PermissionStatusBlock prefix={PREFIX} status={permissionStatus} />
+      </ScenarioSection>
 
-      <View style={sharedStyles.section}>
-        <Text style={sharedStyles.sectionTitle}>1. Permission</Text>
-        <View style={sharedStyles.statusContainer}>
-          <Text style={sharedStyles.statusLabel}>Permission:</Text>
-          <Text
-            style={sharedStyles.statusValue}
-            testID={`${PREFIX}-permission`}
-          >
-            {permissionStatus}
-          </Text>
-        </View>
-      </View>
-
-      <View style={sharedStyles.divider} />
-
-      <View style={sharedStyles.section}>
-        <Text style={sharedStyles.sectionTitle}>2. Native Availability</Text>
-        <View style={sharedStyles.buttonContainer}>
-          <Button
-            title="Check After Native Fix"
-            onPress={runAvailableScenario}
-            color="#1976D2"
-            testID={`${PREFIX}-run-available-button`}
-          />
-        </View>
+      <ScenarioSection index={2} title="Native Availability" divided>
+        <ScenarioButton
+          title="Check After Native Fix"
+          onPress={runAvailableScenario}
+          testID={`${PREFIX}-run-available-button`}
+        />
         <ResultBlock
           prefix={PREFIX}
           id="available"
           label="Availability"
           result={results.available}
         />
-      </View>
+      </ScenarioSection>
 
-      <View style={sharedStyles.divider} />
-
-      <View style={sharedStyles.section}>
-        <Text style={sharedStyles.sectionTitle}>3. Permission Denied</Text>
-        <View style={sharedStyles.buttonContainer}>
-          <Button
-            title="Run Denied Availability"
-            onPress={runDeniedScenario}
-            color="#7B1FA2"
-            testID={`${PREFIX}-run-denied-button`}
-          />
-        </View>
+      <ScenarioSection index={3} title="Permission Denied" divided>
+        <ScenarioButton
+          title="Run Denied Availability"
+          onPress={runDeniedScenario}
+          color="#7B1FA2"
+          testID={`${PREFIX}-run-denied-button`}
+        />
         <ResultBlock
           prefix={PREFIX}
           id="denied"
           label="Permission denied"
           result={results.denied}
         />
-      </View>
-    </ScrollView>
+      </ScenarioSection>
+    </ScenarioScreen>
   );
 }
