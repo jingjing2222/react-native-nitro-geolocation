@@ -58,6 +58,7 @@
     "react": "*",
     "react-native": "*"
   },
+  "sideEffects": false,
   "publishConfig": {
     "access": "public"
   },

@@ -84,6 +84,7 @@
     "react-native": ">=0.75.0",
     "react-native-nitro-modules": "*"
   },
+  "sideEffects": false,
   "create-react-native-library": {
     "languages": "kotlin-swift",
     "type": "nitro-module",
