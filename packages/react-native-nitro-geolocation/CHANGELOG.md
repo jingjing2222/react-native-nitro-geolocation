@@ -1,5 +1,12 @@
 # react-native-nitro-geolocation
 
+## 1.2.5
+
+### Patch Changes
+
+- 86d80e4: Add `sideEffects: false` to enable tree shaking in bundlers.
+- b6dc32a: Fix an iOS Release issue where location request options could be dropped while bridging optional options structs through Nitro's Swift bridge.
+
 ## 1.2.4
 
 ### Patch Changes

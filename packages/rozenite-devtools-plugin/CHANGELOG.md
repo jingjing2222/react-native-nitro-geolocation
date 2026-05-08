@@ -1,5 +1,11 @@
 # @react-native-nitro-geolocation/rozenite-plugin
 
+## 1.1.1
+
+### Patch Changes
+
+- 86d80e4: Add `sideEffects: false` to enable tree shaking in bundlers.
+
 ## 1.1.0
 
 ### Minor Changes
