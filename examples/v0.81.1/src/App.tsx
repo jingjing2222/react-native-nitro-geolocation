@@ -16,6 +16,7 @@ import GeocodingScreen from "./screens/GeocodingScreen";
 import HeadingScreen from "./screens/HeadingScreen";
 import IOSAccuracyAuthorizationScreen from "./screens/IOSAccuracyAuthorizationScreen";
 import IOSLocationTuningScreen from "./screens/IOSLocationTuningScreen";
+import IOSReleaseOptionsBridgeScreen from "./screens/IOSReleaseOptionsBridgeScreen";
 import Issue67Screen from "./screens/Issue67Screen";
 import LastKnownPositionScreen from "./screens/LastKnownPositionScreen";
 import LocationAvailabilityScreen from "./screens/LocationAvailabilityScreen";
@@ -47,6 +48,7 @@ const linking = {
       AndroidRequestOptions: "android-request-options",
       IOSLocationTuning: "ios-location-tuning",
       IOSAccuracyAuthorization: "ios-accuracy-authorization",
+      IOSReleaseOptionsBridge: "ios-release-options-bridge",
       Issue67: "issue-67"
     }
   }
@@ -170,6 +172,11 @@ export default function App() {
         <Tab.Screen
           name="IOSAccuracyAuthorization"
           component={IOSAccuracyAuthorizationScreen}
+          options={hiddenTabOptions}
+        />
+        <Tab.Screen
+          name="IOSReleaseOptionsBridge"
+          component={IOSReleaseOptionsBridgeScreen}
           options={hiddenTabOptions}
         />
         <Tab.Screen

@@ -6,6 +6,7 @@ export { default as CurrentPositionScreen } from "./CurrentPositionScreen";
 export { default as GeocodingScreen } from "./GeocodingScreen";
 export { default as IOSAccuracyAuthorizationScreen } from "./IOSAccuracyAuthorizationScreen";
 export { default as IOSLocationTuningScreen } from "./IOSLocationTuningScreen";
+export { default as IOSReleaseOptionsBridgeScreen } from "./IOSReleaseOptionsBridgeScreen";
 export { default as Issue67Screen } from "./Issue67Screen";
 export { default as LastKnownPositionScreen } from "./LastKnownPositionScreen";
 export { default as LocationAvailabilityScreen } from "./LocationAvailabilityScreen";
