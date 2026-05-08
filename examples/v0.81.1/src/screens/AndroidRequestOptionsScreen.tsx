@@ -31,6 +31,7 @@ import {
 const PREFIX = "android-request-options";
 const FIXTURE_LATITUDE = 37.5665;
 const FIXTURE_LONGITUDE = 126.978;
+const ANDROID_COARSE_COORDINATE_TOLERANCE = 0.03;
 const WATCH_TIMEOUT_MS = 20000;
 
 const initialResults = createScenarioResults([
@@ -68,6 +69,14 @@ const assertNotExactFixtureCoordinates = (position: GeolocationResponse) => {
   }
 };
 
+const assertAndroidCoarseFixtureCoordinates = (
+  position: GeolocationResponse
+) => {
+  return assertFixtureCoordinates(position, {
+    coordinateTolerance: ANDROID_COARSE_COORDINATE_TOLERANCE
+  });
+};
+
 export default function AndroidRequestOptionsScreen() {
   const { permissionStatus, refreshPermission, ensurePermission } =
     usePermissionStatus();
@@ -103,7 +112,7 @@ export default function AndroidRequestOptionsScreen() {
           timeout: 15000
         })
       );
-      const coordinates = assertFixtureCoordinates(position);
+      const coordinates = assertAndroidCoarseFixtureCoordinates(position);
 
       if (Platform.OS === "android" && position.provider === "gps") {
         throw new Error("coarse granularity unexpectedly returned GPS.");
@@ -418,7 +427,8 @@ export default function AndroidRequestOptionsScreen() {
         throw new Error("Mixed watch did not deliver both subscriptions.");
       }
 
-      const coarseCoordinates = assertFixtureCoordinates(coarseReading);
+      const coarseCoordinates =
+        assertAndroidCoarseFixtureCoordinates(coarseReading);
       const fineCoordinates = assertFixtureCoordinates(fineReading);
       assertNotExactFixtureCoordinates(coarseReading);
 

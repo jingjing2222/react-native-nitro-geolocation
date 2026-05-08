@@ -23,7 +23,30 @@ export const SEOUL_FIXTURE = {
   longitude: 126.978
 };
 
-const COORDINATE_TOLERANCE = 0.02;
+const DEFAULT_COORDINATE_TOLERANCE = 0.02;
+
+/**
+ * Options for fixture coordinate assertions.
+ *
+ * Use the default tolerance for precise fixture checks. Pass a larger
+ * tolerance only for platform paths that intentionally return approximate
+ * coordinates, such as Android coarse granularity.
+ *
+ * @example
+ * ```ts
+ * assertFixtureCoordinates(position, {
+ *   coordinateTolerance: 0.03
+ * });
+ * ```
+ *
+ * @property {number} [coordinateTolerance = 0.02] - Maximum accepted absolute
+ * latitude and longitude delta from `SEOUL_FIXTURE`, measured in decimal
+ * degrees. The default keeps precise fixture assertions tight; Android coarse
+ * results can opt into a wider value.
+ */
+export type FixtureCoordinateOptions = {
+  coordinateTolerance?: number;
+};
 
 /**
  * Error thrown when a native position is finite but not close to the fixture.
@@ -73,13 +96,20 @@ export class FixtureMismatchError extends Error {
  * @param {GeolocationResponse} position - Native geolocation response to
  * validate against `SEOUL_FIXTURE`. The helper reads
  * `position.coords.latitude` and `position.coords.longitude`.
+ * @param {FixtureCoordinateOptions} [options] - Optional assertion settings
+ * for scenarios that need a platform-specific fixture tolerance.
  * @returns {string} Formatted `latitude, longitude` summary for pass messages,
  * with both values rounded to six decimal places.
  * @throws {Error} Throws when either coordinate is not a finite number.
  * @throws {FixtureMismatchError} Throws when finite coordinates do not match
  * the shared fixture within tolerance.
  */
-export const assertFixtureCoordinates = (position: GeolocationResponse) => {
+export const assertFixtureCoordinates = (
+  position: GeolocationResponse,
+  options: FixtureCoordinateOptions = {}
+) => {
+  const coordinateTolerance =
+    options.coordinateTolerance ?? DEFAULT_COORDINATE_TOLERANCE;
   const latitudeDelta = Math.abs(
     position.coords.latitude - SEOUL_FIXTURE.latitude
   );
@@ -95,8 +125,8 @@ export const assertFixtureCoordinates = (position: GeolocationResponse) => {
   }
 
   if (
-    latitudeDelta > COORDINATE_TOLERANCE ||
-    longitudeDelta > COORDINATE_TOLERANCE
+    latitudeDelta > coordinateTolerance ||
+    longitudeDelta > coordinateTolerance
   ) {
     throw new FixtureMismatchError(
       `Position did not match fixture: ${position.coords.latitude.toFixed(
