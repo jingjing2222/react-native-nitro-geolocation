@@ -1,31 +1,28 @@
-import React, { useEffect, useState } from "react";
-import {
-  Button,
-  Platform,
-  ScrollView,
-  StyleSheet,
-  Text,
-  View
-} from "react-native";
+import React, { useState } from "react";
+import { Platform } from "react-native";
 import {
   LocationErrorCode,
-  checkPermission,
-  getCurrentPosition,
-  getLocationErrorCodeName,
-  requestPermission
+  getCurrentPosition
 } from "react-native-nitro-geolocation";
 import type {
   GeolocationResponse,
   LocationRequestOptions
 } from "react-native-nitro-geolocation";
-import { runWithNativeGeolocation } from "./scenarioUtils";
-
-type ScenarioStatus = "idle" | "running" | "passed" | "failed";
-
-type ScenarioResult = {
-  status: ScenarioStatus;
-  message: string;
-};
+import {
+  FixtureMismatchError,
+  PermissionStatusBlock,
+  ResultBlock,
+  ScenarioButton,
+  ScenarioMessageList,
+  ScenarioScreen,
+  ScenarioSection,
+  assertFixtureCoordinates,
+  createScenarioResults,
+  getDisplayErrorMessage,
+  runWithNativeGeolocation,
+  usePermissionStatus,
+  useScenarioResults
+} from "./scenario";
 
 type AccuracyScenario = {
   id: string;
@@ -41,78 +38,14 @@ type PositiveScenarioMessage = {
   message: string;
 };
 
-class FixtureMismatchError extends Error {
-  constructor(message: string) {
-    super(message);
-    this.name = "FixtureMismatchError";
-    Object.setPrototypeOf(this, FixtureMismatchError.prototype);
-  }
-}
-
-const SEOUL_FIXTURE = {
-  latitude: 37.5665,
-  longitude: 126.978
-};
-
-const COORDINATE_TOLERANCE = 0.02;
 const FIXTURE_RETRY_TIMEOUT_MS = 25000;
 const FIXTURE_RETRY_INTERVAL_MS = 1000;
 
-const initialResults: Record<string, ScenarioResult> = {
-  positive: {
-    status: "idle",
-    message: "Not run"
-  },
-  invalid: {
-    status: "idle",
-    message: "Not run"
-  },
-  denied: {
-    status: "idle",
-    message: "Not run"
-  }
-};
-
-const getDisplayErrorMessage = (error: unknown) => {
-  const maybeError = error as { code?: unknown; message?: unknown };
-  const code = typeof maybeError.code === "number" ? maybeError.code : null;
-  const name = code === null ? "UNKNOWN" : getLocationErrorCodeName(code);
-  const message =
-    typeof maybeError.message === "string" ? maybeError.message : String(error);
-
-  return code === null ? message : `${name}: ${message}`;
-};
-
-const assertFixtureCoordinates = (position: GeolocationResponse) => {
-  const latitudeDelta = Math.abs(
-    position.coords.latitude - SEOUL_FIXTURE.latitude
-  );
-  const longitudeDelta = Math.abs(
-    position.coords.longitude - SEOUL_FIXTURE.longitude
-  );
-
-  if (
-    !Number.isFinite(position.coords.latitude) ||
-    !Number.isFinite(position.coords.longitude)
-  ) {
-    throw new Error("Position contained non-finite coordinates.");
-  }
-
-  if (
-    latitudeDelta > COORDINATE_TOLERANCE ||
-    longitudeDelta > COORDINATE_TOLERANCE
-  ) {
-    throw new FixtureMismatchError(
-      `Position did not match fixture: ${position.coords.latitude.toFixed(
-        6
-      )}, ${position.coords.longitude.toFixed(6)}.`
-    );
-  }
-
-  return `${position.coords.latitude.toFixed(
-    6
-  )}, ${position.coords.longitude.toFixed(6)}`;
-};
+const initialResults = createScenarioResults([
+  "positive",
+  "invalid",
+  "denied"
+] as const);
 
 const assertNotGpsProvider = (position: GeolocationResponse) => {
   const coordinates = assertFixtureCoordinates(position);
@@ -269,33 +202,19 @@ const getPositiveScenarios = (): AccuracyScenario[] => {
 };
 
 export default function AccuracyPresetsScreen() {
-  const [permissionStatus, setPermissionStatus] = useState("unknown");
-  const [results, setResults] = useState(initialResults);
+  const {
+    permissionStatus,
+    requestLocationPermission: requestNativePermission,
+    setPermissionStatus
+  } = usePermissionStatus();
+  const { results, setResult } = useScenarioResults(initialResults);
   const [scenarioMessages, setScenarioMessages] = useState<
     PositiveScenarioMessage[]
   >([]);
 
-  const setResult = (
-    key: keyof typeof initialResults,
-    result: ScenarioResult
-  ) => {
-    setResults((previous) => ({
-      ...previous,
-      [key]: result
-    }));
-  };
-
-  const refreshPermission = async () => {
-    const status = await checkPermission();
-    setPermissionStatus(status);
-    return status;
-  };
-
   const requestLocationPermission = async () => {
     try {
-      const status = await requestPermission();
-      setPermissionStatus(status);
-      return status;
+      return await requestNativePermission();
     } catch (error) {
       const message = getDisplayErrorMessage(error);
       setPermissionStatus(message);
@@ -426,240 +345,72 @@ export default function AccuracyPresetsScreen() {
     }
   };
 
-  useEffect(() => {
-    refreshPermission();
-  }, []);
-
   return (
-    <ScrollView style={styles.container} testID="accuracy-presets-screen">
-      <View style={styles.header}>
-        <Text style={styles.title}>Accuracy Presets</Text>
-        <Text style={styles.subtitle}>
-          Native request contract for platform accuracy options
-        </Text>
-      </View>
+    <ScenarioScreen
+      prefix="accuracy-presets"
+      title="Accuracy Presets"
+      subtitle="Native request contract for platform accuracy options"
+    >
+      <ScenarioSection index={1} title="Permission">
+        <PermissionStatusBlock
+          prefix="accuracy-presets"
+          status={permissionStatus}
+        />
+        <ScenarioButton
+          title="Request Permission"
+          onPress={requestLocationPermission}
+          color="#4CAF50"
+          testID="accuracy-presets-request-permission-button"
+        />
+      </ScenarioSection>
 
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>1. Permission</Text>
-        <View style={styles.statusContainer}>
-          <Text style={styles.statusLabel}>Permission:</Text>
-          <Text style={styles.statusValue} testID="accuracy-presets-permission">
-            {permissionStatus}
-          </Text>
-        </View>
-        <View style={styles.buttonContainer}>
-          <Button
-            title="Request Permission"
-            onPress={requestLocationPermission}
-            color="#4CAF50"
-            testID="accuracy-presets-request-permission-button"
-          />
-        </View>
-      </View>
-
-      <View style={styles.divider} />
-
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>2. Positive Presets</Text>
-        <View style={styles.buttonContainer}>
-          <Button
-            title="Run Preset Requests"
-            onPress={runPositiveScenarios}
-            color="#1976D2"
-            testID="accuracy-presets-run-positive-button"
-          />
-        </View>
+      <ScenarioSection index={2} title="Positive Presets" divided>
+        <ScenarioButton
+          title="Run Preset Requests"
+          onPress={runPositiveScenarios}
+          testID="accuracy-presets-run-positive-button"
+        />
         <ResultBlock
+          prefix="accuracy-presets"
           id="positive"
           label="Positive presets"
           result={results.positive}
         />
-        {scenarioMessages.map((scenario, index) => (
-          <View
-            key={scenario.id}
-            style={styles.scenarioContainer}
-            testID={`accuracy-presets-scenario-${index}`}
-          >
-            <Text
-              style={styles.scenarioTitle}
-              testID={`accuracy-presets-scenario-${index}-title`}
-            >
-              {scenario.title}
-            </Text>
-            <Text
-              style={styles.scenarioText}
-              testID={`accuracy-presets-scenario-${index}-message`}
-            >
-              {scenario.message}
-            </Text>
-          </View>
-        ))}
-      </View>
+        <ScenarioMessageList
+          prefix="accuracy-presets"
+          messages={scenarioMessages}
+        />
+      </ScenarioSection>
 
-      <View style={styles.divider} />
-
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>3. Invalid Preset</Text>
-        <View style={styles.buttonContainer}>
-          <Button
-            title="Run Invalid Preset"
-            onPress={runInvalidPresetScenario}
-            color="#D84315"
-            testID="accuracy-presets-run-invalid-button"
-          />
-        </View>
+      <ScenarioSection index={3} title="Invalid Preset" divided>
+        <ScenarioButton
+          title="Run Invalid Preset"
+          onPress={runInvalidPresetScenario}
+          color="#D84315"
+          testID="accuracy-presets-run-invalid-button"
+        />
         <ResultBlock
+          prefix="accuracy-presets"
           id="invalid"
           label="Invalid preset"
           result={results.invalid}
         />
-      </View>
+      </ScenarioSection>
 
-      <View style={styles.divider} />
-
-      <View style={styles.section}>
-        <Text style={styles.sectionTitle}>4. Permission Denied</Text>
-        <View style={styles.buttonContainer}>
-          <Button
-            title="Run Denied Request"
-            onPress={runPermissionDeniedScenario}
-            color="#7B1FA2"
-            testID="accuracy-presets-run-denied-button"
-          />
-        </View>
+      <ScenarioSection index={4} title="Permission Denied" divided>
+        <ScenarioButton
+          title="Run Denied Request"
+          onPress={runPermissionDeniedScenario}
+          color="#7B1FA2"
+          testID="accuracy-presets-run-denied-button"
+        />
         <ResultBlock
+          prefix="accuracy-presets"
           id="denied"
           label="Permission denied"
           result={results.denied}
         />
-      </View>
-    </ScrollView>
+      </ScenarioSection>
+    </ScenarioScreen>
   );
 }
-
-function ResultBlock({
-  id,
-  label,
-  result
-}: {
-  id: string;
-  label: string;
-  result: ScenarioResult;
-}) {
-  return (
-    <View
-      style={[
-        styles.resultContainer,
-        result.status === "passed" && styles.resultPassed,
-        result.status === "failed" && styles.resultFailed
-      ]}
-      testID={`accuracy-presets-${id}-result`}
-    >
-      <Text
-        style={styles.resultStatus}
-        testID={`accuracy-presets-${id}-status`}
-      >
-        {label}: {result.status}
-      </Text>
-      <Text
-        style={styles.resultMessage}
-        testID={`accuracy-presets-${id}-message`}
-      >
-        {result.message}
-      </Text>
-    </View>
-  );
-}
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#fff"
-  },
-  header: {
-    padding: 20,
-    backgroundColor: "#37474F"
-  },
-  title: {
-    fontSize: 24,
-    fontWeight: "700",
-    color: "#fff",
-    marginBottom: 8
-  },
-  subtitle: {
-    fontSize: 14,
-    color: "#ECEFF1"
-  },
-  section: {
-    padding: 20
-  },
-  sectionTitle: {
-    fontSize: 18,
-    fontWeight: "600",
-    color: "#000",
-    marginBottom: 12
-  },
-  statusContainer: {
-    backgroundColor: "#ECEFF1",
-    padding: 12,
-    borderRadius: 8,
-    marginBottom: 12
-  },
-  statusLabel: {
-    fontSize: 14,
-    color: "#455A64",
-    fontWeight: "600"
-  },
-  statusValue: {
-    fontSize: 16,
-    color: "#000",
-    fontWeight: "700",
-    marginTop: 4
-  },
-  buttonContainer: {
-    marginVertical: 8
-  },
-  resultContainer: {
-    padding: 12,
-    borderRadius: 8,
-    backgroundColor: "#F5F5F5",
-    borderWidth: 1,
-    borderColor: "#E0E0E0",
-    marginTop: 8
-  },
-  resultPassed: {
-    backgroundColor: "#E8F5E9",
-    borderColor: "#4CAF50"
-  },
-  resultFailed: {
-    backgroundColor: "#FFEBEE",
-    borderColor: "#E53935"
-  },
-  resultStatus: {
-    fontSize: 16,
-    fontWeight: "700",
-    color: "#000",
-    marginBottom: 4
-  },
-  resultMessage: {
-    fontSize: 13,
-    color: "#424242"
-  },
-  scenarioContainer: {
-    marginTop: 8
-  },
-  scenarioTitle: {
-    fontSize: 12,
-    color: "#000",
-    fontWeight: "700"
-  },
-  scenarioText: {
-    fontSize: 12,
-    color: "#263238",
-    marginTop: 2
-  },
-  divider: {
-    height: 1,
-    backgroundColor: "#E0E0E0"
-  }
-});

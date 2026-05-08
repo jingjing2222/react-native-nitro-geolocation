@@ -1,5 +1,4 @@
-import React, { useState } from "react";
-import { Button, ScrollView, Text, View } from "react-native";
+import React from "react";
 import {
   LocationErrorCode,
   geocode,
@@ -12,12 +11,14 @@ import type {
 import {
   ResultBlock,
   SEOUL_FIXTURE,
+  ScenarioButton,
+  ScenarioScreen,
+  ScenarioSection,
   assertLocationErrorCode,
-  createIdleResult,
+  createScenarioResults,
   getDisplayErrorMessage,
-  sharedStyles
-} from "./scenarioUtils";
-import type { ScenarioResult } from "./scenarioUtils";
+  useScenarioResults
+} from "./scenario";
 
 const PREFIX = "geocoding";
 const ADDRESS_QUERY = "City Hall, Seoul, South Korea";
@@ -26,6 +27,13 @@ const INVALID_COORDS = {
   latitude: 1234,
   longitude: SEOUL_FIXTURE.longitude
 };
+
+const initialResults = createScenarioResults([
+  "geocode",
+  "reverse",
+  "emptyAddress",
+  "invalidCoords"
+] as const);
 
 const formatLocation = (location: GeocodedLocation) => {
   const accuracy = location.accuracy;
@@ -108,30 +116,23 @@ const expectLocationError = async (
 };
 
 export default function GeocodingScreen() {
-  const [geocodeResult, setGeocodeResult] =
-    useState<ScenarioResult>(createIdleResult);
-  const [reverseResult, setReverseResult] =
-    useState<ScenarioResult>(createIdleResult);
-  const [emptyAddressResult, setEmptyAddressResult] =
-    useState<ScenarioResult>(createIdleResult);
-  const [invalidCoordsResult, setInvalidCoordsResult] =
-    useState<ScenarioResult>(createIdleResult);
+  const { results, setResult } = useScenarioResults(initialResults);
 
   const runPositiveScenarios = async () => {
-    setGeocodeResult({ status: "running", message: ADDRESS_QUERY });
-    setReverseResult({
+    setResult("geocode", { status: "running", message: ADDRESS_QUERY });
+    setResult("reverse", {
       status: "running",
       message: `${SEOUL_FIXTURE.latitude}, ${SEOUL_FIXTURE.longitude}`
     });
 
     try {
       const locations = await geocode(ADDRESS_QUERY);
-      setGeocodeResult({
+      setResult("geocode", {
         status: "passed",
         message: assertGeocodeResults(locations)
       });
     } catch (error) {
-      setGeocodeResult({
+      setResult("geocode", {
         status: "failed",
         message: getDisplayErrorMessage(error)
       });
@@ -139,12 +140,12 @@ export default function GeocodingScreen() {
 
     try {
       const addresses = await reverseGeocode(SEOUL_FIXTURE);
-      setReverseResult({
+      setResult("reverse", {
         status: "passed",
         message: assertReverseGeocodeResults(addresses)
       });
     } catch (error) {
-      setReverseResult({
+      setResult("reverse", {
         status: "failed",
         message: getDisplayErrorMessage(error)
       });
@@ -152,14 +153,14 @@ export default function GeocodingScreen() {
   };
 
   const runNegativeScenarios = async () => {
-    setEmptyAddressResult({ status: "running", message: "Blank address" });
-    setInvalidCoordsResult({
+    setResult("emptyAddress", { status: "running", message: "Blank address" });
+    setResult("invalidCoords", {
       status: "running",
       message: `${INVALID_COORDS.latitude}, ${INVALID_COORDS.longitude}`
     });
 
     try {
-      setEmptyAddressResult({
+      setResult("emptyAddress", {
         status: "passed",
         message: await expectLocationError(
           () => geocode("   "),
@@ -167,14 +168,14 @@ export default function GeocodingScreen() {
         )
       });
     } catch (error) {
-      setEmptyAddressResult({
+      setResult("emptyAddress", {
         status: "failed",
         message: getDisplayErrorMessage(error)
       });
     }
 
     try {
-      setInvalidCoordsResult({
+      setResult("invalidCoords", {
         status: "passed",
         message: await expectLocationError(
           () => reverseGeocode(INVALID_COORDS),
@@ -182,7 +183,7 @@ export default function GeocodingScreen() {
         )
       });
     } catch (error) {
-      setInvalidCoordsResult({
+      setResult("invalidCoords", {
         status: "failed",
         message: getDisplayErrorMessage(error)
       });
@@ -190,71 +191,61 @@ export default function GeocodingScreen() {
   };
 
   return (
-    <ScrollView style={sharedStyles.container} testID={`${PREFIX}-screen`}>
-      <View style={sharedStyles.header}>
-        <Text style={sharedStyles.title}>Geocoding</Text>
-        <Text style={sharedStyles.subtitle}>
-          Native address and coordinate conversion
-        </Text>
-      </View>
-
-      <View style={sharedStyles.section}>
-        <Text style={sharedStyles.sectionTitle}>1. Positive Scenarios</Text>
-        <Text style={sharedStyles.description}>
-          Resolve an address to coordinates and Seoul fixture coordinates to a
-          readable address through the native platform geocoder.
-        </Text>
-        <View style={sharedStyles.buttonContainer}>
-          <Button
-            title="Run Positive Geocoding"
-            onPress={runPositiveScenarios}
-            color="#2563EB"
-            testID={`${PREFIX}-run-positive-button`}
-          />
-        </View>
+    <ScenarioScreen
+      prefix={PREFIX}
+      title="Geocoding"
+      subtitle="Native address and coordinate conversion"
+    >
+      <ScenarioSection
+        index={1}
+        title="Positive Scenarios"
+        description="Resolve an address to coordinates and Seoul fixture coordinates to a readable address through the native platform geocoder."
+      >
+        <ScenarioButton
+          title="Run Positive Geocoding"
+          onPress={runPositiveScenarios}
+          color="#2563EB"
+          testID={`${PREFIX}-run-positive-button`}
+        />
         <ResultBlock
           prefix={PREFIX}
           id="geocode"
           label="Geocode"
-          result={geocodeResult}
+          result={results.geocode}
         />
         <ResultBlock
           prefix={PREFIX}
           id="reverse"
           label="Reverse geocode"
-          result={reverseResult}
+          result={results.reverse}
         />
-      </View>
+      </ScenarioSection>
 
-      <View style={sharedStyles.divider} />
-
-      <View style={sharedStyles.section}>
-        <Text style={sharedStyles.sectionTitle}>2. Negative Scenarios</Text>
-        <Text style={sharedStyles.description}>
-          Invalid user input should reject with the Modern API structured error
-          contract instead of rendering a synthetic pass state.
-        </Text>
-        <View style={sharedStyles.buttonContainer}>
-          <Button
-            title="Run Negative Geocoding"
-            onPress={runNegativeScenarios}
-            color="#B91C1C"
-            testID={`${PREFIX}-run-negative-button`}
-          />
-        </View>
+      <ScenarioSection
+        index={2}
+        title="Negative Scenarios"
+        description="Invalid user input should reject with the Modern API structured error contract instead of rendering a synthetic pass state."
+        divided
+      >
+        <ScenarioButton
+          title="Run Negative Geocoding"
+          onPress={runNegativeScenarios}
+          color="#B91C1C"
+          testID={`${PREFIX}-run-negative-button`}
+        />
         <ResultBlock
           prefix={PREFIX}
           id="empty-address"
           label="Empty address"
-          result={emptyAddressResult}
+          result={results.emptyAddress}
         />
         <ResultBlock
           prefix={PREFIX}
           id="invalid-coords"
           label="Invalid coordinates"
-          result={invalidCoordsResult}
+          result={results.invalidCoords}
         />
-      </View>
-    </ScrollView>
+      </ScenarioSection>
+    </ScenarioScreen>
   );
 }

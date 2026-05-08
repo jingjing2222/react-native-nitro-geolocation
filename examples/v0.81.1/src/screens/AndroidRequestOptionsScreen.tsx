@@ -1,11 +1,9 @@
-import React, { useEffect, useState } from "react";
-import { Button, Platform, ScrollView, Text, View } from "react-native";
+import React from "react";
+import { Platform } from "react-native";
 import {
   LocationErrorCode,
-  checkPermission,
   getCurrentPosition,
   getLastKnownPosition,
-  requestPermission,
   setConfiguration,
   unwatch,
   watchHeading,
@@ -16,31 +14,37 @@ import type {
   LocationRequestOptions
 } from "react-native-nitro-geolocation";
 import {
-  ResultBlock,
+  PermissionStatusBlock,
+  ResultList,
+  ScenarioButton,
+  ScenarioScreen,
+  ScenarioSection,
   assertFixtureCoordinates,
   assertLocationErrorCode,
-  createIdleResult,
+  createScenarioResults,
   getDisplayErrorMessage,
   runWithNativeGeolocation,
-  sharedStyles
-} from "./scenarioUtils";
-import type { ScenarioResult } from "./scenarioUtils";
+  usePermissionStatus,
+  useScenarioResults
+} from "./scenario";
 
 const PREFIX = "android-request-options";
 const FIXTURE_LATITUDE = 37.5665;
 const FIXTURE_LONGITUDE = 126.978;
 const WATCH_TIMEOUT_MS = 20000;
 
-const initialResults = {
-  fused: createIdleResult(),
-  oneShotDistance: createIdleResult(),
-  coarseCache: createIdleResult(),
-  mixedWatch: createIdleResult(),
-  maxUpdates: createIdleResult(),
-  headingUnwatch: createIdleResult(),
-  invalid: createIdleResult(),
-  fineDenied: createIdleResult()
-};
+const initialResults = createScenarioResults([
+  "fused",
+  "oneShotDistance",
+  "coarseCache",
+  "mixedWatch",
+  "maxUpdates",
+  "headingUnwatch",
+  "invalid",
+  "fineDenied"
+] as const);
+
+type ResultKey = keyof typeof initialResults;
 
 const assertFinitePosition = (position: GeolocationResponse) => {
   if (
@@ -65,32 +69,9 @@ const assertNotExactFixtureCoordinates = (position: GeolocationResponse) => {
 };
 
 export default function AndroidRequestOptionsScreen() {
-  const [permissionStatus, setPermissionStatus] = useState("unknown");
-  const [results, setResults] = useState(initialResults);
-
-  const setResult = (
-    key: keyof typeof initialResults,
-    result: ScenarioResult
-  ) => {
-    setResults((previous) => ({
-      ...previous,
-      [key]: result
-    }));
-  };
-
-  const refreshPermission = async () => {
-    const status = await checkPermission();
-    setPermissionStatus(status);
-    return status;
-  };
-
-  const ensurePermission = async () => {
-    const status = await requestPermission();
-    setPermissionStatus(status);
-    if (status !== "granted") {
-      throw new Error(`Permission was not granted: ${status}`);
-    }
-  };
+  const { permissionStatus, refreshPermission, ensurePermission } =
+    usePermissionStatus();
+  const { results, setResult } = useScenarioResults(initialResults);
 
   const configurePlayServices = () => {
     setConfiguration({
@@ -672,197 +653,153 @@ export default function AndroidRequestOptionsScreen() {
     }
   };
 
-  useEffect(() => {
-    refreshPermission();
-  }, []);
+  const renderResultSection = ({
+    index,
+    title,
+    buttonTitle,
+    onPress,
+    color,
+    buttonTestID,
+    resultId,
+    resultKey,
+    resultLabel
+  }: {
+    index: number;
+    title: string;
+    buttonTitle: string;
+    onPress: () => Promise<void>;
+    color: string;
+    buttonTestID: string;
+    resultId: string;
+    resultKey: ResultKey;
+    resultLabel: string;
+  }) => (
+    <ScenarioSection index={index} title={title} divided>
+      <ScenarioButton
+        title={buttonTitle}
+        onPress={onPress}
+        color={color}
+        testID={buttonTestID}
+      />
+      <ResultList
+        prefix={PREFIX}
+        results={results}
+        items={[
+          {
+            id: resultId,
+            label: resultLabel,
+            resultKey
+          }
+        ]}
+      />
+    </ScenarioSection>
+  );
 
   return (
-    <ScrollView style={sharedStyles.container} testID={`${PREFIX}-screen`}>
-      <View style={sharedStyles.header}>
-        <Text style={sharedStyles.title}>Android Request Options</Text>
-        <Text style={sharedStyles.subtitle}>
-          Fused request controls with update limits and rejection paths
-        </Text>
-      </View>
+    <ScenarioScreen
+      prefix={PREFIX}
+      title="Android Request Options"
+      subtitle="Fused request controls with update limits and rejection paths"
+    >
+      <ScenarioSection index={1} title="Permission">
+        <PermissionStatusBlock prefix={PREFIX} status={permissionStatus} />
+      </ScenarioSection>
 
-      <View style={sharedStyles.section}>
-        <Text style={sharedStyles.sectionTitle}>1. Permission</Text>
-        <View style={sharedStyles.statusContainer}>
-          <Text style={sharedStyles.statusLabel}>Permission:</Text>
-          <Text
-            style={sharedStyles.statusValue}
-            testID={`${PREFIX}-permission`}
-          >
-            {permissionStatus}
-          </Text>
-        </View>
-      </View>
+      {renderResultSection({
+        index: 2,
+        title: "Fused Coarse Request",
+        buttonTitle: "Run Fused Request",
+        onPress: runFusedRequestScenario,
+        color: "#1976D2",
+        buttonTestID: `${PREFIX}-run-fused-button`,
+        resultId: "fused",
+        resultKey: "fused",
+        resultLabel: "Fused request"
+      })}
 
-      <View style={sharedStyles.divider} />
+      {renderResultSection({
+        index: 3,
+        title: "One-Shot Distance Filter",
+        buttonTitle: "Run One-Shot Distance Filter",
+        onPress: runOneShotDistanceFilterScenario,
+        color: "#00695C",
+        buttonTestID: `${PREFIX}-run-one-shot-distance-button`,
+        resultId: "one-shot-distance",
+        resultKey: "oneShotDistance",
+        resultLabel: "One-shot distance"
+      })}
 
-      <View style={sharedStyles.section}>
-        <Text style={sharedStyles.sectionTitle}>2. Fused Coarse Request</Text>
-        <View style={sharedStyles.buttonContainer}>
-          <Button
-            title="Run Fused Request"
-            onPress={runFusedRequestScenario}
-            color="#1976D2"
-            testID={`${PREFIX}-run-fused-button`}
-          />
-        </View>
-        <ResultBlock
-          prefix={PREFIX}
-          id="fused"
-          label="Fused request"
-          result={results.fused}
-        />
-      </View>
+      {renderResultSection({
+        index: 4,
+        title: "Coarse Cache Isolation",
+        buttonTitle: "Run Coarse Cache Isolation",
+        onPress: runCoarseCacheScenario,
+        color: "#5E35B1",
+        buttonTestID: `${PREFIX}-run-coarse-cache-button`,
+        resultId: "coarse-cache",
+        resultKey: "coarseCache",
+        resultLabel: "Coarse cache"
+      })}
 
-      <View style={sharedStyles.divider} />
+      {renderResultSection({
+        index: 5,
+        title: "Mixed Watch Granularity",
+        buttonTitle: "Run Mixed Watch Granularity",
+        onPress: runMixedWatchScenario,
+        color: "#455A64",
+        buttonTestID: `${PREFIX}-run-mixed-watch-button`,
+        resultId: "mixed-watch",
+        resultKey: "mixedWatch",
+        resultLabel: "Mixed watch"
+      })}
 
-      <View style={sharedStyles.section}>
-        <Text style={sharedStyles.sectionTitle}>
-          3. One-Shot Distance Filter
-        </Text>
-        <View style={sharedStyles.buttonContainer}>
-          <Button
-            title="Run One-Shot Distance Filter"
-            onPress={runOneShotDistanceFilterScenario}
-            color="#00695C"
-            testID={`${PREFIX}-run-one-shot-distance-button`}
-          />
-        </View>
-        <ResultBlock
-          prefix={PREFIX}
-          id="one-shot-distance"
-          label="One-shot distance"
-          result={results.oneShotDistance}
-        />
-      </View>
+      {renderResultSection({
+        index: 6,
+        title: "Max Updates Watch",
+        buttonTitle: "Run Max Updates Watch",
+        onPress: runMaxUpdatesScenario,
+        color: "#00897B",
+        buttonTestID: `${PREFIX}-run-max-updates-button`,
+        resultId: "max-updates",
+        resultKey: "maxUpdates",
+        resultLabel: "Max updates"
+      })}
 
-      <View style={sharedStyles.divider} />
+      {renderResultSection({
+        index: 7,
+        title: "Heading Unwatch Isolation",
+        buttonTitle: "Run Heading Unwatch Isolation",
+        onPress: runHeadingUnwatchScenario,
+        color: "#6D4C41",
+        buttonTestID: `${PREFIX}-run-heading-unwatch-button`,
+        resultId: "heading-unwatch",
+        resultKey: "headingUnwatch",
+        resultLabel: "Heading unwatch"
+      })}
 
-      <View style={sharedStyles.section}>
-        <Text style={sharedStyles.sectionTitle}>4. Coarse Cache Isolation</Text>
-        <View style={sharedStyles.buttonContainer}>
-          <Button
-            title="Run Coarse Cache Isolation"
-            onPress={runCoarseCacheScenario}
-            color="#5E35B1"
-            testID={`${PREFIX}-run-coarse-cache-button`}
-          />
-        </View>
-        <ResultBlock
-          prefix={PREFIX}
-          id="coarse-cache"
-          label="Coarse cache"
-          result={results.coarseCache}
-        />
-      </View>
+      {renderResultSection({
+        index: 8,
+        title: "Invalid Max Updates",
+        buttonTitle: "Run Invalid Max Updates",
+        onPress: runInvalidMaxUpdatesScenario,
+        color: "#D84315",
+        buttonTestID: `${PREFIX}-run-invalid-button`,
+        resultId: "invalid",
+        resultKey: "invalid",
+        resultLabel: "Invalid maxUpdates"
+      })}
 
-      <View style={sharedStyles.divider} />
-
-      <View style={sharedStyles.section}>
-        <Text style={sharedStyles.sectionTitle}>
-          5. Mixed Watch Granularity
-        </Text>
-        <View style={sharedStyles.buttonContainer}>
-          <Button
-            title="Run Mixed Watch Granularity"
-            onPress={runMixedWatchScenario}
-            color="#455A64"
-            testID={`${PREFIX}-run-mixed-watch-button`}
-          />
-        </View>
-        <ResultBlock
-          prefix={PREFIX}
-          id="mixed-watch"
-          label="Mixed watch"
-          result={results.mixedWatch}
-        />
-      </View>
-
-      <View style={sharedStyles.divider} />
-
-      <View style={sharedStyles.section}>
-        <Text style={sharedStyles.sectionTitle}>6. Max Updates Watch</Text>
-        <View style={sharedStyles.buttonContainer}>
-          <Button
-            title="Run Max Updates Watch"
-            onPress={runMaxUpdatesScenario}
-            color="#00897B"
-            testID={`${PREFIX}-run-max-updates-button`}
-          />
-        </View>
-        <ResultBlock
-          prefix={PREFIX}
-          id="max-updates"
-          label="Max updates"
-          result={results.maxUpdates}
-        />
-      </View>
-
-      <View style={sharedStyles.divider} />
-
-      <View style={sharedStyles.section}>
-        <Text style={sharedStyles.sectionTitle}>
-          7. Heading Unwatch Isolation
-        </Text>
-        <View style={sharedStyles.buttonContainer}>
-          <Button
-            title="Run Heading Unwatch Isolation"
-            onPress={runHeadingUnwatchScenario}
-            color="#6D4C41"
-            testID={`${PREFIX}-run-heading-unwatch-button`}
-          />
-        </View>
-        <ResultBlock
-          prefix={PREFIX}
-          id="heading-unwatch"
-          label="Heading unwatch"
-          result={results.headingUnwatch}
-        />
-      </View>
-
-      <View style={sharedStyles.divider} />
-
-      <View style={sharedStyles.section}>
-        <Text style={sharedStyles.sectionTitle}>8. Invalid Max Updates</Text>
-        <View style={sharedStyles.buttonContainer}>
-          <Button
-            title="Run Invalid Max Updates"
-            onPress={runInvalidMaxUpdatesScenario}
-            color="#D84315"
-            testID={`${PREFIX}-run-invalid-button`}
-          />
-        </View>
-        <ResultBlock
-          prefix={PREFIX}
-          id="invalid"
-          label="Invalid maxUpdates"
-          result={results.invalid}
-        />
-      </View>
-
-      <View style={sharedStyles.divider} />
-
-      <View style={sharedStyles.section}>
-        <Text style={sharedStyles.sectionTitle}>9. Fine Permission Gate</Text>
-        <View style={sharedStyles.buttonContainer}>
-          <Button
-            title="Run Fine Permission Gate"
-            onPress={runFineDeniedScenario}
-            color="#7B1FA2"
-            testID={`${PREFIX}-run-fine-denied-button`}
-          />
-        </View>
-        <ResultBlock
-          prefix={PREFIX}
-          id="fine-denied"
-          label="Fine permission"
-          result={results.fineDenied}
-        />
-      </View>
-    </ScrollView>
+      {renderResultSection({
+        index: 9,
+        title: "Fine Permission Gate",
+        buttonTitle: "Run Fine Permission Gate",
+        onPress: runFineDeniedScenario,
+        color: "#7B1FA2",
+        buttonTestID: `${PREFIX}-run-fine-denied-button`,
+        resultId: "fine-denied",
+        resultKey: "fineDenied",
+        resultLabel: "Fine permission"
+      })}
+    </ScenarioScreen>
   );
 }
