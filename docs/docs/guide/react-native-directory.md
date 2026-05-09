@@ -40,7 +40,6 @@ Targets bare React Native, RN CLI, and Expo development/custom native builds. Ex
 - npm package has discoverability keywords.
 - Repository topics include React Native, geolocation, Nitro, JSI, platform, and Android provider keywords.
 - Docs include Expo development build guidance.
-- Docs include a migration demo from community imports to `/compat` and Modern API.
+- Docs include community and service migration paths.
 - Benchmark docs clearly state cached-read and JS-native latency scope.
 - Roadmap issue tracks `v1.3` compatibility matrix, web fallback, extra benchmarks, and real migration examples.
-

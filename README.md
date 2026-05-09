@@ -351,7 +351,9 @@ Geolocation.clearWatch(watchId);
 
 ---
 
-## 🔄 Migration from `@react-native-community/geolocation`
+## 🔄 Migration
+
+### From `@react-native-community/geolocation`
 
 The safest migration is two-step: switch imports to `/compat` first, verify
 the app, then move call sites to the Modern API where it improves ownership,
@@ -378,18 +380,6 @@ The skill source is
 The bundled bootstrap script is
 [`skills/community-migration/scripts/migrate-to-compat.mjs`](https://github.com/jingjing2222/react-native-nitro-geolocation/tree/main/skills/community-migration/scripts/migrate-to-compat.mjs).
 
-For apps currently using `react-native-geolocation-service`, use the dedicated
-direct-to-Modern migration skill instead:
-
-```bash
-npx skills add jingjing2222/react-native-nitro-geolocation --skill service-migration
-```
-
-That path intentionally does not use `/compat`; it maps service-specific
-behavior such as `accuracy`, fused provider intent, Android settings dialogs,
-`mocked`/`provider` metadata, and provider-related error codes to the Modern
-API.
-
 For a drop-in compatibility migration, change the import to use `/compat`:
 
 ```diff
@@ -410,8 +400,24 @@ Then migrate individual call sites to the Modern API:
 + });
 ```
 
-See the [migration demo](https://react-native-nitro-geolocation.pages.dev/guide/migration-demo)
+See [Community Migration](https://react-native-nitro-geolocation.pages.dev/guide/community-migration)
 for the full community import → `/compat` → Modern API path.
+
+### From `react-native-geolocation-service`
+
+Apps currently using `react-native-geolocation-service` should migrate directly
+to the Modern API. Do not route this path through `/compat`; the service package
+has Android fused-provider, settings-dialog, `mocked`/`provider`, and
+provider-related error behavior that maps more naturally to Modern APIs.
+
+Install the dedicated Agent Skills-compatible migration playbook:
+
+```bash
+npx skills add jingjing2222/react-native-nitro-geolocation --skill service-migration
+```
+
+See [Service Migration](https://react-native-nitro-geolocation.pages.dev/guide/service-migration)
+for the direct service → Modern API path.
 
 ---
 
@@ -435,8 +441,8 @@ path cheaper.
 - [Modern API Reference](https://react-native-nitro-geolocation.pages.dev/guide/modern-api)
 - [Compat API Reference](https://react-native-nitro-geolocation.pages.dev/guide/compat-api)
 - [Migration Skills](https://react-native-nitro-geolocation.pages.dev/guide/migration-assistance)
+- [Community Migration](https://react-native-nitro-geolocation.pages.dev/guide/community-migration)
 - [Service Migration](https://react-native-nitro-geolocation.pages.dev/guide/service-migration)
-- [Community Migration Demo](https://react-native-nitro-geolocation.pages.dev/guide/migration-demo)
 - [Expo Development Build Guide](https://react-native-nitro-geolocation.pages.dev/guide/expo-development-build)
 - [DevTools Plugin Guide](https://react-native-nitro-geolocation.pages.dev/guide/devtools)
 - [Why Nitro Module?](https://react-native-nitro-geolocation.pages.dev/guide/why-nitro-module)

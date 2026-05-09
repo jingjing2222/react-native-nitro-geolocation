@@ -55,13 +55,14 @@ provider-related error codes.
 
 For `@react-native-community/geolocation`, first make the mechanical
 dependency/import change and verify the app still builds. Then refactor the
-callback-based compat code to Modern API calls.
+callback-based compat code to Modern API calls. See
+[Community Migration](/guide/community-migration).
 
 For `react-native-geolocation-service`, migrate directly to named Modern API
 imports. That package's Android fused-provider and settings-dialog options map
 more naturally to Modern APIs such as
 `setConfiguration({ locationProvider: 'playServices' })` and
-`requestLocationSettings()`.
+`requestLocationSettings()`. See [Service Migration](/guide/service-migration).
 
 The final target state should avoid runtime imports from
 `@react-native-community/geolocation`, `navigator.geolocation`, and
