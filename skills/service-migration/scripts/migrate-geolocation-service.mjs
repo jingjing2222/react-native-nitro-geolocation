@@ -886,7 +886,11 @@ function upsertNitroImport(t, program, names) {
       continue;
     }
     for (const specifier of statement.specifiers) {
-      if (t.isImportSpecifier(specifier)) {
+      if (
+        t.isImportSpecifier(specifier) &&
+        specifier.importKind !== "type" &&
+        specifier.importKind !== "typeof"
+      ) {
         importedLocals.add(specifier.local.name);
       }
     }
@@ -897,6 +901,17 @@ function upsertNitroImport(t, program, names) {
 
   if (nitroImport) {
     for (const name of missingNames) {
+      const matchingTypeSpecifier = nitroImport.specifiers.find(
+        (specifier) =>
+          t.isImportSpecifier(specifier) &&
+          specifier.importKind === "type" &&
+          t.isIdentifier(specifier.local, { name }) &&
+          t.isIdentifier(specifier.imported, { name })
+      );
+      if (matchingTypeSpecifier) {
+        matchingTypeSpecifier.importKind = null;
+        continue;
+      }
       nitroImport.specifiers.push(
         t.importSpecifier(t.identifier(name), t.identifier(name))
       );
@@ -923,7 +938,13 @@ function upsertNitroImport(t, program, names) {
   program.body.splice(insertionIndex, 0, importDeclaration);
 }
 
-function transformSourceFile(file, root, tools, report, { dryRun }) {
+function transformSourceFile(
+  file,
+  root,
+  tools,
+  report,
+  { dryRun, locationProvider }
+) {
   const { parser, traverse, generate, t } = tools;
   const source = readFileSync(file, "utf8");
   if (!source.includes(LEGACY_PACKAGE)) return false;
@@ -1069,7 +1090,7 @@ function transformSourceFile(file, root, tools, report, { dryRun }) {
             statement.insertBefore(
               t.expressionStatement(
                 t.callExpression(t.identifier("setConfiguration"), [
-                  configObject(t, "playServices", level)
+                  configObject(t, locationProvider, level)
                 ])
               )
             );
@@ -1441,7 +1462,8 @@ async function main() {
   if (tools) {
     for (const file of files) {
       transformSourceFile(file, options.root, tools, report, {
-        dryRun: options.dryRun
+        dryRun: options.dryRun,
+        locationProvider: options.locationProvider
       });
     }
 
