@@ -1,5 +1,11 @@
 # react-native-nitro-geolocation
 
+## 1.2.6
+
+### Patch Changes
+
+- 1e398d1: Document scoped migration skills for community geolocation and geolocation-service migrations.
+
 ## 1.2.5
 
 ### Patch Changes
