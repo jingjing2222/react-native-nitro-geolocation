@@ -1,14 +1,41 @@
 ---
-title: Migration Demo
+title: Community Migration
 ---
 
-# Migration Demo
+# Community Migration
 
-The safest migration from `@react-native-community/geolocation` is two-step:
-switch imports to `/compat` first, verify the app still behaves the same, then
-move call sites to the Modern API.
+Use this path for apps that import `@react-native-community/geolocation`,
+`navigator.geolocation`, or `react-native-nitro-geolocation/compat`.
 
-## Step 1: Community package
+The safest migration is two-step: switch community imports to `/compat` first,
+verify the app still behaves the same, then move call sites to the Modern API
+where it improves ownership, permission timing, cache behavior, or Android
+settings handling.
+
+## Agent Skill
+
+This repository ships an Agent Skills-compatible migration playbook for this
+path:
+
+```bash
+npx skills add jingjing2222/react-native-nitro-geolocation --skill community-migration
+```
+
+The skill source is
+[`skills/community-migration`](https://github.com/jingjing2222/react-native-nitro-geolocation/tree/main/skills/community-migration).
+
+The bundled bootstrap script performs the first safe mechanical pass:
+
+```bash
+node <skill-dir>/scripts/migrate-to-compat.mjs --root <app-root>
+```
+
+After the compat bootstrap, use the skill to refactor selected call sites to the
+Modern API.
+
+## Migration Path
+
+### Step 1: Community Package
 
 ```tsx
 import Geolocation from '@react-native-community/geolocation';
@@ -28,7 +55,7 @@ Geolocation.getCurrentPosition(
 );
 ```
 
-## Step 2: Drop-in `/compat`
+### Step 2: Drop-In `/compat`
 
 First install the Nitro packages:
 
@@ -61,7 +88,7 @@ Geolocation.getCurrentPosition(
 );
 ```
 
-## Step 3: Modern API
+### Step 3: Modern API
 
 After the `/compat` migration is stable, move individual call sites to the
 Modern API:
@@ -123,16 +150,3 @@ function LocationTracker() {
   );
 }
 ```
-
-## Agent-Assisted Migration
-
-This repository also ships an Agent Skills-compatible migration playbook:
-
-```bash
-npx skills add jingjing2222/react-native-nitro-geolocation --skill react-native-nitro-geolocation-modern-migration
-```
-
-The skill first rewrites community imports to `/compat`, then guides a coding
-agent through Modern API refactors with explicit checks for permission timing,
-watch cleanup, cached reads, accuracy, and Android provider/settings handling.
-

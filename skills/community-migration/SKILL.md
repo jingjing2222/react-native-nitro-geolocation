@@ -1,9 +1,9 @@
 ---
-name: react-native-nitro-geolocation-modern-migration
-description: Migrate React Native apps from @react-native-community/geolocation, navigator.geolocation, or react-native-nitro-geolocation/compat to react-native-nitro-geolocation. Use when installing the Nitro packages, running the bundled compat bootstrap codemod, removing the legacy package, then refactoring callback-based compat usage to the Modern API with Promise functions, requestPermission, setConfiguration, useWatchPosition, watchPosition, and unwatch.
+name: community-migration
+description: Migrate React Native apps from @react-native-community/geolocation to react-native-nitro-geolocation. Use when installing the Nitro packages, running the bundled compat bootstrap codemod, removing @react-native-community/geolocation, then refactoring community-compatible call sites to the Modern API with Promise functions, requestPermission, setConfiguration, useWatchPosition, watchPosition, and unwatch.
 ---
 
-# React Native Nitro Geolocation Modern Migration
+# Community Geolocation Migration
 
 Use a two-phase migration:
 
@@ -46,10 +46,12 @@ the semantic Modern API refactor.
    `react-native-nitro-geolocation` version, confirm an API exists in
    `node_modules/react-native-nitro-geolocation` or the installed package types
    before using docs-only APIs.
-7. Find remaining geolocation usage:
+7. Find remaining community geolocation usage:
    ```bash
-   rg "@react-native-community/geolocation|navigator\\.geolocation|react-native-nitro-geolocation/compat|setRNConfiguration|requestAuthorization|watchPosition|clearWatch|stopObserving"
+   rg "@react-native-community/geolocation|react-native-nitro-geolocation/compat|setRNConfiguration|requestAuthorization|watchPosition|clearWatch|stopObserving|navigator\\.geolocation"
    ```
+   Treat `navigator.geolocation` as a manual-review compatibility site, not as
+   the primary migration scope.
 8. Inspect each call site before refactoring. Identify whether it is in a React
    function component, class component, hook, service module, background task, or
    test.

@@ -1,27 +1,41 @@
 ---
-title: Migration Assistance
+title: Migration Skills
 ---
 
-# Migration Assistance
+# Migration Skills
 
 Use this guide when migrating an existing app from
-`@react-native-community/geolocation`, `navigator.geolocation`, or
-`react-native-nitro-geolocation/compat` toward the Modern API.
+`@react-native-community/geolocation`, `navigator.geolocation`,
+`react-native-geolocation-service`, or `react-native-nitro-geolocation/compat`
+toward the Modern API.
 
 ## Agent Skill
 
-This repository publishes an Agent Skills-compatible migration playbook for
-coding agents:
-[`react-native-nitro-geolocation-modern-migration`](https://github.com/jingjing2222/react-native-nitro-geolocation/tree/main/skills/react-native-nitro-geolocation-modern-migration).
+This repository publishes Agent Skills-compatible migration playbooks for
+coding agents.
+
+For `@react-native-community/geolocation`, `navigator.geolocation`, or existing
+`/compat` code, use:
+
+[`community-migration`](https://github.com/jingjing2222/react-native-nitro-geolocation/tree/main/skills/community-migration).
 
 Install it with the Vercel Labs `skills` CLI:
 
 ```bash
-npx skills add jingjing2222/react-native-nitro-geolocation --skill react-native-nitro-geolocation-modern-migration
+npx skills add jingjing2222/react-native-nitro-geolocation --skill community-migration
 ```
 
-The skill is migration assistance, not a fully automatic migration. It uses a
-two-phase workflow:
+For `react-native-geolocation-service`, migrate directly to the Modern API with:
+
+[`service-migration`](https://github.com/jingjing2222/react-native-nitro-geolocation/tree/main/skills/service-migration).
+
+```bash
+npx skills add jingjing2222/react-native-nitro-geolocation --skill service-migration
+```
+
+Both skills are migration assistance, not fully automatic migrations.
+
+The community migration skill uses a two-phase workflow:
 
 1. Run a package-manager-aware compat bootstrap script that installs
    `react-native-nitro-modules` and `react-native-nitro-geolocation`, rewrites
@@ -32,11 +46,23 @@ two-phase workflow:
    criteria for permission timing, React lifecycle ownership, watch cleanup,
    cache-vs-fresh reads, accuracy, and Android provider/settings handling.
 
-## Migration Shape
+The service migration skill skips `/compat` and targets the Modern API directly.
+It preserves service-specific behavior such as `accuracy`, fused-provider
+intent, Android settings-dialog handling, `mocked`/`provider` metadata, and
+provider-related error codes.
 
-For the safest migration, first make the mechanical dependency/import change and
-verify the app still builds. Then refactor the callback-based compat code to
-Modern API calls.
+## Choose a Path
+
+For `@react-native-community/geolocation`, first make the mechanical
+dependency/import change and verify the app still builds. Then refactor the
+callback-based compat code to Modern API calls. See
+[Community Migration](/guide/community-migration).
+
+For `react-native-geolocation-service`, migrate directly to named Modern API
+imports. That package's Android fused-provider and settings-dialog options map
+more naturally to Modern APIs such as
+`setConfiguration({ locationProvider: 'playServices' })` and
+`requestLocationSettings()`. See [Service Migration](/guide/service-migration).
 
 The final target state should avoid runtime imports from
 `@react-native-community/geolocation`, `navigator.geolocation`, and
