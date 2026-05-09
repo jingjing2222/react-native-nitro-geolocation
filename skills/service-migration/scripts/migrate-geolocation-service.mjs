@@ -308,6 +308,7 @@ function createReport(root) {
     parseFailures: [],
     importSites: [],
     callsites: new Map(),
+    unresolvedLegacyFiles: [],
     riskyHits: [],
     manualReview: [],
     validationCommands: []
@@ -324,6 +325,13 @@ function addManualReview(report, file, line, message) {
 
 function addCallsite(report, name) {
   report.callsites.set(name, (report.callsites.get(name) ?? 0) + 1);
+}
+
+function addUnresolvedLegacyReference(report, file, line, message) {
+  if (!report.unresolvedLegacyFiles.includes(file)) {
+    report.unresolvedLegacyFiles.push(file);
+  }
+  addManualReview(report, file, line, message);
 }
 
 function scanInventory(files, root, report) {
@@ -799,6 +807,52 @@ function isCodeMember(t, node) {
   return t.isIdentifier(node.property, { name: "code" });
 }
 
+function codeMemberObjectIdentifier(t, node) {
+  if (!isCodeMember(t, node)) return null;
+  return t.isIdentifier(node.object) ? node.object : null;
+}
+
+function rewriteInlineErrorCodeComparisons(t, callbackPath, requiredImports) {
+  if (!callbackPath) return;
+  if (
+    !callbackPath.isFunctionExpression?.() &&
+    !callbackPath.isArrowFunctionExpression?.()
+  ) {
+    return;
+  }
+
+  const [firstParam] = callbackPath.node.params;
+  if (!t.isIdentifier(firstParam)) return;
+
+  const errorBinding = callbackPath.scope.getBinding(firstParam.name);
+  if (!errorBinding) return;
+
+  callbackPath.traverse({
+    BinaryExpression(path) {
+      if (!["==", "===", "!=", "!=="].includes(path.node.operator)) return;
+
+      const leftObject = codeMemberObjectIdentifier(t, path.node.left);
+      const rightObject = codeMemberObjectIdentifier(t, path.node.right);
+      const codeObject = leftObject ?? rightObject;
+      if (!codeObject) return;
+
+      const binding = path.scope.getBinding(codeObject.name);
+      if (binding !== errorBinding) return;
+
+      const literalSide = leftObject ? path.node.right : path.node.left;
+      const codeName = numericErrorCodeName(t, literalSide);
+      if (!codeName) return;
+
+      requiredImports.add("LocationErrorCode");
+      if (leftObject) {
+        path.node.right = enumMember(t, codeName);
+      } else {
+        path.node.left = enumMember(t, codeName);
+      }
+    }
+  });
+}
+
 function upsertNitroImport(t, program, names) {
   if (names.size === 0) return;
 
@@ -892,11 +946,12 @@ function transformSourceFile(file, root, tools, report, { dryRun }) {
   const rel = relative(root, file);
   const legacyLocals = new Set();
   const requiredImports = new Set();
-  let removedLegacyImport = false;
+  let foundLegacyImport = false;
 
   traverse(ast, {
     ImportDeclaration(path) {
       if (path.node.source.value !== LEGACY_PACKAGE) return;
+      foundLegacyImport = true;
 
       for (const specifier of path.node.specifiers) {
         if (t.isImportDefaultSpecifier(specifier)) {
@@ -904,7 +959,7 @@ function transformSourceFile(file, root, tools, report, { dryRun }) {
         } else if (t.isImportNamespaceSpecifier(specifier)) {
           legacyLocals.add(specifier.local.name);
         } else {
-          addManualReview(
+          addUnresolvedLegacyReference(
             report,
             rel,
             location(t, specifier),
@@ -912,9 +967,6 @@ function transformSourceFile(file, root, tools, report, { dryRun }) {
           );
         }
       }
-
-      removedLegacyImport = true;
-      path.remove();
     },
     VariableDeclarator(path) {
       const init = path.node.init;
@@ -923,7 +975,7 @@ function transformSourceFile(file, root, tools, report, { dryRun }) {
         t.isIdentifier(init.callee, { name: "require" }) &&
         t.isStringLiteral(init.arguments[0], { value: LEGACY_PACKAGE })
       ) {
-        addManualReview(
+        addUnresolvedLegacyReference(
           report,
           rel,
           location(t, path.node),
@@ -933,7 +985,7 @@ function transformSourceFile(file, root, tools, report, { dryRun }) {
     }
   });
 
-  if (!removedLegacyImport || legacyLocals.size === 0) {
+  if (!foundLegacyImport || legacyLocals.size === 0) {
     return false;
   }
 
@@ -943,9 +995,11 @@ function transformSourceFile(file, root, tools, report, { dryRun }) {
       if (!info || !legacyLocals.has(info.objectName)) return;
 
       const args = path.node.arguments;
+      const argumentPaths = path.get("arguments");
 
       if (info.propertyName === "getCurrentPosition") {
         requiredImports.add("getCurrentPosition");
+        rewriteInlineErrorCodeComparisons(t, argumentPaths[1], requiredImports);
         const transformedOptions = transformOptions(t, args[2], {
           report,
           file: rel,
@@ -970,6 +1024,7 @@ function transformSourceFile(file, root, tools, report, { dryRun }) {
 
       if (info.propertyName === "watchPosition") {
         requiredImports.add("watchPosition");
+        rewriteInlineErrorCodeComparisons(t, argumentPaths[1], requiredImports);
         const transformedOptions = transformOptions(t, args[2], {
           report,
           file: rel,
@@ -1006,17 +1061,26 @@ function transformSourceFile(file, root, tools, report, { dryRun }) {
 
       if (info.propertyName === "requestAuthorization") {
         requiredImports.add("requestPermission");
-        requiredImports.add("setConfiguration");
         const level = t.isStringLiteral(args[0]) ? args[0].value : null;
         if (level && ["always", "whenInUse"].includes(level)) {
           const statement = path.getStatementParent();
-          statement?.insertBefore(
-            t.expressionStatement(
-              t.callExpression(t.identifier("setConfiguration"), [
-                configObject(t, "playServices", level)
-              ])
-            )
-          );
+          if (statement) {
+            requiredImports.add("setConfiguration");
+            statement.insertBefore(
+              t.expressionStatement(
+                t.callExpression(t.identifier("setConfiguration"), [
+                  configObject(t, "playServices", level)
+                ])
+              )
+            );
+          } else {
+            addManualReview(
+              report,
+              rel,
+              location(t, path.node),
+              "requestAuthorization has no statement parent for automatic setConfiguration() insertion. Add authorizationLevel in startup configuration manually."
+            );
+          }
         } else {
           addManualReview(
             report,
@@ -1057,26 +1121,36 @@ function transformSourceFile(file, root, tools, report, { dryRun }) {
 
       requiredImports.add("LocationErrorCode");
       path.replaceWith(enumMember(t, info.propertyName));
-    },
-    BinaryExpression(path) {
-      if (!["==", "===", "!=", "!=="].includes(path.node.operator)) return;
-
-      const leftIsCode = isCodeMember(t, path.node.left);
-      const rightIsCode = isCodeMember(t, path.node.right);
-      if (!leftIsCode && !rightIsCode) return;
-
-      const literalSide = leftIsCode ? path.node.right : path.node.left;
-      const codeName = numericErrorCodeName(t, literalSide);
-      if (!codeName) return;
-
-      requiredImports.add("LocationErrorCode");
-      if (leftIsCode) {
-        path.node.right = enumMember(t, codeName);
-      } else {
-        path.node.left = enumMember(t, codeName);
-      }
     }
   });
+
+  let hasUnresolvedLegacyReferences = false;
+  traverse(ast, {
+    Identifier(path) {
+      if (!legacyLocals.has(path.node.name)) return;
+      if (!path.isReferencedIdentifier()) return;
+
+      hasUnresolvedLegacyReferences = true;
+      path.stop();
+    }
+  });
+
+  if (hasUnresolvedLegacyReferences) {
+    addUnresolvedLegacyReference(
+      report,
+      rel,
+      null,
+      "Legacy Geolocation import was retained because references remain that the codemod cannot safely rewrite. Review these usages before removing react-native-geolocation-service."
+    );
+  } else {
+    traverse(ast, {
+      ImportDeclaration(path) {
+        if (path.node.source.value === LEGACY_PACKAGE) {
+          path.remove();
+        }
+      }
+    });
+  }
 
   upsertNitroImport(t, ast.program, requiredImports);
 
@@ -1259,6 +1333,19 @@ function buildReportText({
   }
   lines.push("");
 
+  lines.push("## Unresolved Legacy References");
+  if (report.unresolvedLegacyFiles.length === 0) {
+    lines.push("None.");
+  } else {
+    for (const file of [...new Set(report.unresolvedLegacyFiles)].sort()) {
+      lines.push(`- ${file}`);
+    }
+    lines.push(
+      `${LEGACY_PACKAGE} was not removed because unresolved legacy references remain.`
+    );
+  }
+  lines.push("");
+
   lines.push("## Manual Review");
   if (report.manualReview.length === 0) {
     lines.push("None.");
@@ -1366,9 +1453,17 @@ async function main() {
     }
   }
 
-  if (!options.skipRemove && hasLegacyPackage) {
+  if (
+    !options.skipRemove &&
+    hasLegacyPackage &&
+    report.unresolvedLegacyFiles.length === 0
+  ) {
     const [command, args] = commandForRemove(manager, LEGACY_PACKAGE);
     runCommand(command, args, { cwd: options.root, dryRun: options.dryRun });
+  } else if (!options.skipRemove && hasLegacyPackage) {
+    console.log(
+      `${LEGACY_PACKAGE} removal skipped because unresolved legacy references remain.`
+    );
   } else if (!hasLegacyPackage) {
     console.log(`${LEGACY_PACKAGE} is not listed in package.json.`);
   }
