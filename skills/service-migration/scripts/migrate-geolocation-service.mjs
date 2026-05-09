@@ -802,46 +802,69 @@ function isCodeMember(t, node) {
 function upsertNitroImport(t, program, names) {
   if (names.size === 0) return;
 
+  const sortedNames = [...names].sort();
   let nitroImport = null;
-  for (const statement of program.body) {
+  let lastNitroImportIndex = -1;
+
+  for (const [index, statement] of program.body.entries()) {
     if (
       t.isImportDeclaration(statement) &&
-      statement.source.value === NITRO_PACKAGE
+      statement.source.value === NITRO_PACKAGE &&
+      statement.importKind !== "type"
     ) {
-      nitroImport = statement;
-      break;
+      lastNitroImportIndex = index;
+      const hasNamespaceSpecifier = statement.specifiers.some((specifier) =>
+        t.isImportNamespaceSpecifier(specifier)
+      );
+      if (!hasNamespaceSpecifier && !nitroImport) {
+        nitroImport = statement;
+      }
     }
   }
 
-  if (nitroImport) {
-    const existing = new Set(
-      nitroImport.specifiers
-        .filter((specifier) => t.isImportSpecifier(specifier))
-        .map((specifier) => specifier.imported.name)
-    );
-    for (const name of [...names].sort()) {
-      if (!existing.has(name)) {
-        nitroImport.specifiers.push(
-          t.importSpecifier(t.identifier(name), t.identifier(name))
-        );
+  const importedLocals = new Set();
+  for (const statement of program.body) {
+    if (
+      !t.isImportDeclaration(statement) ||
+      statement.source.value !== NITRO_PACKAGE ||
+      statement.importKind === "type"
+    ) {
+      continue;
+    }
+    for (const specifier of statement.specifiers) {
+      if (t.isImportSpecifier(specifier)) {
+        importedLocals.add(specifier.local.name);
       }
+    }
+  }
+
+  const missingNames = sortedNames.filter((name) => !importedLocals.has(name));
+  if (missingNames.length === 0) return;
+
+  if (nitroImport) {
+    for (const name of missingNames) {
+      nitroImport.specifiers.push(
+        t.importSpecifier(t.identifier(name), t.identifier(name))
+      );
     }
     return;
   }
 
   const importDeclaration = t.importDeclaration(
-    [...names]
-      .sort()
-      .map((name) => t.importSpecifier(t.identifier(name), t.identifier(name))),
+    missingNames.map((name) =>
+      t.importSpecifier(t.identifier(name), t.identifier(name))
+    ),
     t.stringLiteral(NITRO_PACKAGE)
   );
 
-  let insertionIndex = 0;
-  while (
-    insertionIndex < program.body.length &&
-    t.isImportDeclaration(program.body[insertionIndex])
-  ) {
-    insertionIndex += 1;
+  let insertionIndex = lastNitroImportIndex + 1;
+  if (insertionIndex === 0) {
+    while (
+      insertionIndex < program.body.length &&
+      t.isImportDeclaration(program.body[insertionIndex])
+    ) {
+      insertionIndex += 1;
+    }
   }
   program.body.splice(insertionIndex, 0, importDeclaration);
 }
@@ -1003,7 +1026,6 @@ function transformSourceFile(file, root, tools, report, { dryRun }) {
           );
         }
         if (source.includes("disabled")) {
-          requiredImports.add("hasServicesEnabled");
           addManualReview(
             report,
             rel,
