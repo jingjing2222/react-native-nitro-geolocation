@@ -1,0 +1,6 @@
+interface:
+  display_name: "RN Geolocation Service Migration"
+  short_description: "Migrate geolocation-service to Nitro Modern API"
+  default_prompt: "Use $service-migration to migrate this React Native app from react-native-geolocation-service directly to react-native-nitro-geolocation Modern API."
+policy:
+  allow_implicit_invocation: true

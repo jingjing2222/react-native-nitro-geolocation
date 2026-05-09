@@ -1,0 +1,6 @@
+interface:
+  display_name: "Community Geolocation Migration"
+  short_description: "Migrate community geolocation to Nitro"
+  default_prompt: "Use $community-migration to migrate this app from @react-native-community/geolocation to react-native-nitro-geolocation."
+policy:
+  allow_implicit_invocation: true

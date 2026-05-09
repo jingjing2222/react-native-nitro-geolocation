@@ -370,13 +370,25 @@ Android provider/settings handling.
 With the Vercel Labs `skills` CLI:
 
 ```bash
-npx skills add jingjing2222/react-native-nitro-geolocation --skill react-native-nitro-geolocation-modern-migration
+npx skills add jingjing2222/react-native-nitro-geolocation --skill community-migration
 ```
 
 The skill source is
-[`skills/react-native-nitro-geolocation-modern-migration/SKILL.md`](https://github.com/jingjing2222/react-native-nitro-geolocation/tree/main/skills/react-native-nitro-geolocation-modern-migration).
+[`skills/community-migration/SKILL.md`](https://github.com/jingjing2222/react-native-nitro-geolocation/tree/main/skills/community-migration).
 The bundled bootstrap script is
-[`skills/react-native-nitro-geolocation-modern-migration/scripts/migrate-to-compat.mjs`](https://github.com/jingjing2222/react-native-nitro-geolocation/tree/main/skills/react-native-nitro-geolocation-modern-migration/scripts/migrate-to-compat.mjs).
+[`skills/community-migration/scripts/migrate-to-compat.mjs`](https://github.com/jingjing2222/react-native-nitro-geolocation/tree/main/skills/community-migration/scripts/migrate-to-compat.mjs).
+
+For apps currently using `react-native-geolocation-service`, use the dedicated
+direct-to-Modern migration skill instead:
+
+```bash
+npx skills add jingjing2222/react-native-nitro-geolocation --skill service-migration
+```
+
+That path intentionally does not use `/compat`; it maps service-specific
+behavior such as `accuracy`, fused provider intent, Android settings dialogs,
+`mocked`/`provider` metadata, and provider-related error codes to the Modern
+API.
 
 For a drop-in compatibility migration, change the import to use `/compat`:
 

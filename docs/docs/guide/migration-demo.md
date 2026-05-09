@@ -129,10 +129,18 @@ function LocationTracker() {
 This repository also ships an Agent Skills-compatible migration playbook:
 
 ```bash
-npx skills add jingjing2222/react-native-nitro-geolocation --skill react-native-nitro-geolocation-modern-migration
+npx skills add jingjing2222/react-native-nitro-geolocation --skill community-migration
 ```
 
 The skill first rewrites community imports to `/compat`, then guides a coding
 agent through Modern API refactors with explicit checks for permission timing,
 watch cleanup, cached reads, accuracy, and Android provider/settings handling.
 
+For apps using `react-native-geolocation-service`, use the direct Modern API
+skill instead:
+
+```bash
+npx skills add jingjing2222/react-native-nitro-geolocation --skill service-migration
+```
+
+That path does not introduce `/compat`.
