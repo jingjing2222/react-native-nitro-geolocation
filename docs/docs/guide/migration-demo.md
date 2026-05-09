@@ -1,8 +1,8 @@
 ---
-title: Migration Demo
+title: Community Migration Demo
 ---
 
-# Migration Demo
+# Community Migration Demo
 
 The safest migration from `@react-native-community/geolocation` is two-step:
 switch imports to `/compat` first, verify the app still behaves the same, then

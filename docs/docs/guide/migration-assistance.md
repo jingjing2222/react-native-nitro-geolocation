@@ -1,8 +1,8 @@
 ---
-title: Migration Assistance
+title: Migration Skills
 ---
 
-# Migration Assistance
+# Migration Skills
 
 Use this guide when migrating an existing app from
 `@react-native-community/geolocation`, `navigator.geolocation`,
@@ -51,7 +51,7 @@ It preserves service-specific behavior such as `accuracy`, fused-provider
 intent, Android settings-dialog handling, `mocked`/`provider` metadata, and
 provider-related error codes.
 
-## Migration Shape
+## Choose a Path
 
 For `@react-native-community/geolocation`, first make the mechanical
 dependency/import change and verify the app still builds. Then refactor the

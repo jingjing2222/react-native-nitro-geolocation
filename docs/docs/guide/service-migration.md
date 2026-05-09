@@ -1,8 +1,8 @@
 ---
-title: Migrating from react-native-geolocation-service
+title: Service Migration
 ---
 
-# Migrating from react-native-geolocation-service
+# Service Migration
 
 Apps that use `react-native-geolocation-service` should migrate directly to the
 Modern API:

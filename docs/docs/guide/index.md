@@ -218,7 +218,9 @@ Whether you're upgrading an existing app or building a new one using the latest 
 ## Next Steps
 
 - [Quick Start Guide](/guide/quick-start) — Get up and running in minutes
-- [Migration Demo](/guide/migration-demo) — Move from community imports to `/compat` and Modern API
+- [Migration Skills](/guide/migration-assistance) — Choose the right agent skill for community or service migrations
+- [Service Migration](/guide/service-migration) — Move from `react-native-geolocation-service` directly to the Modern API
+- [Community Migration Demo](/guide/migration-demo) — Move from community imports to `/compat` and the Modern API
 - [Expo Development Build Guide](/guide/expo-development-build) — Use the package in Expo custom native builds
 - [Modern API Reference](/guide/modern-api) — Explore functions and hooks
 - [Compat API Reference](/guide/compat-api) — Compatibility documentation
