@@ -2,6 +2,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import {
   checkPermission,
   getCurrentPosition,
+  getLastKnownPosition,
   requestPermission,
   stopObserving,
   unwatch,
@@ -125,6 +126,28 @@ describe("web Modern API", () => {
     await expect(getCurrentPosition()).rejects.toEqual({
       code: 1,
       message: "denied"
+    });
+  });
+
+  it("maps getLastKnownPosition cache miss to POSITION_UNAVAILABLE", async () => {
+    const getCurrentPositionMock = vi.fn((_success, error) => {
+      error({ code: 3, message: "Timeout expired" });
+    });
+    setNavigator({
+      geolocation: {
+        getCurrentPosition: getCurrentPositionMock,
+        watchPosition: vi.fn(),
+        clearWatch: vi.fn()
+      }
+    });
+
+    await expect(getLastKnownPosition()).rejects.toEqual({
+      code: 2,
+      message: "No cached browser location is available."
+    });
+    expect(getCurrentPositionMock.mock.calls[0][2]).toMatchObject({
+      maximumAge: Number.POSITIVE_INFINITY,
+      timeout: 0
     });
   });
 

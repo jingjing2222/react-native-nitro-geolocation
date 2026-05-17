@@ -285,7 +285,17 @@ export function getLastKnownPosition(
   options?: LocationRequestOptions
 ): Promise<GeolocationResponse> {
   const maximumAge = options?.maximumAge ?? Number.POSITIVE_INFINITY;
-  return getCurrentPosition({ ...options, maximumAge, timeout: 0 });
+  return getCurrentPosition({ ...options, maximumAge, timeout: 0 }).catch(
+    (error) => {
+      if ((error as LocationError).code === LocationErrorCode.TIMEOUT) {
+        throw createLocationError(
+          LocationErrorCode.POSITION_UNAVAILABLE,
+          "No cached browser location is available."
+        );
+      }
+      throw error;
+    }
+  );
 }
 
 export function geocode(_address: string): Promise<GeocodedLocation[]> {
