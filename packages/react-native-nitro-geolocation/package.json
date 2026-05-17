@@ -4,9 +4,13 @@
   "description": "Nitro-powered native geolocation for modern React Native apps",
   "main": "src/index",
   "source": "src/index",
+  "browser": "src/index.web.tsx",
+  "react-native": "src/index.tsx",
   "exports": {
     ".": {
       "types": "./src/index.tsx",
+      "browser": "./src/index.web.tsx",
+      "react-native": "./src/index.tsx",
       "default": "./src/index.tsx"
     },
     "./compat": {

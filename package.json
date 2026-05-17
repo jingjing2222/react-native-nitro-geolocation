@@ -16,6 +16,7 @@
     "lint": "biome ci --formatter-enabled=false --linter-enabled=true .",
     "lint:fix": "biome check --write .",
     "test:unit": "yarn workspace react-native-nitro-geolocation test",
+    "test:e2e:web": "yarn workspace react-native-nitro-geolocation-web-e2e build",
     "test:e2e:android": "yarn workspace react-native-nitro-geolocation-example test:e2e:android",
     "test:e2e:ios": "yarn workspace react-native-nitro-geolocation-example test:e2e:ios"
   },

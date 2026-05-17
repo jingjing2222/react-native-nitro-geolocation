@@ -16,7 +16,7 @@
     "build:ios:release": "react-native build-ios --mode Release",
     "typecheck": "tsc --noEmit",
     "test:e2e:android": "bash ./scripts/test-e2e-android.sh",
-    "test:e2e:ios": "maestro test --platform ios .maestro/all-tests.yaml"
+    "test:e2e:ios": "bash ./scripts/test-e2e-ios.sh"
   },
   "dependencies": {
     "@react-native-community/geolocation": "^3.4.0",
@@ -29,7 +29,8 @@
     "react-native-nitro-geolocation": "workspace: *",
     "react-native-nitro-modules": "^0.35.0",
     "react-native-safe-area-context": "^5.5.2",
-    "react-native-screens": "4.19.0"
+    "react-native-screens": "4.19.0",
+    "react-native-webview": "13.16.1"
   },
   "devDependencies": {
     "@babel/core": "^7.25.2",

@@ -16,4 +16,5 @@ export { default as LocationSimulationScreen } from "./LocationSimulationScreen"
 export { default as MockedMetadataScreen } from "./MockedMetadataScreen";
 export { default as PermissionCheckScreen } from "./PermissionCheckScreen";
 export { default as ProviderSettingsScreen } from "./ProviderSettingsScreen";
+export { default as WebE2EScreen } from "./WebE2EScreen";
 export { default as WatchPositionScreen } from "./WatchPositionScreen";

@@ -1,0 +1,156 @@
+import { afterEach, describe, expect, it, vi } from "vitest";
+import {
+  checkPermission,
+  getCurrentPosition,
+  requestPermission,
+  stopObserving,
+  unwatch,
+  watchPosition
+} from ".";
+
+type TestNavigator = {
+  geolocation?: {
+    getCurrentPosition: ReturnType<typeof vi.fn>;
+    watchPosition: ReturnType<typeof vi.fn>;
+    clearWatch: ReturnType<typeof vi.fn>;
+  };
+  permissions?: {
+    query: ReturnType<typeof vi.fn>;
+  };
+};
+
+function setNavigator(navigatorValue: TestNavigator | undefined) {
+  Object.defineProperty(globalThis, "navigator", {
+    configurable: true,
+    value: navigatorValue
+  });
+}
+
+function createPosition(latitude = 37.5665, longitude = 126.978) {
+  return {
+    coords: {
+      latitude,
+      longitude,
+      altitude: undefined,
+      accuracy: 11,
+      altitudeAccuracy: undefined,
+      heading: undefined,
+      speed: undefined
+    },
+    timestamp: 1779015190000
+  };
+}
+
+afterEach(() => {
+  stopObserving();
+  vi.restoreAllMocks();
+  Reflect.deleteProperty(globalThis, "navigator");
+});
+
+describe("web Modern API", () => {
+  it("wraps navigator.geolocation.getCurrentPosition and normalizes nullable coords", async () => {
+    const getCurrentPositionMock = vi.fn((success) => {
+      success(createPosition());
+    });
+    setNavigator({
+      geolocation: {
+        getCurrentPosition: getCurrentPositionMock,
+        watchPosition: vi.fn(),
+        clearWatch: vi.fn()
+      }
+    });
+
+    await expect(
+      getCurrentPosition({ enableHighAccuracy: true, timeout: 1234 })
+    ).resolves.toEqual({
+      coords: {
+        latitude: 37.5665,
+        longitude: 126.978,
+        altitude: null,
+        accuracy: 11,
+        altitudeAccuracy: null,
+        heading: null,
+        speed: null
+      },
+      timestamp: 1779015190000,
+      provider: "unknown"
+    });
+    expect(getCurrentPositionMock.mock.calls[0][2]).toEqual({
+      enableHighAccuracy: true,
+      timeout: 1234,
+      maximumAge: undefined
+    });
+  });
+
+  it("maps browser error codes to Modern API LocationError codes", async () => {
+    setNavigator({
+      geolocation: {
+        getCurrentPosition: vi.fn((_success, error) => {
+          error({ code: 1, message: "denied" });
+        }),
+        watchPosition: vi.fn(),
+        clearWatch: vi.fn()
+      }
+    });
+
+    await expect(getCurrentPosition()).rejects.toEqual({
+      code: 1,
+      message: "denied"
+    });
+  });
+
+  it("uses permissions.query when checkPermission can read geolocation state", async () => {
+    setNavigator({
+      geolocation: {
+        getCurrentPosition: vi.fn(),
+        watchPosition: vi.fn(),
+        clearWatch: vi.fn()
+      },
+      permissions: {
+        query: vi.fn(async () => ({ state: "prompt" }))
+      }
+    });
+
+    await expect(checkPermission()).resolves.toBe("undetermined");
+  });
+
+  it("requests permission with a one-shot geolocation call", async () => {
+    setNavigator({
+      geolocation: {
+        getCurrentPosition: vi.fn((success) => {
+          success(createPosition());
+        }),
+        watchPosition: vi.fn(),
+        clearWatch: vi.fn()
+      }
+    });
+
+    await expect(requestPermission()).resolves.toBe("granted");
+  });
+
+  it("tracks web watch tokens and clears individual/all watchers", () => {
+    const clearWatch = vi.fn();
+    const watchPositionMock = vi
+      .fn()
+      .mockReturnValueOnce(10)
+      .mockReturnValueOnce(11);
+    setNavigator({
+      geolocation: {
+        getCurrentPosition: vi.fn(),
+        watchPosition: watchPositionMock,
+        clearWatch
+      }
+    });
+
+    const firstToken = watchPosition(vi.fn());
+    const secondToken = watchPosition(vi.fn());
+
+    expect(firstToken).toMatch(/^web-/);
+    expect(secondToken).toMatch(/^web-/);
+    unwatch(firstToken);
+    expect(clearWatch).toHaveBeenCalledWith(10);
+
+    stopObserving();
+    expect(clearWatch).toHaveBeenCalledWith(11);
+  });
+});

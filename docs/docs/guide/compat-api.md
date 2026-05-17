@@ -34,12 +34,11 @@ Promise/function API.
 | `watchPosition` | Supported | Returns a numeric watch id. |
 | `clearWatch` | Supported | Clears a watch id from `watchPosition`. |
 | `stopObserving` | Supported | Preserved for legacy cleanup compatibility. |
-| `navigator.geolocation` polyfill | Not supported in `v1.2.x` | Planned for `v1.3`. |
-| Web | Not supported in `v1.2.x` | Planned as a `/compat` browser fallback in `v1.3`. |
+| `navigator.geolocation` polyfill | Not supported | Use the Modern API root import for web. |
+| Web | Native-only for `/compat` | Modern API root import supports web through `navigator.geolocation`. |
 
-The community package supports web by delegating to the browser
-`navigator.geolocation` API. `react-native-nitro-geolocation` currently targets
-native Nitro bindings and does not include that browser fallback in `v1.2.x`.
+The root Modern API supports web by delegating to the browser
+`navigator.geolocation` API. The `/compat` subpath remains native-only.
 
 ## Summary
 

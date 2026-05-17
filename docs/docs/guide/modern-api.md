@@ -71,6 +71,15 @@ export type ModernGeolocationConfiguration = GeolocationConfiguration;
 - Once at app startup (e.g., in `App.tsx` or `index.js`)
 - Before making any location requests
 
+**Web behavior**:
+
+- Browser builds resolve the root import to a web entry that uses
+  `navigator.geolocation`.
+- `setConfiguration()` is a no-op on web. Browser permission prompts are driven
+  by `getCurrentPosition()` / `watchPosition()`, not by a standalone platform
+  request API.
+- `authorizationLevel`, `enableBackgroundLocationUpdates`, and
+  `locationProvider` are ignored on web.
 
 ## Permission Functions
 
@@ -146,6 +155,9 @@ function PermissionButton() {
 - Shows system permission dialog if `undetermined`
 - Returns immediately if already `granted` or `denied`
 - On iOS, uses `authorizationLevel` from configuration
+- On web, triggers the browser prompt by making a one-shot
+  `navigator.geolocation.getCurrentPosition()` call, then returns the mapped
+  browser permission state.
 
 
 ## Location Functions
@@ -219,6 +231,40 @@ current Core Location service status and does not show a settings dialog.
   starting a fresh native request.
 - Modern API errors include `PLAY_SERVICE_NOT_AVAILABLE`,
   `SETTINGS_NOT_SATISFIED`, and `TIMEOUT`.
+
+### Web Notes
+
+Modern API web support uses the browser standard `navigator.geolocation` API.
+It requires a secure context (`https://`, `localhost`, or another browser-trusted
+origin). Unsupported browsers or unavailable providers reject location requests
+with `POSITION_UNAVAILABLE`.
+
+Supported on web:
+
+- `checkPermission()` maps `navigator.permissions.query({ name:
+  'geolocation' })` to `granted`, `denied`, or `undetermined` when the
+  Permissions API is available.
+- `requestPermission()` performs a one-shot browser geolocation request because
+  browsers do not expose a standalone geolocation permission request API.
+- `getCurrentPosition()` wraps `navigator.geolocation.getCurrentPosition()`.
+- `watchPosition()` wraps `navigator.geolocation.watchPosition()` and returns a
+  string token.
+- `unwatch()` and `stopObserving()` clear browser watch IDs.
+
+Web option behavior:
+
+- `enableHighAccuracy`, `timeout`, and `maximumAge` are forwarded to the
+  browser.
+- `distanceFilter` is applied in JavaScript for watch updates after the first
+  emitted position.
+- `authorizationLevel`, `enableBackgroundLocationUpdates`, `locationProvider`,
+  `interval`, `fastestInterval`, `useSignificantChanges`, Android granularity
+  options, and iOS tuning options are ignored because browsers do not provide
+  matching controls.
+- Geocoding, heading, Android settings, and temporary full-accuracy APIs are
+  native-focused. On web, provider/status helpers return browser availability
+  where possible; unsupported sensor/geocoder calls reject with
+  `POSITION_UNAVAILABLE`.
 
 ### getCurrentPosition()
 
