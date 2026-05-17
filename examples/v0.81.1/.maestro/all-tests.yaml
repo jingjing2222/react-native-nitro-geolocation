@@ -1,6 +1,7 @@
 appId: nitrogeolocation.example
 ---
 # Run platform-compatible geolocation tests in sequence.
+# Web E2E is intentionally separate because it requires a local web server.
 
 - runFlow: permission-check.yaml
 - runFlow: current-position.yaml
@@ -44,5 +45,4 @@ appId: nitrogeolocation.example
       platform: iOS
     file: mocked-metadata-ios-true.yaml
 - runFlow: api-errors.yaml
-- runFlow: web-e2e.yaml
 - runFlow: compat-api.yaml
