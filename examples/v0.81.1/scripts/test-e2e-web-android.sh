@@ -21,18 +21,32 @@ cleanup() {
 
 trap cleanup EXIT
 
-(cd "$REPO_DIR" && yarn workspace react-native-nitro-geolocation-web-e2e start --port "$WEB_E2E_PORT") &
+if curl -fsS "http://127.0.0.1:$WEB_E2E_PORT" >/dev/null 2>&1; then
+  echo "Port $WEB_E2E_PORT is already in use. Stop the existing web E2E server before running this script." >&2
+  exit 1
+fi
+
+(cd "$REPO_DIR" && yarn workspace react-native-nitro-geolocation-web-e2e start --port "$WEB_E2E_PORT" --strictPort) &
 WEB_SERVER_PID="$!"
 
 for _ in {1..60}; do
-  if curl -fsS "http://127.0.0.1:$WEB_E2E_PORT" >/dev/null; then
+  if ! kill -0 "$WEB_SERVER_PID" >/dev/null 2>&1; then
+    wait "$WEB_SERVER_PID"
+    exit 1
+  fi
+  if curl -fsS "http://127.0.0.1:$WEB_E2E_PORT" | grep -q "Nitro Geolocation Web E2E"; then
     "$ADB_BIN" reverse "tcp:$WEB_E2E_PORT" "tcp:$WEB_E2E_PORT" >/dev/null
     break
   fi
   sleep 1
 done
 
-if ! curl -fsS "http://127.0.0.1:$WEB_E2E_PORT" >/dev/null; then
+if ! kill -0 "$WEB_SERVER_PID" >/dev/null 2>&1; then
+  wait "$WEB_SERVER_PID"
+  exit 1
+fi
+
+if ! curl -fsS "http://127.0.0.1:$WEB_E2E_PORT" | grep -q "Nitro Geolocation Web E2E"; then
   echo "Timed out waiting for web E2E server on port $WEB_E2E_PORT" >&2
   exit 1
 fi

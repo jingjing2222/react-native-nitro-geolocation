@@ -24,38 +24,65 @@ appId: nitrogeolocation.example
     text: "열기|Open"
     optional: true
 
+- tapOn:
+    text: "Allow"
+    optional: true
+
+- tapOn:
+    text: "Allow"
+    optional: true
+
 - extendedWaitUntil:
-    visible: "Nitro Geolocation Web E2E"
-    timeout: 20000
+    visible: "get-current-position: running: move-for-get-current-position"
+    timeout: 40000
+
+- setLocation:
+    latitude: 37.5671
+    longitude: 126.9786
+
+- extendedWaitUntil:
+    visible: "watch-position: running: move-for-watch-position"
+    timeout: 40000
+
+- setLocation:
+    latitude: 37.5678
+    longitude: 126.9793
+
+- extendedWaitUntil:
+    visible: "unwatch: running: move-for-unwatch-initial"
+    timeout: 40000
+
+- setLocation:
+    latitude: 37.5685
+    longitude: 126.98
 
 - extendedWaitUntil:
     visible: "unwatch: running: move-after-unwatch"
     timeout: 40000
 
 - setLocation:
-    latitude: 37.5675
-    longitude: 126.9790
+    latitude: 37.5692
+    longitude: 126.9807
+
+- extendedWaitUntil:
+    visible: "stop-observing: running: move-for-stop-observing-initial"
+    timeout: 40000
+
+- setLocation:
+    latitude: 37.5699
+    longitude: 126.9814
 
 - extendedWaitUntil:
     visible: "stop-observing: running: move-after-stop-observing"
     timeout: 40000
 
 - setLocation:
-    latitude: 37.5685
-    longitude: 126.9800
+    latitude: 37.5706
+    longitude: 126.9821
 
 - extendedWaitUntil:
-    visible: "stop-observing: pass"
+    visible: "success-suite: pass"
     timeout: 20000
-
-- assertVisible: "API availability"
-- assertVisible: "checkPermission"
-- assertVisible: "requestPermission"
-- assertVisible: "getCurrentPosition"
-- assertVisible: "watchPosition emits update"
-- assertVisible: "unwatch stops watcher"
-- assertVisible: "stopObserving clears watchers"
-- assertVisible: "PASS"
 
 - launchApp:
     clearState: true
@@ -72,6 +99,10 @@ appId: nitrogeolocation.example
     link: nitrogeolocation://app/web-e2e?autorun=denied
 - tapOn:
     text: "열기|Open"
+    optional: true
+
+- tapOn:
+    text: "Don’t allow|Don't allow"
     optional: true
 
 - extendedWaitUntil:

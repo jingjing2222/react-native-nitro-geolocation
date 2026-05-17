@@ -102,6 +102,16 @@ const unavailableButton =
 const timeoutButton = document.querySelector<HTMLButtonElement>("#run-timeout");
 const clearButton = document.querySelector<HTMLButtonElement>("#clear-results");
 
+const expectedLocations = {
+  getCurrentPosition: { latitude: 37.5671, longitude: 126.9786 },
+  watchPosition: { latitude: 37.5678, longitude: 126.9793 },
+  unwatchInitial: { latitude: 37.5685, longitude: 126.98 },
+  unwatchAfterClear: { latitude: 37.5692, longitude: 126.9807 },
+  stopObservingInitial: { latitude: 37.5699, longitude: 126.9814 },
+  stopObservingAfterClear: { latitude: 37.5706, longitude: 126.9821 }
+} as const;
+const expectedLocationTolerance = 0.00015;
+
 function render() {
   if (!grid) {
     return;
@@ -162,6 +172,10 @@ function setScenario(
   }
 }
 
+function postNativeStatus(id: string, status: ScenarioStatus, raw?: unknown) {
+  window.ReactNativeWebView?.postMessage(JSON.stringify({ id, status, raw }));
+}
+
 function assertPosition(position: GeolocationResponse) {
   if (
     typeof position.coords.latitude !== "number" ||
@@ -196,6 +210,180 @@ async function runStep<T>(
     setScenario(id, "fail", error);
     throw error;
   }
+}
+
+async function watchUntilFirstEvent({
+  timeoutMs,
+  clearOnFirst,
+  acceptPosition = () => true,
+  onStarted
+}: {
+  timeoutMs: number;
+  clearOnFirst: boolean;
+  acceptPosition?: (position: GeolocationResponse) => boolean;
+  onStarted?: (token: string) => void;
+}) {
+  const startedAt = Date.now();
+  const events: GeolocationResponse[] = [];
+  const errors: unknown[] = [];
+
+  return new Promise<{
+    token: string;
+    events: GeolocationResponse[];
+    errors: unknown[];
+    position: GeolocationResponse;
+  }>((resolve, reject) => {
+    let activeToken = "";
+    let stopped = false;
+    let resolved = false;
+    const fail = (error: unknown, tokenToClear = activeToken) => {
+      if (stopped || resolved) {
+        return;
+      }
+      stopped = true;
+      window.clearTimeout(timeout);
+      if (tokenToClear) {
+        unwatch(tokenToClear);
+      }
+      reject(error);
+    };
+    const pass = (token: string, position: GeolocationResponse) => {
+      if (resolved) {
+        return;
+      }
+      resolved = true;
+      window.clearTimeout(timeout);
+      if (clearOnFirst) {
+        stopped = true;
+        unwatch(token);
+      }
+      resolve({ token, events, errors, position });
+    };
+    const timeout = window.setTimeout(() => {
+      fail(
+        new Error(
+          `Timed out waiting for accepted watch event after ${timeoutMs}ms.`
+        )
+      );
+    }, timeoutMs);
+    const startWatch = () => {
+      if (stopped || resolved) {
+        return;
+      }
+      let token = "";
+      token = watchPosition(
+        (nextPosition) => {
+          if (stopped) {
+            return;
+          }
+          events.push(nextPosition);
+          if (!acceptPosition(nextPosition)) {
+            return;
+          }
+          pass(token, nextPosition);
+        },
+        (error) => {
+          if (stopped) {
+            return;
+          }
+          errors.push(error);
+          if (resolved) {
+            return;
+          }
+          if (token) {
+            unwatch(token);
+          }
+          if (Date.now() - startedAt >= timeoutMs) {
+            fail(error, "");
+            return;
+          }
+          window.setTimeout(startWatch, 500);
+        },
+        { maximumAge: 0, timeout: 15000 }
+      );
+      activeToken = token;
+      onStarted?.(token);
+    };
+
+    startWatch();
+  });
+}
+
+async function getCurrentPositionUntilSuccess(timeoutMs: number) {
+  const startedAt = Date.now();
+  const transientErrors: unknown[] = [];
+
+  while (true) {
+    try {
+      const position = await getCurrentPosition({
+        maximumAge: 0,
+        timeout: 15000
+      });
+      return { position, transientErrors };
+    } catch (error) {
+      transientErrors.push(error);
+      const code = getErrorCode(error);
+      if ((code !== 2 && code !== 3) || Date.now() - startedAt >= timeoutMs) {
+        throw error;
+      }
+      await wait(500);
+    }
+  }
+}
+
+async function getCurrentPositionUntilExpected({
+  expected,
+  timeoutMs
+}: {
+  expected: ExpectedLocation;
+  timeoutMs: number;
+}) {
+  const startedAt = Date.now();
+  const transientErrors: unknown[] = [];
+  const ignoredPositions: GeolocationResponse[] = [];
+
+  while (true) {
+    try {
+      const position = await getCurrentPosition({
+        maximumAge: 0,
+        timeout: 15000
+      });
+      if (isNearExpected(position, expected)) {
+        return { position, transientErrors, ignoredPositions };
+      }
+      ignoredPositions.push(position);
+      if (Date.now() - startedAt >= timeoutMs) {
+        throw new Error(
+          `getCurrentPosition did not return expected coords ${expected.latitude}, ${expected.longitude}.`
+        );
+      }
+      await wait(500);
+    } catch (error) {
+      transientErrors.push(error);
+      const code = getErrorCode(error);
+      if ((code !== 2 && code !== 3) || Date.now() - startedAt >= timeoutMs) {
+        throw error;
+      }
+      await wait(500);
+    }
+  }
+}
+
+type ExpectedLocation = {
+  latitude: number;
+  longitude: number;
+};
+
+function isNearExpected(
+  position: GeolocationResponse,
+  expected: ExpectedLocation
+) {
+  return (
+    Math.abs(position.coords.latitude - expected.latitude) <=
+      expectedLocationTolerance &&
+    Math.abs(position.coords.longitude - expected.longitude) <=
+      expectedLocationTolerance
+  );
 }
 
 async function runSuccessSuite() {
@@ -236,55 +424,93 @@ async function runSuccessSuite() {
     }
   );
 
-  await runStep(
-    "watch-position",
-    () =>
-      new Promise<GeolocationResponse>((resolve, reject) => {
-        const token = watchPosition(
-          (nextPosition) => {
-            unwatch(token);
-            resolve(nextPosition);
-          },
-          reject,
-          { maximumAge: 0, timeout: 15000 }
-        );
-      }),
-    assertPosition
-  );
-
   const position = await runStep(
     "get-current-position",
-    () => getCurrentPosition({ maximumAge: 0, timeout: 15000 }),
-    assertPosition
+    async () => {
+      const baseline = await getCurrentPositionUntilSuccess(30000);
+      setScenario(
+        "get-current-position",
+        "running",
+        { phase: "move-for-get-current-position", baseline },
+        "Move device location now; one-shot getCurrentPosition should return real coords."
+      );
+      return getCurrentPositionUntilExpected({
+        expected: expectedLocations.getCurrentPosition,
+        timeoutMs: 30000
+      });
+    },
+    (result) => assertPosition(result.position)
+  );
+
+  await runStep(
+    "watch-position",
+    async () => {
+      return watchUntilFirstEvent({
+        clearOnFirst: true,
+        timeoutMs: 30000,
+        acceptPosition: (nextPosition) =>
+          isNearExpected(nextPosition, expectedLocations.watchPosition),
+        onStarted: () => {
+          setScenario(
+            "watch-position",
+            "running",
+            {
+              phase: "move-for-watch-position",
+              baseline: position.position,
+              expected: expectedLocations.watchPosition
+            },
+            "Move device location now; the browser watch should emit the expected coordinate."
+          );
+        }
+      });
+    },
+    (result) => assertPosition(result.position)
   );
 
   await runStep(
     "unwatch",
     async () => {
-      const events: GeolocationResponse[] = [];
-      let token = "";
-      const firstEvent = new Promise<GeolocationResponse>((resolve, reject) => {
-        token = watchPosition(
-          (nextPosition) => {
-            events.push(nextPosition);
-            resolve(nextPosition);
-          },
-          reject,
-          { maximumAge: 0, timeout: 15000 }
-        );
+      const unwatchBaseline = await getCurrentPositionUntilSuccess(30000);
+      const { token, events, errors } = await watchUntilFirstEvent({
+        clearOnFirst: false,
+        timeoutMs: 30000,
+        acceptPosition: (nextPosition) =>
+          isNearExpected(nextPosition, expectedLocations.unwatchInitial),
+        onStarted: () => {
+          setScenario(
+            "unwatch",
+            "running",
+            {
+              phase: "move-for-unwatch-initial",
+              baseline: unwatchBaseline.position,
+              expected: expectedLocations.unwatchInitial
+            },
+            "Move device location now; the watcher should emit the expected coordinate before unwatch."
+          );
+        }
       });
-      await firstEvent;
       unwatch(token);
       const callbackCountAfterUnwatch = events.length;
       setScenario(
         "unwatch",
         "running",
-        { phase: "move-after-unwatch", token, callbackCountAfterUnwatch },
-        "Watcher emitted once and token was cleared. Move device location now; no extra callback should arrive."
+        {
+          phase: "move-after-unwatch",
+          token,
+          callbackCountAfterUnwatch,
+          expected: expectedLocations.unwatchAfterClear,
+          transientErrors: errors
+        },
+        "Watcher emitted once and token was cleared. Move device location now; a one-shot probe should see it without extra watch callbacks."
       );
-      await wait(5000);
+      const probeAfterUnwatch = await getCurrentPositionUntilExpected({
+        expected: expectedLocations.unwatchAfterClear,
+        timeoutMs: 30000
+      });
       return {
         token,
+        transientErrors: errors,
+        probeAfterUnwatch,
         callbackCountAfterUnwatch,
         callbackCount: events.length
       };
@@ -304,53 +530,74 @@ async function runSuccessSuite() {
   await runStep(
     "stop-observing",
     async () => {
-      const firstEvents: GeolocationResponse[] = [];
-      const secondEvents: GeolocationResponse[] = [];
-      let firstToken = "";
-      let secondToken = "";
-      const firstReady = new Promise<GeolocationResponse>((resolve, reject) => {
-        firstToken = watchPosition(
-          (nextPosition) => {
-            firstEvents.push(nextPosition);
-            resolve(nextPosition);
-          },
-          reject,
-          { maximumAge: 0, timeout: 15000 }
-        );
-      });
-      const secondReady = new Promise<GeolocationResponse>(
-        (resolve, reject) => {
-          secondToken = watchPosition(
-            (nextPosition) => {
-              secondEvents.push(nextPosition);
-              resolve(nextPosition);
-            },
-            reject,
-            { maximumAge: 0, timeout: 15000 }
-          );
+      const stopBaseline = await getCurrentPositionUntilSuccess(30000);
+      let startedWatchCount = 0;
+      const postStopInitialMoveRequest = () => {
+        startedWatchCount += 1;
+        if (startedWatchCount !== 2) {
+          return;
         }
-      );
-      await Promise.all([firstReady, secondReady]);
+        setScenario(
+          "stop-observing",
+          "running",
+          {
+            phase: "move-for-stop-observing-initial",
+            baseline: stopBaseline.position,
+            expected: expectedLocations.stopObservingInitial
+          },
+          "Move device location now; both watchers should emit the expected coordinate before stopObserving."
+        );
+      };
+      const [firstWatch, secondWatch] = await Promise.all([
+        watchUntilFirstEvent({
+          clearOnFirst: false,
+          timeoutMs: 30000,
+          acceptPosition: (nextPosition) =>
+            isNearExpected(
+              nextPosition,
+              expectedLocations.stopObservingInitial
+            ),
+          onStarted: postStopInitialMoveRequest
+        }),
+        watchUntilFirstEvent({
+          clearOnFirst: false,
+          timeoutMs: 30000,
+          acceptPosition: (nextPosition) =>
+            isNearExpected(
+              nextPosition,
+              expectedLocations.stopObservingInitial
+            ),
+          onStarted: postStopInitialMoveRequest
+        })
+      ]);
       stopObserving();
-      const callbackCountAfterStop = firstEvents.length + secondEvents.length;
+      const callbackCountAfterStop =
+        firstWatch.events.length + secondWatch.events.length;
       setScenario(
         "stop-observing",
         "running",
         {
           phase: "move-after-stop-observing",
-          firstToken,
-          secondToken,
-          callbackCountAfterStop
+          firstToken: firstWatch.token,
+          secondToken: secondWatch.token,
+          callbackCountAfterStop,
+          expected: expectedLocations.stopObservingAfterClear,
+          transientErrors: [...firstWatch.errors, ...secondWatch.errors]
         },
-        "Both watches emitted once and stopObserving cleared them. Move device location now; no extra callback should arrive."
+        "Both watches emitted once and stopObserving cleared them. Move device location now; a one-shot probe should see it without extra watch callbacks."
       );
-      await wait(5000);
+      const probeAfterStopObserving = await getCurrentPositionUntilExpected({
+        expected: expectedLocations.stopObservingAfterClear,
+        timeoutMs: 30000
+      });
       return {
-        firstToken,
-        secondToken,
+        firstToken: firstWatch.token,
+        secondToken: secondWatch.token,
+        transientErrors: [...firstWatch.errors, ...secondWatch.errors],
+        probeAfterStopObserving,
         callbackCountAfterStop,
-        callbackCount: firstEvents.length + secondEvents.length,
-        baseline: position
+        callbackCount: firstWatch.events.length + secondWatch.events.length,
+        baseline: position.position
       };
     },
     (result) => {
@@ -386,6 +633,7 @@ async function runSuccessSuite() {
         .join(", ")}`
     );
   }
+  postNativeStatus("success-suite", "pass");
 }
 
 async function runDeniedCheck() {
