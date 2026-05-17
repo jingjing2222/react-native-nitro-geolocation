@@ -70,6 +70,9 @@ export {
   stopObserving
 } from "./api";
 
+// Background API
+export * from "./background";
+
 // Hooks
 export * from "./hooks";
 

@@ -36,6 +36,7 @@ appId: nitrogeolocation.example
     when:
       platform: Android
     file: provider-settings.yaml
+- runFlow: background-e2e.yaml
 - runFlow:
     when:
       platform: Android

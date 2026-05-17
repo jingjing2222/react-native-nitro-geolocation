@@ -9,6 +9,7 @@ import React from "react";
 import AccuracyPresetsScreen from "./screens/AccuracyPresetsScreen";
 import AndroidRequestOptionsScreen from "./screens/AndroidRequestOptionsScreen";
 import ApiErrorsScreen from "./screens/ApiErrorsScreen";
+import BackgroundE2EScreen from "./screens/BackgroundE2EScreen";
 import CompatScreen from "./screens/CompatScreen";
 import CurrentPositionScreen from "./screens/CurrentPositionScreen";
 import DefaultScreen from "./screens/DefaultScreen";
@@ -47,6 +48,7 @@ const linking = {
       LocationAvailability: "location-availability",
       Heading: "heading",
       AndroidRequestOptions: "android-request-options",
+      BackgroundE2E: "background-e2e",
       IOSLocationTuning: "ios-location-tuning",
       IOSAccuracyAuthorization: "ios-accuracy-authorization",
       IOSReleaseOptionsBridge: "ios-release-options-bridge",
@@ -164,6 +166,11 @@ export default function App() {
         <Tab.Screen
           name="AndroidRequestOptions"
           component={AndroidRequestOptionsScreen}
+          options={hiddenTabOptions}
+        />
+        <Tab.Screen
+          name="BackgroundE2E"
+          component={BackgroundE2EScreen}
           options={hiddenTabOptions}
         />
         <Tab.Screen

@@ -1,5 +1,11 @@
 # react-native-nitro-geolocation
 
+## 1.3.0
+
+### Minor Changes
+
+- Add dedicated Background Location API with Android foreground-service updates, iOS background updates, native event persistence, Android Headless JS delivery, geofencing, activity recognition events, start-on-boot support, native HTTP sync, and stored event recovery.
+
 ## 1.2.6
 
 ### Patch Changes

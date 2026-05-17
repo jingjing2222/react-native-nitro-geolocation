@@ -19,11 +19,11 @@ public final class NitroGeolocationAutolinking {
       return __cxxWrapped.getCxxPart()
     }()
   }
-  
+
   public static func isNitroGeolocationRecyclable() -> Bool {
     return NitroGeolocation.self is any RecyclableView.Type
   }
-  
+
   public static func createNitroGeolocationCompat() -> bridge.std__shared_ptr_HybridNitroGeolocationCompatSpec_ {
     let hybridObject = NitroGeolocationCompat()
     return { () -> bridge.std__shared_ptr_HybridNitroGeolocationCompatSpec_ in
@@ -31,8 +31,20 @@ public final class NitroGeolocationAutolinking {
       return __cxxWrapped.getCxxPart()
     }()
   }
-  
+
   public static func isNitroGeolocationCompatRecyclable() -> Bool {
     return NitroGeolocationCompat.self is any RecyclableView.Type
+  }
+
+  public static func createNitroBackgroundLocation() -> bridge.std__shared_ptr_HybridNitroBackgroundLocationSpec_ {
+    let hybridObject = NitroBackgroundLocation()
+    return { () -> bridge.std__shared_ptr_HybridNitroBackgroundLocationSpec_ in
+      let __cxxWrapped = hybridObject.getCxxWrapper()
+      return __cxxWrapped.getCxxPart()
+    }()
+  }
+
+  public static func isNitroBackgroundLocationRecyclable() -> Bool {
+    return NitroBackgroundLocation.self is any RecyclableView.Type
   }
 }
