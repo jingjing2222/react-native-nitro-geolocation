@@ -235,12 +235,23 @@ export function getProviderStatus(): Promise<LocationProviderStatus> {
   });
 }
 
-export function getLocationAvailability(): Promise<LocationAvailability> {
-  const available = Boolean(getGeolocation());
-  return Promise.resolve({
-    available,
-    reason: available ? undefined : createUnsupportedError().message
-  });
+export async function getLocationAvailability(): Promise<LocationAvailability> {
+  if (!getGeolocation()) {
+    return {
+      available: false,
+      reason: createUnsupportedError().message
+    };
+  }
+
+  const permission = await checkPermission();
+  if (permission === "denied" || permission === "restricted") {
+    return {
+      available: false,
+      reason: "Browser geolocation permission is denied."
+    };
+  }
+
+  return { available: true };
 }
 
 export function requestLocationSettings(

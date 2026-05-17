@@ -3,6 +3,7 @@ import {
   checkPermission,
   getCurrentPosition,
   getLastKnownPosition,
+  getLocationAvailability,
   requestPermission,
   stopObserving,
   unwatch,
@@ -184,6 +185,24 @@ describe("web Modern API", () => {
     });
 
     await expect(checkPermission()).resolves.toBe("undetermined");
+  });
+
+  it("marks location unavailable when browser permission is denied", async () => {
+    setNavigator({
+      geolocation: {
+        getCurrentPosition: vi.fn(),
+        watchPosition: vi.fn(),
+        clearWatch: vi.fn()
+      },
+      permissions: {
+        query: vi.fn(async () => ({ state: "denied" }))
+      }
+    });
+
+    await expect(getLocationAvailability()).resolves.toEqual({
+      available: false,
+      reason: "Browser geolocation permission is denied."
+    });
   });
 
   it("requests permission with a one-shot geolocation call", async () => {
