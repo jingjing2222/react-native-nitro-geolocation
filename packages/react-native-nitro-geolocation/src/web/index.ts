@@ -364,7 +364,20 @@ export function useWatchPosition(options?: UseWatchPositionOptions) {
   const [isWatching, setIsWatching] = useState(false);
   const [error, setError] = useState<LocationError | null>(null);
   const tokenRef = useRef<string | null>(null);
+  const isMountedRef = useRef(true);
+  const optionsRef = useRef(options);
   const enabled = options?.enabled ?? false;
+
+  useEffect(() => {
+    optionsRef.current = options;
+  }, [options]);
+
+  useEffect(() => {
+    isMountedRef.current = true;
+    return () => {
+      isMountedRef.current = false;
+    };
+  }, []);
 
   useEffect(() => {
     if (!enabled) {
@@ -378,15 +391,33 @@ export function useWatchPosition(options?: UseWatchPositionOptions) {
 
     setIsWatching(true);
     setError(null);
-    tokenRef.current = watchPosition(setPosition, setError, options);
+    const token = watchPosition(
+      (nextPosition) => {
+        if (!isMountedRef.current) {
+          return;
+        }
+        setPosition(nextPosition);
+        setError(null);
+      },
+      (nextError) => {
+        if (!isMountedRef.current) {
+          return;
+        }
+        setError(nextError);
+      },
+      optionsRef.current
+    );
+    tokenRef.current = token;
 
     return () => {
-      if (tokenRef.current) {
-        unwatch(tokenRef.current);
+      if (token) {
+        unwatch(token);
+      }
+      if (tokenRef.current === token) {
         tokenRef.current = null;
       }
     };
-  }, [enabled, options]);
+  }, [enabled]);
 
   return {
     position,
