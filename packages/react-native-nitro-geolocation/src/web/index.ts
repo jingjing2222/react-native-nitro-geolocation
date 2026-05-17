@@ -98,9 +98,13 @@ function toPositionOptions(
     return undefined;
   }
 
+  const androidAccuracy = options.accuracy?.android;
+
   return {
     enableHighAccuracy:
-      options.enableHighAccuracy ?? options.accuracy?.android === "high",
+      androidAccuracy !== undefined
+        ? androidAccuracy === "high"
+        : options.enableHighAccuracy,
     timeout: options.timeout,
     maximumAge: options.maximumAge
   };

@@ -82,6 +82,35 @@ describe("web Modern API", () => {
     });
   });
 
+  it("lets explicit Android accuracy override legacy enableHighAccuracy", async () => {
+    const getCurrentPositionMock = vi.fn((success) => {
+      success(createPosition());
+    });
+    setNavigator({
+      geolocation: {
+        getCurrentPosition: getCurrentPositionMock,
+        watchPosition: vi.fn(),
+        clearWatch: vi.fn()
+      }
+    });
+
+    await getCurrentPosition({
+      enableHighAccuracy: false,
+      accuracy: { android: "high" }
+    });
+    expect(getCurrentPositionMock.mock.calls[0][2]).toMatchObject({
+      enableHighAccuracy: true
+    });
+
+    await getCurrentPosition({
+      enableHighAccuracy: true,
+      accuracy: { android: "low" }
+    });
+    expect(getCurrentPositionMock.mock.calls[1][2]).toMatchObject({
+      enableHighAccuracy: false
+    });
+  });
+
   it("maps browser error codes to Modern API LocationError codes", async () => {
     setNavigator({
       geolocation: {
