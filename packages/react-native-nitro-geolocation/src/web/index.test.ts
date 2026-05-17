@@ -79,7 +79,27 @@ describe("web Modern API", () => {
     expect(getCurrentPositionMock.mock.calls[0][2]).toEqual({
       enableHighAccuracy: true,
       timeout: 1234,
-      maximumAge: undefined
+      maximumAge: 0
+    });
+  });
+
+  it("applies Modern API default browser position options", async () => {
+    const getCurrentPositionMock = vi.fn((success) => {
+      success(createPosition());
+    });
+    setNavigator({
+      geolocation: {
+        getCurrentPosition: getCurrentPositionMock,
+        watchPosition: vi.fn(),
+        clearWatch: vi.fn()
+      }
+    });
+
+    await getCurrentPosition();
+    expect(getCurrentPositionMock.mock.calls[0][2]).toEqual({
+      enableHighAccuracy: undefined,
+      timeout: 600000,
+      maximumAge: 0
     });
   });
 
@@ -199,6 +219,11 @@ describe("web Modern API", () => {
 
     expect(firstToken).toMatch(/^web-/);
     expect(secondToken).toMatch(/^web-/);
+    expect(watchPositionMock.mock.calls[0][2]).toEqual({
+      enableHighAccuracy: undefined,
+      timeout: 600000,
+      maximumAge: 0
+    });
     unwatch(firstToken);
     expect(clearWatch).toHaveBeenCalledWith(10);
 

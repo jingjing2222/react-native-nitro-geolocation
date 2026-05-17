@@ -79,6 +79,7 @@ export interface UseWatchPositionOptions extends LocationRequestOptions {
 }
 
 const activeWatches = new Map<string, number>();
+const defaultTimeoutMs = 600000;
 let nextWatchId = 1;
 
 function getNavigator(): BrowserNavigator | undefined {
@@ -93,20 +94,16 @@ function getGeolocation(): BrowserGeolocation | undefined {
 
 function toPositionOptions(
   options?: LocationRequestOptions
-): BrowserPositionOptions | undefined {
-  if (!options) {
-    return undefined;
-  }
-
-  const androidAccuracy = options.accuracy?.android;
+): BrowserPositionOptions {
+  const androidAccuracy = options?.accuracy?.android;
 
   return {
     enableHighAccuracy:
       androidAccuracy !== undefined
         ? androidAccuracy === "high"
-        : options.enableHighAccuracy,
-    timeout: options.timeout,
-    maximumAge: options.maximumAge
+        : options?.enableHighAccuracy,
+    timeout: options?.timeout ?? defaultTimeoutMs,
+    maximumAge: options?.maximumAge ?? 0
   };
 }
 
