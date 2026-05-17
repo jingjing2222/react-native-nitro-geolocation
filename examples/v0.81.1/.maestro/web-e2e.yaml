@@ -1,0 +1,120 @@
+appId: nitrogeolocation.example
+---
+# Web Modern API contract through react-native-webview.
+# Requires examples/web-e2e dev server on port 4173.
+
+- launchApp:
+    clearState: true
+    permissions:
+      all: allow
+
+- setLocation:
+    latitude: 37.5665
+    longitude: 126.9780
+
+- extendedWaitUntil:
+    visible: "Geolocation API"
+    timeout: 20000
+
+- stopApp
+
+- openLink:
+    link: nitrogeolocation://app/web-e2e?autorun=success
+- tapOn:
+    text: "열기|Open"
+    optional: true
+
+- tapOn:
+    text: "Allow"
+    optional: true
+
+- tapOn:
+    text: "Allow"
+    optional: true
+
+- extendedWaitUntil:
+    visible: "get-current-position: running: move-for-get-current-position"
+    timeout: 40000
+
+- setLocation:
+    latitude: 37.5671
+    longitude: 126.9786
+
+- extendedWaitUntil:
+    visible: "watch-position: running: move-for-watch-position"
+    timeout: 40000
+
+- setLocation:
+    latitude: 37.5678
+    longitude: 126.9793
+
+- extendedWaitUntil:
+    visible: "unwatch: running: move-for-unwatch-initial"
+    timeout: 40000
+
+- setLocation:
+    latitude: 37.5685
+    longitude: 126.98
+
+- extendedWaitUntil:
+    visible: "unwatch: running: move-after-unwatch"
+    timeout: 40000
+
+- setLocation:
+    latitude: 37.5692
+    longitude: 126.9807
+
+- extendedWaitUntil:
+    visible: "stop-observing: running: move-for-stop-observing-initial"
+    timeout: 40000
+
+- setLocation:
+    latitude: 37.5699
+    longitude: 126.9814
+
+- extendedWaitUntil:
+    visible: "stop-observing: running: move-after-stop-observing"
+    timeout: 40000
+
+- setLocation:
+    latitude: 37.5706
+    longitude: 126.9821
+
+- extendedWaitUntil:
+    visible: "success-suite: pass"
+    timeout: 20000
+
+- launchApp:
+    clearState: true
+    permissions:
+      all: deny
+
+- extendedWaitUntil:
+    visible: "Geolocation API"
+    timeout: 20000
+
+- stopApp
+
+- openLink:
+    link: nitrogeolocation://app/web-e2e?autorun=denied
+- tapOn:
+    text: "열기|Open"
+    optional: true
+
+- tapOn:
+    text: "Don’t allow|Don't allow"
+    optional: true
+
+- extendedWaitUntil:
+    visible: "Nitro Geolocation Web E2E"
+    timeout: 20000
+
+- tapOn:
+    text: "Don’t allow|Don't allow"
+    optional: true
+
+- extendedWaitUntil:
+    visible: "permission-denied: pass"
+    timeout: 20000
+
+- assertVisible: "permission denied -> PERMISSION_DENIED"

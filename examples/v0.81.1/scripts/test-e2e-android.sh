@@ -18,7 +18,7 @@ restore_location() {
 
 trap restore_location EXIT
 
-restore_location
+set_location_enabled true
 "$MAESTRO_BIN" test --platform android "$FLOW_DIR/all-tests.yaml"
 
 set_location_enabled false

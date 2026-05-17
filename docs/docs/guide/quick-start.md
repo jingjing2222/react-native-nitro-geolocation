@@ -351,8 +351,10 @@ geolocation API. You'll get:
 - Improved permission consistency
 - TypeScript definitions out of the box
 
-Web and `navigator.geolocation` polyfill behavior are not supported in `v1.2.x`.
-They are planned for a `/compat` browser fallback in `v1.3`.
+The root Modern API supports web through the browser `navigator.geolocation`
+API. The `/compat` subpath remains native-only. Web location requires a secure
+context and browser permission; unsupported provider/sensor APIs reject with the
+Modern API `POSITION_UNAVAILABLE` error shape.
 
 ### From Compat to Modern API (Recommended)
 

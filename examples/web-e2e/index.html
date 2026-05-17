@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Nitro Geolocation Web E2E</title>
+  </head>
+  <body>
+    <main class="shell">
+      <header>
+        <h1>Nitro Geolocation Web E2E</h1>
+        <p>
+          Modern API browser adapter contract with real
+          navigator.geolocation calls.
+        </p>
+      </header>
+
+      <section class="toolbar" aria-label="E2E actions">
+        <button id="run-success" type="button">Run Success Suite</button>
+        <button id="run-denied" type="button">Run Denied Check</button>
+        <button id="run-unavailable" type="button">
+          Run Unavailable Check
+        </button>
+        <button id="run-timeout" type="button">Run Timeout Check</button>
+        <button id="clear-results" type="button">Clear</button>
+      </section>
+
+      <section class="status-grid" id="scenario-grid"></section>
+    </main>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>

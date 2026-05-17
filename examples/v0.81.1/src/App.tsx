@@ -25,6 +25,7 @@ import MockedMetadataScreen from "./screens/MockedMetadataScreen";
 import PermissionCheckScreen from "./screens/PermissionCheckScreen";
 import ProviderSettingsScreen from "./screens/ProviderSettingsScreen";
 import WatchPositionScreen from "./screens/WatchPositionScreen";
+import WebE2EScreen from "./screens/WebE2EScreen";
 
 const Tab = createBottomTabNavigator();
 const linking = {
@@ -49,6 +50,7 @@ const linking = {
       IOSLocationTuning: "ios-location-tuning",
       IOSAccuracyAuthorization: "ios-accuracy-authorization",
       IOSReleaseOptionsBridge: "ios-release-options-bridge",
+      WebE2E: "web-e2e",
       Issue67: "issue-67"
     }
   }
@@ -177,6 +179,11 @@ export default function App() {
         <Tab.Screen
           name="IOSReleaseOptionsBridge"
           component={IOSReleaseOptionsBridgeScreen}
+          options={hiddenTabOptions}
+        />
+        <Tab.Screen
+          name="WebE2E"
+          component={WebE2EScreen}
           options={hiddenTabOptions}
         />
         <Tab.Screen

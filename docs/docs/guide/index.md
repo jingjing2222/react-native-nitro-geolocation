@@ -19,12 +19,12 @@ to a typed Modern API.
 | New Architecture / Nitro-based app | Recommended |
 | Expo development build or custom native build | Supported with native setup |
 | Expo managed app without native rebuild | Use `expo-location` |
-| Web support required | Use `@react-native-community/geolocation` or `expo-location` for now |
+| Web support required | Use the Modern API root import |
 | Full background tracking / geofencing | Use a dedicated background-location library |
 
-Web is not supported in `v1.2.x`. The community package handles web by
-delegating to the browser `navigator.geolocation` API; this package currently
-targets native Nitro bindings. A `/compat` web fallback is planned for `v1.3`.
+Web support is available for the Modern API root import. Browser builds resolve
+the package root to a web entry that uses `navigator.geolocation` and does not
+load Nitro native bindings. The `/compat` subpath remains native-only.
 
 React Native Nitro Geolocation provides **two APIs** to fit your needs:
 

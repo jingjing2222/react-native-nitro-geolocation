@@ -1,0 +1,18 @@
+{
+  "name": "react-native-nitro-geolocation-web-e2e",
+  "version": "0.0.1",
+  "private": true,
+  "scripts": {
+    "start": "vite --host 127.0.0.1",
+    "build": "vite build",
+    "web:e2e": "vite --host 127.0.0.1",
+    "web:e2e:build": "vite build"
+  },
+  "dependencies": {
+    "react-native-nitro-geolocation": "workspace:*"
+  },
+  "devDependencies": {
+    "typescript": "5.9.3",
+    "vite": "8.0.10"
+  }
+}

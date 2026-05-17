@@ -1,0 +1,37 @@
+appId: nitrogeolocation.example
+---
+# Web Modern API provider-disabled contract through react-native-webview.
+# Android runner disables device location before invoking this flow.
+
+- launchApp:
+    clearState: true
+    permissions:
+      all: allow
+
+- extendedWaitUntil:
+    visible: "Geolocation API"
+    timeout: 20000
+
+- stopApp
+
+- openLink:
+    link: nitrogeolocation://app/web-e2e?autorun=unavailable
+- tapOn:
+    text: "열기|Open"
+    optional: true
+
+- extendedWaitUntil:
+    visible: "Web E2E"
+    timeout: 20000
+
+- tapOn:
+    text: "Reload"
+    optional: true
+
+- extendedWaitUntil:
+    visible: "Nitro Geolocation Web E2E"
+    timeout: 60000
+
+- extendedWaitUntil:
+    visible: "position-unavailable: (pass|manual)"
+    timeout: 20000
