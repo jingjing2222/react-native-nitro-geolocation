@@ -58,6 +58,24 @@ export const scenarios: Scenario[] = [
     status: "idle"
   },
   {
+    id: "compat-get-current-position",
+    title: "compat getCurrentPosition",
+    detail: "Compat callback receives normalized coords from real browser.",
+    status: "idle"
+  },
+  {
+    id: "compat-watch-position",
+    title: "compat watchPosition + clearWatch",
+    detail: "Compat watch emits coords, clearWatch stops subsequent callbacks.",
+    status: "idle"
+  },
+  {
+    id: "compat-stop-observing",
+    title: "compat stopObserving clears all watches",
+    detail: "stopObserving clears every active compat watch.",
+    status: "idle"
+  },
+  {
     id: "permission-denied",
     title: "permission denied -> PERMISSION_DENIED",
     detail: "Run with browser geolocation permission blocked.",

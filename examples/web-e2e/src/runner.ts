@@ -1,4 +1,3 @@
-import Geolocation from "react-native-nitro-geolocation/compat";
 import {
   checkPermission,
   getCurrentPosition,
@@ -11,6 +10,10 @@ import type {
   GeolocationResponse,
   PermissionStatus
 } from "react-native-nitro-geolocation";
+import {
+  runCompatApiAvailabilityCheck,
+  runCompatScenarios
+} from "./compatRunner";
 import { setScenario } from "./dom";
 import {
   type ExpectedLocation,
@@ -216,22 +219,7 @@ export async function runSuccessSuite() {
     throw new Error("Modern API browser export is incomplete.");
   }
 
-  setScenario("compat-api-availability", "running");
-  const compatShape = {
-    getCurrentPosition: typeof Geolocation.getCurrentPosition,
-    watchPosition: typeof Geolocation.watchPosition,
-    clearWatch: typeof Geolocation.clearWatch,
-    stopObserving: typeof Geolocation.stopObserving,
-    requestAuthorization: typeof Geolocation.requestAuthorization,
-    setRNConfiguration: typeof Geolocation.setRNConfiguration
-  };
-  const compatReady = Object.values(compatShape).every(
-    (type) => type === "function"
-  );
-  setScenario("compat-api-availability", compatReady ? "pass" : "fail", compatShape);
-  if (!compatReady) {
-    throw new Error("Compat API browser export is incomplete.");
-  }
+  runCompatApiAvailabilityCheck();
 
   await runStep<PermissionStatus>(
     "check-permission",
@@ -445,6 +433,8 @@ export async function runSuccessSuite() {
     }
   );
 
+  await runCompatScenarios();
+
   const failedScenarios = scenarios.filter(
     (scenario) =>
       [
@@ -455,7 +445,10 @@ export async function runSuccessSuite() {
         "get-current-position",
         "watch-position",
         "unwatch",
-        "stop-observing"
+        "stop-observing",
+        "compat-get-current-position",
+        "compat-watch-position",
+        "compat-stop-observing"
       ].includes(scenario.id) && scenario.status !== "pass"
   );
   if (failedScenarios.length > 0) {
@@ -520,7 +513,6 @@ export async function runUnavailableCheck() {
     );
   }
 }
-
 export async function runTimeoutCheck() {
   setScenario("timeout", "running");
   try {
