@@ -127,7 +127,6 @@ class NitroBackgroundLocationController private constructor(
         validate(options)
         config = options
         persistConfig(options)
-        options.geofencing?.let { registerPersistedGeofencesIfNeeded() }
     }
 
     fun getConfigOrNull(): BackgroundLocationOptions? {

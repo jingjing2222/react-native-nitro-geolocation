@@ -243,7 +243,12 @@ class NitroBackgroundLocation: HybridNitroBackgroundLocationSpec {
             if let since = options?.since {
                 rows = rows.filter { $0.createdAt >= since }
             }
-            return Array(rows.prefix(Int(options?.limit ?? 100)))
+            let limit = self.safePrefixCount(
+                options?.limit,
+                defaultValue: 100,
+                upperBound: rows.count
+            )
+            return Array(rows.prefix(limit))
         }
     }
 
@@ -298,7 +303,12 @@ class NitroBackgroundLocation: HybridNitroBackgroundLocationSpec {
             if let types = options?.types, !types.isEmpty {
                 rows = rows.filter { types.contains($0.type) }
             }
-            return Array(rows.prefix(Int(options?.limit ?? 100)))
+            let limit = self.safePrefixCount(
+                options?.limit,
+                defaultValue: 100,
+                upperBound: rows.count
+            )
+            return Array(rows.prefix(limit))
         }
     }
 
@@ -683,6 +693,26 @@ class NitroBackgroundLocation: HybridNitroBackgroundLocationSpec {
         return options?.persist != false
     }
 
+    private func safePrefixCount(
+        _ value: Double?,
+        defaultValue: Int,
+        upperBound: Int
+    ) -> Int {
+        let requested = value ?? Double(defaultValue)
+        guard requested.isFinite, requested > 0 else { return 0 }
+        return Int(min(requested.rounded(.down), Double(upperBound)))
+    }
+
+    private func positiveFiniteInt(_ value: Double?, defaultValue: Int) -> Int {
+        guard let value, value.isFinite, value > 0 else {
+            return defaultValue
+        }
+        if value >= Double(Int.max) {
+            return Int.max
+        }
+        return max(Int(value.rounded(.down)), 1)
+    }
+
     private func appendStoredLocation(_ location: StoredBackgroundLocation) {
         guard shouldPersist() else { return }
         storedLocations.append(location)
@@ -762,7 +792,7 @@ class NitroBackgroundLocation: HybridNitroBackgroundLocationSpec {
     }
     private func scheduleSyncIfNeeded() {
         guard let sync = options?.sync else { return }
-        let threshold = max(Int(sync.syncThreshold ?? 1), 1)
+        let threshold = positiveFiniteInt(sync.syncThreshold, defaultValue: 1)
         let unsyncedCount = storedLocations.filter { !$0.synced }.count
         guard unsyncedCount >= threshold else { return }
 
@@ -801,9 +831,12 @@ class NitroBackgroundLocation: HybridNitroBackgroundLocationSpec {
     }
 
     private func performSyncStoredLocations() -> BackgroundHttpSyncResult {
-        let unsynced = storedLocations
-            .filter { !$0.synced }
-            .prefix(Int(options?.sync?.batchSize ?? 50))
+        let allUnsynced = storedLocations.filter { !$0.synced }
+        let unsynced = allUnsynced.prefix(safePrefixCount(
+            options?.sync?.batchSize,
+            defaultValue: 50,
+            upperBound: allUnsynced.count
+        ))
         let ids = unsynced.map(\.id)
         if ids.isEmpty {
             return BackgroundHttpSyncResult(
