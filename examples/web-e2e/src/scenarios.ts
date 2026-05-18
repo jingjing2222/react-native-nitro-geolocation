@@ -16,6 +16,12 @@ export const scenarios: Scenario[] = [
     status: "idle"
   },
   {
+    id: "compat-api-availability",
+    title: "Compat API availability",
+    detail: "Compat browser export resolves without native bindings.",
+    status: "idle"
+  },
+  {
     id: "check-permission",
     title: "checkPermission",
     detail: "Reads browser permission state when Permissions API exists.",
@@ -49,6 +55,24 @@ export const scenarios: Scenario[] = [
     id: "stop-observing",
     title: "stopObserving clears watchers",
     detail: "Clears all active web watch tokens.",
+    status: "idle"
+  },
+  {
+    id: "compat-get-current-position",
+    title: "compat getCurrentPosition",
+    detail: "Compat callback receives normalized coords from real browser.",
+    status: "idle"
+  },
+  {
+    id: "compat-watch-position",
+    title: "compat watchPosition + clearWatch",
+    detail: "Compat watch emits coords, clearWatch stops subsequent callbacks.",
+    status: "idle"
+  },
+  {
+    id: "compat-stop-observing",
+    title: "compat stopObserving clears all watches",
+    detail: "stopObserving clears every active compat watch.",
     status: "idle"
   },
   {

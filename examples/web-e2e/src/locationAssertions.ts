@@ -14,7 +14,12 @@ export const expectedLocations = {
   unwatchInitial: { latitude: 37.5685, longitude: 126.98 },
   unwatchAfterClear: { latitude: 37.5692, longitude: 126.9807 },
   stopObservingInitial: { latitude: 37.5699, longitude: 126.9814 },
-  stopObservingAfterClear: { latitude: 37.5706, longitude: 126.9821 }
+  stopObservingAfterClear: { latitude: 37.5706, longitude: 126.9821 },
+  compatGetCurrentPosition: { latitude: 37.5713, longitude: 126.9828 },
+  compatWatchPositionInitial: { latitude: 37.572, longitude: 126.9835 },
+  compatWatchPositionAfterClear: { latitude: 37.5727, longitude: 126.9842 },
+  compatStopObservingInitial: { latitude: 37.5734, longitude: 126.9849 },
+  compatStopObservingAfterClear: { latitude: 37.5741, longitude: 126.9856 }
 } as const;
 
 const expectedLocationTolerance = 0.00015;

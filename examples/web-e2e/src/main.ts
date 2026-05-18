@@ -1,3 +1,4 @@
+import { runCompatSuite } from "./compatRunner";
 import { render } from "./dom";
 import {
   runDeniedCheck,
@@ -9,6 +10,7 @@ import { scenarios } from "./scenarios";
 import "./styles.css";
 
 const successButton = document.querySelector<HTMLButtonElement>("#run-success");
+const compatButton = document.querySelector<HTMLButtonElement>("#run-compat");
 const deniedButton = document.querySelector<HTMLButtonElement>("#run-denied");
 const unavailableButton =
   document.querySelector<HTMLButtonElement>("#run-unavailable");
@@ -17,6 +19,9 @@ const clearButton = document.querySelector<HTMLButtonElement>("#clear-results");
 
 successButton?.addEventListener("click", () => {
   void runSuccessSuite();
+});
+compatButton?.addEventListener("click", () => {
+  void runCompatSuite();
 });
 deniedButton?.addEventListener("click", () => {
   void runDeniedCheck();
@@ -43,6 +48,8 @@ render();
 const params = new URLSearchParams(location.search);
 if (params.get("autorun") === "success") {
   void runSuccessSuite();
+} else if (params.get("autorun") === "compat") {
+  void runCompatSuite();
 } else if (params.get("autorun") === "denied") {
   void runDeniedCheck();
 } else if (params.get("autorun") === "unavailable") {
