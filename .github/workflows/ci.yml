@@ -130,3 +130,7 @@ jobs:
       - name: Check package contents
         run: |
           yarn pack:check
+
+      - name: Check source line budgets
+        run: |
+          yarn source-lines:check
