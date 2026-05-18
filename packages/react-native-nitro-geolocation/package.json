@@ -15,8 +15,8 @@
     },
     "./compat": {
       "types": "./src/compat/index.tsx",
-      "react-native": "./src/compat/index.tsx",
       "browser": "./src/compat/index.web.ts",
+      "react-native": "./src/compat/index.tsx",
       "default": "./src/compat/index.tsx"
     },
     "./background": {
