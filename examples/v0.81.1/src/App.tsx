@@ -1,5 +1,4 @@
 import {
-  type Position,
   createPosition,
   useGeolocationDevTools
 } from "@react-native-nitro-geolocation/rozenite-plugin";
@@ -64,18 +63,6 @@ const hiddenTabOptions = {
 };
 
 const initialPosition = createPosition("Los Angeles, USA");
-const customPosition: Position = {
-  coords: {
-    latitude: 34.052235,
-    longitude: -118.243683,
-    accuracy: 100,
-    altitude: 0,
-    altitudeAccuracy: 0,
-    heading: 0,
-    speed: 0
-  },
-  timestamp: Date.now()
-};
 
 export default function App() {
   if (__DEV__) {

@@ -1,7 +1,14 @@
 appId: nitrogeolocation.example
 ---
 # Test 1: Permission Check and Request
-- launchApp
+- launchApp:
+    clearState: true
+    permissions:
+      all: allow
+- extendedWaitUntil:
+    visible: "Geolocation API"
+    timeout: 30000
+- stopApp
 - openLink:
     link: nitrogeolocation://app/permission-check
 - tapOn:
@@ -9,8 +16,9 @@ appId: nitrogeolocation.example
     optional: true
 
 # Navigate directly to the permission contract page.
-- assertVisible: "Geolocation API"
-- assertVisible: "1. Permission Management"
+- extendedWaitUntil:
+    visible: "1. Permission Management"
+    timeout: 30000
 
 # Check initial permission status
 - tapOn: "Check"

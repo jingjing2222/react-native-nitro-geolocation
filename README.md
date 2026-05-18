@@ -37,7 +37,7 @@ Full documentation available at:
 | Expo development build or custom native build | Supported with native setup |
 | Expo managed app without native rebuild | Use `expo-location` |
 | Web support required | Use the Modern API root import |
-| Full background tracking / geofencing | Use a dedicated background-location library |
+| Full background tracking / geofencing | Use `react-native-nitro-geolocation/background` |
 
 Web support is available for the Modern API root import. Browser builds resolve
 the package root to a web entry that uses `navigator.geolocation` and does not

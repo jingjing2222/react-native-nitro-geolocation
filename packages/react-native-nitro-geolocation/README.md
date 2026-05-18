@@ -36,12 +36,12 @@ Full documentation available at:
 | New Architecture / Nitro-based app | Recommended |
 | Expo development build or custom native build | Supported with native setup |
 | Expo managed app without native rebuild | Use `expo-location` |
-| Web support required | Use `@react-native-community/geolocation` or `expo-location` for now |
-| Full background tracking / geofencing | Use a dedicated background-location library |
+| Web support required | Use the Modern API root import |
+| Full background tracking / geofencing | Use `react-native-nitro-geolocation/background` |
 
-Web is not supported in `v1.2.x`. The community package handles web by
-delegating to the browser `navigator.geolocation` API; this package currently
-targets native Nitro bindings. A `/compat` web fallback is planned for `v1.3`.
+Web support is available for the Modern API root import. Browser builds resolve
+the package root to a web entry that uses `navigator.geolocation` and does not
+load Nitro native bindings. The `/compat` subpath remains native-only.
 
 ---
 
@@ -168,8 +168,8 @@ Geolocation.clearWatch(watchId);
 | `watchPosition` | Supported | Returns a numeric watch id. |
 | `clearWatch` | Supported | Clears a watch id from `watchPosition`. |
 | `stopObserving` | Supported | Preserved for legacy cleanup compatibility. |
-| `navigator.geolocation` polyfill | Not supported in `v1.2.x` | Planned for `v1.3`. |
-| Web | Not supported in `v1.2.x` | Planned as a `/compat` browser fallback in `v1.3`. |
+| `navigator.geolocation` polyfill | Not supported | Use the Modern API root import for web. |
+| Web | Native-only for `/compat` | Modern API root import supports web through `navigator.geolocation`. |
 
 ---
 

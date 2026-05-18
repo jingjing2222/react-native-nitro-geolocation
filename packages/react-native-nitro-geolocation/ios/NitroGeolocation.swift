@@ -139,7 +139,6 @@ class NitroGeolocation: HybridNitroGeolocationSpec {
 
     // Watch subscription storage (first-class functions!)
     private struct WatchSubscription {
-        let token: String
         let success: (GeolocationResponse) -> Void
         let error: ((LocationError) -> Void)?
         let options: ParsedOptions
@@ -162,14 +161,12 @@ class NitroGeolocation: HybridNitroGeolocationSpec {
     }
 
     private struct HeadingRequest {
-        let id: UUID
         let success: (Heading) -> Void
         let error: (LocationError) -> Void
         var timer: DispatchSourceTimer?
     }
 
     private struct HeadingSubscription {
-        let token: String
         let success: (Heading) -> Void
         let error: ((LocationError) -> Void)?
         let options: ParsedHeadingOptions
@@ -191,7 +188,6 @@ class NitroGeolocation: HybridNitroGeolocationSpec {
     private var pendingPositionRequests: [UUID: PositionRequest] = [:]
 
     private struct PositionRequest {
-        let id: UUID
         let success: (GeolocationResponse) -> Void
         let error: (LocationError) -> Void
         let options: ParsedOptions
@@ -404,7 +400,6 @@ class NitroGeolocation: HybridNitroGeolocationSpec {
         // Create position request
         let id = UUID()
         var request = PositionRequest(
-            id: id,
             success: success,
             error: { locationError in
                 error?(locationError)
@@ -568,7 +563,6 @@ class NitroGeolocation: HybridNitroGeolocationSpec {
 
         let id = UUID()
         var request = HeadingRequest(
-            id: id,
             success: success,
             error: { headingError in
                 error?(headingError)
@@ -610,7 +604,6 @@ class NitroGeolocation: HybridNitroGeolocationSpec {
         }
 
         let subscription = HeadingSubscription(
-            token: token,
             success: success,
             error: error,
             options: parsedOptions,
@@ -637,7 +630,6 @@ class NitroGeolocation: HybridNitroGeolocationSpec {
         let parsedOptions = ParsedOptions.parse(from: options)
 
         let subscription = WatchSubscription(
-            token: token,
             success: success,
             error: error,
             options: parsedOptions

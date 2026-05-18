@@ -15,7 +15,8 @@
       "**/*.js",
       "**/ios/**",
       "**/android/**",
-      "doc_build/**"
+      "doc_build/**",
+      "evidence/**"
     ]
   },
   "formatter": {

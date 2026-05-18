@@ -14,10 +14,12 @@ set_location_enabled() {
 
 restore_location() {
   set_location_enabled true || true
+  "$ADB_BIN" reverse --remove tcp:8081 >/dev/null 2>&1 || true
 }
 
 trap restore_location EXIT
 
+"$ADB_BIN" reverse tcp:8081 tcp:8081 >/dev/null
 set_location_enabled true
 "$MAESTRO_BIN" test --platform android "$FLOW_DIR/all-tests.yaml"
 

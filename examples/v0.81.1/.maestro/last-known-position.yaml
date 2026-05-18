@@ -14,7 +14,7 @@ appId: nitrogeolocation.example
 - stopApp
 
 - openLink:
-    link: nitrogeolocation://app/last-known-position
+    link: nitrogeolocation://app/last-known-position?case=allowed
 - tapOn:
     text: "열기|Open"
     optional: true
@@ -91,14 +91,10 @@ appId: nitrogeolocation.example
     permissions:
       all: deny
 
-- extendedWaitUntil:
-    visible: "Geolocation API"
-    timeout: 10000
-
 - stopApp
 
 - openLink:
-    link: nitrogeolocation://app/last-known-position
+    link: nitrogeolocation://app/last-known-position?case=denied
 - tapOn:
     text: "열기|Open"
     optional: true
