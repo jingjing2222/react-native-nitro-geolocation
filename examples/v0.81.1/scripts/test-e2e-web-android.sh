@@ -13,6 +13,7 @@ WEB_SERVER_PID=""
 
 cleanup() {
   "$ADB_BIN" shell cmd location set-location-enabled true >/dev/null 2>&1 || true
+  "$ADB_BIN" reverse --remove tcp:8081 >/dev/null 2>&1 || true
   "$ADB_BIN" reverse --remove "tcp:$WEB_E2E_PORT" >/dev/null 2>&1 || true
   if [[ -n "$WEB_SERVER_PID" ]]; then
     kill "$WEB_SERVER_PID" >/dev/null 2>&1 || true
@@ -35,6 +36,7 @@ for _ in {1..60}; do
     exit 1
   fi
   if curl -fsS "http://127.0.0.1:$WEB_E2E_PORT" | grep -q "Nitro Geolocation Web E2E"; then
+    "$ADB_BIN" reverse tcp:8081 tcp:8081 >/dev/null
     "$ADB_BIN" reverse "tcp:$WEB_E2E_PORT" "tcp:$WEB_E2E_PORT" >/dev/null
     break
   fi

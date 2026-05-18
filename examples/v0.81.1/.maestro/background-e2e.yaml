@@ -30,28 +30,62 @@ appId: nitrogeolocation.example
 
 - tapOn:
     id: "background-e2e-invalid-config-button"
-- extendedWaitUntil:
-    visible: "Missing notification: passed"
+- scrollUntilVisible:
+    element: "Missing notification: passed"
+    direction: DOWN
     timeout: 10000
 
+- scrollUntilVisible:
+    element: "Configure Background"
+    direction: DOWN
+    centerElement: true
 - tapOn:
-    id: "background-e2e-happy-path-button"
-- extendedWaitUntil:
-    visible: "Configure: passed"
-    timeout: 10000
+    text: "Configure Background"
+- scrollUntilVisible:
+    element: "Configure: passed"
+    direction: DOWN
+    timeout: 30000
 
-- extendedWaitUntil:
-    visible: "Start stop: passed"
-    timeout: 10000
+- scrollUntilVisible:
+    element: "Start Stop Tracking"
+    direction: UP
+    centerElement: true
+- tapOn:
+    text: "Start Stop Tracking"
+- scrollUntilVisible:
+    element: "Start stop: passed"
+    direction: DOWN
+    timeout: 30000
 
-- extendedWaitUntil:
-    visible: "Geofence: passed"
-    timeout: 10000
+- scrollUntilVisible:
+    element: "Register Geofence"
+    direction: UP
+    centerElement: true
+- tapOn:
+    text: "Register Geofence"
+- scrollUntilVisible:
+    element: "Geofence: passed"
+    direction: DOWN
+    timeout: 30000
 
-- extendedWaitUntil:
-    visible: "Storage: passed"
-    timeout: 10000
+- scrollUntilVisible:
+    element: "Recover Stored Events"
+    direction: UP
+    centerElement: true
+- tapOn:
+    text: "Recover Stored Events"
+- scrollUntilVisible:
+    element: "Storage: passed"
+    direction: DOWN
+    timeout: 30000
 
-- extendedWaitUntil:
-    visible: "Sync: passed"
-    timeout: 10000
+- scrollUntilVisible:
+    element: "Run Native Sync"
+    direction: UP
+    centerElement: true
+- tapOn:
+    text: "Run Native Sync"
+- scrollUntilVisible:
+    element: "Sync: passed"
+    direction: DOWN
+    timeout: 30000

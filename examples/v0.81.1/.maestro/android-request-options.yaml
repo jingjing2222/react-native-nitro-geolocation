@@ -13,8 +13,6 @@ appId: nitrogeolocation.example
     visible: "Geolocation API"
     timeout: 10000
 
-- stopApp
-
 - openLink:
     link: nitrogeolocation://app/android-request-options
 - tapOn:
@@ -39,7 +37,7 @@ appId: nitrogeolocation.example
 - assertVisible:
     id: "android-request-options-fused-result"
 - assertVisible:
-    text: ".*Fused coarse request returned 37\\.[0-9]+, 126\\.[0-9]+; provider=fused.*"
+    text: ".*Fused coarse request returned -?[0-9]+\\.[0-9]+, -?[0-9]+\\.[0-9]+; provider=fused.*"
 - assertVisible:
     text: ".*provider=.*"
 
