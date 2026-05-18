@@ -1,0 +1,124 @@
+{
+  "$schema": "https://unpkg.com/knip@6/schema.json",
+  "entry": ["scripts/check-pack.mjs"],
+  "project": ["scripts/*.mjs"],
+  "ignore": [
+    "**/nitrogen/generated/**",
+    "**/dist/**",
+    "**/build/**",
+    "**/Pods/**",
+    "**/node_modules/**",
+    "skills/community-migration/scripts/migrate-to-compat.mjs",
+    "skills/service-migration/scripts/migrate-geolocation-service.mjs"
+  ],
+  "ignoreBinaries": [
+    "biome",
+    "build",
+    "pod-install",
+    "react-native",
+    "tsc",
+    "vite"
+  ],
+  "ignoreDependencies": [
+    "@babel/core",
+    "@babel/preset-env",
+    "@babel/runtime",
+    "@react-native/babel-preset",
+    "@react-native-community/cli",
+    "@react-native-community/cli-platform-android",
+    "@react-native-community/cli-platform-ios",
+    "@react-native/metro-config",
+    "@react-native/typescript-config",
+    "@tsconfig/react-native",
+    "@types/node",
+    "@types/react",
+    "@types/react-test-renderer",
+    "@rspress/core",
+    "@react-native-community/geolocation",
+    "@react-native-nitro-geolocation/rozenite-plugin",
+    "@react-navigation/bottom-tabs",
+    "@react-navigation/native",
+    "react-native-safe-area-context",
+    "react-native-screens",
+    "react-native-webview",
+    "react",
+    "react-dom",
+    "react-native",
+    "react-native-builder-bob",
+    "react-native-monorepo-config",
+    "typescript",
+    "vite",
+    "vitest"
+  ],
+  "workspaces": {
+    "packages/react-native-nitro-geolocation": {
+      "entry": [
+        "src/index.tsx",
+        "src/index.web.tsx",
+        "src/compat/index.tsx",
+        "src/background/index.ts",
+        "src/background/index.web.ts"
+      ],
+      "project": [
+        "src/**/*.{ts,tsx}",
+        "!src/**/*.test.ts",
+        "!src/**/*.test.tsx",
+        "!src/**/*.spec.ts",
+        "!src/**/*.spec.tsx"
+      ],
+      "ignore": ["nitrogen/generated/**"]
+    },
+    "packages/rozenite-devtools-plugin": {
+      "entry": [
+        "react-native.ts",
+        "rozenite.config.ts",
+        "src/react-native/useGeolocationDevTools.ts",
+        "src/ui/geolocation-devtools.tsx"
+      ],
+      "project": ["react-native.ts", "rozenite.config.ts", "src/**/*.{ts,tsx}"],
+      "ignoreDependencies": [
+        "@rozenite/plugin-bridge",
+        "@types/leaflet",
+        "class-variance-authority",
+        "clsx",
+        "leaflet",
+        "lucide-react",
+        "react-native-web",
+        "tailwind-merge",
+        "tailwindcss",
+        "tailwindcss-animate",
+        "tw-animate-css"
+      ]
+    },
+    "examples/v0.81.1": {
+      "entry": [
+        "index.js",
+        "src/App.tsx",
+        "src/backgroundLongRunTask.ts",
+        ".maestro/scripts/wait-15s.js"
+      ],
+      "project": ["src/**/*.{ts,tsx}", "index.js", ".maestro/scripts/*.js"],
+      "ignoreDependencies": [
+        "@react-native-community/geolocation",
+        "@react-native/new-app-screen"
+      ]
+    },
+    "examples/benchmark": {
+      "entry": ["index.js", "App.tsx"],
+      "project": ["App.tsx", "index.js"],
+      "ignoreDependencies": [
+        "@react-native/new-app-screen",
+        "react-native-safe-area-context"
+      ],
+      "ignoreBinaries": ["pod-install"]
+    },
+    "examples/web-e2e": {
+      "entry": ["src/main.ts", "vite.config.ts"],
+      "project": ["src/**/*.ts", "vite.config.ts"]
+    },
+    "docs": {
+      "entry": ["rspress.config.ts"],
+      "project": ["**/*.{ts,tsx}"]
+    }
+  }
+}
