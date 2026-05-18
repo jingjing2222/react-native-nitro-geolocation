@@ -8,6 +8,7 @@
   "react-native-directory",
   "modern-api",
   "compat-api",
+  "agent-context-map",
   "devtools",
   "why-nitro-module",
   "benchmark"

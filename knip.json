@@ -114,7 +114,8 @@
     },
     "examples/web-e2e": {
       "entry": ["src/main.ts", "vite.config.ts"],
-      "project": ["src/**/*.ts", "vite.config.ts"]
+      "project": ["src/**/*.ts", "vite.config.ts"],
+      "ignoreDependencies": ["react-native-nitro-geolocation"]
     },
     "docs": {
       "entry": ["rspress.config.ts"],

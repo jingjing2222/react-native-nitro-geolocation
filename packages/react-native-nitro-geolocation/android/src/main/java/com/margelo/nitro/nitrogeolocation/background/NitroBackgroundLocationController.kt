@@ -8,17 +8,10 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.location.Location
 import android.location.LocationManager
-import android.net.Uri
 import android.os.Build
-import android.os.Handler
-import android.os.Looper
-import android.provider.Settings
 import androidx.core.content.ContextCompat
 import com.facebook.react.HeadlessJsTaskService
 import com.facebook.react.bridge.ReactApplicationContext
-import com.facebook.react.modules.core.PermissionAwareActivity
-import com.facebook.react.modules.core.PermissionListener
-import com.margelo.nitro.core.NullType
 import com.google.android.gms.location.Geofence
 import com.google.android.gms.location.ActivityRecognition
 import com.google.android.gms.location.ActivityRecognitionResult
@@ -27,18 +20,12 @@ import com.google.android.gms.location.GeofencingRequest
 import com.google.android.gms.location.LocationRequest
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.location.Priority
-import com.google.android.gms.location.DetectedActivity as GmsDetectedActivity
 import com.google.android.gms.tasks.Task
 import com.margelo.nitro.nitrogeolocation.*
-import java.io.OutputStreamWriter
-import java.net.HttpURLConnection
-import java.net.URL
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
 import java.util.UUID
-import org.json.JSONArray
-import org.json.JSONObject
 
 private const val ACTION_LOCATION_UPDATE =
     "com.margelo.nitro.nitrogeolocation.background.LOCATION_UPDATE"
@@ -68,6 +55,8 @@ class NitroBackgroundLocationController private constructor(
     }
     private val prefs =
         appContext.getSharedPreferences("nitro_background_location", Context.MODE_PRIVATE)
+    private val permissions = AndroidBackgroundPermissions(appContext) { getConfigOrNull() }
+    private val httpSync = AndroidBackgroundHttpSync()
     private val taskExecutor = Executors.newSingleThreadExecutor()
 
     @Volatile
@@ -77,50 +66,15 @@ class NitroBackgroundLocationController private constructor(
     private var state = BackgroundLocationState.IDLE
 
     fun checkBackgroundPermission(): BackgroundPermissionResult {
-        val foreground = foregroundPermission()
-        val background = backgroundPermission()
-        return BackgroundPermissionResult(
-            foreground,
-            background,
-            accuracyAuthorization(),
-            Build.VERSION.SDK_INT < Build.VERSION_CODES.R,
-            background != BackgroundPermissionStatus.GRANTED
-        )
+        return permissions.checkBackgroundPermission()
     }
 
     fun requestBackgroundPermission(reactContext: ReactApplicationContext): BackgroundPermissionResult {
-        val activity = reactContext.currentActivity
-        if (activity != null) {
-            val permissions = mutableListOf<String>()
-            if (foregroundPermission() != PermissionStatus.GRANTED) {
-                permissions += Manifest.permission.ACCESS_FINE_LOCATION
-                permissions += Manifest.permission.ACCESS_COARSE_LOCATION
-            }
-            if (Build.VERSION.SDK_INT == Build.VERSION_CODES.Q &&
-                backgroundPermission() != BackgroundPermissionStatus.GRANTED) {
-                permissions += Manifest.permission.ACCESS_BACKGROUND_LOCATION
-            }
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU &&
-                getConfigOrNull()?.android?.requestNotificationPermission != false &&
-                notificationPermission() != PermissionStatus.GRANTED) {
-                permissions += Manifest.permission.POST_NOTIFICATIONS
-            }
-            if (permissions.isNotEmpty()) {
-                requestPermissionsAndWait(activity, permissions.toTypedArray())
-            }
-        }
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R &&
-            backgroundPermission() != BackgroundPermissionStatus.GRANTED) {
-            openAppLocationSettings()
-        }
-        return checkBackgroundPermission()
+        return permissions.requestBackgroundPermission(reactContext)
     }
 
     fun openAppLocationSettings() {
-        val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS)
-            .setData(Uri.fromParts("package", appContext.packageName, null))
-            .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-        appContext.startActivity(intent)
+        permissions.openAppLocationSettings()
     }
 
     fun configure(options: BackgroundLocationOptions) {
@@ -143,10 +97,10 @@ class NitroBackgroundLocationController private constructor(
         options?.let(::configure)
         val current = requireConfig()
         validate(current)
-        if (foregroundPermission() != PermissionStatus.GRANTED) {
+        if (permissions.foregroundPermission() != PermissionStatus.GRANTED) {
             throw SecurityException("Foreground location permission is required")
         }
-        if (backgroundPermission() != BackgroundPermissionStatus.GRANTED) {
+        if (permissions.backgroundPermission() != BackgroundPermissionStatus.GRANTED) {
             throw SecurityException("Background location permission is required")
         }
         state = BackgroundLocationState.STARTING
@@ -187,9 +141,9 @@ class NitroBackgroundLocationController private constructor(
             state,
             prefs.getBoolean("running", false),
             config != null || prefs.getBoolean("configured", false),
-            foregroundPermission(),
-            backgroundPermission(),
-            accuracyAuthorization(),
+            permissions.foregroundPermission(),
+            permissions.backgroundPermission(),
+            permissions.accuracyAuthorization(),
             providerEnabled,
             null,
             store.count("background_locations"),
@@ -198,7 +152,7 @@ class NitroBackgroundLocationController private constructor(
             AndroidBackgroundLocationStatus(
                 prefs.getBoolean("running", false),
                 null,
-                notificationPermission()
+                permissions.notificationPermission()
             ),
             null,
             null
@@ -236,7 +190,7 @@ class NitroBackgroundLocationController private constructor(
             id,
             source,
             true,
-            providerFrom(location.provider),
+            backgroundProviderFrom(location.provider),
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) location.isMock else location.isFromMockProvider,
             System.currentTimeMillis().toDouble(),
             null,
@@ -347,7 +301,7 @@ class NitroBackgroundLocationController private constructor(
     }
 
     fun addGeofences(regions: Array<GeofenceRegion>, options: GeofencingOptions?) {
-        if (backgroundPermission() != BackgroundPermissionStatus.GRANTED) {
+        if (permissions.backgroundPermission() != BackgroundPermissionStatus.GRANTED) {
             throw SecurityException("Background location permission is required to register geofences")
         }
         val geofences = regions.map { region ->
@@ -409,60 +363,12 @@ class NitroBackgroundLocationController private constructor(
         if (sync == null) {
             return BackgroundHttpSyncResult(true, null, emptyArray(), emptyArray(), null)
         }
-        val result = uploadLocationsWithRetry(sync, locations)
+        val result = httpSync.uploadLocationsWithRetry(sync, locations)
         store.markSynced(result.syncedLocationIds.toList())
         if (sync.autoClear == true) {
             store.clearLocations(result.syncedLocationIds)
         }
         return result
-    }
-
-    private fun uploadLocationsWithRetry(
-        sync: BackgroundHttpSyncOptions,
-        locations: Array<StoredBackgroundLocation>
-    ): BackgroundHttpSyncResult {
-        val ids = locations.map { it.id }
-        val maxAttempts = if (sync.retry == true) {
-            (sync.maxRetries?.toInt()?.takeIf { it >= 0 } ?: 3) + 1
-        } else {
-            1
-        }
-        var lastStatus: Int? = null
-        var lastError: String? = null
-
-        if (sync.batch == false) {
-            return uploadSingleLocationsWithRetry(sync, locations, maxAttempts)
-        }
-
-        repeat(maxAttempts) { attempt ->
-            try {
-                val response = uploadLocations(sync, locations)
-                lastStatus = response
-                if (response in 200..299) {
-                    return BackgroundHttpSyncResult(
-                        true,
-                        response.toDouble(),
-                        ids.toTypedArray(),
-                        emptyArray(),
-                        null
-                    )
-                }
-                lastError = "HTTP sync failed with status $response"
-            } catch (error: Exception) {
-                lastError = error.message ?: "HTTP sync failed"
-            }
-            if (attempt < maxAttempts - 1) {
-                Thread.sleep(1_000L)
-            }
-        }
-
-        return BackgroundHttpSyncResult(
-            false,
-            lastStatus?.toDouble(),
-            emptyArray(),
-            ids.toTypedArray(),
-            lastError ?: "HTTP sync failed"
-        )
     }
 
     private fun scheduleSyncIfNeeded() {
@@ -572,74 +478,6 @@ class NitroBackgroundLocationController private constructor(
             throw IllegalArgumentException(
                 "Android background tracking requires android.foregroundService notification options"
             )
-        }
-    }
-
-    private fun requestPermissionsAndWait(
-        activity: android.app.Activity,
-        permissions: Array<String>
-    ) {
-        val permissionAware = activity as? PermissionAwareActivity
-        val latch = CountDownLatch(1)
-        var lifecycleCallbacks: android.app.Application.ActivityLifecycleCallbacks? = null
-        fun finishNonPermissionAwareRequest() {
-            latch.countDown()
-            lifecycleCallbacks?.let {
-                runCatching {
-                    activity.application.unregisterActivityLifecycleCallbacks(it)
-                }
-                lifecycleCallbacks = null
-            }
-        }
-        if (permissionAware == null) {
-            lifecycleCallbacks = object : android.app.Application.ActivityLifecycleCallbacks {
-                override fun onActivityCreated(
-                    activity: android.app.Activity,
-                    savedInstanceState: android.os.Bundle?
-                ) = Unit
-                override fun onActivityStarted(activity: android.app.Activity) = Unit
-                override fun onActivityResumed(resumedActivity: android.app.Activity) {
-                    if (resumedActivity === activity) {
-                        finishNonPermissionAwareRequest()
-                    }
-                }
-                override fun onActivityPaused(activity: android.app.Activity) = Unit
-                override fun onActivityStopped(activity: android.app.Activity) = Unit
-                override fun onActivitySaveInstanceState(
-                    activity: android.app.Activity,
-                    outState: android.os.Bundle
-                ) = Unit
-                override fun onActivityDestroyed(activity: android.app.Activity) = Unit
-            }
-            activity.application.registerActivityLifecycleCallbacks(lifecycleCallbacks)
-        }
-        Handler(Looper.getMainLooper()).post {
-            if (permissionAware == null) {
-                androidx.core.app.ActivityCompat.requestPermissions(activity, permissions, 9473)
-                Handler(Looper.getMainLooper()).postDelayed(
-                    { finishNonPermissionAwareRequest() },
-                    60_000
-                )
-            } else {
-                permissionAware.requestPermissions(
-                    permissions,
-                    9473,
-                    PermissionListener { requestCode, _, _ ->
-                        if (requestCode == 9473) {
-                            latch.countDown()
-                            true
-                        } else {
-                            false
-                        }
-                    }
-                )
-            }
-        }
-        if (Looper.myLooper() != Looper.getMainLooper()) {
-            latch.await(60, TimeUnit.SECONDS)
-        }
-        if (permissionAware == null && Looper.myLooper() != Looper.getMainLooper()) {
-            finishNonPermissionAwareRequest()
         }
     }
 
@@ -815,85 +653,6 @@ class NitroBackgroundLocationController private constructor(
         )
     }
 
-    private fun uploadLocations(
-        sync: BackgroundHttpSyncOptions,
-        locations: Array<StoredBackgroundLocation>
-    ): Int {
-        val connection = (URL(sync.url).openConnection() as HttpURLConnection).apply {
-            requestMethod = sync.method?.name ?: "POST"
-            connectTimeout = 15_000
-            readTimeout = 15_000
-            doOutput = true
-            setRequestProperty("Content-Type", "application/json")
-            sync.headers?.forEach { (key, value) -> setRequestProperty(key, value) }
-        }
-        OutputStreamWriter(connection.outputStream).use { writer ->
-            writer.write(sync.batchBody(locations).toString())
-        }
-        return connection.responseCode
-    }
-
-    private fun uploadSingleLocationsWithRetry(
-        sync: BackgroundHttpSyncOptions,
-        locations: Array<StoredBackgroundLocation>,
-        maxAttempts: Int
-    ): BackgroundHttpSyncResult {
-        val synced = mutableListOf<String>()
-        val failed = mutableListOf<String>()
-        var lastStatus: Int? = null
-        var lastError: String? = null
-
-        for (location in locations) {
-            var didSync = false
-            for (attempt in 0 until maxAttempts) {
-                try {
-                    val response = uploadLocation(sync, location)
-                    lastStatus = response
-                    if (response in 200..299) {
-                        synced += location.id
-                        didSync = true
-                        break
-                    }
-                    lastError = "HTTP sync failed with status $response"
-                } catch (error: Exception) {
-                    lastError = error.message ?: "HTTP sync failed"
-                }
-                if (!didSync && attempt < maxAttempts - 1) {
-                    Thread.sleep(1_000L)
-                }
-            }
-            if (!didSync) {
-                failed += location.id
-            }
-        }
-
-        return BackgroundHttpSyncResult(
-            failed.isEmpty(),
-            lastStatus?.toDouble(),
-            synced.toTypedArray(),
-            failed.toTypedArray(),
-            if (failed.isEmpty()) null else lastError ?: "HTTP sync failed"
-        )
-    }
-
-    private fun uploadLocation(
-        sync: BackgroundHttpSyncOptions,
-        location: StoredBackgroundLocation
-    ): Int {
-        val connection = (URL(sync.url).openConnection() as HttpURLConnection).apply {
-            requestMethod = sync.method?.name ?: "POST"
-            connectTimeout = 15_000
-            readTimeout = 15_000
-            doOutput = true
-            setRequestProperty("Content-Type", "application/json")
-            sync.headers?.forEach { (key, value) -> setRequestProperty(key, value) }
-        }
-        OutputStreamWriter(connection.outputStream).use { writer ->
-            writer.write(sync.singleBody(location).toString())
-        }
-        return connection.responseCode
-    }
-
     private fun locationPendingIntent(): PendingIntent {
         val intent = Intent(appContext, NitroLocationUpdateReceiver::class.java)
             .setAction(ACTION_LOCATION_UPDATE)
@@ -927,64 +686,6 @@ class NitroBackgroundLocationController private constructor(
         )
     }
 
-    private fun foregroundPermission(): PermissionStatus {
-        val fine = ContextCompat.checkSelfPermission(
-            appContext,
-            Manifest.permission.ACCESS_FINE_LOCATION
-        ) == PackageManager.PERMISSION_GRANTED
-        val coarse = ContextCompat.checkSelfPermission(
-            appContext,
-            Manifest.permission.ACCESS_COARSE_LOCATION
-        ) == PackageManager.PERMISSION_GRANTED
-        return if (fine || coarse) PermissionStatus.GRANTED else PermissionStatus.DENIED
-    }
-
-    private fun backgroundPermission(): BackgroundPermissionStatus {
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) {
-            return BackgroundPermissionStatus.GRANTED
-        }
-        return if (
-            ContextCompat.checkSelfPermission(
-                appContext,
-                Manifest.permission.ACCESS_BACKGROUND_LOCATION
-            ) == PackageManager.PERMISSION_GRANTED
-        ) {
-            BackgroundPermissionStatus.GRANTED
-        } else {
-            BackgroundPermissionStatus.DENIED
-        }
-    }
-
-    private fun notificationPermission(): PermissionStatus? {
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) return null
-        return if (
-            ContextCompat.checkSelfPermission(
-                appContext,
-                Manifest.permission.POST_NOTIFICATIONS
-            ) == PackageManager.PERMISSION_GRANTED
-        ) {
-            PermissionStatus.GRANTED
-        } else {
-            PermissionStatus.DENIED
-        }
-    }
-
-    private fun accuracyAuthorization(): AccuracyAuthorization {
-        val fine = ContextCompat.checkSelfPermission(
-            appContext,
-            Manifest.permission.ACCESS_FINE_LOCATION
-        ) == PackageManager.PERMISSION_GRANTED
-        val coarse = ContextCompat.checkSelfPermission(
-            appContext,
-            Manifest.permission.ACCESS_COARSE_LOCATION
-        ) == PackageManager.PERMISSION_GRANTED
-        return when {
-            fine -> AccuracyAuthorization.FULL
-            coarse -> AccuracyAuthorization.REDUCED
-            else -> AccuracyAuthorization.UNKNOWN
-        }
-    }
-
     private fun resolvePriority(options: BackgroundLocationOptions): Int {
         return when (options.accuracy?.android) {
             AndroidAccuracyPreset.HIGH -> Priority.PRIORITY_HIGH_ACCURACY
@@ -992,262 +693,6 @@ class NitroBackgroundLocationController private constructor(
             AndroidAccuracyPreset.PASSIVE -> Priority.PRIORITY_PASSIVE
             else -> Priority.PRIORITY_BALANCED_POWER_ACCURACY
         }
-    }
-
-    private fun providerFrom(provider: String?): LocationProviderUsed {
-        return when (provider) {
-            LocationManager.GPS_PROVIDER -> LocationProviderUsed.GPS
-            LocationManager.NETWORK_PROVIDER -> LocationProviderUsed.NETWORK
-            LocationManager.PASSIVE_PROVIDER -> LocationProviderUsed.PASSIVE
-            "fused" -> LocationProviderUsed.FUSED
-            else -> LocationProviderUsed.UNKNOWN
-        }
-    }
-
-    private fun BackgroundEventEnvelope.toJson(): JSONObject {
-        return JSONObject()
-            .put("id", id)
-            .put("type", type.jsValue())
-            .put("timestamp", timestamp)
-            .put("deliveredToJS", deliveredToJS)
-            .apply {
-                location?.let { put("location", it.toJson()) }
-                geofence?.let { put("geofence", it.toJson()) }
-                activity?.let { put("activity", it.toJson()) }
-                result?.let { put("result", it.toJson()) }
-            }
-    }
-
-    private fun BackgroundHttpSyncResult.toJson(): JSONObject {
-        return JSONObject()
-            .put("success", success)
-            .put("statusCode", statusCode)
-            .put("syncedLocationIds", JSONArray(syncedLocationIds.toList()))
-            .put("failedLocationIds", JSONArray(failedLocationIds.toList()))
-            .put("error", error)
-    }
-
-    private fun DetectedActivity.toJson(): JSONObject {
-        return JSONObject()
-            .put("type", type.jsValue())
-            .put("confidence", confidence)
-            .put("timestamp", timestamp)
-    }
-
-    private fun StoredBackgroundLocation.toJson(): JSONObject {
-        return JSONObject()
-            .put("id", id)
-            .put("deliveredToJS", deliveredToJS)
-            .put("synced", synced)
-            .put("createdAt", createdAt)
-            .put("source", source.jsValue())
-            .put("isFromBackground", isFromBackground)
-            .put("provider", provider?.jsValue())
-            .put("mocked", mocked)
-            .put("recordedAt", recordedAt)
-            .put("coords", coords.toJson())
-            .put("timestamp", timestamp)
-    }
-
-    private fun BackgroundLocation.toJson(): JSONObject {
-        return JSONObject()
-            .put("id", id)
-            .put("source", source.jsValue())
-            .put("isFromBackground", isFromBackground)
-            .put("provider", provider?.jsValue())
-            .put("mocked", mocked)
-            .put("recordedAt", recordedAt)
-            .put("coords", coords.toJson())
-            .put("timestamp", timestamp)
-    }
-
-    private fun GeolocationCoordinates.toJson(): JSONObject {
-        return JSONObject()
-            .put("latitude", latitude)
-            .put("longitude", longitude)
-            .put("altitude", altitude?.asSecondOrNull())
-            .put("accuracy", accuracy)
-            .put("altitudeAccuracy", altitudeAccuracy?.asSecondOrNull())
-            .put("heading", heading?.asSecondOrNull())
-            .put("speed", speed?.asSecondOrNull())
-    }
-
-    private fun GeofenceEvent.toJson(): JSONObject {
-        return JSONObject()
-            .put("region", region.toJson())
-            .put("transition", transition.jsValue())
-            .put("timestamp", timestamp)
-    }
-
-    private fun GeofenceRegion.toJson(): JSONObject {
-        return JSONObject()
-            .put("identifier", identifier)
-            .put("latitude", latitude)
-            .put("longitude", longitude)
-            .put("radius", radius)
-            .put("notifyOnEntry", notifyOnEntry)
-            .put("notifyOnExit", notifyOnExit)
-            .put("notifyOnDwell", notifyOnDwell)
-            .put("loiteringDelay", loiteringDelay)
-            .put("expirationDuration", expirationDuration)
-            .put("metadata", metadataToJsonObject(metadata))
-    }
-
-    private fun metadataToJsonObject(
-        metadata: Map<String, Variant_NullType_Boolean_String_Double>?
-    ): JSONObject? {
-        metadata ?: return null
-        val json = JSONObject()
-        metadata.forEach { (key, value) ->
-            when (value) {
-                is Variant_NullType_Boolean_String_Double.First -> json.put(key, JSONObject.NULL)
-                is Variant_NullType_Boolean_String_Double.Second -> json.put(key, value.value)
-                is Variant_NullType_Boolean_String_Double.Third -> json.put(key, value.value)
-                is Variant_NullType_Boolean_String_Double.Fourth -> json.put(key, value.value)
-            }
-        }
-        return json
-    }
-
-    private fun stringMapToJson(map: Map<String, String>): String {
-        val json = JSONObject()
-        map.forEach { (key, value) -> json.put(key, value) }
-        return json.toString()
-    }
-
-    private fun jsonToStringMap(payload: String): Map<String, String> {
-        val json = JSONObject(payload)
-        val map = mutableMapOf<String, String>()
-        val keys = json.keys()
-        while (keys.hasNext()) {
-            val key = keys.next()
-            map[key] = json.getString(key)
-        }
-        return map
-    }
-
-    private fun variantMapToJson(map: Map<String, Variant_NullType_Boolean_String_Double>): String {
-        return metadataToJsonObject(map)?.toString() ?: "{}"
-    }
-
-    private fun jsonToVariantMap(payload: String): Map<String, Variant_NullType_Boolean_String_Double> {
-        val json = JSONObject(payload)
-        val map = mutableMapOf<String, Variant_NullType_Boolean_String_Double>()
-        val keys = json.keys()
-        while (keys.hasNext()) {
-            val key = keys.next()
-            map[key] = when (val value = json.get(key)) {
-                JSONObject.NULL -> Variant_NullType_Boolean_String_Double.create(NullType.NULL)
-                is Boolean -> Variant_NullType_Boolean_String_Double.create(value)
-                is String -> Variant_NullType_Boolean_String_Double.create(value)
-                is Number -> Variant_NullType_Boolean_String_Double.create(value.toDouble())
-                else -> Variant_NullType_Boolean_String_Double.create(value.toString())
-            }
-        }
-        return map
-    }
-
-    private fun BackgroundHttpSyncOptions.batchBody(locations: Array<StoredBackgroundLocation>): JSONObject {
-        val body = metadataToJsonObject(bodyTemplate) ?: JSONObject()
-        body.put("locations", JSONArray(locations.map { it.toJson() }))
-        return body
-    }
-
-    private fun BackgroundHttpSyncOptions.singleBody(location: StoredBackgroundLocation): JSONObject {
-        val body = metadataToJsonObject(bodyTemplate)
-        if (body != null) {
-            body.put("location", location.toJson())
-            return body
-        }
-        return location.toJson()
-    }
-
-    private fun BackgroundEventType.jsValue(): String {
-        return when (this) {
-            BackgroundEventType.LOCATION -> "location"
-            BackgroundEventType.GEOFENCE -> "geofence"
-            BackgroundEventType.ACTIVITY -> "activity"
-            BackgroundEventType.PROVIDERCHANGE -> "providerChange"
-            BackgroundEventType.HTTPSYNC -> "httpSync"
-            BackgroundEventType.ERROR -> "error"
-        }
-    }
-
-    private fun BackgroundLocationSource.jsValue(): String {
-        return when (this) {
-            BackgroundLocationSource.FOREGROUNDSERVICE -> "foregroundService"
-            BackgroundLocationSource.BACKGROUND -> "background"
-            BackgroundLocationSource.SIGNIFICANTCHANGE -> "significantChange"
-            BackgroundLocationSource.GEOFENCE -> "geofence"
-            BackgroundLocationSource.DEFERRED -> "deferred"
-            BackgroundLocationSource.MANUAL -> "manual"
-            BackgroundLocationSource.UNKNOWN -> "unknown"
-        }
-    }
-
-    private fun LocationProviderUsed.jsValue(): String {
-        return when (this) {
-            LocationProviderUsed.GPS -> "gps"
-            LocationProviderUsed.NETWORK -> "network"
-            LocationProviderUsed.PASSIVE -> "passive"
-            LocationProviderUsed.FUSED -> "fused"
-            LocationProviderUsed.UNKNOWN -> "unknown"
-        }
-    }
-
-    private fun GeofenceTransition.jsValue(): String {
-        return when (this) {
-            GeofenceTransition.ENTER -> "enter"
-            GeofenceTransition.EXIT -> "exit"
-            GeofenceTransition.DWELL -> "dwell"
-        }
-    }
-
-    private fun DetectedActivityType.jsValue(): String {
-        return when (this) {
-            DetectedActivityType.STILL -> "still"
-            DetectedActivityType.WALKING -> "walking"
-            DetectedActivityType.RUNNING -> "running"
-            DetectedActivityType.ONFOOT -> "onFoot"
-            DetectedActivityType.ONBICYCLE -> "onBicycle"
-            DetectedActivityType.INVEHICLE -> "inVehicle"
-            DetectedActivityType.TILTING -> "tilting"
-            DetectedActivityType.UNKNOWN -> "unknown"
-        }
-    }
-
-    private fun GmsDetectedActivity.toNitroActivityType(): DetectedActivityType {
-        return when (type) {
-            GmsDetectedActivity.STILL -> DetectedActivityType.STILL
-            GmsDetectedActivity.WALKING -> DetectedActivityType.WALKING
-            GmsDetectedActivity.RUNNING -> DetectedActivityType.RUNNING
-            GmsDetectedActivity.ON_FOOT -> DetectedActivityType.ONFOOT
-            GmsDetectedActivity.ON_BICYCLE -> DetectedActivityType.ONBICYCLE
-            GmsDetectedActivity.IN_VEHICLE -> DetectedActivityType.INVEHICLE
-            GmsDetectedActivity.TILTING -> DetectedActivityType.TILTING
-            else -> DetectedActivityType.UNKNOWN
-        }
-    }
-
-    private fun GeofenceRegion.toTransitionTypes(): Int {
-        var transitions = 0
-        if (notifyOnEntry != false) transitions = transitions or Geofence.GEOFENCE_TRANSITION_ENTER
-        if (notifyOnExit != false) transitions = transitions or Geofence.GEOFENCE_TRANSITION_EXIT
-        if (notifyOnDwell == true) transitions = transitions or Geofence.GEOFENCE_TRANSITION_DWELL
-        return transitions
-    }
-
-    private fun GeofencingOptions?.toInitialTrigger(): Int {
-        val triggers = this?.initialTrigger ?: return 0
-        var value = 0
-        for (trigger in triggers) {
-            value = value or when (trigger) {
-                GeofenceTransition.ENTER -> GeofencingRequest.INITIAL_TRIGGER_ENTER
-                GeofenceTransition.EXIT -> GeofencingRequest.INITIAL_TRIGGER_EXIT
-                GeofenceTransition.DWELL -> GeofencingRequest.INITIAL_TRIGGER_DWELL
-            }
-        }
-        return value
     }
 
     companion object {

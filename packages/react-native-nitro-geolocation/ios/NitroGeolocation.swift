@@ -3,38 +3,6 @@ import CoreLocation
 import NitroModules
 
 /**
- * LocationManager Delegate class to handle CLLocationManager callbacks.
- */
-private class LocationManagerDelegate: NSObject, CLLocationManagerDelegate {
-    weak var geolocation: NitroGeolocation?
-
-    init(geolocation: NitroGeolocation) {
-        self.geolocation = geolocation
-        super.init()
-    }
-
-    func locationManagerDidChangeAuthorization(_ manager: CLLocationManager) {
-        geolocation?.handleAuthorizationChange(manager)
-    }
-
-    func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
-        geolocation?.handleLocationUpdate(locations)
-    }
-
-    func locationManager(_ manager: CLLocationManager, didFailWithError error: Error) {
-        geolocation?.handleLocationError(error)
-    }
-
-    func locationManager(_ manager: CLLocationManager, didUpdateHeading newHeading: CLHeading) {
-        geolocation?.handleHeadingUpdate(newHeading)
-    }
-
-    func locationManagerShouldDisplayHeadingCalibration(_ manager: CLLocationManager) -> Bool {
-        return false
-    }
-}
-
-/**
  * Geolocation implementation for the native Modern API contract.
  *
  * Key features:
@@ -44,135 +12,6 @@ private class LocationManagerDelegate: NSObject, CLLocationManagerDelegate {
  * - Automatic subscription management
  */
 class NitroGeolocation: HybridNitroGeolocationSpec {
-    // MARK: - Types
-
-    private struct ParsedOptions {
-        let timeout: Double
-        let maximumAge: Double
-        let accuracy: CLLocationAccuracy
-        let distanceFilter: CLLocationDistance
-        let useSignificantChanges: Bool
-        let activityType: CLActivityType?
-        let pausesLocationUpdatesAutomatically: Bool?
-        let showsBackgroundLocationIndicator: Bool?
-
-        static let DEFAULT_TIMEOUT: Double = 10 * 60 * 1000  // 10 minutes in ms
-        static let DEFAULT_MAXIMUM_AGE: Double = 0
-
-        static func parse(
-            from options: LocationRequestOptions?,
-            defaultMaximumAge: Double = DEFAULT_MAXIMUM_AGE
-        ) -> ParsedOptions {
-            let timeout = options?.timeout ?? DEFAULT_TIMEOUT
-            let maximumAge = options?.maximumAge ?? defaultMaximumAge
-            let enableHighAccuracy = options?.enableHighAccuracy ?? false
-            let accuracy = resolveAccuracy(
-                preset: options?.accuracy?.ios,
-                enableHighAccuracy: enableHighAccuracy
-            )
-            let distanceFilter = options?.distanceFilter ?? kCLDistanceFilterNone
-            let useSignificantChanges = options?.useSignificantChanges ?? false
-
-            return ParsedOptions(
-                timeout: timeout,
-                maximumAge: maximumAge,
-                accuracy: accuracy,
-                distanceFilter: distanceFilter,
-                useSignificantChanges: useSignificantChanges,
-                activityType: resolveActivityType(options?.activityType),
-                pausesLocationUpdatesAutomatically: options?.pausesLocationUpdatesAutomatically,
-                showsBackgroundLocationIndicator: options?.showsBackgroundLocationIndicator
-            )
-        }
-
-        static func parseLastKnown(from options: LocationRequestOptions?) -> ParsedOptions {
-            return parse(from: options, defaultMaximumAge: Double.infinity)
-        }
-
-        private static func resolveAccuracy(
-            preset: IOSAccuracyPreset?,
-            enableHighAccuracy: Bool
-        ) -> CLLocationAccuracy {
-            guard let preset else {
-                return enableHighAccuracy
-                    ? kCLLocationAccuracyBest
-                    : kCLLocationAccuracyHundredMeters
-            }
-
-            switch preset {
-            case .bestfornavigation:
-                return kCLLocationAccuracyBestForNavigation
-            case .best:
-                return kCLLocationAccuracyBest
-            case .nearesttenmeters:
-                return kCLLocationAccuracyNearestTenMeters
-            case .hundredmeters:
-                return kCLLocationAccuracyHundredMeters
-            case .kilometer:
-                return kCLLocationAccuracyKilometer
-            case .threekilometers:
-                return kCLLocationAccuracyThreeKilometers
-            case .reduced:
-                return kCLLocationAccuracyReduced
-            }
-        }
-
-        private static func resolveActivityType(_ activityType: IOSActivityType?) -> CLActivityType? {
-            guard let activityType else {
-                return nil
-            }
-
-            switch activityType {
-            case .other:
-                return .other
-            case .automotivenavigation:
-                return .automotiveNavigation
-            case .fitness:
-                return .fitness
-            case .othernavigation:
-                return .otherNavigation
-            case .airborne:
-                return .airborne
-            }
-        }
-    }
-
-    // Watch subscription storage (first-class functions!)
-    private struct WatchSubscription {
-        let success: (GeolocationResponse) -> Void
-        let error: ((LocationError) -> Void)?
-        let options: ParsedOptions
-    }
-
-    private struct ParsedHeadingOptions {
-        let headingFilter: CLLocationDegrees
-
-        // Apple's documented `CLLocationManager.headingFilter` default is 1°.
-        // Defaulting to `0` here propagates through `mergeHeadingFilter` into
-        // `kCLHeadingFilterNone` (-1), which fires the delegate on every
-        // CLHeading tick (sub-degree firehose for stationary users). 1° matches
-        // CL's documented behavior and lets the delegate fire only on
-        // perceptible changes.
-        static func parse(from options: HeadingOptions?) -> ParsedHeadingOptions {
-            return ParsedHeadingOptions(
-                headingFilter: options?.headingFilter ?? 1
-            )
-        }
-    }
-
-    private struct HeadingRequest {
-        let success: (Heading) -> Void
-        let error: (LocationError) -> Void
-        var timer: DispatchSourceTimer?
-    }
-
-    private struct HeadingSubscription {
-        let success: (Heading) -> Void
-        let error: ((LocationError) -> Void)?
-        let options: ParsedHeadingOptions
-        var lastDeliveredHeading: Double?
-    }
-
     // MARK: - Properties
 
     private var configuration: GeolocationConfiguration?
@@ -187,13 +26,6 @@ class NitroGeolocation: HybridNitroGeolocationSpec {
     // getCurrentPosition promise resolvers with timeout
     private var pendingPositionRequests: [UUID: PositionRequest] = [:]
 
-    private struct PositionRequest {
-        let success: (GeolocationResponse) -> Void
-        let error: (LocationError) -> Void
-        let options: ParsedOptions
-        var timer: DispatchSourceTimer?
-    }
-
     // Watch subscriptions (token -> callback)
     private var watchSubscriptions: [String: WatchSubscription] = [:]
 
@@ -201,15 +33,6 @@ class NitroGeolocation: HybridNitroGeolocationSpec {
     private var pendingHeadingRequests: [UUID: HeadingRequest] = [:]
     private var headingSubscriptions: [String: HeadingSubscription] = [:]
     private var activeGeocoders: [UUID: CLGeocoder] = [:]
-
-    // Error codes
-    private let INTERNAL_ERROR = -1
-    private let PERMISSION_DENIED = 1
-    private let POSITION_UNAVAILABLE = 2
-    private let TIMEOUT = 3
-    private let PLAY_SERVICE_NOT_AVAILABLE = 4
-    private let SETTINGS_NOT_SATISFIED = 5
-    private let DEFAULT_HEADING_TIMEOUT_MS: Double = 10_000
 
     // MARK: - Configuration
 
@@ -259,7 +82,7 @@ class NitroGeolocation: HybridNitroGeolocationSpec {
 
     func getProviderStatus() throws -> Promise<LocationProviderStatus> {
         return Promise.async {
-            return self.createLocationProviderStatus()
+            return createLocationProviderStatus()
         }
     }
 
@@ -345,8 +168,8 @@ class NitroGeolocation: HybridNitroGeolocationSpec {
                 withPurposeKey: trimmedPurposeKey
             ) { requestError in
                 if let requestError {
-                    error?(self.createLocationError(
-                        code: self.INTERNAL_ERROR,
+                    error?(createLocationError(
+                        code: INTERNAL_ERROR,
                         message: "Unable to request temporary full accuracy: \(requestError.localizedDescription)"
                     ))
                     return
@@ -371,7 +194,7 @@ class NitroGeolocation: HybridNitroGeolocationSpec {
                 ? "This application is not authorized to use location services"
                 : "User denied access to location services."
             error?(createLocationError(
-                code: self.PERMISSION_DENIED,
+                code: PERMISSION_DENIED,
                 message: message
             ))
             return
@@ -379,7 +202,7 @@ class NitroGeolocation: HybridNitroGeolocationSpec {
 
         if !CLLocationManager.locationServicesEnabled() {
             error?(createLocationError(
-                code: self.SETTINGS_NOT_SATISFIED,
+                code: SETTINGS_NOT_SATISFIED,
                 message: "Location services disabled."
             ))
             return
@@ -435,7 +258,7 @@ class NitroGeolocation: HybridNitroGeolocationSpec {
                 ? "This application is not authorized to use location services"
                 : "User denied access to location services."
             error?(createLocationError(
-                code: self.PERMISSION_DENIED,
+                code: PERMISSION_DENIED,
                 message: message
             ))
             return
@@ -444,7 +267,7 @@ class NitroGeolocation: HybridNitroGeolocationSpec {
         let parsedOptions = ParsedOptions.parseLastKnown(from: options)
         guard let cached = self.getBestCachedLocation(options: parsedOptions) else {
             error?(createLocationError(
-                code: self.POSITION_UNAVAILABLE,
+                code: POSITION_UNAVAILABLE,
                 message: "No cached location available."
             ))
             return
@@ -495,7 +318,7 @@ class NitroGeolocation: HybridNitroGeolocationSpec {
                     }
 
                     let locations = (placemarks ?? []).compactMap {
-                        self.placemarkToGeocodedLocation($0)
+                        $0.toGeocodedLocation()
                     }
                     success(locations)
                 }
@@ -543,7 +366,7 @@ class NitroGeolocation: HybridNitroGeolocationSpec {
                     }
 
                     let addresses = (placemarks ?? []).map {
-                        self.placemarkToReverseGeocodedAddress($0)
+                        $0.toReverseGeocodedAddress()
                     }
                     success(addresses)
                 }
@@ -682,7 +505,7 @@ class NitroGeolocation: HybridNitroGeolocationSpec {
 
     // MARK: - Location Manager Callbacks
 
-    fileprivate func handleAuthorizationChange(_ manager: CLLocationManager) {
+    func handleAuthorizationChange(_ manager: CLLocationManager) {
         let status = getCurrentAuthorizationStatus(from: manager)
         let mappedStatus = mapCLAuthorizationStatus(status)
 
@@ -700,7 +523,7 @@ class NitroGeolocation: HybridNitroGeolocationSpec {
         }
     }
 
-    fileprivate func handleLocationUpdate(_ locations: [CLLocation]) {
+    func handleLocationUpdate(_ locations: [CLLocation]) {
         guard let location = locations.last else { return }
 
         lastLocation = location
@@ -726,7 +549,7 @@ class NitroGeolocation: HybridNitroGeolocationSpec {
         }
     }
 
-    fileprivate func handleLocationError(_ error: Error) {
+    func handleLocationError(_ error: Error) {
         let locationError: LocationError
 
         if let clError = error as? CLError {
@@ -768,7 +591,7 @@ class NitroGeolocation: HybridNitroGeolocationSpec {
         stopMonitoring()
     }
 
-    fileprivate func handleHeadingUpdate(_ clHeading: CLHeading) {
+    func handleHeadingUpdate(_ clHeading: CLHeading) {
         let heading = headingToResponse(clHeading)
 
         for (id, request) in Array(pendingHeadingRequests) {
@@ -926,32 +749,6 @@ class NitroGeolocation: HybridNitroGeolocationSpec {
         headingSubscriptions.removeAll()
 
         stopHeadingMonitoring()
-    }
-
-    private func headingToResponse(_ clHeading: CLHeading) -> Heading {
-        let trueHeading = clHeading.trueHeading >= 0
-            ? clHeading.trueHeading
-            : nil
-        let accuracy = clHeading.headingAccuracy >= 0
-            ? clHeading.headingAccuracy
-            : nil
-
-        return Heading(
-            magneticHeading: normalizeHeading(clHeading.magneticHeading),
-            trueHeading: trueHeading.map(normalizeHeading),
-            accuracy: accuracy,
-            timestamp: clHeading.timestamp.timeIntervalSince1970 * 1000
-        )
-    }
-
-    private func angularDistance(_ first: Double, _ second: Double) -> Double {
-        let distance = Swift.abs(first - second).truncatingRemainder(dividingBy: 360)
-        return distance > 180 ? 360 - distance : distance
-    }
-
-    private func normalizeHeading(_ value: Double) -> Double {
-        let normalized = value.truncatingRemainder(dividingBy: 360)
-        return normalized < 0 ? normalized + 360 : normalized
     }
 
     private func updateLocationManagerConfiguration() {
@@ -1240,82 +1037,7 @@ class NitroGeolocation: HybridNitroGeolocationSpec {
     }
 
     private func locationToPosition(_ location: CLLocation) -> GeolocationResponse {
-        let coords = GeolocationCoordinates(
-            latitude: location.coordinate.latitude,
-            longitude: location.coordinate.longitude,
-            altitude: location.nitroGeolocationAltitude,
-            accuracy: location.horizontalAccuracy,
-            altitudeAccuracy: location.nitroGeolocationAltitudeAccuracy,
-            heading: location.nitroGeolocationHeading,
-            speed: location.nitroGeolocationSpeed
-        )
-
-        return GeolocationResponse(
-            coords: coords,
-            timestamp: location.timestamp.timeIntervalSince1970 * 1000,
-            mocked: location.nitroGeolocationMocked,
-            provider: location.nitroGeolocationProvider
-        )
-    }
-
-    private func placemarkToGeocodedLocation(_ placemark: CLPlacemark) -> GeocodedLocation? {
-        guard let location = placemark.location else {
-            return nil
-        }
-
-        let accuracy = location.horizontalAccuracy >= 0
-            ? location.horizontalAccuracy
-            : nil
-
-        return GeocodedLocation(
-            latitude: location.coordinate.latitude,
-            longitude: location.coordinate.longitude,
-            accuracy: accuracy
-        )
-    }
-
-    private func placemarkToReverseGeocodedAddress(_ placemark: CLPlacemark) -> ReverseGeocodedAddress {
-        return ReverseGeocodedAddress(
-            country: placemark.country.nonEmptyTrimmed,
-            region: placemark.administrativeArea.nonEmptyTrimmed,
-            city: placemark.locality.nonEmptyTrimmed,
-            district: placemark.subLocality.nonEmptyTrimmed,
-            street: formatStreet(placemark),
-            postalCode: placemark.postalCode.nonEmptyTrimmed,
-            formattedAddress: formatAddress(placemark)
-        )
-    }
-
-    private func formatStreet(_ placemark: CLPlacemark) -> String? {
-        return [
-            placemark.subThoroughfare.nonEmptyTrimmed,
-            placemark.thoroughfare.nonEmptyTrimmed
-        ]
-            .compactMap { $0 }
-            .joined(separator: " ")
-            .nonEmptyTrimmed
-    }
-
-    private func formatAddress(_ placemark: CLPlacemark) -> String? {
-        var parts: [String] = []
-
-        appendDistinct(placemark.name.nonEmptyTrimmed, to: &parts)
-        appendDistinct(formatStreet(placemark), to: &parts)
-        appendDistinct(placemark.subLocality.nonEmptyTrimmed, to: &parts)
-        appendDistinct(placemark.locality.nonEmptyTrimmed, to: &parts)
-        appendDistinct(placemark.administrativeArea.nonEmptyTrimmed, to: &parts)
-        appendDistinct(placemark.postalCode.nonEmptyTrimmed, to: &parts)
-        appendDistinct(placemark.country.nonEmptyTrimmed, to: &parts)
-
-        return parts.joined(separator: ", ").nonEmptyTrimmed
-    }
-
-    private func appendDistinct(_ value: String?, to parts: inout [String]) {
-        guard let value, !parts.contains(value) else {
-            return
-        }
-
-        parts.append(value)
+        return location.toGeolocationResponse()
     }
 
     private func validateGeocodingCoordinates(_ coords: GeocodingCoordinates) -> LocationError? {
@@ -1371,51 +1093,4 @@ class NitroGeolocation: HybridNitroGeolocationSpec {
         )
     }
 
-    private func createLocationError(code: Int, message: String) -> LocationError {
-        return LocationError(
-            code: Double(code),
-            message: message
-        )
-    }
-
-    private func createLocationProviderStatus() -> LocationProviderStatus {
-        return LocationProviderStatus(
-            locationServicesEnabled: CLLocationManager.locationServicesEnabled(),
-            backgroundModeEnabled: isLocationBackgroundModeEnabled(),
-            gpsAvailable: nil,
-            networkAvailable: nil,
-            passiveAvailable: nil,
-            googleLocationAccuracyEnabled: nil
-        )
-    }
-
-    private func isLocationBackgroundModeEnabled() -> Bool {
-        guard let backgroundModes = Bundle.main.object(
-            forInfoDictionaryKey: "UIBackgroundModes"
-        ) as? [String] else {
-            return false
-        }
-
-        return backgroundModes.contains("location")
-    }
-}
-
-private extension Optional where Wrapped == String {
-    var nonEmptyTrimmed: String? {
-        guard let trimmed = self?.trimmingCharacters(in: .whitespacesAndNewlines) else {
-            return nil
-        }
-
-        return trimmed.isEmpty ? nil : trimmed
-    }
-}
-
-private extension String {
-    var nonEmptyTrimmed: String? {
-        return trimmingCharacters(in: .whitespacesAndNewlines).nilIfEmpty
-    }
-
-    var nilIfEmpty: String? {
-        return isEmpty ? nil : self
-    }
 }
