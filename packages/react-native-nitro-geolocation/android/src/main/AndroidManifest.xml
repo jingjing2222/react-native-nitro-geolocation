@@ -1,2 +1,41 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+  <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+  <uses-permission android:name="android.permission.FOREGROUND_SERVICE_LOCATION" />
+  <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+  <uses-permission android:name="android.permission.ACTIVITY_RECOGNITION" />
+  <uses-permission android:name="android.permission.WAKE_LOCK" />
+
+  <application>
+    <service
+      android:name=".background.NitroBackgroundLocationService"
+      android:exported="false"
+      android:foregroundServiceType="location" />
+
+    <service
+      android:name=".background.NitroBackgroundHeadlessTaskService"
+      android:exported="false" />
+
+    <receiver
+      android:name=".background.NitroLocationUpdateReceiver"
+      android:exported="false" />
+
+    <receiver
+      android:name=".background.NitroGeofenceReceiver"
+      android:exported="false" />
+
+    <receiver
+      android:name=".background.NitroActivityRecognitionReceiver"
+      android:exported="false" />
+
+    <receiver
+      android:name=".background.NitroBootReceiver"
+      android:enabled="true"
+      android:exported="true"
+      android:permission="android.permission.RECEIVE_BOOT_COMPLETED">
+      <intent-filter>
+        <action android:name="android.intent.action.BOOT_COMPLETED" />
+        <action android:name="android.intent.action.LOCKED_BOOT_COMPLETED" />
+      </intent-filter>
+    </receiver>
+  </application>
 </manifest>

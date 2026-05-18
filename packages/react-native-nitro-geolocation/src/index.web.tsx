@@ -6,6 +6,7 @@
  */
 
 export * from "./web";
+export * from "./background/index.web";
 
 export type {
   PermissionStatus,

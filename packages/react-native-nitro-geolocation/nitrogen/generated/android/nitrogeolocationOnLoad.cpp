@@ -28,6 +28,9 @@
 #include "JFunc_void.hpp"
 #include "JFunc_void_CompatGeolocationError.hpp"
 #include "JFunc_void_CompatGeolocationResponse.hpp"
+#include "JHybridNitroBackgroundLocationSpec.hpp"
+#include "JFunc_void_BackgroundEventEnvelope.hpp"
+#include "JFunc_void_BackgroundLocation.hpp"
 #include <NitroModules/DefaultConstructableObject.hpp>
 
 namespace margelo::nitro::nitrogeolocation {
@@ -54,6 +57,14 @@ struct JHybridNitroGeolocationCompatSpecImpl: public jni::JavaClass<JHybridNitro
     return javaPart->getJHybridNitroGeolocationCompatSpec();
   }
 };
+struct JHybridNitroBackgroundLocationSpecImpl: public jni::JavaClass<JHybridNitroBackgroundLocationSpecImpl, JHybridNitroBackgroundLocationSpec::JavaPart> {
+  static constexpr auto kJavaDescriptor = "Lcom/margelo/nitro/nitrogeolocation/NitroBackgroundLocation;";
+  static std::shared_ptr<JHybridNitroBackgroundLocationSpec> create() {
+    static const auto constructorFn = javaClassStatic()->getConstructor<JHybridNitroBackgroundLocationSpecImpl::javaobject()>();
+    jni::local_ref<JHybridNitroBackgroundLocationSpec::JavaPart> javaPart = javaClassStatic()->newObject(constructorFn);
+    return javaPart->getJHybridNitroBackgroundLocationSpec();
+  }
+};
 
 void registerAllNatives() {
   using namespace margelo::nitro;
@@ -73,6 +84,9 @@ void registerAllNatives() {
   margelo::nitro::nitrogeolocation::JFunc_void_cxx::registerNatives();
   margelo::nitro::nitrogeolocation::JFunc_void_CompatGeolocationError_cxx::registerNatives();
   margelo::nitro::nitrogeolocation::JFunc_void_CompatGeolocationResponse_cxx::registerNatives();
+  margelo::nitro::nitrogeolocation::JHybridNitroBackgroundLocationSpec::CxxPart::registerNatives();
+  margelo::nitro::nitrogeolocation::JFunc_void_BackgroundEventEnvelope_cxx::registerNatives();
+  margelo::nitro::nitrogeolocation::JFunc_void_BackgroundLocation_cxx::registerNatives();
 
   // Register Nitro Hybrid Objects
   HybridObjectRegistry::registerHybridObjectConstructor(
@@ -85,6 +99,12 @@ void registerAllNatives() {
     "NitroGeolocationCompat",
     []() -> std::shared_ptr<HybridObject> {
       return JHybridNitroGeolocationCompatSpecImpl::create();
+    }
+  );
+  HybridObjectRegistry::registerHybridObjectConstructor(
+    "NitroBackgroundLocation",
+    []() -> std::shared_ptr<HybridObject> {
+      return JHybridNitroBackgroundLocationSpecImpl::create();
     }
   );
 }

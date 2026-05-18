@@ -12,6 +12,7 @@
 
 #include "HybridNitroGeolocationSpecSwift.hpp"
 #include "HybridNitroGeolocationCompatSpecSwift.hpp"
+#include "HybridNitroBackgroundLocationSpecSwift.hpp"
 
 @interface NitroGeolocationAutolinking : NSObject
 @end
@@ -33,6 +34,13 @@
     "NitroGeolocationCompat",
     []() -> std::shared_ptr<HybridObject> {
       std::shared_ptr<HybridNitroGeolocationCompatSpec> hybridObject = NitroGeolocation::NitroGeolocationAutolinking::createNitroGeolocationCompat();
+      return hybridObject;
+    }
+  );
+  HybridObjectRegistry::registerHybridObjectConstructor(
+    "NitroBackgroundLocation",
+    []() -> std::shared_ptr<HybridObject> {
+      std::shared_ptr<HybridNitroBackgroundLocationSpec> hybridObject = NitroGeolocation::NitroGeolocationAutolinking::createNitroBackgroundLocation();
       return hybridObject;
     }
   );

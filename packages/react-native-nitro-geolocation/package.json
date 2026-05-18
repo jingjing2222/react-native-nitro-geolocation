@@ -16,6 +16,12 @@
     "./compat": {
       "types": "./src/compat/index.tsx",
       "default": "./src/compat/index.tsx"
+    },
+    "./background": {
+      "types": "./src/background/index.ts",
+      "browser": "./src/background/index.web.ts",
+      "react-native": "./src/background/index.ts",
+      "default": "./src/background/index.ts"
     }
   },
   "codegenConfig": {

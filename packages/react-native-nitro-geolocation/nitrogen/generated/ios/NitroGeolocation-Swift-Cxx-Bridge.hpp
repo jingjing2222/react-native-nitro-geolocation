@@ -10,26 +10,82 @@
 // Forward declarations of C++ defined types
 // Forward declaration of `AccuracyAuthorization` to properly resolve imports.
 namespace margelo::nitro::nitrogeolocation { enum class AccuracyAuthorization; }
+// Forward declaration of `ActivityRecognitionOptions` to properly resolve imports.
+namespace margelo::nitro::nitrogeolocation { struct ActivityRecognitionOptions; }
 // Forward declaration of `AndroidAccuracyPreset` to properly resolve imports.
 namespace margelo::nitro::nitrogeolocation { enum class AndroidAccuracyPreset; }
+// Forward declaration of `AndroidBackgroundLocationOptions` to properly resolve imports.
+namespace margelo::nitro::nitrogeolocation { struct AndroidBackgroundLocationOptions; }
+// Forward declaration of `AndroidBackgroundLocationStatus` to properly resolve imports.
+namespace margelo::nitro::nitrogeolocation { struct AndroidBackgroundLocationStatus; }
+// Forward declaration of `AndroidBackgroundProvider` to properly resolve imports.
+namespace margelo::nitro::nitrogeolocation { enum class AndroidBackgroundProvider; }
+// Forward declaration of `AndroidForegroundServiceOptions` to properly resolve imports.
+namespace margelo::nitro::nitrogeolocation { struct AndroidForegroundServiceOptions; }
 // Forward declaration of `AndroidGranularity` to properly resolve imports.
 namespace margelo::nitro::nitrogeolocation { enum class AndroidGranularity; }
 // Forward declaration of `AuthorizationLevelInternal` to properly resolve imports.
 namespace margelo::nitro::nitrogeolocation { enum class AuthorizationLevelInternal; }
 // Forward declaration of `AuthorizationLevel` to properly resolve imports.
 namespace margelo::nitro::nitrogeolocation { enum class AuthorizationLevel; }
+// Forward declaration of `BackgroundEventEnvelope` to properly resolve imports.
+namespace margelo::nitro::nitrogeolocation { struct BackgroundEventEnvelope; }
+// Forward declaration of `BackgroundEventType` to properly resolve imports.
+namespace margelo::nitro::nitrogeolocation { enum class BackgroundEventType; }
+// Forward declaration of `BackgroundHttpMethod` to properly resolve imports.
+namespace margelo::nitro::nitrogeolocation { enum class BackgroundHttpMethod; }
+// Forward declaration of `BackgroundHttpSyncOptions` to properly resolve imports.
+namespace margelo::nitro::nitrogeolocation { struct BackgroundHttpSyncOptions; }
+// Forward declaration of `BackgroundHttpSyncResult` to properly resolve imports.
+namespace margelo::nitro::nitrogeolocation { struct BackgroundHttpSyncResult; }
+// Forward declaration of `BackgroundLocationOptions` to properly resolve imports.
+namespace margelo::nitro::nitrogeolocation { struct BackgroundLocationOptions; }
+// Forward declaration of `BackgroundLocationSource` to properly resolve imports.
+namespace margelo::nitro::nitrogeolocation { enum class BackgroundLocationSource; }
+// Forward declaration of `BackgroundLocationState` to properly resolve imports.
+namespace margelo::nitro::nitrogeolocation { enum class BackgroundLocationState; }
+// Forward declaration of `BackgroundLocationStatus` to properly resolve imports.
+namespace margelo::nitro::nitrogeolocation { struct BackgroundLocationStatus; }
+// Forward declaration of `BackgroundLocation` to properly resolve imports.
+namespace margelo::nitro::nitrogeolocation { struct BackgroundLocation; }
+// Forward declaration of `BackgroundPermissionResult` to properly resolve imports.
+namespace margelo::nitro::nitrogeolocation { struct BackgroundPermissionResult; }
+// Forward declaration of `BackgroundPermissionStatus` to properly resolve imports.
+namespace margelo::nitro::nitrogeolocation { enum class BackgroundPermissionStatus; }
+// Forward declaration of `BackgroundTrackingMode` to properly resolve imports.
+namespace margelo::nitro::nitrogeolocation { enum class BackgroundTrackingMode; }
+// Forward declaration of `BatterySnapshot` to properly resolve imports.
+namespace margelo::nitro::nitrogeolocation { struct BatterySnapshot; }
 // Forward declaration of `CompatGeolocationError` to properly resolve imports.
 namespace margelo::nitro::nitrogeolocation { struct CompatGeolocationError; }
 // Forward declaration of `CompatGeolocationResponse` to properly resolve imports.
 namespace margelo::nitro::nitrogeolocation { struct CompatGeolocationResponse; }
+// Forward declaration of `DetectedActivityType` to properly resolve imports.
+namespace margelo::nitro::nitrogeolocation { enum class DetectedActivityType; }
+// Forward declaration of `DetectedActivity` to properly resolve imports.
+namespace margelo::nitro::nitrogeolocation { struct DetectedActivity; }
 // Forward declaration of `GeocodedLocation` to properly resolve imports.
 namespace margelo::nitro::nitrogeolocation { struct GeocodedLocation; }
+// Forward declaration of `GeofenceEvent` to properly resolve imports.
+namespace margelo::nitro::nitrogeolocation { struct GeofenceEvent; }
+// Forward declaration of `GeofenceRegion` to properly resolve imports.
+namespace margelo::nitro::nitrogeolocation { struct GeofenceRegion; }
+// Forward declaration of `GeofenceTransition` to properly resolve imports.
+namespace margelo::nitro::nitrogeolocation { enum class GeofenceTransition; }
+// Forward declaration of `GeofencingOptions` to properly resolve imports.
+namespace margelo::nitro::nitrogeolocation { struct GeofencingOptions; }
 // Forward declaration of `GeolocationCoordinates` to properly resolve imports.
 namespace margelo::nitro::nitrogeolocation { struct GeolocationCoordinates; }
 // Forward declaration of `GeolocationResponse` to properly resolve imports.
 namespace margelo::nitro::nitrogeolocation { struct GeolocationResponse; }
+// Forward declaration of `GetStoredBackgroundEventsOptions` to properly resolve imports.
+namespace margelo::nitro::nitrogeolocation { struct GetStoredBackgroundEventsOptions; }
+// Forward declaration of `GetStoredBackgroundLocationsOptions` to properly resolve imports.
+namespace margelo::nitro::nitrogeolocation { struct GetStoredBackgroundLocationsOptions; }
 // Forward declaration of `Heading` to properly resolve imports.
 namespace margelo::nitro::nitrogeolocation { struct Heading; }
+// Forward declaration of `HybridNitroBackgroundLocationSpec` to properly resolve imports.
+namespace margelo::nitro::nitrogeolocation { class HybridNitroBackgroundLocationSpec; }
 // Forward declaration of `HybridNitroGeolocationCompatSpec` to properly resolve imports.
 namespace margelo::nitro::nitrogeolocation { class HybridNitroGeolocationCompatSpec; }
 // Forward declaration of `HybridNitroGeolocationSpec` to properly resolve imports.
@@ -38,6 +94,12 @@ namespace margelo::nitro::nitrogeolocation { class HybridNitroGeolocationSpec; }
 namespace margelo::nitro::nitrogeolocation { enum class IOSAccuracyPreset; }
 // Forward declaration of `IOSActivityType` to properly resolve imports.
 namespace margelo::nitro::nitrogeolocation { enum class IOSActivityType; }
+// Forward declaration of `IOSBackgroundActivityType` to properly resolve imports.
+namespace margelo::nitro::nitrogeolocation { enum class IOSBackgroundActivityType; }
+// Forward declaration of `IOSBackgroundLocationOptions` to properly resolve imports.
+namespace margelo::nitro::nitrogeolocation { struct IOSBackgroundLocationOptions; }
+// Forward declaration of `IOSBackgroundLocationStatus` to properly resolve imports.
+namespace margelo::nitro::nitrogeolocation { struct IOSBackgroundLocationStatus; }
 // Forward declaration of `LocationAccuracyOptions` to properly resolve imports.
 namespace margelo::nitro::nitrogeolocation { struct LocationAccuracyOptions; }
 // Forward declaration of `LocationAvailability` to properly resolve imports.
@@ -56,8 +118,14 @@ namespace margelo::nitro::nitrogeolocation { enum class LocationProvider; }
 namespace margelo::nitro::nitrogeolocation { enum class PermissionStatus; }
 // Forward declaration of `ReverseGeocodedAddress` to properly resolve imports.
 namespace margelo::nitro::nitrogeolocation { struct ReverseGeocodedAddress; }
+// Forward declaration of `StoredBackgroundEventEnvelope` to properly resolve imports.
+namespace margelo::nitro::nitrogeolocation { struct StoredBackgroundEventEnvelope; }
+// Forward declaration of `StoredBackgroundLocation` to properly resolve imports.
+namespace margelo::nitro::nitrogeolocation { struct StoredBackgroundLocation; }
 
 // Forward declarations of Swift defined types
+// Forward declaration of `HybridNitroBackgroundLocationSpec_cxx` to properly resolve imports.
+namespace NitroGeolocation { class HybridNitroBackgroundLocationSpec_cxx; }
 // Forward declaration of `HybridNitroGeolocationCompatSpec_cxx` to properly resolve imports.
 namespace NitroGeolocation { class HybridNitroGeolocationCompatSpec_cxx; }
 // Forward declaration of `HybridNitroGeolocationSpec_cxx` to properly resolve imports.
@@ -65,20 +133,51 @@ namespace NitroGeolocation { class HybridNitroGeolocationSpec_cxx; }
 
 // Include C++ defined types
 #include "AccuracyAuthorization.hpp"
+#include "ActivityRecognitionOptions.hpp"
 #include "AndroidAccuracyPreset.hpp"
+#include "AndroidBackgroundLocationOptions.hpp"
+#include "AndroidBackgroundLocationStatus.hpp"
+#include "AndroidBackgroundProvider.hpp"
+#include "AndroidForegroundServiceOptions.hpp"
 #include "AndroidGranularity.hpp"
 #include "AuthorizationLevel.hpp"
 #include "AuthorizationLevelInternal.hpp"
+#include "BackgroundEventEnvelope.hpp"
+#include "BackgroundEventType.hpp"
+#include "BackgroundHttpMethod.hpp"
+#include "BackgroundHttpSyncOptions.hpp"
+#include "BackgroundHttpSyncResult.hpp"
+#include "BackgroundLocation.hpp"
+#include "BackgroundLocationOptions.hpp"
+#include "BackgroundLocationSource.hpp"
+#include "BackgroundLocationState.hpp"
+#include "BackgroundLocationStatus.hpp"
+#include "BackgroundPermissionResult.hpp"
+#include "BackgroundPermissionStatus.hpp"
+#include "BackgroundTrackingMode.hpp"
+#include "BatterySnapshot.hpp"
 #include "CompatGeolocationError.hpp"
 #include "CompatGeolocationResponse.hpp"
+#include "DetectedActivity.hpp"
+#include "DetectedActivityType.hpp"
 #include "GeocodedLocation.hpp"
+#include "GeofenceEvent.hpp"
+#include "GeofenceRegion.hpp"
+#include "GeofenceTransition.hpp"
+#include "GeofencingOptions.hpp"
 #include "GeolocationCoordinates.hpp"
 #include "GeolocationResponse.hpp"
+#include "GetStoredBackgroundEventsOptions.hpp"
+#include "GetStoredBackgroundLocationsOptions.hpp"
 #include "Heading.hpp"
+#include "HybridNitroBackgroundLocationSpec.hpp"
 #include "HybridNitroGeolocationCompatSpec.hpp"
 #include "HybridNitroGeolocationSpec.hpp"
 #include "IOSAccuracyPreset.hpp"
 #include "IOSActivityType.hpp"
+#include "IOSBackgroundActivityType.hpp"
+#include "IOSBackgroundLocationOptions.hpp"
+#include "IOSBackgroundLocationStatus.hpp"
 #include "LocationAccuracyOptions.hpp"
 #include "LocationAvailability.hpp"
 #include "LocationError.hpp"
@@ -88,6 +187,8 @@ namespace NitroGeolocation { class HybridNitroGeolocationSpec_cxx; }
 #include "LocationProviderUsed.hpp"
 #include "PermissionStatus.hpp"
 #include "ReverseGeocodedAddress.hpp"
+#include "StoredBackgroundEventEnvelope.hpp"
+#include "StoredBackgroundLocation.hpp"
 #include <NitroModules/Null.hpp>
 #include <NitroModules/Promise.hpp>
 #include <NitroModules/PromiseHolder.hpp>
@@ -97,6 +198,7 @@ namespace NitroGeolocation { class HybridNitroGeolocationSpec_cxx; }
 #include <memory>
 #include <optional>
 #include <string>
+#include <unordered_map>
 #include <variant>
 #include <vector>
 
@@ -120,7 +222,7 @@ namespace margelo::nitro::nitrogeolocation::bridge::swift {
   inline bool get_std__optional_bool_(const std::optional<bool>& optional) noexcept {
     return optional.value();
   }
-  
+
   // pragma MARK: std::optional<AuthorizationLevel>
   /**
    * Specialized version of `std::optional<AuthorizationLevel>`.
@@ -135,7 +237,7 @@ namespace margelo::nitro::nitrogeolocation::bridge::swift {
   inline AuthorizationLevel get_std__optional_AuthorizationLevel_(const std::optional<AuthorizationLevel>& optional) noexcept {
     return optional.value();
   }
-  
+
   // pragma MARK: std::optional<LocationProvider>
   /**
    * Specialized version of `std::optional<LocationProvider>`.
@@ -150,7 +252,7 @@ namespace margelo::nitro::nitrogeolocation::bridge::swift {
   inline LocationProvider get_std__optional_LocationProvider_(const std::optional<LocationProvider>& optional) noexcept {
     return optional.value();
   }
-  
+
   // pragma MARK: std::shared_ptr<Promise<PermissionStatus>>
   /**
    * Specialized version of `std::shared_ptr<Promise<PermissionStatus>>`.
@@ -162,7 +264,7 @@ namespace margelo::nitro::nitrogeolocation::bridge::swift {
   inline PromiseHolder<PermissionStatus> wrap_std__shared_ptr_Promise_PermissionStatus__(std::shared_ptr<Promise<PermissionStatus>> promise) noexcept {
     return PromiseHolder<PermissionStatus>(std::move(promise));
   }
-  
+
   // pragma MARK: std::function<void(PermissionStatus /* result */)>
   /**
    * Specialized version of `std::function<void(PermissionStatus)>`.
@@ -184,7 +286,7 @@ namespace margelo::nitro::nitrogeolocation::bridge::swift {
   inline Func_void_PermissionStatus_Wrapper wrap_Func_void_PermissionStatus(Func_void_PermissionStatus value) noexcept {
     return Func_void_PermissionStatus_Wrapper(std::move(value));
   }
-  
+
   // pragma MARK: std::function<void(const std::exception_ptr& /* error */)>
   /**
    * Specialized version of `std::function<void(const std::exception_ptr&)>`.
@@ -206,7 +308,7 @@ namespace margelo::nitro::nitrogeolocation::bridge::swift {
   inline Func_void_std__exception_ptr_Wrapper wrap_Func_void_std__exception_ptr(Func_void_std__exception_ptr value) noexcept {
     return Func_void_std__exception_ptr_Wrapper(std::move(value));
   }
-  
+
   // pragma MARK: std::function<void(const LocationError& /* error */)>
   /**
    * Specialized version of `std::function<void(const LocationError&)>`.
@@ -228,7 +330,7 @@ namespace margelo::nitro::nitrogeolocation::bridge::swift {
   inline Func_void_LocationError_Wrapper wrap_Func_void_LocationError(Func_void_LocationError value) noexcept {
     return Func_void_LocationError_Wrapper(std::move(value));
   }
-  
+
   // pragma MARK: std::optional<std::function<void(const LocationError& /* error */)>>
   /**
    * Specialized version of `std::optional<std::function<void(const LocationError& / * error * /)>>`.
@@ -243,7 +345,7 @@ namespace margelo::nitro::nitrogeolocation::bridge::swift {
   inline std::function<void(const LocationError& /* error */)> get_std__optional_std__function_void_const_LocationError_____error______(const std::optional<std::function<void(const LocationError& /* error */)>>& optional) noexcept {
     return optional.value();
   }
-  
+
   // pragma MARK: std::shared_ptr<Promise<bool>>
   /**
    * Specialized version of `std::shared_ptr<Promise<bool>>`.
@@ -255,7 +357,7 @@ namespace margelo::nitro::nitrogeolocation::bridge::swift {
   inline PromiseHolder<bool> wrap_std__shared_ptr_Promise_bool__(std::shared_ptr<Promise<bool>> promise) noexcept {
     return PromiseHolder<bool>(std::move(promise));
   }
-  
+
   // pragma MARK: std::function<void(bool /* result */)>
   /**
    * Specialized version of `std::function<void(bool)>`.
@@ -277,7 +379,7 @@ namespace margelo::nitro::nitrogeolocation::bridge::swift {
   inline Func_void_bool_Wrapper wrap_Func_void_bool(Func_void_bool value) noexcept {
     return Func_void_bool_Wrapper(std::move(value));
   }
-  
+
   // pragma MARK: std::shared_ptr<Promise<LocationProviderStatus>>
   /**
    * Specialized version of `std::shared_ptr<Promise<LocationProviderStatus>>`.
@@ -289,7 +391,7 @@ namespace margelo::nitro::nitrogeolocation::bridge::swift {
   inline PromiseHolder<LocationProviderStatus> wrap_std__shared_ptr_Promise_LocationProviderStatus__(std::shared_ptr<Promise<LocationProviderStatus>> promise) noexcept {
     return PromiseHolder<LocationProviderStatus>(std::move(promise));
   }
-  
+
   // pragma MARK: std::function<void(const LocationProviderStatus& /* result */)>
   /**
    * Specialized version of `std::function<void(const LocationProviderStatus&)>`.
@@ -311,7 +413,7 @@ namespace margelo::nitro::nitrogeolocation::bridge::swift {
   inline Func_void_LocationProviderStatus_Wrapper wrap_Func_void_LocationProviderStatus(Func_void_LocationProviderStatus value) noexcept {
     return Func_void_LocationProviderStatus_Wrapper(std::move(value));
   }
-  
+
   // pragma MARK: std::optional<std::string>
   /**
    * Specialized version of `std::optional<std::string>`.
@@ -326,7 +428,7 @@ namespace margelo::nitro::nitrogeolocation::bridge::swift {
   inline std::string get_std__optional_std__string_(const std::optional<std::string>& optional) noexcept {
     return optional.value();
   }
-  
+
   // pragma MARK: std::shared_ptr<Promise<LocationAvailability>>
   /**
    * Specialized version of `std::shared_ptr<Promise<LocationAvailability>>`.
@@ -338,7 +440,7 @@ namespace margelo::nitro::nitrogeolocation::bridge::swift {
   inline PromiseHolder<LocationAvailability> wrap_std__shared_ptr_Promise_LocationAvailability__(std::shared_ptr<Promise<LocationAvailability>> promise) noexcept {
     return PromiseHolder<LocationAvailability>(std::move(promise));
   }
-  
+
   // pragma MARK: std::function<void(const LocationAvailability& /* result */)>
   /**
    * Specialized version of `std::function<void(const LocationAvailability&)>`.
@@ -360,7 +462,7 @@ namespace margelo::nitro::nitrogeolocation::bridge::swift {
   inline Func_void_LocationAvailability_Wrapper wrap_Func_void_LocationAvailability(Func_void_LocationAvailability value) noexcept {
     return Func_void_LocationAvailability_Wrapper(std::move(value));
   }
-  
+
   // pragma MARK: std::optional<AndroidAccuracyPreset>
   /**
    * Specialized version of `std::optional<AndroidAccuracyPreset>`.
@@ -375,7 +477,7 @@ namespace margelo::nitro::nitrogeolocation::bridge::swift {
   inline AndroidAccuracyPreset get_std__optional_AndroidAccuracyPreset_(const std::optional<AndroidAccuracyPreset>& optional) noexcept {
     return optional.value();
   }
-  
+
   // pragma MARK: std::optional<IOSAccuracyPreset>
   /**
    * Specialized version of `std::optional<IOSAccuracyPreset>`.
@@ -390,7 +492,7 @@ namespace margelo::nitro::nitrogeolocation::bridge::swift {
   inline IOSAccuracyPreset get_std__optional_IOSAccuracyPreset_(const std::optional<IOSAccuracyPreset>& optional) noexcept {
     return optional.value();
   }
-  
+
   // pragma MARK: std::optional<LocationAccuracyOptions>
   /**
    * Specialized version of `std::optional<LocationAccuracyOptions>`.
@@ -405,7 +507,7 @@ namespace margelo::nitro::nitrogeolocation::bridge::swift {
   inline LocationAccuracyOptions get_std__optional_LocationAccuracyOptions_(const std::optional<LocationAccuracyOptions>& optional) noexcept {
     return optional.value();
   }
-  
+
   // pragma MARK: std::optional<double>
   /**
    * Specialized version of `std::optional<double>`.
@@ -420,7 +522,7 @@ namespace margelo::nitro::nitrogeolocation::bridge::swift {
   inline double get_std__optional_double_(const std::optional<double>& optional) noexcept {
     return optional.value();
   }
-  
+
   // pragma MARK: std::shared_ptr<Promise<AccuracyAuthorization>>
   /**
    * Specialized version of `std::shared_ptr<Promise<AccuracyAuthorization>>`.
@@ -432,7 +534,7 @@ namespace margelo::nitro::nitrogeolocation::bridge::swift {
   inline PromiseHolder<AccuracyAuthorization> wrap_std__shared_ptr_Promise_AccuracyAuthorization__(std::shared_ptr<Promise<AccuracyAuthorization>> promise) noexcept {
     return PromiseHolder<AccuracyAuthorization>(std::move(promise));
   }
-  
+
   // pragma MARK: std::function<void(AccuracyAuthorization /* result */)>
   /**
    * Specialized version of `std::function<void(AccuracyAuthorization)>`.
@@ -454,7 +556,7 @@ namespace margelo::nitro::nitrogeolocation::bridge::swift {
   inline Func_void_AccuracyAuthorization_Wrapper wrap_Func_void_AccuracyAuthorization(Func_void_AccuracyAuthorization value) noexcept {
     return Func_void_AccuracyAuthorization_Wrapper(std::move(value));
   }
-  
+
   // pragma MARK: std::variant<nitro::NullType, double>
   /**
    * Wrapper struct for `std::variant<nitro::NullType, double>`.
@@ -483,7 +585,7 @@ namespace margelo::nitro::nitrogeolocation::bridge::swift {
   inline std__variant_nitro__NullType__double_ create_std__variant_nitro__NullType__double_(double value) noexcept {
     return std__variant_nitro__NullType__double_(value);
   }
-  
+
   // pragma MARK: std::optional<std::variant<nitro::NullType, double>>
   /**
    * Specialized version of `std::optional<std::variant<nitro::NullType, double>>`.
@@ -498,7 +600,7 @@ namespace margelo::nitro::nitrogeolocation::bridge::swift {
   inline std::variant<nitro::NullType, double> get_std__optional_std__variant_nitro__NullType__double__(const std::optional<std::variant<nitro::NullType, double>>& optional) noexcept {
     return optional.value();
   }
-  
+
   // pragma MARK: std::optional<LocationProviderUsed>
   /**
    * Specialized version of `std::optional<LocationProviderUsed>`.
@@ -513,7 +615,7 @@ namespace margelo::nitro::nitrogeolocation::bridge::swift {
   inline LocationProviderUsed get_std__optional_LocationProviderUsed_(const std::optional<LocationProviderUsed>& optional) noexcept {
     return optional.value();
   }
-  
+
   // pragma MARK: std::function<void(const GeolocationResponse& /* position */)>
   /**
    * Specialized version of `std::function<void(const GeolocationResponse&)>`.
@@ -535,7 +637,7 @@ namespace margelo::nitro::nitrogeolocation::bridge::swift {
   inline Func_void_GeolocationResponse_Wrapper wrap_Func_void_GeolocationResponse(Func_void_GeolocationResponse value) noexcept {
     return Func_void_GeolocationResponse_Wrapper(std::move(value));
   }
-  
+
   // pragma MARK: std::optional<AndroidGranularity>
   /**
    * Specialized version of `std::optional<AndroidGranularity>`.
@@ -550,7 +652,7 @@ namespace margelo::nitro::nitrogeolocation::bridge::swift {
   inline AndroidGranularity get_std__optional_AndroidGranularity_(const std::optional<AndroidGranularity>& optional) noexcept {
     return optional.value();
   }
-  
+
   // pragma MARK: std::optional<IOSActivityType>
   /**
    * Specialized version of `std::optional<IOSActivityType>`.
@@ -565,7 +667,7 @@ namespace margelo::nitro::nitrogeolocation::bridge::swift {
   inline IOSActivityType get_std__optional_IOSActivityType_(const std::optional<IOSActivityType>& optional) noexcept {
     return optional.value();
   }
-  
+
   // pragma MARK: std::vector<GeocodedLocation>
   /**
    * Specialized version of `std::vector<GeocodedLocation>`.
@@ -576,7 +678,7 @@ namespace margelo::nitro::nitrogeolocation::bridge::swift {
     vector.reserve(size);
     return vector;
   }
-  
+
   // pragma MARK: std::function<void(const std::vector<GeocodedLocation>& /* locations */)>
   /**
    * Specialized version of `std::function<void(const std::vector<GeocodedLocation>&)>`.
@@ -598,7 +700,7 @@ namespace margelo::nitro::nitrogeolocation::bridge::swift {
   inline Func_void_std__vector_GeocodedLocation__Wrapper wrap_Func_void_std__vector_GeocodedLocation_(Func_void_std__vector_GeocodedLocation_ value) noexcept {
     return Func_void_std__vector_GeocodedLocation__Wrapper(std::move(value));
   }
-  
+
   // pragma MARK: std::vector<ReverseGeocodedAddress>
   /**
    * Specialized version of `std::vector<ReverseGeocodedAddress>`.
@@ -609,7 +711,7 @@ namespace margelo::nitro::nitrogeolocation::bridge::swift {
     vector.reserve(size);
     return vector;
   }
-  
+
   // pragma MARK: std::function<void(const std::vector<ReverseGeocodedAddress>& /* addresses */)>
   /**
    * Specialized version of `std::function<void(const std::vector<ReverseGeocodedAddress>&)>`.
@@ -631,7 +733,7 @@ namespace margelo::nitro::nitrogeolocation::bridge::swift {
   inline Func_void_std__vector_ReverseGeocodedAddress__Wrapper wrap_Func_void_std__vector_ReverseGeocodedAddress_(Func_void_std__vector_ReverseGeocodedAddress_ value) noexcept {
     return Func_void_std__vector_ReverseGeocodedAddress__Wrapper(std::move(value));
   }
-  
+
   // pragma MARK: std::function<void(const Heading& /* heading */)>
   /**
    * Specialized version of `std::function<void(const Heading&)>`.
@@ -653,7 +755,7 @@ namespace margelo::nitro::nitrogeolocation::bridge::swift {
   inline Func_void_Heading_Wrapper wrap_Func_void_Heading(Func_void_Heading value) noexcept {
     return Func_void_Heading_Wrapper(std::move(value));
   }
-  
+
   // pragma MARK: std::shared_ptr<HybridNitroGeolocationSpec>
   /**
    * Specialized version of `std::shared_ptr<HybridNitroGeolocationSpec>`.
@@ -661,11 +763,11 @@ namespace margelo::nitro::nitrogeolocation::bridge::swift {
   using std__shared_ptr_HybridNitroGeolocationSpec_ = std::shared_ptr<HybridNitroGeolocationSpec>;
   std::shared_ptr<HybridNitroGeolocationSpec> create_std__shared_ptr_HybridNitroGeolocationSpec_(void* NON_NULL swiftUnsafePointer) noexcept;
   void* NON_NULL get_std__shared_ptr_HybridNitroGeolocationSpec_(std__shared_ptr_HybridNitroGeolocationSpec_ cppType);
-  
+
   // pragma MARK: std::weak_ptr<HybridNitroGeolocationSpec>
   using std__weak_ptr_HybridNitroGeolocationSpec_ = std::weak_ptr<HybridNitroGeolocationSpec>;
   inline std__weak_ptr_HybridNitroGeolocationSpec_ weakify_std__shared_ptr_HybridNitroGeolocationSpec_(const std::shared_ptr<HybridNitroGeolocationSpec>& strong) noexcept { return strong; }
-  
+
   // pragma MARK: Result<void>
   using Result_void_ = Result<void>;
   inline Result_void_ create_Result_void_() noexcept {
@@ -674,7 +776,7 @@ namespace margelo::nitro::nitrogeolocation::bridge::swift {
   inline Result_void_ create_Result_void_(const std::exception_ptr& error) noexcept {
     return Result<void>::withError(error);
   }
-  
+
   // pragma MARK: Result<std::shared_ptr<Promise<PermissionStatus>>>
   using Result_std__shared_ptr_Promise_PermissionStatus___ = Result<std::shared_ptr<Promise<PermissionStatus>>>;
   inline Result_std__shared_ptr_Promise_PermissionStatus___ create_Result_std__shared_ptr_Promise_PermissionStatus___(const std::shared_ptr<Promise<PermissionStatus>>& value) noexcept {
@@ -683,7 +785,7 @@ namespace margelo::nitro::nitrogeolocation::bridge::swift {
   inline Result_std__shared_ptr_Promise_PermissionStatus___ create_Result_std__shared_ptr_Promise_PermissionStatus___(const std::exception_ptr& error) noexcept {
     return Result<std::shared_ptr<Promise<PermissionStatus>>>::withError(error);
   }
-  
+
   // pragma MARK: Result<std::shared_ptr<Promise<bool>>>
   using Result_std__shared_ptr_Promise_bool___ = Result<std::shared_ptr<Promise<bool>>>;
   inline Result_std__shared_ptr_Promise_bool___ create_Result_std__shared_ptr_Promise_bool___(const std::shared_ptr<Promise<bool>>& value) noexcept {
@@ -692,7 +794,7 @@ namespace margelo::nitro::nitrogeolocation::bridge::swift {
   inline Result_std__shared_ptr_Promise_bool___ create_Result_std__shared_ptr_Promise_bool___(const std::exception_ptr& error) noexcept {
     return Result<std::shared_ptr<Promise<bool>>>::withError(error);
   }
-  
+
   // pragma MARK: Result<std::shared_ptr<Promise<LocationProviderStatus>>>
   using Result_std__shared_ptr_Promise_LocationProviderStatus___ = Result<std::shared_ptr<Promise<LocationProviderStatus>>>;
   inline Result_std__shared_ptr_Promise_LocationProviderStatus___ create_Result_std__shared_ptr_Promise_LocationProviderStatus___(const std::shared_ptr<Promise<LocationProviderStatus>>& value) noexcept {
@@ -701,7 +803,7 @@ namespace margelo::nitro::nitrogeolocation::bridge::swift {
   inline Result_std__shared_ptr_Promise_LocationProviderStatus___ create_Result_std__shared_ptr_Promise_LocationProviderStatus___(const std::exception_ptr& error) noexcept {
     return Result<std::shared_ptr<Promise<LocationProviderStatus>>>::withError(error);
   }
-  
+
   // pragma MARK: Result<std::shared_ptr<Promise<LocationAvailability>>>
   using Result_std__shared_ptr_Promise_LocationAvailability___ = Result<std::shared_ptr<Promise<LocationAvailability>>>;
   inline Result_std__shared_ptr_Promise_LocationAvailability___ create_Result_std__shared_ptr_Promise_LocationAvailability___(const std::shared_ptr<Promise<LocationAvailability>>& value) noexcept {
@@ -710,7 +812,7 @@ namespace margelo::nitro::nitrogeolocation::bridge::swift {
   inline Result_std__shared_ptr_Promise_LocationAvailability___ create_Result_std__shared_ptr_Promise_LocationAvailability___(const std::exception_ptr& error) noexcept {
     return Result<std::shared_ptr<Promise<LocationAvailability>>>::withError(error);
   }
-  
+
   // pragma MARK: Result<std::shared_ptr<Promise<AccuracyAuthorization>>>
   using Result_std__shared_ptr_Promise_AccuracyAuthorization___ = Result<std::shared_ptr<Promise<AccuracyAuthorization>>>;
   inline Result_std__shared_ptr_Promise_AccuracyAuthorization___ create_Result_std__shared_ptr_Promise_AccuracyAuthorization___(const std::shared_ptr<Promise<AccuracyAuthorization>>& value) noexcept {
@@ -719,7 +821,7 @@ namespace margelo::nitro::nitrogeolocation::bridge::swift {
   inline Result_std__shared_ptr_Promise_AccuracyAuthorization___ create_Result_std__shared_ptr_Promise_AccuracyAuthorization___(const std::exception_ptr& error) noexcept {
     return Result<std::shared_ptr<Promise<AccuracyAuthorization>>>::withError(error);
   }
-  
+
   // pragma MARK: Result<std::string>
   using Result_std__string_ = Result<std::string>;
   inline Result_std__string_ create_Result_std__string_(const std::string& value) noexcept {
@@ -728,7 +830,7 @@ namespace margelo::nitro::nitrogeolocation::bridge::swift {
   inline Result_std__string_ create_Result_std__string_(const std::exception_ptr& error) noexcept {
     return Result<std::string>::withError(error);
   }
-  
+
   // pragma MARK: std::optional<AuthorizationLevelInternal>
   /**
    * Specialized version of `std::optional<AuthorizationLevelInternal>`.
@@ -743,7 +845,7 @@ namespace margelo::nitro::nitrogeolocation::bridge::swift {
   inline AuthorizationLevelInternal get_std__optional_AuthorizationLevelInternal_(const std::optional<AuthorizationLevelInternal>& optional) noexcept {
     return optional.value();
   }
-  
+
   // pragma MARK: std::optional<LocationProviderInternal>
   /**
    * Specialized version of `std::optional<LocationProviderInternal>`.
@@ -758,7 +860,7 @@ namespace margelo::nitro::nitrogeolocation::bridge::swift {
   inline LocationProviderInternal get_std__optional_LocationProviderInternal_(const std::optional<LocationProviderInternal>& optional) noexcept {
     return optional.value();
   }
-  
+
   // pragma MARK: std::function<void()>
   /**
    * Specialized version of `std::function<void()>`.
@@ -780,7 +882,7 @@ namespace margelo::nitro::nitrogeolocation::bridge::swift {
   inline Func_void_Wrapper wrap_Func_void(Func_void value) noexcept {
     return Func_void_Wrapper(std::move(value));
   }
-  
+
   // pragma MARK: std::optional<std::function<void()>>
   /**
    * Specialized version of `std::optional<std::function<void()>>`.
@@ -795,7 +897,7 @@ namespace margelo::nitro::nitrogeolocation::bridge::swift {
   inline std::function<void()> get_std__optional_std__function_void____(const std::optional<std::function<void()>>& optional) noexcept {
     return optional.value();
   }
-  
+
   // pragma MARK: std::function<void(const CompatGeolocationError& /* error */)>
   /**
    * Specialized version of `std::function<void(const CompatGeolocationError&)>`.
@@ -817,7 +919,7 @@ namespace margelo::nitro::nitrogeolocation::bridge::swift {
   inline Func_void_CompatGeolocationError_Wrapper wrap_Func_void_CompatGeolocationError(Func_void_CompatGeolocationError value) noexcept {
     return Func_void_CompatGeolocationError_Wrapper(std::move(value));
   }
-  
+
   // pragma MARK: std::optional<std::function<void(const CompatGeolocationError& /* error */)>>
   /**
    * Specialized version of `std::optional<std::function<void(const CompatGeolocationError& / * error * /)>>`.
@@ -832,7 +934,7 @@ namespace margelo::nitro::nitrogeolocation::bridge::swift {
   inline std::function<void(const CompatGeolocationError& /* error */)> get_std__optional_std__function_void_const_CompatGeolocationError_____error______(const std::optional<std::function<void(const CompatGeolocationError& /* error */)>>& optional) noexcept {
     return optional.value();
   }
-  
+
   // pragma MARK: std::function<void(const CompatGeolocationResponse& /* position */)>
   /**
    * Specialized version of `std::function<void(const CompatGeolocationResponse&)>`.
@@ -854,7 +956,7 @@ namespace margelo::nitro::nitrogeolocation::bridge::swift {
   inline Func_void_CompatGeolocationResponse_Wrapper wrap_Func_void_CompatGeolocationResponse(Func_void_CompatGeolocationResponse value) noexcept {
     return Func_void_CompatGeolocationResponse_Wrapper(std::move(value));
   }
-  
+
   // pragma MARK: std::shared_ptr<HybridNitroGeolocationCompatSpec>
   /**
    * Specialized version of `std::shared_ptr<HybridNitroGeolocationCompatSpec>`.
@@ -862,11 +964,11 @@ namespace margelo::nitro::nitrogeolocation::bridge::swift {
   using std__shared_ptr_HybridNitroGeolocationCompatSpec_ = std::shared_ptr<HybridNitroGeolocationCompatSpec>;
   std::shared_ptr<HybridNitroGeolocationCompatSpec> create_std__shared_ptr_HybridNitroGeolocationCompatSpec_(void* NON_NULL swiftUnsafePointer) noexcept;
   void* NON_NULL get_std__shared_ptr_HybridNitroGeolocationCompatSpec_(std__shared_ptr_HybridNitroGeolocationCompatSpec_ cppType);
-  
+
   // pragma MARK: std::weak_ptr<HybridNitroGeolocationCompatSpec>
   using std__weak_ptr_HybridNitroGeolocationCompatSpec_ = std::weak_ptr<HybridNitroGeolocationCompatSpec>;
   inline std__weak_ptr_HybridNitroGeolocationCompatSpec_ weakify_std__shared_ptr_HybridNitroGeolocationCompatSpec_(const std::shared_ptr<HybridNitroGeolocationCompatSpec>& strong) noexcept { return strong; }
-  
+
   // pragma MARK: Result<double>
   using Result_double_ = Result<double>;
   inline Result_double_ create_Result_double_(double value) noexcept {
@@ -874,6 +976,961 @@ namespace margelo::nitro::nitrogeolocation::bridge::swift {
   }
   inline Result_double_ create_Result_double_(const std::exception_ptr& error) noexcept {
     return Result<double>::withError(error);
+  }
+
+  // pragma MARK: std::optional<AccuracyAuthorization>
+  /**
+   * Specialized version of `std::optional<AccuracyAuthorization>`.
+   */
+  using std__optional_AccuracyAuthorization_ = std::optional<AccuracyAuthorization>;
+  inline std::optional<AccuracyAuthorization> create_std__optional_AccuracyAuthorization_(const AccuracyAuthorization& value) noexcept {
+    return std::optional<AccuracyAuthorization>(value);
+  }
+  inline bool has_value_std__optional_AccuracyAuthorization_(const std::optional<AccuracyAuthorization>& optional) noexcept {
+    return optional.has_value();
+  }
+  inline AccuracyAuthorization get_std__optional_AccuracyAuthorization_(const std::optional<AccuracyAuthorization>& optional) noexcept {
+    return optional.value();
+  }
+
+  // pragma MARK: std::shared_ptr<Promise<BackgroundPermissionResult>>
+  /**
+   * Specialized version of `std::shared_ptr<Promise<BackgroundPermissionResult>>`.
+   */
+  using std__shared_ptr_Promise_BackgroundPermissionResult__ = std::shared_ptr<Promise<BackgroundPermissionResult>>;
+  inline std::shared_ptr<Promise<BackgroundPermissionResult>> create_std__shared_ptr_Promise_BackgroundPermissionResult__() noexcept {
+    return Promise<BackgroundPermissionResult>::create();
+  }
+  inline PromiseHolder<BackgroundPermissionResult> wrap_std__shared_ptr_Promise_BackgroundPermissionResult__(std::shared_ptr<Promise<BackgroundPermissionResult>> promise) noexcept {
+    return PromiseHolder<BackgroundPermissionResult>(std::move(promise));
+  }
+
+  // pragma MARK: std::function<void(const BackgroundPermissionResult& /* result */)>
+  /**
+   * Specialized version of `std::function<void(const BackgroundPermissionResult&)>`.
+   */
+  using Func_void_BackgroundPermissionResult = std::function<void(const BackgroundPermissionResult& /* result */)>;
+  /**
+   * Wrapper class for a `std::function<void(const BackgroundPermissionResult& / * result * /)>`, this can be used from Swift.
+   */
+  class Func_void_BackgroundPermissionResult_Wrapper final {
+  public:
+    explicit Func_void_BackgroundPermissionResult_Wrapper(std::function<void(const BackgroundPermissionResult& /* result */)>&& func): _function(std::make_unique<std::function<void(const BackgroundPermissionResult& /* result */)>>(std::move(func))) {}
+    inline void call(BackgroundPermissionResult result) const noexcept {
+      _function->operator()(result);
+    }
+  private:
+    std::unique_ptr<std::function<void(const BackgroundPermissionResult& /* result */)>> _function;
+  } SWIFT_NONCOPYABLE;
+  Func_void_BackgroundPermissionResult create_Func_void_BackgroundPermissionResult(void* NON_NULL swiftClosureWrapper) noexcept;
+  inline Func_void_BackgroundPermissionResult_Wrapper wrap_Func_void_BackgroundPermissionResult(Func_void_BackgroundPermissionResult value) noexcept {
+    return Func_void_BackgroundPermissionResult_Wrapper(std::move(value));
+  }
+
+  // pragma MARK: std::shared_ptr<Promise<void>>
+  /**
+   * Specialized version of `std::shared_ptr<Promise<void>>`.
+   */
+  using std__shared_ptr_Promise_void__ = std::shared_ptr<Promise<void>>;
+  inline std::shared_ptr<Promise<void>> create_std__shared_ptr_Promise_void__() noexcept {
+    return Promise<void>::create();
+  }
+  inline PromiseHolder<void> wrap_std__shared_ptr_Promise_void__(std::shared_ptr<Promise<void>> promise) noexcept {
+    return PromiseHolder<void>(std::move(promise));
+  }
+
+  // pragma MARK: std::optional<BackgroundTrackingMode>
+  /**
+   * Specialized version of `std::optional<BackgroundTrackingMode>`.
+   */
+  using std__optional_BackgroundTrackingMode_ = std::optional<BackgroundTrackingMode>;
+  inline std::optional<BackgroundTrackingMode> create_std__optional_BackgroundTrackingMode_(const BackgroundTrackingMode& value) noexcept {
+    return std::optional<BackgroundTrackingMode>(value);
+  }
+  inline bool has_value_std__optional_BackgroundTrackingMode_(const std::optional<BackgroundTrackingMode>& optional) noexcept {
+    return optional.has_value();
+  }
+  inline BackgroundTrackingMode get_std__optional_BackgroundTrackingMode_(const std::optional<BackgroundTrackingMode>& optional) noexcept {
+    return optional.value();
+  }
+
+  // pragma MARK: std::optional<AndroidBackgroundProvider>
+  /**
+   * Specialized version of `std::optional<AndroidBackgroundProvider>`.
+   */
+  using std__optional_AndroidBackgroundProvider_ = std::optional<AndroidBackgroundProvider>;
+  inline std::optional<AndroidBackgroundProvider> create_std__optional_AndroidBackgroundProvider_(const AndroidBackgroundProvider& value) noexcept {
+    return std::optional<AndroidBackgroundProvider>(value);
+  }
+  inline bool has_value_std__optional_AndroidBackgroundProvider_(const std::optional<AndroidBackgroundProvider>& optional) noexcept {
+    return optional.has_value();
+  }
+  inline AndroidBackgroundProvider get_std__optional_AndroidBackgroundProvider_(const std::optional<AndroidBackgroundProvider>& optional) noexcept {
+    return optional.value();
+  }
+
+  // pragma MARK: std::optional<AndroidBackgroundLocationOptions>
+  /**
+   * Specialized version of `std::optional<AndroidBackgroundLocationOptions>`.
+   */
+  using std__optional_AndroidBackgroundLocationOptions_ = std::optional<AndroidBackgroundLocationOptions>;
+  inline std::optional<AndroidBackgroundLocationOptions> create_std__optional_AndroidBackgroundLocationOptions_(const AndroidBackgroundLocationOptions& value) noexcept {
+    return std::optional<AndroidBackgroundLocationOptions>(value);
+  }
+  inline bool has_value_std__optional_AndroidBackgroundLocationOptions_(const std::optional<AndroidBackgroundLocationOptions>& optional) noexcept {
+    return optional.has_value();
+  }
+  inline AndroidBackgroundLocationOptions get_std__optional_AndroidBackgroundLocationOptions_(const std::optional<AndroidBackgroundLocationOptions>& optional) noexcept {
+    return optional.value();
+  }
+
+  // pragma MARK: std::optional<IOSBackgroundActivityType>
+  /**
+   * Specialized version of `std::optional<IOSBackgroundActivityType>`.
+   */
+  using std__optional_IOSBackgroundActivityType_ = std::optional<IOSBackgroundActivityType>;
+  inline std::optional<IOSBackgroundActivityType> create_std__optional_IOSBackgroundActivityType_(const IOSBackgroundActivityType& value) noexcept {
+    return std::optional<IOSBackgroundActivityType>(value);
+  }
+  inline bool has_value_std__optional_IOSBackgroundActivityType_(const std::optional<IOSBackgroundActivityType>& optional) noexcept {
+    return optional.has_value();
+  }
+  inline IOSBackgroundActivityType get_std__optional_IOSBackgroundActivityType_(const std::optional<IOSBackgroundActivityType>& optional) noexcept {
+    return optional.value();
+  }
+
+  // pragma MARK: std::optional<IOSBackgroundLocationOptions>
+  /**
+   * Specialized version of `std::optional<IOSBackgroundLocationOptions>`.
+   */
+  using std__optional_IOSBackgroundLocationOptions_ = std::optional<IOSBackgroundLocationOptions>;
+  inline std::optional<IOSBackgroundLocationOptions> create_std__optional_IOSBackgroundLocationOptions_(const IOSBackgroundLocationOptions& value) noexcept {
+    return std::optional<IOSBackgroundLocationOptions>(value);
+  }
+  inline bool has_value_std__optional_IOSBackgroundLocationOptions_(const std::optional<IOSBackgroundLocationOptions>& optional) noexcept {
+    return optional.has_value();
+  }
+  inline IOSBackgroundLocationOptions get_std__optional_IOSBackgroundLocationOptions_(const std::optional<IOSBackgroundLocationOptions>& optional) noexcept {
+    return optional.value();
+  }
+
+  // pragma MARK: std::vector<GeofenceTransition>
+  /**
+   * Specialized version of `std::vector<GeofenceTransition>`.
+   */
+  using std__vector_GeofenceTransition_ = std::vector<GeofenceTransition>;
+  inline std::vector<GeofenceTransition> create_std__vector_GeofenceTransition_(size_t size) noexcept {
+    std::vector<GeofenceTransition> vector;
+    vector.reserve(size);
+    return vector;
+  }
+
+  // pragma MARK: std::optional<std::vector<GeofenceTransition>>
+  /**
+   * Specialized version of `std::optional<std::vector<GeofenceTransition>>`.
+   */
+  using std__optional_std__vector_GeofenceTransition__ = std::optional<std::vector<GeofenceTransition>>;
+  inline std::optional<std::vector<GeofenceTransition>> create_std__optional_std__vector_GeofenceTransition__(const std::vector<GeofenceTransition>& value) noexcept {
+    return std::optional<std::vector<GeofenceTransition>>(value);
+  }
+  inline bool has_value_std__optional_std__vector_GeofenceTransition__(const std::optional<std::vector<GeofenceTransition>>& optional) noexcept {
+    return optional.has_value();
+  }
+  inline std::vector<GeofenceTransition> get_std__optional_std__vector_GeofenceTransition__(const std::optional<std::vector<GeofenceTransition>>& optional) noexcept {
+    return optional.value();
+  }
+
+  // pragma MARK: std::optional<GeofencingOptions>
+  /**
+   * Specialized version of `std::optional<GeofencingOptions>`.
+   */
+  using std__optional_GeofencingOptions_ = std::optional<GeofencingOptions>;
+  inline std::optional<GeofencingOptions> create_std__optional_GeofencingOptions_(const GeofencingOptions& value) noexcept {
+    return std::optional<GeofencingOptions>(value);
+  }
+  inline bool has_value_std__optional_GeofencingOptions_(const std::optional<GeofencingOptions>& optional) noexcept {
+    return optional.has_value();
+  }
+  inline GeofencingOptions get_std__optional_GeofencingOptions_(const std::optional<GeofencingOptions>& optional) noexcept {
+    return optional.value();
+  }
+
+  // pragma MARK: std::optional<ActivityRecognitionOptions>
+  /**
+   * Specialized version of `std::optional<ActivityRecognitionOptions>`.
+   */
+  using std__optional_ActivityRecognitionOptions_ = std::optional<ActivityRecognitionOptions>;
+  inline std::optional<ActivityRecognitionOptions> create_std__optional_ActivityRecognitionOptions_(const ActivityRecognitionOptions& value) noexcept {
+    return std::optional<ActivityRecognitionOptions>(value);
+  }
+  inline bool has_value_std__optional_ActivityRecognitionOptions_(const std::optional<ActivityRecognitionOptions>& optional) noexcept {
+    return optional.has_value();
+  }
+  inline ActivityRecognitionOptions get_std__optional_ActivityRecognitionOptions_(const std::optional<ActivityRecognitionOptions>& optional) noexcept {
+    return optional.value();
+  }
+
+  // pragma MARK: std::optional<BackgroundHttpMethod>
+  /**
+   * Specialized version of `std::optional<BackgroundHttpMethod>`.
+   */
+  using std__optional_BackgroundHttpMethod_ = std::optional<BackgroundHttpMethod>;
+  inline std::optional<BackgroundHttpMethod> create_std__optional_BackgroundHttpMethod_(const BackgroundHttpMethod& value) noexcept {
+    return std::optional<BackgroundHttpMethod>(value);
+  }
+  inline bool has_value_std__optional_BackgroundHttpMethod_(const std::optional<BackgroundHttpMethod>& optional) noexcept {
+    return optional.has_value();
+  }
+  inline BackgroundHttpMethod get_std__optional_BackgroundHttpMethod_(const std::optional<BackgroundHttpMethod>& optional) noexcept {
+    return optional.value();
+  }
+
+  // pragma MARK: std::unordered_map<std::string, std::string>
+  /**
+   * Specialized version of `std::unordered_map<std::string, std::string>`.
+   */
+  using std__unordered_map_std__string__std__string_ = std::unordered_map<std::string, std::string>;
+  inline std::unordered_map<std::string, std::string> create_std__unordered_map_std__string__std__string_(size_t size) noexcept {
+    std::unordered_map<std::string, std::string> map;
+    map.reserve(size);
+    return map;
+  }
+  inline std::vector<std::string> get_std__unordered_map_std__string__std__string__keys(const std__unordered_map_std__string__std__string_& map) noexcept {
+    std::vector<std::string> keys;
+    keys.reserve(map.size());
+    for (const auto& entry : map) {
+      keys.push_back(entry.first);
+    }
+    return keys;
+  }
+  inline std::string get_std__unordered_map_std__string__std__string__value(const std__unordered_map_std__string__std__string_& map, const std::string& key) noexcept {
+    return map.find(key)->second;
+  }
+  inline void emplace_std__unordered_map_std__string__std__string_(std__unordered_map_std__string__std__string_& map, const std::string& key, const std::string& value) noexcept {
+    map.emplace(key, value);
+  }
+
+  // pragma MARK: std::optional<std::unordered_map<std::string, std::string>>
+  /**
+   * Specialized version of `std::optional<std::unordered_map<std::string, std::string>>`.
+   */
+  using std__optional_std__unordered_map_std__string__std__string__ = std::optional<std::unordered_map<std::string, std::string>>;
+  inline std::optional<std::unordered_map<std::string, std::string>> create_std__optional_std__unordered_map_std__string__std__string__(const std::unordered_map<std::string, std::string>& value) noexcept {
+    return std::optional<std::unordered_map<std::string, std::string>>(value);
+  }
+  inline bool has_value_std__optional_std__unordered_map_std__string__std__string__(const std::optional<std::unordered_map<std::string, std::string>>& optional) noexcept {
+    return optional.has_value();
+  }
+  inline std::unordered_map<std::string, std::string> get_std__optional_std__unordered_map_std__string__std__string__(const std::optional<std::unordered_map<std::string, std::string>>& optional) noexcept {
+    return optional.value();
+  }
+
+  // pragma MARK: std::variant<nitro::NullType, bool, std::string, double>
+  /**
+   * Wrapper struct for `std::variant<nitro::NullType, bool, std::string, double>`.
+   * std::variant cannot be used in Swift because of a Swift bug.
+   * Not even specializing it works. So we create a wrapper struct.
+   */
+  struct std__variant_nitro__NullType__bool__std__string__double_ final {
+    std::variant<nitro::NullType, bool, std::string, double> variant;
+    std__variant_nitro__NullType__bool__std__string__double_(std::variant<nitro::NullType, bool, std::string, double> variant): variant(variant) { }
+    operator std::variant<nitro::NullType, bool, std::string, double>() const noexcept {
+      return variant;
+    }
+    inline size_t index() const noexcept {
+      return variant.index();
+    }
+    inline nitro::NullType get_0() const noexcept {
+      return std::get<0>(variant);
+    }
+    inline bool get_1() const noexcept {
+      return std::get<1>(variant);
+    }
+    inline std::string get_2() const noexcept {
+      return std::get<2>(variant);
+    }
+    inline double get_3() const noexcept {
+      return std::get<3>(variant);
+    }
+  };
+  inline std__variant_nitro__NullType__bool__std__string__double_ create_std__variant_nitro__NullType__bool__std__string__double_(nitro::NullType value) noexcept {
+    return std__variant_nitro__NullType__bool__std__string__double_(value);
+  }
+  inline std__variant_nitro__NullType__bool__std__string__double_ create_std__variant_nitro__NullType__bool__std__string__double_(bool value) noexcept {
+    return std__variant_nitro__NullType__bool__std__string__double_(value);
+  }
+  inline std__variant_nitro__NullType__bool__std__string__double_ create_std__variant_nitro__NullType__bool__std__string__double_(const std::string& value) noexcept {
+    return std__variant_nitro__NullType__bool__std__string__double_(value);
+  }
+  inline std__variant_nitro__NullType__bool__std__string__double_ create_std__variant_nitro__NullType__bool__std__string__double_(double value) noexcept {
+    return std__variant_nitro__NullType__bool__std__string__double_(value);
+  }
+
+  // pragma MARK: std::unordered_map<std::string, std::variant<nitro::NullType, bool, std::string, double>>
+  /**
+   * Specialized version of `std::unordered_map<std::string, std::variant<nitro::NullType, bool, std::string, double>>`.
+   */
+  using std__unordered_map_std__string__std__variant_nitro__NullType__bool__std__string__double__ = std::unordered_map<std::string, std::variant<nitro::NullType, bool, std::string, double>>;
+  inline std::unordered_map<std::string, std::variant<nitro::NullType, bool, std::string, double>> create_std__unordered_map_std__string__std__variant_nitro__NullType__bool__std__string__double__(size_t size) noexcept {
+    std::unordered_map<std::string, std::variant<nitro::NullType, bool, std::string, double>> map;
+    map.reserve(size);
+    return map;
+  }
+  inline std::vector<std::string> get_std__unordered_map_std__string__std__variant_nitro__NullType__bool__std__string__double___keys(const std__unordered_map_std__string__std__variant_nitro__NullType__bool__std__string__double__& map) noexcept {
+    std::vector<std::string> keys;
+    keys.reserve(map.size());
+    for (const auto& entry : map) {
+      keys.push_back(entry.first);
+    }
+    return keys;
+  }
+  inline std::variant<nitro::NullType, bool, std::string, double> get_std__unordered_map_std__string__std__variant_nitro__NullType__bool__std__string__double___value(const std__unordered_map_std__string__std__variant_nitro__NullType__bool__std__string__double__& map, const std::string& key) noexcept {
+    return map.find(key)->second;
+  }
+  inline void emplace_std__unordered_map_std__string__std__variant_nitro__NullType__bool__std__string__double__(std__unordered_map_std__string__std__variant_nitro__NullType__bool__std__string__double__& map, const std::string& key, const std::variant<nitro::NullType, bool, std::string, double>& value) noexcept {
+    map.emplace(key, value);
+  }
+
+  // pragma MARK: std::optional<std::unordered_map<std::string, std::variant<nitro::NullType, bool, std::string, double>>>
+  /**
+   * Specialized version of `std::optional<std::unordered_map<std::string, std::variant<nitro::NullType, bool, std::string, double>>>`.
+   */
+  using std__optional_std__unordered_map_std__string__std__variant_nitro__NullType__bool__std__string__double___ = std::optional<std::unordered_map<std::string, std::variant<nitro::NullType, bool, std::string, double>>>;
+  inline std::optional<std::unordered_map<std::string, std::variant<nitro::NullType, bool, std::string, double>>> create_std__optional_std__unordered_map_std__string__std__variant_nitro__NullType__bool__std__string__double___(const std::unordered_map<std::string, std::variant<nitro::NullType, bool, std::string, double>>& value) noexcept {
+    return std::optional<std::unordered_map<std::string, std::variant<nitro::NullType, bool, std::string, double>>>(value);
+  }
+  inline bool has_value_std__optional_std__unordered_map_std__string__std__variant_nitro__NullType__bool__std__string__double___(const std::optional<std::unordered_map<std::string, std::variant<nitro::NullType, bool, std::string, double>>>& optional) noexcept {
+    return optional.has_value();
+  }
+  inline std::unordered_map<std::string, std::variant<nitro::NullType, bool, std::string, double>> get_std__optional_std__unordered_map_std__string__std__variant_nitro__NullType__bool__std__string__double___(const std::optional<std::unordered_map<std::string, std::variant<nitro::NullType, bool, std::string, double>>>& optional) noexcept {
+    return optional.value();
+  }
+
+  // pragma MARK: std::optional<BackgroundHttpSyncOptions>
+  /**
+   * Specialized version of `std::optional<BackgroundHttpSyncOptions>`.
+   */
+  using std__optional_BackgroundHttpSyncOptions_ = std::optional<BackgroundHttpSyncOptions>;
+  inline std::optional<BackgroundHttpSyncOptions> create_std__optional_BackgroundHttpSyncOptions_(const BackgroundHttpSyncOptions& value) noexcept {
+    return std::optional<BackgroundHttpSyncOptions>(value);
+  }
+  inline bool has_value_std__optional_BackgroundHttpSyncOptions_(const std::optional<BackgroundHttpSyncOptions>& optional) noexcept {
+    return optional.has_value();
+  }
+  inline BackgroundHttpSyncOptions get_std__optional_BackgroundHttpSyncOptions_(const std::optional<BackgroundHttpSyncOptions>& optional) noexcept {
+    return optional.value();
+  }
+
+  // pragma MARK: std::optional<BackgroundLocationOptions>
+  /**
+   * Specialized version of `std::optional<BackgroundLocationOptions>`.
+   */
+  using std__optional_BackgroundLocationOptions_ = std::optional<BackgroundLocationOptions>;
+  inline std::optional<BackgroundLocationOptions> create_std__optional_BackgroundLocationOptions_(const BackgroundLocationOptions& value) noexcept {
+    return std::optional<BackgroundLocationOptions>(value);
+  }
+  inline bool has_value_std__optional_BackgroundLocationOptions_(const std::optional<BackgroundLocationOptions>& optional) noexcept {
+    return optional.has_value();
+  }
+  inline BackgroundLocationOptions get_std__optional_BackgroundLocationOptions_(const std::optional<BackgroundLocationOptions>& optional) noexcept {
+    return optional.value();
+  }
+
+  // pragma MARK: std::shared_ptr<Promise<std::optional<BackgroundLocationOptions>>>
+  /**
+   * Specialized version of `std::shared_ptr<Promise<std::optional<BackgroundLocationOptions>>>`.
+   */
+  using std__shared_ptr_Promise_std__optional_BackgroundLocationOptions___ = std::shared_ptr<Promise<std::optional<BackgroundLocationOptions>>>;
+  inline std::shared_ptr<Promise<std::optional<BackgroundLocationOptions>>> create_std__shared_ptr_Promise_std__optional_BackgroundLocationOptions___() noexcept {
+    return Promise<std::optional<BackgroundLocationOptions>>::create();
+  }
+  inline PromiseHolder<std::optional<BackgroundLocationOptions>> wrap_std__shared_ptr_Promise_std__optional_BackgroundLocationOptions___(std::shared_ptr<Promise<std::optional<BackgroundLocationOptions>>> promise) noexcept {
+    return PromiseHolder<std::optional<BackgroundLocationOptions>>(std::move(promise));
+  }
+
+  // pragma MARK: std::function<void(const std::optional<BackgroundLocationOptions>& /* result */)>
+  /**
+   * Specialized version of `std::function<void(const std::optional<BackgroundLocationOptions>&)>`.
+   */
+  using Func_void_std__optional_BackgroundLocationOptions_ = std::function<void(const std::optional<BackgroundLocationOptions>& /* result */)>;
+  /**
+   * Wrapper class for a `std::function<void(const std::optional<BackgroundLocationOptions>& / * result * /)>`, this can be used from Swift.
+   */
+  class Func_void_std__optional_BackgroundLocationOptions__Wrapper final {
+  public:
+    explicit Func_void_std__optional_BackgroundLocationOptions__Wrapper(std::function<void(const std::optional<BackgroundLocationOptions>& /* result */)>&& func): _function(std::make_unique<std::function<void(const std::optional<BackgroundLocationOptions>& /* result */)>>(std::move(func))) {}
+    inline void call(std::optional<BackgroundLocationOptions> result) const noexcept {
+      _function->operator()(result);
+    }
+  private:
+    std::unique_ptr<std::function<void(const std::optional<BackgroundLocationOptions>& /* result */)>> _function;
+  } SWIFT_NONCOPYABLE;
+  Func_void_std__optional_BackgroundLocationOptions_ create_Func_void_std__optional_BackgroundLocationOptions_(void* NON_NULL swiftClosureWrapper) noexcept;
+  inline Func_void_std__optional_BackgroundLocationOptions__Wrapper wrap_Func_void_std__optional_BackgroundLocationOptions_(Func_void_std__optional_BackgroundLocationOptions_ value) noexcept {
+    return Func_void_std__optional_BackgroundLocationOptions__Wrapper(std::move(value));
+  }
+
+  // pragma MARK: std::optional<LocationProviderStatus>
+  /**
+   * Specialized version of `std::optional<LocationProviderStatus>`.
+   */
+  using std__optional_LocationProviderStatus_ = std::optional<LocationProviderStatus>;
+  inline std::optional<LocationProviderStatus> create_std__optional_LocationProviderStatus_(const LocationProviderStatus& value) noexcept {
+    return std::optional<LocationProviderStatus>(value);
+  }
+  inline bool has_value_std__optional_LocationProviderStatus_(const std::optional<LocationProviderStatus>& optional) noexcept {
+    return optional.has_value();
+  }
+  inline LocationProviderStatus get_std__optional_LocationProviderStatus_(const std::optional<LocationProviderStatus>& optional) noexcept {
+    return optional.value();
+  }
+
+  // pragma MARK: std::optional<PermissionStatus>
+  /**
+   * Specialized version of `std::optional<PermissionStatus>`.
+   */
+  using std__optional_PermissionStatus_ = std::optional<PermissionStatus>;
+  inline std::optional<PermissionStatus> create_std__optional_PermissionStatus_(const PermissionStatus& value) noexcept {
+    return std::optional<PermissionStatus>(value);
+  }
+  inline bool has_value_std__optional_PermissionStatus_(const std::optional<PermissionStatus>& optional) noexcept {
+    return optional.has_value();
+  }
+  inline PermissionStatus get_std__optional_PermissionStatus_(const std::optional<PermissionStatus>& optional) noexcept {
+    return optional.value();
+  }
+
+  // pragma MARK: std::optional<AndroidBackgroundLocationStatus>
+  /**
+   * Specialized version of `std::optional<AndroidBackgroundLocationStatus>`.
+   */
+  using std__optional_AndroidBackgroundLocationStatus_ = std::optional<AndroidBackgroundLocationStatus>;
+  inline std::optional<AndroidBackgroundLocationStatus> create_std__optional_AndroidBackgroundLocationStatus_(const AndroidBackgroundLocationStatus& value) noexcept {
+    return std::optional<AndroidBackgroundLocationStatus>(value);
+  }
+  inline bool has_value_std__optional_AndroidBackgroundLocationStatus_(const std::optional<AndroidBackgroundLocationStatus>& optional) noexcept {
+    return optional.has_value();
+  }
+  inline AndroidBackgroundLocationStatus get_std__optional_AndroidBackgroundLocationStatus_(const std::optional<AndroidBackgroundLocationStatus>& optional) noexcept {
+    return optional.value();
+  }
+
+  // pragma MARK: std::optional<IOSBackgroundLocationStatus>
+  /**
+   * Specialized version of `std::optional<IOSBackgroundLocationStatus>`.
+   */
+  using std__optional_IOSBackgroundLocationStatus_ = std::optional<IOSBackgroundLocationStatus>;
+  inline std::optional<IOSBackgroundLocationStatus> create_std__optional_IOSBackgroundLocationStatus_(const IOSBackgroundLocationStatus& value) noexcept {
+    return std::optional<IOSBackgroundLocationStatus>(value);
+  }
+  inline bool has_value_std__optional_IOSBackgroundLocationStatus_(const std::optional<IOSBackgroundLocationStatus>& optional) noexcept {
+    return optional.has_value();
+  }
+  inline IOSBackgroundLocationStatus get_std__optional_IOSBackgroundLocationStatus_(const std::optional<IOSBackgroundLocationStatus>& optional) noexcept {
+    return optional.value();
+  }
+
+  // pragma MARK: std::optional<LocationError>
+  /**
+   * Specialized version of `std::optional<LocationError>`.
+   */
+  using std__optional_LocationError_ = std::optional<LocationError>;
+  inline std::optional<LocationError> create_std__optional_LocationError_(const LocationError& value) noexcept {
+    return std::optional<LocationError>(value);
+  }
+  inline bool has_value_std__optional_LocationError_(const std::optional<LocationError>& optional) noexcept {
+    return optional.has_value();
+  }
+  inline LocationError get_std__optional_LocationError_(const std::optional<LocationError>& optional) noexcept {
+    return optional.value();
+  }
+
+  // pragma MARK: std::shared_ptr<Promise<BackgroundLocationStatus>>
+  /**
+   * Specialized version of `std::shared_ptr<Promise<BackgroundLocationStatus>>`.
+   */
+  using std__shared_ptr_Promise_BackgroundLocationStatus__ = std::shared_ptr<Promise<BackgroundLocationStatus>>;
+  inline std::shared_ptr<Promise<BackgroundLocationStatus>> create_std__shared_ptr_Promise_BackgroundLocationStatus__() noexcept {
+    return Promise<BackgroundLocationStatus>::create();
+  }
+  inline PromiseHolder<BackgroundLocationStatus> wrap_std__shared_ptr_Promise_BackgroundLocationStatus__(std::shared_ptr<Promise<BackgroundLocationStatus>> promise) noexcept {
+    return PromiseHolder<BackgroundLocationStatus>(std::move(promise));
+  }
+
+  // pragma MARK: std::function<void(const BackgroundLocationStatus& /* result */)>
+  /**
+   * Specialized version of `std::function<void(const BackgroundLocationStatus&)>`.
+   */
+  using Func_void_BackgroundLocationStatus = std::function<void(const BackgroundLocationStatus& /* result */)>;
+  /**
+   * Wrapper class for a `std::function<void(const BackgroundLocationStatus& / * result * /)>`, this can be used from Swift.
+   */
+  class Func_void_BackgroundLocationStatus_Wrapper final {
+  public:
+    explicit Func_void_BackgroundLocationStatus_Wrapper(std::function<void(const BackgroundLocationStatus& /* result */)>&& func): _function(std::make_unique<std::function<void(const BackgroundLocationStatus& /* result */)>>(std::move(func))) {}
+    inline void call(BackgroundLocationStatus result) const noexcept {
+      _function->operator()(result);
+    }
+  private:
+    std::unique_ptr<std::function<void(const BackgroundLocationStatus& /* result */)>> _function;
+  } SWIFT_NONCOPYABLE;
+  Func_void_BackgroundLocationStatus create_Func_void_BackgroundLocationStatus(void* NON_NULL swiftClosureWrapper) noexcept;
+  inline Func_void_BackgroundLocationStatus_Wrapper wrap_Func_void_BackgroundLocationStatus(Func_void_BackgroundLocationStatus value) noexcept {
+    return Func_void_BackgroundLocationStatus_Wrapper(std::move(value));
+  }
+
+  // pragma MARK: std::optional<DetectedActivity>
+  /**
+   * Specialized version of `std::optional<DetectedActivity>`.
+   */
+  using std__optional_DetectedActivity_ = std::optional<DetectedActivity>;
+  inline std::optional<DetectedActivity> create_std__optional_DetectedActivity_(const DetectedActivity& value) noexcept {
+    return std::optional<DetectedActivity>(value);
+  }
+  inline bool has_value_std__optional_DetectedActivity_(const std::optional<DetectedActivity>& optional) noexcept {
+    return optional.has_value();
+  }
+  inline DetectedActivity get_std__optional_DetectedActivity_(const std::optional<DetectedActivity>& optional) noexcept {
+    return optional.value();
+  }
+
+  // pragma MARK: std::optional<BatterySnapshot>
+  /**
+   * Specialized version of `std::optional<BatterySnapshot>`.
+   */
+  using std__optional_BatterySnapshot_ = std::optional<BatterySnapshot>;
+  inline std::optional<BatterySnapshot> create_std__optional_BatterySnapshot_(const BatterySnapshot& value) noexcept {
+    return std::optional<BatterySnapshot>(value);
+  }
+  inline bool has_value_std__optional_BatterySnapshot_(const std::optional<BatterySnapshot>& optional) noexcept {
+    return optional.has_value();
+  }
+  inline BatterySnapshot get_std__optional_BatterySnapshot_(const std::optional<BatterySnapshot>& optional) noexcept {
+    return optional.value();
+  }
+
+  // pragma MARK: std::optional<BackgroundLocation>
+  /**
+   * Specialized version of `std::optional<BackgroundLocation>`.
+   */
+  using std__optional_BackgroundLocation_ = std::optional<BackgroundLocation>;
+  inline std::optional<BackgroundLocation> create_std__optional_BackgroundLocation_(const BackgroundLocation& value) noexcept {
+    return std::optional<BackgroundLocation>(value);
+  }
+  inline bool has_value_std__optional_BackgroundLocation_(const std::optional<BackgroundLocation>& optional) noexcept {
+    return optional.has_value();
+  }
+  inline BackgroundLocation get_std__optional_BackgroundLocation_(const std::optional<BackgroundLocation>& optional) noexcept {
+    return optional.value();
+  }
+
+  // pragma MARK: std::optional<GeofenceEvent>
+  /**
+   * Specialized version of `std::optional<GeofenceEvent>`.
+   */
+  using std__optional_GeofenceEvent_ = std::optional<GeofenceEvent>;
+  inline std::optional<GeofenceEvent> create_std__optional_GeofenceEvent_(const GeofenceEvent& value) noexcept {
+    return std::optional<GeofenceEvent>(value);
+  }
+  inline bool has_value_std__optional_GeofenceEvent_(const std::optional<GeofenceEvent>& optional) noexcept {
+    return optional.has_value();
+  }
+  inline GeofenceEvent get_std__optional_GeofenceEvent_(const std::optional<GeofenceEvent>& optional) noexcept {
+    return optional.value();
+  }
+
+  // pragma MARK: std::vector<std::string>
+  /**
+   * Specialized version of `std::vector<std::string>`.
+   */
+  using std__vector_std__string_ = std::vector<std::string>;
+  inline std::vector<std::string> create_std__vector_std__string_(size_t size) noexcept {
+    std::vector<std::string> vector;
+    vector.reserve(size);
+    return vector;
+  }
+
+  // pragma MARK: std::optional<BackgroundHttpSyncResult>
+  /**
+   * Specialized version of `std::optional<BackgroundHttpSyncResult>`.
+   */
+  using std__optional_BackgroundHttpSyncResult_ = std::optional<BackgroundHttpSyncResult>;
+  inline std::optional<BackgroundHttpSyncResult> create_std__optional_BackgroundHttpSyncResult_(const BackgroundHttpSyncResult& value) noexcept {
+    return std::optional<BackgroundHttpSyncResult>(value);
+  }
+  inline bool has_value_std__optional_BackgroundHttpSyncResult_(const std::optional<BackgroundHttpSyncResult>& optional) noexcept {
+    return optional.has_value();
+  }
+  inline BackgroundHttpSyncResult get_std__optional_BackgroundHttpSyncResult_(const std::optional<BackgroundHttpSyncResult>& optional) noexcept {
+    return optional.value();
+  }
+
+  // pragma MARK: std::function<void(const BackgroundEventEnvelope& /* event */)>
+  /**
+   * Specialized version of `std::function<void(const BackgroundEventEnvelope&)>`.
+   */
+  using Func_void_BackgroundEventEnvelope = std::function<void(const BackgroundEventEnvelope& /* event */)>;
+  /**
+   * Wrapper class for a `std::function<void(const BackgroundEventEnvelope& / * event * /)>`, this can be used from Swift.
+   */
+  class Func_void_BackgroundEventEnvelope_Wrapper final {
+  public:
+    explicit Func_void_BackgroundEventEnvelope_Wrapper(std::function<void(const BackgroundEventEnvelope& /* event */)>&& func): _function(std::make_unique<std::function<void(const BackgroundEventEnvelope& /* event */)>>(std::move(func))) {}
+    inline void call(BackgroundEventEnvelope event) const noexcept {
+      _function->operator()(event);
+    }
+  private:
+    std::unique_ptr<std::function<void(const BackgroundEventEnvelope& /* event */)>> _function;
+  } SWIFT_NONCOPYABLE;
+  Func_void_BackgroundEventEnvelope create_Func_void_BackgroundEventEnvelope(void* NON_NULL swiftClosureWrapper) noexcept;
+  inline Func_void_BackgroundEventEnvelope_Wrapper wrap_Func_void_BackgroundEventEnvelope(Func_void_BackgroundEventEnvelope value) noexcept {
+    return Func_void_BackgroundEventEnvelope_Wrapper(std::move(value));
+  }
+
+  // pragma MARK: std::function<void(const BackgroundLocation& /* location */)>
+  /**
+   * Specialized version of `std::function<void(const BackgroundLocation&)>`.
+   */
+  using Func_void_BackgroundLocation = std::function<void(const BackgroundLocation& /* location */)>;
+  /**
+   * Wrapper class for a `std::function<void(const BackgroundLocation& / * location * /)>`, this can be used from Swift.
+   */
+  class Func_void_BackgroundLocation_Wrapper final {
+  public:
+    explicit Func_void_BackgroundLocation_Wrapper(std::function<void(const BackgroundLocation& /* location */)>&& func): _function(std::make_unique<std::function<void(const BackgroundLocation& /* location */)>>(std::move(func))) {}
+    inline void call(BackgroundLocation location) const noexcept {
+      _function->operator()(location);
+    }
+  private:
+    std::unique_ptr<std::function<void(const BackgroundLocation& /* location */)>> _function;
+  } SWIFT_NONCOPYABLE;
+  Func_void_BackgroundLocation create_Func_void_BackgroundLocation(void* NON_NULL swiftClosureWrapper) noexcept;
+  inline Func_void_BackgroundLocation_Wrapper wrap_Func_void_BackgroundLocation(Func_void_BackgroundLocation value) noexcept {
+    return Func_void_BackgroundLocation_Wrapper(std::move(value));
+  }
+
+  // pragma MARK: std::vector<StoredBackgroundLocation>
+  /**
+   * Specialized version of `std::vector<StoredBackgroundLocation>`.
+   */
+  using std__vector_StoredBackgroundLocation_ = std::vector<StoredBackgroundLocation>;
+  inline std::vector<StoredBackgroundLocation> create_std__vector_StoredBackgroundLocation_(size_t size) noexcept {
+    std::vector<StoredBackgroundLocation> vector;
+    vector.reserve(size);
+    return vector;
+  }
+
+  // pragma MARK: std::shared_ptr<Promise<std::vector<StoredBackgroundLocation>>>
+  /**
+   * Specialized version of `std::shared_ptr<Promise<std::vector<StoredBackgroundLocation>>>`.
+   */
+  using std__shared_ptr_Promise_std__vector_StoredBackgroundLocation___ = std::shared_ptr<Promise<std::vector<StoredBackgroundLocation>>>;
+  inline std::shared_ptr<Promise<std::vector<StoredBackgroundLocation>>> create_std__shared_ptr_Promise_std__vector_StoredBackgroundLocation___() noexcept {
+    return Promise<std::vector<StoredBackgroundLocation>>::create();
+  }
+  inline PromiseHolder<std::vector<StoredBackgroundLocation>> wrap_std__shared_ptr_Promise_std__vector_StoredBackgroundLocation___(std::shared_ptr<Promise<std::vector<StoredBackgroundLocation>>> promise) noexcept {
+    return PromiseHolder<std::vector<StoredBackgroundLocation>>(std::move(promise));
+  }
+
+  // pragma MARK: std::function<void(const std::vector<StoredBackgroundLocation>& /* result */)>
+  /**
+   * Specialized version of `std::function<void(const std::vector<StoredBackgroundLocation>&)>`.
+   */
+  using Func_void_std__vector_StoredBackgroundLocation_ = std::function<void(const std::vector<StoredBackgroundLocation>& /* result */)>;
+  /**
+   * Wrapper class for a `std::function<void(const std::vector<StoredBackgroundLocation>& / * result * /)>`, this can be used from Swift.
+   */
+  class Func_void_std__vector_StoredBackgroundLocation__Wrapper final {
+  public:
+    explicit Func_void_std__vector_StoredBackgroundLocation__Wrapper(std::function<void(const std::vector<StoredBackgroundLocation>& /* result */)>&& func): _function(std::make_unique<std::function<void(const std::vector<StoredBackgroundLocation>& /* result */)>>(std::move(func))) {}
+    inline void call(std::vector<StoredBackgroundLocation> result) const noexcept {
+      _function->operator()(result);
+    }
+  private:
+    std::unique_ptr<std::function<void(const std::vector<StoredBackgroundLocation>& /* result */)>> _function;
+  } SWIFT_NONCOPYABLE;
+  Func_void_std__vector_StoredBackgroundLocation_ create_Func_void_std__vector_StoredBackgroundLocation_(void* NON_NULL swiftClosureWrapper) noexcept;
+  inline Func_void_std__vector_StoredBackgroundLocation__Wrapper wrap_Func_void_std__vector_StoredBackgroundLocation_(Func_void_std__vector_StoredBackgroundLocation_ value) noexcept {
+    return Func_void_std__vector_StoredBackgroundLocation__Wrapper(std::move(value));
+  }
+
+  // pragma MARK: std::optional<GetStoredBackgroundLocationsOptions>
+  /**
+   * Specialized version of `std::optional<GetStoredBackgroundLocationsOptions>`.
+   */
+  using std__optional_GetStoredBackgroundLocationsOptions_ = std::optional<GetStoredBackgroundLocationsOptions>;
+  inline std::optional<GetStoredBackgroundLocationsOptions> create_std__optional_GetStoredBackgroundLocationsOptions_(const GetStoredBackgroundLocationsOptions& value) noexcept {
+    return std::optional<GetStoredBackgroundLocationsOptions>(value);
+  }
+  inline bool has_value_std__optional_GetStoredBackgroundLocationsOptions_(const std::optional<GetStoredBackgroundLocationsOptions>& optional) noexcept {
+    return optional.has_value();
+  }
+  inline GetStoredBackgroundLocationsOptions get_std__optional_GetStoredBackgroundLocationsOptions_(const std::optional<GetStoredBackgroundLocationsOptions>& optional) noexcept {
+    return optional.value();
+  }
+
+  // pragma MARK: std::optional<std::vector<std::string>>
+  /**
+   * Specialized version of `std::optional<std::vector<std::string>>`.
+   */
+  using std__optional_std__vector_std__string__ = std::optional<std::vector<std::string>>;
+  inline std::optional<std::vector<std::string>> create_std__optional_std__vector_std__string__(const std::vector<std::string>& value) noexcept {
+    return std::optional<std::vector<std::string>>(value);
+  }
+  inline bool has_value_std__optional_std__vector_std__string__(const std::optional<std::vector<std::string>>& optional) noexcept {
+    return optional.has_value();
+  }
+  inline std::vector<std::string> get_std__optional_std__vector_std__string__(const std::optional<std::vector<std::string>>& optional) noexcept {
+    return optional.value();
+  }
+
+  // pragma MARK: std::vector<StoredBackgroundEventEnvelope>
+  /**
+   * Specialized version of `std::vector<StoredBackgroundEventEnvelope>`.
+   */
+  using std__vector_StoredBackgroundEventEnvelope_ = std::vector<StoredBackgroundEventEnvelope>;
+  inline std::vector<StoredBackgroundEventEnvelope> create_std__vector_StoredBackgroundEventEnvelope_(size_t size) noexcept {
+    std::vector<StoredBackgroundEventEnvelope> vector;
+    vector.reserve(size);
+    return vector;
+  }
+
+  // pragma MARK: std::shared_ptr<Promise<std::vector<StoredBackgroundEventEnvelope>>>
+  /**
+   * Specialized version of `std::shared_ptr<Promise<std::vector<StoredBackgroundEventEnvelope>>>`.
+   */
+  using std__shared_ptr_Promise_std__vector_StoredBackgroundEventEnvelope___ = std::shared_ptr<Promise<std::vector<StoredBackgroundEventEnvelope>>>;
+  inline std::shared_ptr<Promise<std::vector<StoredBackgroundEventEnvelope>>> create_std__shared_ptr_Promise_std__vector_StoredBackgroundEventEnvelope___() noexcept {
+    return Promise<std::vector<StoredBackgroundEventEnvelope>>::create();
+  }
+  inline PromiseHolder<std::vector<StoredBackgroundEventEnvelope>> wrap_std__shared_ptr_Promise_std__vector_StoredBackgroundEventEnvelope___(std::shared_ptr<Promise<std::vector<StoredBackgroundEventEnvelope>>> promise) noexcept {
+    return PromiseHolder<std::vector<StoredBackgroundEventEnvelope>>(std::move(promise));
+  }
+
+  // pragma MARK: std::function<void(const std::vector<StoredBackgroundEventEnvelope>& /* result */)>
+  /**
+   * Specialized version of `std::function<void(const std::vector<StoredBackgroundEventEnvelope>&)>`.
+   */
+  using Func_void_std__vector_StoredBackgroundEventEnvelope_ = std::function<void(const std::vector<StoredBackgroundEventEnvelope>& /* result */)>;
+  /**
+   * Wrapper class for a `std::function<void(const std::vector<StoredBackgroundEventEnvelope>& / * result * /)>`, this can be used from Swift.
+   */
+  class Func_void_std__vector_StoredBackgroundEventEnvelope__Wrapper final {
+  public:
+    explicit Func_void_std__vector_StoredBackgroundEventEnvelope__Wrapper(std::function<void(const std::vector<StoredBackgroundEventEnvelope>& /* result */)>&& func): _function(std::make_unique<std::function<void(const std::vector<StoredBackgroundEventEnvelope>& /* result */)>>(std::move(func))) {}
+    inline void call(std::vector<StoredBackgroundEventEnvelope> result) const noexcept {
+      _function->operator()(result);
+    }
+  private:
+    std::unique_ptr<std::function<void(const std::vector<StoredBackgroundEventEnvelope>& /* result */)>> _function;
+  } SWIFT_NONCOPYABLE;
+  Func_void_std__vector_StoredBackgroundEventEnvelope_ create_Func_void_std__vector_StoredBackgroundEventEnvelope_(void* NON_NULL swiftClosureWrapper) noexcept;
+  inline Func_void_std__vector_StoredBackgroundEventEnvelope__Wrapper wrap_Func_void_std__vector_StoredBackgroundEventEnvelope_(Func_void_std__vector_StoredBackgroundEventEnvelope_ value) noexcept {
+    return Func_void_std__vector_StoredBackgroundEventEnvelope__Wrapper(std::move(value));
+  }
+
+  // pragma MARK: std::vector<BackgroundEventType>
+  /**
+   * Specialized version of `std::vector<BackgroundEventType>`.
+   */
+  using std__vector_BackgroundEventType_ = std::vector<BackgroundEventType>;
+  inline std::vector<BackgroundEventType> create_std__vector_BackgroundEventType_(size_t size) noexcept {
+    std::vector<BackgroundEventType> vector;
+    vector.reserve(size);
+    return vector;
+  }
+
+  // pragma MARK: std::optional<std::vector<BackgroundEventType>>
+  /**
+   * Specialized version of `std::optional<std::vector<BackgroundEventType>>`.
+   */
+  using std__optional_std__vector_BackgroundEventType__ = std::optional<std::vector<BackgroundEventType>>;
+  inline std::optional<std::vector<BackgroundEventType>> create_std__optional_std__vector_BackgroundEventType__(const std::vector<BackgroundEventType>& value) noexcept {
+    return std::optional<std::vector<BackgroundEventType>>(value);
+  }
+  inline bool has_value_std__optional_std__vector_BackgroundEventType__(const std::optional<std::vector<BackgroundEventType>>& optional) noexcept {
+    return optional.has_value();
+  }
+  inline std::vector<BackgroundEventType> get_std__optional_std__vector_BackgroundEventType__(const std::optional<std::vector<BackgroundEventType>>& optional) noexcept {
+    return optional.value();
+  }
+
+  // pragma MARK: std::optional<GetStoredBackgroundEventsOptions>
+  /**
+   * Specialized version of `std::optional<GetStoredBackgroundEventsOptions>`.
+   */
+  using std__optional_GetStoredBackgroundEventsOptions_ = std::optional<GetStoredBackgroundEventsOptions>;
+  inline std::optional<GetStoredBackgroundEventsOptions> create_std__optional_GetStoredBackgroundEventsOptions_(const GetStoredBackgroundEventsOptions& value) noexcept {
+    return std::optional<GetStoredBackgroundEventsOptions>(value);
+  }
+  inline bool has_value_std__optional_GetStoredBackgroundEventsOptions_(const std::optional<GetStoredBackgroundEventsOptions>& optional) noexcept {
+    return optional.has_value();
+  }
+  inline GetStoredBackgroundEventsOptions get_std__optional_GetStoredBackgroundEventsOptions_(const std::optional<GetStoredBackgroundEventsOptions>& optional) noexcept {
+    return optional.value();
+  }
+
+  // pragma MARK: std::vector<GeofenceRegion>
+  /**
+   * Specialized version of `std::vector<GeofenceRegion>`.
+   */
+  using std__vector_GeofenceRegion_ = std::vector<GeofenceRegion>;
+  inline std::vector<GeofenceRegion> create_std__vector_GeofenceRegion_(size_t size) noexcept {
+    std::vector<GeofenceRegion> vector;
+    vector.reserve(size);
+    return vector;
+  }
+
+  // pragma MARK: std::shared_ptr<Promise<std::vector<GeofenceRegion>>>
+  /**
+   * Specialized version of `std::shared_ptr<Promise<std::vector<GeofenceRegion>>>`.
+   */
+  using std__shared_ptr_Promise_std__vector_GeofenceRegion___ = std::shared_ptr<Promise<std::vector<GeofenceRegion>>>;
+  inline std::shared_ptr<Promise<std::vector<GeofenceRegion>>> create_std__shared_ptr_Promise_std__vector_GeofenceRegion___() noexcept {
+    return Promise<std::vector<GeofenceRegion>>::create();
+  }
+  inline PromiseHolder<std::vector<GeofenceRegion>> wrap_std__shared_ptr_Promise_std__vector_GeofenceRegion___(std::shared_ptr<Promise<std::vector<GeofenceRegion>>> promise) noexcept {
+    return PromiseHolder<std::vector<GeofenceRegion>>(std::move(promise));
+  }
+
+  // pragma MARK: std::function<void(const std::vector<GeofenceRegion>& /* result */)>
+  /**
+   * Specialized version of `std::function<void(const std::vector<GeofenceRegion>&)>`.
+   */
+  using Func_void_std__vector_GeofenceRegion_ = std::function<void(const std::vector<GeofenceRegion>& /* result */)>;
+  /**
+   * Wrapper class for a `std::function<void(const std::vector<GeofenceRegion>& / * result * /)>`, this can be used from Swift.
+   */
+  class Func_void_std__vector_GeofenceRegion__Wrapper final {
+  public:
+    explicit Func_void_std__vector_GeofenceRegion__Wrapper(std::function<void(const std::vector<GeofenceRegion>& /* result */)>&& func): _function(std::make_unique<std::function<void(const std::vector<GeofenceRegion>& /* result */)>>(std::move(func))) {}
+    inline void call(std::vector<GeofenceRegion> result) const noexcept {
+      _function->operator()(result);
+    }
+  private:
+    std::unique_ptr<std::function<void(const std::vector<GeofenceRegion>& /* result */)>> _function;
+  } SWIFT_NONCOPYABLE;
+  Func_void_std__vector_GeofenceRegion_ create_Func_void_std__vector_GeofenceRegion_(void* NON_NULL swiftClosureWrapper) noexcept;
+  inline Func_void_std__vector_GeofenceRegion__Wrapper wrap_Func_void_std__vector_GeofenceRegion_(Func_void_std__vector_GeofenceRegion_ value) noexcept {
+    return Func_void_std__vector_GeofenceRegion__Wrapper(std::move(value));
+  }
+
+  // pragma MARK: std::shared_ptr<Promise<BackgroundHttpSyncResult>>
+  /**
+   * Specialized version of `std::shared_ptr<Promise<BackgroundHttpSyncResult>>`.
+   */
+  using std__shared_ptr_Promise_BackgroundHttpSyncResult__ = std::shared_ptr<Promise<BackgroundHttpSyncResult>>;
+  inline std::shared_ptr<Promise<BackgroundHttpSyncResult>> create_std__shared_ptr_Promise_BackgroundHttpSyncResult__() noexcept {
+    return Promise<BackgroundHttpSyncResult>::create();
+  }
+  inline PromiseHolder<BackgroundHttpSyncResult> wrap_std__shared_ptr_Promise_BackgroundHttpSyncResult__(std::shared_ptr<Promise<BackgroundHttpSyncResult>> promise) noexcept {
+    return PromiseHolder<BackgroundHttpSyncResult>(std::move(promise));
+  }
+
+  // pragma MARK: std::function<void(const BackgroundHttpSyncResult& /* result */)>
+  /**
+   * Specialized version of `std::function<void(const BackgroundHttpSyncResult&)>`.
+   */
+  using Func_void_BackgroundHttpSyncResult = std::function<void(const BackgroundHttpSyncResult& /* result */)>;
+  /**
+   * Wrapper class for a `std::function<void(const BackgroundHttpSyncResult& / * result * /)>`, this can be used from Swift.
+   */
+  class Func_void_BackgroundHttpSyncResult_Wrapper final {
+  public:
+    explicit Func_void_BackgroundHttpSyncResult_Wrapper(std::function<void(const BackgroundHttpSyncResult& /* result */)>&& func): _function(std::make_unique<std::function<void(const BackgroundHttpSyncResult& /* result */)>>(std::move(func))) {}
+    inline void call(BackgroundHttpSyncResult result) const noexcept {
+      _function->operator()(result);
+    }
+  private:
+    std::unique_ptr<std::function<void(const BackgroundHttpSyncResult& /* result */)>> _function;
+  } SWIFT_NONCOPYABLE;
+  Func_void_BackgroundHttpSyncResult create_Func_void_BackgroundHttpSyncResult(void* NON_NULL swiftClosureWrapper) noexcept;
+  inline Func_void_BackgroundHttpSyncResult_Wrapper wrap_Func_void_BackgroundHttpSyncResult(Func_void_BackgroundHttpSyncResult value) noexcept {
+    return Func_void_BackgroundHttpSyncResult_Wrapper(std::move(value));
+  }
+
+  // pragma MARK: std::shared_ptr<HybridNitroBackgroundLocationSpec>
+  /**
+   * Specialized version of `std::shared_ptr<HybridNitroBackgroundLocationSpec>`.
+   */
+  using std__shared_ptr_HybridNitroBackgroundLocationSpec_ = std::shared_ptr<HybridNitroBackgroundLocationSpec>;
+  std::shared_ptr<HybridNitroBackgroundLocationSpec> create_std__shared_ptr_HybridNitroBackgroundLocationSpec_(void* NON_NULL swiftUnsafePointer) noexcept;
+  void* NON_NULL get_std__shared_ptr_HybridNitroBackgroundLocationSpec_(std__shared_ptr_HybridNitroBackgroundLocationSpec_ cppType);
+
+  // pragma MARK: std::weak_ptr<HybridNitroBackgroundLocationSpec>
+  using std__weak_ptr_HybridNitroBackgroundLocationSpec_ = std::weak_ptr<HybridNitroBackgroundLocationSpec>;
+  inline std__weak_ptr_HybridNitroBackgroundLocationSpec_ weakify_std__shared_ptr_HybridNitroBackgroundLocationSpec_(const std::shared_ptr<HybridNitroBackgroundLocationSpec>& strong) noexcept { return strong; }
+
+  // pragma MARK: Result<std::shared_ptr<Promise<BackgroundPermissionResult>>>
+  using Result_std__shared_ptr_Promise_BackgroundPermissionResult___ = Result<std::shared_ptr<Promise<BackgroundPermissionResult>>>;
+  inline Result_std__shared_ptr_Promise_BackgroundPermissionResult___ create_Result_std__shared_ptr_Promise_BackgroundPermissionResult___(const std::shared_ptr<Promise<BackgroundPermissionResult>>& value) noexcept {
+    return Result<std::shared_ptr<Promise<BackgroundPermissionResult>>>::withValue(value);
+  }
+  inline Result_std__shared_ptr_Promise_BackgroundPermissionResult___ create_Result_std__shared_ptr_Promise_BackgroundPermissionResult___(const std::exception_ptr& error) noexcept {
+    return Result<std::shared_ptr<Promise<BackgroundPermissionResult>>>::withError(error);
+  }
+
+  // pragma MARK: Result<std::shared_ptr<Promise<void>>>
+  using Result_std__shared_ptr_Promise_void___ = Result<std::shared_ptr<Promise<void>>>;
+  inline Result_std__shared_ptr_Promise_void___ create_Result_std__shared_ptr_Promise_void___(const std::shared_ptr<Promise<void>>& value) noexcept {
+    return Result<std::shared_ptr<Promise<void>>>::withValue(value);
+  }
+  inline Result_std__shared_ptr_Promise_void___ create_Result_std__shared_ptr_Promise_void___(const std::exception_ptr& error) noexcept {
+    return Result<std::shared_ptr<Promise<void>>>::withError(error);
+  }
+
+  // pragma MARK: Result<std::shared_ptr<Promise<std::optional<BackgroundLocationOptions>>>>
+  using Result_std__shared_ptr_Promise_std__optional_BackgroundLocationOptions____ = Result<std::shared_ptr<Promise<std::optional<BackgroundLocationOptions>>>>;
+  inline Result_std__shared_ptr_Promise_std__optional_BackgroundLocationOptions____ create_Result_std__shared_ptr_Promise_std__optional_BackgroundLocationOptions____(const std::shared_ptr<Promise<std::optional<BackgroundLocationOptions>>>& value) noexcept {
+    return Result<std::shared_ptr<Promise<std::optional<BackgroundLocationOptions>>>>::withValue(value);
+  }
+  inline Result_std__shared_ptr_Promise_std__optional_BackgroundLocationOptions____ create_Result_std__shared_ptr_Promise_std__optional_BackgroundLocationOptions____(const std::exception_ptr& error) noexcept {
+    return Result<std::shared_ptr<Promise<std::optional<BackgroundLocationOptions>>>>::withError(error);
+  }
+
+  // pragma MARK: Result<std::shared_ptr<Promise<BackgroundLocationStatus>>>
+  using Result_std__shared_ptr_Promise_BackgroundLocationStatus___ = Result<std::shared_ptr<Promise<BackgroundLocationStatus>>>;
+  inline Result_std__shared_ptr_Promise_BackgroundLocationStatus___ create_Result_std__shared_ptr_Promise_BackgroundLocationStatus___(const std::shared_ptr<Promise<BackgroundLocationStatus>>& value) noexcept {
+    return Result<std::shared_ptr<Promise<BackgroundLocationStatus>>>::withValue(value);
+  }
+  inline Result_std__shared_ptr_Promise_BackgroundLocationStatus___ create_Result_std__shared_ptr_Promise_BackgroundLocationStatus___(const std::exception_ptr& error) noexcept {
+    return Result<std::shared_ptr<Promise<BackgroundLocationStatus>>>::withError(error);
+  }
+
+  // pragma MARK: Result<std::shared_ptr<Promise<std::vector<StoredBackgroundLocation>>>>
+  using Result_std__shared_ptr_Promise_std__vector_StoredBackgroundLocation____ = Result<std::shared_ptr<Promise<std::vector<StoredBackgroundLocation>>>>;
+  inline Result_std__shared_ptr_Promise_std__vector_StoredBackgroundLocation____ create_Result_std__shared_ptr_Promise_std__vector_StoredBackgroundLocation____(const std::shared_ptr<Promise<std::vector<StoredBackgroundLocation>>>& value) noexcept {
+    return Result<std::shared_ptr<Promise<std::vector<StoredBackgroundLocation>>>>::withValue(value);
+  }
+  inline Result_std__shared_ptr_Promise_std__vector_StoredBackgroundLocation____ create_Result_std__shared_ptr_Promise_std__vector_StoredBackgroundLocation____(const std::exception_ptr& error) noexcept {
+    return Result<std::shared_ptr<Promise<std::vector<StoredBackgroundLocation>>>>::withError(error);
+  }
+
+  // pragma MARK: Result<std::shared_ptr<Promise<std::vector<StoredBackgroundEventEnvelope>>>>
+  using Result_std__shared_ptr_Promise_std__vector_StoredBackgroundEventEnvelope____ = Result<std::shared_ptr<Promise<std::vector<StoredBackgroundEventEnvelope>>>>;
+  inline Result_std__shared_ptr_Promise_std__vector_StoredBackgroundEventEnvelope____ create_Result_std__shared_ptr_Promise_std__vector_StoredBackgroundEventEnvelope____(const std::shared_ptr<Promise<std::vector<StoredBackgroundEventEnvelope>>>& value) noexcept {
+    return Result<std::shared_ptr<Promise<std::vector<StoredBackgroundEventEnvelope>>>>::withValue(value);
+  }
+  inline Result_std__shared_ptr_Promise_std__vector_StoredBackgroundEventEnvelope____ create_Result_std__shared_ptr_Promise_std__vector_StoredBackgroundEventEnvelope____(const std::exception_ptr& error) noexcept {
+    return Result<std::shared_ptr<Promise<std::vector<StoredBackgroundEventEnvelope>>>>::withError(error);
+  }
+
+  // pragma MARK: Result<std::shared_ptr<Promise<std::vector<GeofenceRegion>>>>
+  using Result_std__shared_ptr_Promise_std__vector_GeofenceRegion____ = Result<std::shared_ptr<Promise<std::vector<GeofenceRegion>>>>;
+  inline Result_std__shared_ptr_Promise_std__vector_GeofenceRegion____ create_Result_std__shared_ptr_Promise_std__vector_GeofenceRegion____(const std::shared_ptr<Promise<std::vector<GeofenceRegion>>>& value) noexcept {
+    return Result<std::shared_ptr<Promise<std::vector<GeofenceRegion>>>>::withValue(value);
+  }
+  inline Result_std__shared_ptr_Promise_std__vector_GeofenceRegion____ create_Result_std__shared_ptr_Promise_std__vector_GeofenceRegion____(const std::exception_ptr& error) noexcept {
+    return Result<std::shared_ptr<Promise<std::vector<GeofenceRegion>>>>::withError(error);
+  }
+
+  // pragma MARK: Result<std::shared_ptr<Promise<BackgroundHttpSyncResult>>>
+  using Result_std__shared_ptr_Promise_BackgroundHttpSyncResult___ = Result<std::shared_ptr<Promise<BackgroundHttpSyncResult>>>;
+  inline Result_std__shared_ptr_Promise_BackgroundHttpSyncResult___ create_Result_std__shared_ptr_Promise_BackgroundHttpSyncResult___(const std::shared_ptr<Promise<BackgroundHttpSyncResult>>& value) noexcept {
+    return Result<std::shared_ptr<Promise<BackgroundHttpSyncResult>>>::withValue(value);
+  }
+  inline Result_std__shared_ptr_Promise_BackgroundHttpSyncResult___ create_Result_std__shared_ptr_Promise_BackgroundHttpSyncResult___(const std::exception_ptr& error) noexcept {
+    return Result<std::shared_ptr<Promise<BackgroundHttpSyncResult>>>::withError(error);
   }
 
 } // namespace margelo::nitro::nitrogeolocation::bridge::swift

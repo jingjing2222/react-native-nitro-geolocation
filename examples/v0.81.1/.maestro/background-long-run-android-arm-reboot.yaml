@@ -1,0 +1,19 @@
+appId: nitrogeolocation.example
+---
+# Arms a post-reboot proof window before the shell wrapper reboots the emulator.
+
+- openLink:
+    link: nitrogeolocation://app/background-long-run
+- tapOn:
+    text: "열기|Open"
+    optional: true
+
+- extendedWaitUntil:
+    visible: "Background Long Run E2E"
+    timeout: 10000
+
+- tapOn:
+    id: "background-long-run-arm-reboot-button"
+- extendedWaitUntil:
+    visible: "Reboot probe: passed"
+    timeout: 15000

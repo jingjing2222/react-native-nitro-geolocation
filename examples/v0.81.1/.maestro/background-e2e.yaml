@@ -1,0 +1,57 @@
+appId: nitrogeolocation.example
+---
+# Background subsystem E2E page mixes expected failure and success contracts.
+
+- launchApp:
+    clearState: true
+    permissions:
+      all: allow
+
+- extendedWaitUntil:
+    visible: "Geolocation API"
+    timeout: 10000
+
+- stopApp
+
+- openLink:
+    link: nitrogeolocation://app/background-e2e
+- tapOn:
+    text: "열기|Open"
+    optional: true
+
+- extendedWaitUntil:
+    visible: "Background Location E2E"
+    timeout: 10000
+
+- tapOn:
+    id: "background-e2e-refresh-button"
+- assertVisible:
+    id: "background-e2e-status"
+
+- tapOn:
+    id: "background-e2e-invalid-config-button"
+- extendedWaitUntil:
+    visible: "Missing notification: passed"
+    timeout: 10000
+
+- tapOn:
+    id: "background-e2e-happy-path-button"
+- extendedWaitUntil:
+    visible: "Configure: passed"
+    timeout: 10000
+
+- extendedWaitUntil:
+    visible: "Start stop: passed"
+    timeout: 10000
+
+- extendedWaitUntil:
+    visible: "Geofence: passed"
+    timeout: 10000
+
+- extendedWaitUntil:
+    visible: "Storage: passed"
+    timeout: 10000
+
+- extendedWaitUntil:
+    visible: "Sync: passed"
+    timeout: 10000
