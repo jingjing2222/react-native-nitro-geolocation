@@ -1,3 +1,4 @@
+import Geolocation from "react-native-nitro-geolocation/compat";
 import {
   checkPermission,
   getCurrentPosition,
@@ -213,6 +214,23 @@ export async function runSuccessSuite() {
   setScenario("api-availability", apiReady ? "pass" : "fail", apiShape);
   if (!apiReady) {
     throw new Error("Modern API browser export is incomplete.");
+  }
+
+  setScenario("compat-api-availability", "running");
+  const compatShape = {
+    getCurrentPosition: typeof Geolocation.getCurrentPosition,
+    watchPosition: typeof Geolocation.watchPosition,
+    clearWatch: typeof Geolocation.clearWatch,
+    stopObserving: typeof Geolocation.stopObserving,
+    requestAuthorization: typeof Geolocation.requestAuthorization,
+    setRNConfiguration: typeof Geolocation.setRNConfiguration
+  };
+  const compatReady = Object.values(compatShape).every(
+    (type) => type === "function"
+  );
+  setScenario("compat-api-availability", compatReady ? "pass" : "fail", compatShape);
+  if (!compatReady) {
+    throw new Error("Compat API browser export is incomplete.");
   }
 
   await runStep<PermissionStatus>(
@@ -431,6 +449,7 @@ export async function runSuccessSuite() {
     (scenario) =>
       [
         "api-availability",
+        "compat-api-availability",
         "check-permission",
         "request-permission",
         "get-current-position",

@@ -16,6 +16,12 @@ export const scenarios: Scenario[] = [
     status: "idle"
   },
   {
+    id: "compat-api-availability",
+    title: "Compat API availability",
+    detail: "Compat browser export resolves without native bindings.",
+    status: "idle"
+  },
+  {
     id: "check-permission",
     title: "checkPermission",
     detail: "Reads browser permission state when Permissions API exists.",
