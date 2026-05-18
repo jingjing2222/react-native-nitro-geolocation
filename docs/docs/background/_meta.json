@@ -9,5 +9,6 @@
   "headless-js",
   "http-sync",
   "storage",
+  "long-run-e2e",
   "troubleshooting"
 ]

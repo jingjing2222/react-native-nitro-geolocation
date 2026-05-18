@@ -137,6 +137,38 @@ selected inside the master flow with `when.platform`.
 - Uses Maestro permissions to grant `ACCESS_COARSE_LOCATION` and deny `ACCESS_FINE_LOCATION`
 - Uses `setLocation` to provide deterministic coordinates, then verifies `enableHighAccuracy=false` returns a position instead of timing out
 
+### `background-e2e.yaml`
+- Short smoke contract for the dedicated background API page
+- Mixes one expected failure case with configure/start-stop/geofence/storage/sync success checks
+- Included in `all-tests.yaml` because it does not require long background waits or reboot
+
+### `background-long-run-android.yaml`
+- Android-only long-run contract for background delivery
+- Starts tracking, sends the app home, injects outside/inside/outside movement with native processing waits, then verifies post-marker stored location events, Headless JS delivery, and geofence enter/exit events
+- Not included in `all-tests.yaml` because it mutates device background state and can take longer than normal smoke flows
+- Run with:
+
+```bash
+yarn test:e2e:background-long-run:android
+```
+
+### `background-long-run-android-reboot.yaml`
+- Android-only post-reboot verification
+- Run through `RUN_REBOOT=1 yarn test:e2e:background-long-run:android`
+- Requires an Android emulator that accepts `adb emu geo fix`; the wrapper refuses physical devices before rebooting
+- Uses `background-long-run-android-arm-reboot.yaml` to clear queues and save a post-reboot proof marker before the emulator reboot
+- Verifies persisted `startOnBoot`, running state, geofence registration, post-boot location storage, and post-boot geofence transition storage
+
+### `background-long-run-ios.yaml`
+- iOS-only long-run contract for background/significant-change storage drain
+- Sends the app home, injects movement with native processing waits, then verifies native storage has post-marker background location events
+- Does not assert Android Headless JS or Android boot behavior because iOS has no equivalent contract
+- Run with:
+
+```bash
+yarn test:e2e:background-long-run:ios
+```
+
 ### `mocked-metadata-android-true.yaml`
 - Android-only contract for `mocked=true` and `provider` response metadata
 - Opens the dedicated mocked metadata page

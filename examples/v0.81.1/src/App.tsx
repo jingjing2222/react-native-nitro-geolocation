@@ -22,6 +22,7 @@ import Issue67Screen from "./screens/Issue67Screen";
 import LastKnownPositionScreen from "./screens/LastKnownPositionScreen";
 import LocationAvailabilityScreen from "./screens/LocationAvailabilityScreen";
 import LocationSimulationScreen from "./screens/LocationSimulationScreen";
+import { LongRunBackgroundE2EScreen } from "./screens/LongRunBackgroundE2EScreen";
 import MockedMetadataScreen from "./screens/MockedMetadataScreen";
 import PermissionCheckScreen from "./screens/PermissionCheckScreen";
 import ProviderSettingsScreen from "./screens/ProviderSettingsScreen";
@@ -49,6 +50,7 @@ const linking = {
       Heading: "heading",
       AndroidRequestOptions: "android-request-options",
       BackgroundE2E: "background-e2e",
+      LongRunBackgroundE2E: "background-long-run",
       IOSLocationTuning: "ios-location-tuning",
       IOSAccuracyAuthorization: "ios-accuracy-authorization",
       IOSReleaseOptionsBridge: "ios-release-options-bridge",
@@ -171,6 +173,11 @@ export default function App() {
         <Tab.Screen
           name="BackgroundE2E"
           component={BackgroundE2EScreen}
+          options={hiddenTabOptions}
+        />
+        <Tab.Screen
+          name="LongRunBackgroundE2E"
+          component={LongRunBackgroundE2EScreen}
           options={hiddenTabOptions}
         />
         <Tab.Screen

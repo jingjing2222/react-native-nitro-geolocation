@@ -12,4 +12,5 @@ import {
 } from 'react-native-nitro-geolocation/background';
 ```
 
-Prefer `react-native-nitro-geolocation/background`; main-package namespace export exists only for convenience.
+Prefer `react-native-nitro-geolocation/background` so foreground and background
+imports stay explicit and tree-shakable.

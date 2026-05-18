@@ -1,0 +1,68 @@
+appId: nitrogeolocation.example
+---
+# iOS long-run flow. iOS has no Headless JS or boot receiver contract, so this
+# verifies background/significant-change storage drain and platform limits.
+
+- launchApp:
+    clearState: true
+    permissions:
+      all: allow
+
+- extendedWaitUntil:
+    visible: "Geolocation API"
+    timeout: 10000
+
+- stopApp
+
+- openLink:
+    link: nitrogeolocation://app/background-long-run
+- tapOn:
+    text: "열기|Open"
+    optional: true
+
+- extendedWaitUntil:
+    visible: "Background Long Run E2E"
+    timeout: 10000
+
+- tapOn:
+    id: "background-long-run-prepare-button"
+- extendedWaitUntil:
+    visible: "Prepare: passed"
+    timeout: 20000
+
+- setLocation:
+    latitude: 37.563
+    longitude: 126.97
+- pressKey: Home
+- setLocation:
+    latitude: 37.5665
+    longitude: 126.978
+- runScript: scripts/wait-15s.js
+- setLocation:
+    latitude: 37.563
+    longitude: 126.97
+- runScript: scripts/wait-15s.js
+
+- openLink:
+    link: nitrogeolocation://app/background-long-run
+- tapOn:
+    text: "열기|Open"
+    optional: true
+
+- extendedWaitUntil:
+    visible: "Background Long Run E2E"
+    timeout: 10000
+
+- tapOn:
+    id: "background-long-run-refresh-button"
+- tapOn:
+    id: "background-long-run-validate-ios-drain-button"
+- extendedWaitUntil:
+    visible: "iOS drain: passed"
+    timeout: 15000
+
+- tapOn:
+    id: "background-long-run-platform-limits-button"
+- extendedWaitUntil:
+    visible: "Platform limits: passed"
+    timeout: 10000

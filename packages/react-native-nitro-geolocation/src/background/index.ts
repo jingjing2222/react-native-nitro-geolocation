@@ -66,7 +66,9 @@ export const getBackgroundConfiguration =
   );
 export const startBackgroundLocation: NitroBackgroundLocation["startBackgroundLocation"] =
   (options) =>
-    NativeBackgroundLocation.startBackgroundLocation(options ?? (null as any));
+    NativeBackgroundLocation.startBackgroundLocation(
+      options ?? (undefined as any)
+    );
 export const stopBackgroundLocation =
   NativeBackgroundLocation.stopBackgroundLocation.bind(
     NativeBackgroundLocation
@@ -82,12 +84,12 @@ export const getBackgroundLocationStatus =
 export const getStoredBackgroundLocations: NitroBackgroundLocation["getStoredBackgroundLocations"] =
   (options) =>
     NativeBackgroundLocation.getStoredBackgroundLocations(
-      options ?? (null as any)
+      options ?? (undefined as any)
     );
 export const clearStoredBackgroundLocations: NitroBackgroundLocation["clearStoredBackgroundLocations"] =
   (ids) =>
     NativeBackgroundLocation.clearStoredBackgroundLocations(
-      ids ?? (null as any)
+      ids ?? (undefined as any)
     );
 export const markStoredBackgroundLocationsDelivered =
   NativeBackgroundLocation.markStoredBackgroundLocationsDelivered.bind(
@@ -97,7 +99,7 @@ export async function getStoredBackgroundEvents(
   options?: Parameters<NitroBackgroundLocation["getStoredBackgroundEvents"]>[0]
 ): Promise<StoredBackgroundEvent[]> {
   const events = await NativeBackgroundLocation.getStoredBackgroundEvents(
-    options ?? (null as any)
+    options ?? (undefined as any)
   );
   return events.map((event: StoredBackgroundEventEnvelope) => ({
     ...event,
@@ -106,7 +108,9 @@ export async function getStoredBackgroundEvents(
 }
 export const clearStoredBackgroundEvents: NitroBackgroundLocation["clearStoredBackgroundEvents"] =
   (ids) =>
-    NativeBackgroundLocation.clearStoredBackgroundEvents(ids ?? (null as any));
+    NativeBackgroundLocation.clearStoredBackgroundEvents(
+      ids ?? (undefined as any)
+    );
 export const markStoredBackgroundEventsDelivered =
   NativeBackgroundLocation.markStoredBackgroundEventsDelivered.bind(
     NativeBackgroundLocation
@@ -116,14 +120,17 @@ export const addGeofences = NativeBackgroundLocation.addGeofences.bind(
 );
 export const removeGeofences: NitroBackgroundLocation["removeGeofences"] = (
   identifiers
-) => NativeBackgroundLocation.removeGeofences(identifiers ?? (null as any));
+) =>
+  NativeBackgroundLocation.removeGeofences(identifiers ?? (undefined as any));
 export const getRegisteredGeofences =
   NativeBackgroundLocation.getRegisteredGeofences.bind(
     NativeBackgroundLocation
   );
 export const startActivityRecognition: NitroBackgroundLocation["startActivityRecognition"] =
   (options) =>
-    NativeBackgroundLocation.startActivityRecognition(options ?? (null as any));
+    NativeBackgroundLocation.startActivityRecognition(
+      options ?? (undefined as any)
+    );
 export const stopActivityRecognition =
   NativeBackgroundLocation.stopActivityRecognition.bind(
     NativeBackgroundLocation
