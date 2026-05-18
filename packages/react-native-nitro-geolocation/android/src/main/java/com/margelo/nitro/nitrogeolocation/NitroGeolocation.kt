@@ -3,7 +3,6 @@ package com.margelo.nitro.nitrogeolocation
 import android.Manifest
 import android.content.Context
 import android.content.pm.PackageManager
-import android.location.Address
 import android.location.Geocoder
 import android.location.Location
 import android.location.LocationListener
@@ -21,7 +20,6 @@ import com.facebook.react.modules.core.PermissionListener
 import com.google.android.gms.common.ConnectionResult
 import com.google.android.gms.common.GoogleApiAvailability
 import com.google.android.gms.location.LocationCallback
-import com.google.android.gms.location.LocationRequest as GmsLocationRequest
 import com.google.android.gms.location.LocationResult
 import com.google.android.gms.location.LocationServices
 import com.margelo.nitro.NitroModules
@@ -31,11 +29,6 @@ import java.util.Locale
 import java.util.UUID
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.atomic.AtomicBoolean
-
-private const val NO_LOCATION_PROVIDER_AVAILABLE_MESSAGE = "No location provider available"
-private const val NO_APPROXIMATE_LOCATION_PROVIDER_AVAILABLE_MESSAGE =
-    "No location provider is available for approximate location. " +
-        "ACCESS_COARSE_LOCATION is granted, but no enabled coarse-compatible provider is available."
 
 /**
  * Geolocation implementation for Android.
@@ -50,94 +43,6 @@ private const val NO_APPROXIMATE_LOCATION_PROVIDER_AVAILABLE_MESSAGE =
 class NitroGeolocation(
     private val reactContext: ReactApplicationContext = NitroModules.applicationContext!!
 ) : HybridNitroGeolocationSpec() {
-
-    // MARK: - Types
-
-    private data class ParsedOptions(
-        val timeout: Double,
-        val maximumAge: Double,
-        val androidAccuracy: AndroidAccuracyResolution,
-        val interval: Double,
-        val fastestInterval: Double,
-        val distanceFilter: Double,
-        val granularity: AndroidGranularity,
-        val waitForAccurateLocation: Boolean,
-        val maxUpdateAge: Double?,
-        val maxUpdateDelay: Double,
-        val maxUpdates: Int?
-    ) {
-        companion object {
-            private const val DEFAULT_TIMEOUT = 10.0 * 60 * 1000 // 10 minutes in ms
-            private const val DEFAULT_MAXIMUM_AGE = 0.0
-            private const val DEFAULT_INTERVAL = 1000.0
-            private const val DEFAULT_FASTEST_INTERVAL = 100.0
-            private const val DEFAULT_DISTANCE_FILTER = 0.0
-            private const val DEFAULT_MAX_UPDATE_DELAY = 0.0
-
-            fun parse(
-                options: LocationRequestOptions?,
-                defaultMaximumAge: Double = DEFAULT_MAXIMUM_AGE
-            ): ParsedOptions {
-                val enableHighAccuracy = options?.enableHighAccuracy ?: false
-                val maxUpdates = options?.maxUpdates?.let { value ->
-                    if (!value.isFinite()) {
-                        0
-                    } else {
-                        value.toInt()
-                    }
-                }
-
-                return ParsedOptions(
-                    timeout = options?.timeout ?: DEFAULT_TIMEOUT,
-                    maximumAge = options?.maximumAge ?: defaultMaximumAge,
-                    androidAccuracy = resolveAndroidAccuracy(
-                        options?.accuracy,
-                        enableHighAccuracy
-                    ),
-                    interval = options?.interval ?: DEFAULT_INTERVAL,
-                    fastestInterval = options?.fastestInterval ?: DEFAULT_FASTEST_INTERVAL,
-                    distanceFilter = options?.distanceFilter ?: DEFAULT_DISTANCE_FILTER,
-                    granularity = options?.granularity ?: AndroidGranularity.PERMISSION,
-                    waitForAccurateLocation = options?.waitForAccurateLocation ?: false,
-                    maxUpdateAge = options?.maxUpdateAge,
-                    maxUpdateDelay = options?.maxUpdateDelay ?: DEFAULT_MAX_UPDATE_DELAY,
-                    maxUpdates = maxUpdates
-                )
-            }
-
-            fun parseLastKnown(options: LocationRequestOptions?): ParsedOptions {
-                return parse(options, defaultMaximumAge = Double.POSITIVE_INFINITY)
-            }
-        }
-    }
-
-    private data class WatchSubscription(
-        val token: String,
-        val success: (GeolocationResponse) -> Unit,
-        val error: ((LocationError) -> Unit)?,
-        val options: ParsedOptions,
-        var deliveredUpdates: Int = 0
-    )
-
-    private sealed interface PositionResult {
-        data class Success(val position: GeolocationResponse) : PositionResult
-        data class Failure(val error: LocationError) : PositionResult
-    }
-
-    private data class PositionRequest(
-        val id: UUID,
-        val resolver: (PositionResult) -> Unit,
-        val options: ParsedOptions,
-        val handler: Handler,
-        val providers: List<String>,
-        val deadlineElapsedRealtime: Long,
-        var providerIndex: Int = 0,
-        var cancellationSignal: CancellationSignal? = null
-    ) {
-        fun remainingTimeoutMillis(): Long {
-            return (deadlineElapsedRealtime - SystemClock.elapsedRealtime()).coerceAtLeast(0L)
-        }
-    }
 
     // MARK: - Properties
 
@@ -182,14 +87,6 @@ class NitroGeolocation(
     // Location listener for watch subscriptions
     private var watchLocationListener: LocationListener? = null
     private var fusedWatchLocationCallback: LocationCallback? = null
-
-    // Error codes
-    private val INTERNAL_ERROR = -1.0
-    private val PERMISSION_DENIED = 1.0
-    private val POSITION_UNAVAILABLE = 2.0
-    private val TIMEOUT = 3.0
-    private val PLAY_SERVICE_NOT_AVAILABLE = 4.0
-    private val SETTINGS_NOT_SATISFIED = 5.0
 
     // MARK: - Configuration
 
@@ -475,7 +372,7 @@ class NitroGeolocation(
             @Suppress("DEPRECATION")
             geocoder.getFromLocationName(query, GEOCODER_MAX_RESULTS)
                 .orEmpty()
-                .mapNotNull { geocodedAddressToLocation(it) }
+                .mapNotNull { it.toGeocodedLocation() }
                 .toTypedArray()
         }
     }
@@ -500,7 +397,7 @@ class NitroGeolocation(
                 GEOCODER_MAX_RESULTS
             )
                 .orEmpty()
-                .map { addressToReverseGeocodedAddress(it) }
+                .map { it.toReverseGeocodedAddress() }
                 .toTypedArray()
         }
     }
@@ -1489,64 +1386,7 @@ class NitroGeolocation(
     private fun locationToPosition(location: Location): GeolocationResponse {
         lastLocation = location
 
-        val coords = GeolocationCoordinates(
-            latitude = location.latitude,
-            longitude = location.longitude,
-            altitude = location.altitudeValue(),
-            accuracy = location.accuracy.toDouble(),
-            altitudeAccuracy = location.altitudeAccuracyValue(),
-            heading = location.headingValue(),
-            speed = location.speedValue()
-        )
-
-        return GeolocationResponse(
-            coords = coords,
-            timestamp = location.time.toDouble(),
-            mocked = location.isMocked(),
-            provider = location.providerUsed()
-        )
-    }
-
-    private fun geocodedAddressToLocation(address: Address): GeocodedLocation? {
-        if (!address.hasLatitude() || !address.hasLongitude()) {
-            return null
-        }
-
-        return GeocodedLocation(
-            latitude = address.latitude,
-            longitude = address.longitude,
-            accuracy = null
-        )
-    }
-
-    private fun addressToReverseGeocodedAddress(address: Address): ReverseGeocodedAddress {
-        return ReverseGeocodedAddress(
-            country = address.countryName.nonBlankOrNull(),
-            region = address.adminArea.nonBlankOrNull(),
-            city = (address.locality ?: address.subAdminArea).nonBlankOrNull(),
-            district = address.subLocality.nonBlankOrNull(),
-            street = formatStreet(address),
-            postalCode = address.postalCode.nonBlankOrNull(),
-            formattedAddress = formatAddressLines(address)
-        )
-    }
-
-    private fun formatStreet(address: Address): String? {
-        return listOf(address.subThoroughfare, address.thoroughfare)
-            .mapNotNull { it.nonBlankOrNull() }
-            .joinToString(" ")
-            .nonBlankOrNull()
-    }
-
-    private fun formatAddressLines(address: Address): String? {
-        if (address.maxAddressLineIndex < 0) {
-            return null
-        }
-
-        return (0..address.maxAddressLineIndex)
-            .mapNotNull { index -> address.getAddressLine(index).nonBlankOrNull() }
-            .joinToString(", ")
-            .nonBlankOrNull()
+        return location.toGeolocationResponse()
     }
 
     private fun validateGeocodingCoordinates(coords: GeocodingCoordinates): LocationError? {
@@ -1605,107 +1445,9 @@ class NitroGeolocation(
         }.start()
     }
 
-    private fun createLocationAvailability(
-        available: Boolean,
-        reason: String?
-    ): LocationAvailability {
-        return LocationAvailability(
-            available = available,
-            reason = reason
-        )
-    }
-
-    private fun createLocationError(code: Double, message: String): LocationError {
-        return LocationError(
-            code = code,
-            message = message
-        )
-    }
-
-    private fun createPlayServicesUnavailableError(): LocationError {
-        return createLocationError(
-            PLAY_SERVICE_NOT_AVAILABLE,
-            "Google Play Services location provider is not available."
-        )
-    }
-
-    private fun createPositionTimeoutError(options: ParsedOptions): LocationError {
-        val timeoutSeconds = options.timeout / 1000.0
-        val message = String.format("Unable to fetch location within %.1fs.", timeoutSeconds)
-        return createLocationError(TIMEOUT, message)
-    }
-
-    private fun createRequestDeadlineElapsedRealtime(timeout: Double): Long {
-        val now = SystemClock.elapsedRealtime()
-        val timeoutMillis = coerceTimeoutMillis(timeout)
-        val maxTimeoutMillis = Long.MAX_VALUE - now
-
-        return if (timeoutMillis >= maxTimeoutMillis) {
-            Long.MAX_VALUE
-        } else {
-            now + timeoutMillis
-        }
-    }
-
-    private fun coerceTimeoutMillis(timeout: Double): Long {
-        return when {
-            timeout.isNaN() || timeout <= 0.0 -> 0L
-            timeout.isInfinite() || timeout >= Long.MAX_VALUE.toDouble() -> Long.MAX_VALUE
-            else -> timeout.toLong()
-        }
-    }
-
-    private fun buildFusedLocationRequest(
-        options: ParsedOptions,
-        maxUpdatesOverride: Int? = null,
-        includeDistanceFilter: Boolean = true
-    ): GmsLocationRequest {
-        val builder = GmsLocationRequest
-            .Builder(options.androidAccuracy.gmsPriority(), coercePositiveMillis(options.interval))
-            .setMinUpdateIntervalMillis(coercePositiveMillis(options.fastestInterval))
-            .setGranularity(options.granularity.gmsGranularity())
-            .setWaitForAccurateLocation(options.waitForAccurateLocation)
-            .setMaxUpdateDelayMillis(coerceNonNegativeMillis(options.maxUpdateDelay))
-
-        if (includeDistanceFilter) {
-            builder.setMinUpdateDistanceMeters(options.distanceFilter.toFloat())
-        }
-
-        options.maxUpdateAge?.let { value ->
-            builder.setMaxUpdateAgeMillis(coerceNonNegativeMillis(value))
-        }
-
-        val maxUpdates = maxUpdatesOverride ?: options.maxUpdates
-        if (maxUpdates != null) {
-            builder.setMaxUpdates(maxUpdates)
-        }
-
-        return builder.build()
-    }
-
-    private fun coercePositiveMillis(value: Double): Long {
-        return when {
-            value.isNaN() || value <= 0.0 -> 1L
-            value.isInfinite() || value >= Long.MAX_VALUE.toDouble() -> Long.MAX_VALUE
-            else -> value.toLong()
-        }
-    }
-
-    private fun coerceNonNegativeMillis(value: Double): Long {
-        return when {
-            value.isNaN() || value <= 0.0 -> 0L
-            value.isInfinite() || value >= Long.MAX_VALUE.toDouble() -> Long.MAX_VALUE
-            else -> value.toLong()
-        }
-    }
-
     companion object {
         private const val PERMISSION_REQUEST_CODE = 8947
         private const val GEOCODER_MAX_RESULTS = 5
         private const val TWO_MINUTES_MS = 2 * 60 * 1000L
     }
-}
-
-private fun String?.nonBlankOrNull(): String? {
-    return this?.trim()?.takeIf { it.isNotEmpty() }
 }
