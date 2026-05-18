@@ -79,6 +79,8 @@ export function getCurrentPosition(
   );
 }
 
+const activeWatches = new Set<number>();
+
 export function watchPosition(
   success: (position: CompatGeolocationResponse) => void,
   error?: (error: CompatGeolocationError) => void,
@@ -95,7 +97,7 @@ export function watchPosition(
     });
     return -1;
   }
-  return geo.watchPosition(
+  const watchId = geo.watchPosition(
     (pos) => success(mapPosition(pos)),
     error ? (err) => error(mapError(err)) : undefined,
     options
@@ -106,13 +108,26 @@ export function watchPosition(
         }
       : undefined
   );
+  activeWatches.add(watchId);
+  return watchId;
 }
 
 export function clearWatch(watchId: number): void {
   getGeolocation()?.clearWatch(watchId);
+  activeWatches.delete(watchId);
 }
 
-export function stopObserving(): void {}
+export function stopObserving(): void {
+  const geo = getGeolocation();
+  if (!geo) {
+    activeWatches.clear();
+    return;
+  }
+  for (const watchId of activeWatches) {
+    geo.clearWatch(watchId);
+  }
+  activeWatches.clear();
+}
 
 const Geolocation = {
   setRNConfiguration,
