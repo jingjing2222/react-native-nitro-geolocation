@@ -642,7 +642,9 @@ class NitroBackgroundLocation: HybridNitroBackgroundLocationSpec {
         let stopOnStill = activityOptions?.stopOnStill ?? (options.trackingMode == .activityaware)
         if activity.type == .still && stopOnStill {
             runOnMainSync {
+                self.manager?.disallowDeferredLocationUpdates()
                 self.manager?.stopUpdatingLocation()
+                self.manager?.stopMonitoringSignificantLocationChanges()
             }
             return
         }
@@ -1545,6 +1547,7 @@ class NitroBackgroundLocation: HybridNitroBackgroundLocationSpec {
     }
 
     private func permissionResult() -> BackgroundPermissionResult {
+        ensureManager()
         let status = CLLocationManager.authorizationStatus()
         let foreground: PermissionStatus
         let background: BackgroundPermissionStatus
