@@ -13,10 +13,11 @@ import android.os.CancellationSignal
 import android.os.Handler
 import android.os.Looper
 import android.os.SystemClock
-import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import com.facebook.proguard.annotations.DoNotStrip
 import com.facebook.react.bridge.ReactApplicationContext
+import com.facebook.react.modules.core.PermissionAwareActivity
+import com.facebook.react.modules.core.PermissionListener
 import com.google.android.gms.common.ConnectionResult
 import com.google.android.gms.common.GoogleApiAvailability
 import com.google.android.gms.location.LocationCallback
@@ -181,7 +182,6 @@ class NitroGeolocation(
     // Location listener for watch subscriptions
     private var watchLocationListener: LocationListener? = null
     private var fusedWatchLocationCallback: LocationCallback? = null
-    private var currentWatchProvider: String? = null
 
     // Error codes
     private val INTERNAL_ERROR = -1.0
@@ -227,6 +227,15 @@ class NitroGeolocation(
             return
         }
 
+        val permissionAware = activity as? PermissionAwareActivity
+        if (permissionAware == null) {
+            error?.invoke(createLocationError(
+                INTERNAL_ERROR,
+                "Current activity cannot request permissions"
+            ))
+            return
+        }
+
         // Queue resolver
         pendingPermissionResolvers.add(success)
 
@@ -236,10 +245,10 @@ class NitroGeolocation(
             Manifest.permission.ACCESS_COARSE_LOCATION
         )
 
-        ActivityCompat.requestPermissions(
-            activity,
+        permissionAware.requestPermissions(
             permissions,
-            PERMISSION_REQUEST_CODE
+            PERMISSION_REQUEST_CODE,
+            createPermissionListener()
         )
     }
 
@@ -730,8 +739,13 @@ class NitroGeolocation(
         return null
     }
 
-    // Handle permission request result (called from Activity)
-    fun onPermissionResult(requestCode: Int, grantResults: IntArray) {
+    private fun createPermissionListener() =
+        PermissionListener { requestCode, _, grantResults ->
+            onPermissionResult(requestCode, grantResults)
+            requestCode == PERMISSION_REQUEST_CODE
+        }
+
+    private fun onPermissionResult(requestCode: Int, grantResults: IntArray) {
         if (requestCode != PERMISSION_REQUEST_CODE) return
 
         val granted = grantResults.isNotEmpty() && grantResults.any { it == PackageManager.PERMISSION_GRANTED }
@@ -1250,7 +1264,6 @@ class NitroGeolocation(
             notifyWatchProviderUnavailable()
             return
         }
-        currentWatchProvider = provider
 
         val listener = object : LocationListener {
             override fun onLocationChanged(location: Location) {
@@ -1464,7 +1477,6 @@ class NitroGeolocation(
         }
         watchLocationListener = null
         fusedWatchLocationCallback = null
-        currentWatchProvider = null
     }
 
     private fun restartWatchingLocation() {
