@@ -11,11 +11,11 @@
         "!android/build",
         "src/*.ts",
         "src/*.tsx",
-        "example/package.json",
-        "example/android",
-        "!example/android/.gradle",
-        "!example/android/build",
-        "!example/android/app/build"
+        "../../examples/v0.81.1/package.json",
+        "../../examples/v0.81.1/android",
+        "!../../examples/v0.81.1/android/.gradle",
+        "!../../examples/v0.81.1/android/build",
+        "!../../examples/v0.81.1/android/app/build"
       ],
       "outputs": []
     },
@@ -31,10 +31,10 @@
         "ios",
         "src/*.ts",
         "src/*.tsx",
-        "example/package.json",
-        "example/ios",
-        "!example/ios/build",
-        "!example/ios/Pods"
+        "../../examples/v0.81.1/package.json",
+        "../../examples/v0.81.1/ios",
+        "!../../examples/v0.81.1/ios/build",
+        "!../../examples/v0.81.1/ios/Pods"
       ],
       "outputs": []
     }

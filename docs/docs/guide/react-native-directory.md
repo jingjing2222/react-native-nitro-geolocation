@@ -17,14 +17,14 @@ Native Directory.
 | New Architecture | Required target; implemented through Nitro Modules |
 | Expo Go | Not supported |
 | Expo development builds | Supported with native setup |
-| Full background tracking/geofencing | Not targeted |
+| Full background tracking/geofencing | Supported through `react-native-nitro-geolocation/background` |
 
 ## Directory Positioning
 
 Recommended short description:
 
 ```txt
-Nitro-powered native geolocation for React Native 0.75+. Use /compat to replace @react-native-community/geolocation, then migrate to a typed Modern API with Android settings checks, geocoding, heading, and DevTools mocking.
+Nitro-powered native geolocation for React Native 0.75+. Use /compat to replace @react-native-community/geolocation, then migrate to a typed Modern API with Android settings checks, geocoding, heading, background tracking, and DevTools mocking.
 ```
 
 Recommended caveat:
@@ -42,4 +42,4 @@ Targets bare React Native, RN CLI, Expo development/custom native builds, and Mo
 - Docs include Expo development build guidance.
 - Docs include community and service migration paths.
 - Benchmark docs clearly state cached-read and JS-native latency scope.
-- Roadmap issue tracks compatibility matrix, `/compat` web fallback, extra benchmarks, and real migration examples.
+- Roadmap issue tracks compatibility matrix, extra benchmarks, and real migration examples.
