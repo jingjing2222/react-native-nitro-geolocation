@@ -65,9 +65,9 @@ export interface GeolocationConfiguration {
 
   /**
    * Android: Location provider
-   * - 'playServices': Use Google Play Services (fused location)
+   * - 'playServices': Prefer Google Play Services (fused location), then platform fallback
    * - 'android_platform': Use Android platform LocationManager
-   * - 'auto': Use Android platform LocationManager by default
+   * - 'auto': Prefer Google Play Services (fused location), then platform fallback
    */
   locationProvider?: LocationProvider;
 }
@@ -296,7 +296,7 @@ export interface NitroGeolocation
    * Get whether the current platform is likely to deliver location updates.
    *
    * Android: uses Fused Location availability when the configured provider is
-   * Play Services, otherwise falls back to platform provider/service checks.
+   * auto or Play Services, then falls back to platform provider/service checks.
    *
    * iOS: maps Core Location service and authorization state.
    */
@@ -347,7 +347,7 @@ export interface NitroGeolocation
    *
    * Strategy:
    * 1. Check cached location (if maximumAge allows)
-   * 2. Request fresh location from GPS/Network
+   * 2. Request fresh location from the configured native provider
    * 3. Timeout after specified duration
    *
    * Internal native contract. The public JS API wraps this in a Promise so

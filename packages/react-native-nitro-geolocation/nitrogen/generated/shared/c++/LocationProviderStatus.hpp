@@ -44,11 +44,12 @@ namespace margelo::nitro::nitrogeolocation {
     std::optional<bool> gpsAvailable     SWIFT_PRIVATE;
     std::optional<bool> networkAvailable     SWIFT_PRIVATE;
     std::optional<bool> passiveAvailable     SWIFT_PRIVATE;
+    std::optional<bool> googlePlayServicesAvailable     SWIFT_PRIVATE;
     std::optional<bool> googleLocationAccuracyEnabled     SWIFT_PRIVATE;
 
   public:
     LocationProviderStatus() = default;
-    explicit LocationProviderStatus(bool locationServicesEnabled, bool backgroundModeEnabled, std::optional<bool> gpsAvailable, std::optional<bool> networkAvailable, std::optional<bool> passiveAvailable, std::optional<bool> googleLocationAccuracyEnabled): locationServicesEnabled(locationServicesEnabled), backgroundModeEnabled(backgroundModeEnabled), gpsAvailable(gpsAvailable), networkAvailable(networkAvailable), passiveAvailable(passiveAvailable), googleLocationAccuracyEnabled(googleLocationAccuracyEnabled) {}
+    explicit LocationProviderStatus(bool locationServicesEnabled, bool backgroundModeEnabled, std::optional<bool> gpsAvailable, std::optional<bool> networkAvailable, std::optional<bool> passiveAvailable, std::optional<bool> googlePlayServicesAvailable, std::optional<bool> googleLocationAccuracyEnabled): locationServicesEnabled(locationServicesEnabled), backgroundModeEnabled(backgroundModeEnabled), gpsAvailable(gpsAvailable), networkAvailable(networkAvailable), passiveAvailable(passiveAvailable), googlePlayServicesAvailable(googlePlayServicesAvailable), googleLocationAccuracyEnabled(googleLocationAccuracyEnabled) {}
 
   public:
     friend bool operator==(const LocationProviderStatus& lhs, const LocationProviderStatus& rhs) = default;
@@ -69,6 +70,7 @@ namespace margelo::nitro {
         JSIConverter<std::optional<bool>>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "gpsAvailable"))),
         JSIConverter<std::optional<bool>>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "networkAvailable"))),
         JSIConverter<std::optional<bool>>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "passiveAvailable"))),
+        JSIConverter<std::optional<bool>>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "googlePlayServicesAvailable"))),
         JSIConverter<std::optional<bool>>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "googleLocationAccuracyEnabled")))
       );
     }
@@ -79,6 +81,7 @@ namespace margelo::nitro {
       obj.setProperty(runtime, PropNameIDCache::get(runtime, "gpsAvailable"), JSIConverter<std::optional<bool>>::toJSI(runtime, arg.gpsAvailable));
       obj.setProperty(runtime, PropNameIDCache::get(runtime, "networkAvailable"), JSIConverter<std::optional<bool>>::toJSI(runtime, arg.networkAvailable));
       obj.setProperty(runtime, PropNameIDCache::get(runtime, "passiveAvailable"), JSIConverter<std::optional<bool>>::toJSI(runtime, arg.passiveAvailable));
+      obj.setProperty(runtime, PropNameIDCache::get(runtime, "googlePlayServicesAvailable"), JSIConverter<std::optional<bool>>::toJSI(runtime, arg.googlePlayServicesAvailable));
       obj.setProperty(runtime, PropNameIDCache::get(runtime, "googleLocationAccuracyEnabled"), JSIConverter<std::optional<bool>>::toJSI(runtime, arg.googleLocationAccuracyEnabled));
       return obj;
     }
@@ -95,6 +98,7 @@ namespace margelo::nitro {
       if (!JSIConverter<std::optional<bool>>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "gpsAvailable")))) return false;
       if (!JSIConverter<std::optional<bool>>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "networkAvailable")))) return false;
       if (!JSIConverter<std::optional<bool>>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "passiveAvailable")))) return false;
+      if (!JSIConverter<std::optional<bool>>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "googlePlayServicesAvailable")))) return false;
       if (!JSIConverter<std::optional<bool>>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "googleLocationAccuracyEnabled")))) return false;
       return true;
     }

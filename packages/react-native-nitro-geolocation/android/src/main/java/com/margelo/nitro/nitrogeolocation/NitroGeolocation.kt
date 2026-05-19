@@ -19,9 +19,11 @@ import com.facebook.react.modules.core.PermissionAwareActivity
 import com.facebook.react.modules.core.PermissionListener
 import com.google.android.gms.common.ConnectionResult
 import com.google.android.gms.common.GoogleApiAvailability
+import com.google.android.gms.location.CurrentLocationRequest
 import com.google.android.gms.location.LocationCallback
 import com.google.android.gms.location.LocationResult
 import com.google.android.gms.location.LocationServices
+import com.google.android.gms.tasks.CancellationTokenSource
 import com.margelo.nitro.NitroModules
 import com.margelo.nitro.core.Promise
 import java.io.IOException
@@ -29,6 +31,10 @@ import java.util.Locale
 import java.util.UUID
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.atomic.AtomicBoolean
+import java.util.concurrent.atomic.AtomicLong
+
+private const val FUSED_ATTEMPT_TIMEOUT_MS = 15_000L
+private const val FUSED_FALLBACK_RESERVED_TIMEOUT_MS = 10_000L
 
 /**
  * Geolocation implementation for Android.
@@ -87,6 +93,7 @@ class NitroGeolocation(
     // Location listener for watch subscriptions
     private var watchLocationListener: LocationListener? = null
     private var fusedWatchLocationCallback: LocationCallback? = null
+    private val watchLocationGeneration = AtomicLong(0L)
 
     // MARK: - Configuration
 
@@ -178,36 +185,26 @@ class NitroGeolocation(
             return promise
         }
 
-        if (requiresPlayServices()) {
-            if (!isGooglePlayServicesAvailable()) {
-                promise.resolve(createLocationAvailability(false, "playServicesUnavailable"))
-                return promise
-            }
-
+        if (currentProviderRoute(isGooglePlayServicesAvailable()) == AndroidProviderRoute.FUSED) {
             fusedLocationClient.locationAvailability
                 .addOnSuccessListener { availability ->
-                    promise.resolve(
-                        createLocationAvailability(
-                            availability.isLocationAvailable,
-                            if (availability.isLocationAvailable) null else "fusedLocationUnavailable"
-                        )
-                    )
+                    if (availability.isLocationAvailable) {
+                        promise.resolve(createLocationAvailability(true, null))
+                        return@addOnSuccessListener
+                    }
+
+                    promise.resolve(getPlatformLocationAvailability())
                 }
-                .addOnFailureListener { exception ->
-                    promise.resolve(createLocationAvailability(
-                        false,
-                        "fusedLocationUnavailable: ${exception.message ?: "unknown error"}"
-                    ))
+                .addOnFailureListener {
+                    promise.resolve(getPlatformLocationAvailability())
                 }
                 .addOnCanceledListener {
-                    promise.resolve(createLocationAvailability(false, "fusedLocationUnavailable"))
+                    promise.resolve(getPlatformLocationAvailability())
                 }
             return promise
         }
 
-        val providers = getValidProviders(resolveAndroidAccuracy(null, enableHighAccuracy = false))
-        val reason = if (providers.isEmpty()) "noLocationProvider" else null
-        promise.resolve(createLocationAvailability(providers.isNotEmpty(), reason))
+        promise.resolve(getPlatformLocationAvailability())
         return promise
     }
 
@@ -268,16 +265,41 @@ class NitroGeolocation(
             error?.invoke(permissionError)
             return
         }
-        if (requiresPlayServices() && !isGooglePlayServicesAvailable()) {
-            error?.invoke(createPlayServicesUnavailableError())
+        val deadlineElapsedRealtime = createRequestDeadlineElapsedRealtime(parsedOptions.timeout)
+        if (currentProviderRoute(isGooglePlayServicesAvailable()) == AndroidProviderRoute.FUSED) {
+            getCurrentPositionWithFused(
+                success,
+                { fusedError ->
+                    runAndroidCurrentPositionFallbackAfterFusedFailure(
+                        locationProvider = configuration?.locationProvider,
+                        runPlatformFallback = {
+                            getCurrentPositionWithPlatform(
+                                success,
+                                error,
+                                parsedOptions,
+                                deadlineElapsedRealtime
+                            )
+                        },
+                        failWithoutFallback = {
+                            error?.invoke(fusedError)
+                        }
+                    )
+                },
+                parsedOptions,
+                deadlineElapsedRealtime
+            )
             return
         }
 
-        if (requiresPlayServices()) {
-            getCurrentPositionWithFused(success, error, parsedOptions)
-            return
-        }
+        getCurrentPositionWithPlatform(success, error, parsedOptions, deadlineElapsedRealtime)
+    }
 
+    private fun getCurrentPositionWithPlatform(
+        success: (GeolocationResponse) -> Unit,
+        error: ((LocationError) -> Unit)?,
+        parsedOptions: ParsedOptions,
+        deadlineElapsedRealtime: Long = createRequestDeadlineElapsedRealtime(parsedOptions.timeout)
+    ) {
         val providers = getValidProviders(parsedOptions)
         if (providers.isEmpty()) {
             error?.invoke(createNoLocationProviderError(parsedOptions))
@@ -290,8 +312,13 @@ class NitroGeolocation(
             return
         }
 
+        if (remainingTimeoutMillis(deadlineElapsedRealtime) <= 0L) {
+            error?.invoke(createPositionTimeoutError(parsedOptions))
+            return
+        }
+
         // Request fresh location
-        requestFreshLocation(providers, parsedOptions) { result ->
+        requestFreshLocation(providers, parsedOptions, deadlineElapsedRealtime) { result ->
             when (result) {
                 is PositionResult.Success -> success(result.position)
                 is PositionResult.Failure -> error?.invoke(result.error)
@@ -323,16 +350,33 @@ class NitroGeolocation(
             error?.invoke(permissionError)
             return
         }
-        if (requiresPlayServices() && !isGooglePlayServicesAvailable()) {
-            error?.invoke(createPlayServicesUnavailableError())
+        if (currentProviderRoute(isGooglePlayServicesAvailable()) == AndroidProviderRoute.FUSED) {
+            getLastKnownPositionWithFused(
+                success,
+                { fusedError ->
+                    runAndroidLastKnownPositionFallbackAfterFusedFailure(
+                        locationProvider = configuration?.locationProvider,
+                        runPlatformFallback = {
+                            getLastKnownPositionWithPlatform(success, error, parsedOptions)
+                        },
+                        failWithoutFallback = {
+                            error?.invoke(fusedError)
+                        }
+                    )
+                },
+                parsedOptions
+            )
             return
         }
 
-        if (requiresPlayServices()) {
-            getLastKnownPositionWithFused(success, error, parsedOptions)
-            return
-        }
+        getLastKnownPositionWithPlatform(success, error, parsedOptions)
+    }
 
+    private fun getLastKnownPositionWithPlatform(
+        success: (GeolocationResponse) -> Unit,
+        error: ((LocationError) -> Unit)?,
+        parsedOptions: ParsedOptions
+    ) {
         val providers = getValidProviders(parsedOptions)
         if (providers.isEmpty()) {
             error?.invoke(createNoLocationProviderError(parsedOptions))
@@ -657,15 +701,24 @@ class NitroGeolocation(
 
     // MARK: - Helper Functions - Provider Selection
 
-    private fun requiresPlayServices(): Boolean {
-        // TODO: Switch auto/default Android provider selection to prefer
-        // Google Play Services when available.
-        return configuration?.locationProvider == LocationProvider.PLAYSERVICES
+    private fun currentProviderRoute(
+        googlePlayServicesAvailable: Boolean
+    ): AndroidProviderRoute {
+        return selectAndroidProviderRoute(
+            locationProvider = configuration?.locationProvider,
+            googlePlayServicesAvailable = googlePlayServicesAvailable
+        )
     }
 
     private fun isGooglePlayServicesAvailable(): Boolean {
         return GoogleApiAvailability.getInstance()
             .isGooglePlayServicesAvailable(reactContext) == ConnectionResult.SUCCESS
+    }
+
+    private fun getPlatformLocationAvailability(): LocationAvailability {
+        val providers = getValidProviders(resolveAndroidAccuracy(null, enableHighAccuracy = false))
+        val reason = if (providers.isEmpty()) "noLocationProvider" else null
+        return createLocationAvailability(providers.isNotEmpty(), reason)
     }
 
     private fun getValidProvider(accuracy: AndroidAccuracyResolution): String? {
@@ -782,21 +835,26 @@ class NitroGeolocation(
     private fun getCurrentPositionWithFused(
         success: (GeolocationResponse) -> Unit,
         error: ((LocationError) -> Unit)?,
-        options: ParsedOptions
+        options: ParsedOptions,
+        deadlineElapsedRealtime: Long
     ) {
         if (effectiveMaximumAge(options) > 0.0) {
-            getFusedCachedLocation(options) { cachedLocation ->
+            getFusedCachedLocation(options) { cachedLocation, fusedError ->
                 if (cachedLocation != null) {
-                    success(locationToPosition(cachedLocation))
+                    success(locationToPosition(cachedLocation, LocationProviderUsed.FUSED))
+                    return@getFusedCachedLocation
+                }
+                if (fusedError != null) {
+                    error?.invoke(fusedError)
                     return@getFusedCachedLocation
                 }
 
-                requestFusedFreshLocation(success, error, options)
+                requestFusedFreshLocation(success, error, options, deadlineElapsedRealtime)
             }
             return
         }
 
-        requestFusedFreshLocation(success, error, options)
+        requestFusedFreshLocation(success, error, options, deadlineElapsedRealtime)
     }
 
     private fun getLastKnownPositionWithFused(
@@ -804,9 +862,13 @@ class NitroGeolocation(
         error: ((LocationError) -> Unit)?,
         options: ParsedOptions
     ) {
-        getFusedCachedLocation(options) { cachedLocation ->
+        getFusedCachedLocation(options) { cachedLocation, fusedError ->
             if (cachedLocation != null) {
-                success(locationToPosition(cachedLocation))
+                success(locationToPosition(cachedLocation, LocationProviderUsed.FUSED))
+                return@getFusedCachedLocation
+            }
+            if (fusedError != null) {
+                error?.invoke(fusedError)
                 return@getFusedCachedLocation
             }
 
@@ -819,46 +881,63 @@ class NitroGeolocation(
 
     private fun getFusedCachedLocation(
         options: ParsedOptions,
-        completion: (Location?) -> Unit
+        completion: (Location?, LocationError?) -> Unit
     ) {
         // Fused lastLocation is not requested with LocationRequest granularity,
         // so it cannot prove that a cached fix satisfies coarse-only callers.
         if (options.granularity == AndroidGranularity.COARSE) {
-            completion(null)
+            completion(null, null)
             return
         }
 
         try {
             fusedLocationClient.lastLocation
                 .addOnSuccessListener { location ->
-                    completion(location?.takeIf { isCachedLocationValid(it, options) })
+                    completion(location?.takeIf { isCachedLocationValid(it, options) }, null)
                 }
-                .addOnFailureListener {
-                    completion(null)
+                .addOnFailureListener { exception ->
+                    completion(null, createPermissionErrorOrNull(exception))
                 }
                 .addOnCanceledListener {
-                    completion(null)
+                    completion(null, null)
                 }
         } catch (e: SecurityException) {
-            completion(null)
+            completion(null, createFusedSecurityError(e.message))
         }
     }
 
     private fun requestFusedFreshLocation(
         success: (GeolocationResponse) -> Unit,
         error: ((LocationError) -> Unit)?,
-        options: ParsedOptions
+        options: ParsedOptions,
+        deadlineElapsedRealtime: Long
     ) {
         val handler = Handler(Looper.getMainLooper())
         val didComplete = AtomicBoolean(false)
-        lateinit var callback: LocationCallback
+        val remainingTimeoutMillis = remainingTimeoutMillis(deadlineElapsedRealtime)
+
+        if (remainingTimeoutMillis <= 0L) {
+            error?.invoke(createPositionTimeoutError(options))
+            return
+        }
+        val fusedAttemptTimeoutMillis = fusedAttemptTimeoutMillis(remainingTimeoutMillis)
+        val cancellationTokenSource = CancellationTokenSource()
+        var locationUpdateCallback: LocationCallback? = null
 
         fun complete(result: PositionResult) {
             if (!didComplete.compareAndSet(false, true)) return
 
             handler.removeCallbacksAndMessages(null)
+            locationUpdateCallback?.let { callback ->
+                try {
+                    fusedLocationClient.removeLocationUpdates(callback)
+                } catch (_: Exception) {
+                    // Ignore cleanup races.
+                }
+            }
+            locationUpdateCallback = null
             try {
-                fusedLocationClient.removeLocationUpdates(callback)
+                cancellationTokenSource.cancel()
             } catch (_: Exception) {
                 // Ignore cleanup races.
             }
@@ -869,35 +948,89 @@ class NitroGeolocation(
             }
         }
 
-        callback = object : LocationCallback() {
-            override fun onLocationResult(result: LocationResult) {
-                val location = result.lastLocation
-                if (location != null) {
-                    complete(PositionResult.Success(locationToPosition(location)))
-                }
-            }
-        }
-
         val timeoutRunnable = Runnable {
             complete(PositionResult.Failure(createPositionTimeoutError(options)))
         }
 
         try {
-            fusedLocationClient.requestLocationUpdates(
-                buildFusedLocationRequest(
-                    options,
+            if (options.waitForAccurateLocation) {
+                val request = buildFusedLocationRequest(
+                    options.copy(maxUpdateAge = effectiveMaximumAge(options)),
                     maxUpdatesOverride = 1,
                     includeDistanceFilter = false
-                ),
-                callback,
-                Looper.getMainLooper()
+                )
+                val callback = object : LocationCallback() {
+                    override fun onLocationResult(result: LocationResult) {
+                        val location = result.lastLocation
+                        if (location != null) {
+                            complete(PositionResult.Success(
+                                locationToPosition(location, LocationProviderUsed.FUSED)
+                            ))
+                        } else {
+                            complete(PositionResult.Failure(createLocationError(
+                                POSITION_UNAVAILABLE,
+                                "Unable to get fused location"
+                            )))
+                        }
+                    }
+                }
+                locationUpdateCallback = callback
+
+                fusedLocationClient.requestLocationUpdates(
+                    request,
+                    callback,
+                    Looper.getMainLooper()
+                )
+                    .addOnFailureListener { exception ->
+                        complete(PositionResult.Failure(
+                            createFusedRequestFailureError(exception)
+                        ))
+                    }
+                    .addOnCanceledListener {
+                        complete(PositionResult.Failure(createPositionTimeoutError(options)))
+                    }
+
+                handler.postDelayed(timeoutRunnable, fusedAttemptTimeoutMillis)
+                return
+            }
+
+            val request = CurrentLocationRequest.Builder()
+                .setPriority(options.androidAccuracy.gmsPriority())
+                .setGranularity(options.granularity.gmsGranularity())
+                .setMaxUpdateAgeMillis(
+                    coerceNonNegativeMillis(effectiveMaximumAge(options))
+                )
+                .setDurationMillis(fusedAttemptTimeoutMillis)
+                .build()
+
+            fusedLocationClient.getCurrentLocation(
+                request,
+                cancellationTokenSource.token
             )
-            handler.postDelayed(timeoutRunnable, coerceTimeoutMillis(options.timeout))
+                .addOnSuccessListener { location ->
+                    if (location != null) {
+                        complete(PositionResult.Success(
+                            locationToPosition(location, LocationProviderUsed.FUSED)
+                        ))
+                    } else {
+                        complete(PositionResult.Failure(createLocationError(
+                            POSITION_UNAVAILABLE,
+                            "Unable to get fused location"
+                        )))
+                    }
+                }
+                .addOnFailureListener { exception ->
+                    complete(PositionResult.Failure(
+                        createFusedRequestFailureError(exception)
+                    ))
+                }
+                .addOnCanceledListener {
+                    complete(PositionResult.Failure(createPositionTimeoutError(options)))
+                }
+
+            handler.postDelayed(timeoutRunnable, fusedAttemptTimeoutMillis)
         } catch (e: SecurityException) {
-            complete(PositionResult.Failure(createLocationError(
-                PERMISSION_DENIED,
-                "Security exception: ${e.message}"
-            )))
+            complete(PositionResult.Failure(createFusedSecurityError(e.message)))
         } catch (e: Exception) {
             complete(PositionResult.Failure(createLocationError(
                 POSITION_UNAVAILABLE,
@@ -906,11 +1039,53 @@ class NitroGeolocation(
         }
     }
 
+    private fun fusedAttemptTimeoutMillis(remainingTimeoutMillis: Long): Long {
+        if (remainingTimeoutMillis == Long.MAX_VALUE) {
+            return FUSED_ATTEMPT_TIMEOUT_MS
+        }
+
+        if (remainingTimeoutMillis <= FUSED_FALLBACK_RESERVED_TIMEOUT_MS) {
+            return (remainingTimeoutMillis / 2L).coerceAtLeast(1L)
+        }
+
+        return minOf(
+            FUSED_ATTEMPT_TIMEOUT_MS,
+            (remainingTimeoutMillis - FUSED_FALLBACK_RESERVED_TIMEOUT_MS).coerceAtLeast(1L)
+        )
+    }
+
+    private fun createPermissionErrorOrNull(exception: Exception): LocationError? {
+        return if (exception is SecurityException) {
+            createFusedSecurityError(exception.message)
+        } else {
+            null
+        }
+    }
+
+    private fun createFusedRequestFailureError(exception: Exception): LocationError {
+        return if (exception is SecurityException) {
+            createFusedSecurityError(exception.message)
+        } else {
+            createLocationError(
+                POSITION_UNAVAILABLE,
+                "Unable to request fused location: ${exception.message}"
+            )
+        }
+    }
+
+    private fun createFusedSecurityError(message: String?): LocationError {
+        return createLocationError(
+            PERMISSION_DENIED,
+            "Security exception: ${message ?: "unknown error"}"
+        )
+    }
+
     // MARK: - Helper Functions - Request Fresh Location
 
     private fun requestFreshLocation(
         providers: List<String>,
         options: ParsedOptions,
+        deadlineElapsedRealtime: Long = createRequestDeadlineElapsedRealtime(options.timeout),
         resolver: (PositionResult) -> Unit
     ) {
         val id = UUID.randomUUID()
@@ -922,7 +1097,7 @@ class NitroGeolocation(
             options = options,
             handler = handler,
             providers = providers,
-            deadlineElapsedRealtime = createRequestDeadlineElapsedRealtime(options.timeout)
+            deadlineElapsedRealtime = deadlineElapsedRealtime
         )
 
         pendingPositionRequests[id] = request
@@ -948,9 +1123,9 @@ class NitroGeolocation(
             return
         }
 
-        // Android's getCurrentLocation may resolve a recent historical fix. A maximumAge of 0
-        // means callers explicitly asked us to wait for a fresh provider update.
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R && request.options.maximumAge > 0.0) {
+        // Android's getCurrentLocation may resolve a recent historical fix. An effective
+        // maximum age of 0 means callers explicitly asked us to wait for a fresh update.
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R && effectiveMaximumAge(request.options) > 0.0) {
             requestCurrentLocationModern(provider, requestId, request.handler, remainingTimeoutMillis)
         } else {
             requestCurrentLocationLegacy(provider, requestId, request.handler, remainingTimeoutMillis)
@@ -981,14 +1156,14 @@ class NitroGeolocation(
 
                 val request = pendingPositionRequests[requestId]
                 if (request != null) {
-                    if (location != null) {
+                    if (location != null && isCachedLocationValid(location, request.options)) {
                         pendingPositionRequests.remove(requestId)
                         val position = locationToPosition(location)
                         request.resolver(PositionResult.Success(position))
                     } else {
                         handleProviderFailure(requestId, createLocationError(
                             POSITION_UNAVAILABLE,
-                            "Unable to get location"
+                            "Unable to get fresh location"
                         ))
                     }
                 }
@@ -1145,15 +1320,22 @@ class NitroGeolocation(
     // MARK: - Helper Functions - Watch Position
 
     private fun startWatchingLocation() {
-        if (requiresPlayServices() && !isGooglePlayServicesAvailable()) {
-            notifyWatchPlayServicesUnavailable()
+        val generation = watchLocationGeneration.get()
+
+        if (currentProviderRoute(isGooglePlayServicesAvailable()) == AndroidProviderRoute.FUSED) {
+            startWatchingFusedLocation(generation)
             return
         }
 
-        if (requiresPlayServices()) {
-            startWatchingFusedLocation()
-            return
-        }
+        startWatchingPlatformLocation(generation)
+    }
+
+    private fun isActiveWatchGeneration(generation: Long): Boolean {
+        return watchSubscriptions.isNotEmpty() && watchLocationGeneration.get() == generation
+    }
+
+    private fun startWatchingPlatformLocation(generation: Long) {
+        if (!isActiveWatchGeneration(generation)) return
 
         val mergedOptions = mergeWatchOptions()
         val provider = getValidProvider(mergedOptions)
@@ -1164,11 +1346,15 @@ class NitroGeolocation(
 
         val listener = object : LocationListener {
             override fun onLocationChanged(location: Location) {
+                if (!isActiveWatchGeneration(generation)) return
+
                 val position = locationToPosition(location)
                 deliverWatchPosition(position)
             }
 
             override fun onProviderDisabled(provider: String) {
+                if (!isActiveWatchGeneration(generation)) return
+
                 val error = LocationError(
                     code = SETTINGS_NOT_SATISFIED,
                     message = "Provider disabled: $provider"
@@ -1184,6 +1370,7 @@ class NitroGeolocation(
             override fun onStatusChanged(provider: String?, status: Int, extras: android.os.Bundle?) {}
         }
 
+        removePlatformWatchLocationListener()
         watchLocationListener = listener
 
         try {
@@ -1206,16 +1393,38 @@ class NitroGeolocation(
         }
     }
 
-    private fun startWatchingFusedLocation() {
+    private fun startWatchingFusedLocation(generation: Long) {
+        if (!isActiveWatchGeneration(generation)) return
+
         val mergedOptions = mergeWatchOptions()
         val callback = object : LocationCallback() {
             override fun onLocationResult(result: LocationResult) {
+                if (!isActiveWatchGeneration(generation)) return
+
                 val location = result.lastLocation ?: return
-                deliverWatchPosition(locationToPosition(location))
+                deliverWatchPosition(locationToPosition(location, LocationProviderUsed.FUSED))
             }
         }
 
+        removeFusedWatchLocationCallback()
         fusedWatchLocationCallback = callback
+
+        fun handleFusedRequestFailure(fusedError: LocationError? = null) {
+            if (!isActiveWatchGeneration(generation)) return
+
+            removeFusedWatchLocationCallback()
+            runAndroidWatchPositionFallbackAfterFusedFailure(
+                locationProvider = configuration?.locationProvider,
+                runPlatformFallback = { startWatchingPlatformLocation(generation) },
+                failWithoutFallback = {
+                    if (fusedError != null) {
+                        notifyWatchError(fusedError)
+                    } else {
+                        notifyWatchProviderUnavailable()
+                    }
+                }
+            )
+        }
 
         try {
             fusedLocationClient.requestLocationUpdates(
@@ -1223,24 +1432,25 @@ class NitroGeolocation(
                 callback,
                 Looper.getMainLooper()
             )
+                .addOnSuccessListener {
+                    if (!isActiveWatchGeneration(generation)) {
+                        try {
+                            fusedLocationClient.removeLocationUpdates(callback)
+                        } catch (e: Exception) {
+                            // Ignore
+                        }
+                    }
+                }
+                .addOnFailureListener { exception ->
+                    handleFusedRequestFailure(createFusedRequestFailureError(exception))
+                }
+                .addOnCanceledListener {
+                    handleFusedRequestFailure()
+                }
         } catch (e: SecurityException) {
-            val error = LocationError(
-                code = PERMISSION_DENIED,
-                message = "Permission denied: ${e.message}"
-            )
-
-            for ((_, subscription) in watchSubscriptions) {
-                subscription.error?.invoke(error)
-            }
-        } catch (e: Exception) {
-            val error = LocationError(
-                code = POSITION_UNAVAILABLE,
-                message = "Unable to request fused location updates: ${e.message}"
-            )
-
-            for ((_, subscription) in watchSubscriptions) {
-                subscription.error?.invoke(error)
-            }
+            handleFusedRequestFailure(createFusedSecurityError(e.message))
+        } catch (_: Exception) {
+            handleFusedRequestFailure()
         }
     }
 
@@ -1328,9 +1538,9 @@ class NitroGeolocation(
         }
     }
 
-    private fun notifyWatchPlayServicesUnavailable() {
+    private fun notifyWatchError(error: LocationError) {
         for ((_, subscription) in watchSubscriptions) {
-            subscription.error?.invoke(createPlayServicesUnavailableError())
+            subscription.error?.invoke(error)
         }
     }
 
@@ -1358,6 +1568,12 @@ class NitroGeolocation(
     }
 
     private fun stopWatchingLocation() {
+        watchLocationGeneration.incrementAndGet()
+        removePlatformWatchLocationListener()
+        removeFusedWatchLocationCallback()
+    }
+
+    private fun removePlatformWatchLocationListener() {
         watchLocationListener?.let { listener ->
             try {
                 locationManager.removeUpdates(listener)
@@ -1365,6 +1581,10 @@ class NitroGeolocation(
                 // Ignore
             }
         }
+        watchLocationListener = null
+    }
+
+    private fun removeFusedWatchLocationCallback() {
         fusedWatchLocationCallback?.let { callback ->
             try {
                 fusedLocationClient.removeLocationUpdates(callback)
@@ -1372,7 +1592,6 @@ class NitroGeolocation(
                 // Ignore
             }
         }
-        watchLocationListener = null
         fusedWatchLocationCallback = null
     }
 
@@ -1383,10 +1602,13 @@ class NitroGeolocation(
 
     // MARK: - Helper Functions - Conversion
 
-    private fun locationToPosition(location: Location): GeolocationResponse {
+    private fun locationToPosition(
+        location: Location,
+        providerOverride: LocationProviderUsed? = null
+    ): GeolocationResponse {
         lastLocation = location
 
-        return location.toGeolocationResponse()
+        return location.toGeolocationResponse(providerOverride)
     }
 
     private fun validateGeocodingCoordinates(coords: GeocodingCoordinates): LocationError? {
