@@ -4,7 +4,8 @@ This guide walks you through installing and setting up **React Native Nitro Geol
 
 ## 1. Installation
 
-Before installing the module, make sure you have a React Native environment (0.75+).
+Before installing the module, make sure your app uses React Native 0.75+ with
+the New Architecture and Nitro Modules enabled.
 
 ```bash
 # Install Nitro core and Geolocation module
@@ -38,6 +39,9 @@ Add the following keys to your **Info.plist**:
 <string>This app requires access to your location at all times.</string>
 ```
 
+For background tracking, also enable the `location` background mode in
+`UIBackgroundModes`; see [iOS background setup](/background/setup-ios).
+
 
 ## 3. Android Setup
 
@@ -54,404 +58,70 @@ Optional (for background access):
 <uses-permission android:name="android.permission.ACCESS_BACKGROUND_LOCATION" />
 ```
 
-## 4. Android Reliability
+Full background tracking uses a foreground service on Android. Add the full
+permission set from [Android background setup](/background/setup-android) when
+using `react-native-nitro-geolocation/background`, including Android 13+
+`POST_NOTIFICATIONS` for the tracking notification.
 
-Use the Android provider and settings APIs when your flow depends on accurate
-location or when you are migrating from packages that rely on fused location.
+## 4. Get Your First Location
+
+Configure once at app startup. Ask for permission from a user action, then read
+one position.
 
 ```tsx
 import {
   getCurrentPosition,
-  getLastKnownPosition,
-  requestLocationSettings,
+  requestPermission,
   setConfiguration
 } from 'react-native-nitro-geolocation';
 
 setConfiguration({
   authorizationLevel: 'whenInUse',
-  locationProvider: 'playServices'
+  locationProvider: 'auto'
 });
 
+async function handleUseMyLocation() {
+  const status = await requestPermission();
+
+  if (status === 'granted') {
+    const position = await getCurrentPosition({
+      accuracy: { android: 'high', ios: 'best' },
+      timeout: 15000
+    });
+  }
+}
+```
+
+## 5. Android Accuracy Helpers (Optional)
+
+If Android needs a settings prompt or an explicit cached read, configure the
+provider in your startup `setConfiguration()` call and add the settings helpers
+from the [Modern API reference](/guide/modern-api).
+
+```tsx
+import {
+  getLastKnownPosition,
+  requestLocationSettings
+} from 'react-native-nitro-geolocation';
+
 await requestLocationSettings({
-  accuracy: { android: 'high' },
-  interval: 5000,
-  fastestInterval: 1000
+  accuracy: { android: 'high' }
 });
 
 const cached = await getLastKnownPosition({
   maximumAge: 60_000,
   accuracy: { android: 'balanced', ios: 'hundredMeters' }
 });
-
-const fresh = await getCurrentPosition({
-  accuracy: { android: 'high', ios: 'best' },
-  granularity: 'permission',
-  waitForAccurateLocation: true,
-  timeout: 15000
-});
 ```
-
-- `locationProvider: 'auto'` and `locationProvider: 'playServices'` prefer
-  Google Play Services fused location when available and fall back to Android's
-  platform provider.
-- `locationProvider: 'android'` forces Android's platform `LocationManager`
-  path.
-- `requestLocationSettings()` can show Android's native settings resolution
-  dialog when settings do not satisfy the request.
-- `granularity` and Android permission state support approximate/coarse
-  location handling.
-- `getLastKnownPosition()` makes cached reads explicit instead of hiding them
-  inside a fresh request.
-- Modern API errors include `PLAY_SERVICE_NOT_AVAILABLE`,
-  `SETTINGS_NOT_SATISFIED`, and `TIMEOUT`.
-
-
-## 5. Usage with Modern API (Recommended)
-
-The Modern API provides **simple functional calls** with direct functions and a single hook for tracking.
-
-### Setup Configuration
-
-Configure once at app startup:
-
-```tsx
-import { useEffect } from 'react';
-import { setConfiguration } from 'react-native-nitro-geolocation';
-
-function App() {
-  useEffect(() => {
-    setConfiguration({
-      authorizationLevel: 'whenInUse',
-      enableBackgroundLocationUpdates: false,
-      locationProvider: 'auto'
-    });
-  }, []);
-
-  return (
-    <NavigationContainer>
-      <RootNavigator />
-    </NavigationContainer>
-  );
-}
-```
-
-### Request Permission
-
-```tsx
-import { useState } from 'react';
-import { Button, Text, View } from 'react-native';
-import { requestPermission } from 'react-native-nitro-geolocation';
-
-function PermissionButton() {
-  const [status, setStatus] = useState<string>('unknown');
-  const [loading, setLoading] = useState(false);
-
-  const handlePress = async () => {
-    setLoading(true);
-    try {
-      const result = await requestPermission();
-      setStatus(result);
-      if (result === 'granted') {
-        console.log('Permission granted!');
-      }
-    } catch (err) {
-      console.error('Permission error:', err);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  return (
-    <View>
-      <Button
-        onPress={handlePress}
-        disabled={loading}
-        title={loading ? 'Requesting...' : 'Enable Location'}
-      />
-      <Text>Status: {status}</Text>
-    </View>
-  );
-}
-```
-
-### Get Current Position
-
-```tsx
-import { useState } from 'react';
-import { Button, Text, View } from 'react-native';
-import {
-  getCurrentPosition,
-  type GeolocationResponse
-} from 'react-native-nitro-geolocation';
-
-function LocationButton() {
-  const [position, setPosition] = useState<GeolocationResponse | null>(null);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-
-  const handlePress = async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      const pos = await getCurrentPosition({
-        enableHighAccuracy: true,
-        timeout: 15000
-      });
-      setPosition(pos);
-    } catch (err: any) {
-      setError(err?.message || 'Unknown error');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  return (
-    <View>
-      <Button
-        onPress={handlePress}
-        disabled={loading}
-        title={loading ? 'Loading...' : 'Get Location'}
-      />
-      {error && <Text style={{ color: 'red' }}>Error: {error}</Text>}
-      {position && (
-        <View>
-          <Text>Lat: {position.coords.latitude}</Text>
-          <Text>Lng: {position.coords.longitude}</Text>
-          <Text>Accuracy: {position.coords.accuracy}m</Text>
-        </View>
-      )}
-    </View>
-  );
-}
-```
-
-### Geocode and Reverse Geocode
-
-```tsx
-import {
-  geocode,
-  reverseGeocode
-} from 'react-native-nitro-geolocation';
-
-const locations = await geocode('City Hall, Seoul, South Korea');
-const firstLocation = locations[0];
-
-const addresses = await reverseGeocode({
-  latitude: 37.5665,
-  longitude: 126.978
-});
-const firstAddress = addresses[0];
-```
-
-`geocode(address)` and `reverseGeocode(coords)` use Android `Geocoder` and iOS
-`CLGeocoder`. Result quality, language, and availability depend on the platform
-geocoder service and network state.
-
-### Watch Position (Real-time Tracking)
-
-```tsx
-import { useState } from 'react';
-import { Switch, Text, View } from 'react-native';
-import { useWatchPosition } from 'react-native-nitro-geolocation';
-
-function LiveTracker() {
-  const [enabled, setEnabled] = useState(false);
-
-  const { position, error, isWatching } = useWatchPosition({
-    enabled,
-    enableHighAccuracy: true,
-    distanceFilter: 10,  // Update every 10 meters
-    interval: 5000       // Update every 5 seconds
-  });
-
-  return (
-    <View>
-      <Switch
-        value={enabled}
-        onValueChange={setEnabled}
-        label="Track location"
-      />
-
-      <Text>Status: {isWatching ? 'Watching 🟢' : 'Stopped 🔴'}</Text>
-
-      {error && (
-        <Text style={{ color: 'red' }}>Error: {error.message}</Text>
-      )}
-
-      {position && (
-        <View>
-          <Text>Lat: {position.coords.latitude}</Text>
-          <Text>Lng: {position.coords.longitude}</Text>
-          <Text>Accuracy: {position.coords.accuracy}m</Text>
-          {position.coords.speed !== null && (
-            <Text>Speed: {position.coords.speed}m/s</Text>
-          )}
-        </View>
-      )}
-    </View>
-  );
-}
-```
-
-**Key Features**:
-- ✅ Automatic cleanup when component unmounts
-- ✅ Declarative start/stop with `enabled` prop
-- ✅ No need to manage watch IDs manually
-- ✅ Battery efficient - native subscription stops when disabled
-
-
-## 6. Usage with Compat API (Compatibility)
-
-For compatibility with `@react-native-community/geolocation`, use the `/compat` import:
-
-```tsx
-import Geolocation from 'react-native-nitro-geolocation/compat';
-
-Geolocation.getCurrentPosition(
-  (position) => {
-    console.log('Latitude:', position.coords.latitude);
-    console.log('Longitude:', position.coords.longitude);
-  },
-  (error) => console.error('Location error:', error),
-  { enableHighAccuracy: true, timeout: 15000 }
-);
-
-// Subscribe to updates
-const watchId = Geolocation.watchPosition(
-  (position) => console.log('Updated position:', position),
-  (error) => console.error(error)
-);
-
-// Don't forget to cleanup!
-Geolocation.clearWatch(watchId);
-```
-
-
-## 7. Migration Guides
-
-### From `@react-native-community/geolocation`
-
-Simply change the import path:
-
-```diff
-- import Geolocation from '@react-native-community/geolocation';
-+ import Geolocation from 'react-native-nitro-geolocation/compat';
-```
-
-or
-
-```diff
-- import { getCurrentPosition, watchPosition } from '@react-native-community/geolocation';
-+ import { getCurrentPosition, watchPosition } from 'react-native-nitro-geolocation/compat';
-```
-
-The `/compat` path is drop-in compatible with the core native community
-geolocation API. You'll get:
-- Better performance via JSI
-- Reduced bridge serialization overhead
-- Improved permission consistency
-- TypeScript definitions out of the box
-
-The root Modern API supports web through the browser `navigator.geolocation`
-API. The `/compat` subpath remains native-only. Web location requires a secure
-context and browser permission; unsupported provider/sensor APIs reject with the
-Modern API `POSITION_UNAVAILABLE` error shape.
-
-### From Compat to Modern API (Recommended)
-
-Upgrade to the simpler functional API:
-
-**Before (Compat API)**:
-```tsx
-import Geolocation from 'react-native-nitro-geolocation/compat';
-
-function LocationTracker() {
-  const [position, setPosition] = useState(null);
-  const watchIdRef = useRef(null);
-
-  useEffect(() => {
-    watchIdRef.current = Geolocation.watchPosition(
-      (pos) => setPosition(pos),
-      (err) => console.error(err),
-      { enableHighAccuracy: true }
-    );
-
-    return () => {
-      if (watchIdRef.current !== null) {
-        Geolocation.clearWatch(watchIdRef.current);
-      }
-    };
-  }, []);
-
-  return <Map position={position} />;
-}
-```
-
-**After (Modern API)**:
-```tsx
-import { useWatchPosition } from 'react-native-nitro-geolocation';
-
-function LocationTracker() {
-  const { position } = useWatchPosition({
-    enabled: true,
-    enableHighAccuracy: true
-  });
-
-  return <Map position={position} />;
-}
-```
-
-**Benefits**:
-- 70% less code
-- No watch ID management
-- Automatic cleanup
-- Declarative enable/disable
-- Better TypeScript support
-
-
-## 8. Development Tools (Optional)
-
-For an enhanced development experience, install the Rozenite DevTools plugin to mock locations:
-
-```bash
-npm install @react-native-nitro-geolocation/rozenite-plugin
-# or
-yarn add @react-native-nitro-geolocation/rozenite-plugin
-```
-
-Add to your app:
-
-```tsx
-import { useGeolocationDevTools, createPosition } from '@react-native-nitro-geolocation/rozenite-plugin';
-
-function App() {
-  // Enable location mocking in development
-  useGeolocationDevTools({
-    initialPosition: createPosition('Seoul, South Korea')
-  });
-
-  // ... rest of your app
-}
-```
-
-**Features**:
-- 🗺️ Interactive map interface
-- 📍 Click to set location
-- ⌨️ Arrow key navigation
-- 🏙️ 20 city presets
-- 📊 Real-time heading/speed calculation
-
-Learn more in the [DevTools Plugin Guide](/guide/devtools).
-
-:::warning Prerequisites
-The DevTools plugin requires [Rozenite DevTools](https://github.com/rozenite/rozenite) to be installed in your project.
-:::
 
 
 ## Next Steps
 
-- [DevTools Plugin Guide](/guide/devtools) — Mock locations in development
 - [Modern API Reference](/guide/modern-api) — Complete documentation
 - [Compat API Reference](/guide/compat-api) — Compatibility methods
+- [Background Location](/background/overview) — Native background tracking, geofencing, and storage recovery
+- [Migration Guides](/guide/migration-assistance) — Move from community/service geolocation packages
+- [Expo Development Builds](/guide/expo-development-build) — Use the package in Expo custom native builds
+- [DevTools Plugin Guide](/guide/devtools) — Mock locations in development
 - [Why Nitro Module?](/guide/why-nitro-module) — Architecture deep dive
 - [Benchmark Results](/guide/benchmark) — Performance comparison
