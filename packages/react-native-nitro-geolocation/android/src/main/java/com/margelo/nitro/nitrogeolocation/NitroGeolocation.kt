@@ -19,22 +19,16 @@ import com.facebook.react.modules.core.PermissionAwareActivity
 import com.facebook.react.modules.core.PermissionListener
 import com.google.android.gms.common.ConnectionResult
 import com.google.android.gms.common.GoogleApiAvailability
-import com.google.android.gms.location.CurrentLocationRequest
 import com.google.android.gms.location.LocationCallback
 import com.google.android.gms.location.LocationResult
 import com.google.android.gms.location.LocationServices
-import com.google.android.gms.tasks.CancellationTokenSource
 import com.margelo.nitro.NitroModules
 import com.margelo.nitro.core.Promise
 import java.io.IOException
 import java.util.Locale
 import java.util.UUID
 import java.util.concurrent.ConcurrentHashMap
-import java.util.concurrent.atomic.AtomicBoolean
 import java.util.concurrent.atomic.AtomicLong
-
-private const val FUSED_ATTEMPT_TIMEOUT_MS = 15_000L
-private const val FUSED_FALLBACK_RESERVED_TIMEOUT_MS = 10_000L
 
 /**
  * Geolocation implementation for Android.
@@ -66,6 +60,14 @@ class NitroGeolocation(
     }
     private val fusedLocationClient by lazy {
         LocationServices.getFusedLocationProviderClient(reactContext)
+    }
+    private val fusedLocationProvider by lazy {
+        AndroidFusedLocationProvider(
+            fusedLocationClient = fusedLocationClient,
+            isCachedLocationValid = ::isCachedLocationValid,
+            effectiveMaximumAge = ::effectiveMaximumAge,
+            locationToPosition = ::locationToPosition
+        )
     }
     private val headingManager: AndroidHeadingManager by lazy {
         AndroidHeadingManager(
@@ -267,7 +269,7 @@ class NitroGeolocation(
         }
         val deadlineElapsedRealtime = createRequestDeadlineElapsedRealtime(parsedOptions.timeout)
         if (currentProviderRoute(isGooglePlayServicesAvailable()) == AndroidProviderRoute.FUSED) {
-            getCurrentPositionWithFused(
+            fusedLocationProvider.getCurrentPosition(
                 success,
                 { fusedError ->
                     runAndroidCurrentPositionFallbackAfterFusedFailure(
@@ -351,7 +353,7 @@ class NitroGeolocation(
             return
         }
         if (currentProviderRoute(isGooglePlayServicesAvailable()) == AndroidProviderRoute.FUSED) {
-            getLastKnownPositionWithFused(
+            fusedLocationProvider.getLastKnownPosition(
                 success,
                 { fusedError ->
                     runAndroidLastKnownPositionFallbackAfterFusedFailure(
@@ -832,254 +834,6 @@ class NitroGeolocation(
         return bestLocation
     }
 
-    private fun getCurrentPositionWithFused(
-        success: (GeolocationResponse) -> Unit,
-        error: ((LocationError) -> Unit)?,
-        options: ParsedOptions,
-        deadlineElapsedRealtime: Long
-    ) {
-        if (effectiveMaximumAge(options) > 0.0) {
-            getFusedCachedLocation(options) { cachedLocation, fusedError ->
-                if (cachedLocation != null) {
-                    success(locationToPosition(cachedLocation, LocationProviderUsed.FUSED))
-                    return@getFusedCachedLocation
-                }
-                if (fusedError != null) {
-                    error?.invoke(fusedError)
-                    return@getFusedCachedLocation
-                }
-
-                requestFusedFreshLocation(success, error, options, deadlineElapsedRealtime)
-            }
-            return
-        }
-
-        requestFusedFreshLocation(success, error, options, deadlineElapsedRealtime)
-    }
-
-    private fun getLastKnownPositionWithFused(
-        success: (GeolocationResponse) -> Unit,
-        error: ((LocationError) -> Unit)?,
-        options: ParsedOptions
-    ) {
-        getFusedCachedLocation(options) { cachedLocation, fusedError ->
-            if (cachedLocation != null) {
-                success(locationToPosition(cachedLocation, LocationProviderUsed.FUSED))
-                return@getFusedCachedLocation
-            }
-            if (fusedError != null) {
-                error?.invoke(fusedError)
-                return@getFusedCachedLocation
-            }
-
-            error?.invoke(createLocationError(
-                POSITION_UNAVAILABLE,
-                "No cached location available"
-            ))
-        }
-    }
-
-    private fun getFusedCachedLocation(
-        options: ParsedOptions,
-        completion: (Location?, LocationError?) -> Unit
-    ) {
-        // Fused lastLocation is not requested with LocationRequest granularity,
-        // so it cannot prove that a cached fix satisfies coarse-only callers.
-        if (options.granularity == AndroidGranularity.COARSE) {
-            completion(null, null)
-            return
-        }
-
-        try {
-            fusedLocationClient.lastLocation
-                .addOnSuccessListener { location ->
-                    completion(location?.takeIf { isCachedLocationValid(it, options) }, null)
-                }
-                .addOnFailureListener { exception ->
-                    completion(null, createPermissionErrorOrNull(exception))
-                }
-                .addOnCanceledListener {
-                    completion(null, null)
-                }
-        } catch (e: SecurityException) {
-            completion(null, createFusedSecurityError(e.message))
-        }
-    }
-
-    private fun requestFusedFreshLocation(
-        success: (GeolocationResponse) -> Unit,
-        error: ((LocationError) -> Unit)?,
-        options: ParsedOptions,
-        deadlineElapsedRealtime: Long
-    ) {
-        val handler = Handler(Looper.getMainLooper())
-        val didComplete = AtomicBoolean(false)
-        val remainingTimeoutMillis = remainingTimeoutMillis(deadlineElapsedRealtime)
-
-        if (remainingTimeoutMillis <= 0L) {
-            error?.invoke(createPositionTimeoutError(options))
-            return
-        }
-        val fusedAttemptTimeoutMillis = fusedAttemptTimeoutMillis(remainingTimeoutMillis)
-        val cancellationTokenSource = CancellationTokenSource()
-        var locationUpdateCallback: LocationCallback? = null
-
-        fun complete(result: PositionResult) {
-            if (!didComplete.compareAndSet(false, true)) return
-
-            handler.removeCallbacksAndMessages(null)
-            locationUpdateCallback?.let { callback ->
-                try {
-                    fusedLocationClient.removeLocationUpdates(callback)
-                } catch (_: Exception) {
-                    // Ignore cleanup races.
-                }
-            }
-            locationUpdateCallback = null
-            try {
-                cancellationTokenSource.cancel()
-            } catch (_: Exception) {
-                // Ignore cleanup races.
-            }
-
-            when (result) {
-                is PositionResult.Success -> success(result.position)
-                is PositionResult.Failure -> error?.invoke(result.error)
-            }
-        }
-
-        val timeoutRunnable = Runnable {
-            complete(PositionResult.Failure(createPositionTimeoutError(options)))
-        }
-
-        try {
-            if (options.waitForAccurateLocation) {
-                val request = buildFusedLocationRequest(
-                    options.copy(maxUpdateAge = effectiveMaximumAge(options)),
-                    maxUpdatesOverride = 1,
-                    includeDistanceFilter = false
-                )
-                val callback = object : LocationCallback() {
-                    override fun onLocationResult(result: LocationResult) {
-                        val location = result.lastLocation
-                        if (location != null) {
-                            complete(PositionResult.Success(
-                                locationToPosition(location, LocationProviderUsed.FUSED)
-                            ))
-                        } else {
-                            complete(PositionResult.Failure(createLocationError(
-                                POSITION_UNAVAILABLE,
-                                "Unable to get fused location"
-                            )))
-                        }
-                    }
-                }
-                locationUpdateCallback = callback
-
-                fusedLocationClient.requestLocationUpdates(
-                    request,
-                    callback,
-                    Looper.getMainLooper()
-                )
-                    .addOnFailureListener { exception ->
-                        complete(PositionResult.Failure(
-                            createFusedRequestFailureError(exception)
-                        ))
-                    }
-                    .addOnCanceledListener {
-                        complete(PositionResult.Failure(createPositionTimeoutError(options)))
-                    }
-
-                handler.postDelayed(timeoutRunnable, fusedAttemptTimeoutMillis)
-                return
-            }
-
-            val request = CurrentLocationRequest.Builder()
-                .setPriority(options.androidAccuracy.gmsPriority())
-                .setGranularity(options.granularity.gmsGranularity())
-                .setMaxUpdateAgeMillis(
-                    coerceNonNegativeMillis(effectiveMaximumAge(options))
-                )
-                .setDurationMillis(fusedAttemptTimeoutMillis)
-                .build()
-
-            fusedLocationClient.getCurrentLocation(
-                request,
-                cancellationTokenSource.token
-            )
-                .addOnSuccessListener { location ->
-                    if (location != null) {
-                        complete(PositionResult.Success(
-                            locationToPosition(location, LocationProviderUsed.FUSED)
-                        ))
-                    } else {
-                        complete(PositionResult.Failure(createLocationError(
-                            POSITION_UNAVAILABLE,
-                            "Unable to get fused location"
-                        )))
-                    }
-                }
-                .addOnFailureListener { exception ->
-                    complete(PositionResult.Failure(
-                        createFusedRequestFailureError(exception)
-                    ))
-                }
-                .addOnCanceledListener {
-                    complete(PositionResult.Failure(createPositionTimeoutError(options)))
-                }
-
-            handler.postDelayed(timeoutRunnable, fusedAttemptTimeoutMillis)
-        } catch (e: SecurityException) {
-            complete(PositionResult.Failure(createFusedSecurityError(e.message)))
-        } catch (e: Exception) {
-            complete(PositionResult.Failure(createLocationError(
-                POSITION_UNAVAILABLE,
-                "Unable to request fused location: ${e.message}"
-            )))
-        }
-    }
-
-    private fun fusedAttemptTimeoutMillis(remainingTimeoutMillis: Long): Long {
-        if (remainingTimeoutMillis == Long.MAX_VALUE) {
-            return FUSED_ATTEMPT_TIMEOUT_MS
-        }
-
-        if (remainingTimeoutMillis <= FUSED_FALLBACK_RESERVED_TIMEOUT_MS) {
-            return (remainingTimeoutMillis / 2L).coerceAtLeast(1L)
-        }
-
-        return minOf(
-            FUSED_ATTEMPT_TIMEOUT_MS,
-            (remainingTimeoutMillis - FUSED_FALLBACK_RESERVED_TIMEOUT_MS).coerceAtLeast(1L)
-        )
-    }
-
-    private fun createPermissionErrorOrNull(exception: Exception): LocationError? {
-        return if (exception is SecurityException) {
-            createFusedSecurityError(exception.message)
-        } else {
-            null
-        }
-    }
-
-    private fun createFusedRequestFailureError(exception: Exception): LocationError {
-        return if (exception is SecurityException) {
-            createFusedSecurityError(exception.message)
-        } else {
-            createLocationError(
-                POSITION_UNAVAILABLE,
-                "Unable to request fused location: ${exception.message}"
-            )
-        }
-    }
-
-    private fun createFusedSecurityError(message: String?): LocationError {
-        return createLocationError(
-            PERMISSION_DENIED,
-            "Security exception: ${message ?: "unknown error"}"
-        )
-    }
-
     // MARK: - Helper Functions - Request Fresh Location
 
     private fun requestFreshLocation(
@@ -1426,32 +1180,20 @@ class NitroGeolocation(
             )
         }
 
-        try {
-            fusedLocationClient.requestLocationUpdates(
-                buildFusedLocationRequest(mergedOptions),
-                callback,
-                Looper.getMainLooper()
-            )
-                .addOnSuccessListener {
-                    if (!isActiveWatchGeneration(generation)) {
-                        try {
-                            fusedLocationClient.removeLocationUpdates(callback)
-                        } catch (e: Exception) {
-                            // Ignore
-                        }
+        fusedLocationProvider.requestWatchUpdates(
+            options = mergedOptions,
+            callback = callback,
+            onInactiveStart = {
+                if (!isActiveWatchGeneration(generation)) {
+                    try {
+                        fusedLocationClient.removeLocationUpdates(callback)
+                    } catch (e: Exception) {
+                        // Ignore
                     }
                 }
-                .addOnFailureListener { exception ->
-                    handleFusedRequestFailure(createFusedRequestFailureError(exception))
-                }
-                .addOnCanceledListener {
-                    handleFusedRequestFailure()
-                }
-        } catch (e: SecurityException) {
-            handleFusedRequestFailure(createFusedSecurityError(e.message))
-        } catch (_: Exception) {
-            handleFusedRequestFailure()
-        }
+            },
+            onFailure = { fusedError -> handleFusedRequestFailure(fusedError) }
+        )
     }
 
     private fun mergeWatchOptions(): ParsedOptions {
