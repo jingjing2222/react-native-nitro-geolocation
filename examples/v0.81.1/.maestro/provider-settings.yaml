@@ -36,6 +36,11 @@ appId: nitrogeolocation.example
 - assertVisible:
     id: "provider-settings-network"
 
+- scrollUntilVisible:
+    element: "Prepare Check-In"
+    direction: DOWN
+    centerElement: true
+
 - tapOn: "Prepare Check-In"
 - tapOn:
     text: "Turn on|OK|확인|켜기|사용"

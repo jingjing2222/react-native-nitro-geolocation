@@ -51,10 +51,20 @@ appId: nitrogeolocation.example
     id: "latitude-text"
 - assertVisible:
     text: "Latitude: 37\\.566500"
+- scrollUntilVisible:
+    element:
+      id: "longitude-text"
+    direction: DOWN
+    centerElement: true
 - assertVisible:
     id: "longitude-text"
 - assertVisible:
     text: "Longitude: 126\\.978000"
+- scrollUntilVisible:
+    element:
+      id: "accuracy-text"
+    direction: DOWN
+    centerElement: true
 - assertVisible:
     id: "accuracy-text"
 

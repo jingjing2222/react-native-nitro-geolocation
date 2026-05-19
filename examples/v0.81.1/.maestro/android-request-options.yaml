@@ -1,7 +1,9 @@
 appId: nitrogeolocation.example
 ---
-# Android request options: exercise Fused request controls, cache isolation,
+# Android request options: exercise fused request controls, cache isolation,
 # watch auto-stop, heading-token cleanup, invalid options, and permission gates.
+# Live non-mocked provider proof is gated in android-provider-selection.yaml for
+# connected physical devices.
 
 - launchApp:
     clearState: true
@@ -20,8 +22,13 @@ appId: nitrogeolocation.example
     optional: true
 
 - extendedWaitUntil:
-    visible: "Fused request controls with update limits and rejection paths"
+    visible: "Provider selection, fused request controls, and rejection paths"
     timeout: 10000
+
+- scrollUntilVisible:
+    element: "Run Fused Request"
+    direction: DOWN
+    centerElement: true
 
 - setLocation:
     latitude: 37.5665
@@ -37,9 +44,7 @@ appId: nitrogeolocation.example
 - assertVisible:
     id: "android-request-options-fused-result"
 - assertVisible:
-    text: ".*Fused coarse request returned -?[0-9]+\\.[0-9]+, -?[0-9]+\\.[0-9]+; provider=fused.*"
-- assertVisible:
-    text: ".*provider=.*"
+    text: ".*auto coarse request returned -?[0-9]+\\.[0-9]+, -?[0-9]+\\.[0-9]+.*playServices coarse request returned -?[0-9]+\\.[0-9]+, -?[0-9]+\\.[0-9]+.*"
 
 - scrollUntilVisible:
     element: "Run One-Shot Distance Filter"
@@ -51,11 +56,10 @@ appId: nitrogeolocation.example
     longitude: 126.978
 
 - tapOn:
-    text: "Run One-Shot Distance Filter"
+    id: "android-request-options-run-one-shot-distance-button"
 
-- scrollUntilVisible:
-    element: "One-shot distance: passed"
-    direction: DOWN
+- extendedWaitUntil:
+    visible: "One-shot distance: passed"
     timeout: 15000
 
 - assertVisible:
@@ -73,17 +77,16 @@ appId: nitrogeolocation.example
     longitude: 126.978
 
 - tapOn:
-    text: "Run Coarse Cache Isolation"
+    id: "android-request-options-run-coarse-cache-button"
 
-- scrollUntilVisible:
-    element: "Coarse cache: passed"
-    direction: DOWN
+- extendedWaitUntil:
+    visible: "Coarse cache: passed"
     timeout: 30000
 
 - assertVisible:
     id: "android-request-options-coarse-cache-result"
 - assertVisible:
-    text: ".*POSITION_UNAVAILABLE.*coarse cache-only read did not reuse.*"
+    text: ".*coarse cache-only read did not reuse the fine cache.*"
 
 - scrollUntilVisible:
     element: "Run Mixed Watch Granularity"
@@ -95,15 +98,10 @@ appId: nitrogeolocation.example
     longitude: 126.978
 
 - tapOn:
-    text: "Run Mixed Watch Granularity"
+    id: "android-request-options-run-mixed-watch-button"
 
-- setLocation:
-    latitude: 37.5665
-    longitude: 126.978
-
-- scrollUntilVisible:
-    element: "Mixed watch: passed"
-    direction: DOWN
+- extendedWaitUntil:
+    visible: "Mixed watch: passed"
     timeout: 30000
 
 - assertVisible:
@@ -121,15 +119,15 @@ appId: nitrogeolocation.example
     longitude: 126.978
 
 - tapOn:
-    text: "Run Max Updates Watch"
+    id: "android-request-options-run-max-updates-button"
+
+- extendedWaitUntil:
+    visible: "Max updates first reading received; inject another location"
+    timeout: 30000
 
 - setLocation:
-    latitude: 37.5667
-    longitude: 126.9782
-- waitForAnimationToEnd
-- setLocation:
-    latitude: 37.5669
-    longitude: 126.9784
+    latitude: 37.5765
+    longitude: 126.988
 
 - extendedWaitUntil:
     visible: "Max updates: passed"
@@ -150,19 +148,18 @@ appId: nitrogeolocation.example
     longitude: 126.978
 
 - tapOn:
-    text: "Run Heading Unwatch Isolation"
+    id: "android-request-options-run-heading-unwatch-button"
+
+- extendedWaitUntil:
+    visible: "Heading unwatch first reading received; inject another location"
+    timeout: 30000
 
 - setLocation:
-    latitude: 37.5667
-    longitude: 126.9782
-- waitForAnimationToEnd
-- setLocation:
-    latitude: 37.5669
-    longitude: 126.9784
+    latitude: 37.5765
+    longitude: 126.988
 
-- scrollUntilVisible:
-    element: "Heading unwatch: passed"
-    direction: DOWN
+- extendedWaitUntil:
+    visible: "Heading unwatch: passed"
     timeout: 30000
 
 - assertVisible:
@@ -176,11 +173,10 @@ appId: nitrogeolocation.example
     centerElement: true
 
 - tapOn:
-    text: "Run Invalid Max Updates"
+    id: "android-request-options-run-invalid-button"
 
-- scrollUntilVisible:
-    element: "Invalid maxUpdates: passed"
-    direction: DOWN
+- extendedWaitUntil:
+    visible: "Invalid maxUpdates: passed"
     timeout: 10000
 
 - assertVisible:
@@ -210,20 +206,20 @@ appId: nitrogeolocation.example
     optional: true
 
 - extendedWaitUntil:
-    visible: "Fused request controls with update limits and rejection paths"
+    visible: "Provider selection, fused request controls, and rejection paths"
     timeout: 10000
 
 - scrollUntilVisible:
     element: "Run Fine Permission Gate"
     direction: DOWN
     centerElement: true
+    timeout: 40000
 
 - tapOn:
-    text: "Run Fine Permission Gate"
+    id: "android-request-options-run-fine-denied-button"
 
-- scrollUntilVisible:
-    element: "Fine permission: passed"
-    direction: DOWN
+- extendedWaitUntil:
+    visible: "Fine permission: passed"
     timeout: 15000
 
 - assertVisible:

@@ -49,8 +49,10 @@ appId: nitrogeolocation.example
     timeout: 10000
 
 # Wait for position update
-- extendedWaitUntil:
-    visible: "Watched Position (Live)"
+- scrollUntilVisible:
+    element: "Watched Position (Live)"
+    direction: DOWN
+    centerElement: true
     timeout: 15000
 
 # Verify position data is displayed
@@ -60,6 +62,11 @@ appId: nitrogeolocation.example
     id: "latitude-text"
 - assertVisible:
     text: "Latitude: 37\\.566500"
+- scrollUntilVisible:
+    element:
+      id: "longitude-text"
+    direction: DOWN
+    centerElement: true
 - assertVisible:
     id: "longitude-text"
 - assertVisible:
@@ -69,6 +76,11 @@ appId: nitrogeolocation.example
 - waitForAnimationToEnd
 
 # Disable watching
+- scrollUntilVisible:
+    element:
+      id: "watch-toggle-switch"
+    direction: UP
+    centerElement: true
 - tapOn:
     id: "watch-toggle-switch"
 
@@ -99,9 +111,11 @@ appId: nitrogeolocation.example
 - tapOn:
     id: "watch-toggle-switch"
 
-- extendedWaitUntil:
-    visible: "Error: .*(Location permission|denied access).*"
+- scrollUntilVisible:
+    element: "Error: .*(Location permission|denied access).*"
+    direction: DOWN
+    visibilityPercentage: 30
     timeout: 10000
 
 - assertVisible:
-    id: "watch-position-error"
+    text: "Error: .*(Location permission|denied access).*"

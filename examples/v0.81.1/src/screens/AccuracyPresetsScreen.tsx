@@ -29,7 +29,6 @@ type AccuracyScenario = {
   title: string;
   options: LocationRequestOptions;
   assertPosition?: (position: GeolocationResponse) => string;
-  acceptNoGpsFallbackRejection?: boolean;
 };
 
 type PositiveScenarioMessage = {
@@ -46,29 +45,6 @@ const initialResults = createScenarioResults([
   "invalid",
   "denied"
 ] as const);
-
-const assertNotGpsProvider = (position: GeolocationResponse) => {
-  const coordinates = assertFixtureCoordinates(position);
-
-  if (Platform.OS === "android" && position.provider === "gps") {
-    throw new Error("Explicit non-high preset unexpectedly used GPS.");
-  }
-
-  return `${coordinates}, provider=${position.provider ?? "unknown"}`;
-};
-
-const isNoGpsFallbackRejection = (error: unknown) => {
-  if (Platform.OS !== "android") return false;
-
-  const maybeError = error as { code?: unknown };
-  if (typeof maybeError.code !== "number") return false;
-
-  return [
-    LocationErrorCode.POSITION_UNAVAILABLE,
-    LocationErrorCode.TIMEOUT,
-    LocationErrorCode.SETTINGS_NOT_SATISFIED
-  ].includes(maybeError.code);
-};
 
 const isFixtureMismatchError = (
   error: unknown
@@ -133,7 +109,7 @@ const getPositiveScenarios = (): AccuracyScenario[] => {
       },
       {
         id: "android-balanced-overrides-true",
-        title: "Android balanced does not fall back to GPS",
+        title: "Android balanced overrides enableHighAccuracy=true",
         options: {
           enableHighAccuracy: true,
           accuracy: {
@@ -141,13 +117,11 @@ const getPositiveScenarios = (): AccuracyScenario[] => {
           },
           maximumAge: 0,
           timeout: 15000
-        },
-        assertPosition: assertNotGpsProvider,
-        acceptNoGpsFallbackRejection: true
+        }
       },
       {
-        id: "android-low-no-gps-fallback",
-        title: "Android low does not fall back to GPS",
+        id: "android-low-overrides-true",
+        title: "Android low overrides enableHighAccuracy=true",
         options: {
           enableHighAccuracy: true,
           accuracy: {
@@ -155,9 +129,7 @@ const getPositiveScenarios = (): AccuracyScenario[] => {
           },
           maximumAge: 0,
           timeout: 15000
-        },
-        assertPosition: assertNotGpsProvider,
-        acceptNoGpsFallbackRejection: true
+        }
       }
     ];
   }
@@ -237,30 +209,12 @@ export default function AccuracyPresetsScreen() {
 
       const messages: PositiveScenarioMessage[] = [];
       for (const scenario of getPositiveScenarios()) {
-        try {
-          const summary = await runScenarioWithSettledFixture(scenario);
-          messages.push({
-            id: scenario.id,
-            title: scenario.title,
-            message: `contract passed with injected location ${summary}`
-          });
-        } catch (error) {
-          if (
-            scenario.acceptNoGpsFallbackRejection &&
-            isNoGpsFallbackRejection(error)
-          ) {
-            messages.push({
-              id: scenario.id,
-              title: scenario.title,
-              message: `contract passed by rejecting instead of using GPS (${getDisplayErrorMessage(
-                error
-              )})`
-            });
-            continue;
-          }
-
-          throw error;
-        }
+        const summary = await runScenarioWithSettledFixture(scenario);
+        messages.push({
+          id: scenario.id,
+          title: scenario.title,
+          message: `contract passed with injected location ${summary}`
+        });
       }
 
       setScenarioMessages(messages);

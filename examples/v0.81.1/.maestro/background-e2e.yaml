@@ -28,6 +28,12 @@ appId: nitrogeolocation.example
 - assertVisible:
     id: "background-e2e-status"
 
+- scrollUntilVisible:
+    element:
+      id: "background-e2e-invalid-config-button"
+    direction: DOWN
+    centerElement: true
+
 - tapOn:
     id: "background-e2e-invalid-config-button"
 - scrollUntilVisible:
