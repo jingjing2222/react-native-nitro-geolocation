@@ -1,5 +1,12 @@
 # @react-native-nitro-geolocation/rozenite-plugin
 
+## 1.1.2
+
+### Patch Changes
+
+- 7651df9: Refresh release documentation and simplify first-run guidance without changing
+  package runtime behavior.
+
 ## 1.1.1
 
 ### Patch Changes
