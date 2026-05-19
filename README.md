@@ -179,7 +179,39 @@ permission set from the Android background setup guide when using
 
 ---
 
-### 4. Continue In The Docs
+### 4. DevTools Plugin
+
+Use the Rozenite DevTools plugin to mock locations during development with an
+interactive map. It works with the Modern API root import.
+
+![DevTools Plugin Demo](https://raw.githubusercontent.com/jingjing2222/react-native-nitro-geolocation/main/devtools.gif)
+
+```bash
+yarn add @react-native-nitro-geolocation/rozenite-plugin
+```
+
+```tsx
+import {
+  createPosition,
+  useGeolocationDevTools,
+} from "@react-native-nitro-geolocation/rozenite-plugin";
+
+function App() {
+  useGeolocationDevTools({
+    initialPosition: createPosition("Seoul, South Korea"),
+  });
+
+  return <RootNavigator />;
+}
+```
+
+The plugin requires Rozenite DevTools in your app. See the
+[DevTools Plugin guide](https://react-native-nitro-geolocation.pages.dev/guide/devtools)
+for setup, presets, troubleshooting, and the demo.
+
+---
+
+### 5. Continue In The Docs
 
 Use the docs site for the detailed flows:
 
