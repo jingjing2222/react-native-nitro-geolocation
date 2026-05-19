@@ -40,11 +40,18 @@ appId: nitrogeolocation.example
     element: "3. Heading Watch"
     direction: DOWN
 
+- scrollUntilVisible:
+    element:
+      id: "heading-run-watch-button"
+    direction: DOWN
+    centerElement: true
+
 - tapOn:
     id: "heading-run-watch-button"
 
-- extendedWaitUntil:
-    visible: "Heading watch: passed"
+- scrollUntilVisible:
+    element: "Heading watch: passed"
+    direction: DOWN
     timeout: 25000
 
 - assertVisible:

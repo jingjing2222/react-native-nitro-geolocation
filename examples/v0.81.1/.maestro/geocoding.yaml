@@ -19,6 +19,9 @@ appId: nitrogeolocation.example
 - tapOn:
     text: "열기|Open"
     optional: true
+- tapOn:
+    id: "com.google.android.googlequicksearchbox:id/assistant_robin_fast_track_banner_dismiss_button"
+    optional: true
 
 - extendedWaitUntil:
     visible: "Native address and coordinate conversion"

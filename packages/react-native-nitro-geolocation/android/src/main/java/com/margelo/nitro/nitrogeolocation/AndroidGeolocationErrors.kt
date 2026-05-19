@@ -56,6 +56,10 @@ internal fun createRequestDeadlineElapsedRealtime(timeout: Double): Long {
     }
 }
 
+internal fun remainingTimeoutMillis(deadlineElapsedRealtime: Long): Long {
+    return (deadlineElapsedRealtime - SystemClock.elapsedRealtime()).coerceAtLeast(0L)
+}
+
 internal fun coerceTimeoutMillis(timeout: Double): Long {
     return when {
         timeout.isNaN() || timeout <= 0.0 -> 0L

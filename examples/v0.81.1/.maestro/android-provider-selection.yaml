@@ -1,0 +1,73 @@
+appId: nitrogeolocation.example
+---
+# Android provider-selection proof. Run on a connected physical Android device
+# with live location services and Google Play Services enabled. Do not run after
+# Maestro setLocation unless the app has been relaunched with real providers.
+
+- assertTrue: ${PROVIDER_SELECTION_PHYSICAL_DEVICE == '1'}
+
+- launchApp:
+    clearState: true
+    permissions:
+      android.permission.ACCESS_COARSE_LOCATION: allow
+      android.permission.ACCESS_FINE_LOCATION: allow
+
+- extendedWaitUntil:
+    visible: "Geolocation API"
+    timeout: 10000
+
+- openLink:
+    link: nitrogeolocation://app/android-request-options
+- tapOn:
+    text: "열기|Open"
+    optional: true
+
+- extendedWaitUntil:
+    visible: "Provider selection, fused request controls, and rejection paths"
+    timeout: 10000
+
+- tapOn:
+    id: "android-request-options-run-auto-provider-button"
+
+- extendedWaitUntil:
+    visible: "Auto provider: passed"
+    timeout: 60000
+
+- assertVisible:
+    id: "android-request-options-auto-provider-result"
+- assertVisible:
+    text: ".*auto returned fused provider (with|without) Google location accuracy status and returned -?[0-9]+\\.[0-9]+, -?[0-9]+\\.[0-9]+; provider=fused; mocked=false.*"
+
+- scrollUntilVisible:
+    element: "Run Play Services Provider"
+    direction: DOWN
+    centerElement: true
+
+- tapOn:
+    id: "android-request-options-run-play-services-provider-button"
+
+- extendedWaitUntil:
+    visible: "Play Services provider: passed"
+    timeout: 60000
+
+- assertVisible:
+    id: "android-request-options-play-services-provider-result"
+- assertVisible:
+    text: ".*playServices returned fused provider (with|without) Google location accuracy status and returned -?[0-9]+\\.[0-9]+, -?[0-9]+\\.[0-9]+; provider=fused; mocked=false.*"
+
+- scrollUntilVisible:
+    element: "Run Platform Provider"
+    direction: DOWN
+    centerElement: true
+
+- tapOn:
+    id: "android-request-options-run-platform-provider-button"
+
+- extendedWaitUntil:
+    visible: "Platform provider: passed"
+    timeout: 60000
+
+- assertVisible:
+    id: "android-request-options-platform-provider-result"
+- assertVisible:
+    text: ".*android returned .*provider=(gps|network|passive); mocked=false.*android_platform returned .*provider=(gps|network|passive); mocked=false.*"

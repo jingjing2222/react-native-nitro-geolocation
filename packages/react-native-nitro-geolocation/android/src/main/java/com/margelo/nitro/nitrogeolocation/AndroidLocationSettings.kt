@@ -134,12 +134,15 @@ internal class AndroidLocationSettings(
     private fun createProviderStatus(
         googleLocationAccuracyEnabled: Boolean?
     ): LocationProviderStatus {
+        val googlePlayServicesAvailable = isGooglePlayServicesAvailable()
+
         return LocationProviderStatus(
             locationServicesEnabled = hasServicesEnabled(),
             backgroundModeEnabled = hasBackgroundLocationPermission(),
             gpsAvailable = isProviderEnabled(AndroidLocationManager.GPS_PROVIDER),
             networkAvailable = isProviderEnabled(AndroidLocationManager.NETWORK_PROVIDER),
             passiveAvailable = isProviderEnabled(AndroidLocationManager.PASSIVE_PROVIDER),
+            googlePlayServicesAvailable = googlePlayServicesAvailable,
             googleLocationAccuracyEnabled = googleLocationAccuracyEnabled
         )
     }

@@ -15,6 +15,9 @@ export default function AndroidRequestOptionsScreen() {
   const {
     permissionStatus,
     results,
+    runAutoProviderScenario,
+    runPlayServicesProviderScenario,
+    runPlatformProviderScenario,
     runFusedRequestScenario,
     runOneShotDistanceFilterScenario,
     runCoarseCacheScenario,
@@ -71,7 +74,7 @@ export default function AndroidRequestOptionsScreen() {
     <ScenarioScreen
       prefix={PREFIX}
       title="Android Request Options"
-      subtitle="Fused request controls with update limits and rejection paths"
+      subtitle="Provider selection, fused request controls, and rejection paths"
     >
       <ScenarioSection index={1} title="Permission">
         <PermissionStatusBlock prefix={PREFIX} status={permissionStatus} />
@@ -79,10 +82,46 @@ export default function AndroidRequestOptionsScreen() {
 
       {renderResultSection({
         index: 2,
+        title: "Auto Provider Selection",
+        buttonTitle: "Run Auto Provider",
+        onPress: runAutoProviderScenario,
+        color: "#1976D2",
+        buttonTestID: `${PREFIX}-run-auto-provider-button`,
+        resultId: "auto-provider",
+        resultKey: "autoProvider",
+        resultLabel: "Auto provider"
+      })}
+
+      {renderResultSection({
+        index: 3,
+        title: "Play Services Provider Selection",
+        buttonTitle: "Run Play Services Provider",
+        onPress: runPlayServicesProviderScenario,
+        color: "#0288D1",
+        buttonTestID: `${PREFIX}-run-play-services-provider-button`,
+        resultId: "play-services-provider",
+        resultKey: "playServicesProvider",
+        resultLabel: "Play Services provider"
+      })}
+
+      {renderResultSection({
+        index: 4,
+        title: "Platform Provider Selection",
+        buttonTitle: "Run Platform Provider",
+        onPress: runPlatformProviderScenario,
+        color: "#455A64",
+        buttonTestID: `${PREFIX}-run-platform-provider-button`,
+        resultId: "platform-provider",
+        resultKey: "platformProvider",
+        resultLabel: "Platform provider"
+      })}
+
+      {renderResultSection({
+        index: 5,
         title: "Fused Coarse Request",
         buttonTitle: "Run Fused Request",
         onPress: runFusedRequestScenario,
-        color: "#1976D2",
+        color: "#0288D1",
         buttonTestID: `${PREFIX}-run-fused-button`,
         resultId: "fused",
         resultKey: "fused",
@@ -90,7 +129,7 @@ export default function AndroidRequestOptionsScreen() {
       })}
 
       {renderResultSection({
-        index: 3,
+        index: 6,
         title: "One-Shot Distance Filter",
         buttonTitle: "Run One-Shot Distance Filter",
         onPress: runOneShotDistanceFilterScenario,
@@ -102,7 +141,7 @@ export default function AndroidRequestOptionsScreen() {
       })}
 
       {renderResultSection({
-        index: 4,
+        index: 7,
         title: "Coarse Cache Isolation",
         buttonTitle: "Run Coarse Cache Isolation",
         onPress: runCoarseCacheScenario,
@@ -114,11 +153,11 @@ export default function AndroidRequestOptionsScreen() {
       })}
 
       {renderResultSection({
-        index: 5,
+        index: 8,
         title: "Mixed Watch Granularity",
         buttonTitle: "Run Mixed Watch Granularity",
         onPress: runMixedWatchScenario,
-        color: "#455A64",
+        color: "#546E7A",
         buttonTestID: `${PREFIX}-run-mixed-watch-button`,
         resultId: "mixed-watch",
         resultKey: "mixedWatch",
@@ -126,7 +165,7 @@ export default function AndroidRequestOptionsScreen() {
       })}
 
       {renderResultSection({
-        index: 6,
+        index: 9,
         title: "Max Updates Watch",
         buttonTitle: "Run Max Updates Watch",
         onPress: runMaxUpdatesScenario,
@@ -138,7 +177,7 @@ export default function AndroidRequestOptionsScreen() {
       })}
 
       {renderResultSection({
-        index: 7,
+        index: 10,
         title: "Heading Unwatch Isolation",
         buttonTitle: "Run Heading Unwatch Isolation",
         onPress: runHeadingUnwatchScenario,
@@ -150,7 +189,7 @@ export default function AndroidRequestOptionsScreen() {
       })}
 
       {renderResultSection({
-        index: 8,
+        index: 11,
         title: "Invalid Max Updates",
         buttonTitle: "Run Invalid Max Updates",
         onPress: runInvalidMaxUpdatesScenario,
@@ -162,7 +201,7 @@ export default function AndroidRequestOptionsScreen() {
       })}
 
       {renderResultSection({
-        index: 9,
+        index: 12,
         title: "Fine Permission Gate",
         buttonTitle: "Run Fine Permission Gate",
         onPress: runFineDeniedScenario,

@@ -18,7 +18,7 @@ public extension LocationProviderStatus {
   /**
    * Create a new instance of `LocationProviderStatus`.
    */
-  init(locationServicesEnabled: Bool, backgroundModeEnabled: Bool, gpsAvailable: Bool?, networkAvailable: Bool?, passiveAvailable: Bool?, googleLocationAccuracyEnabled: Bool?) {
+  init(locationServicesEnabled: Bool, backgroundModeEnabled: Bool, gpsAvailable: Bool?, networkAvailable: Bool?, passiveAvailable: Bool?, googlePlayServicesAvailable: Bool?, googleLocationAccuracyEnabled: Bool?) {
     self.init(locationServicesEnabled, backgroundModeEnabled, { () -> bridge.std__optional_bool_ in
       if let __unwrappedValue = gpsAvailable {
         return bridge.create_std__optional_bool_(__unwrappedValue)
@@ -33,6 +33,12 @@ public extension LocationProviderStatus {
       }
     }(), { () -> bridge.std__optional_bool_ in
       if let __unwrappedValue = passiveAvailable {
+        return bridge.create_std__optional_bool_(__unwrappedValue)
+      } else {
+        return .init()
+      }
+    }(), { () -> bridge.std__optional_bool_ in
+      if let __unwrappedValue = googlePlayServicesAvailable {
         return bridge.create_std__optional_bool_(__unwrappedValue)
       } else {
         return .init()
@@ -85,6 +91,18 @@ public extension LocationProviderStatus {
     return { () -> Bool? in
       if bridge.has_value_std__optional_bool_(self.__passiveAvailable) {
         let __unwrapped = bridge.get_std__optional_bool_(self.__passiveAvailable)
+        return __unwrapped
+      } else {
+        return nil
+      }
+    }()
+  }
+
+  @inline(__always)
+  var googlePlayServicesAvailable: Bool? {
+    return { () -> Bool? in
+      if bridge.has_value_std__optional_bool_(self.__googlePlayServicesAvailable) {
+        let __unwrapped = bridge.get_std__optional_bool_(self.__googlePlayServicesAvailable)
         return __unwrapped
       } else {
         return nil

@@ -112,6 +112,7 @@ permission helpers, and location assertions live in
 | Android heading | `heading-android.yaml` | `HeadingScreen.tsx` |
 | iOS heading | `heading-ios.yaml` | `HeadingScreen.tsx` |
 | Android request options | `android-request-options.yaml` | `AndroidRequestOptionsScreen.tsx` |
+| Android provider selection | `android-provider-selection.yaml` | `AndroidRequestOptionsScreen.tsx` |
 | Android provider settings | `provider-settings.yaml`, `provider-settings-not-ready.yaml` | `ProviderSettingsScreen.tsx` |
 | iOS location tuning | `ios-location-tuning.yaml` | `IOSLocationTuningScreen.tsx` |
 | iOS accuracy authorization | `ios-accuracy-authorization.yaml` | `IOSAccuracyAuthorizationScreen.tsx` |
@@ -144,3 +145,7 @@ Run from repo root with the matching workspace script:
 | iOS long-run background | `yarn workspace react-native-nitro-geolocation-example test:e2e:background-long-run:ios` |
 | Android web E2E | `yarn workspace react-native-nitro-geolocation-example test:e2e:web:android` |
 | iOS web E2E | `yarn workspace react-native-nitro-geolocation-example test:e2e:web:ios` |
+
+Android `all-tests.yaml` can include live provider-selection checks through
+`android-provider-selection.yaml` when `RUN_ANDROID_PROVIDER_SELECTION=1` is
+set.

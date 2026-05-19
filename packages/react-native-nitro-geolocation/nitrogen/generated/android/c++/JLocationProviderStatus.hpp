@@ -41,6 +41,8 @@ namespace margelo::nitro::nitrogeolocation {
       jni::local_ref<jni::JBoolean> networkAvailable = this->getFieldValue(fieldNetworkAvailable);
       static const auto fieldPassiveAvailable = clazz->getField<jni::JBoolean>("passiveAvailable");
       jni::local_ref<jni::JBoolean> passiveAvailable = this->getFieldValue(fieldPassiveAvailable);
+      static const auto fieldGooglePlayServicesAvailable = clazz->getField<jni::JBoolean>("googlePlayServicesAvailable");
+      jni::local_ref<jni::JBoolean> googlePlayServicesAvailable = this->getFieldValue(fieldGooglePlayServicesAvailable);
       static const auto fieldGoogleLocationAccuracyEnabled = clazz->getField<jni::JBoolean>("googleLocationAccuracyEnabled");
       jni::local_ref<jni::JBoolean> googleLocationAccuracyEnabled = this->getFieldValue(fieldGoogleLocationAccuracyEnabled);
       return LocationProviderStatus(
@@ -49,6 +51,7 @@ namespace margelo::nitro::nitrogeolocation {
         gpsAvailable != nullptr ? std::make_optional(static_cast<bool>(gpsAvailable->value())) : std::nullopt,
         networkAvailable != nullptr ? std::make_optional(static_cast<bool>(networkAvailable->value())) : std::nullopt,
         passiveAvailable != nullptr ? std::make_optional(static_cast<bool>(passiveAvailable->value())) : std::nullopt,
+        googlePlayServicesAvailable != nullptr ? std::make_optional(static_cast<bool>(googlePlayServicesAvailable->value())) : std::nullopt,
         googleLocationAccuracyEnabled != nullptr ? std::make_optional(static_cast<bool>(googleLocationAccuracyEnabled->value())) : std::nullopt
       );
     }
@@ -59,7 +62,7 @@ namespace margelo::nitro::nitrogeolocation {
      */
     [[maybe_unused]]
     static jni::local_ref<JLocationProviderStatus::javaobject> fromCpp(const LocationProviderStatus& value) {
-      using JSignature = JLocationProviderStatus(jboolean, jboolean, jni::alias_ref<jni::JBoolean>, jni::alias_ref<jni::JBoolean>, jni::alias_ref<jni::JBoolean>, jni::alias_ref<jni::JBoolean>);
+      using JSignature = JLocationProviderStatus(jboolean, jboolean, jni::alias_ref<jni::JBoolean>, jni::alias_ref<jni::JBoolean>, jni::alias_ref<jni::JBoolean>, jni::alias_ref<jni::JBoolean>, jni::alias_ref<jni::JBoolean>);
       static const auto clazz = javaClassStatic();
       static const auto create = clazz->getStaticMethod<JSignature>("fromCpp");
       return create(
@@ -69,6 +72,7 @@ namespace margelo::nitro::nitrogeolocation {
         value.gpsAvailable.has_value() ? jni::JBoolean::valueOf(value.gpsAvailable.value()) : nullptr,
         value.networkAvailable.has_value() ? jni::JBoolean::valueOf(value.networkAvailable.value()) : nullptr,
         value.passiveAvailable.has_value() ? jni::JBoolean::valueOf(value.passiveAvailable.value()) : nullptr,
+        value.googlePlayServicesAvailable.has_value() ? jni::JBoolean::valueOf(value.googlePlayServicesAvailable.value()) : nullptr,
         value.googleLocationAccuracyEnabled.has_value() ? jni::JBoolean::valueOf(value.googleLocationAccuracyEnabled.value()) : nullptr
       );
     }

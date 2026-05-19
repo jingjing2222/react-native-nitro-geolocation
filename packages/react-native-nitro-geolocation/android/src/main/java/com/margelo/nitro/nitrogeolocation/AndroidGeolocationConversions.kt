@@ -3,7 +3,9 @@ package com.margelo.nitro.nitrogeolocation
 import android.location.Address
 import android.location.Location
 
-internal fun Location.toGeolocationResponse(): GeolocationResponse {
+internal fun Location.toGeolocationResponse(
+    providerOverride: LocationProviderUsed? = null
+): GeolocationResponse {
     val coords = GeolocationCoordinates(
         latitude = latitude,
         longitude = longitude,
@@ -18,7 +20,7 @@ internal fun Location.toGeolocationResponse(): GeolocationResponse {
         coords = coords,
         timestamp = time.toDouble(),
         mocked = isMocked(),
-        provider = providerUsed()
+        provider = providerOverride ?: providerUsed()
     )
 }
 

@@ -81,17 +81,38 @@ appId: nitrogeolocation.example
     latitude: 37.5665
     longitude: 126.978
 
+- scrollUntilVisible:
+    element: "Get Position"
+    direction: DOWN
+    centerElement: true
+
 - tapOn: "Get Position"
-- extendedWaitUntil:
-    visible: "Current Position"
+- scrollUntilVisible:
+    element: "Current Position"
+    direction: DOWN
     timeout: 15000
 
 - assertVisible:
     id: "api-error-position"
+- scrollUntilVisible:
+    element:
+      id: "api-error-latitude"
+    direction: DOWN
+    centerElement: true
 - assertVisible:
     id: "api-error-latitude"
+- scrollUntilVisible:
+    element:
+      id: "api-error-longitude"
+    direction: DOWN
+    centerElement: true
 - assertVisible:
     id: "api-error-longitude"
+- scrollUntilVisible:
+    element:
+      id: "api-error-accuracy"
+    direction: DOWN
+    centerElement: true
 - assertVisible:
     id: "api-error-accuracy"
 

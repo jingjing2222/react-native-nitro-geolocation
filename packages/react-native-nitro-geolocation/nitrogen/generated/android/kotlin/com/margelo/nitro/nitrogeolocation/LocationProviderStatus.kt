@@ -35,6 +35,9 @@ data class LocationProviderStatus(
   val passiveAvailable: Boolean?,
   @DoNotStrip
   @Keep
+  val googlePlayServicesAvailable: Boolean?,
+  @DoNotStrip
+  @Keep
   val googleLocationAccuracyEnabled: Boolean?
 ) {
   /* primary constructor */
@@ -47,6 +50,7 @@ data class LocationProviderStatus(
       && Objects.deepEquals(this.gpsAvailable, other.gpsAvailable)
       && Objects.deepEquals(this.networkAvailable, other.networkAvailable)
       && Objects.deepEquals(this.passiveAvailable, other.passiveAvailable)
+      && Objects.deepEquals(this.googlePlayServicesAvailable, other.googlePlayServicesAvailable)
       && Objects.deepEquals(this.googleLocationAccuracyEnabled, other.googleLocationAccuracyEnabled)
   }
 
@@ -57,6 +61,7 @@ data class LocationProviderStatus(
       gpsAvailable,
       networkAvailable,
       passiveAvailable,
+      googlePlayServicesAvailable,
       googleLocationAccuracyEnabled
     ).contentDeepHashCode()
   }
@@ -69,8 +74,8 @@ data class LocationProviderStatus(
     @Keep
     @Suppress("unused")
     @JvmStatic
-    private fun fromCpp(locationServicesEnabled: Boolean, backgroundModeEnabled: Boolean, gpsAvailable: Boolean?, networkAvailable: Boolean?, passiveAvailable: Boolean?, googleLocationAccuracyEnabled: Boolean?): LocationProviderStatus {
-      return LocationProviderStatus(locationServicesEnabled, backgroundModeEnabled, gpsAvailable, networkAvailable, passiveAvailable, googleLocationAccuracyEnabled)
+    private fun fromCpp(locationServicesEnabled: Boolean, backgroundModeEnabled: Boolean, gpsAvailable: Boolean?, networkAvailable: Boolean?, passiveAvailable: Boolean?, googlePlayServicesAvailable: Boolean?, googleLocationAccuracyEnabled: Boolean?): LocationProviderStatus {
+      return LocationProviderStatus(locationServicesEnabled, backgroundModeEnabled, gpsAvailable, networkAvailable, passiveAvailable, googlePlayServicesAvailable, googleLocationAccuracyEnabled)
     }
   }
 }

@@ -23,6 +23,7 @@ func createLocationProviderStatus() -> LocationProviderStatus {
         gpsAvailable: nil,
         networkAvailable: nil,
         passiveAvailable: nil,
+        googlePlayServicesAvailable: nil,
         googleLocationAccuracyEnabled: nil
     )
 }

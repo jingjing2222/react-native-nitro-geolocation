@@ -45,11 +45,18 @@ appId: nitrogeolocation.example
     element: "3. System Cache Read"
     direction: DOWN
 
+- scrollUntilVisible:
+    element:
+      id: "last-known-position-run-system-button"
+    direction: DOWN
+    centerElement: true
+
 - tapOn:
     id: "last-known-position-run-system-button"
 
-- extendedWaitUntil:
-    visible: "System cache: passed"
+- scrollUntilVisible:
+    element: "System cache: passed"
+    direction: DOWN
     timeout: 20000
 
 - assertVisible:
@@ -90,6 +97,10 @@ appId: nitrogeolocation.example
     clearState: true
     permissions:
       all: deny
+
+- extendedWaitUntil:
+    visible: "Geolocation API"
+    timeout: 10000
 
 - stopApp
 

@@ -40,16 +40,26 @@ appId: nitrogeolocation.example
     text: "3 accuracy preset contracts passed."
 - assertVisible:
     id: "accuracy-presets-scenario-0"
+- scrollUntilVisible:
+    element:
+      id: "accuracy-presets-scenario-1"
+    direction: DOWN
+    centerElement: true
 - assertVisible:
     id: "accuracy-presets-scenario-1"
+- scrollUntilVisible:
+    element:
+      id: "accuracy-presets-scenario-2"
+    direction: DOWN
+    centerElement: true
 - assertVisible:
     id: "accuracy-presets-scenario-2"
 - assertVisible:
     text: ".*(iOS bestForNavigation overrides enableHighAccuracy=false|Android high overrides enableHighAccuracy=false).*"
 - assertVisible:
-    text: ".*(iOS nearestTenMeters returns fixture coordinates|Android balanced does not fall back to GPS).*"
+    text: ".*(iOS nearestTenMeters returns fixture coordinates|Android balanced overrides enableHighAccuracy=true).*"
 - assertVisible:
-    text: ".*(iOS reduced overrides enableHighAccuracy=true|Android low does not fall back to GPS).*"
+    text: ".*(iOS reduced overrides enableHighAccuracy=true|Android low overrides enableHighAccuracy=true).*"
 - assertVisible:
     text: ".*37.566500, 126.978000.*"
 
@@ -59,6 +69,10 @@ appId: nitrogeolocation.example
 
 - tapOn:
     id: "accuracy-presets-run-invalid-button"
+
+- scrollUntilVisible:
+    element: "Invalid preset: passed"
+    direction: DOWN
 
 - extendedWaitUntil:
     visible: "Invalid preset: passed"

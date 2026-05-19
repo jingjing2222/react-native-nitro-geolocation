@@ -112,6 +112,9 @@ export interface LocationProviderStatus {
   /** Android-only passive provider availability. Undefined on iOS. */
   passiveAvailable?: boolean;
 
+  /** Android-only Google Play Services availability. Undefined on iOS. */
+  googlePlayServicesAvailable?: boolean;
+
   /**
    * Android-only Google Location Accuracy state when Google Play Services
    * exposes it. Undefined on iOS or when unavailable.

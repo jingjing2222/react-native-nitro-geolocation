@@ -9,7 +9,7 @@ import type { GeolocationResponse } from "../publicTypes";
  *
  * Strategy:
  * 1. Check cached location (if maximumAge allows)
- * 2. Request fresh location from GPS/Network
+ * 2. Request fresh location from the configured native provider
  * 3. Timeout after specified duration
  *
  * @param options - Location request options

@@ -45,7 +45,7 @@ setConfiguration({
 - `autoRequestPermission?: boolean` - Deprecated compatibility option. `setConfiguration()` does not request permission; call `requestPermission()` explicitly when the app is ready to show the native prompt.
 - `authorizationLevel?: 'whenInUse' | 'always' | 'auto'` - iOS: Authorization level
 - `enableBackgroundLocationUpdates?: boolean` - iOS: Enable background location
-- `locationProvider?: 'playServices' | 'android' | 'auto'` - Android: Location provider. `auto` currently uses Android's platform `LocationManager`; set `playServices` explicitly to use Google Play Services fused location.
+- `locationProvider?: 'playServices' | 'android' | 'auto'` - Android: `auto` and `playServices` prefer Google Play Services fused location when available and fall back to Android's platform provider. `android` forces the platform `LocationManager` path.
 
 **Type**:
 
@@ -55,7 +55,7 @@ export type GeolocationConfiguration = {
   autoRequestPermission?: boolean;
   authorizationLevel?: 'always' | 'whenInUse' | 'auto';
   enableBackgroundLocationUpdates?: boolean;
-  /** `auto` currently uses Android's platform LocationManager. */
+  /** `auto` and `playServices` prefer fused, then platform fallback. */
   locationProvider?: 'playServices' | 'android' | 'auto';
 };
 
@@ -204,13 +204,14 @@ async function prepareAccurateLocation() {
   location services are enabled.
 - `getProviderStatus(): Promise<LocationProviderStatus>` - Returns provider
   state such as `locationServicesEnabled`, `gpsAvailable`,
-  `networkAvailable`, `passiveAvailable`, and Android Google Location Accuracy
-  when Google Play Services exposes it.
+  `networkAvailable`, `passiveAvailable`, Android Google Play Services
+  availability, and Google Location Accuracy when Google Play Services exposes
+  it.
 - `getLocationAvailability(): Promise<{ available: boolean; reason?: string }>` -
   Available since `v1.2`. Android reads Fused Location availability when
-  `locationProvider: 'playServices'` is configured and otherwise falls back to
-  platform provider/service checks. iOS maps Core Location service and
-  authorization state.
+  `locationProvider: 'auto'` or `locationProvider: 'playServices'` is
+  configured, then falls back to platform provider/service checks. iOS maps Core
+  Location service and authorization state.
 - `requestLocationSettings(options?): Promise<LocationProviderStatus>` -
   Checks the requested Android location settings and shows Android's native
   resolution dialog when available. It resolves with the updated provider
@@ -221,10 +222,11 @@ current Core Location service status and does not show a settings dialog.
 
 ### Android Reliability Notes
 
-- `locationProvider: 'playServices'` uses Google Play Services fused location.
-- `locationProvider: 'auto'` currently uses Android's platform
-  `LocationManager`; set `playServices` explicitly when you need fused
-  behavior.
+- `locationProvider: 'auto'` and `locationProvider: 'playServices'` prefer
+  Google Play Services fused location when available and fall back to Android's
+  platform provider.
+- `locationProvider: 'android'` forces Android's platform `LocationManager`
+  path.
 - Approximate/coarse location flows are supported through permissions and
   Android `granularity`.
 - Use `getLastKnownPosition()` when you want an explicit cached read without
@@ -350,10 +352,13 @@ await getCurrentPosition({
 });
 ```
 
-Android maps the presets to native provider/priority intent: `high` prefers
-GPS with a network fallback, `balanced` uses the network provider, `low` uses
-network/passive providers, and `passive` only listens through the passive
-provider. iOS maps the presets to Core Location `desiredAccuracy` constants.
+Android maps the presets to native accuracy/priority intent. With `auto` or
+`playServices`, requests prefer Google Play Services fused location and use the
+matching fused priority before platform fallback. With `android`, requests stay
+on `LocationManager`: `high` prefers GPS with a network fallback, `balanced`
+uses the network provider, `low` uses network/passive providers, and `passive`
+only listens through the passive provider. iOS maps the presets to Core
+Location `desiredAccuracy` constants.
 
 iOS tuning options are applied to both one-time requests and watches through
 the shared Core Location manager configuration:

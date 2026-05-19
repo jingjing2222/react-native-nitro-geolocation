@@ -13,8 +13,9 @@ import type { LocationProviderStatus } from "../publicTypes";
  * the current Core Location status:
  * - `locationServicesEnabled`: `CLLocationManager.locationServicesEnabled()`
  * - `backgroundModeEnabled`: whether `UIBackgroundModes` contains `location`
- * - `gpsAvailable`, `networkAvailable`, `passiveAvailable`, and
- *   `googleLocationAccuracyEnabled`: `undefined`
+ * - `gpsAvailable`, `networkAvailable`, `passiveAvailable`,
+ *   `googlePlayServicesAvailable`, and `googleLocationAccuracyEnabled`:
+ *   `undefined`
  */
 export function requestLocationSettings(
   options?: LocationSettingsOptions
