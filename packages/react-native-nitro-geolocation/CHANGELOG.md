@@ -1,5 +1,21 @@
 # react-native-nitro-geolocation
 
+## 1.3.0
+
+### Minor Changes
+
+- 8216b3d: Add Compat API web support through a browser conditional export backed by `navigator.geolocation`.
+- 104417c: Prefer Google Play Services fused location for Android `auto` and `playServices` provider configuration, with Android platform provider fallback when fused location is unavailable or cannot start. Keep explicit `android` provider configuration on the platform `LocationManager` path.
+- 16681aa: Add Modern API web support through a browser conditional export backed by `navigator.geolocation`.
+- b90c38b: Add a dedicated `./background` API with native-storage-backed background location tracking, geofencing, activity recognition events, Headless JS delivery, HTTP sync, documentation, and E2E examples.
+
+### Patch Changes
+
+- 7651df9: Refresh release documentation and simplify first-run guidance without changing
+  package runtime behavior.
+- f8b9060: Add repository dead-code guardrails, clean stale package metadata, and remove confirmed unused example/native code. The web implementation now keeps browser helpers, watch state, and the React hook in separate modules while preserving the public API surface.
+- 73dafb9: Split native geolocation adapters, background controllers, and E2E scenario runners into focused helper modules, and add source line-count guardrails plus an agent context map for future maintenance.
+
 ## 1.2.6
 
 ### Patch Changes
