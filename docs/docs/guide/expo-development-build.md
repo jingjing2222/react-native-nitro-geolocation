@@ -50,6 +50,9 @@ iOS `Info.plist`:
 <string>This app requires access to your location at all times.</string>
 ```
 
+For background tracking, also enable the `location` background mode in
+`UIBackgroundModes`; see [iOS background setup](/background/setup-ios).
+
 Android `AndroidManifest.xml`:
 
 ```xml
@@ -63,6 +66,11 @@ Optional background permission:
 <uses-permission android:name="android.permission.ACCESS_BACKGROUND_LOCATION" />
 ```
 
+Full background tracking uses a foreground service on Android. Add the full
+permission set from [Android background setup](/background/setup-android) when
+using `react-native-nitro-geolocation/background`, including Android 13+
+`POST_NOTIFICATIONS` for the tracking notification.
+
 ## Supported Positioning
 
 Use this package when you want Nitro/New Architecture native geolocation in an
@@ -71,4 +79,3 @@ Expo development build or custom native build.
 Use `expo-location` when you need Expo Go, managed workflow setup without native
 rebuilds, Expo background tasks, Expo geofencing, or Expo config-plugin-driven
 permission setup.
-

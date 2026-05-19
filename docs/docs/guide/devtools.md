@@ -110,13 +110,13 @@ Enter exact coordinates via input fields:
 ### Location Presets
 Quick access to 20 major cities worldwide:
 
-**Asia-Pacific**: Seoul, Tokyo, Beijing, Singapore, Mumbai, Sydney
+**Asia-Pacific**: Seoul, Tokyo, Beijing, Shanghai, Hong Kong, Singapore, Mumbai, Bangkok, Sydney
 
-**Europe**: London, Paris, Berlin, Moscow, Istanbul
+**Europe**: London, Paris, Berlin, Moscow
 
-**Americas**: New York, Los Angeles, São Paulo, Mexico City, Toronto, Buenos Aires
+**Americas**: New York, Los Angeles, San Francisco, São Paulo, Mexico City, Toronto
 
-**Middle East & Africa**: Dubai, Cairo, Johannesburg
+**Middle East**: Dubai
 
 ### Real-time Position Data
 

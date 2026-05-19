@@ -10,23 +10,29 @@ React Native 0.75+ / New Architecture path for replacing the core native
 `@react-native-community/geolocation` API with `/compat`, then gradually moving
 to a typed Modern API.
 
+The current release line adds a clearer three-surface story: Modern and
+`/compat` foreground geolocation on web, plus a native Background Location API
+for tracking, geofencing, storage recovery, Headless JS, and HTTP sync.
+
 ## When should I use this?
 
 | Use case | Recommendation |
 | --- | --- |
-| Bare React Native 0.75+ app | Use Nitro Geolocation |
+| Bare React Native 0.75+ app with New Architecture/Nitro enabled | Use Nitro Geolocation |
 | Migrating from `@react-native-community/geolocation` | Start with `/compat` |
 | New Architecture / Nitro-based app | Recommended |
 | Expo development build or custom native build | Supported with native setup |
 | Expo managed app without native rebuild | Use `expo-location` |
-| Web support required | Use the Modern API root import |
+| Web support required | Use the Modern API root import or `/compat` callback API |
 | Full background tracking / geofencing | Use `react-native-nitro-geolocation/background` |
 
-Web support is available for the Modern API root import. Browser builds resolve
-the package root to a web entry that uses `navigator.geolocation` and does not
-load Nitro native bindings. The `/compat` subpath remains native-only.
+Web support is available for the Modern API root import and the `/compat`
+subpath. Browser builds resolve both entries to implementations backed by
+`navigator.geolocation` and do not load Nitro native bindings. Background
+location remains native-only.
 
-React Native Nitro Geolocation provides **two APIs** to fit your needs:
+React Native Nitro Geolocation provides **three public API surfaces** to fit
+your needs:
 
 ## 1. Modern API (Recommended)
 
@@ -50,10 +56,14 @@ setConfiguration({
 
 // Request permission
 const status = await requestPermission();
+if (status !== 'granted') {
+  throw new Error('Location permission was not granted');
+}
 
 // Get current location
 const position = await getCurrentPosition({
-  enableHighAccuracy: true
+  accuracy: { android: 'high', ios: 'best' },
+  timeout: 15000
 });
 
 // Convert between addresses and coordinates
@@ -67,7 +77,7 @@ const addresses = await reverseGeocode({
 function LocationTracker() {
   const { position, error, isWatching } = useWatchPosition({
     enabled: true,
-    enableHighAccuracy: true,
+    accuracy: { android: 'high', ios: 'bestForNavigation' },
     distanceFilter: 10
   });
 
@@ -108,6 +118,16 @@ Geolocation.getCurrentPosition(
 - Minimal migration effort
 - Callback-based API preference
 
+## 3. Background API
+
+Native background tracking, geofencing, activity events, Android Headless JS,
+HTTP sync, and stored event recovery should use the explicit background subpath
+`react-native-nitro-geolocation/background`.
+
+Background location is native-only. Browser builds expose unsupported stubs so
+web bundles can still import shared code safely. Start with the
+[Background Location guide](/background/overview) when you need full background
+tracking, geofencing, storage recovery, or native sync.
 
 ## Why Modern API?
 
@@ -201,13 +221,14 @@ Instead of complex provider patterns or class-based APIs, we provide:
 
 ## What You Get
 
-Whether you choose Modern or Compat API, you get:
+The package has three clear surfaces:
 
-- 🚀 **Lower cached-read overhead** through direct JSI bindings
-- 📱 **Improved native consistency** across Android and iOS
-- 🔁 **Seamless migration** from `@react-native-community/geolocation`
-- 🧩 **TypeScript-first** developer experience
-- 🔄 **Compat API** (via `/compat`) for the core native community geolocation surface
+- **Modern API** - typed foreground geolocation, geocoding, watching, cached reads, and Android settings helpers.
+- **Compat API** - a `/compat` path for migrating the core `@react-native-community/geolocation` surface.
+- **Background API** - native tracking, geofencing, storage recovery, Headless JS, and HTTP sync.
+
+Modern and `/compat` foreground APIs also support web through the browser
+`navigator.geolocation` API.
 
 The benchmark measures cached location reads and the JS-to-native call path. It
 does not make cold GPS acquisition itself 22x faster.

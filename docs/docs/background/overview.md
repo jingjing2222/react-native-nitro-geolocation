@@ -14,3 +14,11 @@ import {
 
 Prefer `react-native-nitro-geolocation/background` so foreground and background
 imports stay explicit and tree-shakable.
+
+## Where to go next
+
+- [Android Setup](/background/setup-android) and [iOS Setup](/background/setup-ios) - add the required native permissions and capabilities.
+- [Permissions](/background/permissions) - request foreground/background access and handle settings round-trips.
+- [Start And Stop](/background/start-stop) - start continuous tracking and subscribe to native updates.
+- [Storage Recovery](/background/storage) - drain events recorded while JavaScript was not running.
+- [Geofencing](/background/geofencing), [Activity Recognition](/background/activity-recognition), and [Native HTTP Sync](/background/http-sync) - add advanced background behavior.

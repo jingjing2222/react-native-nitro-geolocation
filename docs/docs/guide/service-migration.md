@@ -10,8 +10,13 @@ Modern API:
 ```ts
 import {
   getCurrentPosition,
+  getLastKnownPosition,
+  hasServicesEnabled,
+  LocationErrorCode,
+  requestPermission,
   requestLocationSettings,
   setConfiguration,
+  stopObserving,
   unwatch,
   watchPosition
 } from 'react-native-nitro-geolocation';

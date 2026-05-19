@@ -93,7 +93,7 @@ function App() {
 
 ### Available city presets
 
-Seoul, Tokyo, Beijing, Singapore, Mumbai, London, Paris, Berlin, Moscow, Istanbul, New York, Los Angeles, São Paulo, Mexico City, Toronto, Sydney, Dubai, Cairo, Johannesburg, Buenos Aires
+Seoul, Tokyo, New York, Los Angeles, San Francisco, London, Paris, Berlin, Sydney, Singapore, Hong Kong, Shanghai, Beijing, Dubai, Mumbai, Bangkok, Toronto, São Paulo, Mexico City, Moscow
 
 ## Opening DevTools
 
