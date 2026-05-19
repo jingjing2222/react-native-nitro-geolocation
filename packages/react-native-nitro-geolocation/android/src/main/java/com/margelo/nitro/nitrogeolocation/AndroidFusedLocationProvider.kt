@@ -169,8 +169,12 @@ internal class AndroidFusedLocationProvider(
 
         try {
             if (options.waitForAccurateLocation) {
+                val initialUpdateMaxAge = fusedInitialUpdateMaxAge(
+                    options,
+                    effectiveMaximumAge(options)
+                )
                 val request = buildFusedLocationRequest(
-                    options.copy(maxUpdateAge = effectiveMaximumAge(options)),
+                    options.copy(maxUpdateAge = initialUpdateMaxAge),
                     maxUpdatesOverride = 1,
                     includeDistanceFilter = false
                 )
@@ -213,7 +217,9 @@ internal class AndroidFusedLocationProvider(
                 .setPriority(options.androidAccuracy.gmsPriority())
                 .setGranularity(options.granularity.gmsGranularity())
                 .setMaxUpdateAgeMillis(
-                    coerceNonNegativeMillis(effectiveMaximumAge(options))
+                    coerceNonNegativeMillis(
+                        fusedInitialUpdateMaxAge(options, effectiveMaximumAge(options))
+                    )
                 )
                 .setDurationMillis(fusedAttemptTimeoutMillis)
                 .build()
@@ -279,6 +285,13 @@ internal fun createFusedSecurityError(message: String?): LocationError {
         PERMISSION_DENIED,
         "Security exception: ${message ?: "unknown error"}"
     )
+}
+
+internal fun fusedInitialUpdateMaxAge(
+    options: ParsedOptions,
+    effectiveMaximumAge: Double
+): Double {
+    return options.maxUpdateAge ?: effectiveMaximumAge
 }
 
 private fun fusedAttemptTimeoutMillis(remainingTimeoutMillis: Long): Long {
