@@ -914,6 +914,13 @@ class NitroGeolocation(
                         pendingPositionRequests.remove(requestId)
                         val position = locationToPosition(location)
                         request.resolver(PositionResult.Success(position))
+                    } else if (location != null) {
+                        retryCurrentLocationLegacyAfterStaleModern(
+                            provider,
+                            requestId,
+                            handler,
+                            request
+                        )
                     } else {
                         handleProviderFailure(requestId, createLocationError(
                             POSITION_UNAVAILABLE,
@@ -934,6 +941,24 @@ class NitroGeolocation(
                 "Security exception: ${e.message}"
             ))
         }
+    }
+
+    private fun retryCurrentLocationLegacyAfterStaleModern(
+        provider: String,
+        requestId: UUID,
+        handler: Handler,
+        request: PositionRequest
+    ) {
+        request.cancellationSignal?.cancel()
+        request.cancellationSignal = null
+
+        val remainingTimeoutMillis = request.remainingTimeoutMillis()
+        if (remainingTimeoutMillis <= 0L) {
+            handlePositionTimeout(requestId)
+            return
+        }
+
+        requestCurrentLocationLegacy(provider, requestId, handler, remainingTimeoutMillis)
     }
 
     private fun requestCurrentLocationLegacy(
