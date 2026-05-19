@@ -162,7 +162,7 @@ Geolocation.clearWatch(watchId);
 
 | Community API | Nitro `/compat` | Notes |
 |---|---:|---|
-| `setRNConfiguration` | Supported | Android `auto` currently maps to the platform provider; set `playServices` explicitly for fused location. |
+| `setRNConfiguration` | Supported | Preserves the legacy config method; Android provider selection is handled by the Modern API root import. |
 | `requestAuthorization` | Supported | iOS authorization follows configured `Info.plist` keys and `authorizationLevel`. |
 | `getCurrentPosition` | Supported | Keeps the legacy callback and error shape. |
 | `watchPosition` | Supported | Returns a numeric watch id. |
@@ -225,10 +225,11 @@ Optional (for background):
 
 ### 4. Android Reliability
 
-- Uses Google Play Services fused location when `locationProvider:
-  "playServices"` is set.
-- Keeps `locationProvider: "auto"` on Android's platform `LocationManager` by
-  default. Set `playServices` explicitly when you want fused location behavior.
+- `locationProvider: "auto"` and `locationProvider: "playServices"` prefer
+  Google Play Services fused location when available and fall back to Android's
+  platform provider.
+- Use `locationProvider: "android"` when you need to force Android's platform
+  `LocationManager` path.
 - Supports native settings resolution through `requestLocationSettings`.
 - Supports approximate/coarse location handling through permissions and
   Android `granularity`.

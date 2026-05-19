@@ -91,10 +91,11 @@ const fresh = await getCurrentPosition({
 });
 ```
 
-- `locationProvider: 'playServices'` uses Google Play Services fused location.
-- `locationProvider: 'auto'` currently uses Android's platform
-  `LocationManager`; set `playServices` explicitly when you want fused
-  behavior.
+- `locationProvider: 'auto'` and `locationProvider: 'playServices'` prefer
+  Google Play Services fused location when available and fall back to Android's
+  platform provider.
+- `locationProvider: 'android'` forces Android's platform `LocationManager`
+  path.
 - `requestLocationSettings()` can show Android's native settings resolution
   dialog when settings do not satisfy the request.
 - `granularity` and Android permission state support approximate/coarse

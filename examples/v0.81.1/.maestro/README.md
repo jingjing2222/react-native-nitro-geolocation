@@ -74,8 +74,11 @@ yarn test:e2e:android
 `test:e2e:ios` runs `.maestro/all-tests.yaml` with the iOS platform flag.
 `test:e2e:android` runs the same master flow with the Android platform flag,
 then runs `provider-settings-not-ready.yaml` after disabling Android location
-services and restores the device state afterward. Platform-only flows are
-selected inside the master flow with `when.platform`.
+services and restores the device state afterward. Set
+`RUN_ANDROID_PROVIDER_SELECTION=1` on a physical Android device to include the
+live provider-selection proof. The wrapper rejects emulators for this proof and
+requires `ANDROID_SERIAL` when multiple Android devices are connected.
+Platform-only flows are selected inside the master flow with `when.platform`.
 
 ## Test Files
 
@@ -124,13 +127,21 @@ selected inside the master flow with `when.platform`.
 
 ### `android-request-options.yaml`
 - Android-only contract for `granularity`, `waitForAccurateLocation`, `maxUpdateAge`, `maxUpdateDelay`, and `maxUpdates`
-- Uses Play Services configuration for a real Fused request and asserts coarse granularity does not return GPS
-- Verifies one-shot Fused requests ignore watch-only `distanceFilter` instead of waiting for movement
-- Seeds a fine Fused fix, then verifies a coarse cache-only read does not reuse an ungranular `lastLocation`
+- Uses `auto` and Play Services configuration for seeded coarse request-option coverage without asserting provider route
+- Verifies one-shot requests ignore watch-only `distanceFilter` instead of waiting for movement
+- Seeds a fine fix, then verifies a coarse cache-only read does not reuse an ungranular `lastLocation`
 - Starts simultaneous coarse and fine watches and verifies the coarse watcher does not receive exact fine coordinates
 - Verifies `maxUpdates=1` stops a native watch after the first update even when more locations are injected
 - Verifies removing a heading watch token does not restart a stopped `maxUpdates=1` location watch
 - Verifies invalid `maxUpdates=0` and coarse-only `granularity="fine"` reject
+
+### `android-provider-selection.yaml`
+- Android-only physical-device proof for live provider selection before any Maestro `setLocation`
+- Requires live location services, Google Play Services, and `mocked=false`
+- Requires `PROVIDER_SELECTION_PHYSICAL_DEVICE=1`, which the Android wrapper sets after its physical-device guard
+- Verifies `auto` and `playServices` return a live non-mocked fix through the fused API route
+- Verifies explicit `android` and native `android_platform` stay on the platform provider path
+- Included from `all-tests.yaml` when `RUN_ANDROID_PROVIDER_SELECTION=1`
 
 ### `issue-67-android-coarse-location.yaml`
 - Android-only contract for approximate/coarse permission handling
@@ -240,6 +251,7 @@ The two iOS cases intentionally differ like this:
 ### `all-tests.yaml`
 - Master flow that runs all platform-compatible tests sequentially
 - Includes Android-only contracts with `when.platform`
+- Includes physical Android provider-selection proof when `RUN_ANDROID_PROVIDER_SELECTION=1`
 
 ## Location Simulation
 
@@ -281,6 +293,7 @@ London: 51.5074, -0.1278
    cd examples/v0.81.1
    yarn ios:release  # or yarn android:release
    yarn test:e2e:ios  # or yarn test:e2e:android
+   RUN_ANDROID_PROVIDER_SELECTION=1 yarn test:e2e:android  # physical Android live provider proof
    ```
 
 2. Copy the terminal output
@@ -294,6 +307,7 @@ London: 51.5074, -0.1278
 ## E2E Test Results
 
 ✅ Run permission-check.yaml
+✅ Run android-provider-selection.yaml (physical Android with RUN_ANDROID_PROVIDER_SELECTION=1)
 ✅ Run current-position.yaml
 ✅ Run watch-position.yaml
 ✅ Run location-simulation.yaml
