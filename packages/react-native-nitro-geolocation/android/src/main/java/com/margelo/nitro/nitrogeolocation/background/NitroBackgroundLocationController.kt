@@ -100,7 +100,8 @@ class NitroBackgroundLocationController private constructor(
         if (permissions.foregroundPermission() != PermissionStatus.GRANTED) {
             throw SecurityException("Foreground location permission is required")
         }
-        if (permissions.backgroundPermission() != BackgroundPermissionStatus.GRANTED) {
+        if (current.android?.foregroundService == null &&
+            permissions.backgroundPermission() != BackgroundPermissionStatus.GRANTED) {
             throw SecurityException("Background location permission is required")
         }
         state = BackgroundLocationState.STARTING

@@ -1,0 +1,33 @@
+appId: nitrogeolocation.example
+---
+# Repro for #120 on iOS. Regression contract fails if Motion & Fitness prompt appears.
+
+- launchApp:
+    clearState: true
+    permissions:
+      all: allow
+
+- extendedWaitUntil:
+    visible: "Geolocation API"
+    timeout: 30000
+
+- stopApp
+
+- openLink:
+    link: nitrogeolocation://app/issue-120
+- tapOn:
+    text: "열기|Open"
+    optional: true
+
+- extendedWaitUntil:
+    visible: "Issue 120"
+    timeout: 15000
+
+- tapOn:
+    id: "issue-120-run-button"
+- extendedWaitUntil:
+    visible: "Issue 120: passed"
+    timeout: 30000
+- assertNotVisible: ".*Motion.*Fitness.*"
+- assertVisible:
+    id: "issue-120-stop-without-motion-result"

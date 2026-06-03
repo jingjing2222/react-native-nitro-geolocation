@@ -18,6 +18,10 @@ import IOSAccuracyAuthorizationScreen from "./screens/IOSAccuracyAuthorizationSc
 import IOSLocationTuningScreen from "./screens/IOSLocationTuningScreen";
 import IOSReleaseOptionsBridgeScreen from "./screens/IOSReleaseOptionsBridgeScreen";
 import Issue67Screen from "./screens/Issue67Screen";
+import Issue119Screen from "./screens/Issue119Screen";
+import Issue120Screen from "./screens/Issue120Screen";
+import Issue121Screen from "./screens/Issue121Screen";
+import Issue122Screen from "./screens/Issue122Screen";
 import LastKnownPositionScreen from "./screens/LastKnownPositionScreen";
 import LocationAvailabilityScreen from "./screens/LocationAvailabilityScreen";
 import LocationSimulationScreen from "./screens/LocationSimulationScreen";
@@ -53,6 +57,10 @@ const linking = {
       IOSLocationTuning: "ios-location-tuning",
       IOSAccuracyAuthorization: "ios-accuracy-authorization",
       IOSReleaseOptionsBridge: "ios-release-options-bridge",
+      Issue119: "issue-119",
+      Issue120: "issue-120",
+      Issue121: "issue-121",
+      Issue122: "issue-122",
       WebE2E: "web-e2e",
       Issue67: "issue-67"
     }
@@ -180,6 +188,26 @@ export default function App() {
         <Tab.Screen
           name="IOSReleaseOptionsBridge"
           component={IOSReleaseOptionsBridgeScreen}
+          options={hiddenTabOptions}
+        />
+        <Tab.Screen
+          name="Issue119"
+          component={Issue119Screen}
+          options={hiddenTabOptions}
+        />
+        <Tab.Screen
+          name="Issue120"
+          component={Issue120Screen}
+          options={hiddenTabOptions}
+        />
+        <Tab.Screen
+          name="Issue121"
+          component={Issue121Screen}
+          options={hiddenTabOptions}
+        />
+        <Tab.Screen
+          name="Issue122"
+          component={Issue122Screen}
           options={hiddenTabOptions}
         />
         <Tab.Screen
