@@ -1,5 +1,12 @@
 # react-native-nitro-geolocation
 
+## 1.3.1
+
+### Patch Changes
+
+- 3244af3: Fix Android foreground service background location startup requiring background location permission.
+- 4d234ea: Add README guidance for the Rozenite DevTools plugin.
+
 ## 1.3.0
 
 ### Minor Changes
