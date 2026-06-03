@@ -1,0 +1,30 @@
+appId: nitrogeolocation.example
+---
+# Repro for #122 on Android. iOS-only issue is skipped on this platform.
+
+- launchApp:
+    clearState: true
+
+- extendedWaitUntil:
+    visible: "Geolocation API"
+    timeout: 30000
+
+- stopApp
+
+- openLink:
+    link: nitrogeolocation://app/issue-122
+- tapOn:
+    text: "열기|Open"
+    optional: true
+
+- extendedWaitUntil:
+    visible: "Issue 122"
+    timeout: 15000
+
+- tapOn:
+    id: "issue-122-run-button"
+- extendedWaitUntil:
+    visible: "Issue 122: passed"
+    timeout: 15000
+- assertVisible:
+    id: "issue-122-persist-false-result"

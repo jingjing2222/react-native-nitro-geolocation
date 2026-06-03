@@ -1,0 +1,49 @@
+appId: nitrogeolocation.example
+---
+# Repro for #122 on iOS. Regression contract fails on main while bug exists.
+
+- launchApp:
+    clearState: true
+    permissions:
+      all: allow
+
+- extendedWaitUntil:
+    visible: "Geolocation API"
+    timeout: 30000
+
+- stopApp
+
+- openLink:
+    link: nitrogeolocation://app/issue-122
+- tapOn:
+    text: "열기|Open"
+    optional: true
+
+- extendedWaitUntil:
+    visible: "Issue 122"
+    timeout: 15000
+
+- tapOn:
+    id: "issue-122-run-button"
+- extendedWaitUntil:
+    visible: "persist=false tracking started"
+    timeout: 30000
+- setLocation:
+    latitude: 37.5665
+    longitude: 126.978
+- setLocation:
+    latitude: 37.567
+    longitude: 126.9785
+- setLocation:
+    latitude: 37.5675
+    longitude: 126.979
+- setLocation:
+    latitude: 37.568
+    longitude: 126.9795
+- tapOn:
+    id: "issue-122-validate-button"
+- extendedWaitUntil:
+    visible: "Issue 122: passed"
+    timeout: 30000
+- assertVisible:
+    id: "issue-122-persist-false-result"

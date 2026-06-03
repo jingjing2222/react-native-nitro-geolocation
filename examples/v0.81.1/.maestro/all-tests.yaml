@@ -5,6 +5,38 @@ appId: nitrogeolocation.example
 # Android provider-selection proof is gated because it needs a connected
 # physical Android device with live, non-mocked providers.
 
+- runFlow:
+    when:
+      platform: Android
+    file: issue-119-android.yaml
+- runFlow:
+    when:
+      platform: Android
+    file: issue-120-android.yaml
+- runFlow:
+    when:
+      platform: Android
+    file: issue-121-android.yaml
+- runFlow:
+    when:
+      platform: Android
+    file: issue-122-android.yaml
+- runFlow:
+    when:
+      platform: iOS
+    file: issue-119-ios.yaml
+- runFlow:
+    when:
+      platform: iOS
+    file: issue-120-ios.yaml
+- runFlow:
+    when:
+      platform: iOS
+    file: issue-121-ios.yaml
+- runFlow:
+    when:
+      platform: iOS
+    file: issue-122-ios.yaml
 - runFlow: permission-check.yaml
 - runFlow:
     when:

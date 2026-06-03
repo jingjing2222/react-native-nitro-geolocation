@@ -1,0 +1,34 @@
+appId: nitrogeolocation.example
+---
+# Repro for #121 on Android. Regression contract fails on main while bug exists.
+
+- launchApp:
+    clearState: true
+    permissions:
+      all: deny
+      android.permission.ACCESS_COARSE_LOCATION: allow
+      android.permission.ACCESS_FINE_LOCATION: allow
+
+- extendedWaitUntil:
+    visible: "Geolocation API"
+    timeout: 30000
+
+- stopApp
+
+- openLink:
+    link: nitrogeolocation://app/issue-121
+- tapOn:
+    text: "열기|Open"
+    optional: true
+
+- extendedWaitUntil:
+    visible: "Issue 121"
+    timeout: 15000
+
+- tapOn:
+    id: "issue-121-run-button"
+- extendedWaitUntil:
+    visible: "Issue 121: passed"
+    timeout: 30000
+- assertVisible:
+    id: "issue-121-foreground-service-result"
