@@ -5,7 +5,9 @@ appId: nitrogeolocation.example
 - launchApp:
     clearState: true
     permissions:
-      all: allow
+      all: deny
+      location: always
+      motion: unset
 
 - extendedWaitUntil:
     visible: "Geolocation API"

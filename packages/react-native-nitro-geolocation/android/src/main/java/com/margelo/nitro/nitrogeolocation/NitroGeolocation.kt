@@ -116,9 +116,10 @@ class NitroGeolocation(
         success: (PermissionStatus) -> Unit,
         error: ((LocationError) -> Unit)?
     ): Unit {
-        // Check if already determined
+        // Android reports missing location permission as DENIED even before a
+        // runtime prompt has been shown, so denied must still request.
         val currentStatus = getCurrentPermissionStatus()
-        if (currentStatus != PermissionStatus.UNDETERMINED) {
+        if (currentStatus == PermissionStatus.GRANTED) {
             success(currentStatus)
             return
         }
