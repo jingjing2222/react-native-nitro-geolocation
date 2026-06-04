@@ -23,6 +23,7 @@ class NitroBackgroundLocation: HybridNitroBackgroundLocationSpec {
     private var delegate: NitroBackgroundLocationDelegate?
     private let motionManager = CMMotionActivityManager()
     private let motionQueue = OperationQueue()
+    private var isMotionUpdatesRunning = false
     private let syncQueue = DispatchQueue(label: "nitro.background.sync")
     private let httpSync = IOSBackgroundHttpSync()
     private var permissionSemaphore: DispatchSemaphore?
@@ -114,7 +115,7 @@ class NitroBackgroundLocation: HybridNitroBackgroundLocationSpec {
                 self.manager?.stopUpdatingLocation()
                 self.manager?.stopMonitoringSignificantLocationChanges()
             }
-            self.motionManager.stopActivityUpdates()
+            self.stopMotionUpdatesIfRunning()
             self.isRunning = false
             self.state = .stopped
         }
@@ -128,7 +129,7 @@ class NitroBackgroundLocation: HybridNitroBackgroundLocationSpec {
                 self.manager?.stopMonitoringSignificantLocationChanges()
                 self.manager?.monitoredRegions.forEach { self.manager?.stopMonitoring(for: $0) }
             }
-            self.motionManager.stopActivityUpdates()
+            self.stopMotionUpdatesIfRunning()
             self.options = nil
             self.defaults.removeObject(forKey: self.optionsKey)
             self.isRunning = false
@@ -376,7 +377,7 @@ class NitroBackgroundLocation: HybridNitroBackgroundLocationSpec {
 
     func stopActivityRecognition() throws -> Promise<Void> {
         return Promise.async {
-            self.motionManager.stopActivityUpdates()
+            self.stopMotionUpdatesIfRunning()
         }
     }
 
@@ -496,6 +497,13 @@ class NitroBackgroundLocation: HybridNitroBackgroundLocationSpec {
             guard let self, let activity else { return }
             self.handleMotionActivity(activity)
         }
+        isMotionUpdatesRunning = true
+    }
+
+    private func stopMotionUpdatesIfRunning() {
+        guard isMotionUpdatesRunning else { return }
+        motionManager.stopActivityUpdates()
+        isMotionUpdatesRunning = false
     }
 
     private func handleMotionActivity(_ activity: CMMotionActivity) {

@@ -4,6 +4,10 @@ appId: nitrogeolocation.example
 
 - launchApp:
     clearState: true
+    permissions:
+      all: deny
+      android.permission.ACCESS_COARSE_LOCATION: deny
+      android.permission.ACCESS_FINE_LOCATION: deny
 
 - extendedWaitUntil:
     visible: "Geolocation API"
