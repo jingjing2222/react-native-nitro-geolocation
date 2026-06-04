@@ -1,5 +1,11 @@
 # react-native-nitro-geolocation
 
+## 1.3.2
+
+### Patch Changes
+
+- a4e769a: Fix Android requestPermission prompting from a denied initial state and avoid requesting iOS Motion & Fitness permission when background motion tracking was not started.
+
 ## 1.3.1
 
 ### Patch Changes
