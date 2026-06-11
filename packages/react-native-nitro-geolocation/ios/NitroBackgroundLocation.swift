@@ -544,6 +544,12 @@ class NitroBackgroundLocation: HybridNitroBackgroundLocationSpec {
     }
 
     func handleError(_ error: Error) {
+        // kCLErrorLocationUnknown is transient — CoreLocation couldn't get a fix right now but keeps
+        // trying (very common on the Simulator and during brief GPS gaps). Apple's guidance is to
+        // ignore it; forwarding it would pollute the consumer's error stream with benign noise.
+        if let clError = error as? CLError, clError.code == .locationUnknown {
+            return
+        }
         let locationError = LocationError(code: -1, message: error.localizedDescription)
         errorListeners.values.forEach { $0(locationError) }
     }
