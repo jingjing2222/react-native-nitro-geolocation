@@ -25,9 +25,14 @@ class NitroBackgroundLocationService : Service() {
             config.activityRecognition?.enabled == true) {
             runCatching {
                 controller.startActivityRecognition(config.activityRecognition)
+            }.onFailure {
+                controller.recordError("Failed to start activity recognition: ${it.message}", it)
             }
         }
         runCatching { controller.registerPersistedGeofencesIfNeeded() }
+            .onFailure {
+                controller.recordError("Failed to register persisted geofences: ${it.message}", it)
+            }
         return if (config.stopOnTerminate == false) START_STICKY else START_NOT_STICKY
     }
 

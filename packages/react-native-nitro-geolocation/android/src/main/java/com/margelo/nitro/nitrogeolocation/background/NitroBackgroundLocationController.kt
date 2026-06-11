@@ -199,6 +199,9 @@ class NitroBackgroundLocationController private constructor(
         }
     }
 
+    internal fun recordError(message: String, throwable: Throwable) =
+        recordError(ERROR_CODE_POSITION_UNAVAILABLE, message, throwable)
+
     private fun clearError() {
         lastError = null
         prefs.edit()
