@@ -742,6 +742,19 @@ class NitroBackgroundLocationController private constructor(
         )
     }
 
+    private fun mutablePendingIntentFlags(): Int {
+        // The platform / Google Play Services inject the result (LocationResult, GeofencingEvent,
+        // ActivityRecognitionResult) into the broadcast at send time, which requires a mutable
+        // PendingIntent. Android 12+ (S) defaults to immutable and rejects an immutable callback
+        // intent outright with "ApiException: 10: PendingIntent must be mutable", silently killing
+        // delivery. Request FLAG_MUTABLE explicitly there; pre-S PendingIntents are mutable already.
+        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_MUTABLE
+        } else {
+            PendingIntent.FLAG_UPDATE_CURRENT
+        }
+    }
+
     private fun locationPendingIntent(): PendingIntent {
         val intent = Intent(appContext, NitroLocationUpdateReceiver::class.java)
             .setAction(ACTION_LOCATION_UPDATE)
@@ -749,7 +762,7 @@ class NitroBackgroundLocationController private constructor(
             appContext,
             1001,
             intent,
-            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+            mutablePendingIntentFlags()
         )
     }
 
@@ -760,7 +773,7 @@ class NitroBackgroundLocationController private constructor(
             appContext,
             1002,
             intent,
-            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+            mutablePendingIntentFlags()
         )
     }
 
@@ -771,7 +784,7 @@ class NitroBackgroundLocationController private constructor(
             appContext,
             1003,
             intent,
-            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+            mutablePendingIntentFlags()
         )
     }
 
