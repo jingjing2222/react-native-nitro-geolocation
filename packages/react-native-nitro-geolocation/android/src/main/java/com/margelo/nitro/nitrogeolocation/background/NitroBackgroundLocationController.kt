@@ -601,10 +601,16 @@ class NitroBackgroundLocationController private constructor(
 
     private fun dispatchEvent(event: BackgroundEventEnvelope) {
         eventHub.emit(event)
-        val intent = Intent(appContext, NitroBackgroundHeadlessTaskService::class.java)
-            .putExtra("event", event.toJson().toString())
-        appContext.startService(intent)
-        HeadlessJsTaskService.acquireWakeLockNow(appContext)
+        // The in-process eventHub already delivered to any live JS listeners; the headless task is
+        // the fallback for when JS is dead. Guard its start: startService from the background can be
+        // rejected (ForegroundServiceStartNotAllowed / IllegalState), which must not crash the
+        // broadcast receiver thread that drives delivery.
+        runCatching {
+            val intent = Intent(appContext, NitroBackgroundHeadlessTaskService::class.java)
+                .putExtra("event", event.toJson().toString())
+            appContext.startService(intent)
+            HeadlessJsTaskService.acquireWakeLockNow(appContext)
+        }.onFailure { NitroGeoLog.w("dispatchEvent: headless task dispatch failed", it) }
     }
 
     private fun waitForTask(task: Task<Void>) {
