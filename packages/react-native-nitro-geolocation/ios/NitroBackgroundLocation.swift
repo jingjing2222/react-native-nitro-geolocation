@@ -690,25 +690,31 @@ class NitroBackgroundLocation: HybridNitroBackgroundLocationSpec {
         return max(Int(value.rounded(.down)), 1)
     }
 
+    // Default store cap (rows) applied when maxStored* is unset, matching the Android side. An
+    // explicit value <= 0 means UNBOUNDED (no cap), preserving the library's original opt-out.
+    private static let defaultMaxStoredRows = 10_000
+
+    private func resolveMaxStored(_ configured: Double?, default def: Int) -> Int? {
+        guard let configured = configured else { return def }
+        if configured <= 0 { return nil }
+        return Int(configured)
+    }
+
     private func appendStoredLocation(_ location: StoredBackgroundLocation) {
         guard shouldPersist() else { return }
         storedLocations.append(location)
-        if let maxValue = options?.maxStoredLocations, maxValue > 0 {
-            let max = Int(maxValue)
-            if storedLocations.count > max {
-                storedLocations = Array(storedLocations.suffix(max))
-            }
+        if let max = resolveMaxStored(options?.maxStoredLocations, default: Self.defaultMaxStoredRows),
+           storedLocations.count > max {
+            storedLocations = Array(storedLocations.suffix(max))
         }
     }
 
     private func appendStoredEvent(_ event: StoredBackgroundEventEnvelope) {
         guard shouldPersist() else { return }
         storedEvents.append(event)
-        if let maxValue = options?.maxStoredEvents, maxValue > 0 {
-            let max = Int(maxValue)
-            if storedEvents.count > max {
-                storedEvents = Array(storedEvents.suffix(max))
-            }
+        if let max = resolveMaxStored(options?.maxStoredEvents, default: Self.defaultMaxStoredRows),
+           storedEvents.count > max {
+            storedEvents = Array(storedEvents.suffix(max))
         }
     }
 
