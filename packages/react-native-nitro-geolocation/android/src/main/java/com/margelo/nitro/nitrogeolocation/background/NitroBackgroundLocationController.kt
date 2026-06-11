@@ -34,6 +34,10 @@ private const val ACTION_GEOFENCE_UPDATE =
 private const val ACTION_ACTIVITY_UPDATE =
     "com.margelo.nitro.nitrogeolocation.background.ACTIVITY_UPDATE"
 
+// LocationError codes mirror the W3C GeolocationPositionError contract.
+private const val ERROR_CODE_PERMISSION_DENIED = 1
+private const val ERROR_CODE_POSITION_UNAVAILABLE = 2
+
 class NitroBackgroundLocationController private constructor(
     private val context: Context
 ) {
@@ -64,6 +68,9 @@ class NitroBackgroundLocationController private constructor(
 
     @Volatile
     private var state = BackgroundLocationState.IDLE
+
+    @Volatile
+    private var lastError: LocationError? = null
 
     fun checkBackgroundPermission(): BackgroundPermissionResult {
         return permissions.checkBackgroundPermission()
@@ -161,8 +168,51 @@ class NitroBackgroundLocationController private constructor(
                 permissions.notificationPermission()
             ),
             null,
-            null
+            currentLastError()
         )
+    }
+
+    internal fun recordError(code: Int, message: String, throwable: Throwable? = null) {
+        val error = LocationError(code.toDouble(), message)
+        lastError = error
+        prefs.edit()
+            .putInt("lastErrorCode", code)
+            .putString("lastErrorMessage", message)
+            .putLong("lastErrorAt", System.currentTimeMillis())
+            .apply()
+        NitroGeoLog.e("background location error [$code]: $message", throwable)
+        runCatching {
+            dispatchEvent(
+                BackgroundEventEnvelope(
+                    null,
+                    null,
+                    null,
+                    null,
+                    null,
+                    error,
+                    UUID.randomUUID().toString(),
+                    BackgroundEventType.ERROR,
+                    System.currentTimeMillis().toDouble(),
+                    false
+                )
+            )
+        }
+    }
+
+    private fun clearError() {
+        lastError = null
+        prefs.edit()
+            .remove("lastErrorCode")
+            .remove("lastErrorMessage")
+            .remove("lastErrorAt")
+            .apply()
+    }
+
+    private fun currentLastError(): LocationError? {
+        lastError?.let { return it }
+        val message = prefs.getString("lastErrorMessage", null) ?: return null
+        return LocationError(prefs.getInt("lastErrorCode", 0).toDouble(), message)
+            .also { lastError = it }
     }
 
     @SuppressLint("MissingPermission")
@@ -184,7 +234,26 @@ class NitroBackgroundLocationController private constructor(
             .setMaxUpdateDelayMillis(current.maxUpdateDelay?.toLong() ?: 0L)
             .build()
 
-        fusedLocationClient.requestLocationUpdates(request, locationPendingIntent())
+        try {
+            fusedLocationClient.requestLocationUpdates(request, locationPendingIntent())
+                .addOnSuccessListener {
+                    NitroGeoLog.d("startNativeLocationUpdates(): fused registration accepted")
+                    clearError()
+                }
+                .addOnFailureListener { error ->
+                    recordError(
+                        ERROR_CODE_POSITION_UNAVAILABLE,
+                        "Failed to register fused location updates: ${error.message}",
+                        error
+                    )
+                }
+        } catch (error: SecurityException) {
+            recordError(
+                ERROR_CODE_PERMISSION_DENIED,
+                "Missing location permission for fused updates: ${error.message}",
+                error
+            )
+        }
     }
 
     fun stopNativeLocationUpdates() {
@@ -452,12 +521,20 @@ class NitroBackgroundLocationController private constructor(
             .filter { provider -> runCatching { platformLocationManager.isProviderEnabled(provider) }.getOrDefault(false) }
             .ifEmpty { listOf(LocationManager.GPS_PROVIDER) }
         providers.forEach { provider ->
-            platformLocationManager.requestLocationUpdates(
-                provider,
-                interval,
-                distance,
-                locationPendingIntent()
-            )
+            try {
+                platformLocationManager.requestLocationUpdates(
+                    provider,
+                    interval,
+                    distance,
+                    locationPendingIntent()
+                )
+            } catch (error: SecurityException) {
+                recordError(
+                    ERROR_CODE_PERMISSION_DENIED,
+                    "Missing location permission for $provider updates: ${error.message}",
+                    error
+                )
+            }
         }
     }
 
