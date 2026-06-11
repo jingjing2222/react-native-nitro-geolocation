@@ -97,6 +97,9 @@ class NitroBackgroundLocationController private constructor(
         options?.let(::configure)
         val current = requireConfig()
         validate(current)
+        NitroGeoLog.d(
+            "start(): provider=${current.android?.locationProvider} interval=${current.interval} state=$state"
+        )
         if (permissions.foregroundPermission() != PermissionStatus.GRANTED) {
             throw SecurityException("Foreground location permission is required")
         }
@@ -111,9 +114,11 @@ class NitroBackgroundLocationController private constructor(
             Intent(appContext, NitroBackgroundLocationService::class.java)
         )
         state = BackgroundLocationState.RUNNING
+        NitroGeoLog.d("start(): foreground service requested, state=RUNNING")
     }
 
     fun stop() {
+        NitroGeoLog.d("stop(): tearing down location updates")
         state = BackgroundLocationState.STOPPING
         stopNativeLocationUpdates()
         stopActivityRecognition()
@@ -164,9 +169,11 @@ class NitroBackgroundLocationController private constructor(
     fun startNativeLocationUpdates() {
         val current = requireConfig()
         if (current.android?.locationProvider == AndroidBackgroundProvider.ANDROID_PLATFORM) {
+            NitroGeoLog.d("startNativeLocationUpdates(): ANDROID_PLATFORM LocationManager path")
             startPlatformLocationUpdates(current)
             return
         }
+        NitroGeoLog.d("startNativeLocationUpdates(): FUSED provider, registering broadcast PendingIntent")
         val request = LocationRequest.Builder(
             resolvePriority(current),
             current.interval?.toLong() ?: 10_000L
@@ -186,6 +193,7 @@ class NitroBackgroundLocationController private constructor(
     }
 
     fun handleNativeLocation(location: Location, source: BackgroundLocationSource) {
+        NitroGeoLog.d("handleNativeLocation(): src=$source lat=${location.latitude} lng=${location.longitude}")
         val id = UUID.randomUUID().toString()
         val backgroundLocation = BackgroundLocation(
             id,

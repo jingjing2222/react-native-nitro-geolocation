@@ -14,10 +14,12 @@ class NitroBackgroundLocationService : Service() {
         val foregroundService = config.android?.foregroundService
             ?: throw IllegalStateException("Android foreground service options are required")
         val notification = NitroBackgroundNotificationFactory.create(this, foregroundService)
+        NitroGeoLog.d("Service.onStartCommand(): startForeground id=${foregroundService.notificationId?.toInt() ?: 9471}")
         startForeground(
             foregroundService.notificationId?.toInt() ?: 9471,
             notification
         )
+        NitroGeoLog.d("Service.onStartCommand(): starting native location updates")
         controller.startNativeLocationUpdates()
         if (config.trackingMode == com.margelo.nitro.nitrogeolocation.BackgroundTrackingMode.ACTIVITYAWARE ||
             config.activityRecognition?.enabled == true) {
