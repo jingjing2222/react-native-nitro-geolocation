@@ -67,6 +67,10 @@ class NitroBackgroundLocationController private constructor(
     private val httpSync = AndroidBackgroundHttpSync()
     private val taskExecutor = Executors.newSingleThreadExecutor()
 
+    // Serializes HTTP-sync uploads: a burst of locations queues onto one worker instead of
+    // spawning an unbounded number of raw threads.
+    private val syncExecutor = Executors.newSingleThreadExecutor()
+
     @Volatile
     private var config: BackgroundLocationOptions? = null
 
@@ -489,7 +493,7 @@ class NitroBackgroundLocationController private constructor(
         if (interval > 0 && now - lastSyncAt < interval) return
         prefs.edit().putLong("lastSyncAt", now).apply()
 
-        Thread {
+        syncExecutor.execute {
             val result = runCatching { syncStoredLocations() }.getOrElse { error ->
                 BackgroundHttpSyncResult(
                     false,
@@ -513,7 +517,7 @@ class NitroBackgroundLocationController private constructor(
             )
             persistEventIfNeeded(event)
             dispatchEvent(event)
-        }.start()
+        }
     }
 
     private fun shouldPersist(): Boolean {
