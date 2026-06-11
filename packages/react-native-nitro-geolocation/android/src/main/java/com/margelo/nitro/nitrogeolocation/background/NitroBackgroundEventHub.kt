@@ -46,20 +46,26 @@ class NitroBackgroundEventHub {
     }
 
     fun emit(event: BackgroundEventEnvelope) {
-        eventListeners.values.forEach { listener -> listener(event) }
+        eventListeners.values.forEach { listener -> dispatch { listener(event) } }
 
         when (event.type) {
             BackgroundEventType.LOCATION -> {
                 event.location?.let { location ->
-                    locationListeners.values.forEach { listener -> listener(location) }
+                    locationListeners.values.forEach { listener -> dispatch { listener(location) } }
                 }
             }
             BackgroundEventType.ERROR -> {
                 event.error?.let { error ->
-                    errorListeners.values.forEach { listener -> listener(error) }
+                    errorListeners.values.forEach { listener -> dispatch { listener(error) } }
                 }
             }
             else -> Unit
         }
+    }
+
+    // Listeners run inline on the caller's thread (often the broadcast receiver thread). Isolate
+    // each one so a single throwing listener cannot abort delivery to the remaining listeners.
+    private inline fun dispatch(block: () -> Unit) {
+        runCatching(block).onFailure { NitroGeoLog.w("background event listener threw", it) }
     }
 }
