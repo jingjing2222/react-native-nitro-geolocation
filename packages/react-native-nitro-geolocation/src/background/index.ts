@@ -8,6 +8,7 @@ import type {
   BackgroundGeofenceEventEnvelope,
   BackgroundHttpSyncEvent,
   BackgroundLocation,
+  BackgroundLocationStatus,
   BackgroundSubscription,
   StoredBackgroundEvent,
   StoredBackgroundEventEnvelope
@@ -65,10 +66,7 @@ export const getBackgroundConfiguration =
     NativeBackgroundLocation
   );
 export const startBackgroundLocation: NitroBackgroundLocation["startBackgroundLocation"] =
-  (options) =>
-    NativeBackgroundLocation.startBackgroundLocation(
-      options ?? (undefined as any)
-    );
+  (options) => NativeBackgroundLocation.startBackgroundLocation(options);
 export const stopBackgroundLocation =
   NativeBackgroundLocation.stopBackgroundLocation.bind(
     NativeBackgroundLocation
@@ -82,15 +80,9 @@ export const getBackgroundLocationStatus =
     NativeBackgroundLocation
   );
 export const getStoredBackgroundLocations: NitroBackgroundLocation["getStoredBackgroundLocations"] =
-  (options) =>
-    NativeBackgroundLocation.getStoredBackgroundLocations(
-      options ?? (undefined as any)
-    );
+  (options) => NativeBackgroundLocation.getStoredBackgroundLocations(options);
 export const clearStoredBackgroundLocations: NitroBackgroundLocation["clearStoredBackgroundLocations"] =
-  (ids) =>
-    NativeBackgroundLocation.clearStoredBackgroundLocations(
-      ids ?? (undefined as any)
-    );
+  (ids) => NativeBackgroundLocation.clearStoredBackgroundLocations(ids);
 export const markStoredBackgroundLocationsDelivered =
   NativeBackgroundLocation.markStoredBackgroundLocationsDelivered.bind(
     NativeBackgroundLocation
@@ -98,19 +90,15 @@ export const markStoredBackgroundLocationsDelivered =
 export async function getStoredBackgroundEvents(
   options?: Parameters<NitroBackgroundLocation["getStoredBackgroundEvents"]>[0]
 ): Promise<StoredBackgroundEvent[]> {
-  const events = await NativeBackgroundLocation.getStoredBackgroundEvents(
-    options ?? (undefined as any)
-  );
+  const events =
+    await NativeBackgroundLocation.getStoredBackgroundEvents(options);
   return events.map((event: StoredBackgroundEventEnvelope) => ({
     ...event,
     event: narrowBackgroundEvent(event.event)
   }));
 }
 export const clearStoredBackgroundEvents: NitroBackgroundLocation["clearStoredBackgroundEvents"] =
-  (ids) =>
-    NativeBackgroundLocation.clearStoredBackgroundEvents(
-      ids ?? (undefined as any)
-    );
+  (ids) => NativeBackgroundLocation.clearStoredBackgroundEvents(ids);
 export const markStoredBackgroundEventsDelivered =
   NativeBackgroundLocation.markStoredBackgroundEventsDelivered.bind(
     NativeBackgroundLocation
@@ -120,23 +108,92 @@ export const addGeofences = NativeBackgroundLocation.addGeofences.bind(
 );
 export const removeGeofences: NitroBackgroundLocation["removeGeofences"] = (
   identifiers
-) =>
-  NativeBackgroundLocation.removeGeofences(identifiers ?? (undefined as any));
+) => NativeBackgroundLocation.removeGeofences(identifiers);
 export const getRegisteredGeofences =
   NativeBackgroundLocation.getRegisteredGeofences.bind(
     NativeBackgroundLocation
   );
 export const startActivityRecognition: NitroBackgroundLocation["startActivityRecognition"] =
-  (options) =>
-    NativeBackgroundLocation.startActivityRecognition(
-      options ?? (undefined as any)
-    );
+  (options) => NativeBackgroundLocation.startActivityRecognition(options);
 export const stopActivityRecognition =
   NativeBackgroundLocation.stopActivityRecognition.bind(
     NativeBackgroundLocation
   );
 export const syncStoredLocations =
   NativeBackgroundLocation.syncStoredLocations.bind(NativeBackgroundLocation);
+
+export interface BackgroundLocationDiagnosis {
+  /** True when no blocking issues were found. */
+  healthy: boolean;
+  /** The raw status the diagnosis was derived from. */
+  status: BackgroundLocationStatus;
+  /** Human-readable, actionable reasons delivery may not be working. Empty when healthy. */
+  issues: string[];
+}
+
+/**
+ * Inspects the current background-location status and returns actionable reasons why location
+ * delivery may not be working. Useful when the pipeline is silent: it surfaces the common causes
+ * (a recorded native error, missing permissions, disabled location services, or a service that is
+ * configured but not yet delivering) without the caller having to interpret the raw status object.
+ */
+export async function diagnoseBackgroundLocation(): Promise<BackgroundLocationDiagnosis> {
+  const status = await getBackgroundLocationStatus();
+  const issues: string[] = [];
+
+  if (status.lastError) {
+    issues.push(
+      `Last native error: ${status.lastError.message} (code ${status.lastError.code}).`
+    );
+  }
+  if (status.foregroundPermission !== "granted") {
+    issues.push(
+      `Foreground location permission is "${status.foregroundPermission}", not "granted".`
+    );
+  }
+  if (status.backgroundPermission !== "granted") {
+    issues.push(
+      `Background location permission is "${status.backgroundPermission}", not "granted".`
+    );
+  }
+  if (!status.locationServicesEnabled) {
+    issues.push("Device location services are turned off.");
+  }
+  if (status.isConfigured && !status.isRunning) {
+    issues.push(
+      "Tracking is configured but not running — call startBackgroundLocation()."
+    );
+  }
+  if (status.isRunning && status.state !== "running") {
+    issues.push(
+      `Service is started but not yet delivering (state: "${status.state}").`
+    );
+  }
+  if (
+    status.isRunning &&
+    status.state === "running" &&
+    status.storedLocationCount === 0
+  ) {
+    issues.push(
+      "Running with no stored locations yet — the provider may have no fix, or distanceFilter/interval is filtering updates."
+    );
+  }
+  if (status.android) {
+    if (status.isRunning && !status.android.isForegroundServiceRunning) {
+      issues.push("Android foreground service is not running.");
+    }
+    if (
+      status.android.notificationPermission &&
+      status.android.notificationPermission !== "granted"
+    ) {
+      issues.push(
+        `Android notification permission is "${status.android.notificationPermission}" — the foreground-service notification may be suppressed.`
+      );
+    }
+  }
+
+  return { healthy: issues.length === 0, status, issues };
+}
 
 export function onBackgroundEvent(
   listener: (event: BackgroundEvent) => void
