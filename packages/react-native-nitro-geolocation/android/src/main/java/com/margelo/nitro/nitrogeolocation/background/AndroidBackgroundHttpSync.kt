@@ -165,8 +165,8 @@ internal class AndroidBackgroundHttpSync {
     // Exponential backoff with full jitter so many devices retrying a failed sync don't hammer the
     // server in lockstep (thundering herd).
     private fun backoffDelayMs(attempt: Int): Long {
-        val capped = (BASE_BACKOFF_MS shl attempt).coerceIn(BASE_BACKOFF_MS, MAX_BACKOFF_MS)
-        return capped + Random.nextLong(BASE_BACKOFF_MS)
+        return backoffBaseDelayMs(attempt, BASE_BACKOFF_MS, MAX_BACKOFF_MS) +
+            Random.nextLong(BASE_BACKOFF_MS)
     }
 
     private companion object {

@@ -531,13 +531,17 @@ class NitroBackgroundLocationController private constructor(
     }
 
     private fun currentMaxStoredLocations(): Int {
-        return getConfigOrNull()?.maxStoredLocations?.toInt()?.takeIf { it > 0 }
-            ?: DEFAULT_MAX_STORED_LOCATIONS
+        return resolveMaxStored(
+            getConfigOrNull()?.maxStoredLocations?.toInt(),
+            DEFAULT_MAX_STORED_LOCATIONS
+        )
     }
 
     private fun currentMaxStoredEvents(): Int {
-        return getConfigOrNull()?.maxStoredEvents?.toInt()?.takeIf { it > 0 }
-            ?: DEFAULT_MAX_STORED_EVENTS
+        return resolveMaxStored(
+            getConfigOrNull()?.maxStoredEvents?.toInt(),
+            DEFAULT_MAX_STORED_EVENTS
+        )
     }
 
     @SuppressLint("MissingPermission")
@@ -777,19 +781,6 @@ class NitroBackgroundLocationController private constructor(
         )
     }
 
-    private fun mutablePendingIntentFlags(): Int {
-        // The platform / Google Play Services inject the result (LocationResult, GeofencingEvent,
-        // ActivityRecognitionResult) into the broadcast at send time, which requires a mutable
-        // PendingIntent. Android 12+ (S) defaults to immutable and rejects an immutable callback
-        // intent outright with "ApiException: 10: PendingIntent must be mutable", silently killing
-        // delivery. Request FLAG_MUTABLE explicitly there; pre-S PendingIntents are mutable already.
-        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_MUTABLE
-        } else {
-            PendingIntent.FLAG_UPDATE_CURRENT
-        }
-    }
-
     private fun locationPendingIntent(): PendingIntent {
         val intent = Intent(appContext, NitroLocationUpdateReceiver::class.java)
             .setAction(ACTION_LOCATION_UPDATE)
@@ -797,7 +788,7 @@ class NitroBackgroundLocationController private constructor(
             appContext,
             1001,
             intent,
-            mutablePendingIntentFlags()
+            mutablePendingIntentFlags(Build.VERSION.SDK_INT)
         )
     }
 
@@ -808,7 +799,7 @@ class NitroBackgroundLocationController private constructor(
             appContext,
             1002,
             intent,
-            mutablePendingIntentFlags()
+            mutablePendingIntentFlags(Build.VERSION.SDK_INT)
         )
     }
 
@@ -819,7 +810,7 @@ class NitroBackgroundLocationController private constructor(
             appContext,
             1003,
             intent,
-            mutablePendingIntentFlags()
+            mutablePendingIntentFlags(Build.VERSION.SDK_INT)
         )
     }
 
