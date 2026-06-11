@@ -35,7 +35,18 @@ internal fun backoffBaseDelayMs(attempt: Int, baseMs: Long, maxMs: Long): Long {
     return grown.coerceIn(baseMs, maxMs)
 }
 
-/** Resolves the effective store cap: a configured positive value, otherwise the default. */
+/**
+ * Resolves the effective store cap (rows), preserving the library's original opt-out for unbounded
+ * storage while adding a safe default when the option is unset:
+ *  - unset (null) → [default] (a safety cap so the store can't grow without bound by accident)
+ *  - explicit <= 0 → 0, meaning UNBOUNDED — pruneRows treats <= 0 as no-prune, the same opt-out the
+ *    original code gave for any non-positive value
+ *  - explicit > 0 → that cap
+ */
 internal fun resolveMaxStored(configured: Int?, default: Int): Int {
-    return configured?.takeIf { it > 0 } ?: default
+    return when {
+        configured == null -> default
+        configured <= 0 -> 0
+        else -> configured
+    }
 }

@@ -54,9 +54,14 @@ class BackgroundDecisionsTest {
     }
 
     @Test
-    fun resolveMaxStoredFallsBackToDefaultWhenUnsetOrNonPositive() {
+    fun resolveMaxStoredFallsBackToDefaultWhenUnset() {
         assertEquals(10_000, resolveMaxStored(null, 10_000))
-        assertEquals(10_000, resolveMaxStored(0, 10_000))
-        assertEquals(10_000, resolveMaxStored(-5, 10_000))
+    }
+
+    @Test
+    fun resolveMaxStoredTreatsNonPositiveAsUnbounded() {
+        // 0 is the library's explicit unbounded opt-out (pruneRows treats <= 0 as no-prune).
+        assertEquals(0, resolveMaxStored(0, 10_000))
+        assertEquals(0, resolveMaxStored(-5, 10_000))
     }
 }

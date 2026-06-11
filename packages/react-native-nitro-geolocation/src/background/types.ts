@@ -76,7 +76,15 @@ export interface BackgroundLocationOptions {
   maxUpdateDelay?: number;
   waitForAccurateLocation?: boolean;
   persist?: boolean;
+  /**
+   * Max number of locations retained in the on-device store before older rows are pruned.
+   * Unset → a built-in safety cap (the native default). Set to `0` for UNBOUNDED storage.
+   */
   maxStoredLocations?: number;
+  /**
+   * Max number of events retained in the on-device store before older rows are pruned.
+   * Unset → a built-in safety cap (the native default). Set to `0` for UNBOUNDED storage.
+   */
   maxStoredEvents?: number;
   stopOnTerminate?: boolean;
   startOnBoot?: boolean;
