@@ -38,6 +38,10 @@ private const val ACTION_ACTIVITY_UPDATE =
 private const val ERROR_CODE_PERMISSION_DENIED = 1
 private const val ERROR_CODE_POSITION_UNAVAILABLE = 2
 
+// Default store caps so an unconfigured store cannot grow without bound over a long trip.
+private const val DEFAULT_MAX_STORED_LOCATIONS = 10_000
+private const val DEFAULT_MAX_STORED_EVENTS = 10_000
+
 class NitroBackgroundLocationController private constructor(
     private val context: Context
 ) {
@@ -522,12 +526,14 @@ class NitroBackgroundLocationController private constructor(
         store.pruneEvents(currentMaxStoredEvents())
     }
 
-    private fun currentMaxStoredLocations(): Int? {
+    private fun currentMaxStoredLocations(): Int {
         return getConfigOrNull()?.maxStoredLocations?.toInt()?.takeIf { it > 0 }
+            ?: DEFAULT_MAX_STORED_LOCATIONS
     }
 
-    private fun currentMaxStoredEvents(): Int? {
+    private fun currentMaxStoredEvents(): Int {
         return getConfigOrNull()?.maxStoredEvents?.toInt()?.takeIf { it > 0 }
+            ?: DEFAULT_MAX_STORED_EVENTS
     }
 
     @SuppressLint("MissingPermission")
