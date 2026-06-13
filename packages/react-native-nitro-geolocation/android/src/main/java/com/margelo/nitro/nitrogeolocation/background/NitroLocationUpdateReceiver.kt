@@ -11,6 +11,7 @@ import com.margelo.nitro.nitrogeolocation.BackgroundLocationSource
 
 class NitroLocationUpdateReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent) {
+        NitroGeoLog.d("LocationUpdateReceiver.onReceive(): action=${intent.action}")
         val controller = NitroBackgroundLocationController.getInstance(context)
         val platformLocation = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             intent.getParcelableExtra(LocationManager.KEY_LOCATION_CHANGED, Location::class.java)
@@ -26,7 +27,16 @@ class NitroLocationUpdateReceiver : BroadcastReceiver() {
             return
         }
 
-        val result = LocationResult.extractResult(intent) ?: return
+        val result = LocationResult.extractResult(intent)
+        if (result == null) {
+            NitroGeoLog.w(
+                "LocationUpdateReceiver.onReceive(): broadcast carried no location " +
+                    "(KEY_LOCATION_CHANGED and LocationResult both null) — dropping. " +
+                    "On Android 12+ this usually means the broadcast PendingIntent was built " +
+                    "with FLAG_IMMUTABLE, so the OS could not inject the LocationResult extras."
+            )
+            return
+        }
         for (location in result.locations) {
             controller.handleNativeLocation(
                 location,

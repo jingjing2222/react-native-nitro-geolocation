@@ -13,14 +13,25 @@ class NitroBootReceiver : BroadcastReceiver() {
             return
         }
 
-        val prefs = context.applicationContext.getSharedPreferences(
-            "nitro_background_location",
-            Context.MODE_PRIVATE
-        )
-        val controller = NitroBackgroundLocationController.getInstance(context)
-        runCatching { controller.registerPersistedGeofencesIfNeeded() }
-        if (prefs.getBoolean("startOnBoot", false)) {
-            runCatching { controller.start(null) }
-        }
+        // registerPersistedGeofencesIfNeeded() blocks (waitForTask, up to 30s) and start() does
+        // disk I/O; running them inline would block the broadcast's main thread and risk an ANR.
+        // Hand off to a worker thread and keep the broadcast alive with goAsync() until it finishes.
+        val appContext = context.applicationContext
+        val pendingResult = goAsync()
+        Thread {
+            try {
+                val prefs = appContext.getSharedPreferences(
+                    "nitro_background_location",
+                    Context.MODE_PRIVATE
+                )
+                val controller = NitroBackgroundLocationController.getInstance(appContext)
+                runCatching { controller.registerPersistedGeofencesIfNeeded() }
+                if (prefs.getBoolean("startOnBoot", false)) {
+                    runCatching { controller.start(null) }
+                }
+            } finally {
+                pendingResult.finish()
+            }
+        }.start()
     }
 }

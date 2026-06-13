@@ -34,6 +34,14 @@ private const val ACTION_GEOFENCE_UPDATE =
 private const val ACTION_ACTIVITY_UPDATE =
     "com.margelo.nitro.nitrogeolocation.background.ACTIVITY_UPDATE"
 
+// LocationError codes mirror the W3C GeolocationPositionError contract.
+private const val ERROR_CODE_PERMISSION_DENIED = 1
+private const val ERROR_CODE_POSITION_UNAVAILABLE = 2
+
+// Default store caps so an unconfigured store cannot grow without bound over a long trip.
+private const val DEFAULT_MAX_STORED_LOCATIONS = 10_000
+private const val DEFAULT_MAX_STORED_EVENTS = 10_000
+
 class NitroBackgroundLocationController private constructor(
     private val context: Context
 ) {
@@ -59,11 +67,22 @@ class NitroBackgroundLocationController private constructor(
     private val httpSync = AndroidBackgroundHttpSync()
     private val taskExecutor = Executors.newSingleThreadExecutor()
 
+    // Serializes HTTP-sync uploads: a burst of locations queues onto one worker instead of
+    // spawning an unbounded number of raw threads.
+    private val syncExecutor = Executors.newSingleThreadExecutor()
+
     @Volatile
     private var config: BackgroundLocationOptions? = null
 
     @Volatile
     private var state = BackgroundLocationState.IDLE
+
+    @Volatile
+    private var lastError: LocationError? = null
+
+    // Serializes lifecycle transitions (configure/start/stop/reset), which are invoked from
+    // Nitro Promise.async worker threads and must not interleave on the shared singleton.
+    private val lifecycleLock = Any()
 
     fun checkBackgroundPermission(): BackgroundPermissionResult {
         return permissions.checkBackgroundPermission()
@@ -78,9 +97,11 @@ class NitroBackgroundLocationController private constructor(
     }
 
     fun configure(options: BackgroundLocationOptions) {
-        validate(options)
-        config = options
-        persistConfig(options)
+        synchronized(lifecycleLock) {
+            validate(options)
+            config = options
+            persistConfig(options)
+        }
     }
 
     fun getConfigOrNull(): BackgroundLocationOptions? {
@@ -94,41 +115,53 @@ class NitroBackgroundLocationController private constructor(
     }
 
     fun start(options: BackgroundLocationOptions?) {
-        options?.let(::configure)
-        val current = requireConfig()
-        validate(current)
-        if (permissions.foregroundPermission() != PermissionStatus.GRANTED) {
-            throw SecurityException("Foreground location permission is required")
+        synchronized(lifecycleLock) {
+            options?.let(::configure)
+            val current = requireConfig()
+            validate(current)
+            NitroGeoLog.d(
+                "start(): provider=${current.android?.locationProvider} interval=${current.interval} state=$state"
+            )
+            if (permissions.foregroundPermission() != PermissionStatus.GRANTED) {
+                throw SecurityException("Foreground location permission is required")
+            }
+            if (current.android?.foregroundService == null &&
+                permissions.backgroundPermission() != BackgroundPermissionStatus.GRANTED) {
+                throw SecurityException("Background location permission is required")
+            }
+            state = BackgroundLocationState.STARTING
+            prefs.edit().putBoolean("running", true).apply()
+            ContextCompat.startForegroundService(
+                appContext,
+                Intent(appContext, NitroBackgroundLocationService::class.java)
+            )
+            // State stays STARTING until the service actually registers updates and the provider
+            // confirms (see startNativeLocationUpdates) — only then do we report RUNNING.
+            NitroGeoLog.d("start(): foreground service requested, state=STARTING")
         }
-        if (current.android?.foregroundService == null &&
-            permissions.backgroundPermission() != BackgroundPermissionStatus.GRANTED) {
-            throw SecurityException("Background location permission is required")
-        }
-        state = BackgroundLocationState.STARTING
-        prefs.edit().putBoolean("running", true).apply()
-        ContextCompat.startForegroundService(
-            appContext,
-            Intent(appContext, NitroBackgroundLocationService::class.java)
-        )
-        state = BackgroundLocationState.RUNNING
     }
 
     fun stop() {
-        state = BackgroundLocationState.STOPPING
-        stopNativeLocationUpdates()
-        stopActivityRecognition()
-        appContext.stopService(Intent(appContext, NitroBackgroundLocationService::class.java))
-        prefs.edit().putBoolean("running", false).apply()
-        state = BackgroundLocationState.STOPPED
+        synchronized(lifecycleLock) {
+            NitroGeoLog.d("stop(): tearing down location updates")
+            state = BackgroundLocationState.STOPPING
+            stopNativeLocationUpdates()
+            stopActivityRecognition()
+            appContext.stopService(Intent(appContext, NitroBackgroundLocationService::class.java))
+            prefs.edit().putBoolean("running", false).apply()
+            state = BackgroundLocationState.STOPPED
+        }
     }
 
     fun reset() {
-        stop()
-        removeGeofences(null)
-        config = null
-        prefs.edit().clear().apply()
-        store.clearEvents(null)
-        store.clearLocations(null)
+        synchronized(lifecycleLock) {
+            stop()
+            removeGeofences(null)
+            config = null
+            prefs.edit().clear().apply()
+            store.clearEvents(null)
+            store.clearLocations(null)
+        }
     }
 
     fun getStatus(): BackgroundLocationStatus {
@@ -156,17 +189,65 @@ class NitroBackgroundLocationController private constructor(
                 permissions.notificationPermission()
             ),
             null,
-            null
+            currentLastError()
         )
+    }
+
+    internal fun recordError(code: Int, message: String, throwable: Throwable? = null) {
+        val error = LocationError(code.toDouble(), message)
+        lastError = error
+        prefs.edit()
+            .putInt("lastErrorCode", code)
+            .putString("lastErrorMessage", message)
+            .putLong("lastErrorAt", System.currentTimeMillis())
+            .apply()
+        NitroGeoLog.e("background location error [$code]: $message", throwable)
+        runCatching {
+            dispatchEvent(
+                BackgroundEventEnvelope(
+                    null,
+                    null,
+                    null,
+                    null,
+                    null,
+                    error,
+                    UUID.randomUUID().toString(),
+                    BackgroundEventType.ERROR,
+                    System.currentTimeMillis().toDouble(),
+                    false
+                )
+            )
+        }
+    }
+
+    internal fun recordError(message: String, throwable: Throwable) =
+        recordError(ERROR_CODE_POSITION_UNAVAILABLE, message, throwable)
+
+    private fun clearError() {
+        lastError = null
+        prefs.edit()
+            .remove("lastErrorCode")
+            .remove("lastErrorMessage")
+            .remove("lastErrorAt")
+            .apply()
+    }
+
+    private fun currentLastError(): LocationError? {
+        lastError?.let { return it }
+        val message = prefs.getString("lastErrorMessage", null) ?: return null
+        return LocationError(prefs.getInt("lastErrorCode", 0).toDouble(), message)
+            .also { lastError = it }
     }
 
     @SuppressLint("MissingPermission")
     fun startNativeLocationUpdates() {
         val current = requireConfig()
         if (current.android?.locationProvider == AndroidBackgroundProvider.ANDROID_PLATFORM) {
+            NitroGeoLog.d("startNativeLocationUpdates(): ANDROID_PLATFORM LocationManager path")
             startPlatformLocationUpdates(current)
             return
         }
+        NitroGeoLog.d("startNativeLocationUpdates(): FUSED provider, registering broadcast PendingIntent")
         val request = LocationRequest.Builder(
             resolvePriority(current),
             current.interval?.toLong() ?: 10_000L
@@ -177,7 +258,27 @@ class NitroBackgroundLocationController private constructor(
             .setMaxUpdateDelayMillis(current.maxUpdateDelay?.toLong() ?: 0L)
             .build()
 
-        fusedLocationClient.requestLocationUpdates(request, locationPendingIntent())
+        try {
+            fusedLocationClient.requestLocationUpdates(request, locationPendingIntent())
+                .addOnSuccessListener {
+                    NitroGeoLog.d("startNativeLocationUpdates(): fused registration accepted")
+                    state = BackgroundLocationState.RUNNING
+                    clearError()
+                }
+                .addOnFailureListener { error ->
+                    recordError(
+                        ERROR_CODE_POSITION_UNAVAILABLE,
+                        "Failed to register fused location updates: ${error.message}",
+                        error
+                    )
+                }
+        } catch (error: SecurityException) {
+            recordError(
+                ERROR_CODE_PERMISSION_DENIED,
+                "Missing location permission for fused updates: ${error.message}",
+                error
+            )
+        }
     }
 
     fun stopNativeLocationUpdates() {
@@ -186,6 +287,7 @@ class NitroBackgroundLocationController private constructor(
     }
 
     fun handleNativeLocation(location: Location, source: BackgroundLocationSource) {
+        NitroGeoLog.d("handleNativeLocation(): src=$source lat=${location.latitude} lng=${location.longitude}")
         val id = UUID.randomUUID().toString()
         val backgroundLocation = BackgroundLocation(
             id,
@@ -391,7 +493,7 @@ class NitroBackgroundLocationController private constructor(
         if (interval > 0 && now - lastSyncAt < interval) return
         prefs.edit().putLong("lastSyncAt", now).apply()
 
-        Thread {
+        syncExecutor.execute {
             val result = runCatching { syncStoredLocations() }.getOrElse { error ->
                 BackgroundHttpSyncResult(
                     false,
@@ -415,7 +517,7 @@ class NitroBackgroundLocationController private constructor(
             )
             persistEventIfNeeded(event)
             dispatchEvent(event)
-        }.start()
+        }
     }
 
     private fun shouldPersist(): Boolean {
@@ -428,12 +530,18 @@ class NitroBackgroundLocationController private constructor(
         store.pruneEvents(currentMaxStoredEvents())
     }
 
-    private fun currentMaxStoredLocations(): Int? {
-        return getConfigOrNull()?.maxStoredLocations?.toInt()?.takeIf { it > 0 }
+    private fun currentMaxStoredLocations(): Int {
+        return resolveMaxStored(
+            getConfigOrNull()?.maxStoredLocations?.toInt(),
+            DEFAULT_MAX_STORED_LOCATIONS
+        )
     }
 
-    private fun currentMaxStoredEvents(): Int? {
-        return getConfigOrNull()?.maxStoredEvents?.toInt()?.takeIf { it > 0 }
+    private fun currentMaxStoredEvents(): Int {
+        return resolveMaxStored(
+            getConfigOrNull()?.maxStoredEvents?.toInt(),
+            DEFAULT_MAX_STORED_EVENTS
+        )
     }
 
     @SuppressLint("MissingPermission")
@@ -443,13 +551,26 @@ class NitroBackgroundLocationController private constructor(
         val providers = listOf(LocationManager.GPS_PROVIDER, LocationManager.NETWORK_PROVIDER)
             .filter { provider -> runCatching { platformLocationManager.isProviderEnabled(provider) }.getOrDefault(false) }
             .ifEmpty { listOf(LocationManager.GPS_PROVIDER) }
+        var registered = false
         providers.forEach { provider ->
-            platformLocationManager.requestLocationUpdates(
-                provider,
-                interval,
-                distance,
-                locationPendingIntent()
-            )
+            try {
+                platformLocationManager.requestLocationUpdates(
+                    provider,
+                    interval,
+                    distance,
+                    locationPendingIntent()
+                )
+                registered = true
+            } catch (error: SecurityException) {
+                recordError(
+                    ERROR_CODE_PERMISSION_DENIED,
+                    "Missing location permission for $provider updates: ${error.message}",
+                    error
+                )
+            }
+        }
+        if (registered) {
+            state = BackgroundLocationState.RUNNING
         }
     }
 
@@ -484,10 +605,16 @@ class NitroBackgroundLocationController private constructor(
 
     private fun dispatchEvent(event: BackgroundEventEnvelope) {
         eventHub.emit(event)
-        val intent = Intent(appContext, NitroBackgroundHeadlessTaskService::class.java)
-            .putExtra("event", event.toJson().toString())
-        appContext.startService(intent)
-        HeadlessJsTaskService.acquireWakeLockNow(appContext)
+        // The in-process eventHub already delivered to any live JS listeners; the headless task is
+        // the fallback for when JS is dead. Guard its start: startService from the background can be
+        // rejected (ForegroundServiceStartNotAllowed / IllegalState), which must not crash the
+        // broadcast receiver thread that drives delivery.
+        runCatching {
+            val intent = Intent(appContext, NitroBackgroundHeadlessTaskService::class.java)
+                .putExtra("event", event.toJson().toString())
+            appContext.startService(intent)
+            HeadlessJsTaskService.acquireWakeLockNow(appContext)
+        }.onFailure { NitroGeoLog.w("dispatchEvent: headless task dispatch failed", it) }
     }
 
     private fun waitForTask(task: Task<Void>) {
@@ -661,7 +788,7 @@ class NitroBackgroundLocationController private constructor(
             appContext,
             1001,
             intent,
-            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+            mutablePendingIntentFlags(Build.VERSION.SDK_INT)
         )
     }
 
@@ -672,7 +799,7 @@ class NitroBackgroundLocationController private constructor(
             appContext,
             1002,
             intent,
-            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+            mutablePendingIntentFlags(Build.VERSION.SDK_INT)
         )
     }
 
@@ -683,7 +810,7 @@ class NitroBackgroundLocationController private constructor(
             appContext,
             1003,
             intent,
-            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+            mutablePendingIntentFlags(Build.VERSION.SDK_INT)
         )
     }
 

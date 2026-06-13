@@ -29,6 +29,12 @@ import org.json.JSONObject
 class NitroBackgroundStore(context: Context) :
     SQLiteOpenHelper(context, "nitro_background_location.db", null, 3) {
 
+    init {
+        // WAL lets the broadcast-receiver writer and concurrent readers (JS Promise threads and the
+        // sync worker) proceed without blocking each other under a steady stream of location inserts.
+        setWriteAheadLoggingEnabled(true)
+    }
+
     override fun onCreate(db: SQLiteDatabase) {
         db.execSQL(
             """

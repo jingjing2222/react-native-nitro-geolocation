@@ -6,6 +6,7 @@ import com.margelo.nitro.nitrogeolocation.StoredBackgroundLocation
 import java.io.OutputStreamWriter
 import java.net.HttpURLConnection
 import java.net.URL
+import kotlin.random.Random
 
 internal class AndroidBackgroundHttpSync {
     fun uploadLocationsWithRetry(
@@ -43,7 +44,7 @@ internal class AndroidBackgroundHttpSync {
                 lastError = error.message ?: "HTTP sync failed"
             }
             if (attempt < maxAttempts - 1) {
-                Thread.sleep(1_000L)
+                Thread.sleep(backoffDelayMs(attempt))
             }
         }
 
@@ -61,10 +62,16 @@ internal class AndroidBackgroundHttpSync {
         locations: Array<StoredBackgroundLocation>
     ): Int {
         val connection = createConnection(sync)
-        OutputStreamWriter(connection.outputStream).use { writer ->
-            writer.write(sync.batchBody(locations).toString())
+        return try {
+            OutputStreamWriter(connection.outputStream).use { writer ->
+                writer.write(sync.batchBody(locations).toString())
+            }
+            val code = connection.responseCode
+            drainResponse(connection, code)
+            code
+        } finally {
+            connection.disconnect()
         }
-        return connection.responseCode
     }
 
     private fun uploadSingleLocationsWithRetry(
@@ -93,7 +100,7 @@ internal class AndroidBackgroundHttpSync {
                     lastError = error.message ?: "HTTP sync failed"
                 }
                 if (!didSync && attempt < maxAttempts - 1) {
-                    Thread.sleep(1_000L)
+                    Thread.sleep(backoffDelayMs(attempt))
                 }
             }
             if (!didSync) {
@@ -115,10 +122,16 @@ internal class AndroidBackgroundHttpSync {
         location: StoredBackgroundLocation
     ): Int {
         val connection = createConnection(sync)
-        OutputStreamWriter(connection.outputStream).use { writer ->
-            writer.write(sync.singleBody(location).toString())
+        return try {
+            OutputStreamWriter(connection.outputStream).use { writer ->
+                writer.write(sync.singleBody(location).toString())
+            }
+            val code = connection.responseCode
+            drainResponse(connection, code)
+            code
+        } finally {
+            connection.disconnect()
         }
-        return connection.responseCode
     }
 
     private fun createConnection(sync: BackgroundHttpSyncOptions): HttpURLConnection {
@@ -130,5 +143,35 @@ internal class AndroidBackgroundHttpSync {
             setRequestProperty("Content-Type", "application/json")
             sync.headers?.forEach { (key, value) -> setRequestProperty(key, value) }
         }
+    }
+
+    // Drain (up to a cap) then disconnect so the socket is returned to the pool; an undrained
+    // HttpURLConnection blocks connection reuse and leaks sockets over a long trip.
+    private fun drainResponse(connection: HttpURLConnection, code: Int) {
+        runCatching {
+            val stream = if (code in 200..299) connection.inputStream else connection.errorStream
+            stream?.use { input ->
+                val buffer = ByteArray(4_096)
+                var total = 0
+                while (total < MAX_DRAIN_BYTES) {
+                    val read = input.read(buffer)
+                    if (read < 0) break
+                    total += read
+                }
+            }
+        }
+    }
+
+    // Exponential backoff with full jitter so many devices retrying a failed sync don't hammer the
+    // server in lockstep (thundering herd).
+    private fun backoffDelayMs(attempt: Int): Long {
+        return backoffBaseDelayMs(attempt, BASE_BACKOFF_MS, MAX_BACKOFF_MS) +
+            Random.nextLong(BASE_BACKOFF_MS)
+    }
+
+    private companion object {
+        const val BASE_BACKOFF_MS = 1_000L
+        const val MAX_BACKOFF_MS = 30_000L
+        const val MAX_DRAIN_BYTES = 64 * 1024
     }
 }
