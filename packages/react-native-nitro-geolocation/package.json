@@ -1,6 +1,6 @@
 {
   "name": "react-native-nitro-geolocation",
-  "version": "1.3.3",
+  "version": "1.4.0",
   "description": "Nitro-powered native geolocation for modern React Native apps",
   "main": "src/index",
   "source": "src/index",
