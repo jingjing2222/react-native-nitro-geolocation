@@ -112,12 +112,15 @@ for the full compatibility matrix and option notes.
 ### 3. Background API
 
 Native background tracking, geofencing, activity events, Android Headless JS,
-HTTP sync, and stored event recovery should use the explicit background subpath.
+HTTP sync, stored event recovery, and silent-delivery diagnosis should use the
+explicit background subpath.
 
 Background location is native-only. Browser builds expose unsupported stubs so
 web bundles can still import shared code safely. Start with the
 [Background Location guide](https://react-native-nitro-geolocation.pages.dev/background/overview)
 for permissions, start/stop, geofencing, storage recovery, and native sync.
+Use `diagnoseBackgroundLocation()` from the same subpath to turn the raw
+background status into actionable issues when delivery is silent.
 
 ---
 
@@ -218,7 +221,7 @@ Use the docs site for the detailed flows:
 - [Quick Start](https://react-native-nitro-geolocation.pages.dev/guide/quick-start) - install, set native permissions, and read your first location.
 - [Modern API](https://react-native-nitro-geolocation.pages.dev/guide/modern-api) - accuracy presets, watches, Android settings, cached reads, geocoding, heading, and iOS accuracy authorization.
 - [Compat API](https://react-native-nitro-geolocation.pages.dev/guide/compat-api) - callback compatibility and web behavior.
-- [Background Location](https://react-native-nitro-geolocation.pages.dev/background/overview) - native background tracking, geofencing, storage recovery, Headless JS, and HTTP sync.
+- [Background Location](https://react-native-nitro-geolocation.pages.dev/background/overview) - native background tracking, geofencing, storage recovery, Headless JS, HTTP sync, and delivery diagnosis.
 - [Migration Assistance](https://react-native-nitro-geolocation.pages.dev/guide/migration-assistance) - choose the community or service migration path.
 - [Expo Development Builds](https://react-native-nitro-geolocation.pages.dev/guide/expo-development-build) - use the package in Expo custom native builds.
 - [DevTools Plugin](https://react-native-nitro-geolocation.pages.dev/guide/devtools) - mock locations during development.
