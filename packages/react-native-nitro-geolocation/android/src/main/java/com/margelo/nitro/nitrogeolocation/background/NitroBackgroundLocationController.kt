@@ -604,7 +604,8 @@ class NitroBackgroundLocationController private constructor(
     }
 
     private fun dispatchEvent(event: BackgroundEventEnvelope) {
-        eventHub.emit(event)
+        val deliveredToInProcessListener = eventHub.emit(event)
+        if (!shouldDispatchHeadlessTask(deliveredToInProcessListener)) return
         // The in-process eventHub already delivered to any live JS listeners; the headless task is
         // the fallback for when JS is dead. Guard its start: startService from the background can be
         // rejected (ForegroundServiceStartNotAllowed / IllegalState), which must not crash the

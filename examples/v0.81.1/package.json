@@ -20,6 +20,7 @@
     "test:e2e:ios": "bash ./scripts/test-e2e-ios.sh",
     "test:e2e:background-long-run:android": "bash ./scripts/test-background-long-run-android.sh",
     "test:e2e:background-long-run:ios": "bash ./scripts/test-background-long-run-ios.sh",
+    "test:e2e:issue-132:android": "bash ./scripts/test-issue-132-android.sh",
     "test:e2e:web:android": "bash ./scripts/test-e2e-web-android.sh",
     "test:e2e:web:ios": "bash ./scripts/test-e2e-web-ios.sh"
   },
