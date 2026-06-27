@@ -64,4 +64,14 @@ class BackgroundDecisionsTest {
         assertEquals(0, resolveMaxStored(0, 10_000))
         assertEquals(0, resolveMaxStored(-5, 10_000))
     }
+
+    @Test
+    fun headlessTaskIsSkippedWhenInProcessListenerReceivedEvent() {
+        assertFalse(shouldDispatchHeadlessTask(true))
+    }
+
+    @Test
+    fun headlessTaskRunsWhenNoInProcessListenerReceivedEvent() {
+        assertTrue(shouldDispatchHeadlessTask(false))
+    }
 }

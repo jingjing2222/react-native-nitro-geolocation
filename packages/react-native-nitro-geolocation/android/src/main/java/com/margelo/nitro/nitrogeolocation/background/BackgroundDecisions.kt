@@ -50,3 +50,12 @@ internal fun resolveMaxStored(configured: Int?, default: Int): Int {
         else -> configured
     }
 }
+
+/**
+ * Headless JS is the fallback path when no in-process JS listener received the native event. If a
+ * live listener already handled the event, starting Headless JS duplicates delivery and React
+ * Native warns when the app did not register NitroBackgroundLocationTask.
+ */
+internal fun shouldDispatchHeadlessTask(deliveredToInProcessListener: Boolean): Boolean {
+    return !deliveredToInProcessListener
+}

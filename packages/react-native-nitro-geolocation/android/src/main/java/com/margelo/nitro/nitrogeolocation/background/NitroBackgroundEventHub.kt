@@ -45,22 +45,27 @@ class NitroBackgroundEventHub {
         errorListeners.remove(token)
     }
 
-    fun emit(event: BackgroundEventEnvelope) {
+    fun emit(event: BackgroundEventEnvelope): Boolean {
+        var delivered = eventListeners.isNotEmpty()
         eventListeners.values.forEach { listener -> dispatch { listener(event) } }
 
         when (event.type) {
             BackgroundEventType.LOCATION -> {
                 event.location?.let { location ->
+                    delivered = delivered || locationListeners.isNotEmpty()
                     locationListeners.values.forEach { listener -> dispatch { listener(location) } }
                 }
             }
             BackgroundEventType.ERROR -> {
                 event.error?.let { error ->
+                    delivered = delivered || errorListeners.isNotEmpty()
                     errorListeners.values.forEach { listener -> dispatch { listener(error) } }
                 }
             }
             else -> Unit
         }
+
+        return delivered
     }
 
     // Listeners run inline on the caller's thread (often the broadcast receiver thread). Isolate

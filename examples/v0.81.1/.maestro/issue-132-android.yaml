@@ -1,0 +1,45 @@
+appId: nitrogeolocation.example
+---
+# Repro for #132 on Android.
+# This flow must run against the no-headless bundle built from index.no-headless.js.
+# The companion shell script asserts logcat has no
+# "No task registered for key NitroBackgroundLocationTask" warning.
+
+- launchApp:
+    clearState: true
+    permissions:
+      all: allow
+
+- extendedWaitUntil:
+    visible: "Geolocation API"
+    timeout: 30000
+
+- stopApp
+
+- openLink:
+    link: nitrogeolocation://app/issue-132
+- tapOn:
+    text: "열기|Open"
+    optional: true
+
+- extendedWaitUntil:
+    visible: "Issue 132"
+    timeout: 15000
+
+- tapOn:
+    id: "issue-132-start-button"
+
+- setLocation:
+    latitude: 37.5665
+    longitude: 126.978
+- runScript: scripts/wait-15s.js
+- setLocation:
+    latitude: 37.567
+    longitude: 126.979
+
+- extendedWaitUntil:
+    visible: "Foreground listener: passed"
+    timeout: 30000
+
+- tapOn:
+    id: "issue-132-cleanup-button"
