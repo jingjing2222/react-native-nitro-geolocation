@@ -22,6 +22,7 @@ import Issue119Screen from "./screens/Issue119Screen";
 import Issue120Screen from "./screens/Issue120Screen";
 import Issue121Screen from "./screens/Issue121Screen";
 import Issue122Screen from "./screens/Issue122Screen";
+import Issue132Screen from "./screens/Issue132Screen";
 import LastKnownPositionScreen from "./screens/LastKnownPositionScreen";
 import LocationAvailabilityScreen from "./screens/LocationAvailabilityScreen";
 import LocationSimulationScreen from "./screens/LocationSimulationScreen";
@@ -61,6 +62,7 @@ const linking = {
       Issue120: "issue-120",
       Issue121: "issue-121",
       Issue122: "issue-122",
+      Issue132: "issue-132",
       WebE2E: "web-e2e",
       Issue67: "issue-67"
     }
@@ -208,6 +210,11 @@ export default function App() {
         <Tab.Screen
           name="Issue122"
           component={Issue122Screen}
+          options={hiddenTabOptions}
+        />
+        <Tab.Screen
+          name="Issue132"
+          component={Issue132Screen}
           options={hiddenTabOptions}
         />
         <Tab.Screen
