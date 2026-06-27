@@ -21,6 +21,9 @@
 
 <!--
 If your PR includes code changes, please run E2E tests locally.
+To run optional CI E2E checks, add the `E2E` label to the PR. The iOS and
+Android E2E workflow runs with read-only permissions and reports through GitHub
+Checks.
 For documentation-only changes, you can skip this section.
 
 Run the following command in the example app:
