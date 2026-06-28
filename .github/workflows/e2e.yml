@@ -165,10 +165,9 @@ jobs:
           disable-animations: true
           emulator-options: -no-window -gpu swiftshader_indirect -no-snapshot -noaudio -no-boot-anim -camera-back none
           script: |
-            adb kill-server
-            adb start-server
-            adb wait-for-device
-            timeout 180 bash -c 'until [[ "$(adb shell getprop sys.boot_completed 2>/dev/null | tr -d "\r")" == "1" ]]; do sleep 5; done'
+            adb devices
+            timeout 180 bash -c 'until [[ "$(adb get-state 2>/dev/null)" == "device" ]]; do adb reconnect offline || true; adb devices; sleep 5; done'
+            timeout 180 bash -c 'until [[ "$(adb shell getprop sys.boot_completed 2>/dev/null | tr -d "\r")" == "1" ]]; do adb devices; sleep 5; done'
             adb shell input keyevent 82 || true
             yarn workspace react-native-nitro-geolocation-example android:release
             yarn test:e2e:android
