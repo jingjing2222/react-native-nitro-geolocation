@@ -239,9 +239,21 @@ export default function ProviderSettingsScreen() {
           <KeyValueBlock
             testID="provider-settings-error"
             rows={[
-              { label: "Code", value: error.code },
-              { label: "Name", value: error.name },
-              { label: "Message", value: error.message }
+              {
+                label: "Code",
+                value: error.code,
+                testID: "provider-settings-error-code"
+              },
+              {
+                label: "Name",
+                value: error.name,
+                testID: "provider-settings-error-name"
+              },
+              {
+                label: "Message",
+                value: error.message,
+                testID: "provider-settings-error-message"
+              }
             ]}
           />
         </ScenarioSection>

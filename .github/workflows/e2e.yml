@@ -1,0 +1,286 @@
+name: E2E
+
+on:
+  pull_request:
+    types:
+      - opened
+      - edited
+      - reopened
+      - ready_for_review
+      - synchronize
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: e2e-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  ios-e2e:
+    name: iOS E2E
+    runs-on: macos-15
+    timeout-minutes: 90
+    if: >
+      github.event_name == 'workflow_dispatch' ||
+      contains(github.event.pull_request.title, '[E2E]')
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Compute iOS app fingerprint
+        id: ios-app-fingerprint
+        shell: bash
+        run: |
+          fingerprint="$(
+            {
+              printf 'ios-e2e-app-v1\n'
+              xcodebuild -version
+              git ls-files -z -- \
+                mise.toml \
+                package.json \
+                yarn.lock \
+                packages/react-native-nitro-geolocation \
+                packages/rozenite-devtools-plugin \
+                examples/v0.81.1/package.json \
+                examples/v0.81.1/app.json \
+                examples/v0.81.1/babel.config.js \
+                examples/v0.81.1/index.js \
+                examples/v0.81.1/index.no-headless.js \
+                examples/v0.81.1/metro.config.js \
+                examples/v0.81.1/react-native.config.js \
+                examples/v0.81.1/src \
+                examples/v0.81.1/ios \
+                | xargs -0 shasum -a 256
+            } | shasum -a 256 | awk '{ print $1 }'
+          )"
+          echo "fingerprint=$fingerprint" >> "$GITHUB_OUTPUT"
+          echo "key=ios-e2e-app-$fingerprint" >> "$GITHUB_OUTPUT"
+          echo "iOS app fingerprint: $fingerprint"
+
+      - name: Restore iOS release app cache
+        id: ios-app-cache
+        uses: actions/cache/restore@v4
+        with:
+          path: examples/v0.81.1/ios/build/Build/Products/Release-iphonesimulator/NitroGeolocationExample.app
+          key: ${{ steps.ios-app-fingerprint.outputs.key }}
+
+      - name: Setup mise
+        uses: jdx/mise-action@v3
+        with:
+          install: false
+
+      - name: Trust mise config
+        run: |
+          mise trust --yes
+
+      - name: Install iOS E2E tools via mise
+        run: |
+          mise install java maestro node
+
+      - name: Install iOS native build tools via mise
+        if: steps.ios-app-cache.outputs.cache-hit != 'true'
+        run: |
+          mise install ruby
+
+      - name: Enable Corepack
+        run: |
+          corepack enable
+          mise reshim node
+
+      - name: Install dependencies
+        run: |
+          yarn install
+
+      - name: Build packages
+        run: |
+          yarn build:all
+
+      - name: Install iOS gems
+        if: steps.ios-app-cache.outputs.cache-hit != 'true'
+        working-directory: examples/v0.81.1
+        run: |
+          bundle install
+
+      - name: Install iOS pods
+        if: steps.ios-app-cache.outputs.cache-hit != 'true'
+        working-directory: examples/v0.81.1
+        run: |
+          bundle exec pod install --project-directory=ios
+
+      - name: Boot iOS simulator
+        run: |
+          SIMULATOR_UDID="$(xcrun simctl list devices available | awk -F '[()]' '/iPhone/ { print $2; exit }')"
+          if [ -z "$SIMULATOR_UDID" ]; then
+            echo "No available iPhone simulator found." >&2
+            exit 1
+          fi
+          echo "SIMULATOR_UDID=$SIMULATOR_UDID" >> "$GITHUB_ENV"
+          xcrun simctl boot "$SIMULATOR_UDID" || true
+          xcrun simctl bootstatus "$SIMULATOR_UDID" -b
+
+      - name: Build iOS release app
+        if: steps.ios-app-cache.outputs.cache-hit != 'true'
+        working-directory: examples/v0.81.1
+        run: |
+          xcodebuild \
+            -workspace ios/NitroGeolocationExample.xcworkspace \
+            -scheme NitroGeolocationExample \
+            -configuration Release \
+            -sdk iphonesimulator \
+            -destination "id=$SIMULATOR_UDID" \
+            -derivedDataPath ios/build \
+            build
+
+      - name: Save iOS release app cache
+        if: steps.ios-app-cache.outputs.cache-hit != 'true'
+        continue-on-error: true
+        uses: actions/cache/save@v4
+        with:
+          path: examples/v0.81.1/ios/build/Build/Products/Release-iphonesimulator/NitroGeolocationExample.app
+          key: ${{ steps.ios-app-fingerprint.outputs.key }}
+
+      - name: Install iOS release app
+        working-directory: examples/v0.81.1
+        run: |
+          xcrun simctl install "$SIMULATOR_UDID" ios/build/Build/Products/Release-iphonesimulator/NitroGeolocationExample.app
+
+      - name: Run iOS E2E
+        run: |
+          yarn test:e2e:ios
+
+      - name: Upload iOS E2E artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ios-e2e-artifacts
+          if-no-files-found: ignore
+          path: |
+            ~/.maestro/tests
+
+  android-e2e:
+    name: Android E2E
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    if: >
+      github.event_name == 'workflow_dispatch' ||
+      contains(github.event.pull_request.title, '[E2E]')
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Compute Android app fingerprint
+        id: android-app-fingerprint
+        shell: bash
+        run: |
+          fingerprint="$(
+            {
+              printf 'android-e2e-app-v1\n'
+              printf 'api-level=34\n'
+              git ls-files -z -- \
+                mise.toml \
+                package.json \
+                yarn.lock \
+                packages/react-native-nitro-geolocation \
+                packages/rozenite-devtools-plugin \
+                examples/v0.81.1/package.json \
+                examples/v0.81.1/app.json \
+                examples/v0.81.1/babel.config.js \
+                examples/v0.81.1/index.js \
+                examples/v0.81.1/index.no-headless.js \
+                examples/v0.81.1/metro.config.js \
+                examples/v0.81.1/react-native.config.js \
+                examples/v0.81.1/src \
+                examples/v0.81.1/android \
+                | xargs -0 sha256sum
+            } | sha256sum | awk '{ print $1 }'
+          )"
+          echo "fingerprint=$fingerprint" >> "$GITHUB_OUTPUT"
+          echo "key=android-e2e-app-$fingerprint" >> "$GITHUB_OUTPUT"
+          echo "Android app fingerprint: $fingerprint"
+
+      - name: Restore Android release app cache
+        id: android-app-cache
+        uses: actions/cache/restore@v4
+        with:
+          path: examples/v0.81.1/android/app/build/outputs/apk/release/app-release.apk
+          key: ${{ steps.android-app-fingerprint.outputs.key }}
+
+      - name: Setup mise
+        uses: jdx/mise-action@v3
+        with:
+          install: false
+
+      - name: Trust mise config
+        run: |
+          mise trust --yes
+
+      - name: Install Android E2E tools via mise
+        run: |
+          mise install java maestro node
+
+      - name: Enable Corepack
+        run: |
+          corepack enable
+          mise reshim node
+
+      - name: Install dependencies
+        run: |
+          yarn install
+
+      - name: Build packages
+        run: |
+          yarn build:all
+
+      - name: Build Android release app
+        if: steps.android-app-cache.outputs.cache-hit != 'true'
+        run: |
+          ./examples/v0.81.1/android/gradlew -p examples/v0.81.1/android --no-daemon --console=plain assembleRelease
+
+      - name: Save Android release app cache
+        if: steps.android-app-cache.outputs.cache-hit != 'true'
+        continue-on-error: true
+        uses: actions/cache/save@v4
+        with:
+          path: examples/v0.81.1/android/app/build/outputs/apk/release/app-release.apk
+          key: ${{ steps.android-app-fingerprint.outputs.key }}
+
+      - name: Enable KVM
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+
+      - name: Run Android E2E
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 34
+          arch: x86_64
+          target: google_apis
+          profile: pixel_6
+          emulator-boot-timeout: 600
+          disable-animations: true
+          emulator-options: -no-window -gpu swiftshader_indirect -no-snapshot -noaudio -no-boot-anim -camera-back none
+          script: |
+            adb devices
+            timeout 180 bash -c 'until [[ "$(adb get-state 2>/dev/null)" == "device" ]]; do adb reconnect offline || true; adb devices; sleep 5; done'
+            timeout 180 bash -c 'until [[ "$(adb shell getprop sys.boot_completed 2>/dev/null | tr -d "\r")" == "1" ]]; do adb devices; sleep 5; done'
+            adb shell input keyevent 82 || true
+            adb install -r examples/v0.81.1/android/app/build/outputs/apk/release/app-release.apk
+            yarn test:e2e:android
+
+      - name: Upload Android E2E artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: android-e2e-artifacts
+          if-no-files-found: ignore
+          path: |
+            ~/.maestro/tests

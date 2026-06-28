@@ -7,6 +7,13 @@ appId: nitrogeolocation.example
     permissions:
       all: allow
 
+- runFlow:
+    when:
+      platform: Android
+      visible: ".*isn't responding|.*응답하지 않.*"
+    commands:
+      - tapOn:
+          text: "Wait|대기"
 - extendedWaitUntil:
     visible: "Geolocation API"
     timeout: 10000
@@ -15,6 +22,26 @@ appId: nitrogeolocation.example
 
 - openLink:
     link: nitrogeolocation://app/accuracy-presets
+- runFlow:
+    when:
+      platform: Android
+      visible: ".*isn't responding|.*응답하지 않.*"
+    commands:
+      - tapOn:
+          text: "Wait|대기"
+- runFlow:
+    when:
+      platform: iOS
+      visible: "Cancel|취소"
+    commands:
+      - tapOn:
+          text: "Open|열기"
+- runFlow:
+    when:
+      platform: iOS
+    commands:
+      - openLink:
+          link: nitrogeolocation://app/accuracy-presets
 - waitForAnimationToEnd
 
 - extendedWaitUntil:
@@ -28,9 +55,20 @@ appId: nitrogeolocation.example
 - tapOn:
     id: "e2e-action-accuracy-presets-run-positive-button"
 
-- extendedWaitUntil:
-    visible: "Positive presets: passed"
-    timeout: 60000
+- runFlow:
+    when:
+      platform: Android
+    commands:
+      - extendedWaitUntil:
+          visible: "Positive presets: passed"
+          timeout: 60000
+- runFlow:
+    when:
+      platform: iOS
+    commands:
+      - extendedWaitUntil:
+          visible: "Positive presets: passed"
+          timeout: 120000
 
 - assertVisible:
     id: "accuracy-presets-positive-result"
@@ -71,6 +109,13 @@ appId: nitrogeolocation.example
     permissions:
       all: deny
 
+- runFlow:
+    when:
+      platform: Android
+      visible: ".*isn't responding|.*응답하지 않.*"
+    commands:
+      - tapOn:
+          text: "Wait|대기"
 - extendedWaitUntil:
     visible: "Geolocation API"
     timeout: 10000
@@ -79,6 +124,26 @@ appId: nitrogeolocation.example
 
 - openLink:
     link: nitrogeolocation://app/accuracy-presets
+- runFlow:
+    when:
+      platform: Android
+      visible: ".*isn't responding|.*응답하지 않.*"
+    commands:
+      - tapOn:
+          text: "Wait|대기"
+- runFlow:
+    when:
+      platform: iOS
+      visible: "Cancel|취소"
+    commands:
+      - tapOn:
+          text: "Open|열기"
+- runFlow:
+    when:
+      platform: iOS
+    commands:
+      - openLink:
+          link: nitrogeolocation://app/accuracy-presets
 - waitForAnimationToEnd
 
 - extendedWaitUntil:

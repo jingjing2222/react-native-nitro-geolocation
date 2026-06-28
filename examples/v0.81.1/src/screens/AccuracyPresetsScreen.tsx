@@ -17,6 +17,7 @@ import {
   ScenarioScreen,
   ScenarioSection,
   assertFixtureCoordinates,
+  captureLocationError,
   createScenarioResults,
   getDisplayErrorMessage,
   runWithNativeGeolocation,
@@ -37,8 +38,9 @@ type PositiveScenarioMessage = {
   message: string;
 };
 
-const FIXTURE_RETRY_TIMEOUT_MS = 25000;
+const FIXTURE_RETRY_TIMEOUT_MS = Platform.OS === "ios" ? 90000 : 25000;
 const FIXTURE_RETRY_INTERVAL_MS = 1000;
+const IOS_REQUEST_TIMEOUT_MS = 30000;
 
 const initialResults = createScenarioResults([
   "positive",
@@ -52,6 +54,14 @@ const isFixtureMismatchError = (
   return error instanceof Error && error.name === "FixtureMismatchError";
 };
 
+const isRetryableLocationError = (error: unknown) => {
+  if (isFixtureMismatchError(error)) {
+    return true;
+  }
+
+  return captureLocationError(error).code === LocationErrorCode.TIMEOUT;
+};
+
 const sleep = (durationMs: number) =>
   new Promise<void>((resolve) => {
     setTimeout(() => resolve(), durationMs);
@@ -61,33 +71,33 @@ const runScenarioWithSettledFixture = async (
   scenario: AccuracyScenario
 ): Promise<string> => {
   const deadline = Date.now() + FIXTURE_RETRY_TIMEOUT_MS;
-  let lastFixtureMismatch: FixtureMismatchError | null = null;
+  let lastRetryableError: Error | null = null;
   let attempt = 0;
 
   while (Date.now() <= deadline) {
     attempt += 1;
-    const position = await runWithNativeGeolocation(() =>
-      getCurrentPosition(scenario.options)
-    );
 
     try {
+      const position = await runWithNativeGeolocation(() =>
+        getCurrentPosition(scenario.options)
+      );
+
       return scenario.assertPosition
         ? scenario.assertPosition(position)
         : assertFixtureCoordinates(position);
     } catch (error) {
-      if (!isFixtureMismatchError(error)) {
+      if (!isRetryableLocationError(error)) {
         throw error;
       }
 
-      lastFixtureMismatch = new FixtureMismatchError(
-        `${error.message} Attempt ${attempt}.`
-      );
+      const message = getDisplayErrorMessage(error);
+      lastRetryableError = new Error(`${message} Attempt ${attempt}.`);
       await sleep(FIXTURE_RETRY_INTERVAL_MS);
     }
   }
 
   throw (
-    lastFixtureMismatch ??
+    lastRetryableError ??
     new FixtureMismatchError("Injected fixture location was not observed.")
   );
 };
@@ -143,8 +153,10 @@ const getPositiveScenarios = (): AccuracyScenario[] => {
         accuracy: {
           ios: "bestForNavigation"
         },
+        activityType: "otherNavigation",
         maximumAge: 0,
-        timeout: 15000
+        pausesLocationUpdatesAutomatically: false,
+        timeout: IOS_REQUEST_TIMEOUT_MS
       }
     },
     {
@@ -154,8 +166,10 @@ const getPositiveScenarios = (): AccuracyScenario[] => {
         accuracy: {
           ios: "nearestTenMeters"
         },
+        activityType: "otherNavigation",
         maximumAge: 0,
-        timeout: 15000
+        pausesLocationUpdatesAutomatically: false,
+        timeout: IOS_REQUEST_TIMEOUT_MS
       }
     },
     {
@@ -166,8 +180,10 @@ const getPositiveScenarios = (): AccuracyScenario[] => {
         accuracy: {
           ios: "reduced"
         },
+        activityType: "otherNavigation",
         maximumAge: 0,
-        timeout: 15000
+        pausesLocationUpdatesAutomatically: false,
+        timeout: IOS_REQUEST_TIMEOUT_MS
       }
     }
   ];

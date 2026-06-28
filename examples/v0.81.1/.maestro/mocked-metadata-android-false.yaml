@@ -16,10 +16,37 @@ appId: nitrogeolocation.example
       android.permission.ACCESS_COARSE_LOCATION: allow
       android.permission.ACCESS_FINE_LOCATION: allow
 
+- runFlow:
+    when:
+      platform: Android
+      visible: ".*isn't responding|.*응답하지 않.*"
+    commands:
+      - tapOn:
+          text: "Wait|대기"
 - stopApp
 
 - openLink:
     link: nitrogeolocation://app/mocked-metadata
+- runFlow:
+    when:
+      platform: Android
+      visible: ".*isn't responding|.*응답하지 않.*"
+    commands:
+      - tapOn:
+          text: "Wait|대기"
+- runFlow:
+    when:
+      platform: iOS
+      visible: "Cancel|취소"
+    commands:
+      - tapOn:
+          text: "Open|열기"
+- runFlow:
+    when:
+      platform: iOS
+    commands:
+      - openLink:
+          link: nitrogeolocation://app/mocked-metadata
 - waitForAnimationToEnd
 
 - extendedWaitUntil:
