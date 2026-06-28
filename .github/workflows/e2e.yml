@@ -53,6 +53,10 @@ jobs:
         run: |
           yarn install
 
+      - name: Build packages
+        run: |
+          yarn build:all
+
       - name: Setup Ruby
         uses: ruby/setup-ruby@v1
         with:
@@ -134,6 +138,10 @@ jobs:
       - name: Install dependencies
         run: |
           yarn install
+
+      - name: Build packages
+        run: |
+          yarn build:all
 
       - name: Install Maestro
         run: |
