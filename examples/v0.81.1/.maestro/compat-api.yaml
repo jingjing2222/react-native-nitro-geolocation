@@ -25,7 +25,8 @@ appId: nitrogeolocation.example
     visible: "Compat API"
     timeout: 10000
 
-- tapOn: "Request Authorization"
+- tapOn:
+    id: "e2e-action-compat-request-authorization-button"
 - tapOn:
     text: "Allow While Using App|앱을 사용하는 동안 허용|OK"
     optional: true
@@ -37,12 +38,8 @@ appId: nitrogeolocation.example
     latitude: 37.5665
     longitude: 126.978
 
-- tapOn: "GET CURRENT POSITION"
-
-- scrollUntilVisible:
-    element: "Current Position"
-    direction: DOWN
-    timeout: 15000
+- tapOn:
+    id: "e2e-action-compat-get-current-position-button"
 
 - assertVisible:
     id: "position-info"

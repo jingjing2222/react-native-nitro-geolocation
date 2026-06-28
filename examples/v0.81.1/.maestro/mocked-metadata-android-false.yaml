@@ -28,16 +28,14 @@ appId: nitrogeolocation.example
     visible: "Mocked location metadata contract"
     timeout: 10000
 
-- tapOn: "Request"
+- tapOn:
+    id: "e2e-action-permission-request-button"
 - extendedWaitUntil:
     visible: "granted ✅"
     timeout: 10000
 
-- scrollUntilVisible:
-    element: "2. Get Current Position"
-    direction: DOWN
-
-- tapOn: "Get Position"
+- tapOn:
+    id: "e2e-action-current-position-get-button"
 
 - extendedWaitUntil:
     visible: "Current Position"

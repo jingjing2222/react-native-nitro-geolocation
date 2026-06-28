@@ -24,7 +24,7 @@ appId: nitrogeolocation.example
     timeout: 15000
 
 - tapOn:
-    id: "issue-122-run-button"
+    id: "e2e-action-issue-122-run-button"
 - extendedWaitUntil:
     visible: "persist=false tracking started"
     timeout: 30000
@@ -41,7 +41,7 @@ appId: nitrogeolocation.example
     latitude: 37.568
     longitude: 126.9795
 - tapOn:
-    id: "issue-122-validate-button"
+    id: "e2e-action-issue-122-validate-button"
 - extendedWaitUntil:
     visible: "Issue 122: passed"
     timeout: 30000

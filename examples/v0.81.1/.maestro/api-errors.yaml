@@ -24,27 +24,14 @@ appId: nitrogeolocation.example
     visible: "Modern API error contract"
     timeout: 10000
 
-- scrollUntilVisible:
-    element: "2. Position Request"
-    direction: DOWN
-
-- tapOn: "Get Position"
-- scrollUntilVisible:
-    element: "Result: error"
-    direction: DOWN
-    timeout: 15000
-
+- tapOn:
+    id: "e2e-action-api-errors-get-position-button"
 - assertVisible:
     id: "api-error-details"
 - assertVisible:
     text: "Code: 1"
 - assertVisible:
     text: "Name: PERMISSION_DENIED"
-- scrollUntilVisible:
-    element:
-      id: "api-error-message"
-    direction: DOWN
-    centerElement: true
 - assertVisible:
     id: "api-error-message"
 
@@ -69,7 +56,8 @@ appId: nitrogeolocation.example
     visible: "Modern API error contract"
     timeout: 10000
 
-- tapOn: "Request Permission"
+- tapOn:
+    id: "e2e-action-api-errors-request-permission-button"
 - tapOn:
     text: "Allow While Using App|앱을 사용하는 동안 허용|OK"
     optional: true
@@ -81,47 +69,19 @@ appId: nitrogeolocation.example
     latitude: 37.5665
     longitude: 126.978
 
-- scrollUntilVisible:
-    element: "Get Position"
-    direction: DOWN
-    centerElement: true
-
-- tapOn: "Get Position"
-- scrollUntilVisible:
-    element: "Current Position"
-    direction: DOWN
-    timeout: 15000
-
+- tapOn:
+    id: "e2e-action-api-errors-get-position-button"
 - assertVisible:
     id: "api-error-position"
-- scrollUntilVisible:
-    element:
-      id: "api-error-latitude"
-    direction: DOWN
-    centerElement: true
 - assertVisible:
     id: "api-error-latitude"
-- scrollUntilVisible:
-    element:
-      id: "api-error-longitude"
-    direction: DOWN
-    centerElement: true
 - assertVisible:
     id: "api-error-longitude"
-- scrollUntilVisible:
-    element:
-      id: "api-error-accuracy"
-    direction: DOWN
-    centerElement: true
 - assertVisible:
     id: "api-error-accuracy"
 
-- scrollUntilVisible:
-    element: "Force Timeout"
-    direction: DOWN
-    centerElement: true
-
-- tapOn: "Force Timeout"
+- tapOn:
+    id: "e2e-action-api-errors-force-timeout-button"
 - extendedWaitUntil:
     visible: "Result: error"
     timeout: 10000
@@ -132,47 +92,20 @@ appId: nitrogeolocation.example
     text: "Code: 3"
 - assertVisible:
     text: "Name: TIMEOUT"
-- scrollUntilVisible:
-    element:
-      id: "api-error-message"
-    direction: DOWN
-    centerElement: true
 - assertVisible:
     id: "api-error-message"
 
-- scrollUntilVisible:
-    element: "Error Code Contract"
-    direction: DOWN
-
 - assertVisible:
     id: "api-error-code-contract"
-- scrollUntilVisible:
-    element: "INTERNAL_ERROR"
-    direction: DOWN
 - assertVisible:
     id: "api-error-contract-INTERNAL_ERROR"
-- scrollUntilVisible:
-    element: "PERMISSION_DENIED"
-    direction: DOWN
 - assertVisible:
     id: "api-error-contract-PERMISSION_DENIED"
-- scrollUntilVisible:
-    element: "POSITION_UNAVAILABLE"
-    direction: DOWN
 - assertVisible:
     id: "api-error-contract-POSITION_UNAVAILABLE"
-- scrollUntilVisible:
-    element: "TIMEOUT"
-    direction: DOWN
 - assertVisible:
     id: "api-error-contract-TIMEOUT"
-- scrollUntilVisible:
-    element: "PLAY_SERVICE_NOT_AVAILABLE"
-    direction: DOWN
 - assertVisible:
     id: "api-error-contract-PLAY_SERVICE_NOT_AVAILABLE"
-- scrollUntilVisible:
-    element: "SETTINGS_NOT_SATISFIED"
-    direction: DOWN
 - assertVisible:
     id: "api-error-contract-SETTINGS_NOT_SATISFIED"

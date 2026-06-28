@@ -28,7 +28,7 @@ appId: nitrogeolocation.example
     longitude: 126.978
 
 - tapOn:
-    id: "ios-location-tuning-run-tuned-button"
+    id: "e2e-action-ios-location-tuning-run-tuned-button"
 
 - extendedWaitUntil:
     visible: "Tuned requests: passed"
@@ -41,12 +41,8 @@ appId: nitrogeolocation.example
 - assertVisible:
     text: ".*current 37.566500, 126.978000.*watch 37.566500, 126.978000.*"
 
-- scrollUntilVisible:
-    element: "3. Invalid Activity Type"
-    direction: DOWN
-
 - tapOn:
-    id: "ios-location-tuning-run-invalid-button"
+    id: "e2e-action-ios-location-tuning-run-invalid-button"
 
 - extendedWaitUntil:
     visible: "Invalid activityType: passed"
@@ -80,16 +76,8 @@ appId: nitrogeolocation.example
     visible: "Native iOS manager configuration contract"
     timeout: 10000
 
-- scrollUntilVisible:
-    element: "4. Permission Denied"
-    direction: DOWN
-
 - tapOn:
-    id: "ios-location-tuning-run-denied-button"
-
-- scrollUntilVisible:
-    element: "Permission denied: passed"
-    direction: DOWN
+    id: "e2e-action-ios-location-tuning-run-denied-button"
 
 - extendedWaitUntil:
     visible: "Permission denied: passed"
@@ -97,10 +85,6 @@ appId: nitrogeolocation.example
 
 - assertVisible:
     id: "ios-location-tuning-denied-result"
-- scrollUntilVisible:
-    element:
-      text: ".*PERMISSION_DENIED.*"
-    direction: DOWN
 - assertVisible:
     text: ".*PERMISSION_DENIED.*"
 - assertVisible:

@@ -14,21 +14,21 @@ appId: nitrogeolocation.example
     timeout: 20000
 
 - tapOn:
-    id: "background-long-run-refresh-button"
+    id: "e2e-action-background-long-run-refresh-button"
 - tapOn:
-    id: "background-long-run-validate-reboot-button"
+    id: "e2e-action-background-long-run-validate-reboot-button"
 - extendedWaitUntil:
     visible: "Reboot restore: passed"
     timeout: 20000
 
 - tapOn:
-    id: "background-long-run-validate-location-button"
+    id: "e2e-action-background-long-run-validate-location-button"
 - extendedWaitUntil:
     visible: "Background location: passed"
     timeout: 20000
 
 - tapOn:
-    id: "background-long-run-validate-geofence-button"
+    id: "e2e-action-background-long-run-validate-geofence-button"
 - extendedWaitUntil:
     visible: "Geofence transition: passed"
     timeout: 20000

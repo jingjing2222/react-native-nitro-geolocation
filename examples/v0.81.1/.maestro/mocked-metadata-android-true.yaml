@@ -25,7 +25,8 @@ appId: nitrogeolocation.example
     visible: "Mocked location metadata contract"
     timeout: 10000
 
-- tapOn: "Request"
+- tapOn:
+    id: "e2e-action-permission-request-button"
 - extendedWaitUntil:
     visible: "granted ✅"
     timeout: 10000
@@ -34,11 +35,8 @@ appId: nitrogeolocation.example
     latitude: 37.5665
     longitude: 126.978
 
-- scrollUntilVisible:
-    element: "2. Get Current Position"
-    direction: DOWN
-
-- tapOn: "Get Position"
+- tapOn:
+    id: "e2e-action-current-position-get-button"
 
 - extendedWaitUntil:
     visible: "Current Position"
@@ -46,34 +44,14 @@ appId: nitrogeolocation.example
 
 - assertVisible:
     id: "position-info"
-- scrollUntilVisible:
-    element:
-      id: "latitude-text"
-    direction: DOWN
-    centerElement: true
 - assertVisible:
     id: "latitude-text"
-- scrollUntilVisible:
-    element:
-      id: "longitude-text"
-    direction: DOWN
-    centerElement: true
 - assertVisible:
     id: "longitude-text"
-- scrollUntilVisible:
-    element:
-      id: "mocked-text"
-    direction: DOWN
-    centerElement: true
 - assertVisible:
     id: "mocked-text"
 - assertVisible: "Mocked: true"
 - assertNotVisible: "Mocked: false"
-- scrollUntilVisible:
-    element:
-      id: "provider-text"
-    direction: DOWN
-    centerElement: true
 - assertVisible:
     id: "provider-text"
 - assertVisible: "Provider: (fused|gps|network|passive)"

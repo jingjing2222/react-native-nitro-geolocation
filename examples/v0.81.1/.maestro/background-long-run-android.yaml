@@ -26,7 +26,7 @@ appId: nitrogeolocation.example
     timeout: 10000
 
 - tapOn:
-    id: "background-long-run-prepare-button"
+    id: "e2e-action-background-long-run-prepare-button"
 - extendedWaitUntil:
     visible: "Prepare: passed"
     timeout: 20000
@@ -55,27 +55,27 @@ appId: nitrogeolocation.example
     timeout: 10000
 
 - tapOn:
-    id: "background-long-run-refresh-button"
+    id: "e2e-action-background-long-run-refresh-button"
 - tapOn:
-    id: "background-long-run-validate-location-button"
+    id: "e2e-action-background-long-run-validate-location-button"
 - extendedWaitUntil:
     visible: "Background location: passed"
     timeout: 15000
 
 - tapOn:
-    id: "background-long-run-validate-headless-button"
+    id: "e2e-action-background-long-run-validate-headless-button"
 - extendedWaitUntil:
     visible: "Headless: passed"
     timeout: 15000
 
 - tapOn:
-    id: "background-long-run-validate-geofence-button"
+    id: "e2e-action-background-long-run-validate-geofence-button"
 - extendedWaitUntil:
     visible: "Geofence transition: passed"
     timeout: 15000
 
 - tapOn:
-    id: "background-long-run-platform-limits-button"
+    id: "e2e-action-background-long-run-platform-limits-button"
 - extendedWaitUntil:
     visible: "Platform limits: passed"
     timeout: 10000

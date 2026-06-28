@@ -26,7 +26,8 @@ appId: nitrogeolocation.example
     visible: "Mocked location metadata contract"
     timeout: 10000
 
-- tapOn: "Request"
+- tapOn:
+    id: "e2e-action-permission-request-button"
 - tapOn:
     text: "Allow While Using App|앱을 사용하는 동안 허용"
     optional: true
@@ -38,11 +39,8 @@ appId: nitrogeolocation.example
     latitude: 37.5665
     longitude: 126.978
 
-- scrollUntilVisible:
-    element: "2. Get Current Position"
-    direction: DOWN
-
-- tapOn: "Get Position"
+- tapOn:
+    id: "e2e-action-current-position-get-button"
 
 - extendedWaitUntil:
     visible: "Current Position"

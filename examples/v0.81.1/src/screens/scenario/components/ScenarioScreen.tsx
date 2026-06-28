@@ -3,6 +3,7 @@ import { ScrollView, Text, View } from "react-native";
 import type { ScrollViewProps } from "react-native";
 import { sharedStyles } from "../styles";
 import { createE2EId } from "../utils/e2eIds";
+import { E2EControlPlaneProvider } from "./E2EControlPlane";
 
 /**
  * Props for `ScenarioScreen`.
@@ -91,7 +92,7 @@ export function ScenarioScreen({
           <Text style={sharedStyles.subtitle}>{subtitle}</Text>
         ) : null}
       </View>
-      {children}
+      <E2EControlPlaneProvider>{children}</E2EControlPlaneProvider>
     </ScrollView>
   );
 }

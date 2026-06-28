@@ -2,6 +2,7 @@ import React from "react";
 import { Button, View } from "react-native";
 import type { ButtonProps, StyleProp, ViewStyle } from "react-native";
 import { sharedStyles } from "../styles";
+import { useE2EAction } from "./E2EControlPlane";
 
 /**
  * Props for `ScenarioButton`.
@@ -102,6 +103,8 @@ export function ScenarioButton({
   testID,
   containerStyle
 }: ScenarioButtonProps) {
+  useE2EAction(title, onPress, testID, disabled);
+
   return (
     <View style={[sharedStyles.buttonContainer, containerStyle]}>
       <Button

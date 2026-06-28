@@ -21,17 +21,13 @@ appId: nitrogeolocation.example
     optional: true
 
 # Ensure permission is granted
-- tapOn: "Request"
+- tapOn:
+    id: "e2e-action-permission-request-button"
 - extendedWaitUntil:
     visible: "granted ✅"
     timeout: 10000
 
 # Navigate within the watch-position contract page
-- scrollUntilVisible:
-    element: "3. Watch Position (Hook)"
-    direction: DOWN
-
-# Provide a real device location before exercising the native watcher.
 - setLocation:
     latitude: 37.5665
     longitude: 126.9780
@@ -41,7 +37,7 @@ appId: nitrogeolocation.example
 
 # Enable watching by toggling switch directly
 - tapOn:
-    id: "watch-toggle-switch"
+    id: "e2e-action-watch-toggle-button"
 
 # Verify watching is active
 - extendedWaitUntil:
@@ -49,24 +45,12 @@ appId: nitrogeolocation.example
     timeout: 10000
 
 # Wait for position update
-- scrollUntilVisible:
-    element: "Watched Position (Live)"
-    direction: DOWN
-    centerElement: true
-    timeout: 15000
-
-# Verify position data is displayed
 - assertVisible:
     id: "position-info"
 - assertVisible:
     id: "latitude-text"
 - assertVisible:
     text: "Latitude: 37\\.566500"
-- scrollUntilVisible:
-    element:
-      id: "longitude-text"
-    direction: DOWN
-    centerElement: true
 - assertVisible:
     id: "longitude-text"
 - assertVisible:
@@ -76,13 +60,8 @@ appId: nitrogeolocation.example
 - waitForAnimationToEnd
 
 # Disable watching
-- scrollUntilVisible:
-    element:
-      id: "watch-toggle-switch"
-    direction: UP
-    centerElement: true
 - tapOn:
-    id: "watch-toggle-switch"
+    id: "e2e-action-watch-toggle-button"
 
 # Verify watching stopped
 - assertVisible: "Not Watching 🔴"
@@ -104,18 +83,8 @@ appId: nitrogeolocation.example
     text: "열기|Open"
     optional: true
 
-- scrollUntilVisible:
-    element: "3. Watch Position (Hook)"
-    direction: DOWN
-
 - tapOn:
-    id: "watch-toggle-switch"
-
-- scrollUntilVisible:
-    element: "Error: .*(Location permission|denied access).*"
-    direction: DOWN
-    visibilityPercentage: 30
-    timeout: 10000
+    id: "e2e-action-watch-toggle-button"
 
 - assertVisible:
     text: "Error: .*(Location permission|denied access).*"

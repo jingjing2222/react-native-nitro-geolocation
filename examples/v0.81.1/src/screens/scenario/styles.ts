@@ -24,6 +24,47 @@ export const sharedStyles = StyleSheet.create({
     padding: 20,
     paddingTop: 56
   },
+  e2eControlPlane: {
+    backgroundColor: "#F7F9FC",
+    borderBottomColor: "#D1D5DB",
+    borderBottomWidth: 1,
+    paddingHorizontal: 8,
+    paddingVertical: 6
+  },
+  e2eActionBar: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: 6,
+    marginBottom: 4
+  },
+  e2eAction: {
+    backgroundColor: "#1D4ED8",
+    borderRadius: 6,
+    paddingHorizontal: 8,
+    paddingVertical: 5
+  },
+  e2eActionDisabled: {
+    backgroundColor: "#9CA3AF"
+  },
+  e2eActionText: {
+    color: "#FFFFFF",
+    fontSize: 10,
+    fontWeight: "700"
+  },
+  e2eDump: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    maxHeight: 48,
+    overflow: "hidden"
+  },
+  e2eDumpText: {
+    color: "#F7F9FC",
+    fontSize: 1,
+    height: 2,
+    lineHeight: 2,
+    marginRight: 1,
+    width: 2
+  },
   title: {
     color: "#FFFFFF",
     fontSize: 28,

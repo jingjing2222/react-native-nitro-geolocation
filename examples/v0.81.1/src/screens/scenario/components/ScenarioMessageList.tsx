@@ -2,6 +2,7 @@ import React from "react";
 import { Text, View } from "react-native";
 import { sharedStyles } from "../styles";
 import { createE2EId } from "../utils/e2eIds";
+import { useE2EDumpNode } from "./E2EControlPlane";
 
 /**
  * Detail message for one sub-scenario in `ScenarioMessageList`.
@@ -94,25 +95,45 @@ export function ScenarioMessageList({
   return (
     <>
       {messages.map((scenario, index) => (
-        <View
+        <ScenarioMessageItem
+          id={id}
+          index={index}
           key={scenario.id}
-          style={sharedStyles.scenarioContainer}
-          testID={createE2EId(prefix, id, index)}
-        >
-          <Text
-            style={sharedStyles.scenarioTitle}
-            testID={createE2EId(prefix, id, index, "title")}
-          >
-            {scenario.title}
-          </Text>
-          <Text
-            style={sharedStyles.scenarioText}
-            testID={createE2EId(prefix, id, index, "message")}
-          >
-            {scenario.message}
-          </Text>
-        </View>
+          prefix={prefix}
+          scenario={scenario}
+        />
       ))}
     </>
+  );
+}
+
+function ScenarioMessageItem({
+  id,
+  index,
+  prefix,
+  scenario
+}: {
+  id: string;
+  index: number;
+  prefix: string;
+  scenario: ScenarioMessage;
+}) {
+  const baseId = createE2EId(prefix, id, index);
+  const titleId = createE2EId(prefix, id, index, "title");
+  const messageId = createE2EId(prefix, id, index, "message");
+
+  useE2EDumpNode(`${scenario.title} ${scenario.message}`, baseId);
+  useE2EDumpNode(scenario.title, titleId);
+  useE2EDumpNode(scenario.message, messageId);
+
+  return (
+    <View style={sharedStyles.scenarioContainer} testID={baseId}>
+      <Text style={sharedStyles.scenarioTitle} testID={titleId}>
+        {scenario.title}
+      </Text>
+      <Text style={sharedStyles.scenarioText} testID={messageId}>
+        {scenario.message}
+      </Text>
+    </View>
   );
 }

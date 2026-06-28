@@ -29,7 +29,8 @@ appId: nitrogeolocation.example
     visible: "Accurate Check-In"
     timeout: 10000
 
-- tapOn: "Check Device"
+- tapOn:
+    id: "e2e-action-provider-settings-check-device-button"
 - extendedWaitUntil:
     visible: "Services: disabled"
     timeout: 10000
@@ -38,18 +39,14 @@ appId: nitrogeolocation.example
 - assertVisible: "Network: disabled"
 - assertVisible: "Provider readiness: not ready"
 
-- tapOn: "Prepare Check-In"
+- tapOn:
+    id: "e2e-action-provider-settings-prepare-check-in-button"
 
 - tapOn:
     text: "No thanks|Cancel|취소|아니요|거부"
 
 - extendedWaitUntil:
     visible: "Settings: blocked"
-    timeout: 10000
-
-- scrollUntilVisible:
-    element: "Name: SETTINGS_NOT_SATISFIED"
-    direction: DOWN
     timeout: 10000
 
 - assertVisible: "Name: SETTINGS_NOT_SATISFIED"

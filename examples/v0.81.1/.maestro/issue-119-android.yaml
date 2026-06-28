@@ -26,7 +26,7 @@ appId: nitrogeolocation.example
     timeout: 15000
 
 - tapOn:
-    id: "issue-119-run-button"
+    id: "e2e-action-issue-119-run-button"
 - tapOn:
     text: ".*(While using the app|앱 사용 중에만 허용|Allow).*"
     optional: true

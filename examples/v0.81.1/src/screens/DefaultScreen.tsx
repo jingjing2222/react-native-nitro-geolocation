@@ -152,6 +152,7 @@ export default function DefaultScreen({
           onPress={handleCheckPermission}
           color="#2196F3"
           containerStyle={sharedStyles.button}
+          testID="permission-check-button"
         />
         <ScenarioButton
           title={isPermissionLoading ? "Requesting..." : "Request"}
@@ -159,6 +160,7 @@ export default function DefaultScreen({
           disabled={isPermissionLoading}
           color="#4CAF50"
           containerStyle={sharedStyles.button}
+          testID="permission-request-button"
         />
       </ButtonRow>
     </ScenarioSection>
@@ -201,6 +203,7 @@ export default function DefaultScreen({
         onPress={handleFetchPosition}
         disabled={isCurrentPositionLoading}
         color="#4CAF50"
+        testID="current-position-get-button"
       />
       {renderPositionInfo(currentPosition, "Current Position")}
     </ScenarioSection>
@@ -221,6 +224,12 @@ export default function DefaultScreen({
           onValueChange={setWatchEnabled}
         />
       </View>
+      <ScenarioButton
+        title="Toggle Watch"
+        onPress={() => setWatchEnabled((current) => !current)}
+        color="#7C3AED"
+        testID="watch-toggle-button"
+      />
       <StatusBlock
         rows={[
           {

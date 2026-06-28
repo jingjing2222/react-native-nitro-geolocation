@@ -81,6 +81,46 @@ appId: nitrogeolocation.example
     longitude: 126.9821
 
 - extendedWaitUntil:
+    visible: "compat-get-current-position: running: move-for-compat-get-current-position"
+    timeout: 40000
+
+- setLocation:
+    latitude: 37.5713
+    longitude: 126.9828
+
+- extendedWaitUntil:
+    visible: "compat-watch-position: running: move-for-compat-watch-position"
+    timeout: 40000
+
+- setLocation:
+    latitude: 37.572
+    longitude: 126.9835
+
+- extendedWaitUntil:
+    visible: "compat-watch-position: running: move-after-compat-watch-position"
+    timeout: 40000
+
+- setLocation:
+    latitude: 37.5727
+    longitude: 126.9842
+
+- extendedWaitUntil:
+    visible: "compat-stop-observing: running: move-for-compat-stop-observing-initial"
+    timeout: 40000
+
+- setLocation:
+    latitude: 37.5734
+    longitude: 126.9849
+
+- extendedWaitUntil:
+    visible: "compat-stop-observing: running: move-after-compat-stop-observing"
+    timeout: 40000
+
+- setLocation:
+    latitude: 37.5741
+    longitude: 126.9856
+
+- extendedWaitUntil:
     visible: "success-suite: pass"
     timeout: 20000
 

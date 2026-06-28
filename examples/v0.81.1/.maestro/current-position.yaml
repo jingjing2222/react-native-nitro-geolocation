@@ -21,23 +21,20 @@ appId: nitrogeolocation.example
     optional: true
 
 # First ensure we have permission
-- tapOn: "Request"
+- tapOn:
+    id: "e2e-action-permission-request-button"
 - extendedWaitUntil:
     visible: "granted ✅"
     timeout: 10000
 
 # Navigate within the current-position contract page
-- scrollUntilVisible:
-    element: "2. Get Current Position"
-    direction: DOWN
-
-# Provide a real device location before exercising the native request.
 - setLocation:
     latitude: 37.5665
     longitude: 126.9780
 
 # Get current position
-- tapOn: "Get Position"
+- tapOn:
+    id: "e2e-action-current-position-get-button"
 
 # Wait for position to be fetched
 - extendedWaitUntil:
@@ -51,20 +48,10 @@ appId: nitrogeolocation.example
     id: "latitude-text"
 - assertVisible:
     text: "Latitude: 37\\.566500"
-- scrollUntilVisible:
-    element:
-      id: "longitude-text"
-    direction: DOWN
-    centerElement: true
 - assertVisible:
     id: "longitude-text"
 - assertVisible:
     text: "Longitude: 126\\.978000"
-- scrollUntilVisible:
-    element:
-      id: "accuracy-text"
-    direction: DOWN
-    centerElement: true
 - assertVisible:
     id: "accuracy-text"
 
@@ -85,11 +72,8 @@ appId: nitrogeolocation.example
     text: "열기|Open"
     optional: true
 
-- scrollUntilVisible:
-    element: "2. Get Current Position"
-    direction: DOWN
-
-- tapOn: "Get Position"
+- tapOn:
+    id: "e2e-action-current-position-get-button"
 
 - extendedWaitUntil:
     visible: "Error: .*(Location permission|denied access).*"

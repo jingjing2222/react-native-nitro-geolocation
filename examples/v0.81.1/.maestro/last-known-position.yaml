@@ -28,7 +28,7 @@ appId: nitrogeolocation.example
     longitude: 126.978
 
 - tapOn:
-    id: "last-known-position-run-stale-button"
+    id: "e2e-action-last-known-position-run-stale-button"
 
 - extendedWaitUntil:
     visible: "Stale cache: passed"
@@ -41,23 +41,8 @@ appId: nitrogeolocation.example
 - assertVisible:
     text: ".*without starting a fresh request.*"
 
-- scrollUntilVisible:
-    element: "3. System Cache Read"
-    direction: DOWN
-
-- scrollUntilVisible:
-    element:
-      id: "last-known-position-run-system-button"
-    direction: DOWN
-    centerElement: true
-
 - tapOn:
-    id: "last-known-position-run-system-button"
-
-- scrollUntilVisible:
-    element: "System cache: passed"
-    direction: DOWN
-    timeout: 20000
+    id: "e2e-action-last-known-position-run-system-button"
 
 - assertVisible:
     id: "last-known-position-system-result"
@@ -66,23 +51,8 @@ appId: nitrogeolocation.example
 - assertVisible:
     text: ".*without getCurrentPosition.*"
 
-- scrollUntilVisible:
-    element: "4. Seeded Cache Read"
-    direction: DOWN
-
-- scrollUntilVisible:
-    element:
-      id: "last-known-position-run-cache-button"
-    direction: DOWN
-    centerElement: true
-
 - tapOn:
-    id: "last-known-position-run-cache-button"
-
-- scrollUntilVisible:
-    element: "Seeded cache: passed"
-    direction: DOWN
-    timeout: 60000
+    id: "e2e-action-last-known-position-run-cache-button"
 
 - assertVisible:
     id: "last-known-position-cache-result"
@@ -114,16 +84,8 @@ appId: nitrogeolocation.example
     visible: "Cached location API contract with rejection paths"
     timeout: 10000
 
-- scrollUntilVisible:
-    element: "5. Permission Denied"
-    direction: DOWN
-
 - tapOn:
-    id: "last-known-position-run-denied-button"
-
-- scrollUntilVisible:
-    element: "Permission denied: passed"
-    direction: DOWN
+    id: "e2e-action-last-known-position-run-denied-button"
 
 - extendedWaitUntil:
     visible: "Permission denied: passed"
@@ -131,10 +93,6 @@ appId: nitrogeolocation.example
 
 - assertVisible:
     id: "last-known-position-denied-result"
-- scrollUntilVisible:
-    element:
-      text: ".*PERMISSION_DENIED.*"
-    direction: DOWN
 - assertVisible:
     text: ".*PERMISSION_DENIED.*"
 - assertVisible:

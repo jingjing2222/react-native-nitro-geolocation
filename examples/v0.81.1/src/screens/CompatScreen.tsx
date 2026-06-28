@@ -140,6 +140,7 @@ export default function CompatScreen() {
           title="Request Authorization"
           onPress={handleRequestAuthorization}
           color="#2196F3"
+          testID="compat-request-authorization-button"
         />
       </ScenarioSection>
 
@@ -153,6 +154,7 @@ export default function CompatScreen() {
           onPress={handleGetCurrentPosition}
           disabled={isLoadingPosition}
           color="#4CAF50"
+          testID="compat-get-current-position-button"
         />
         {renderPositionInfo(currentPosition, "Current Position")}
       </ScenarioSection>

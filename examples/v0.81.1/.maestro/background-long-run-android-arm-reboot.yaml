@@ -13,7 +13,7 @@ appId: nitrogeolocation.example
     timeout: 10000
 
 - tapOn:
-    id: "background-long-run-arm-reboot-button"
+    id: "e2e-action-background-long-run-arm-reboot-button"
 - extendedWaitUntil:
     visible: "Reboot probe: passed"
     timeout: 15000

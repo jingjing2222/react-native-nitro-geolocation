@@ -27,7 +27,7 @@ appId: nitrogeolocation.example
     timeout: 15000
 
 - tapOn:
-    id: "issue-132-start-button"
+    id: "e2e-action-issue-132-start-button"
 
 - setLocation:
     latitude: 37.5665
@@ -42,4 +42,4 @@ appId: nitrogeolocation.example
     timeout: 30000
 
 - tapOn:
-    id: "issue-132-cleanup-button"
+    id: "e2e-action-issue-132-cleanup-button"

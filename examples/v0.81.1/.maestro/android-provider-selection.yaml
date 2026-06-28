@@ -27,7 +27,7 @@ appId: nitrogeolocation.example
     timeout: 10000
 
 - tapOn:
-    id: "android-request-options-run-auto-provider-button"
+    id: "e2e-action-android-request-options-run-auto-provider-button"
 
 - extendedWaitUntil:
     visible: "Auto provider: passed"
@@ -38,13 +38,8 @@ appId: nitrogeolocation.example
 - assertVisible:
     text: ".*auto returned fused provider (with|without) Google location accuracy status and returned -?[0-9]+\\.[0-9]+, -?[0-9]+\\.[0-9]+; provider=fused; mocked=false.*"
 
-- scrollUntilVisible:
-    element: "Run Play Services Provider"
-    direction: DOWN
-    centerElement: true
-
 - tapOn:
-    id: "android-request-options-run-play-services-provider-button"
+    id: "e2e-action-android-request-options-run-play-services-provider-button"
 
 - extendedWaitUntil:
     visible: "Play Services provider: passed"
@@ -55,13 +50,8 @@ appId: nitrogeolocation.example
 - assertVisible:
     text: ".*playServices returned fused provider (with|without) Google location accuracy status and returned -?[0-9]+\\.[0-9]+, -?[0-9]+\\.[0-9]+; provider=fused; mocked=false.*"
 
-- scrollUntilVisible:
-    element: "Run Platform Provider"
-    direction: DOWN
-    centerElement: true
-
 - tapOn:
-    id: "android-request-options-run-platform-provider-button"
+    id: "e2e-action-android-request-options-run-platform-provider-button"
 
 - extendedWaitUntil:
     visible: "Platform provider: passed"

@@ -22,7 +22,7 @@ appId: nitrogeolocation.example
     timeout: 15000
 
 - tapOn:
-    id: "issue-122-run-button"
+    id: "e2e-action-issue-122-run-button"
 - extendedWaitUntil:
     visible: "Issue 122: passed"
     timeout: 15000

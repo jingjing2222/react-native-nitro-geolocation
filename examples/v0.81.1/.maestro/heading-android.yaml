@@ -25,7 +25,7 @@ appId: nitrogeolocation.example
     timeout: 10000
 
 - tapOn:
-    id: "heading-run-current-button"
+    id: "e2e-action-heading-run-current-button"
 
 - extendedWaitUntil:
     visible: "Single heading: passed"
@@ -36,40 +36,16 @@ appId: nitrogeolocation.example
 - assertVisible:
     text: ".*Single heading .*deg.*resolved in .*ms.*"
 
-- scrollUntilVisible:
-    element: "3. Heading Watch"
-    direction: DOWN
-
-- scrollUntilVisible:
-    element:
-      id: "heading-run-watch-button"
-    direction: DOWN
-    centerElement: true
-
 - tapOn:
-    id: "heading-run-watch-button"
-
-- scrollUntilVisible:
-    element: "Heading watch: passed"
-    direction: DOWN
-    timeout: 25000
+    id: "e2e-action-heading-run-watch-button"
 
 - assertVisible:
     id: "heading-watch-result"
 - assertVisible:
     text: ".*Watch delivered 2 real heading updates.*"
 
-- scrollUntilVisible:
-    element: "4. Invalid Filter"
-    direction: DOWN
-
 - tapOn:
-    id: "heading-run-invalid-button"
-
-- scrollUntilVisible:
-    element: "Invalid filter: passed"
-    direction: DOWN
-    timeout: 10000
+    id: "e2e-action-heading-run-invalid-button"
 
 - assertVisible:
     id: "heading-invalid-result"
@@ -99,17 +75,8 @@ appId: nitrogeolocation.example
     visible: "Compass-style heading contract with watch and rejection paths"
     timeout: 10000
 
-- scrollUntilVisible:
-    element: "5. Permission Denied"
-    direction: DOWN
-
 - tapOn:
-    id: "heading-run-denied-button"
-
-- scrollUntilVisible:
-    element: "Permission denied: passed"
-    direction: DOWN
-    timeout: 15000
+    id: "e2e-action-heading-run-denied-button"
 
 - assertVisible:
     id: "heading-denied-result"
