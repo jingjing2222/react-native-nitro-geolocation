@@ -142,6 +142,13 @@ Rebuild your native app:
 cd ios && pod install
 ```
 
+Released npm builds try to use the matching GitHub Release prebuilts first:
+Android downloads the release AAR and reuses its native `.so` files, while iOS
+downloads the release XCFramework. If the prebuilt asset is unavailable, the
+native source build is used automatically. Android prebuilts are used only when
+the app's React Native and Nitro Modules major/minor versions match the release
+asset build. To force source builds, set `NITRO_GEOLOCATION_USE_PREBUILT=0`.
+
 ---
 
 ### 2. iOS Setup
