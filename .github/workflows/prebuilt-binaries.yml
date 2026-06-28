@@ -28,18 +28,20 @@ jobs:
         with:
           ref: ${{ steps.ref.outputs.tag }}
 
-      - name: Set up JDK
-        uses: actions/setup-java@v4
+      - name: Setup mise
+        uses: jdx/mise-action@v3
         with:
-          distribution: temurin
-          java-version: 17
+          install: false
 
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 20
+      - name: Trust and install tools via mise
+        run: |
+          mise trust --yes
+          mise install java node
 
       - name: Enable Corepack
-        run: corepack enable
+        run: |
+          corepack enable
+          mise reshim node
 
       - name: Install dependencies
         run: yarn install
@@ -69,12 +71,20 @@ jobs:
         with:
           ref: ${{ steps.ref.outputs.tag }}
 
-      - uses: actions/setup-node@v4
+      - name: Setup mise
+        uses: jdx/mise-action@v3
         with:
-          node-version: 20
+          install: false
+
+      - name: Trust and install tools via mise
+        run: |
+          mise trust --yes
+          mise install node ruby
 
       - name: Enable Corepack
-        run: corepack enable
+        run: |
+          corepack enable
+          mise reshim node
 
       - name: Install JS dependencies
         run: yarn install

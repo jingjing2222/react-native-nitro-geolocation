@@ -15,13 +15,20 @@ jobs:
         with:
           fetch-depth: 0
 
-      - uses: actions/setup-node@v4
+      - name: Setup mise
+        uses: jdx/mise-action@v3
         with:
-          node-version: 20
+          install: false
+
+      - name: Trust and install tools via mise
+        run: |
+          mise trust --yes
+          mise install node
 
       - name: Enable Corepack
         run: |
           corepack enable
+          mise reshim node
 
       - name: Install dependencies
         run: |

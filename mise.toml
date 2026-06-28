@@ -2,5 +2,5 @@
 biome = "1.9.4"
 java = "17.0.2"
 maestro = "latest"
-node = "22"
+node = "24.18.0"
 ruby = "3.3.0"
