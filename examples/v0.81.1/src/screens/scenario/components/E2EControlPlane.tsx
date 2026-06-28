@@ -102,9 +102,7 @@ export function E2EControlPlaneProvider({
       if (existingIndex === -1) return [...current, node];
       if (current[existingIndex].text === node.text) return current;
 
-      const next = [...current];
-      next[existingIndex] = node;
-      return next;
+      return [...current.filter((item) => nodeKey(item) !== key), node];
     });
 
     return () => {
@@ -122,6 +120,8 @@ export function E2EControlPlaneProvider({
     }),
     [registerAction, registerDumpNode]
   );
+  const prioritizedDumpNodes = [...dumpNodes].reverse();
+  const dumpText = prioritizedDumpNodes.map((node) => node.text).join(" | ");
 
   return (
     <E2EControlContext.Provider value={value}>
@@ -153,16 +153,27 @@ export function E2EControlPlaneProvider({
             style={sharedStyles.e2eDump}
             testID="e2e-state-dump"
           >
-            {dumpNodes.map((node) => (
-              <Text
-                key={nodeKey(node)}
-                accessibilityLabel={node.text}
-                style={sharedStyles.e2eDumpText}
-                testID={node.id}
-              >
-                {node.text}
-              </Text>
-            ))}
+            <Text
+              accessibilityLabel={dumpText}
+              style={sharedStyles.e2eDumpText}
+              testID="e2e-state-dump-text"
+            >
+              {dumpText}
+            </Text>
+            <View style={sharedStyles.e2eDumpProbeRow}>
+              {prioritizedDumpNodes
+                .filter((node) => node.id)
+                .map((node) => (
+                  <Text
+                    key={nodeKey(node)}
+                    accessibilityLabel={node.text}
+                    style={sharedStyles.e2eDumpProbe}
+                    testID={node.id}
+                  >
+                    .
+                  </Text>
+                ))}
+            </View>
           </View>
         ) : null}
       </View>

@@ -15,9 +15,7 @@ appId: nitrogeolocation.example
 
 - openLink:
     link: nitrogeolocation://app/ios-release-options-bridge
-- tapOn:
-    text: "열기|Open"
-    optional: true
+- waitForAnimationToEnd
 
 - extendedWaitUntil:
     visible: "Native Swift optional struct bridge contract"

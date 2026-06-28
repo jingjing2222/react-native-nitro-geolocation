@@ -14,9 +14,7 @@ appId: nitrogeolocation.example
 
 - openLink:
     link: nitrogeolocation://app/provider-settings
-- tapOn:
-    text: "열기|Open"
-    optional: true
+- waitForAnimationToEnd
 
 - extendedWaitUntil:
     visible: "Accurate Check-In"

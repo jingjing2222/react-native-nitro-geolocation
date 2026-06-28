@@ -15,9 +15,7 @@ appId: nitrogeolocation.example
 
 - openLink:
     link: nitrogeolocation://app/last-known-position?case=allowed
-- tapOn:
-    text: "열기|Open"
-    optional: true
+- waitForAnimationToEnd
 
 - extendedWaitUntil:
     visible: "Cached location API contract with rejection paths"
@@ -64,7 +62,6 @@ appId: nitrogeolocation.example
 - stopApp
 
 - launchApp:
-    clearState: true
     permissions:
       all: deny
 
@@ -76,9 +73,7 @@ appId: nitrogeolocation.example
 
 - openLink:
     link: nitrogeolocation://app/last-known-position?case=denied
-- tapOn:
-    text: "열기|Open"
-    optional: true
+- waitForAnimationToEnd
 
 - extendedWaitUntil:
     visible: "Cached location API contract with rejection paths"

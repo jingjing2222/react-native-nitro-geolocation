@@ -16,9 +16,7 @@ appId: nitrogeolocation.example
 
 - openLink:
     link: nitrogeolocation://app/geocoding
-- tapOn:
-    text: "열기|Open"
-    optional: true
+- waitForAnimationToEnd
 - tapOn:
     id: "com.google.android.googlequicksearchbox:id/assistant_robin_fast_track_banner_dismiss_button"
     optional: true

@@ -15,9 +15,7 @@ appId: nitrogeolocation.example
 
 - openLink:
     link: nitrogeolocation://app/accuracy-presets
-- tapOn:
-    text: "열기|Open"
-    optional: true
+- waitForAnimationToEnd
 
 - extendedWaitUntil:
     visible: "Native request contract for platform accuracy options"
@@ -70,7 +68,6 @@ appId: nitrogeolocation.example
 - stopApp
 
 - launchApp:
-    clearState: true
     permissions:
       all: deny
 
@@ -82,9 +79,7 @@ appId: nitrogeolocation.example
 
 - openLink:
     link: nitrogeolocation://app/accuracy-presets
-- tapOn:
-    text: "열기|Open"
-    optional: true
+- waitForAnimationToEnd
 
 - extendedWaitUntil:
     visible: "Native request contract for platform accuracy options"

@@ -15,9 +15,7 @@ appId: nitrogeolocation.example
 
 - openLink:
     link: nitrogeolocation://app/background-e2e
-- tapOn:
-    text: "열기|Open"
-    optional: true
+- waitForAnimationToEnd
 
 - extendedWaitUntil:
     visible: "Background Location E2E"

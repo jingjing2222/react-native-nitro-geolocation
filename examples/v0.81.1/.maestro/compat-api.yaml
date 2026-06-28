@@ -14,9 +14,7 @@ appId: nitrogeolocation.example
 
 - openLink:
     link: nitrogeolocation://app/compat
-- tapOn:
-    text: "열기|Open"
-    optional: true
+- waitForAnimationToEnd
 - tapOn:
     text: "Compat API, tab, 8 of 8|Compat API"
     optional: true

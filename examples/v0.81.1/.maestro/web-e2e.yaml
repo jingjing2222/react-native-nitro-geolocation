@@ -20,9 +20,7 @@ appId: nitrogeolocation.example
 
 - openLink:
     link: nitrogeolocation://app/web-e2e?autorun=success
-- tapOn:
-    text: "열기|Open"
-    optional: true
+- waitForAnimationToEnd
 
 - tapOn:
     text: "Allow"
@@ -137,12 +135,10 @@ appId: nitrogeolocation.example
 
 - openLink:
     link: nitrogeolocation://app/web-e2e?autorun=denied
-- tapOn:
-    text: "열기|Open"
-    optional: true
+- waitForAnimationToEnd
 
 - tapOn:
-    text: "Don’t allow|Don't allow"
+    text: "Don’t allow|Don't allow|허용 안함|허용 안 함|허용하지 않음"
     optional: true
 
 - extendedWaitUntil:
@@ -150,7 +146,7 @@ appId: nitrogeolocation.example
     timeout: 20000
 
 - tapOn:
-    text: "Don’t allow|Don't allow"
+    text: "Don’t allow|Don't allow|허용 안함|허용 안 함|허용하지 않음"
     optional: true
 
 - extendedWaitUntil:

@@ -1,6 +1,7 @@
 import React from "react";
 import { ScrollView, Text, View } from "react-native";
 import type { ScrollViewProps } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 import { sharedStyles } from "../styles";
 import { createE2EId } from "../utils/e2eIds";
 import { E2EControlPlaneProvider } from "./E2EControlPlane";
@@ -80,19 +81,21 @@ export function ScenarioScreen({
   ...scrollViewProps
 }: ScenarioScreenProps) {
   return (
-    <ScrollView
-      {...scrollViewProps}
-      style={[sharedStyles.container, scrollViewProps.style]}
-      contentContainerStyle={contentContainerStyle}
-      testID={testID ?? createE2EId(prefix, "screen")}
-    >
-      <View style={sharedStyles.header}>
-        <Text style={sharedStyles.title}>{title}</Text>
-        {subtitle ? (
-          <Text style={sharedStyles.subtitle}>{subtitle}</Text>
-        ) : null}
-      </View>
-      <E2EControlPlaneProvider>{children}</E2EControlPlaneProvider>
-    </ScrollView>
+    <SafeAreaView edges={["top", "bottom"]} style={sharedStyles.container}>
+      <ScrollView
+        {...scrollViewProps}
+        style={[sharedStyles.container, scrollViewProps.style]}
+        contentContainerStyle={contentContainerStyle}
+        testID={testID ?? createE2EId(prefix, "screen")}
+      >
+        <View style={sharedStyles.header}>
+          <Text style={sharedStyles.title}>{title}</Text>
+          {subtitle ? (
+            <Text style={sharedStyles.subtitle}>{subtitle}</Text>
+          ) : null}
+        </View>
+        <E2EControlPlaneProvider>{children}</E2EControlPlaneProvider>
+      </ScrollView>
+    </SafeAreaView>
   );
 }

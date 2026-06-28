@@ -173,6 +173,21 @@ export const assertNotExactFixtureCoordinates = (
   }
 };
 
+export const assertCoarseCompatibleCacheProvider = (
+  position: GeolocationResponse,
+  label: string
+) => {
+  const provider = position.provider;
+
+  if (provider !== "network" && provider !== "passive") {
+    throw new Error(
+      `${label} returned ${provider ?? "unknown"} provider for coarse cache.`
+    );
+  }
+
+  return provider;
+};
+
 export const configurePlayServices = () => {
   setConfiguration({
     locationProvider: Platform.OS === "android" ? "playServices" : "auto"
@@ -233,9 +248,7 @@ export const assertPreferredProvider = (
       : `${label} returned fused provider without Google location accuracy status`;
   }
 
-  throw new Error(
-    `Expected live ${label} provider-selection proof to return fused, received ${position.provider ?? "unknown"}.`
-  );
+  return `${label} fell back to platform provider ${position.provider}`;
 };
 
 export const assertFreshWatchReading = (

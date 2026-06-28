@@ -16,9 +16,7 @@ appId: nitrogeolocation.example
 
 - openLink:
     link: nitrogeolocation://app/current-position
-- tapOn:
-    text: "열기|Open"
-    optional: true
+- waitForAnimationToEnd
 
 # First ensure we have permission
 - tapOn:
@@ -38,7 +36,8 @@ appId: nitrogeolocation.example
 
 # Wait for position to be fetched
 - extendedWaitUntil:
-    visible: "Current Position"
+    visible:
+      id: "position-info"
     timeout: 15000
 
 # Verify position data is displayed using testID
@@ -56,7 +55,6 @@ appId: nitrogeolocation.example
     id: "accuracy-text"
 
 - launchApp:
-    clearState: true
     permissions:
       all: deny
 
@@ -68,9 +66,7 @@ appId: nitrogeolocation.example
 
 - openLink:
     link: nitrogeolocation://app/current-position
-- tapOn:
-    text: "열기|Open"
-    optional: true
+- waitForAnimationToEnd
 
 - tapOn:
     id: "e2e-action-current-position-get-button"

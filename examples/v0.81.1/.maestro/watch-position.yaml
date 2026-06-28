@@ -16,9 +16,7 @@ appId: nitrogeolocation.example
 
 - openLink:
     link: nitrogeolocation://app/watch-position
-- tapOn:
-    text: "열기|Open"
-    optional: true
+- waitForAnimationToEnd
 
 # Ensure permission is granted
 - tapOn:
@@ -33,7 +31,7 @@ appId: nitrogeolocation.example
     longitude: 126.9780
 
 # Verify initial state is not watching
-- assertVisible: "Not Watching 🔴"
+- assertVisible: "Status: Not Watching 🔴"
 
 # Enable watching by toggling switch directly
 - tapOn:
@@ -41,7 +39,7 @@ appId: nitrogeolocation.example
 
 # Verify watching is active
 - extendedWaitUntil:
-    visible: "Watching 🟢"
+    visible: "Status: Watching 🟢"
     timeout: 10000
 
 # Wait for position update
@@ -64,10 +62,9 @@ appId: nitrogeolocation.example
     id: "e2e-action-watch-toggle-button"
 
 # Verify watching stopped
-- assertVisible: "Not Watching 🔴"
+- assertVisible: "Status: Not Watching 🔴"
 
 - launchApp:
-    clearState: true
     permissions:
       all: deny
 
@@ -79,9 +76,7 @@ appId: nitrogeolocation.example
 
 - openLink:
     link: nitrogeolocation://app/watch-position
-- tapOn:
-    text: "열기|Open"
-    optional: true
+- waitForAnimationToEnd
 
 - tapOn:
     id: "e2e-action-watch-toggle-button"

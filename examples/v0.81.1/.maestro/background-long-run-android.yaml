@@ -17,9 +17,7 @@ appId: nitrogeolocation.example
 
 - openLink:
     link: nitrogeolocation://app/background-long-run
-- tapOn:
-    text: "열기|Open"
-    optional: true
+- waitForAnimationToEnd
 
 - extendedWaitUntil:
     visible: "Background Long Run E2E"
@@ -46,9 +44,7 @@ appId: nitrogeolocation.example
 
 - openLink:
     link: nitrogeolocation://app/background-long-run
-- tapOn:
-    text: "열기|Open"
-    optional: true
+- waitForAnimationToEnd
 
 - extendedWaitUntil:
     visible: "Background Long Run E2E"

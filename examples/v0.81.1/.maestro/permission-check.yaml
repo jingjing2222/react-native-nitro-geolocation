@@ -11,9 +11,7 @@ appId: nitrogeolocation.example
 - stopApp
 - openLink:
     link: nitrogeolocation://app/permission-check
-- tapOn:
-    text: "열기|Open"
-    optional: true
+- waitForAnimationToEnd
 
 # Navigate directly to the permission contract page.
 - extendedWaitUntil:

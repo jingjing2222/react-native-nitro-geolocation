@@ -5,8 +5,13 @@ import {
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { NavigationContainer } from "@react-navigation/native";
 import React from "react";
+import { SafeAreaProvider } from "react-native-safe-area-context";
 import AccuracyPresetsScreen from "./screens/AccuracyPresetsScreen";
-import AndroidRequestOptionsScreen from "./screens/AndroidRequestOptionsScreen";
+import AndroidRequestOptionsScreen, {
+  AndroidRequestOptionsErrorScreen,
+  AndroidRequestOptionsProviderScreen,
+  AndroidRequestOptionsWatchScreen
+} from "./screens/AndroidRequestOptionsScreen";
 import ApiErrorsScreen from "./screens/ApiErrorsScreen";
 import BackgroundE2EScreen from "./screens/BackgroundE2EScreen";
 import CompatScreen from "./screens/CompatScreen";
@@ -53,6 +58,9 @@ const linking = {
       LocationAvailability: "location-availability",
       Heading: "heading",
       AndroidRequestOptions: "android-request-options",
+      AndroidRequestOptionsProviders: "android-request-options/providers",
+      AndroidRequestOptionsWatches: "android-request-options/watches",
+      AndroidRequestOptionsErrors: "android-request-options/errors",
       BackgroundE2E: "background-e2e",
       LongRunBackgroundE2E: "background-long-run",
       IOSLocationTuning: "ios-location-tuning",
@@ -69,7 +77,10 @@ const linking = {
   }
 };
 const hiddenTabOptions = {
-  tabBarButton: () => null
+  tabBarButton: () => null,
+  tabBarStyle: {
+    display: "none" as const
+  }
 };
 
 const initialPosition = createPosition("Los Angeles, USA");
@@ -82,154 +93,175 @@ export default function App() {
   }
 
   return (
-    <NavigationContainer linking={linking}>
-      <Tab.Navigator
-        screenOptions={{
-          headerShown: false,
-          tabBarActiveTintColor: "#2196F3",
-          tabBarInactiveTintColor: "#757575"
-        }}
-      >
-        <Tab.Screen
-          name="Default"
-          component={DefaultScreen}
-          options={{
-            tabBarLabel: "Default API"
+    <SafeAreaProvider>
+      <NavigationContainer linking={linking}>
+        <Tab.Navigator
+          tabBar={() => null}
+          screenOptions={{
+            headerShown: false,
+            tabBarStyle: {
+              display: "none" as const
+            },
+            tabBarActiveTintColor: "#2196F3",
+            tabBarInactiveTintColor: "#757575"
           }}
-        />
-        <Tab.Screen
-          name="Issue67"
-          component={Issue67Screen}
-          options={hiddenTabOptions}
-        />
-        <Tab.Screen
-          name="PermissionCheck"
-          component={PermissionCheckScreen}
-          options={hiddenTabOptions}
-        />
-        <Tab.Screen
-          name="CurrentPosition"
-          component={CurrentPositionScreen}
-          options={hiddenTabOptions}
-        />
-        <Tab.Screen
-          name="WatchPosition"
-          component={WatchPositionScreen}
-          options={hiddenTabOptions}
-        />
-        <Tab.Screen
-          name="LocationSimulation"
-          component={LocationSimulationScreen}
-          options={hiddenTabOptions}
-        />
-        <Tab.Screen
-          name="MockedMetadata"
-          component={MockedMetadataScreen}
-          options={hiddenTabOptions}
-        />
-        <Tab.Screen
-          name="ProviderSettings"
-          component={ProviderSettingsScreen}
-          options={hiddenTabOptions}
-        />
-        <Tab.Screen
-          name="ApiErrors"
-          component={ApiErrorsScreen}
-          options={hiddenTabOptions}
-        />
-        <Tab.Screen
-          name="AccuracyPresets"
-          component={AccuracyPresetsScreen}
-          options={hiddenTabOptions}
-        />
-        <Tab.Screen
-          name="LastKnownPosition"
-          component={LastKnownPositionScreen}
-          options={hiddenTabOptions}
-        />
-        <Tab.Screen
-          name="Geocoding"
-          component={GeocodingScreen}
-          options={hiddenTabOptions}
-        />
-        <Tab.Screen
-          name="LocationAvailability"
-          component={LocationAvailabilityScreen}
-          options={hiddenTabOptions}
-        />
-        <Tab.Screen
-          name="Heading"
-          component={HeadingScreen}
-          options={hiddenTabOptions}
-        />
-        <Tab.Screen
-          name="AndroidRequestOptions"
-          component={AndroidRequestOptionsScreen}
-          options={hiddenTabOptions}
-        />
-        <Tab.Screen
-          name="BackgroundE2E"
-          component={BackgroundE2EScreen}
-          options={hiddenTabOptions}
-        />
-        <Tab.Screen
-          name="LongRunBackgroundE2E"
-          component={LongRunBackgroundE2EScreen}
-          options={hiddenTabOptions}
-        />
-        <Tab.Screen
-          name="IOSLocationTuning"
-          component={IOSLocationTuningScreen}
-          options={hiddenTabOptions}
-        />
-        <Tab.Screen
-          name="IOSAccuracyAuthorization"
-          component={IOSAccuracyAuthorizationScreen}
-          options={hiddenTabOptions}
-        />
-        <Tab.Screen
-          name="IOSReleaseOptionsBridge"
-          component={IOSReleaseOptionsBridgeScreen}
-          options={hiddenTabOptions}
-        />
-        <Tab.Screen
-          name="Issue119"
-          component={Issue119Screen}
-          options={hiddenTabOptions}
-        />
-        <Tab.Screen
-          name="Issue120"
-          component={Issue120Screen}
-          options={hiddenTabOptions}
-        />
-        <Tab.Screen
-          name="Issue121"
-          component={Issue121Screen}
-          options={hiddenTabOptions}
-        />
-        <Tab.Screen
-          name="Issue122"
-          component={Issue122Screen}
-          options={hiddenTabOptions}
-        />
-        <Tab.Screen
-          name="Issue132"
-          component={Issue132Screen}
-          options={hiddenTabOptions}
-        />
-        <Tab.Screen
-          name="WebE2E"
-          component={WebE2EScreen}
-          options={hiddenTabOptions}
-        />
-        <Tab.Screen
-          name="Compat"
-          component={CompatScreen}
-          options={{
-            tabBarLabel: "Compat API"
-          }}
-        />
-      </Tab.Navigator>
-    </NavigationContainer>
+        >
+          <Tab.Screen
+            name="Default"
+            component={DefaultScreen}
+            options={{
+              tabBarLabel: "Default API"
+            }}
+          />
+          <Tab.Screen
+            name="Issue67"
+            component={Issue67Screen}
+            options={hiddenTabOptions}
+          />
+          <Tab.Screen
+            name="PermissionCheck"
+            component={PermissionCheckScreen}
+            options={hiddenTabOptions}
+          />
+          <Tab.Screen
+            name="CurrentPosition"
+            component={CurrentPositionScreen}
+            options={hiddenTabOptions}
+          />
+          <Tab.Screen
+            name="WatchPosition"
+            component={WatchPositionScreen}
+            options={hiddenTabOptions}
+          />
+          <Tab.Screen
+            name="LocationSimulation"
+            component={LocationSimulationScreen}
+            options={hiddenTabOptions}
+          />
+          <Tab.Screen
+            name="MockedMetadata"
+            component={MockedMetadataScreen}
+            options={hiddenTabOptions}
+          />
+          <Tab.Screen
+            name="ProviderSettings"
+            component={ProviderSettingsScreen}
+            options={hiddenTabOptions}
+          />
+          <Tab.Screen
+            name="ApiErrors"
+            component={ApiErrorsScreen}
+            options={hiddenTabOptions}
+          />
+          <Tab.Screen
+            name="AccuracyPresets"
+            component={AccuracyPresetsScreen}
+            options={hiddenTabOptions}
+          />
+          <Tab.Screen
+            name="LastKnownPosition"
+            component={LastKnownPositionScreen}
+            options={hiddenTabOptions}
+          />
+          <Tab.Screen
+            name="Geocoding"
+            component={GeocodingScreen}
+            options={hiddenTabOptions}
+          />
+          <Tab.Screen
+            name="LocationAvailability"
+            component={LocationAvailabilityScreen}
+            options={hiddenTabOptions}
+          />
+          <Tab.Screen
+            name="Heading"
+            component={HeadingScreen}
+            options={hiddenTabOptions}
+          />
+          <Tab.Screen
+            name="AndroidRequestOptions"
+            component={AndroidRequestOptionsScreen}
+            options={hiddenTabOptions}
+          />
+          <Tab.Screen
+            name="AndroidRequestOptionsProviders"
+            component={AndroidRequestOptionsProviderScreen}
+            options={hiddenTabOptions}
+          />
+          <Tab.Screen
+            name="AndroidRequestOptionsWatches"
+            component={AndroidRequestOptionsWatchScreen}
+            options={hiddenTabOptions}
+          />
+          <Tab.Screen
+            name="AndroidRequestOptionsErrors"
+            component={AndroidRequestOptionsErrorScreen}
+            options={hiddenTabOptions}
+          />
+          <Tab.Screen
+            name="BackgroundE2E"
+            component={BackgroundE2EScreen}
+            options={hiddenTabOptions}
+          />
+          <Tab.Screen
+            name="LongRunBackgroundE2E"
+            component={LongRunBackgroundE2EScreen}
+            options={hiddenTabOptions}
+          />
+          <Tab.Screen
+            name="IOSLocationTuning"
+            component={IOSLocationTuningScreen}
+            options={hiddenTabOptions}
+          />
+          <Tab.Screen
+            name="IOSAccuracyAuthorization"
+            component={IOSAccuracyAuthorizationScreen}
+            options={hiddenTabOptions}
+          />
+          <Tab.Screen
+            name="IOSReleaseOptionsBridge"
+            component={IOSReleaseOptionsBridgeScreen}
+            options={hiddenTabOptions}
+          />
+          <Tab.Screen
+            name="Issue119"
+            component={Issue119Screen}
+            options={hiddenTabOptions}
+          />
+          <Tab.Screen
+            name="Issue120"
+            component={Issue120Screen}
+            options={hiddenTabOptions}
+          />
+          <Tab.Screen
+            name="Issue121"
+            component={Issue121Screen}
+            options={hiddenTabOptions}
+          />
+          <Tab.Screen
+            name="Issue122"
+            component={Issue122Screen}
+            options={hiddenTabOptions}
+          />
+          <Tab.Screen
+            name="Issue132"
+            component={Issue132Screen}
+            options={hiddenTabOptions}
+          />
+          <Tab.Screen
+            name="WebE2E"
+            component={WebE2EScreen}
+            options={hiddenTabOptions}
+          />
+          <Tab.Screen
+            name="Compat"
+            component={CompatScreen}
+            options={{
+              tabBarLabel: "Compat API"
+            }}
+          />
+        </Tab.Navigator>
+      </NavigationContainer>
+    </SafeAreaProvider>
   );
 }

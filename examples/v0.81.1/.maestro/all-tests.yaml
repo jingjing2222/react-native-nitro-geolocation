@@ -47,6 +47,14 @@ appId: nitrogeolocation.example
     when:
       platform: Android
     file: android-request-options.yaml
+- runFlow:
+    when:
+      platform: Android
+    file: android-request-options-watch.yaml
+- runFlow:
+    when:
+      platform: Android
+    file: android-request-options-errors.yaml
 - runFlow: current-position.yaml
 - runFlow: watch-position.yaml
 - runFlow: location-simulation.yaml

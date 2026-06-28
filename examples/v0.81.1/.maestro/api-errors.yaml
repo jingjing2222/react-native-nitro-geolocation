@@ -16,9 +16,7 @@ appId: nitrogeolocation.example
 
 - openLink:
     link: nitrogeolocation://app/api-errors
-- tapOn:
-    text: "열기|Open"
-    optional: true
+- waitForAnimationToEnd
 
 - extendedWaitUntil:
     visible: "Modern API error contract"
@@ -36,7 +34,6 @@ appId: nitrogeolocation.example
     id: "api-error-message"
 
 - launchApp:
-    clearState: true
     permissions:
       all: allow
 
@@ -48,9 +45,7 @@ appId: nitrogeolocation.example
 
 - openLink:
     link: nitrogeolocation://app/api-errors
-- tapOn:
-    text: "열기|Open"
-    optional: true
+- waitForAnimationToEnd
 
 - extendedWaitUntil:
     visible: "Modern API error contract"

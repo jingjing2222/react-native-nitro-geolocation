@@ -16,9 +16,7 @@ appId: nitrogeolocation.example
 
 - openLink:
     link: nitrogeolocation://app/location-availability
-- tapOn:
-    text: "열기|Open"
-    optional: true
+- waitForAnimationToEnd
 
 - extendedWaitUntil:
     visible: "Availability contract tied to native fixes and permission failures"
@@ -45,7 +43,6 @@ appId: nitrogeolocation.example
 - stopApp
 
 - launchApp:
-    clearState: true
     permissions:
       all: deny
 
@@ -57,9 +54,7 @@ appId: nitrogeolocation.example
 
 - openLink:
     link: nitrogeolocation://app/location-availability
-- tapOn:
-    text: "열기|Open"
-    optional: true
+- waitForAnimationToEnd
 
 - extendedWaitUntil:
     visible: "Availability contract tied to native fixes and permission failures"

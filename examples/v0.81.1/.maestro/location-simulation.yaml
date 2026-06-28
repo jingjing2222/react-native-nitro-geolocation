@@ -16,9 +16,7 @@ appId: nitrogeolocation.example
 
 - openLink:
     link: nitrogeolocation://app/location-simulation
-- tapOn:
-    text: "열기|Open"
-    optional: true
+- waitForAnimationToEnd
 
 # Request permission
 - tapOn:
@@ -35,7 +33,8 @@ appId: nitrogeolocation.example
 - tapOn:
     id: "e2e-action-current-position-get-button"
 - extendedWaitUntil:
-    visible: "Current Position"
+    visible:
+      id: "position-info"
     timeout: 15000
 
 # Verify position loaded
@@ -54,7 +53,8 @@ appId: nitrogeolocation.example
 - tapOn:
     id: "e2e-action-current-position-get-button"
 - extendedWaitUntil:
-    visible: "Current Position"
+    visible:
+      id: "position-info"
     timeout: 15000
 
 # Verify position loaded
@@ -73,7 +73,8 @@ appId: nitrogeolocation.example
 - tapOn:
     id: "e2e-action-current-position-get-button"
 - extendedWaitUntil:
-    visible: "Current Position"
+    visible:
+      id: "position-info"
     timeout: 15000
 
 # Verify position loaded

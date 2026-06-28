@@ -15,9 +15,7 @@ appId: nitrogeolocation.example
 
 - openLink:
     link: nitrogeolocation://app/ios-accuracy-authorization
-- tapOn:
-    text: "열기|Open"
-    optional: true
+- waitForAnimationToEnd
 
 - extendedWaitUntil:
     visible: "Precise and reduced accuracy API contract"
@@ -40,6 +38,7 @@ appId: nitrogeolocation.example
 - tapOn:
     text: ".*(Allow|허용|Turn On|켜기).*"
     optional: true
+- waitForAnimationToEnd
 
 - extendedWaitUntil:
     visible: "Temporary full accuracy: passed"
@@ -61,7 +60,6 @@ appId: nitrogeolocation.example
 - stopApp
 
 - launchApp:
-    clearState: true
     permissions:
       all: deny
 
@@ -73,9 +71,7 @@ appId: nitrogeolocation.example
 
 - openLink:
     link: nitrogeolocation://app/ios-accuracy-authorization
-- tapOn:
-    text: "열기|Open"
-    optional: true
+- waitForAnimationToEnd
 
 - extendedWaitUntil:
     visible: "Precise and reduced accuracy API contract"

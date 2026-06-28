@@ -13,9 +13,7 @@ appId: nitrogeolocation.example
 
 - openLink:
     link: nitrogeolocation://app/issue-121
-- tapOn:
-    text: "열기|Open"
-    optional: true
+- waitForAnimationToEnd
 
 - extendedWaitUntil:
     visible: "Issue 121"
