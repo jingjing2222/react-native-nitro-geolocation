@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { PermissionsAndroid, Platform, Text } from "react-native";
+import { PermissionsAndroid, Platform } from "react-native";
 import { getCurrentPosition } from "react-native-nitro-geolocation";
 import type { GeolocationResponse } from "react-native-nitro-geolocation";
 import {
