@@ -8,6 +8,13 @@ appId: nitrogeolocation.example
       all: deny
       android.permission.ACCESS_COARSE_LOCATION: deny
       android.permission.ACCESS_FINE_LOCATION: deny
+- runFlow:
+    when:
+      platform: Android
+      visible: ".*isn't responding|.*응답하지 않.*"
+    commands:
+      - tapOn:
+          text: "Wait|대기"
 - tapOn:
     text: "Wait|대기"
     optional: true
@@ -20,6 +27,13 @@ appId: nitrogeolocation.example
 
 - openLink:
     link: nitrogeolocation://app/issue-119
+- runFlow:
+    when:
+      platform: Android
+      visible: ".*isn't responding|.*응답하지 않.*"
+    commands:
+      - tapOn:
+          text: "Wait|대기"
 - runFlow:
     when:
       platform: iOS

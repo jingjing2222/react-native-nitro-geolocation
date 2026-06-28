@@ -9,6 +9,13 @@ appId: nitrogeolocation.example
     permissions:
       all: allow
 
+- runFlow:
+    when:
+      platform: Android
+      visible: ".*isn't responding|.*응답하지 않.*"
+    commands:
+      - tapOn:
+          text: "Wait|대기"
 - extendedWaitUntil:
     visible: "Geolocation API"
     timeout: 10000
@@ -17,6 +24,13 @@ appId: nitrogeolocation.example
 
 - openLink:
     link: nitrogeolocation://app/background-long-run
+- runFlow:
+    when:
+      platform: Android
+      visible: ".*isn't responding|.*응답하지 않.*"
+    commands:
+      - tapOn:
+          text: "Wait|대기"
 - runFlow:
     when:
       platform: iOS
@@ -57,6 +71,13 @@ appId: nitrogeolocation.example
 
 - openLink:
     link: nitrogeolocation://app/background-long-run
+- runFlow:
+    when:
+      platform: Android
+      visible: ".*isn't responding|.*응답하지 않.*"
+    commands:
+      - tapOn:
+          text: "Wait|대기"
 - runFlow:
     when:
       platform: iOS

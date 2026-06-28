@@ -6,6 +6,13 @@ appId: nitrogeolocation.example
     link: nitrogeolocation://app/background-long-run
 - runFlow:
     when:
+      platform: Android
+      visible: ".*isn't responding|.*응답하지 않.*"
+    commands:
+      - tapOn:
+          text: "Wait|대기"
+- runFlow:
+    when:
       platform: iOS
       visible: "Cancel|취소"
     commands:
