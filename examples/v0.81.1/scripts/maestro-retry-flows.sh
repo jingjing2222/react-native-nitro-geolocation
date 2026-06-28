@@ -22,6 +22,7 @@ ATTEMPTS="${MAESTRO_RETRY_ATTEMPTS:-3}"
 MAESTRO_BIN="${MAESTRO:-maestro}"
 SUITE_NAME="suite"
 FAILURE_LOG_LINES="${MAESTRO_RETRY_FAILURE_LOG_LINES:-all}"
+INFRA_RETRIES="${MAESTRO_INFRA_RETRIES:-2}"
 MAESTRO_ARGS=()
 MAESTRO_ENV_ARGS=()
 
@@ -87,6 +88,10 @@ if [[ "$FAILURE_LOG_LINES" != "all" ]] && ! [[ "$FAILURE_LOG_LINES" =~ ^[1-9][0-
   echo "--failure-log-lines must be a positive integer or 'all'." >&2
   exit 2
 fi
+if ! [[ "$INFRA_RETRIES" =~ ^[0-9]+$ ]]; then
+  echo "MAESTRO_INFRA_RETRIES must be a non-negative integer." >&2
+  exit 2
+fi
 
 PENDING=("$@")
 if [[ "${#PENDING[@]}" -eq 0 ]]; then
@@ -105,32 +110,76 @@ flow_log_path() {
   printf '%s/attempt-%s-%s.log' "$RUN_DIR" "$attempt" "$name"
 }
 
+is_android_driver_infra_failure() {
+  local log_path="$1"
+  [[ "$PLATFORM" == "android" ]] || return 1
+  grep -Eq \
+    'Maestro Android driver did not start up in time|io\.grpc\.StatusRuntimeException: UNAVAILABLE|Command failed \(tcp:[0-9]+\): closed' \
+    "$log_path"
+}
+
+recover_android_driver() {
+  [[ "$PLATFORM" == "android" ]] || return
+
+  local adb_bin="${ADB:-adb}"
+  local adb_device_args=()
+  if [[ -n "${ANDROID_SERIAL:-}" ]]; then
+    adb_device_args=(-s "$ANDROID_SERIAL")
+  fi
+
+  if command -v "$adb_bin" >/dev/null 2>&1; then
+    "$adb_bin" kill-server >/dev/null 2>&1 || true
+    "$adb_bin" start-server >/dev/null 2>&1 || true
+    "$adb_bin" "${adb_device_args[@]}" wait-for-device >/dev/null 2>&1 || true
+    sleep 3
+  fi
+}
+
 run_flow() {
   local attempt="$1"
   local flow="$2"
   local path="$FLOW_DIR/$flow"
   local log_path
   log_path="$(flow_log_path "$attempt" "$flow")"
+  local infra_try status
 
   if [[ ! -f "$path" ]]; then
     echo "Missing Maestro flow: $path" | tee "$log_path" >&2
     return 1
   fi
 
-  echo "::group::Maestro $SUITE_NAME attempt $attempt/$ATTEMPTS: $flow"
-  set +e
-  CMD=("$MAESTRO_BIN" test --platform "$PLATFORM")
-  if [[ "${#MAESTRO_ARGS[@]}" -gt 0 ]]; then
-    CMD+=("${MAESTRO_ARGS[@]}")
-  fi
-  if [[ "${#MAESTRO_ENV_ARGS[@]}" -gt 0 ]]; then
-    CMD+=("${MAESTRO_ENV_ARGS[@]}")
-  fi
-  CMD+=("$path")
-  "${CMD[@]}" 2>&1 | tee "$log_path"
-  local status="${PIPESTATUS[0]}"
-  set -e
-  echo "::endgroup::"
+  for ((infra_try = 0; infra_try <= INFRA_RETRIES; infra_try++)); do
+    if [[ "$infra_try" -eq 0 ]]; then
+      echo "::group::Maestro $SUITE_NAME attempt $attempt/$ATTEMPTS: $flow"
+    else
+      echo "::group::Maestro $SUITE_NAME attempt $attempt/$ATTEMPTS: $flow (driver recovery $infra_try/$INFRA_RETRIES)"
+      recover_android_driver
+    fi
+
+    set +e
+    CMD=("$MAESTRO_BIN" test --platform "$PLATFORM")
+    if [[ "${#MAESTRO_ARGS[@]}" -gt 0 ]]; then
+      CMD+=("${MAESTRO_ARGS[@]}")
+    fi
+    if [[ "${#MAESTRO_ENV_ARGS[@]}" -gt 0 ]]; then
+      CMD+=("${MAESTRO_ENV_ARGS[@]}")
+    fi
+    CMD+=("$path")
+    "${CMD[@]}" 2>&1 | tee "$log_path"
+    status="${PIPESTATUS[0]}"
+    set -e
+    echo "::endgroup::"
+
+    if [[ "$status" -eq 0 ]]; then
+      return 0
+    fi
+    if ! is_android_driver_infra_failure "$log_path"; then
+      return "$status"
+    fi
+    if [[ "$infra_try" -lt "$INFRA_RETRIES" ]]; then
+      echo "Maestro Android driver infra failure detected. Recovering ADB and retrying $flow without consuming a flow attempt."
+    fi
+  done
 
   return "$status"
 }

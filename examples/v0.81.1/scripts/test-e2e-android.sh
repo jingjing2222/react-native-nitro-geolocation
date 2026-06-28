@@ -8,7 +8,6 @@ FLOW_DIR="$EXAMPLE_DIR/.maestro"
 ADB_BIN="${ADB:-adb}"
 MAESTRO_BIN="${MAESTRO:-maestro}"
 NODE_BIN="${NODE:-node}"
-ANR_DISMISSER_PID=""
 DISABLED_LAUNCHER_PACKAGE=""
 
 adb_cmd() {
@@ -21,59 +20,6 @@ adb_cmd() {
 
 set_location_enabled() {
   adb_cmd shell cmd location set-location-enabled "$1" >/dev/null
-}
-
-dismiss_android_anr_once() {
-  local dump coords
-  dump="$(adb_cmd exec-out uiautomator dump /dev/tty 2>/dev/null || true)"
-  coords="$(
-    printf '%s' "$dump" | "$NODE_BIN" -e '
-      let input = "";
-      process.stdin.setEncoding("utf8");
-      process.stdin.on("data", (chunk) => {
-        input += chunk;
-      });
-      process.stdin.on("end", () => {
-        const match = input.match(
-          /text="(?:Wait|대기)"[^>]*bounds="\[(\d+),(\d+)\]\[(\d+),(\d+)\]"/
-        );
-        if (!match) {
-          return;
-        }
-
-        const [, left, top, right, bottom] = match.map(Number);
-        console.log(
-          `${Math.round((left + right) / 2)} ${Math.round((top + bottom) / 2)}`
-        );
-      });
-    '
-  )"
-
-  if [[ -z "$coords" ]]; then
-    return 1
-  fi
-
-  read -r x y <<<"$coords"
-  adb_cmd shell input tap "$x" "$y" >/dev/null
-  echo "Dismissed Android ANR dialog via Wait."
-}
-
-start_android_anr_dismissal_loop() {
-  (
-    while true; do
-      dismiss_android_anr_once || true
-      sleep 1
-    done
-  ) &
-  ANR_DISMISSER_PID="$!"
-}
-
-stop_android_anr_dismissal_loop() {
-  if [[ -n "$ANR_DISMISSER_PID" ]]; then
-    kill "$ANR_DISMISSER_PID" >/dev/null 2>&1 || true
-    wait "$ANR_DISMISSER_PID" 2>/dev/null || true
-    ANR_DISMISSER_PID=""
-  fi
 }
 
 disable_emulator_launcher() {
@@ -108,7 +54,6 @@ restore_emulator_launcher() {
 }
 
 restore_location() {
-  stop_android_anr_dismissal_loop
   restore_emulator_launcher
   set_location_enabled true || true
   adb_cmd reverse --remove tcp:8081 >/dev/null 2>&1 || true
@@ -166,7 +111,6 @@ run_maestro_flows() {
 
 adb_cmd reverse tcp:8081 tcp:8081 >/dev/null
 disable_emulator_launcher
-start_android_anr_dismissal_loop
 status=0
 
 set_location_enabled true
