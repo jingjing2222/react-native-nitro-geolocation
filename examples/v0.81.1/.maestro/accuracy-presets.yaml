@@ -55,9 +55,20 @@ appId: nitrogeolocation.example
 - tapOn:
     id: "e2e-action-accuracy-presets-run-positive-button"
 
-- extendedWaitUntil:
-    visible: "Positive presets: passed"
-    timeout: 120000
+- runFlow:
+    when:
+      platform: Android
+    commands:
+      - extendedWaitUntil:
+          visible: "Positive presets: passed"
+          timeout: 60000
+- runFlow:
+    when:
+      platform: iOS
+    commands:
+      - extendedWaitUntil:
+          visible: "Positive presets: passed"
+          timeout: 120000
 
 - assertVisible:
     id: "accuracy-presets-positive-result"

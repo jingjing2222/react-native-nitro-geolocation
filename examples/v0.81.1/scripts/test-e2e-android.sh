@@ -9,6 +9,7 @@ ADB_BIN="${ADB:-adb}"
 MAESTRO_BIN="${MAESTRO:-maestro}"
 NODE_BIN="${NODE:-node}"
 ANR_DISMISSER_PID=""
+DISABLED_LAUNCHER_PACKAGE=""
 
 adb_cmd() {
   if [[ -n "${ANDROID_SERIAL:-}" ]]; then
@@ -75,8 +76,40 @@ stop_android_anr_dismissal_loop() {
   fi
 }
 
+disable_emulator_launcher() {
+  if ! is_emulator; then
+    return
+  fi
+
+  local launcher_package
+  launcher_package="$(
+    adb_cmd shell cmd package resolve-activity --brief \
+      -a android.intent.action.MAIN \
+      -c android.intent.category.HOME 2>/dev/null |
+      tr -d '\r' |
+      awk -F/ 'NF > 1 { package = $1 } END { print package }'
+  )"
+
+  if [[ -z "$launcher_package" || "$launcher_package" == "android" ]]; then
+    return
+  fi
+
+  if adb_cmd shell pm disable-user --user 0 "$launcher_package" >/dev/null 2>&1; then
+    DISABLED_LAUNCHER_PACKAGE="$launcher_package"
+    echo "Disabled emulator launcher package to avoid launcher ANR dialogs: $launcher_package"
+  fi
+}
+
+restore_emulator_launcher() {
+  if [[ -n "$DISABLED_LAUNCHER_PACKAGE" ]]; then
+    adb_cmd shell pm enable "$DISABLED_LAUNCHER_PACKAGE" >/dev/null 2>&1 || true
+    DISABLED_LAUNCHER_PACKAGE=""
+  fi
+}
+
 restore_location() {
   stop_android_anr_dismissal_loop
+  restore_emulator_launcher
   set_location_enabled true || true
   adb_cmd reverse --remove tcp:8081 >/dev/null 2>&1 || true
 }
@@ -132,6 +165,7 @@ run_maestro_flows() {
 }
 
 adb_cmd reverse tcp:8081 tcp:8081 >/dev/null
+disable_emulator_launcher
 start_android_anr_dismissal_loop
 status=0
 
