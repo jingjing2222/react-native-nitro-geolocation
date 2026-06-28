@@ -140,6 +140,12 @@ jobs:
           curl -Ls "https://get.maestro.mobile.dev" | bash
           echo "$HOME/.maestro/bin" >> "$GITHUB_PATH"
 
+      - name: Enable KVM
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+
       - name: Run Android E2E
         uses: reactivecircus/android-emulator-runner@v2
         with:
@@ -147,7 +153,14 @@ jobs:
           arch: x86_64
           target: google_apis
           profile: pixel_6
+          disable-animations: true
+          emulator-options: -no-window -gpu swiftshader_indirect -no-snapshot -noaudio -no-boot-anim -camera-back none
           script: |
+            adb kill-server
+            adb start-server
+            adb wait-for-device
+            timeout 180 bash -c 'until [[ "$(adb shell getprop sys.boot_completed 2>/dev/null | tr -d "\r")" == "1" ]]; do sleep 5; done'
+            adb shell input keyevent 82 || true
             yarn workspace react-native-nitro-geolocation-example android:release
             yarn test:e2e:android
 
