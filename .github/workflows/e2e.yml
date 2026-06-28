@@ -34,20 +34,20 @@ jobs:
         with:
           persist-credentials: false
 
-      - name: Setup Node
-        uses: actions/setup-node@v4
+      - name: Setup mise
+        uses: jdx/mise-action@v3
         with:
-          node-version: 20
+          install: false
 
-      - name: Setup Java
-        uses: actions/setup-java@v4
-        with:
-          distribution: temurin
-          java-version: 17
+      - name: Trust and install tools via mise
+        run: |
+          mise trust --yes
+          mise install java maestro node ruby
 
       - name: Enable Corepack
         run: |
           corepack enable
+          mise reshim node
 
       - name: Install dependencies
         run: |
@@ -57,22 +57,15 @@ jobs:
         run: |
           yarn build:all
 
-      - name: Setup Ruby
-        uses: ruby/setup-ruby@v1
-        with:
-          ruby-version: "3.3"
-          bundler-cache: true
-          working-directory: examples/v0.81.1
+      - name: Install iOS gems
+        working-directory: examples/v0.81.1
+        run: |
+          bundle install
 
       - name: Install iOS pods
         working-directory: examples/v0.81.1
         run: |
           bundle exec pod install --project-directory=ios
-
-      - name: Install Maestro
-        run: |
-          curl -Ls "https://get.maestro.mobile.dev" | bash
-          echo "$HOME/.maestro/bin" >> "$GITHUB_PATH"
 
       - name: Boot iOS simulator
         run: |
@@ -128,20 +121,20 @@ jobs:
         with:
           persist-credentials: false
 
-      - name: Setup Node
-        uses: actions/setup-node@v4
+      - name: Setup mise
+        uses: jdx/mise-action@v3
         with:
-          node-version: 20
+          install: false
 
-      - name: Setup Java
-        uses: actions/setup-java@v4
-        with:
-          distribution: temurin
-          java-version: 17
+      - name: Trust and install tools via mise
+        run: |
+          mise trust --yes
+          mise install java maestro node
 
       - name: Enable Corepack
         run: |
           corepack enable
+          mise reshim node
 
       - name: Install dependencies
         run: |
@@ -150,11 +143,6 @@ jobs:
       - name: Build packages
         run: |
           yarn build:all
-
-      - name: Install Maestro
-        run: |
-          curl -Ls "https://get.maestro.mobile.dev" | bash
-          echo "$HOME/.maestro/bin" >> "$GITHUB_PATH"
 
       - name: Enable KVM
         run: |
