@@ -23,10 +23,16 @@ appId: nitrogeolocation.example
 - runFlow:
     when:
       platform: iOS
-      visible: ".*NitroGeolocationExample.*"
+      visible: "Open in.*NitroGeolocationExample.*"
     commands:
       - tapOn:
           text: "Open|열기"
+- runFlow:
+    when:
+      platform: iOS
+    commands:
+      - openLink:
+          link: nitrogeolocation://app/web-e2e?autorun=success
 - waitForAnimationToEnd
 
 - tapOn:
@@ -145,10 +151,16 @@ appId: nitrogeolocation.example
 - runFlow:
     when:
       platform: iOS
-      visible: ".*NitroGeolocationExample.*"
+      visible: "Open in.*NitroGeolocationExample.*"
     commands:
       - tapOn:
           text: "Open|열기"
+- runFlow:
+    when:
+      platform: iOS
+    commands:
+      - openLink:
+          link: nitrogeolocation://app/web-e2e?autorun=denied
 - waitForAnimationToEnd
 
 - tapOn:

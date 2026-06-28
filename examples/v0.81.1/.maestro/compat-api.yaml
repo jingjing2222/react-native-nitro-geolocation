@@ -17,10 +17,16 @@ appId: nitrogeolocation.example
 - runFlow:
     when:
       platform: iOS
-      visible: ".*NitroGeolocationExample.*"
+      visible: "Open in.*NitroGeolocationExample.*"
     commands:
       - tapOn:
           text: "Open|열기"
+- runFlow:
+    when:
+      platform: iOS
+    commands:
+      - openLink:
+          link: nitrogeolocation://app/compat
 - waitForAnimationToEnd
 - tapOn:
     text: "Compat API, tab, 8 of 8|Compat API"
