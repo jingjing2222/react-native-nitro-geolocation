@@ -10,16 +10,34 @@
   },
   "autolinking": {
     "NitroGeolocation": {
-      "swift": "NitroGeolocation",
-      "kotlin": "NitroGeolocation"
+      "ios": {
+        "language": "swift",
+        "implementationClassName": "NitroGeolocation"
+      },
+      "android": {
+        "language": "kotlin",
+        "implementationClassName": "NitroGeolocation"
+      }
     },
     "NitroGeolocationCompat": {
-      "swift": "NitroGeolocationCompat",
-      "kotlin": "NitroGeolocationCompat"
+      "ios": {
+        "language": "swift",
+        "implementationClassName": "NitroGeolocationCompat"
+      },
+      "android": {
+        "language": "kotlin",
+        "implementationClassName": "NitroGeolocationCompat"
+      }
     },
     "NitroBackgroundLocation": {
-      "swift": "NitroBackgroundLocation",
-      "kotlin": "NitroBackgroundLocation"
+      "ios": {
+        "language": "swift",
+        "implementationClassName": "NitroBackgroundLocation"
+      },
+      "android": {
+        "language": "kotlin",
+        "implementationClassName": "NitroBackgroundLocation"
+      }
     }
   },
   "ignorePaths": ["node_modules", "example"]
