@@ -1,32 +1,34 @@
 #!/usr/bin/env node
-import { readFileSync } from 'node:fs';
+import { readFileSync } from "node:fs";
 
 const [suitePath, platformArg] = process.argv.slice(2);
 
 if (!suitePath || !platformArg) {
-  console.error('Usage: maestro-suite-flows.mjs <suite.yaml> <android|ios>');
+  console.error("Usage: maestro-suite-flows.mjs <suite.yaml> <android|ios>");
   process.exit(2);
 }
 
 const targetPlatform = platformArg.toLowerCase();
-const lines = readFileSync(suitePath, 'utf8').split(/\r?\n/);
+const lines = readFileSync(suitePath, "utf8").split(/\r?\n/);
 
 function parseEnvGuard(expression) {
   const trimmed = expression.trim();
-  if (trimmed === 'true') {
+  if (trimmed === "true") {
     return true;
   }
-  if (trimmed === 'false') {
+  if (trimmed === "false") {
     return false;
   }
 
-  const match = trimmed.match(/^\$\{\s*([A-Z0-9_]+)\s*==\s*['"]([^'"]+)['"]\s*\}$/);
+  const match = trimmed.match(
+    /^\$\{\s*([A-Z0-9_]+)\s*==\s*['"]([^'"]+)['"]\s*\}$/
+  );
   if (!match) {
     throw new Error(`Unsupported Maestro runFlow guard: ${expression}`);
   }
 
   const [, name, expected] = match;
-  return (process.env[name] ?? '') === expected;
+  return (process.env[name] ?? "") === expected;
 }
 
 function shouldInclude(entry) {
