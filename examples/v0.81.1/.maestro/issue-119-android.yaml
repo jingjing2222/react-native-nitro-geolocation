@@ -8,6 +8,9 @@ appId: nitrogeolocation.example
       all: deny
       android.permission.ACCESS_COARSE_LOCATION: deny
       android.permission.ACCESS_FINE_LOCATION: deny
+- tapOn:
+    text: "Wait|대기"
+    optional: true
 
 - extendedWaitUntil:
     visible: "Geolocation API"
