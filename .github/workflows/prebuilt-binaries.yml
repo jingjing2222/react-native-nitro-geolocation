@@ -1,0 +1,126 @@
+name: Prebuilt Binaries
+
+on:
+  push:
+    tags:
+      - "react-native-nitro-geolocation@*"
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Package tag to build, for example react-native-nitro-geolocation@1.4.2"
+        required: true
+        type: string
+
+permissions:
+  contents: write
+
+jobs:
+  android:
+    name: Build Android AAR
+    runs-on: ubuntu-latest
+    steps:
+      - name: Resolve tag
+        id: ref
+        run: echo "tag=${{ inputs.tag || github.ref_name }}" >> "$GITHUB_OUTPUT"
+
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ steps.ref.outputs.tag }}
+
+      - name: Set up JDK
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Enable Corepack
+        run: corepack enable
+
+      - name: Install dependencies
+        run: yarn install
+
+      - name: Build AAR
+        run: scripts/build-prebuilt-android.sh build/prebuilt
+
+      - name: Upload Android artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: android-prebuilt
+          path: |
+            build/prebuilt/*-android.aar
+            build/prebuilt/*-android.aar.sha256
+          if-no-files-found: error
+
+  ios:
+    name: Build iOS XCFramework
+    runs-on: macos-latest
+    steps:
+      - name: Resolve tag
+        id: ref
+        run: echo "tag=${{ inputs.tag || github.ref_name }}" >> "$GITHUB_OUTPUT"
+
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ steps.ref.outputs.tag }}
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Enable Corepack
+        run: corepack enable
+
+      - name: Install JS dependencies
+        run: yarn install
+
+      - name: Install Ruby dependencies
+        working-directory: examples/v0.81.1
+        run: bundle install
+
+      - name: Build XCFramework
+        run: scripts/build-prebuilt-ios.sh build/prebuilt
+
+      - name: Upload iOS artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ios-prebuilt
+          path: |
+            build/prebuilt/*-ios.xcframework.zip
+            build/prebuilt/*-ios.xcframework.zip.sha256
+          if-no-files-found: error
+
+  publish:
+    name: Upload release assets
+    runs-on: ubuntu-latest
+    needs:
+      - android
+      - ios
+    steps:
+      - name: Resolve tag
+        id: ref
+        run: echo "tag=${{ inputs.tag || github.ref_name }}" >> "$GITHUB_OUTPUT"
+
+      - name: Download artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: build/prebuilt
+          merge-multiple: true
+
+      - name: Create release if missing
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ steps.ref.outputs.tag }}
+        run: |
+          gh release view "$TAG" >/dev/null 2>&1 || gh release create "$TAG" --title "$TAG" --generate-notes
+
+      - name: Upload release assets
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ steps.ref.outputs.tag }}
+        run: gh release upload "$TAG" build/prebuilt/* --clobber

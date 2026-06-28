@@ -34,6 +34,157 @@ def getExtOrDefaultValue(name, defaultValue) {
   return rootProject.ext.has(name) ? rootProject.ext.get(name) : (project.properties["NitroGeolocation_" + name] ?: defaultValue)
 }
 
+def getNitroGeolocationBooleanProperty(name, defaultValue) {
+  def envName = "NITRO_GEOLOCATION_${name.replaceAll(/([A-Z])/, "_\$1").toUpperCase()}"
+  def propertyName = "NitroGeolocation_${name}"
+  def value = rootProject.ext.has(name) ? rootProject.ext.get(name) : (project.properties[propertyName] ?: System.getenv(envName))
+  return value == null ? defaultValue : !["0", "false", "no", "off"].contains(value.toString().toLowerCase())
+}
+
+def getNitroGeolocationStringProperty(name, defaultValue) {
+  def envName = "NITRO_GEOLOCATION_${name.replaceAll(/([A-Z])/, "_\$1").toUpperCase()}"
+  def propertyName = "NitroGeolocation_${name}"
+  return rootProject.ext.has(name) ? rootProject.ext.get(name) : (project.properties[propertyName] ?: System.getenv(envName) ?: defaultValue)
+}
+
+def parseMajorMinor(version) {
+  def matcher = (version ?: "") =~ /(\d+)\.(\d+)/
+  return matcher.find() ? "${matcher.group(1)}.${matcher.group(2)}" : null
+}
+
+def readPackageJsonVersion(packageJsonFile) {
+  if (!packageJsonFile.exists()) {
+    return null
+  }
+
+  try {
+    return new groovy.json.JsonSlurper().parse(packageJsonFile).version
+  } catch (Throwable ignored) {
+    return null
+  }
+}
+
+def readNodeModuleVersion(moduleName) {
+  def candidates = [
+    rootProject.file("../node_modules/${moduleName}/package.json"),
+    file("../node_modules/${moduleName}/package.json"),
+    new File(file("..").canonicalFile, "node_modules/${moduleName}/package.json")
+  ]
+
+  for (def candidate : candidates) {
+    def version = readPackageJsonVersion(candidate)
+    if (version != null) {
+      return version
+    }
+  }
+
+  return null
+}
+
+def isNitroGeolocationSourceCheckout() {
+  def packageDir = file("..").canonicalFile
+  def workspacePackageJson = new File(packageDir, "../../package.json")
+  if (!workspacePackageJson.exists()) {
+    return false
+  }
+
+  try {
+    def workspacePackage = new groovy.json.JsonSlurper().parse(workspacePackageJson)
+    return workspacePackage.name == "react-native-nitro-geolocation-monorepo"
+  } catch (Throwable ignored) {
+    return false
+  }
+}
+
+def packageJson = new groovy.json.JsonSlurper().parse(file("../package.json"))
+def packageVersion = packageJson.version
+def prebuiltTag = "react-native-nitro-geolocation@${packageVersion}"
+def encodedPrebuiltTag = java.net.URLEncoder.encode(prebuiltTag, "UTF-8").replace("+", "%20")
+def prebuiltAssetName = "react-native-nitro-geolocation-${packageVersion}-android.aar"
+def prebuiltUrlBase = getNitroGeolocationStringProperty(
+  "prebuiltUrlBase",
+  "https://github.com/jingjing2222/react-native-nitro-geolocation/releases/download/${encodedPrebuiltTag}"
+)
+def prebuiltUrl = "${prebuiltUrlBase}/${prebuiltAssetName}"
+def prebuiltCacheDir = new File(gradle.gradleUserHomeDir, "caches/react-native-nitro-geolocation/${packageVersion}")
+def prebuiltAarFile = new File(prebuiltCacheDir, prebuiltAssetName)
+def prebuiltJniDir = file("${buildDir}/generated/prebuilt-jni")
+
+def bundledReactNativeVersion = packageJson.devDependencies["react-native"]
+def bundledNitroModulesVersion = packageJson.devDependencies["react-native-nitro-modules"]
+def consumerReactNativeVersion = readNodeModuleVersion("react-native")
+def consumerNitroModulesVersion = readNodeModuleVersion("react-native-nitro-modules")
+def isAndroidPrebuiltAbiCompatible = {
+  return parseMajorMinor(consumerReactNativeVersion) == parseMajorMinor(bundledReactNativeVersion) &&
+    parseMajorMinor(consumerNitroModulesVersion) == parseMajorMinor(bundledNitroModulesVersion)
+}
+
+def downloadNitroGeolocationPrebuiltIfAvailable = {
+  try {
+    if (!prebuiltAarFile.exists()) {
+      prebuiltCacheDir.mkdirs()
+      logger.lifecycle("[NitroGeolocation] Downloading Android prebuilt AAR: ${prebuiltUrl}")
+      new URL(prebuiltUrl).withInputStream { input ->
+        prebuiltAarFile.withOutputStream { output -> output << input }
+      }
+    }
+
+    logger.lifecycle("[NitroGeolocation] Using Android prebuilt native libraries from ${prebuiltAarFile}")
+    return true
+  } catch (Throwable error) {
+    if (prebuiltAarFile.exists()) {
+      prebuiltAarFile.delete()
+    }
+    logger.warn("[NitroGeolocation] Android prebuilt unavailable (${error.message}). Falling back to source build.")
+    return false
+  }
+}
+
+def extractNitroGeolocationPrebuilt = {
+  try {
+    delete(prebuiltJniDir)
+    copy {
+      from(zipTree(prebuiltAarFile))
+      include("jni/**/*.so")
+      into(prebuiltJniDir)
+      eachFile { details ->
+        details.relativePath = new RelativePath(true, details.relativePath.segments.drop(1) as String[])
+      }
+      includeEmptyDirs = false
+    }
+
+    if (fileTree(prebuiltJniDir).matching { include("**/libnitrogeolocation.so") }.empty) {
+      throw new GradleException("AAR did not contain libnitrogeolocation.so")
+    }
+  } catch (Throwable error) {
+    if (prebuiltAarFile.exists()) {
+      prebuiltAarFile.delete()
+    }
+    throw new GradleException("Failed to prepare Android prebuilt native libraries: ${error.message}", error)
+  }
+}
+
+def shouldAttemptPrebuilt = getNitroGeolocationBooleanProperty("usePrebuilt", !isNitroGeolocationSourceCheckout())
+if (shouldAttemptPrebuilt && !isAndroidPrebuiltAbiCompatible()) {
+  logger.lifecycle(
+    "[NitroGeolocation] Android prebuilt disabled for React Native ${consumerReactNativeVersion ?: 'unknown'} " +
+      "and NitroModules ${consumerNitroModulesVersion ?: 'unknown'}; " +
+      "assets target React Native ${bundledReactNativeVersion} and NitroModules ${bundledNitroModulesVersion}."
+  )
+}
+def usePrebuilt = shouldAttemptPrebuilt && isAndroidPrebuiltAbiCompatible() && downloadNitroGeolocationPrebuiltIfAvailable()
+
+def preparePrebuiltTaskProvider = null
+if (usePrebuilt) {
+  preparePrebuiltTaskProvider = tasks.register("prepareNitroGeolocationPrebuilt") {
+    outputs.dir(prebuiltJniDir)
+
+    doLast {
+      extractNitroGeolocationPrebuilt()
+    }
+  }
+}
+
 android {
   namespace "com.margelo.nitro.nitrogeolocation"
 
@@ -43,27 +194,31 @@ android {
     minSdkVersion getExtOrIntegerDefault("minSdkVersion")
     targetSdkVersion getExtOrIntegerDefault("targetSdkVersion")
 
-    externalNativeBuild {
-      cmake {
-        cppFlags "-frtti -fexceptions -Wall -fstack-protector-all"
-        arguments "-DANDROID_STL=c++_shared", "-DANDROID_SUPPORT_FLEXIBLE_PAGE_SIZES=ON"
-        abiFilters (*reactNativeArchitectures())
+    if (!usePrebuilt) {
+      externalNativeBuild {
+        cmake {
+          cppFlags "-frtti -fexceptions -Wall -fstack-protector-all"
+          arguments "-DANDROID_STL=c++_shared", "-DANDROID_SUPPORT_FLEXIBLE_PAGE_SIZES=ON"
+          abiFilters (*reactNativeArchitectures())
 
-        buildTypes {
-          debug {
-            cppFlags "-O1 -g"
-          }
-          release {
-            cppFlags "-O2"
+          buildTypes {
+            debug {
+              cppFlags "-O1 -g"
+            }
+            release {
+              cppFlags "-O2"
+            }
           }
         }
       }
     }
   }
 
-  externalNativeBuild {
-    cmake {
-      path "CMakeLists.txt"
+  if (!usePrebuilt) {
+    externalNativeBuild {
+      cmake {
+        path "CMakeLists.txt"
+      }
     }
   }
 
@@ -114,7 +269,20 @@ android {
         "generated/java",
         "generated/jni"
       ]
+      if (usePrebuilt) {
+        jniLibs.srcDirs += [prebuiltJniDir]
+      }
     }
+  }
+}
+
+if (usePrebuilt) {
+  tasks.matching { task ->
+    task.name == "preBuild" ||
+      task.name.endsWith("PreBuild") ||
+      (task.name.startsWith("merge") && task.name.endsWith("JniLibFolders"))
+  }.configureEach {
+    dependsOn(preparePrebuiltTaskProvider)
   }
 }
 
