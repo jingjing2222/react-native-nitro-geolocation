@@ -50,15 +50,65 @@ if [[ "$RUN_ANDROID_PROVIDER_SELECTION_VALUE" == "1" ]]; then
   PROVIDER_SELECTION_PHYSICAL_DEVICE_VALUE="1"
 fi
 
+COMMON_FLOWS=(
+  current-position.yaml
+  watch-position.yaml
+  location-simulation.yaml
+  accuracy-presets.yaml
+  last-known-position.yaml
+  geocoding.yaml
+  location-availability.yaml
+  heading.yaml
+)
+
+ANDROID_FLOWS=(
+  issue-119-android.yaml
+  issue-120-android.yaml
+  issue-121-android.yaml
+  issue-122-android.yaml
+  permission-check.yaml
+  android-request-options.yaml
+  "${COMMON_FLOWS[@]}"
+  issue-67-android-coarse-location.yaml
+  provider-settings.yaml
+  background-e2e.yaml
+  mocked-metadata-android-true.yaml
+  api-errors.yaml
+  compat-api.yaml
+)
+
+if [[ "$RUN_ANDROID_PROVIDER_SELECTION_VALUE" == "1" ]]; then
+  ANDROID_FLOWS=(
+    "${ANDROID_FLOWS[@]:0:5}"
+    android-provider-selection.yaml
+    "${ANDROID_FLOWS[@]:5}"
+  )
+fi
+
+run_maestro_flows() {
+  local maestro_extra_args=()
+  local arg
+  for arg in "${MAESTRO_DEVICE_ARGS[@]}"; do
+    maestro_extra_args+=(--maestro-arg "$arg")
+  done
+
+  "$SCRIPT_DIR/maestro-retry-flows.sh" \
+    --platform android \
+    --flow-dir "$FLOW_DIR" \
+    --maestro "$MAESTRO_BIN" \
+    "${maestro_extra_args[@]}" \
+    --env "RUN_ANDROID_PROVIDER_SELECTION=$RUN_ANDROID_PROVIDER_SELECTION_VALUE" \
+    --env "PROVIDER_SELECTION_PHYSICAL_DEVICE=$PROVIDER_SELECTION_PHYSICAL_DEVICE_VALUE" \
+    -- "$@"
+}
+
 "$ADB_BIN" "${ADB_DEVICE_ARGS[@]}" reverse tcp:8081 tcp:8081 >/dev/null
+status=0
+
 set_location_enabled true
-"$MAESTRO_BIN" test --platform android \
-  "${MAESTRO_DEVICE_ARGS[@]}" \
-  -e RUN_ANDROID_PROVIDER_SELECTION="$RUN_ANDROID_PROVIDER_SELECTION_VALUE" \
-  -e PROVIDER_SELECTION_PHYSICAL_DEVICE="$PROVIDER_SELECTION_PHYSICAL_DEVICE_VALUE" \
-  "$FLOW_DIR/all-tests.yaml"
+run_maestro_flows "${ANDROID_FLOWS[@]}" || status=1
 
 set_location_enabled false
-"$MAESTRO_BIN" test --platform android \
-  "${MAESTRO_DEVICE_ARGS[@]}" \
-  "$FLOW_DIR/provider-settings-not-ready.yaml"
+run_maestro_flows provider-settings-not-ready.yaml || status=1
+
+exit "$status"
