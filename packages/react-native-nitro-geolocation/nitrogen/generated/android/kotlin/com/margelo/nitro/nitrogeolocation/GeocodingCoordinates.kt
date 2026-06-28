@@ -35,7 +35,7 @@ data class GeocodingCoordinates(
   }
 
   override fun hashCode(): Int {
-    return arrayOf(
+    return arrayOf<Any?>(
       latitude,
       longitude
     ).contentDeepHashCode()

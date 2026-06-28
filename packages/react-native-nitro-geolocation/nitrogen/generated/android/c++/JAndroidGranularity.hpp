@@ -15,7 +15,7 @@ namespace margelo::nitro::nitrogeolocation {
   using namespace facebook;
 
   /**
-   * The C++ JNI bridge between the C++ enum "AndroidGranularity" and the the Kotlin enum "AndroidGranularity".
+   * The C++ JNI bridge between the C++ enum "AndroidGranularity" and the Kotlin enum "AndroidGranularity".
    */
   struct JAndroidGranularity final: public jni::JavaClass<JAndroidGranularity> {
   public:

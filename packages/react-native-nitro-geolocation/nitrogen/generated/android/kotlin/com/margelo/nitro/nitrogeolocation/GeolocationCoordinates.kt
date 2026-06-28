@@ -55,7 +55,7 @@ data class GeolocationCoordinates(
   }
 
   override fun hashCode(): Int {
-    return arrayOf(
+    return arrayOf<Any?>(
       latitude,
       longitude,
       altitude,

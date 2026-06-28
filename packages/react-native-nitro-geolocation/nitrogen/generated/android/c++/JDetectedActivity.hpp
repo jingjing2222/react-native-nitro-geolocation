@@ -18,7 +18,7 @@ namespace margelo::nitro::nitrogeolocation {
   using namespace facebook;
 
   /**
-   * The C++ JNI bridge between the C++ struct "DetectedActivity" and the the Kotlin data class "DetectedActivity".
+   * The C++ JNI bridge between the C++ struct "DetectedActivity" and the Kotlin data class "DetectedActivity".
    */
   struct JDetectedActivity final: public jni::JavaClass<JDetectedActivity> {
   public:

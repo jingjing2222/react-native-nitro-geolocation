@@ -19,7 +19,7 @@ namespace margelo::nitro::nitrogeolocation {
   using namespace facebook;
 
   /**
-   * The C++ JNI bridge between the C++ struct "BackgroundHttpSyncResult" and the the Kotlin data class "BackgroundHttpSyncResult".
+   * The C++ JNI bridge between the C++ struct "BackgroundHttpSyncResult" and the Kotlin data class "BackgroundHttpSyncResult".
    */
   struct JBackgroundHttpSyncResult final: public jni::JavaClass<JBackgroundHttpSyncResult> {
   public:

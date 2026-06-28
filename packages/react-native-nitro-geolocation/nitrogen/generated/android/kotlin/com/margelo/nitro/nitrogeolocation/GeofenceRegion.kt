@@ -67,7 +67,7 @@ data class GeofenceRegion(
   }
 
   override fun hashCode(): Int {
-    return arrayOf(
+    return arrayOf<Any?>(
       identifier,
       latitude,
       longitude,

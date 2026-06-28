@@ -15,7 +15,7 @@ namespace margelo::nitro::nitrogeolocation {
   using namespace facebook;
 
   /**
-   * The C++ JNI bridge between the C++ enum "LocationProviderInternal" and the the Kotlin enum "LocationProviderInternal".
+   * The C++ JNI bridge between the C++ enum "LocationProviderInternal" and the Kotlin enum "LocationProviderInternal".
    */
   struct JLocationProviderInternal final: public jni::JavaClass<JLocationProviderInternal> {
   public:

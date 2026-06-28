@@ -35,7 +35,7 @@ data class IOSBackgroundLocationStatus(
   }
 
   override fun hashCode(): Int {
-    return arrayOf(
+    return arrayOf<Any?>(
       allowsBackgroundLocationUpdates,
       significantChangesEnabled
     ).contentDeepHashCode()

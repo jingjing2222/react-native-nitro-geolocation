@@ -15,7 +15,7 @@ namespace margelo::nitro::nitrogeolocation {
   using namespace facebook;
 
   /**
-   * The C++ JNI bridge between the C++ enum "BackgroundLocationSource" and the the Kotlin enum "BackgroundLocationSource".
+   * The C++ JNI bridge between the C++ enum "BackgroundLocationSource" and the Kotlin enum "BackgroundLocationSource".
    */
   struct JBackgroundLocationSource final: public jni::JavaClass<JBackgroundLocationSource> {
   public:

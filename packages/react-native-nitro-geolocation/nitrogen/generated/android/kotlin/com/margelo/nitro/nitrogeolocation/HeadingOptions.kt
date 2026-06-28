@@ -31,7 +31,7 @@ data class HeadingOptions(
   }
 
   override fun hashCode(): Int {
-    return arrayOf(
+    return arrayOf<Any?>(
       headingFilter
     ).contentDeepHashCode()
   }

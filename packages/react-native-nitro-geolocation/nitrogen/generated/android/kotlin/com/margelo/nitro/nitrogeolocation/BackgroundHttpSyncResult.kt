@@ -47,7 +47,7 @@ data class BackgroundHttpSyncResult(
   }
 
   override fun hashCode(): Int {
-    return arrayOf(
+    return arrayOf<Any?>(
       success,
       statusCode,
       syncedLocationIds,

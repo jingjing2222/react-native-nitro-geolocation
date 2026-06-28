@@ -35,7 +35,7 @@ data class LocationAccuracyOptions(
   }
 
   override fun hashCode(): Int {
-    return arrayOf(
+    return arrayOf<Any?>(
       android,
       ios
     ).contentDeepHashCode()

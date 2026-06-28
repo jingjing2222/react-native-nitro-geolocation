@@ -47,7 +47,7 @@ data class CompatGeolocationError(
   }
 
   override fun hashCode(): Int {
-    return arrayOf(
+    return arrayOf<Any?>(
       code,
       message,
       PERMISSION_DENIED,

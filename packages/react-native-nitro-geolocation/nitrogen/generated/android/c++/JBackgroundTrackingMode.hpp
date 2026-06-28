@@ -15,7 +15,7 @@ namespace margelo::nitro::nitrogeolocation {
   using namespace facebook;
 
   /**
-   * The C++ JNI bridge between the C++ enum "BackgroundTrackingMode" and the the Kotlin enum "BackgroundTrackingMode".
+   * The C++ JNI bridge between the C++ enum "BackgroundTrackingMode" and the Kotlin enum "BackgroundTrackingMode".
    */
   struct JBackgroundTrackingMode final: public jni::JavaClass<JBackgroundTrackingMode> {
   public:

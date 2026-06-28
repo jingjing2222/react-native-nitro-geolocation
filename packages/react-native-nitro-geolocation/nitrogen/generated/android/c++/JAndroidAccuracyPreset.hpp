@@ -15,7 +15,7 @@ namespace margelo::nitro::nitrogeolocation {
   using namespace facebook;
 
   /**
-   * The C++ JNI bridge between the C++ enum "AndroidAccuracyPreset" and the the Kotlin enum "AndroidAccuracyPreset".
+   * The C++ JNI bridge between the C++ enum "AndroidAccuracyPreset" and the Kotlin enum "AndroidAccuracyPreset".
    */
   struct JAndroidAccuracyPreset final: public jni::JavaClass<JAndroidAccuracyPreset> {
   public:

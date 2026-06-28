@@ -17,7 +17,7 @@ namespace margelo::nitro::nitrogeolocation {
   using namespace facebook;
 
   /**
-   * The C++ JNI bridge between the C++ struct "GeocodingCoordinates" and the the Kotlin data class "GeocodingCoordinates".
+   * The C++ JNI bridge between the C++ struct "GeocodingCoordinates" and the Kotlin data class "GeocodingCoordinates".
    */
   struct JGeocodingCoordinates final: public jni::JavaClass<JGeocodingCoordinates> {
   public:

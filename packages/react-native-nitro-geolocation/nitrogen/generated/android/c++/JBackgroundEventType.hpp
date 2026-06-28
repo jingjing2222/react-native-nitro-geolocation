@@ -15,7 +15,7 @@ namespace margelo::nitro::nitrogeolocation {
   using namespace facebook;
 
   /**
-   * The C++ JNI bridge between the C++ enum "BackgroundEventType" and the the Kotlin enum "BackgroundEventType".
+   * The C++ JNI bridge between the C++ enum "BackgroundEventType" and the Kotlin enum "BackgroundEventType".
    */
   struct JBackgroundEventType final: public jni::JavaClass<JBackgroundEventType> {
   public:

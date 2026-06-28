@@ -17,7 +17,7 @@ namespace margelo::nitro::nitrogeolocation {
   using namespace facebook;
 
   /**
-   * The C++ JNI bridge between the C++ struct "ActivityRecognitionOptions" and the the Kotlin data class "ActivityRecognitionOptions".
+   * The C++ JNI bridge between the C++ struct "ActivityRecognitionOptions" and the Kotlin data class "ActivityRecognitionOptions".
    */
   struct JActivityRecognitionOptions final: public jni::JavaClass<JActivityRecognitionOptions> {
   public:

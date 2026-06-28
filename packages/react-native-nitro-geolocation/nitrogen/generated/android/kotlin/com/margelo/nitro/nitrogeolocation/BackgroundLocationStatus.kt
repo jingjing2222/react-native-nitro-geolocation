@@ -83,7 +83,7 @@ data class BackgroundLocationStatus(
   }
 
   override fun hashCode(): Int {
-    return arrayOf(
+    return arrayOf<Any?>(
       state,
       isRunning,
       isConfigured,

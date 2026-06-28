@@ -55,7 +55,7 @@ data class LocationProviderStatus(
   }
 
   override fun hashCode(): Int {
-    return arrayOf(
+    return arrayOf<Any?>(
       locationServicesEnabled,
       backgroundModeEnabled,
       gpsAvailable,

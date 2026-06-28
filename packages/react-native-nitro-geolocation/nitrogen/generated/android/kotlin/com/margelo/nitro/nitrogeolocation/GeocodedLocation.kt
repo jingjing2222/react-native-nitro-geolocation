@@ -39,7 +39,7 @@ data class GeocodedLocation(
   }
 
   override fun hashCode(): Int {
-    return arrayOf(
+    return arrayOf<Any?>(
       latitude,
       longitude,
       accuracy

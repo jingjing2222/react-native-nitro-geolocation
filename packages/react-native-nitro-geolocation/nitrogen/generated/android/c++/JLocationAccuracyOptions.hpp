@@ -21,7 +21,7 @@ namespace margelo::nitro::nitrogeolocation {
   using namespace facebook;
 
   /**
-   * The C++ JNI bridge between the C++ struct "LocationAccuracyOptions" and the the Kotlin data class "LocationAccuracyOptions".
+   * The C++ JNI bridge between the C++ struct "LocationAccuracyOptions" and the Kotlin data class "LocationAccuracyOptions".
    */
   struct JLocationAccuracyOptions final: public jni::JavaClass<JLocationAccuracyOptions> {
   public:

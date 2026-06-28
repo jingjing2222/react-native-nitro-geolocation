@@ -15,7 +15,7 @@ namespace margelo::nitro::nitrogeolocation {
   using namespace facebook;
 
   /**
-   * The C++ JNI bridge between the C++ enum "DetectedActivityType" and the the Kotlin enum "DetectedActivityType".
+   * The C++ JNI bridge between the C++ enum "DetectedActivityType" and the Kotlin enum "DetectedActivityType".
    */
   struct JDetectedActivityType final: public jni::JavaClass<JDetectedActivityType> {
   public:

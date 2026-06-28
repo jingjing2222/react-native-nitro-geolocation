@@ -51,7 +51,7 @@ data class IOSBackgroundLocationOptions(
   }
 
   override fun hashCode(): Int {
-    return arrayOf(
+    return arrayOf<Any?>(
       activityType,
       pausesLocationUpdatesAutomatically,
       showsBackgroundLocationIndicator,
