@@ -17,7 +17,7 @@ appId: nitrogeolocation.example
 - runFlow:
     when:
       platform: iOS
-      visible: "Open in.*NitroGeolocationExample.*"
+      visible: "Cancel|취소"
     commands:
       - tapOn:
           text: "Open|열기"
@@ -65,7 +65,7 @@ appId: nitrogeolocation.example
 - runFlow:
     when:
       platform: iOS
-      visible: "Open in.*NitroGeolocationExample.*"
+      visible: "Cancel|취소"
     commands:
       - tapOn:
           text: "Open|열기"
