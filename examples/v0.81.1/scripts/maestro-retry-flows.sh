@@ -135,6 +135,29 @@ recover_android_driver() {
   fi
 }
 
+dismiss_ios_open_alert() {
+  local attempt="$1"
+  local flow="$2"
+
+  [[ "$PLATFORM" == "ios" ]] || return
+
+  local alert_flow="$FLOW_DIR/dismiss-ios-open-alert.yaml"
+  [[ -f "$alert_flow" ]] || return
+
+  local cleanup_log
+  cleanup_log="$RUN_DIR/ios-open-alert-cleanup-${attempt}-$(basename "$flow" .yaml).log"
+
+  local cleanup_cmd=("$MAESTRO_BIN" test --platform "$PLATFORM")
+  if [[ "${#MAESTRO_ARGS[@]}" -gt 0 ]]; then
+    cleanup_cmd+=("${MAESTRO_ARGS[@]}")
+  fi
+  cleanup_cmd+=("$alert_flow")
+
+  if ! "${cleanup_cmd[@]}" >"$cleanup_log" 2>&1; then
+    echo "iOS open-alert cleanup failed before $flow. Continuing; log: $cleanup_log"
+  fi
+}
+
 run_flow() {
   local attempt="$1"
   local flow="$2"
@@ -155,6 +178,8 @@ run_flow() {
       echo "::group::Maestro $SUITE_NAME attempt $attempt/$ATTEMPTS: $flow (driver recovery $infra_try/$INFRA_RETRIES)"
       recover_android_driver
     fi
+
+    dismiss_ios_open_alert "$attempt" "$flow"
 
     set +e
     CMD=("$MAESTRO_BIN" test --platform "$PLATFORM")

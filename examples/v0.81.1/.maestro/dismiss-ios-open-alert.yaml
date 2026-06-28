@@ -1,0 +1,5 @@
+appId: nitrogeolocation.example
+---
+- tapOn:
+    text: "Open|열기"
+    optional: true
