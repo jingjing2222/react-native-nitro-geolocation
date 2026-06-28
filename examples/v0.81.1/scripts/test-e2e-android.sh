@@ -57,6 +57,9 @@ while IFS= read -r flow; do
 done < <("$NODE_BIN" "$SCRIPT_DIR/maestro-suite-flows.mjs" "$FLOW_DIR/all-tests.yaml" android)
 
 run_maestro_flows() {
+  local suite_name="$1"
+  shift
+
   local maestro_extra_args=()
   if [[ -n "${ANDROID_SERIAL:-}" ]]; then
     maestro_extra_args+=(--maestro-arg --udid --maestro-arg "$ANDROID_SERIAL")
@@ -66,6 +69,7 @@ run_maestro_flows() {
     --platform android \
     --flow-dir "$FLOW_DIR" \
     --maestro "$MAESTRO_BIN" \
+    --suite-name "$suite_name" \
     "${maestro_extra_args[@]}" \
     --env "RUN_ANDROID_PROVIDER_SELECTION=$RUN_ANDROID_PROVIDER_SELECTION_VALUE" \
     --env "PROVIDER_SELECTION_PHYSICAL_DEVICE=$PROVIDER_SELECTION_PHYSICAL_DEVICE_VALUE" \
@@ -76,9 +80,9 @@ adb_cmd reverse tcp:8081 tcp:8081 >/dev/null
 status=0
 
 set_location_enabled true
-run_maestro_flows "${ANDROID_FLOWS[@]}" || status=1
+run_maestro_flows "android location-enabled" "${ANDROID_FLOWS[@]}" || status=1
 
 set_location_enabled false
-run_maestro_flows provider-settings-not-ready.yaml || status=1
+run_maestro_flows "android location-disabled" provider-settings-not-ready.yaml || status=1
 
 exit "$status"

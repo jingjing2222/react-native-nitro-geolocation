@@ -15,6 +15,13 @@ appId: nitrogeolocation.example
 
 - openLink:
     link: nitrogeolocation://app/last-known-position?case=allowed
+- runFlow:
+    when:
+      platform: iOS
+      visible: ".*NitroGeolocationExample.*"
+    commands:
+      - tapOn:
+          text: "Open|열기"
 - waitForAnimationToEnd
 
 - extendedWaitUntil:
@@ -73,6 +80,13 @@ appId: nitrogeolocation.example
 
 - openLink:
     link: nitrogeolocation://app/last-known-position?case=denied
+- runFlow:
+    when:
+      platform: iOS
+      visible: ".*NitroGeolocationExample.*"
+    commands:
+      - tapOn:
+          text: "Open|열기"
 - waitForAnimationToEnd
 
 - extendedWaitUntil:

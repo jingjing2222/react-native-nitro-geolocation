@@ -16,6 +16,13 @@ appId: nitrogeolocation.example
 
 - openLink:
     link: nitrogeolocation://app/web-e2e?autorun=unavailable
+- runFlow:
+    when:
+      platform: iOS
+      visible: ".*NitroGeolocationExample.*"
+    commands:
+      - tapOn:
+          text: "Open|열기"
 - waitForAnimationToEnd
 
 - extendedWaitUntil:

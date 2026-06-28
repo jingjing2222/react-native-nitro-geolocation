@@ -11,6 +11,13 @@ appId: nitrogeolocation.example
 - stopApp
 - openLink:
     link: nitrogeolocation://app/permission-check
+- runFlow:
+    when:
+      platform: iOS
+      visible: ".*NitroGeolocationExample.*"
+    commands:
+      - tapOn:
+          text: "Open|열기"
 - waitForAnimationToEnd
 
 # Navigate directly to the permission contract page.

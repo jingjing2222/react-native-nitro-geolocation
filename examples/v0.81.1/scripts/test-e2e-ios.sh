@@ -17,4 +17,5 @@ done < <("$NODE_BIN" "$SCRIPT_DIR/maestro-suite-flows.mjs" "$FLOW_DIR/all-tests.
   --platform ios \
   --flow-dir "$FLOW_DIR" \
   --maestro "$MAESTRO_BIN" \
+  --suite-name "ios" \
   -- "${IOS_FLOWS[@]}"

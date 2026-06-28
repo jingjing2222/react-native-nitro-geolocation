@@ -10,6 +10,9 @@ Options:
   --maestro <path>      Maestro executable. Default: maestro.
   --maestro-arg <arg>   Extra Maestro arg. Can be repeated.
   --env <key=value>     Extra Maestro env var. Can be repeated.
+  --suite-name <name>   Label used in log messages. Default: suite.
+  --failure-log-lines <n|all>
+                      Lines of each final failed flow log to print. Default: all.
 USAGE
 }
 
@@ -17,6 +20,8 @@ PLATFORM=""
 FLOW_DIR=""
 ATTEMPTS="${MAESTRO_RETRY_ATTEMPTS:-3}"
 MAESTRO_BIN="${MAESTRO:-maestro}"
+SUITE_NAME="suite"
+FAILURE_LOG_LINES="${MAESTRO_RETRY_FAILURE_LOG_LINES:-all}"
 MAESTRO_ARGS=()
 MAESTRO_ENV_ARGS=()
 
@@ -46,6 +51,14 @@ while [[ $# -gt 0 ]]; do
       MAESTRO_ENV_ARGS+=("-e" "$2")
       shift 2
       ;;
+    --suite-name)
+      SUITE_NAME="$2"
+      shift 2
+      ;;
+    --failure-log-lines)
+      FAILURE_LOG_LINES="$2"
+      shift 2
+      ;;
     --)
       shift
       break
@@ -68,6 +81,10 @@ if [[ -z "$PLATFORM" || -z "$FLOW_DIR" ]]; then
 fi
 if ! [[ "$ATTEMPTS" =~ ^[1-9][0-9]*$ ]]; then
   echo "--attempts must be a positive integer." >&2
+  exit 2
+fi
+if [[ "$FAILURE_LOG_LINES" != "all" ]] && ! [[ "$FAILURE_LOG_LINES" =~ ^[1-9][0-9]*$ ]]; then
+  echo "--failure-log-lines must be a positive integer or 'all'." >&2
   exit 2
 fi
 
@@ -100,7 +117,7 @@ run_flow() {
     return 1
   fi
 
-  echo "::group::Maestro attempt $attempt/$ATTEMPTS: $flow"
+  echo "::group::Maestro $SUITE_NAME attempt $attempt/$ATTEMPTS: $flow"
   set +e
   CMD=("$MAESTRO_BIN" test --platform "$PLATFORM")
   if [[ "${#MAESTRO_ARGS[@]}" -gt 0 ]]; then
@@ -118,11 +135,30 @@ run_flow() {
   return "$status"
 }
 
+print_final_failure_log() {
+  local flow="$1"
+  local log_path
+  log_path="$(flow_log_path "$ATTEMPTS" "$flow")"
+
+  echo "::group::Maestro final failure log: $flow"
+  if [[ -f "$log_path" ]]; then
+    echo "Last attempt log: $log_path"
+    if [[ "$FAILURE_LOG_LINES" == "all" ]]; then
+      cat "$log_path"
+    else
+      tail -n "$FAILURE_LOG_LINES" "$log_path"
+    fi
+  else
+    echo "Missing final attempt log: $log_path"
+  fi
+  echo "::endgroup::"
+}
+
 for ((attempt = 1; attempt <= ATTEMPTS; attempt++)); do
   if [[ "$attempt" -eq 1 ]]; then
-    echo "Maestro attempt $attempt/$ATTEMPTS: initial full sweep (${#PENDING[@]} flow(s))"
+    echo "Maestro $SUITE_NAME attempt $attempt/$ATTEMPTS: initial full sweep (${#PENDING[@]} flow(s))"
   else
-    echo "Maestro attempt $attempt/$ATTEMPTS: retry failed flows only (${#PENDING[@]} flow(s))"
+    echo "Maestro $SUITE_NAME attempt $attempt/$ATTEMPTS: retry failed flows only (${#PENDING[@]} flow(s))"
   fi
   NEXT=()
 
@@ -137,18 +173,22 @@ for ((attempt = 1; attempt <= ATTEMPTS; attempt++)); do
 
   if [[ "${#NEXT[@]}" -eq 0 ]]; then
     PENDING=()
-    echo "All Maestro flows passed after attempt $attempt/$ATTEMPTS."
+    echo "All Maestro $SUITE_NAME flows passed after attempt $attempt/$ATTEMPTS."
     exit 0
   fi
   PENDING=("${NEXT[@]}")
 done
 
 echo "::group::Maestro final failures"
-echo "Final failed Maestro flow(s): ${#PENDING[@]}"
+echo "Final failed Maestro $SUITE_NAME flow(s): ${#PENDING[@]}"
 for flow in "${PENDING[@]}"; do
   echo "- $flow"
 done
 echo "Retry logs: $RUN_DIR"
 echo "::endgroup::"
+
+for flow in "${PENDING[@]}"; do
+  print_final_failure_log "$flow"
+done
 
 exit 1

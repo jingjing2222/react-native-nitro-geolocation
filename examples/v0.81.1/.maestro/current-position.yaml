@@ -16,6 +16,13 @@ appId: nitrogeolocation.example
 
 - openLink:
     link: nitrogeolocation://app/current-position
+- runFlow:
+    when:
+      platform: iOS
+      visible: ".*NitroGeolocationExample.*"
+    commands:
+      - tapOn:
+          text: "Open|열기"
 - waitForAnimationToEnd
 
 # First ensure we have permission
@@ -66,6 +73,13 @@ appId: nitrogeolocation.example
 
 - openLink:
     link: nitrogeolocation://app/current-position
+- runFlow:
+    when:
+      platform: iOS
+      visible: ".*NitroGeolocationExample.*"
+    commands:
+      - tapOn:
+          text: "Open|열기"
 - waitForAnimationToEnd
 
 - tapOn:

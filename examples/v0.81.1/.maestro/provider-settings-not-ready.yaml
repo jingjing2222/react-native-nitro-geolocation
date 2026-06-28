@@ -21,6 +21,13 @@ appId: nitrogeolocation.example
 
 - openLink:
     link: nitrogeolocation://app/provider-settings
+- runFlow:
+    when:
+      platform: iOS
+      visible: ".*NitroGeolocationExample.*"
+    commands:
+      - tapOn:
+          text: "Open|열기"
 - waitForAnimationToEnd
 
 - extendedWaitUntil:
@@ -47,5 +54,8 @@ appId: nitrogeolocation.example
     visible: "Settings: blocked"
     timeout: 10000
 
-- assertVisible: "Name: SETTINGS_NOT_SATISFIED"
+- extendedWaitUntil:
+    visible:
+      id: "provider-settings-error-name"
+    timeout: 10000
 - assertVisible: "Provider readiness: not ready"

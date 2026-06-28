@@ -16,6 +16,13 @@ appId: nitrogeolocation.example
 
 - openLink:
     link: nitrogeolocation://app/geocoding
+- runFlow:
+    when:
+      platform: iOS
+      visible: ".*NitroGeolocationExample.*"
+    commands:
+      - tapOn:
+          text: "Open|열기"
 - waitForAnimationToEnd
 - tapOn:
     id: "com.google.android.googlequicksearchbox:id/assistant_robin_fast_track_banner_dismiss_button"

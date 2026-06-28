@@ -17,6 +17,13 @@ appId: nitrogeolocation.example
 
 - openLink:
     link: nitrogeolocation://app/mocked-metadata
+- runFlow:
+    when:
+      platform: iOS
+      visible: ".*NitroGeolocationExample.*"
+    commands:
+      - tapOn:
+          text: "Open|열기"
 - waitForAnimationToEnd
 
 - extendedWaitUntil:
