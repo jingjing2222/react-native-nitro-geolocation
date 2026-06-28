@@ -8,6 +8,7 @@ import {
 import type { GeolocationResponse } from "react-native-nitro-geolocation";
 import {
   ButtonRow,
+  DumpedText,
   KeyValueBlock,
   PositionInfo,
   ScenarioButton,
@@ -17,6 +18,7 @@ import {
   captureLocationError,
   runWithNativeGeolocation,
   sharedStyles,
+  useE2EDumpNode,
   usePermissionStatus
 } from "./scenario";
 import type { CapturedLocationError } from "./scenario";
@@ -148,6 +150,7 @@ export default function ApiErrorsScreen() {
             onPress={handleCheckPermission}
             color="#2196F3"
             containerStyle={sharedStyles.button}
+            testID="api-errors-check-permission-button"
           />
           <ScenarioButton
             title={isLoading ? "Requesting..." : "Request Permission"}
@@ -155,6 +158,7 @@ export default function ApiErrorsScreen() {
             disabled={isLoading}
             color="#4CAF50"
             containerStyle={sharedStyles.button}
+            testID="api-errors-request-permission-button"
           />
         </ButtonRow>
       </ScenarioSection>
@@ -170,6 +174,7 @@ export default function ApiErrorsScreen() {
           onPress={fetchCurrentPosition}
           disabled={isLoading}
           color="#607D8B"
+          testID="api-errors-get-position-button"
         />
         <PositionInfo
           title="Current Position"
@@ -195,13 +200,15 @@ export default function ApiErrorsScreen() {
           onPress={forceTimeoutError}
           disabled={isLoading}
           color="#D84315"
+          testID="api-errors-force-timeout-button"
         />
-        <Text
+        <DumpedText
+          dumpText={`Result: ${position ? "success" : error ? "error" : "idle"}`}
           style={sharedStyles.resultStatus}
           testID="api-error-result-status"
         >
           Result: {position ? "success" : error ? "error" : "idle"}
-        </Text>
+        </DumpedText>
         {error && (
           <KeyValueBlock
             testID="api-error-details"
@@ -216,24 +223,51 @@ export default function ApiErrorsScreen() {
             ]}
           />
         )}
-        <View
-          style={sharedStyles.scenarioContainer}
-          testID="api-error-code-contract"
-        >
-          <Text style={sharedStyles.scenarioTitle}>Error Code Contract</Text>
-          {ERROR_CODE_CONTRACT.map((item) => (
-            <View
-              key={item.name}
-              style={sharedStyles.statusStackRow}
-              testID={`api-error-contract-${item.name}`}
-            >
-              <Text style={sharedStyles.scenarioTitle}>Code {item.code}</Text>
-              <Text style={sharedStyles.scenarioText}>{item.name}</Text>
-              <Text style={sharedStyles.resultMessage}>{item.meaning}</Text>
-            </View>
-          ))}
-        </View>
+        <ErrorCodeContractBlock />
       </ScenarioSection>
     </ScenarioScreen>
+  );
+}
+
+function ErrorCodeContractBlock() {
+  useE2EDumpNode(
+    ERROR_CODE_CONTRACT.map(
+      (item) => `Code ${item.code} ${item.name} ${item.meaning}`
+    ).join(" "),
+    "api-error-code-contract"
+  );
+
+  return (
+    <View
+      style={sharedStyles.scenarioContainer}
+      testID="api-error-code-contract"
+    >
+      <Text style={sharedStyles.scenarioTitle}>Error Code Contract</Text>
+      {ERROR_CODE_CONTRACT.map((item) => (
+        <ErrorCodeContractRow item={item} key={item.name} />
+      ))}
+    </View>
+  );
+}
+
+function ErrorCodeContractRow({
+  item
+}: {
+  item: (typeof ERROR_CODE_CONTRACT)[number];
+}) {
+  useE2EDumpNode(
+    `Code ${item.code} ${item.name} ${item.meaning}`,
+    `api-error-contract-${item.name}`
+  );
+
+  return (
+    <View
+      style={sharedStyles.statusStackRow}
+      testID={`api-error-contract-${item.name}`}
+    >
+      <Text style={sharedStyles.scenarioTitle}>Code {item.code}</Text>
+      <Text style={sharedStyles.scenarioText}>{item.name}</Text>
+      <Text style={sharedStyles.resultMessage}>{item.meaning}</Text>
+    </View>
   );
 }

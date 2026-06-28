@@ -80,6 +80,24 @@ live provider-selection proof. The wrapper rejects emulators for this proof and
 requires `ANDROID_SERIAL` when multiple Android devices are connected.
 Platform-only flows are selected inside the master flow with `when.platform`.
 
+## Stable Screen Queries
+
+Scenario pages expose a small E2E control plane at the top of the screen before
+the human-readable content. `ScenarioButton` automatically registers a matching
+`e2e-action-*` tap target there, and result/status components mirror their
+important text into `e2e-state-dump`. This keeps Maestro queries independent of
+device viewport height while leaving the full visual scenario page intact for
+humans.
+
+When adding a flow:
+
+- Tap app actions by `id: "e2e-action-<button-testID>"`.
+- Assert stable state from the mirrored result ids or visible result text.
+- Avoid `scrollUntilVisible` for app content; add a `testID` or `DumpedText`
+  mirror instead.
+- Text taps are reserved for system UI such as permission dialogs, deep-link
+  open prompts, and web browser prompts.
+
 ## Test Files
 
 ### `permission-check.yaml`

@@ -2,6 +2,7 @@ import React from "react";
 import { Text, View } from "react-native";
 import type { GeolocationResponse } from "react-native-nitro-geolocation";
 import { sharedStyles } from "../styles";
+import { useE2EDumpNode } from "./E2EControlPlane";
 
 /**
  * Optional testID map for each rendered `PositionInfo` field.
@@ -133,47 +134,128 @@ export function PositionInfo({
   if (!position) return null;
 
   return (
+    <PositionInfoContent
+      includeOptionalFields={includeOptionalFields}
+      position={position}
+      testIDs={testIDs}
+      title={title}
+    />
+  );
+}
+
+function PositionInfoContent({
+  includeOptionalFields,
+  position,
+  testIDs,
+  title
+}: Required<Pick<PositionInfoProps, "includeOptionalFields">> &
+  Pick<PositionInfoProps, "position" | "testIDs" | "title"> & {
+    position: GeolocationResponse;
+    testIDs: PositionInfoTestIDs;
+  }) {
+  const latitudeText = `Latitude: ${position.coords.latitude.toFixed(6)}`;
+  const longitudeText = `Longitude: ${position.coords.longitude.toFixed(6)}`;
+  const accuracyText = `Accuracy: ${position.coords.accuracy.toFixed(2)}m`;
+  const mockedText =
+    position.mocked === undefined
+      ? undefined
+      : `Mocked: ${position.mocked ? "true" : "false"}`;
+  const providerText =
+    position.provider === undefined
+      ? undefined
+      : `Provider: ${position.provider}`;
+  const altitudeText =
+    position.coords.altitude === null
+      ? undefined
+      : `Altitude: ${position.coords.altitude.toFixed(2)}m`;
+  const speedText =
+    position.coords.speed === null
+      ? undefined
+      : `Speed: ${position.coords.speed.toFixed(2)}m/s`;
+  const headingText =
+    position.coords.heading === null
+      ? undefined
+      : `Heading: ${position.coords.heading.toFixed(2)}deg`;
+  const timeText = `Time: ${new Date(position.timestamp).toLocaleString()}`;
+
+  useE2EDumpNode(
+    [
+      title,
+      latitudeText,
+      longitudeText,
+      accuracyText,
+      includeOptionalFields ? mockedText : undefined,
+      includeOptionalFields ? providerText : undefined
+    ]
+      .filter(Boolean)
+      .join(" "),
+    testIDs.container
+  );
+  useE2EDumpNode(title, testIDs.title);
+  useE2EDumpNode(latitudeText, testIDs.latitude);
+  useE2EDumpNode(longitudeText, testIDs.longitude);
+  useE2EDumpNode(accuracyText, testIDs.accuracy);
+  useE2EDumpNode(
+    includeOptionalFields ? mockedText : undefined,
+    testIDs.mocked
+  );
+  useE2EDumpNode(
+    includeOptionalFields ? providerText : undefined,
+    testIDs.provider
+  );
+  useE2EDumpNode(
+    includeOptionalFields ? altitudeText : undefined,
+    testIDs.altitude
+  );
+  useE2EDumpNode(includeOptionalFields ? speedText : undefined, testIDs.speed);
+  useE2EDumpNode(
+    includeOptionalFields ? headingText : undefined,
+    testIDs.heading
+  );
+  useE2EDumpNode(includeOptionalFields ? timeText : undefined, testIDs.time);
+
+  return (
     <View style={sharedStyles.positionContainer} testID={testIDs.container}>
       <Text style={sharedStyles.positionTitle} testID={testIDs.title}>
         {title}
       </Text>
       <Text style={sharedStyles.positionText} testID={testIDs.latitude}>
-        Latitude: {position.coords.latitude.toFixed(6)}
+        {latitudeText}
       </Text>
       <Text style={sharedStyles.positionText} testID={testIDs.longitude}>
-        Longitude: {position.coords.longitude.toFixed(6)}
+        {longitudeText}
       </Text>
       <Text style={sharedStyles.positionText} testID={testIDs.accuracy}>
-        Accuracy: {position.coords.accuracy.toFixed(2)}m
+        {accuracyText}
       </Text>
       {includeOptionalFields && position.mocked !== undefined && (
         <Text style={sharedStyles.positionText} testID={testIDs.mocked}>
-          Mocked: {position.mocked ? "true" : "false"}
+          {mockedText}
         </Text>
       )}
       {includeOptionalFields && position.provider !== undefined && (
         <Text style={sharedStyles.positionText} testID={testIDs.provider}>
-          Provider: {position.provider}
+          {providerText}
         </Text>
       )}
       {includeOptionalFields && position.coords.altitude !== null && (
         <Text style={sharedStyles.positionText} testID={testIDs.altitude}>
-          Altitude: {position.coords.altitude.toFixed(2)}m
+          {altitudeText}
         </Text>
       )}
       {includeOptionalFields && position.coords.speed !== null && (
         <Text style={sharedStyles.positionText} testID={testIDs.speed}>
-          Speed: {position.coords.speed.toFixed(2)}m/s
+          {speedText}
         </Text>
       )}
       {includeOptionalFields && position.coords.heading !== null && (
         <Text style={sharedStyles.positionText} testID={testIDs.heading}>
-          Heading: {position.coords.heading.toFixed(2)}deg
+          {headingText}
         </Text>
       )}
       {includeOptionalFields ? (
         <Text style={sharedStyles.positionText} testID={testIDs.time}>
-          Time: {new Date(position.timestamp).toLocaleString()}
+          {timeText}
         </Text>
       ) : null}
     </View>

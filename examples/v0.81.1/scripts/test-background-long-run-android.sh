@@ -9,16 +9,18 @@ ADB_BIN="${ADB:-adb}"
 MAESTRO_BIN="${MAESTRO:-maestro}"
 RUN_REBOOT="${RUN_REBOOT:-0}"
 
-ADB_ARGS=()
 MAESTRO_ARGS=(--platform android)
 
 if [[ -n "${ANDROID_SERIAL:-}" ]]; then
-  ADB_ARGS=(-s "$ANDROID_SERIAL")
   MAESTRO_ARGS+=(--device "$ANDROID_SERIAL")
 fi
 
 adb_device() {
-  "$ADB_BIN" "${ADB_ARGS[@]}" "$@"
+  if [[ -n "${ANDROID_SERIAL:-}" ]]; then
+    "$ADB_BIN" -s "$ANDROID_SERIAL" "$@"
+  else
+    "$ADB_BIN" "$@"
+  fi
 }
 
 set_android_location_enabled() {

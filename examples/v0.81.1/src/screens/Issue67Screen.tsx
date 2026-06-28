@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from "react";
-import { PermissionsAndroid, Platform, Text } from "react-native";
+import { PermissionsAndroid, Platform } from "react-native";
 import { getCurrentPosition } from "react-native-nitro-geolocation";
 import type { GeolocationResponse } from "react-native-nitro-geolocation";
 import {
   ButtonRow,
+  DumpedText,
   ErrorBlock,
   PositionInfo,
   ScenarioButton,
@@ -158,9 +159,13 @@ export default function Issue67Screen() {
           color="#607D8B"
           testID="issue67-get-position-button"
         />
-        <Text style={sharedStyles.resultStatus} testID="issue67-result-status">
+        <DumpedText
+          dumpText={`Result: ${position ? "success" : error ? "error" : "idle"}`}
+          style={sharedStyles.resultStatus}
+          testID="issue67-result-status"
+        >
           Result: {position ? "success" : error ? "error" : "idle"}
-        </Text>
+        </DumpedText>
         {error && <ErrorBlock message={error} testID="issue67-error" />}
         <PositionInfo
           title="Approximate Current Position"

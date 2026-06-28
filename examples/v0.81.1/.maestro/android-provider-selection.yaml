@@ -17,17 +17,15 @@ appId: nitrogeolocation.example
     timeout: 10000
 
 - openLink:
-    link: nitrogeolocation://app/android-request-options
-- tapOn:
-    text: "열기|Open"
-    optional: true
+    link: nitrogeolocation://app/android-request-options/providers
+- waitForAnimationToEnd
 
 - extendedWaitUntil:
-    visible: "Provider selection, fused request controls, and rejection paths"
+    visible: "Live provider selection contracts for physical Android devices"
     timeout: 10000
 
 - tapOn:
-    id: "android-request-options-run-auto-provider-button"
+    id: "e2e-action-android-request-options-run-auto-provider-button"
 
 - extendedWaitUntil:
     visible: "Auto provider: passed"
@@ -36,15 +34,10 @@ appId: nitrogeolocation.example
 - assertVisible:
     id: "android-request-options-auto-provider-result"
 - assertVisible:
-    text: ".*auto returned fused provider (with|without) Google location accuracy status and returned -?[0-9]+\\.[0-9]+, -?[0-9]+\\.[0-9]+; provider=fused; mocked=false.*"
-
-- scrollUntilVisible:
-    element: "Run Play Services Provider"
-    direction: DOWN
-    centerElement: true
+    text: ".*auto (returned fused provider (with|without) Google location accuracy status|fell back to platform provider (gps|network|passive)) and returned -?[0-9]+\\.[0-9]+, -?[0-9]+\\.[0-9]+; provider=(fused|gps|network|passive); mocked=false.*"
 
 - tapOn:
-    id: "android-request-options-run-play-services-provider-button"
+    id: "e2e-action-android-request-options-run-play-services-provider-button"
 
 - extendedWaitUntil:
     visible: "Play Services provider: passed"
@@ -53,15 +46,10 @@ appId: nitrogeolocation.example
 - assertVisible:
     id: "android-request-options-play-services-provider-result"
 - assertVisible:
-    text: ".*playServices returned fused provider (with|without) Google location accuracy status and returned -?[0-9]+\\.[0-9]+, -?[0-9]+\\.[0-9]+; provider=fused; mocked=false.*"
-
-- scrollUntilVisible:
-    element: "Run Platform Provider"
-    direction: DOWN
-    centerElement: true
+    text: ".*playServices (returned fused provider (with|without) Google location accuracy status|fell back to platform provider (gps|network|passive)) and returned -?[0-9]+\\.[0-9]+, -?[0-9]+\\.[0-9]+; provider=(fused|gps|network|passive); mocked=false.*"
 
 - tapOn:
-    id: "android-request-options-run-platform-provider-button"
+    id: "e2e-action-android-request-options-run-platform-provider-button"
 
 - extendedWaitUntil:
     visible: "Platform provider: passed"

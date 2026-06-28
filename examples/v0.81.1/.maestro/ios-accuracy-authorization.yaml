@@ -15,16 +15,14 @@ appId: nitrogeolocation.example
 
 - openLink:
     link: nitrogeolocation://app/ios-accuracy-authorization
-- tapOn:
-    text: "열기|Open"
-    optional: true
+- waitForAnimationToEnd
 
 - extendedWaitUntil:
     visible: "Precise and reduced accuracy API contract"
     timeout: 10000
 
 - tapOn:
-    id: "ios-accuracy-authorization-run-read-button"
+    id: "e2e-action-ios-accuracy-authorization-run-read-button"
 
 - extendedWaitUntil:
     visible: "Read authorization: passed"
@@ -35,15 +33,12 @@ appId: nitrogeolocation.example
 - assertVisible:
     text: ".*Authorization: (full|reduced); permission=granted.*"
 
-- scrollUntilVisible:
-    element: "3. Temporary Full Accuracy"
-    direction: DOWN
-
 - tapOn:
-    id: "ios-accuracy-authorization-run-temporary-button"
+    id: "e2e-action-ios-accuracy-authorization-run-temporary-button"
 - tapOn:
     text: ".*(Allow|허용|Turn On|켜기).*"
     optional: true
+- waitForAnimationToEnd
 
 - extendedWaitUntil:
     visible: "Temporary full accuracy: passed"
@@ -54,17 +49,8 @@ appId: nitrogeolocation.example
 - assertVisible:
     text: ".*Purpose PreciseE2E resolved (full|reduced); current authorization (full|reduced).*"
 
-- scrollUntilVisible:
-    element: "Run Invalid Purpose Key"
-    direction: DOWN
-    centerElement: true
-
 - tapOn:
-    text: "Run Invalid Purpose Key"
-
-- scrollUntilVisible:
-    element: "Invalid purposeKey: passed"
-    direction: DOWN
+    id: "e2e-action-ios-accuracy-authorization-run-invalid-button"
 
 - assertVisible:
     id: "ios-accuracy-authorization-invalid-result"
@@ -74,7 +60,6 @@ appId: nitrogeolocation.example
 - stopApp
 
 - launchApp:
-    clearState: true
     permissions:
       all: deny
 
@@ -86,25 +71,14 @@ appId: nitrogeolocation.example
 
 - openLink:
     link: nitrogeolocation://app/ios-accuracy-authorization
-- tapOn:
-    text: "열기|Open"
-    optional: true
+- waitForAnimationToEnd
 
 - extendedWaitUntil:
     visible: "Precise and reduced accuracy API contract"
     timeout: 10000
 
-- scrollUntilVisible:
-    element: "Run Denied Authorization Read"
-    direction: DOWN
-    centerElement: true
-
 - tapOn:
-    text: "Run Denied Authorization Read"
-
-- scrollUntilVisible:
-    element: "Denied read: passed"
-    direction: DOWN
+    id: "e2e-action-ios-accuracy-authorization-run-denied-button"
 
 - extendedWaitUntil:
     visible: "Denied read: passed"
@@ -112,9 +86,5 @@ appId: nitrogeolocation.example
 
 - assertVisible:
     id: "ios-accuracy-authorization-denied-result"
-- scrollUntilVisible:
-    element:
-      text: ".*Authorization: (full|reduced|unknown); permission=.*read API did not request permission.*"
-    direction: DOWN
 - assertVisible:
     text: ".*Authorization: (full|reduced|unknown); permission=.*read API did not request permission.*"

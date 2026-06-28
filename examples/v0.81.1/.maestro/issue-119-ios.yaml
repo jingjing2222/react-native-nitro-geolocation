@@ -13,16 +13,14 @@ appId: nitrogeolocation.example
 
 - openLink:
     link: nitrogeolocation://app/issue-119
-- tapOn:
-    text: "열기|Open"
-    optional: true
+- waitForAnimationToEnd
 
 - extendedWaitUntil:
     visible: "Issue 119"
     timeout: 15000
 
 - tapOn:
-    id: "issue-119-run-button"
+    id: "e2e-action-issue-119-run-button"
 - extendedWaitUntil:
     visible: "Issue 119: passed"
     timeout: 15000

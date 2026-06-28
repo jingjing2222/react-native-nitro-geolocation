@@ -23,13 +23,25 @@ jobs:
         with:
           fetch-depth: 0
 
-      - uses: actions/setup-node@v4
+      - name: Setup mise
+        uses: jdx/mise-action@v3
         with:
-          node-version: 24
-          registry-url: 'https://registry.npmjs.org'
+          install: false
+
+      - name: Trust and install tools via mise
+        run: |
+          mise trust --yes
+          mise install node
+
+      - name: Configure npm registry
+        run: |
+          echo "registry=https://registry.npmjs.org/" > ~/.npmrc
+          echo "//registry.npmjs.org/:_authToken=\${NODE_AUTH_TOKEN}" >> ~/.npmrc
 
       - name: Enable Corepack
-        run: corepack enable
+        run: |
+          corepack enable
+          mise reshim node
 
       - name: Install dependencies
         run: yarn install

@@ -1,0 +1,85 @@
+appId: nitrogeolocation.example
+---
+# Android watch request options: mixed granularity, maxUpdates, and unwatch isolation.
+
+- launchApp:
+    clearState: true
+    permissions:
+      android.permission.ACCESS_COARSE_LOCATION: allow
+      android.permission.ACCESS_FINE_LOCATION: allow
+
+- extendedWaitUntil:
+    visible: "Geolocation API"
+    timeout: 10000
+
+- openLink:
+    link: nitrogeolocation://app/android-request-options/watches
+- waitForAnimationToEnd
+
+- extendedWaitUntil:
+    visible: "Granularity, maxUpdates, and unwatch isolation contracts"
+    timeout: 10000
+
+- setLocation:
+    latitude: 37.5665
+    longitude: 126.978
+
+- tapOn:
+    id: "e2e-action-android-request-options-run-mixed-watch-button"
+
+- extendedWaitUntil:
+    visible: "Mixed watch: passed"
+    timeout: 30000
+
+- assertVisible:
+    id: "android-request-options-mixed-watch-result"
+- assertVisible:
+    text: ".*Coarse watcher stayed coarse.*fine watcher received.*"
+
+- setLocation:
+    latitude: 37.5672
+    longitude: 126.9787
+
+- tapOn:
+    id: "e2e-action-android-request-options-run-max-updates-button"
+
+- extendedWaitUntil:
+    visible: "Max updates first reading received; inject another location"
+    timeout: 30000
+
+- setLocation:
+    latitude: 37.5765
+    longitude: 126.988
+
+- extendedWaitUntil:
+    visible: "Max updates: passed"
+    timeout: 30000
+
+- assertVisible:
+    id: "android-request-options-max-updates-result"
+- assertVisible:
+    text: ".*Watch stopped after 1 update with maxUpdates=1.*"
+
+- setLocation:
+    latitude: 37.568
+    longitude: 126.9795
+
+- tapOn:
+    id: "e2e-action-android-request-options-run-heading-unwatch-button"
+
+- extendedWaitUntil:
+    visible: "Heading unwatch first reading received; inject another location"
+    timeout: 30000
+
+- setLocation:
+    latitude: 37.5765
+    longitude: 126.988
+
+- extendedWaitUntil:
+    visible: "Heading unwatch: passed"
+    timeout: 30000
+
+- assertVisible:
+    id: "android-request-options-heading-unwatch-result"
+- assertVisible:
+    text: ".*Heading unwatch left maxUpdates=1 location watch stopped.*"
