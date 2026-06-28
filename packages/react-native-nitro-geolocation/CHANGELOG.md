@@ -1,5 +1,13 @@
 # react-native-nitro-geolocation
 
+## 1.4.2
+
+### Patch Changes
+
+- 7a3f42a: Use the mise-managed Node.js 24.18.0 toolchain in CI.
+- d08cf25: Update `react-native-nitro-modules` to 0.35.10 and regenerate Nitrogen bindings.
+- 1f85a01: Publish Android AAR and iOS XCFramework prebuilt assets to GitHub Releases and use matching prebuilts during native installs when available.
+
 ## 1.4.1
 
 ### Patch Changes
