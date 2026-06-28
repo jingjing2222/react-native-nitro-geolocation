@@ -35,7 +35,7 @@ data class LocationError(
   }
 
   override fun hashCode(): Int {
-    return arrayOf(
+    return arrayOf<Any?>(
       code,
       message
     ).contentDeepHashCode()

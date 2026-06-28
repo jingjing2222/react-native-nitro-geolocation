@@ -22,7 +22,7 @@ namespace margelo::nitro::nitrogeolocation {
   using namespace facebook;
 
   /**
-   * The C++ JNI bridge between the C++ struct "AndroidBackgroundLocationOptions" and the the Kotlin data class "AndroidBackgroundLocationOptions".
+   * The C++ JNI bridge between the C++ struct "AndroidBackgroundLocationOptions" and the Kotlin data class "AndroidBackgroundLocationOptions".
    */
   struct JAndroidBackgroundLocationOptions final: public jni::JavaClass<JAndroidBackgroundLocationOptions> {
   public:

@@ -43,7 +43,7 @@ data class GetStoredBackgroundEventsOptions(
   }
 
   override fun hashCode(): Int {
-    return arrayOf(
+    return arrayOf<Any?>(
       types,
       limit,
       since,

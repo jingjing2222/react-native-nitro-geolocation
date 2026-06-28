@@ -35,7 +35,7 @@ data class GeofencingOptions(
   }
 
   override fun hashCode(): Int {
-    return arrayOf(
+    return arrayOf<Any?>(
       initialTrigger,
       notificationResponsiveness
     ).contentDeepHashCode()

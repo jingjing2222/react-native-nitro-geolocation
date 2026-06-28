@@ -17,7 +17,7 @@ namespace margelo::nitro::nitrogeolocation {
   using namespace facebook;
 
   /**
-   * The C++ JNI bridge between the C++ struct "HeadingOptions" and the the Kotlin data class "HeadingOptions".
+   * The C++ JNI bridge between the C++ struct "HeadingOptions" and the Kotlin data class "HeadingOptions".
    */
   struct JHeadingOptions final: public jni::JavaClass<JHeadingOptions> {
   public:

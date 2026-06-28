@@ -51,7 +51,7 @@ data class StoredBackgroundEventEnvelope(
   }
 
   override fun hashCode(): Int {
-    return arrayOf(
+    return arrayOf<Any?>(
       event,
       createdAt,
       id,

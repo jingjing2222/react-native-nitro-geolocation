@@ -15,7 +15,7 @@ namespace margelo::nitro::nitrogeolocation {
   using namespace facebook;
 
   /**
-   * The C++ JNI bridge between the C++ enum "AuthorizationLevel" and the the Kotlin enum "AuthorizationLevel".
+   * The C++ JNI bridge between the C++ enum "AuthorizationLevel" and the Kotlin enum "AuthorizationLevel".
    */
   struct JAuthorizationLevel final: public jni::JavaClass<JAuthorizationLevel> {
   public:

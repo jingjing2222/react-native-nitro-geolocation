@@ -25,7 +25,7 @@ namespace margelo::nitro::nitrogeolocation {
   using namespace facebook;
 
   /**
-   * The C++ JNI bridge between the C++ struct "GeolocationResponse" and the the Kotlin data class "GeolocationResponse".
+   * The C++ JNI bridge between the C++ struct "GeolocationResponse" and the Kotlin data class "GeolocationResponse".
    */
   struct JGeolocationResponse final: public jni::JavaClass<JGeolocationResponse> {
   public:

@@ -39,7 +39,7 @@ data class AndroidBackgroundLocationStatus(
   }
 
   override fun hashCode(): Int {
-    return arrayOf(
+    return arrayOf<Any?>(
       isForegroundServiceRunning,
       isIgnoringBatteryOptimizations,
       notificationPermission

@@ -27,7 +27,7 @@ namespace margelo::nitro::nitrogeolocation {
   using namespace facebook;
 
   /**
-   * The C++ JNI bridge between the C++ struct "LocationRequestOptions" and the the Kotlin data class "LocationRequestOptions".
+   * The C++ JNI bridge between the C++ struct "LocationRequestOptions" and the Kotlin data class "LocationRequestOptions".
    */
   struct JLocationRequestOptions final: public jni::JavaClass<JLocationRequestOptions> {
   public:

@@ -15,7 +15,7 @@ namespace margelo::nitro::nitrogeolocation {
   using namespace facebook;
 
   /**
-   * The C++ JNI bridge between the C++ enum "BackgroundPermissionStatus" and the the Kotlin enum "BackgroundPermissionStatus".
+   * The C++ JNI bridge between the C++ enum "BackgroundPermissionStatus" and the Kotlin enum "BackgroundPermissionStatus".
    */
   struct JBackgroundPermissionStatus final: public jni::JavaClass<JBackgroundPermissionStatus> {
   public:

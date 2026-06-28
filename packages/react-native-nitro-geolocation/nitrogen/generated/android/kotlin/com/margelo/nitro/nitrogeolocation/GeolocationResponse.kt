@@ -43,7 +43,7 @@ data class GeolocationResponse(
   }
 
   override fun hashCode(): Int {
-    return arrayOf(
+    return arrayOf<Any?>(
       coords,
       timestamp,
       mocked,

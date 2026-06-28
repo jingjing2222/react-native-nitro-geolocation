@@ -63,7 +63,7 @@ data class AndroidForegroundServiceOptions(
   }
 
   override fun hashCode(): Int {
-    return arrayOf(
+    return arrayOf<Any?>(
       notificationId,
       notificationTitle,
       notificationText,

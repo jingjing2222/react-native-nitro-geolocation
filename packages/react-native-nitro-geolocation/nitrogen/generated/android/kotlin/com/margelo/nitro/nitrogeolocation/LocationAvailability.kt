@@ -35,7 +35,7 @@ data class LocationAvailability(
   }
 
   override fun hashCode(): Int {
-    return arrayOf(
+    return arrayOf<Any?>(
       available,
       reason
     ).contentDeepHashCode()

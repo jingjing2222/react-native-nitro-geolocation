@@ -47,7 +47,7 @@ data class BackgroundPermissionResult(
   }
 
   override fun hashCode(): Int {
-    return arrayOf(
+    return arrayOf<Any?>(
       foreground,
       background,
       accuracyAuthorization,

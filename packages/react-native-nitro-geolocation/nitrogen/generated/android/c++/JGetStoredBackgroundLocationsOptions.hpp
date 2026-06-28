@@ -17,7 +17,7 @@ namespace margelo::nitro::nitrogeolocation {
   using namespace facebook;
 
   /**
-   * The C++ JNI bridge between the C++ struct "GetStoredBackgroundLocationsOptions" and the the Kotlin data class "GetStoredBackgroundLocationsOptions".
+   * The C++ JNI bridge between the C++ struct "GetStoredBackgroundLocationsOptions" and the Kotlin data class "GetStoredBackgroundLocationsOptions".
    */
   struct JGetStoredBackgroundLocationsOptions final: public jni::JavaClass<JGetStoredBackgroundLocationsOptions> {
   public:

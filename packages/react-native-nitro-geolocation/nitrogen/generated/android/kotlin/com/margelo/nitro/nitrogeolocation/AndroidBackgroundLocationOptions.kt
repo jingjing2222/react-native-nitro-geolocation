@@ -43,7 +43,7 @@ data class AndroidBackgroundLocationOptions(
   }
 
   override fun hashCode(): Int {
-    return arrayOf(
+    return arrayOf<Any?>(
       locationProvider,
       foregroundService,
       requestNotificationPermission,

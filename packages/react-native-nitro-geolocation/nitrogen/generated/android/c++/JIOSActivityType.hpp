@@ -15,7 +15,7 @@ namespace margelo::nitro::nitrogeolocation {
   using namespace facebook;
 
   /**
-   * The C++ JNI bridge between the C++ enum "IOSActivityType" and the the Kotlin enum "IOSActivityType".
+   * The C++ JNI bridge between the C++ enum "IOSActivityType" and the Kotlin enum "IOSActivityType".
    */
   struct JIOSActivityType final: public jni::JavaClass<JIOSActivityType> {
   public:

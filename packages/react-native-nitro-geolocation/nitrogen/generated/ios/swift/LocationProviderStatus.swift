@@ -56,12 +56,12 @@ public extension LocationProviderStatus {
   var locationServicesEnabled: Bool {
     return self.__locationServicesEnabled
   }
-  
+
   @inline(__always)
   var backgroundModeEnabled: Bool {
     return self.__backgroundModeEnabled
   }
-  
+
   @inline(__always)
   var gpsAvailable: Bool? {
     return { () -> Bool? in
@@ -73,7 +73,7 @@ public extension LocationProviderStatus {
       }
     }()
   }
-  
+
   @inline(__always)
   var networkAvailable: Bool? {
     return { () -> Bool? in
@@ -85,7 +85,7 @@ public extension LocationProviderStatus {
       }
     }()
   }
-  
+
   @inline(__always)
   var passiveAvailable: Bool? {
     return { () -> Bool? in
@@ -109,7 +109,7 @@ public extension LocationProviderStatus {
       }
     }()
   }
-  
+
   @inline(__always)
   var googleLocationAccuracyEnabled: Bool? {
     return { () -> Bool? in

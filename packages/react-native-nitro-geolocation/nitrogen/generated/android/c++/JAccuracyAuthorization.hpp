@@ -15,7 +15,7 @@ namespace margelo::nitro::nitrogeolocation {
   using namespace facebook;
 
   /**
-   * The C++ JNI bridge between the C++ enum "AccuracyAuthorization" and the the Kotlin enum "AccuracyAuthorization".
+   * The C++ JNI bridge between the C++ enum "AccuracyAuthorization" and the Kotlin enum "AccuracyAuthorization".
    */
   struct JAccuracyAuthorization final: public jni::JavaClass<JAccuracyAuthorization> {
   public:

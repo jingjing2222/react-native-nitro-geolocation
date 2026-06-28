@@ -15,7 +15,7 @@ namespace margelo::nitro::nitrogeolocation {
   using namespace facebook;
 
   /**
-   * The C++ JNI bridge between the C++ enum "GeofenceTransition" and the the Kotlin enum "GeofenceTransition".
+   * The C++ JNI bridge between the C++ enum "GeofenceTransition" and the Kotlin enum "GeofenceTransition".
    */
   struct JGeofenceTransition final: public jni::JavaClass<JGeofenceTransition> {
   public:

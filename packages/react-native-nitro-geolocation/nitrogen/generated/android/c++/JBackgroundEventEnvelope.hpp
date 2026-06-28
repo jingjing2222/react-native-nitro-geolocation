@@ -53,7 +53,7 @@ namespace margelo::nitro::nitrogeolocation {
   using namespace facebook;
 
   /**
-   * The C++ JNI bridge between the C++ struct "BackgroundEventEnvelope" and the the Kotlin data class "BackgroundEventEnvelope".
+   * The C++ JNI bridge between the C++ struct "BackgroundEventEnvelope" and the Kotlin data class "BackgroundEventEnvelope".
    */
   struct JBackgroundEventEnvelope final: public jni::JavaClass<JBackgroundEventEnvelope> {
   public:

@@ -23,7 +23,7 @@ namespace margelo::nitro::nitrogeolocation {
   using namespace facebook;
 
   /**
-   * The C++ JNI bridge between the C++ struct "CompatGeolocationResponse" and the the Kotlin data class "CompatGeolocationResponse".
+   * The C++ JNI bridge between the C++ struct "CompatGeolocationResponse" and the Kotlin data class "CompatGeolocationResponse".
    */
   struct JCompatGeolocationResponse final: public jni::JavaClass<JCompatGeolocationResponse> {
   public:

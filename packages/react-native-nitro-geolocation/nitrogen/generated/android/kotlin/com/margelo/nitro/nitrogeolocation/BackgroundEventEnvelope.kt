@@ -67,7 +67,7 @@ data class BackgroundEventEnvelope(
   }
 
   override fun hashCode(): Int {
-    return arrayOf(
+    return arrayOf<Any?>(
       location,
       geofence,
       activity,

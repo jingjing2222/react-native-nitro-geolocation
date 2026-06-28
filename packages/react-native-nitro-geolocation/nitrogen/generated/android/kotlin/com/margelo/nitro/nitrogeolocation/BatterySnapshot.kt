@@ -35,7 +35,7 @@ data class BatterySnapshot(
   }
 
   override fun hashCode(): Int {
-    return arrayOf(
+    return arrayOf<Any?>(
       level,
       isCharging
     ).contentDeepHashCode()

@@ -99,7 +99,7 @@ data class BackgroundLocationOptions(
   }
 
   override fun hashCode(): Int {
-    return arrayOf(
+    return arrayOf<Any?>(
       trackingMode,
       accuracy,
       granularity,

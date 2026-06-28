@@ -15,7 +15,7 @@ namespace margelo::nitro::nitrogeolocation {
   using namespace facebook;
 
   /**
-   * The C++ JNI bridge between the C++ enum "BackgroundHttpMethod" and the the Kotlin enum "BackgroundHttpMethod".
+   * The C++ JNI bridge between the C++ enum "BackgroundHttpMethod" and the Kotlin enum "BackgroundHttpMethod".
    */
   struct JBackgroundHttpMethod final: public jni::JavaClass<JBackgroundHttpMethod> {
   public:

@@ -17,7 +17,7 @@ namespace margelo::nitro::nitrogeolocation {
   using namespace facebook;
 
   /**
-   * The C++ JNI bridge between the C++ struct "BatterySnapshot" and the the Kotlin data class "BatterySnapshot".
+   * The C++ JNI bridge between the C++ struct "BatterySnapshot" and the Kotlin data class "BatterySnapshot".
    */
   struct JBatterySnapshot final: public jni::JavaClass<JBatterySnapshot> {
   public:

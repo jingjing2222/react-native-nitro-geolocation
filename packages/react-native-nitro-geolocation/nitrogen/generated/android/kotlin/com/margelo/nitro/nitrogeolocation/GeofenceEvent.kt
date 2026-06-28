@@ -43,7 +43,7 @@ data class GeofenceEvent(
   }
 
   override fun hashCode(): Int {
-    return arrayOf(
+    return arrayOf<Any?>(
       region,
       transition,
       location,

@@ -21,7 +21,7 @@ namespace margelo::nitro::nitrogeolocation {
   using namespace facebook;
 
   /**
-   * The C++ JNI bridge between the C++ struct "CompatGeolocationConfigurationInternal" and the the Kotlin data class "CompatGeolocationConfigurationInternal".
+   * The C++ JNI bridge between the C++ struct "CompatGeolocationConfigurationInternal" and the Kotlin data class "CompatGeolocationConfigurationInternal".
    */
   struct JCompatGeolocationConfigurationInternal final: public jni::JavaClass<JCompatGeolocationConfigurationInternal> {
   public:

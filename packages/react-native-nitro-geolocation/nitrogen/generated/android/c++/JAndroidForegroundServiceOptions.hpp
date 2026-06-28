@@ -18,7 +18,7 @@ namespace margelo::nitro::nitrogeolocation {
   using namespace facebook;
 
   /**
-   * The C++ JNI bridge between the C++ struct "AndroidForegroundServiceOptions" and the the Kotlin data class "AndroidForegroundServiceOptions".
+   * The C++ JNI bridge between the C++ struct "AndroidForegroundServiceOptions" and the Kotlin data class "AndroidForegroundServiceOptions".
    */
   struct JAndroidForegroundServiceOptions final: public jni::JavaClass<JAndroidForegroundServiceOptions> {
   public:

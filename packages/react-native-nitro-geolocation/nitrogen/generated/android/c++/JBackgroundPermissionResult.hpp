@@ -23,7 +23,7 @@ namespace margelo::nitro::nitrogeolocation {
   using namespace facebook;
 
   /**
-   * The C++ JNI bridge between the C++ struct "BackgroundPermissionResult" and the the Kotlin data class "BackgroundPermissionResult".
+   * The C++ JNI bridge between the C++ struct "BackgroundPermissionResult" and the Kotlin data class "BackgroundPermissionResult".
    */
   struct JBackgroundPermissionResult final: public jni::JavaClass<JBackgroundPermissionResult> {
   public:

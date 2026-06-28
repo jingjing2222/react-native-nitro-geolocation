@@ -20,7 +20,7 @@ namespace margelo::nitro::nitrogeolocation {
   using namespace facebook;
 
   /**
-   * The C++ JNI bridge between the C++ struct "GeofencingOptions" and the the Kotlin data class "GeofencingOptions".
+   * The C++ JNI bridge between the C++ struct "GeofencingOptions" and the Kotlin data class "GeofencingOptions".
    */
   struct JGeofencingOptions final: public jni::JavaClass<JGeofencingOptions> {
   public:

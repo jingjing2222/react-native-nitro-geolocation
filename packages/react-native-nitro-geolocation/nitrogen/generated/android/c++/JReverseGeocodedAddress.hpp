@@ -18,7 +18,7 @@ namespace margelo::nitro::nitrogeolocation {
   using namespace facebook;
 
   /**
-   * The C++ JNI bridge between the C++ struct "ReverseGeocodedAddress" and the the Kotlin data class "ReverseGeocodedAddress".
+   * The C++ JNI bridge between the C++ struct "ReverseGeocodedAddress" and the Kotlin data class "ReverseGeocodedAddress".
    */
   struct JReverseGeocodedAddress final: public jni::JavaClass<JReverseGeocodedAddress> {
   public:
