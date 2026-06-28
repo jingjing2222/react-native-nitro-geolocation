@@ -20,8 +20,9 @@ jobs:
         with:
           install: false
 
-      - name: Install tools via mise
+      - name: Trust and install tools via mise
         run: |
+          mise trust --yes
           mise install biome
 
       - name: Run Biome format check
@@ -41,8 +42,9 @@ jobs:
         with:
           install: false
 
-      - name: Install tools via mise
+      - name: Trust and install tools via mise
         run: |
+          mise trust --yes
           mise install biome
 
       - name: Run Biome lint
@@ -57,13 +59,20 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - uses: actions/setup-node@v4
+      - name: Setup mise
+        uses: jdx/mise-action@v3
         with:
-          node-version: 20
+          install: false
+
+      - name: Trust and install tools via mise
+        run: |
+          mise trust --yes
+          mise install node
 
       - name: Enable Corepack
         run: |
           corepack enable
+          mise reshim node
 
       - name: Install dependencies
         run: |
@@ -82,13 +91,20 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - uses: actions/setup-node@v4
+      - name: Setup mise
+        uses: jdx/mise-action@v3
         with:
-          node-version: 20
+          install: false
+
+      - name: Trust and install tools via mise
+        run: |
+          mise trust --yes
+          mise install node
 
       - name: Enable Corepack
         run: |
           corepack enable
+          mise reshim node
 
       - name: Install dependencies
         run: |
@@ -107,13 +123,20 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - uses: actions/setup-node@v4
+      - name: Setup mise
+        uses: jdx/mise-action@v3
         with:
-          node-version: 20
+          install: false
+
+      - name: Trust and install tools via mise
+        run: |
+          mise trust --yes
+          mise install node
 
       - name: Enable Corepack
         run: |
           corepack enable
+          mise reshim node
 
       - name: Install dependencies
         run: |
