@@ -81,14 +81,10 @@ jobs:
           xcrun simctl boot "$SIMULATOR_UDID" || true
           xcrun simctl bootstatus "$SIMULATOR_UDID" -b
 
-      - name: Start Metro
-        run: |
-          yarn workspace react-native-nitro-geolocation-example start > /tmp/metro-ios.log 2>&1 &
-
-      - name: Build and install iOS app
+      - name: Build and install iOS release app
         working-directory: examples/v0.81.1
         run: |
-          yarn react-native run-ios --udid "$SIMULATOR_UDID"
+          yarn react-native run-ios --mode Release --udid "$SIMULATOR_UDID"
 
       - name: Run iOS E2E
         run: |
@@ -101,7 +97,6 @@ jobs:
           name: ios-e2e-artifacts
           if-no-files-found: ignore
           path: |
-            /tmp/metro-ios.log
             ~/.maestro/tests
 
   android-e2e:
@@ -153,8 +148,7 @@ jobs:
           target: google_apis
           profile: pixel_6
           script: |
-            yarn workspace react-native-nitro-geolocation-example start > /tmp/metro-android.log 2>&1 &
-            yarn workspace react-native-nitro-geolocation-example android
+            yarn workspace react-native-nitro-geolocation-example android:release
             yarn test:e2e:android
 
       - name: Upload Android E2E artifacts
@@ -164,5 +158,4 @@ jobs:
           name: android-e2e-artifacts
           if-no-files-found: ignore
           path: |
-            /tmp/metro-android.log
             ~/.maestro/tests
