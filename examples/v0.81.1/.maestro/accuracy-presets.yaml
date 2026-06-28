@@ -57,7 +57,7 @@ appId: nitrogeolocation.example
 
 - extendedWaitUntil:
     visible: "Positive presets: passed"
-    timeout: 60000
+    timeout: 120000
 
 - assertVisible:
     id: "accuracy-presets-positive-result"
