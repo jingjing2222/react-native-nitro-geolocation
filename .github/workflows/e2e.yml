@@ -74,10 +74,18 @@ jobs:
         with:
           install: false
 
-      - name: Trust and install tools via mise
+      - name: Trust mise config
         run: |
           mise trust --yes
-          mise install java maestro node ruby
+
+      - name: Install iOS E2E tools via mise
+        run: |
+          mise install java maestro node
+
+      - name: Install iOS native build tools via mise
+        if: steps.ios-app-cache.outputs.cache-hit != 'true'
+        run: |
+          mise install ruby
 
       - name: Enable Corepack
         run: |
@@ -210,9 +218,12 @@ jobs:
         with:
           install: false
 
-      - name: Trust and install tools via mise
+      - name: Trust mise config
         run: |
           mise trust --yes
+
+      - name: Install Android E2E tools via mise
+        run: |
           mise install java maestro node
 
       - name: Enable Corepack
