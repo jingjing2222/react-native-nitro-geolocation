@@ -4,16 +4,14 @@ appId: nitrogeolocation.example
 
 - openLink:
     link: nitrogeolocation://app/background-long-run
-- tapOn:
-    text: "열기|Open"
-    optional: true
+- waitForAnimationToEnd
 
 - extendedWaitUntil:
     visible: "Background Long Run E2E"
     timeout: 10000
 
 - tapOn:
-    id: "background-long-run-arm-reboot-button"
+    id: "e2e-action-background-long-run-arm-reboot-button"
 - extendedWaitUntil:
     visible: "Reboot probe: passed"
     timeout: 15000

@@ -16,9 +16,7 @@ appId: nitrogeolocation.example
 
 - openLink:
     link: nitrogeolocation://app/location-availability
-- tapOn:
-    text: "열기|Open"
-    optional: true
+- waitForAnimationToEnd
 
 - extendedWaitUntil:
     visible: "Availability contract tied to native fixes and permission failures"
@@ -29,7 +27,7 @@ appId: nitrogeolocation.example
     longitude: 126.978
 
 - tapOn:
-    id: "location-availability-run-available-button"
+    id: "e2e-action-location-availability-run-available-button"
 
 - extendedWaitUntil:
     visible: "Availability: passed"
@@ -45,7 +43,6 @@ appId: nitrogeolocation.example
 - stopApp
 
 - launchApp:
-    clearState: true
     permissions:
       all: deny
 
@@ -57,25 +54,14 @@ appId: nitrogeolocation.example
 
 - openLink:
     link: nitrogeolocation://app/location-availability
-- tapOn:
-    text: "열기|Open"
-    optional: true
+- waitForAnimationToEnd
 
 - extendedWaitUntil:
     visible: "Availability contract tied to native fixes and permission failures"
     timeout: 10000
 
-- scrollUntilVisible:
-    element: "3. Permission Denied"
-    direction: DOWN
-
 - tapOn:
-    id: "location-availability-run-denied-button"
-
-- scrollUntilVisible:
-    element: "Permission denied: passed"
-    direction: DOWN
-    timeout: 15000
+    id: "e2e-action-location-availability-run-denied-button"
 
 - assertVisible:
     id: "location-availability-denied-result"

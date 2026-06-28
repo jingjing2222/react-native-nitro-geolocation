@@ -16,9 +16,7 @@ appId: nitrogeolocation.example
 
 - openLink:
     link: nitrogeolocation://app/issue-67
-- tapOn:
-    text: "열기|Open"
-    optional: true
+- waitForAnimationToEnd
 
 - extendedWaitUntil:
     visible: "Android approximate/coarse getCurrentPosition contract"
@@ -28,21 +26,16 @@ appId: nitrogeolocation.example
     latitude: 37.5665
     longitude: 126.978
 
-- tapOn: "REFRESH"
+- tapOn:
+    id: "e2e-action-issue67-refresh-permissions-button"
 
 - assertVisible: "Fine:"
 - assertVisible: "denied"
 - assertVisible: "Coarse:"
 - assertVisible: "granted"
 
-- scrollUntilVisible:
-    element:
-      id: "issue67-get-position-button"
-    direction: DOWN
-    centerElement: true
-
 - tapOn:
-    id: "issue67-get-position-button"
+    id: "e2e-action-issue67-get-position-button"
 
 - extendedWaitUntil:
     visible: "Result: success"
@@ -50,24 +43,9 @@ appId: nitrogeolocation.example
 
 - assertVisible:
     id: "issue67-position-info"
-- scrollUntilVisible:
-    element:
-      id: "issue67-latitude"
-    direction: DOWN
-    centerElement: true
 - assertVisible:
     id: "issue67-latitude"
-- scrollUntilVisible:
-    element:
-      id: "issue67-longitude"
-    direction: DOWN
-    centerElement: true
 - assertVisible:
     id: "issue67-longitude"
-- scrollUntilVisible:
-    element:
-      id: "issue67-accuracy"
-    direction: DOWN
-    centerElement: true
 - assertVisible:
     id: "issue67-accuracy"

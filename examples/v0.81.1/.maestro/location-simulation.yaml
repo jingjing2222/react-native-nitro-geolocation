@@ -16,29 +16,25 @@ appId: nitrogeolocation.example
 
 - openLink:
     link: nitrogeolocation://app/location-simulation
-- tapOn:
-    text: "열기|Open"
-    optional: true
+- waitForAnimationToEnd
 
 # Request permission
-- tapOn: "Request"
+- tapOn:
+    id: "e2e-action-permission-request-button"
 - extendedWaitUntil:
     visible: "granted ✅"
     timeout: 10000
 
 # Navigate within the location-simulation contract page
-- scrollUntilVisible:
-    element: "2. Get Current Position"
-    direction: DOWN
-
-# Simulate location: San Francisco
 - setLocation:
     latitude: 37.7749
     longitude: -122.4194
 
-- tapOn: "Get Position"
+- tapOn:
+    id: "e2e-action-current-position-get-button"
 - extendedWaitUntil:
-    visible: "Current Position"
+    visible:
+      id: "position-info"
     timeout: 15000
 
 # Verify position loaded
@@ -46,26 +42,19 @@ appId: nitrogeolocation.example
     id: "position-info"
 - assertVisible:
     text: "Latitude: 37\\.774900"
-- scrollUntilVisible:
-    element: "Longitude: -122\\.419400"
-    direction: DOWN
-    centerElement: true
 - assertVisible:
     text: "Longitude: -122\\.419400"
 
 # Simulate location: New York
-- scrollUntilVisible:
-    element: "Get Position"
-    direction: UP
-    centerElement: true
-
 - setLocation:
     latitude: 40.7128
     longitude: -74.0060
 
-- tapOn: "Get Position"
+- tapOn:
+    id: "e2e-action-current-position-get-button"
 - extendedWaitUntil:
-    visible: "Current Position"
+    visible:
+      id: "position-info"
     timeout: 15000
 
 # Verify position loaded
@@ -73,26 +62,19 @@ appId: nitrogeolocation.example
     id: "position-info"
 - assertVisible:
     text: "Latitude: 40\\.712800"
-- scrollUntilVisible:
-    element: "Longitude: -74\\.006000"
-    direction: DOWN
-    centerElement: true
 - assertVisible:
     text: "Longitude: -74\\.006000"
 
 # Simulate location: Seoul
-- scrollUntilVisible:
-    element: "Get Position"
-    direction: UP
-    centerElement: true
-
 - setLocation:
     latitude: 37.5665
     longitude: 126.9780
 
-- tapOn: "Get Position"
+- tapOn:
+    id: "e2e-action-current-position-get-button"
 - extendedWaitUntil:
-    visible: "Current Position"
+    visible:
+      id: "position-info"
     timeout: 15000
 
 # Verify position loaded
@@ -100,9 +82,5 @@ appId: nitrogeolocation.example
     id: "position-info"
 - assertVisible:
     text: "Latitude: 37\\.566500"
-- scrollUntilVisible:
-    element: "Longitude: 126\\.978000"
-    direction: DOWN
-    centerElement: true
 - assertVisible:
     text: "Longitude: 126\\.978000"

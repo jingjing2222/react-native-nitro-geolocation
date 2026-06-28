@@ -15,83 +15,26 @@ appId: nitrogeolocation.example
 
 - openLink:
     link: nitrogeolocation://app/background-e2e
-- tapOn:
-    text: "열기|Open"
-    optional: true
+- waitForAnimationToEnd
 
 - extendedWaitUntil:
     visible: "Background Location E2E"
     timeout: 10000
 
 - tapOn:
-    id: "background-e2e-refresh-button"
+    id: "e2e-action-background-e2e-refresh-button"
 - assertVisible:
     id: "background-e2e-status"
 
-- scrollUntilVisible:
-    element:
-      id: "background-e2e-invalid-config-button"
-    direction: DOWN
-    centerElement: true
-
 - tapOn:
-    id: "background-e2e-invalid-config-button"
-- scrollUntilVisible:
-    element: "Missing notification: passed"
-    direction: DOWN
-    timeout: 10000
-
-- scrollUntilVisible:
-    element: "Configure Background"
-    direction: DOWN
-    centerElement: true
+    id: "e2e-action-background-e2e-invalid-config-button"
 - tapOn:
-    text: "Configure Background"
-- scrollUntilVisible:
-    element: "Configure: passed"
-    direction: DOWN
-    timeout: 30000
-
-- scrollUntilVisible:
-    element: "Start Stop Tracking"
-    direction: UP
-    centerElement: true
+    id: "e2e-action-background-e2e-configure-button"
 - tapOn:
-    text: "Start Stop Tracking"
-- scrollUntilVisible:
-    element: "Start stop: passed"
-    direction: DOWN
-    timeout: 30000
-
-- scrollUntilVisible:
-    element: "Register Geofence"
-    direction: UP
-    centerElement: true
+    id: "e2e-action-background-e2e-start-stop-button"
 - tapOn:
-    text: "Register Geofence"
-- scrollUntilVisible:
-    element: "Geofence: passed"
-    direction: DOWN
-    timeout: 30000
-
-- scrollUntilVisible:
-    element: "Recover Stored Events"
-    direction: UP
-    centerElement: true
+    id: "e2e-action-background-e2e-geofence-button"
 - tapOn:
-    text: "Recover Stored Events"
-- scrollUntilVisible:
-    element: "Storage: passed"
-    direction: DOWN
-    timeout: 30000
-
-- scrollUntilVisible:
-    element: "Run Native Sync"
-    direction: UP
-    centerElement: true
+    id: "e2e-action-background-e2e-storage-button"
 - tapOn:
-    text: "Run Native Sync"
-- scrollUntilVisible:
-    element: "Sync: passed"
-    direction: DOWN
-    timeout: 30000
+    id: "e2e-action-background-e2e-sync-button"

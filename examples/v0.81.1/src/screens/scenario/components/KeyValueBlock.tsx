@@ -1,6 +1,7 @@
 import React from "react";
 import { Text, View } from "react-native";
 import { sharedStyles } from "../styles";
+import { useE2EDumpNode } from "./E2EControlPlane";
 
 /**
  * One combined text row in a `KeyValueBlock`.
@@ -82,21 +83,57 @@ export type KeyValueBlockProps = {
  * combined `Label: value` text node.
  */
 export function KeyValueBlock({ rows, testID }: KeyValueBlockProps) {
+  const blockText = rows
+    .map((row) =>
+      typeof row.value === "string" || typeof row.value === "number"
+        ? `${row.label}: ${row.value}`
+        : undefined
+    )
+    .filter(Boolean)
+    .join(" ");
+
+  useE2EDumpNode(blockText, testID);
+
   return (
     <View style={sharedStyles.statusStackContainer} testID={testID}>
       {rows.map((row, index) => (
-        <Text
+        <KeyValueRow
           key={`${row.label}-${index}`}
-          style={[
-            sharedStyles.positionText,
-            index < rows.length - 1 && sharedStyles.statusStackRow
-          ]}
-          testID={row.testID}
-        >
-          <Text style={sharedStyles.statusLabel}>{row.label}: </Text>
-          <Text style={sharedStyles.statusValue}>{row.value}</Text>
-        </Text>
+          isLast={index === rows.length - 1}
+          row={row}
+        />
       ))}
     </View>
+  );
+}
+
+function KeyValueRow({
+  isLast,
+  row
+}: {
+  isLast: boolean;
+  row: KeyValueBlockRow;
+}) {
+  const valueText =
+    typeof row.value === "string" || typeof row.value === "number"
+      ? String(row.value)
+      : undefined;
+
+  useE2EDumpNode(
+    valueText == null ? undefined : `${row.label}: ${valueText}`,
+    row.testID
+  );
+
+  return (
+    <Text
+      style={[
+        sharedStyles.positionText,
+        !isLast && sharedStyles.statusStackRow
+      ]}
+      testID={row.testID}
+    >
+      <Text style={sharedStyles.statusLabel}>{row.label}: </Text>
+      <Text style={sharedStyles.statusValue}>{row.value}</Text>
+    </Text>
   );
 }

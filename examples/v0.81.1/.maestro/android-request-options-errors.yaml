@@ -1,0 +1,68 @@
+appId: nitrogeolocation.example
+---
+# Android request option errors: invalid options and permission gates.
+
+- launchApp:
+    clearState: true
+    permissions:
+      android.permission.ACCESS_COARSE_LOCATION: allow
+      android.permission.ACCESS_FINE_LOCATION: allow
+
+- extendedWaitUntil:
+    visible: "Geolocation API"
+    timeout: 10000
+
+- openLink:
+    link: nitrogeolocation://app/android-request-options/errors
+- waitForAnimationToEnd
+
+- extendedWaitUntil:
+    visible: "Invalid option and permission rejection contracts"
+    timeout: 10000
+
+- tapOn:
+    id: "e2e-action-android-request-options-run-invalid-button"
+
+- extendedWaitUntil:
+    visible: "Invalid maxUpdates: passed"
+    timeout: 10000
+
+- assertVisible:
+    id: "android-request-options-invalid-result"
+- assertVisible:
+    text: ".*maxUpdates=0 rejected.*"
+
+- stopApp
+
+- launchApp:
+    clearState: true
+    permissions:
+      all: deny
+      android.permission.ACCESS_COARSE_LOCATION: allow
+      android.permission.ACCESS_FINE_LOCATION: deny
+
+- extendedWaitUntil:
+    visible: "Geolocation API"
+    timeout: 10000
+
+- stopApp
+
+- openLink:
+    link: nitrogeolocation://app/android-request-options/errors
+- waitForAnimationToEnd
+
+- extendedWaitUntil:
+    visible: "Invalid option and permission rejection contracts"
+    timeout: 10000
+
+- tapOn:
+    id: "e2e-action-android-request-options-run-fine-denied-button"
+
+- extendedWaitUntil:
+    visible: "Fine permission: passed"
+    timeout: 15000
+
+- assertVisible:
+    id: "android-request-options-fine-denied-result"
+- assertVisible:
+    text: ".*PERMISSION_DENIED.*granularity=fine.*"

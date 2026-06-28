@@ -14,15 +14,14 @@ appId: nitrogeolocation.example
 
 - openLink:
     link: nitrogeolocation://app/provider-settings
-- tapOn:
-    text: "열기|Open"
-    optional: true
+- waitForAnimationToEnd
 
 - extendedWaitUntil:
     visible: "Accurate Check-In"
     timeout: 10000
 
-- tapOn: "Check Device"
+- tapOn:
+    id: "e2e-action-provider-settings-check-device-button"
 - extendedWaitUntil:
     visible: "Services: enabled"
     timeout: 10000
@@ -36,12 +35,8 @@ appId: nitrogeolocation.example
 - assertVisible:
     id: "provider-settings-network"
 
-- scrollUntilVisible:
-    element: "Prepare Check-In"
-    direction: DOWN
-    centerElement: true
-
-- tapOn: "Prepare Check-In"
+- tapOn:
+    id: "e2e-action-provider-settings-prepare-check-in-button"
 - tapOn:
     text: "Turn on|OK|확인|켜기|사용"
     optional: true
@@ -61,17 +56,8 @@ appId: nitrogeolocation.example
     longitude: 126.978
 - waitForAnimationToEnd
 
-- scrollUntilVisible:
-    element: "Confirm Location"
-    direction: DOWN
-    centerElement: true
-
-- tapOn: "Confirm Location"
-- scrollUntilVisible:
-    element: "Ready to check in"
-    direction: DOWN
-    timeout: 15000
-
+- tapOn:
+    id: "e2e-action-provider-settings-confirm-location-button"
 - assertVisible:
     id: "provider-position"
 - assertVisible:

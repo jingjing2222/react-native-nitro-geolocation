@@ -2,6 +2,7 @@ import React from "react";
 import { Text, View } from "react-native";
 import { sharedStyles } from "../styles";
 import { createE2EId } from "../utils/e2eIds";
+import { useE2EDumpNode } from "./E2EControlPlane";
 
 /**
  * One row in a `StatusBlock`.
@@ -99,22 +100,58 @@ export type PermissionStatusBlockProps = {
  * value text nodes for each row.
  */
 export function StatusBlock({ rows, testID }: StatusBlockProps) {
+  const blockText = rows
+    .map((row) =>
+      typeof row.value === "string" || typeof row.value === "number"
+        ? `${row.label} ${row.value}`
+        : undefined
+    )
+    .filter(Boolean)
+    .join(" ");
+
+  useE2EDumpNode(blockText, testID);
+
   return (
     <View style={sharedStyles.statusStackContainer} testID={testID}>
       {rows.map((row, index) => (
-        <View
+        <StatusBlockRenderedRow
           key={`${row.label}-${index}`}
-          style={[
-            sharedStyles.statusStackRow,
-            index === rows.length - 1 && sharedStyles.statusStackRowLast
-          ]}
-        >
-          <Text style={sharedStyles.statusLabel}>{row.label}</Text>
-          <Text style={sharedStyles.statusValue} testID={row.testID}>
-            {row.value}
-          </Text>
-        </View>
+          isLast={index === rows.length - 1}
+          row={row}
+        />
       ))}
+    </View>
+  );
+}
+
+function StatusBlockRenderedRow({
+  isLast,
+  row
+}: {
+  isLast: boolean;
+  row: StatusBlockRow;
+}) {
+  const valueText =
+    typeof row.value === "string" || typeof row.value === "number"
+      ? String(row.value)
+      : undefined;
+
+  useE2EDumpNode(
+    valueText == null ? undefined : `${row.label} ${valueText}`,
+    row.testID
+  );
+
+  return (
+    <View
+      style={[
+        sharedStyles.statusStackRow,
+        isLast && sharedStyles.statusStackRowLast
+      ]}
+    >
+      <Text style={sharedStyles.statusLabel}>{row.label}</Text>
+      <Text style={sharedStyles.statusValue} testID={row.testID}>
+        {row.value}
+      </Text>
     </View>
   );
 }

@@ -16,9 +16,7 @@ appId: nitrogeolocation.example
 
 - openLink:
     link: nitrogeolocation://app/web-e2e?autorun=unavailable
-- tapOn:
-    text: "열기|Open"
-    optional: true
+- waitForAnimationToEnd
 
 - extendedWaitUntil:
     visible: "Web E2E"

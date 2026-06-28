@@ -1,6 +1,7 @@
 import React from "react";
 import { Text, View } from "react-native";
 import { sharedStyles } from "../styles";
+import { useE2EDumpNode } from "./E2EControlPlane";
 
 /**
  * Props for `ErrorBlock`.
@@ -52,10 +53,15 @@ export type ErrorBlockProps = {
  * styling.
  */
 export function ErrorBlock({ message, testID, textTestID }: ErrorBlockProps) {
+  const errorText = `Error: ${message}`;
+
+  useE2EDumpNode(errorText, testID);
+  useE2EDumpNode(errorText, textTestID);
+
   return (
     <View style={sharedStyles.errorContainer} testID={testID}>
       <Text style={sharedStyles.errorText} testID={textTestID}>
-        Error: {message}
+        {errorText}
       </Text>
     </View>
   );

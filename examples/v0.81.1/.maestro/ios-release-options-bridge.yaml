@@ -15,9 +15,7 @@ appId: nitrogeolocation.example
 
 - openLink:
     link: nitrogeolocation://app/ios-release-options-bridge
-- tapOn:
-    text: "열기|Open"
-    optional: true
+- waitForAnimationToEnd
 
 - extendedWaitUntil:
     visible: "Native Swift optional struct bridge contract"
@@ -27,12 +25,8 @@ appId: nitrogeolocation.example
     latitude: 37.5665
     longitude: 126.978
 
-- scrollUntilVisible:
-    element: "2. Distance Filter Guard"
-    direction: DOWN
-
 - tapOn:
-    id: "ios-release-options-bridge-run-distance-filter-button"
+    id: "e2e-action-ios-release-options-bridge-run-distance-filter-button"
 
 - extendedWaitUntil:
     visible: ".*First fixture update captured.*"
@@ -51,12 +45,8 @@ appId: nitrogeolocation.example
 - assertVisible:
     text: ".*distanceFilter=1000000m.*"
 
-- scrollUntilVisible:
-    element: "3. Maximum Age Option Guard"
-    direction: DOWN
-
 - tapOn:
-    id: "ios-release-options-bridge-run-maximum-age-zero-button"
+    id: "e2e-action-ios-release-options-bridge-run-maximum-age-zero-button"
 
 - extendedWaitUntil:
     visible: "Maximum age option guard: passed"
@@ -67,12 +57,8 @@ appId: nitrogeolocation.example
 - assertVisible:
     text: ".*POSITION_UNAVAILABLE.*"
 
-- scrollUntilVisible:
-    element: "4. Heading Filter Option Guard"
-    direction: DOWN
-
 - tapOn:
-    id: "ios-release-options-bridge-run-heading-filter-button"
+    id: "e2e-action-ios-release-options-bridge-run-heading-filter-button"
 
 - extendedWaitUntil:
     visible: "Heading filter option guard: passed"

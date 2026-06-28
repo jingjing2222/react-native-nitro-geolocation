@@ -16,9 +16,7 @@ appId: nitrogeolocation.example
 
 - openLink:
     link: nitrogeolocation://app/geocoding
-- tapOn:
-    text: "열기|Open"
-    optional: true
+- waitForAnimationToEnd
 - tapOn:
     id: "com.google.android.googlequicksearchbox:id/assistant_robin_fast_track_banner_dismiss_button"
     optional: true
@@ -28,7 +26,7 @@ appId: nitrogeolocation.example
     timeout: 10000
 
 - tapOn:
-    id: "geocoding-run-positive-button"
+    id: "e2e-action-geocoding-run-positive-button"
 
 - extendedWaitUntil:
     visible: "Geocode: passed"
@@ -45,12 +43,8 @@ appId: nitrogeolocation.example
 - assertVisible:
     text: ".*candidate\\(s\\).*"
 
-- scrollUntilVisible:
-    element: "Run Negative Geocoding"
-    direction: DOWN
-
 - tapOn:
-    id: "geocoding-run-negative-button"
+    id: "e2e-action-geocoding-run-negative-button"
 
 - extendedWaitUntil:
     visible: "Empty address: passed"

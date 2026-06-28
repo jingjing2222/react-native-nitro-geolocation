@@ -3,6 +3,7 @@ import { Text, View } from "react-native";
 import { sharedStyles } from "../styles";
 import type { ScenarioResult } from "../types";
 import { createE2EId } from "../utils/e2eIds";
+import { useE2EDumpNode } from "./E2EControlPlane";
 
 /**
  * Props for `ResultBlock`.
@@ -108,6 +109,11 @@ export type ResultListProps<TResults extends Record<string, ScenarioResult>> = {
  */
 export function ResultBlock({ prefix, id, label, result }: ResultBlockProps) {
   const baseId = prefix ? createE2EId(prefix, id) : id;
+  const statusText = `${label}: ${result.status}`;
+
+  useE2EDumpNode(`${statusText} ${result.message}`, `${baseId}-result`);
+  useE2EDumpNode(statusText, `${baseId}-status`);
+  useE2EDumpNode(result.message, `${baseId}-message`);
 
   return (
     <View
@@ -119,7 +125,7 @@ export function ResultBlock({ prefix, id, label, result }: ResultBlockProps) {
       testID={`${baseId}-result`}
     >
       <Text style={sharedStyles.resultStatus} testID={`${baseId}-status`}>
-        {label}: {result.status}
+        {statusText}
       </Text>
       <Text style={sharedStyles.resultMessage} testID={`${baseId}-message`}>
         {result.message}

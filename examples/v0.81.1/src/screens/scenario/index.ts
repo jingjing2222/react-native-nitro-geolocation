@@ -14,6 +14,7 @@
  * ```
  */
 export * from "./components/ErrorBlock";
+export * from "./components/E2EControlPlane";
 export * from "./components/KeyValueBlock";
 export * from "./components/PositionInfo";
 export * from "./components/ResultBlock";

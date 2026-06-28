@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from "react";
-import { Text } from "react-native";
 import {
   LocationErrorCode,
   getCurrentPosition,
@@ -13,6 +12,7 @@ import type {
   LocationProviderStatus
 } from "react-native-nitro-geolocation";
 import {
+  DumpedText,
   KeyValueBlock,
   PositionInfo,
   ScenarioButton,
@@ -169,17 +169,19 @@ export default function ProviderSettingsScreen() {
             }
           ]}
         />
-        <Text
+        <DumpedText
+          dumpText={`Provider readiness: ${providerReady ? "ready" : "not ready"}`}
           style={sharedStyles.resultStatus}
           testID="provider-readiness-contract"
         >
           Provider readiness: {providerReady ? "ready" : "not ready"}
-        </Text>
+        </DumpedText>
         <ScenarioButton
           title={isLoading ? "Checking..." : "Check Device"}
           onPress={checkDevice}
           disabled={isLoading}
           color="#1565C0"
+          testID="provider-settings-check-device-button"
         />
       </ScenarioSection>
 
@@ -189,17 +191,19 @@ export default function ProviderSettingsScreen() {
         description="Ask Android to enable the settings required for a high-accuracy check-in location."
         divided
       >
-        <Text
+        <DumpedText
+          dumpText={`Settings: ${settingsStatus}`}
           style={sharedStyles.resultStatus}
           testID="provider-settings-result"
         >
           Settings: {settingsStatus}
-        </Text>
+        </DumpedText>
         <ScenarioButton
           title={isLoading ? "Preparing..." : "Prepare Check-In"}
           onPress={prepareCheckIn}
           disabled={isLoading}
           color="#2E7D32"
+          testID="provider-settings-prepare-check-in-button"
         />
       </ScenarioSection>
 
@@ -214,6 +218,7 @@ export default function ProviderSettingsScreen() {
           onPress={confirmLocation}
           disabled={isLoading}
           color="#455A64"
+          testID="provider-settings-confirm-location-button"
         />
         <PositionInfo
           title="Ready to check in"

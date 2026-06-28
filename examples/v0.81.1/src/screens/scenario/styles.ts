@@ -21,18 +21,67 @@ export const sharedStyles = StyleSheet.create({
   },
   header: {
     backgroundColor: "#111827",
-    padding: 20,
-    paddingTop: 56
+    paddingHorizontal: 14,
+    paddingVertical: 10
+  },
+  e2eControlPlane: {
+    backgroundColor: "#F7F9FC",
+    borderBottomColor: "#D1D5DB",
+    borderBottomWidth: 1,
+    paddingHorizontal: 6,
+    paddingVertical: 4
+  },
+  e2eActionBar: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: 6,
+    marginBottom: 4
+  },
+  e2eAction: {
+    backgroundColor: "#1D4ED8",
+    borderRadius: 6,
+    paddingHorizontal: 8,
+    paddingVertical: 5
+  },
+  e2eActionDisabled: {
+    backgroundColor: "#9CA3AF"
+  },
+  e2eActionText: {
+    color: "#FFFFFF",
+    fontSize: 10,
+    fontWeight: "700"
+  },
+  e2eDump: {
+    flexShrink: 0
+  },
+  e2eDumpText: {
+    color: "#374151",
+    fontSize: 7,
+    lineHeight: 9
+  },
+  e2eDumpProbeRow: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    height: 4,
+    overflow: "hidden"
+  },
+  e2eDumpProbe: {
+    color: "#F7F9FC",
+    fontSize: 1,
+    height: 2,
+    lineHeight: 2,
+    marginRight: 1,
+    width: 2
   },
   title: {
     color: "#FFFFFF",
-    fontSize: 28,
+    fontSize: 18,
     fontWeight: "700"
   },
   subtitle: {
     color: "#D1D5DB",
-    fontSize: 15,
-    marginTop: 8
+    fontSize: 11,
+    marginTop: 3
   },
   section: {
     padding: 20

@@ -20,27 +20,24 @@ appId: nitrogeolocation.example
 
 - openLink:
     link: nitrogeolocation://app/mocked-metadata
-- tapOn:
-    text: "열기|Open"
-    optional: true
+- waitForAnimationToEnd
 
 - extendedWaitUntil:
     visible: "Mocked location metadata contract"
     timeout: 10000
 
-- tapOn: "Request"
+- tapOn:
+    id: "e2e-action-permission-request-button"
 - extendedWaitUntil:
     visible: "granted ✅"
     timeout: 10000
 
-- scrollUntilVisible:
-    element: "2. Get Current Position"
-    direction: DOWN
-
-- tapOn: "Get Position"
+- tapOn:
+    id: "e2e-action-current-position-get-button"
 
 - extendedWaitUntil:
-    visible: "Current Position"
+    visible:
+      id: "position-info"
     timeout: 15000
 
 - assertVisible:

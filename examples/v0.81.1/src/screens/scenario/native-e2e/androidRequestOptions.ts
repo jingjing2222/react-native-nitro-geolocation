@@ -20,10 +20,10 @@ import { runWithNativeGeolocation } from "../utils/nativeGeolocation";
 import { createAndroidProviderSelectionRunners } from "./androidProviderSelection";
 import {
   WATCH_FRESHNESS_GRACE_MS,
+  assertCoarseCompatibleCacheProvider,
   assertErrorMessageIncludes,
   assertFinitePosition,
   assertFreshPosition,
-  assertNotExactFixtureCoordinates,
   configureAutoProvider,
   configurePlayServices,
   requestSeededCoarsePosition
@@ -177,20 +177,23 @@ export const useAndroidRequestOptionsScenario = () => {
         );
         setResult("coarseCache", {
           status: "passed",
-          message: `${locationError.name}: coarse cache-only read did not reuse the fine cache.`
+          message: `${locationError.name}: coarse cache-only read found no coarse-compatible cache.`
         });
         return;
       }
 
       assertFinitePosition(coarseCachePosition);
-      assertNotExactFixtureCoordinates(coarseCachePosition, "Coarse cache");
+      const provider = assertCoarseCompatibleCacheProvider(
+        coarseCachePosition,
+        "Coarse cache"
+      );
       const coordinates = `${coarseCachePosition.coords.latitude.toFixed(
         6
       )}, ${coarseCachePosition.coords.longitude.toFixed(6)}`;
 
       setResult("coarseCache", {
         status: "passed",
-        message: `Coarse cache-only read did not reuse the fine cache and returned ${coordinates}.`
+        message: `Coarse cache-only read used coarse-compatible provider ${provider} and returned ${coordinates}.`
       });
     } catch (error) {
       setResult("coarseCache", {
