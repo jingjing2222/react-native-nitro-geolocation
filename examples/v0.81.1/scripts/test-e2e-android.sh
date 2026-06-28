@@ -7,6 +7,7 @@ FLOW_DIR="$EXAMPLE_DIR/.maestro"
 
 ADB_BIN="${ADB:-adb}"
 MAESTRO_BIN="${MAESTRO:-maestro}"
+NODE_BIN="${NODE:-node}"
 ADB_DEVICE_ARGS=()
 if [[ -n "${ANDROID_SERIAL:-}" ]]; then
   ADB_DEVICE_ARGS=(-s "$ANDROID_SERIAL")
@@ -50,40 +51,10 @@ if [[ "$RUN_ANDROID_PROVIDER_SELECTION_VALUE" == "1" ]]; then
   PROVIDER_SELECTION_PHYSICAL_DEVICE_VALUE="1"
 fi
 
-COMMON_FLOWS=(
-  current-position.yaml
-  watch-position.yaml
-  location-simulation.yaml
-  accuracy-presets.yaml
-  last-known-position.yaml
-  geocoding.yaml
-  location-availability.yaml
-  heading.yaml
-)
-
-ANDROID_FLOWS=(
-  issue-119-android.yaml
-  issue-120-android.yaml
-  issue-121-android.yaml
-  issue-122-android.yaml
-  permission-check.yaml
-  android-request-options.yaml
-  "${COMMON_FLOWS[@]}"
-  issue-67-android-coarse-location.yaml
-  provider-settings.yaml
-  background-e2e.yaml
-  mocked-metadata-android-true.yaml
-  api-errors.yaml
-  compat-api.yaml
-)
-
-if [[ "$RUN_ANDROID_PROVIDER_SELECTION_VALUE" == "1" ]]; then
-  ANDROID_FLOWS=(
-    "${ANDROID_FLOWS[@]:0:5}"
-    android-provider-selection.yaml
-    "${ANDROID_FLOWS[@]:5}"
-  )
-fi
+ANDROID_FLOWS=()
+while IFS= read -r flow; do
+  ANDROID_FLOWS+=("$flow")
+done < <("$NODE_BIN" "$SCRIPT_DIR/maestro-suite-flows.mjs" "$FLOW_DIR/all-tests.yaml" android)
 
 run_maestro_flows() {
   local maestro_extra_args=()
