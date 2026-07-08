@@ -10,7 +10,7 @@ permissions:
   actions: write
   contents: read
   issues: write
-  pull-requests: read
+  pull-requests: write
 
 jobs:
   dispatch-e2e:
@@ -19,7 +19,8 @@ jobs:
     if: >
       github.event.issue.pull_request &&
       github.event.comment.user.login == 'jingjing2222' &&
-      contains(github.event.comment.body, '@E2E')
+      (contains(github.event.comment.body, '/e2e') ||
+        contains(github.event.comment.body, '/E2E'))
 
     steps:
       - name: Validate command
@@ -27,7 +28,7 @@ jobs:
         env:
           COMMENT_BODY: ${{ github.event.comment.body }}
         run: |
-          if printf '%s\n' "$COMMENT_BODY" | grep -Eq '(^|[[:space:]])@E2E([[:space:]]|$)'; then
+          if printf '%s\n' "$COMMENT_BODY" | grep -Eiq '(^|[[:space:]])/e2e([[:space:]]|$)'; then
             echo "matched=true" >> "$GITHUB_OUTPUT"
           else
             echo "matched=false" >> "$GITHUB_OUTPUT"
