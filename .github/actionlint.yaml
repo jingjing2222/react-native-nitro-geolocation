@@ -1,0 +1,4 @@
+self-hosted-runner:
+  labels:
+    - mac-mini-e2e
+    - e2e

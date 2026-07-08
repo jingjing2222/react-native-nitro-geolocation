@@ -1,0 +1,104 @@
+name: E2E Command
+
+on:
+  issue_comment:
+    types:
+      - created
+      - edited
+
+permissions:
+  actions: write
+  contents: read
+  issues: write
+  pull-requests: read
+
+jobs:
+  dispatch-e2e:
+    name: Dispatch E2E
+    runs-on: ubuntu-latest
+    if: >
+      github.event.issue.pull_request &&
+      github.event.comment.user.login == 'jingjing2222' &&
+      contains(github.event.comment.body, '@E2E')
+
+    steps:
+      - name: Validate command
+        id: command
+        env:
+          COMMENT_BODY: ${{ github.event.comment.body }}
+        run: |
+          if printf '%s\n' "$COMMENT_BODY" | grep -Eq '(^|[[:space:]])@E2E([[:space:]]|$)'; then
+            echo "matched=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "matched=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Read pull request
+        id: pr
+        if: steps.command.outputs.matched == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR_NUMBER: ${{ github.event.issue.number }}
+        run: |
+          pr_json="$(gh api "repos/${GITHUB_REPOSITORY}/pulls/${PR_NUMBER}")"
+          echo "head_sha=$(jq -r '.head.sha' <<< "$pr_json")" >> "$GITHUB_OUTPUT"
+          echo "head_ref=$(jq -r '.head.ref' <<< "$pr_json")" >> "$GITHUB_OUTPUT"
+          echo "head_repo=$(jq -r '.head.repo.full_name' <<< "$pr_json")" >> "$GITHUB_OUTPUT"
+
+      - name: Create iOS E2E progress comment
+        id: ios-comment
+        if: steps.command.outputs.matched == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          HEAD_REF: ${{ steps.pr.outputs.head_ref }}
+          HEAD_REPO: ${{ steps.pr.outputs.head_repo }}
+          HEAD_SHA: ${{ steps.pr.outputs.head_sha }}
+          PR_NUMBER: ${{ github.event.issue.number }}
+        run: |
+          body="$(printf '@jingjing2222 iOS E2E: queued\n\n- Detail: Waiting for runner\n- Revision: %s@%s\n- SHA: %s\n' \
+            "$HEAD_REPO" \
+            "$HEAD_REF" \
+            "$HEAD_SHA")"
+
+          comment_id="$(gh api "repos/${GITHUB_REPOSITORY}/issues/${PR_NUMBER}/comments" \
+            -f body="$body" \
+            --jq '.id')"
+          echo "id=$comment_id" >> "$GITHUB_OUTPUT"
+
+      - name: Create Android E2E progress comment
+        id: android-comment
+        if: steps.command.outputs.matched == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          HEAD_REF: ${{ steps.pr.outputs.head_ref }}
+          HEAD_REPO: ${{ steps.pr.outputs.head_repo }}
+          HEAD_SHA: ${{ steps.pr.outputs.head_sha }}
+          PR_NUMBER: ${{ github.event.issue.number }}
+        run: |
+          body="$(printf '@jingjing2222 Android E2E: queued\n\n- Detail: Waiting for runner\n- Revision: %s@%s\n- SHA: %s\n' \
+            "$HEAD_REPO" \
+            "$HEAD_REF" \
+            "$HEAD_SHA")"
+
+          comment_id="$(gh api "repos/${GITHUB_REPOSITORY}/issues/${PR_NUMBER}/comments" \
+            -f body="$body" \
+            --jq '.id')"
+          echo "id=$comment_id" >> "$GITHUB_OUTPUT"
+
+      - name: Dispatch E2E workflow
+        if: steps.command.outputs.matched == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
+          HEAD_SHA: ${{ steps.pr.outputs.head_sha }}
+          HEAD_REPO: ${{ steps.pr.outputs.head_repo }}
+          PR_NUMBER: ${{ github.event.issue.number }}
+        run: |
+          gh workflow run e2e.yml \
+            --ref "${DEFAULT_BRANCH}" \
+            -f pr_number="${PR_NUMBER}" \
+            -f pr_sha="${HEAD_SHA}" \
+            -f pr_repository="${HEAD_REPO}" \
+            -f ios_comment_id="${{ steps.ios-comment.outputs.id }}" \
+            -f android_comment_id="${{ steps.android-comment.outputs.id }}" \
+            -f requested_by="jingjing2222"
