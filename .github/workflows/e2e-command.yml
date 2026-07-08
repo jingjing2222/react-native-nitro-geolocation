@@ -42,9 +42,11 @@ jobs:
           PR_NUMBER: ${{ github.event.issue.number }}
         run: |
           pr_json="$(gh api "repos/${GITHUB_REPOSITORY}/pulls/${PR_NUMBER}")"
-          echo "head_sha=$(jq -r '.head.sha' <<< "$pr_json")" >> "$GITHUB_OUTPUT"
-          echo "head_ref=$(jq -r '.head.ref' <<< "$pr_json")" >> "$GITHUB_OUTPUT"
-          echo "head_repo=$(jq -r '.head.repo.full_name' <<< "$pr_json")" >> "$GITHUB_OUTPUT"
+          {
+            echo "head_sha=$(jq -r '.head.sha' <<< "$pr_json")"
+            echo "head_ref=$(jq -r '.head.ref' <<< "$pr_json")"
+            echo "head_repo=$(jq -r '.head.repo.full_name' <<< "$pr_json")"
+          } >> "$GITHUB_OUTPUT"
 
       - name: Create iOS E2E progress comment
         id: ios-comment
@@ -96,6 +98,7 @@ jobs:
           PR_NUMBER: ${{ github.event.issue.number }}
         run: |
           gh workflow run e2e.yml \
+            -R "${GITHUB_REPOSITORY}" \
             --ref "${DEFAULT_BRANCH}" \
             -f pr_number="${PR_NUMBER}" \
             -f pr_sha="${HEAD_SHA}" \
