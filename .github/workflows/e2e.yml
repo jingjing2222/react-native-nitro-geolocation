@@ -1,36 +1,74 @@
 name: E2E
 
 on:
-  pull_request:
-    types:
-      - opened
-      - edited
-      - reopened
-      - ready_for_review
-      - synchronize
   workflow_dispatch:
+    inputs:
+      pr_number:
+        description: Pull request number to report E2E results to.
+        required: false
+        type: string
+      pr_sha:
+        description: Pull request head SHA to test.
+        required: false
+        type: string
+      pr_repository:
+        description: Pull request head repository to checkout.
+        required: false
+        type: string
+      ios_comment_id:
+        description: Issue comment id to update with iOS E2E progress.
+        required: false
+        type: string
+      android_comment_id:
+        description: Issue comment id to update with Android E2E progress.
+        required: false
+        type: string
+      requested_by:
+        description: GitHub username that requested the run.
+        required: false
+        type: string
 
 permissions:
   contents: read
+  issues: write
+
+env:
+  RUN_URL: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
+  TESTED_REPOSITORY: ${{ inputs.pr_repository || github.repository }}
+  TESTED_SHA: ${{ inputs.pr_sha || github.sha }}
 
 concurrency:
-  group: e2e-${{ github.event.pull_request.number || github.ref }}
+  group: e2e-${{ inputs.pr_number || github.ref }}
   cancel-in-progress: true
 
 jobs:
   ios-e2e:
     name: iOS E2E
-    runs-on: macos-15
+    runs-on:
+      - self-hosted
+      - macOS
+      - ARM64
+      - mac-mini-e2e
     timeout-minutes: 90
-    if: >
-      github.event_name == 'workflow_dispatch' ||
-      contains(github.event.pull_request.title, '[E2E]')
 
     steps:
       - name: Checkout
         uses: actions/checkout@v4
         with:
+          repository: ${{ inputs.pr_repository || github.repository }}
+          ref: ${{ inputs.pr_sha || github.ref }}
           persist-credentials: false
+
+      - name: Update iOS E2E progress
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REQUESTED_BY: ${{ inputs.requested_by }}
+        run: |
+          scripts/ci/update-e2e-comment.sh "${{ inputs.ios_comment_id }}" "iOS" "running" "Bootstrapping runner"
+
+      - name: Bootstrap iOS E2E runner
+        run: |
+          scripts/ci/bootstrap-e2e-runner.sh ios
 
       - name: Compute iOS app fingerprint
         id: ios-app-fingerprint
@@ -69,51 +107,52 @@ jobs:
           path: examples/v0.81.1/ios/build/Build/Products/Release-iphonesimulator/NitroGeolocationExample.app
           key: ${{ steps.ios-app-fingerprint.outputs.key }}
 
-      - name: Setup mise
-        uses: jdx/mise-action@v3
-        with:
-          install: false
-
-      - name: Trust mise config
-        run: |
-          mise trust --yes
-
-      - name: Install iOS E2E tools via mise
-        run: |
-          mise install java maestro node
-
-      - name: Install iOS native build tools via mise
-        if: steps.ios-app-cache.outputs.cache-hit != 'true'
-        run: |
-          mise install ruby
-
       - name: Enable Corepack
         run: |
           corepack enable
-          mise reshim node
 
       - name: Install dependencies
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REQUESTED_BY: ${{ inputs.requested_by }}
         run: |
+          scripts/ci/update-e2e-comment.sh "${{ inputs.ios_comment_id }}" "iOS" "running" "Installing JavaScript dependencies"
           yarn install
 
       - name: Build packages
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REQUESTED_BY: ${{ inputs.requested_by }}
         run: |
+          scripts/ci/update-e2e-comment.sh "${{ inputs.ios_comment_id }}" "iOS" "running" "Building packages"
           yarn build:all
 
       - name: Install iOS gems
         if: steps.ios-app-cache.outputs.cache-hit != 'true'
         working-directory: examples/v0.81.1
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REQUESTED_BY: ${{ inputs.requested_by }}
         run: |
+          ../../scripts/ci/update-e2e-comment.sh "${{ inputs.ios_comment_id }}" "iOS" "running" "Installing iOS gems"
           bundle install
 
       - name: Install iOS pods
         if: steps.ios-app-cache.outputs.cache-hit != 'true'
         working-directory: examples/v0.81.1
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REQUESTED_BY: ${{ inputs.requested_by }}
         run: |
+          ../../scripts/ci/update-e2e-comment.sh "${{ inputs.ios_comment_id }}" "iOS" "running" "Installing iOS pods"
           bundle exec pod install --project-directory=ios
 
       - name: Boot iOS simulator
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REQUESTED_BY: ${{ inputs.requested_by }}
         run: |
+          scripts/ci/update-e2e-comment.sh "${{ inputs.ios_comment_id }}" "iOS" "running" "Booting iOS simulator"
           SIMULATOR_UDID="$(xcrun simctl list devices available | awk -F '[()]' '/iPhone/ { print $2; exit }')"
           if [ -z "$SIMULATOR_UDID" ]; then
             echo "No available iPhone simulator found." >&2
@@ -126,7 +165,11 @@ jobs:
       - name: Build iOS release app
         if: steps.ios-app-cache.outputs.cache-hit != 'true'
         working-directory: examples/v0.81.1
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REQUESTED_BY: ${{ inputs.requested_by }}
         run: |
+          ../../scripts/ci/update-e2e-comment.sh "${{ inputs.ios_comment_id }}" "iOS" "running" "Building iOS release app"
           xcodebuild \
             -workspace ios/NitroGeolocationExample.xcworkspace \
             -scheme NitroGeolocationExample \
@@ -146,11 +189,19 @@ jobs:
 
       - name: Install iOS release app
         working-directory: examples/v0.81.1
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REQUESTED_BY: ${{ inputs.requested_by }}
         run: |
+          ../../scripts/ci/update-e2e-comment.sh "${{ inputs.ios_comment_id }}" "iOS" "running" "Installing iOS release app"
           xcrun simctl install "$SIMULATOR_UDID" ios/build/Build/Products/Release-iphonesimulator/NitroGeolocationExample.app
 
       - name: Run iOS E2E
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REQUESTED_BY: ${{ inputs.requested_by }}
         run: |
+          scripts/ci/update-e2e-comment.sh "${{ inputs.ios_comment_id }}" "iOS" "running" "Running Maestro flows"
           yarn test:e2e:ios
 
       - name: Upload iOS E2E artifacts
@@ -162,19 +213,41 @@ jobs:
           path: |
             ~/.maestro/tests
 
+      - name: Update iOS E2E result
+        if: always()
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REQUESTED_BY: ${{ inputs.requested_by }}
+        run: |
+          scripts/ci/update-e2e-comment.sh "${{ inputs.ios_comment_id }}" "iOS" "${{ job.status }}" "Finished iOS E2E"
+
   android-e2e:
     name: Android E2E
-    runs-on: ubuntu-latest
+    runs-on:
+      - self-hosted
+      - macOS
+      - ARM64
+      - mac-mini-e2e
     timeout-minutes: 90
-    if: >
-      github.event_name == 'workflow_dispatch' ||
-      contains(github.event.pull_request.title, '[E2E]')
 
     steps:
       - name: Checkout
         uses: actions/checkout@v4
         with:
+          repository: ${{ inputs.pr_repository || github.repository }}
+          ref: ${{ inputs.pr_sha || github.ref }}
           persist-credentials: false
+
+      - name: Update Android E2E progress
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REQUESTED_BY: ${{ inputs.requested_by }}
+        run: |
+          scripts/ci/update-e2e-comment.sh "${{ inputs.android_comment_id }}" "Android" "running" "Bootstrapping runner"
+
+      - name: Bootstrap Android E2E runner
+        run: |
+          scripts/ci/bootstrap-e2e-runner.sh android
 
       - name: Compute Android app fingerprint
         id: android-app-fingerprint
@@ -199,8 +272,8 @@ jobs:
                 examples/v0.81.1/react-native.config.js \
                 examples/v0.81.1/src \
                 examples/v0.81.1/android \
-                | xargs -0 sha256sum
-            } | sha256sum | awk '{ print $1 }'
+                | xargs -0 shasum -a 256
+            } | shasum -a 256 | awk '{ print $1 }'
           )"
           echo "fingerprint=$fingerprint" >> "$GITHUB_OUTPUT"
           echo "key=android-e2e-app-$fingerprint" >> "$GITHUB_OUTPUT"
@@ -213,35 +286,33 @@ jobs:
           path: examples/v0.81.1/android/app/build/outputs/apk/release/app-release.apk
           key: ${{ steps.android-app-fingerprint.outputs.key }}
 
-      - name: Setup mise
-        uses: jdx/mise-action@v3
-        with:
-          install: false
-
-      - name: Trust mise config
-        run: |
-          mise trust --yes
-
-      - name: Install Android E2E tools via mise
-        run: |
-          mise install java maestro node
-
       - name: Enable Corepack
         run: |
           corepack enable
-          mise reshim node
 
       - name: Install dependencies
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REQUESTED_BY: ${{ inputs.requested_by }}
         run: |
+          scripts/ci/update-e2e-comment.sh "${{ inputs.android_comment_id }}" "Android" "running" "Installing JavaScript dependencies"
           yarn install
 
       - name: Build packages
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REQUESTED_BY: ${{ inputs.requested_by }}
         run: |
+          scripts/ci/update-e2e-comment.sh "${{ inputs.android_comment_id }}" "Android" "running" "Building packages"
           yarn build:all
 
       - name: Build Android release app
         if: steps.android-app-cache.outputs.cache-hit != 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REQUESTED_BY: ${{ inputs.requested_by }}
         run: |
+          scripts/ci/update-e2e-comment.sh "${{ inputs.android_comment_id }}" "Android" "running" "Building Android release app"
           ./examples/v0.81.1/android/gradlew -p examples/v0.81.1/android --no-daemon --console=plain assembleRelease
 
       - name: Save Android release app cache
@@ -252,29 +323,59 @@ jobs:
           path: examples/v0.81.1/android/app/build/outputs/apk/release/app-release.apk
           key: ${{ steps.android-app-fingerprint.outputs.key }}
 
-      - name: Enable KVM
+      - name: Boot Android emulator
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REQUESTED_BY: ${{ inputs.requested_by }}
         run: |
-          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
-          sudo udevadm control --reload-rules
-          sudo udevadm trigger --name-match=kvm
+          scripts/ci/update-e2e-comment.sh "${{ inputs.android_comment_id }}" "Android" "running" "Booting Android emulator"
+          adb emu kill || true
+          adb kill-server || true
+          emulator -avd nitro-e2e-api-34 -no-window -gpu swiftshader_indirect -no-snapshot -noaudio -no-boot-anim -camera-back none >/tmp/nitro-e2e-emulator.log 2>&1 &
+          echo "ANDROID_EMULATOR_PID=$!" >> "$GITHUB_ENV"
+
+          booted=0
+          for _ in $(seq 1 120); do
+            if [ "$(adb shell getprop sys.boot_completed 2>/dev/null | tr -d '\r')" = "1" ]; then
+              booted=1
+              break
+            fi
+            adb reconnect offline || true
+            adb devices
+            sleep 5
+          done
+
+          if [ "$booted" != "1" ]; then
+            echo "Android emulator did not boot." >&2
+            tail -120 /tmp/nitro-e2e-emulator.log >&2
+            exit 1
+          fi
+
+          adb shell input keyevent 82 || true
+
+      - name: Install Android release app
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REQUESTED_BY: ${{ inputs.requested_by }}
+        run: |
+          scripts/ci/update-e2e-comment.sh "${{ inputs.android_comment_id }}" "Android" "running" "Installing Android release app"
+          adb install -r examples/v0.81.1/android/app/build/outputs/apk/release/app-release.apk
 
       - name: Run Android E2E
-        uses: reactivecircus/android-emulator-runner@v2
-        with:
-          api-level: 34
-          arch: x86_64
-          target: google_apis
-          profile: pixel_6
-          emulator-boot-timeout: 600
-          disable-animations: true
-          emulator-options: -no-window -gpu swiftshader_indirect -no-snapshot -noaudio -no-boot-anim -camera-back none
-          script: |
-            adb devices
-            timeout 180 bash -c 'until [[ "$(adb get-state 2>/dev/null)" == "device" ]]; do adb reconnect offline || true; adb devices; sleep 5; done'
-            timeout 180 bash -c 'until [[ "$(adb shell getprop sys.boot_completed 2>/dev/null | tr -d "\r")" == "1" ]]; do adb devices; sleep 5; done'
-            adb shell input keyevent 82 || true
-            adb install -r examples/v0.81.1/android/app/build/outputs/apk/release/app-release.apk
-            yarn test:e2e:android
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REQUESTED_BY: ${{ inputs.requested_by }}
+        run: |
+          scripts/ci/update-e2e-comment.sh "${{ inputs.android_comment_id }}" "Android" "running" "Running Maestro flows"
+          yarn test:e2e:android
+
+      - name: Stop Android emulator
+        if: always()
+        run: |
+          adb emu kill || true
+          if [ -n "${ANDROID_EMULATOR_PID:-}" ]; then
+            kill "$ANDROID_EMULATOR_PID" || true
+          fi
 
       - name: Upload Android E2E artifacts
         if: always()
@@ -284,3 +385,50 @@ jobs:
           if-no-files-found: ignore
           path: |
             ~/.maestro/tests
+
+      - name: Update Android E2E result
+        if: always()
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REQUESTED_BY: ${{ inputs.requested_by }}
+        run: |
+          scripts/ci/update-e2e-comment.sh "${{ inputs.android_comment_id }}" "Android" "${{ job.status }}" "Finished Android E2E"
+
+  notify-e2e-result:
+    name: Notify E2E Result
+    runs-on: ubuntu-latest
+    needs:
+      - ios-e2e
+      - android-e2e
+    if: always() && inputs.pr_number != ''
+
+    steps:
+      - name: Comment E2E result
+        env:
+          ANDROID_RESULT: ${{ needs.android-e2e.result }}
+          GH_TOKEN: ${{ github.token }}
+          IOS_RESULT: ${{ needs.ios-e2e.result }}
+          PR_NUMBER: ${{ inputs.pr_number }}
+          REQUESTED_BY: ${{ inputs.requested_by }}
+          RUN_URL: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          TESTED_REPOSITORY: ${{ inputs.pr_repository || github.repository }}
+          TESTED_SHA: ${{ inputs.pr_sha }}
+        run: |
+          status="failed"
+          if [ "$IOS_RESULT" = "success" ] && [ "$ANDROID_RESULT" = "success" ]; then
+            status="passed"
+          elif [ "$IOS_RESULT" = "cancelled" ] || [ "$ANDROID_RESULT" = "cancelled" ]; then
+            status="cancelled"
+          fi
+
+          body="$(printf '@%s E2E %s.\n\n- iOS: %s\n- Android: %s\n- Revision: %s@%s\n- Run: %s\n' \
+            "$REQUESTED_BY" \
+            "$status" \
+            "$IOS_RESULT" \
+            "$ANDROID_RESULT" \
+            "$TESTED_REPOSITORY" \
+            "$TESTED_SHA" \
+            "$RUN_URL")"
+
+          gh api "repos/${GITHUB_REPOSITORY}/issues/${PR_NUMBER}/comments" \
+            -f body="$body" || echo "Warning: failed to create final E2E result comment" >&2
