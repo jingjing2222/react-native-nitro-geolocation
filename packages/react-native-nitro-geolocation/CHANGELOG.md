@@ -1,5 +1,11 @@
 # react-native-nitro-geolocation
 
+## 1.4.3
+
+### Patch Changes
+
+- 338316b: Fix iOS permission callback re-entrancy so nested permission requests are not dropped.
+
 ## 1.4.2
 
 ### Patch Changes
