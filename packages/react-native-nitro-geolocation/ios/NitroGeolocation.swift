@@ -513,16 +513,13 @@ class NitroGeolocation: HybridNitroGeolocationSpec {
         let resolvers = pendingPermissionResolvers
         pendingPermissionResolvers.removeAll()
         let shouldStartMonitoring = !pendingPositionRequests.isEmpty || !watchSubscriptions.isEmpty
-
         for resolver in resolvers {
             resolver(mappedStatus)
         }
 
         // If authorized, start monitoring
-        if status == .authorizedAlways || status == .authorizedWhenInUse {
-            if shouldStartMonitoring {
-                startMonitoring()
-            }
+        if shouldStartMonitoring && (status == .authorizedAlways || status == .authorizedWhenInUse) {
+            startMonitoring()
         }
     }
 
