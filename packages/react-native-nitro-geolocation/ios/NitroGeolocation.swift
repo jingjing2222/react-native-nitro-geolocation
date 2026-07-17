@@ -509,15 +509,18 @@ class NitroGeolocation: HybridNitroGeolocationSpec {
         let status = getCurrentAuthorizationStatus(from: manager)
         let mappedStatus = mapCLAuthorizationStatus(status)
 
-        // Resolve pending permission requests
-        for resolver in pendingPermissionResolvers {
+        // Snapshot state before invoking JS callbacks because they can re-enter this instance.
+        let resolvers = pendingPermissionResolvers
+        pendingPermissionResolvers.removeAll()
+        let shouldStartMonitoring = !pendingPositionRequests.isEmpty || !watchSubscriptions.isEmpty
+
+        for resolver in resolvers {
             resolver(mappedStatus)
         }
-        pendingPermissionResolvers.removeAll()
 
         // If authorized, start monitoring
         if status == .authorizedAlways || status == .authorizedWhenInUse {
-            if !pendingPositionRequests.isEmpty || !watchSubscriptions.isEmpty {
+            if shouldStartMonitoring {
                 startMonitoring()
             }
         }
