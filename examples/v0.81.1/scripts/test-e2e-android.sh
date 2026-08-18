@@ -93,20 +93,23 @@ run_maestro_flows() {
   local suite_name="$1"
   shift
 
-  local maestro_extra_args=()
+  local retry_args=(
+    --platform android
+    --flow-dir "$FLOW_DIR"
+    --maestro "$MAESTRO_BIN"
+    --suite-name "$suite_name"
+  )
   if [[ -n "${ANDROID_SERIAL:-}" ]]; then
-    maestro_extra_args+=(--maestro-arg --udid --maestro-arg "$ANDROID_SERIAL")
+    retry_args+=(--maestro-arg --udid --maestro-arg "$ANDROID_SERIAL")
   fi
 
-  "$SCRIPT_DIR/maestro-retry-flows.sh" \
-    --platform android \
-    --flow-dir "$FLOW_DIR" \
-    --maestro "$MAESTRO_BIN" \
-    --suite-name "$suite_name" \
-    "${maestro_extra_args[@]}" \
+  retry_args+=( \
     --env "RUN_ANDROID_PROVIDER_SELECTION=$RUN_ANDROID_PROVIDER_SELECTION_VALUE" \
     --env "PROVIDER_SELECTION_PHYSICAL_DEVICE=$PROVIDER_SELECTION_PHYSICAL_DEVICE_VALUE" \
-    -- "$@"
+    -- "$@" \
+  )
+
+  "$SCRIPT_DIR/maestro-retry-flows.sh" "${retry_args[@]}"
 }
 
 adb_cmd reverse tcp:8081 tcp:8081 >/dev/null
