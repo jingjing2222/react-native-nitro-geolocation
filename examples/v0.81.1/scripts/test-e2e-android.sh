@@ -59,6 +59,13 @@ restore_location() {
   adb_cmd reverse --remove tcp:8081 >/dev/null 2>&1 || true
 }
 
+restore_location_on_exit() {
+  local status=$?
+  trap - EXIT
+  restore_location
+  exit "$status"
+}
+
 is_emulator() {
   [[ "$(adb_cmd shell getprop ro.kernel.qemu | tr -d '\r')" == "1" ]]
 }
@@ -67,7 +74,7 @@ connected_device_count() {
   "$ADB_BIN" devices | awk 'NR > 1 && $2 == "device" { count++ } END { print count + 0 }'
 }
 
-trap restore_location EXIT
+trap restore_location_on_exit EXIT
 
 RUN_ANDROID_PROVIDER_SELECTION_VALUE="${RUN_ANDROID_PROVIDER_SELECTION:-0}"
 PROVIDER_SELECTION_PHYSICAL_DEVICE_VALUE="0"
@@ -84,29 +91,44 @@ if [[ "$RUN_ANDROID_PROVIDER_SELECTION_VALUE" == "1" ]]; then
   PROVIDER_SELECTION_PHYSICAL_DEVICE_VALUE="1"
 fi
 
+if ! android_flow_output="$(
+  "$NODE_BIN" "$SCRIPT_DIR/maestro-suite-flows.mjs" "$FLOW_DIR/all-tests.yaml" android
+)"; then
+  echo "Failed to discover android Maestro flows." >&2
+  exit 1
+fi
+
+if [[ -z "$android_flow_output" ]]; then
+  echo "No android Maestro flows were discovered." >&2
+  exit 1
+fi
+
 ANDROID_FLOWS=()
 while IFS= read -r flow; do
   ANDROID_FLOWS+=("$flow")
-done < <("$NODE_BIN" "$SCRIPT_DIR/maestro-suite-flows.mjs" "$FLOW_DIR/all-tests.yaml" android)
+done <<<"$android_flow_output"
 
 run_maestro_flows() {
   local suite_name="$1"
   shift
 
-  local maestro_extra_args=()
+  local retry_args=(
+    --platform android
+    --flow-dir "$FLOW_DIR"
+    --maestro "$MAESTRO_BIN"
+    --suite-name "$suite_name"
+  )
   if [[ -n "${ANDROID_SERIAL:-}" ]]; then
-    maestro_extra_args+=(--maestro-arg --udid --maestro-arg "$ANDROID_SERIAL")
+    retry_args+=(--maestro-arg --udid --maestro-arg "$ANDROID_SERIAL")
   fi
 
-  "$SCRIPT_DIR/maestro-retry-flows.sh" \
-    --platform android \
-    --flow-dir "$FLOW_DIR" \
-    --maestro "$MAESTRO_BIN" \
-    --suite-name "$suite_name" \
-    "${maestro_extra_args[@]}" \
+  retry_args+=( \
     --env "RUN_ANDROID_PROVIDER_SELECTION=$RUN_ANDROID_PROVIDER_SELECTION_VALUE" \
     --env "PROVIDER_SELECTION_PHYSICAL_DEVICE=$PROVIDER_SELECTION_PHYSICAL_DEVICE_VALUE" \
-    -- "$@"
+    -- "$@" \
+  )
+
+  "$SCRIPT_DIR/maestro-retry-flows.sh" "${retry_args[@]}"
 }
 
 adb_cmd reverse tcp:8081 tcp:8081 >/dev/null

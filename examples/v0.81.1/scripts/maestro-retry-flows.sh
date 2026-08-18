@@ -122,15 +122,15 @@ recover_android_driver() {
   [[ "$PLATFORM" == "android" ]] || return
 
   local adb_bin="${ADB:-adb}"
-  local adb_device_args=()
+  local adb_device_command=("$adb_bin")
   if [[ -n "${ANDROID_SERIAL:-}" ]]; then
-    adb_device_args=(-s "$ANDROID_SERIAL")
+    adb_device_command+=(-s "$ANDROID_SERIAL")
   fi
 
   if command -v "$adb_bin" >/dev/null 2>&1; then
     "$adb_bin" kill-server >/dev/null 2>&1 || true
     "$adb_bin" start-server >/dev/null 2>&1 || true
-    "$adb_bin" "${adb_device_args[@]}" wait-for-device >/dev/null 2>&1 || true
+    "${adb_device_command[@]}" wait-for-device >/dev/null 2>&1 || true
     sleep 3
   fi
 }
