@@ -34,7 +34,38 @@ cat >"$TEST_ROOT/bin/sleep" <<'SLEEP'
 exit 0
 SLEEP
 
-chmod +x "$TEST_ROOT/bin/maestro" "$TEST_ROOT/bin/adb" "$TEST_ROOT/bin/sleep"
+cat >"$TEST_ROOT/bin/node" <<'NODE'
+#!/usr/bin/env bash
+set -euo pipefail
+
+case "$FAKE_NODE_SCENARIO" in
+  parser-error)
+    echo "heading.yaml"
+    echo "Synthetic Maestro suite parser failure" >&2
+    exit 23
+    ;;
+  empty)
+    exit 0
+    ;;
+  *)
+    echo "Unknown fake Node scenario: $FAKE_NODE_SCENARIO" >&2
+    exit 2
+    ;;
+esac
+NODE
+
+cat >"$TEST_ROOT/bin/maestro-recorder" <<'MAESTRO_RECORDER'
+#!/usr/bin/env bash
+set -euo pipefail
+printf '%s\n' "$*" >>"$FAKE_MAESTRO_LOG"
+MAESTRO_RECORDER
+
+chmod +x \
+  "$TEST_ROOT/bin/maestro" \
+  "$TEST_ROOT/bin/adb" \
+  "$TEST_ROOT/bin/sleep" \
+  "$TEST_ROOT/bin/node" \
+  "$TEST_ROOT/bin/maestro-recorder"
 
 run_case() {
   local case_name="$1"
@@ -94,5 +125,64 @@ run_case() {
 
 run_case without-serial ""
 run_case with-serial "emulator-5554"
+
+run_flow_discovery_failure_case() {
+  local platform="$1"
+  local scenario="$2"
+  local expected_error="$3"
+  local case_dir="$TEST_ROOT/$platform-$scenario"
+  local output_path="$case_dir/output.log"
+  local adb_log_path="$case_dir/adb.log"
+  local maestro_log_path="$case_dir/maestro.log"
+  local test_script="$SCRIPT_DIR/test-e2e-$platform.sh"
+  local command_status
+
+  mkdir -p "$case_dir"
+
+  if (
+    unset ANDROID_SERIAL
+    PATH="$TEST_ROOT/bin:$PATH" \
+      ADB="$TEST_ROOT/bin/adb" \
+      NODE="$TEST_ROOT/bin/node" \
+      MAESTRO="$TEST_ROOT/bin/maestro-recorder" \
+      FAKE_ADB_LOG="$adb_log_path" \
+      FAKE_NODE_SCENARIO="$scenario" \
+      FAKE_MAESTRO_LOG="$maestro_log_path" \
+      "$test_script"
+  ) >"$output_path" 2>&1; then
+    command_status=0
+  else
+    command_status=$?
+  fi
+
+  if [[ "$command_status" -eq 0 ]]; then
+    echo "$platform E2E unexpectedly accepted $scenario flow discovery." >&2
+    return 1
+  fi
+
+  grep -Fq "$expected_error" "$output_path"
+
+  if [[ -e "$maestro_log_path" ]]; then
+    echo "$platform E2E invoked Maestro after $scenario flow discovery." >&2
+    return 1
+  fi
+}
+
+run_flow_discovery_failure_case \
+  android \
+  parser-error \
+  "Failed to discover android Maestro flows."
+run_flow_discovery_failure_case \
+  android \
+  empty \
+  "No android Maestro flows were discovered."
+run_flow_discovery_failure_case \
+  ios \
+  parser-error \
+  "Failed to discover ios Maestro flows."
+run_flow_discovery_failure_case \
+  ios \
+  empty \
+  "No ios Maestro flows were discovered."
 
 echo "Maestro retry recovery self-test passed."

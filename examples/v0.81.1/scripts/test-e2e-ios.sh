@@ -8,10 +8,22 @@ FLOW_DIR="$EXAMPLE_DIR/.maestro"
 MAESTRO_BIN="${MAESTRO:-maestro}"
 NODE_BIN="${NODE:-node}"
 
+if ! ios_flow_output="$(
+  "$NODE_BIN" "$SCRIPT_DIR/maestro-suite-flows.mjs" "$FLOW_DIR/all-tests.yaml" ios
+)"; then
+  echo "Failed to discover ios Maestro flows." >&2
+  exit 1
+fi
+
+if [[ -z "$ios_flow_output" ]]; then
+  echo "No ios Maestro flows were discovered." >&2
+  exit 1
+fi
+
 IOS_FLOWS=()
 while IFS= read -r flow; do
   IOS_FLOWS+=("$flow")
-done < <("$NODE_BIN" "$SCRIPT_DIR/maestro-suite-flows.mjs" "$FLOW_DIR/all-tests.yaml" ios)
+done <<<"$ios_flow_output"
 
 "$SCRIPT_DIR/maestro-retry-flows.sh" \
   --platform ios \
