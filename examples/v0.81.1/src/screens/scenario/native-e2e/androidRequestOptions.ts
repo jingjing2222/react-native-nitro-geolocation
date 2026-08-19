@@ -1,14 +1,11 @@
 import {
   LocationErrorCode,
   getCurrentPosition,
-  getLastKnownPosition,
+  getLastKnownPositionAsync,
   unwatch,
   watchPosition
 } from "react-native-nitro-geolocation";
-import type {
-  GeolocationResponse,
-  LocationRequestOptions
-} from "react-native-nitro-geolocation";
+import type { LocationRequestOptions } from "react-native-nitro-geolocation";
 import { usePermissionStatus } from "../hooks/usePermissionStatus";
 import { useScenarioResults } from "../hooks/useScenarioResults";
 import { assertFixtureCoordinates } from "../utils/locationAssertions";
@@ -163,21 +160,16 @@ export const useAndroidRequestOptionsScenario = () => {
         })
       );
 
-      let coarseCachePosition: GeolocationResponse;
-      try {
-        coarseCachePosition = await runWithNativeGeolocation(() =>
-          getLastKnownPosition({
-            granularity: "coarse"
-          })
-        );
-      } catch (error) {
-        const locationError = assertLocationErrorCode(
-          error,
-          LocationErrorCode.POSITION_UNAVAILABLE
-        );
+      const coarseCachePosition = await runWithNativeGeolocation(() =>
+        getLastKnownPositionAsync({
+          granularity: "coarse"
+        })
+      );
+      if (!coarseCachePosition) {
         setResult("coarseCache", {
           status: "passed",
-          message: `${locationError.name}: coarse cache-only read found no coarse-compatible cache.`
+          message:
+            "Coarse cache-only read found no coarse-compatible cache and returned undefined."
         });
         return;
       }

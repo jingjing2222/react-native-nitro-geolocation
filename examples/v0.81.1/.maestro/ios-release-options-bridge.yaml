@@ -82,7 +82,7 @@ appId: nitrogeolocation.example
 - assertVisible:
     id: "ios-release-options-bridge-maximum-age-zero-result"
 - assertVisible:
-    text: ".*POSITION_UNAVAILABLE.*"
+    text: ".*returned undefined for stale cache.*"
 
 - tapOn:
     id: "e2e-action-ios-release-options-bridge-run-heading-filter-button"

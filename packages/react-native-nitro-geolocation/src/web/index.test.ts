@@ -3,12 +3,14 @@ import {
   checkPermission,
   getCurrentPosition,
   getLastKnownPosition,
+  getLastKnownPositionAsync,
   getLocationAvailability,
   requestPermission,
   stopObserving,
   unwatch,
   watchPosition
 } from ".";
+import { clearLastKnownPositionCache } from "../api/positionCache";
 
 type TestNavigator = {
   geolocation?: {
@@ -45,11 +47,26 @@ function createPosition(latitude = 37.5665, longitude = 126.978) {
 
 afterEach(() => {
   stopObserving();
+  clearLastKnownPositionCache();
   vi.restoreAllMocks();
   Reflect.deleteProperty(globalThis, "navigator");
 });
 
 describe("web Modern API", () => {
+  it("returns undefined from a cold sync module cache without querying the browser", () => {
+    const getCurrentPositionMock = vi.fn();
+    setNavigator({
+      geolocation: {
+        getCurrentPosition: getCurrentPositionMock,
+        watchPosition: vi.fn(),
+        clearWatch: vi.fn()
+      }
+    });
+
+    expect(getLastKnownPosition()).toBeUndefined();
+    expect(getCurrentPositionMock).not.toHaveBeenCalled();
+  });
+
   it("wraps navigator.geolocation.getCurrentPosition and normalizes nullable coords", async () => {
     const getCurrentPositionMock = vi.fn((success) => {
       success(createPosition());
@@ -84,6 +101,10 @@ describe("web Modern API", () => {
       enableHighAccuracy: true,
       timeout: 1234,
       maximumAge: 0
+    });
+    expect(getLastKnownPosition()).toMatchObject({
+      coords: { latitude: 37.5665, longitude: 126.978 },
+      timestamp: 1779015190000
     });
   });
 
@@ -151,9 +172,27 @@ describe("web Modern API", () => {
     });
   });
 
-  it("maps getLastKnownPosition cache miss to POSITION_UNAVAILABLE", async () => {
-    const getCurrentPositionMock = vi.fn((_success, error) => {
-      error({ code: 3, message: "Timeout expired" });
+  it("returns an async cache miss without querying or requiring browser geolocation", async () => {
+    const getCurrentPositionMock = vi.fn();
+    setNavigator({
+      geolocation: {
+        getCurrentPosition: getCurrentPositionMock,
+        watchPosition: vi.fn(),
+        clearWatch: vi.fn()
+      }
+    });
+
+    await expect(getLastKnownPositionAsync()).resolves.toBeUndefined();
+    expect(getCurrentPositionMock).not.toHaveBeenCalled();
+
+    setNavigator(undefined);
+    await expect(getLastKnownPositionAsync()).resolves.toBeUndefined();
+  });
+
+  it("reads the observed module cache asynchronously without another browser request", async () => {
+    const timestamp = Date.now();
+    const getCurrentPositionMock = vi.fn((success) => {
+      success({ ...createPosition(37.57, 126.99), timestamp });
     });
     setNavigator({
       geolocation: {
@@ -163,14 +202,36 @@ describe("web Modern API", () => {
       }
     });
 
-    await expect(getLastKnownPosition()).rejects.toEqual({
-      code: 2,
-      message: "No cached browser location is available."
+    await getCurrentPosition();
+    await expect(
+      getLastKnownPositionAsync({ maximumAge: 30_000 })
+    ).resolves.toMatchObject({
+      coords: { latitude: 37.57, longitude: 126.99 },
+      timestamp
     });
-    expect(getCurrentPositionMock.mock.calls[0][2]).toMatchObject({
-      maximumAge: Number.POSITIVE_INFINITY,
-      timeout: 0
+    expect(getCurrentPositionMock).toHaveBeenCalledTimes(1);
+    expect(getLastKnownPosition()).toMatchObject({
+      coords: { latitude: 37.57, longitude: 126.99 }
     });
+  });
+
+  it("filters stale observed positions without querying the browser again", async () => {
+    const getCurrentPositionMock = vi.fn((success) => {
+      success({ ...createPosition(), timestamp: Date.now() - 60_000 });
+    });
+    setNavigator({
+      geolocation: {
+        getCurrentPosition: getCurrentPositionMock,
+        watchPosition: vi.fn(),
+        clearWatch: vi.fn()
+      }
+    });
+
+    await getCurrentPosition();
+    await expect(
+      getLastKnownPositionAsync({ maximumAge: 1_000 })
+    ).resolves.toBeUndefined();
+    expect(getCurrentPositionMock).toHaveBeenCalledTimes(1);
   });
 
   it("uses permissions.query when checkPermission can read geolocation state", async () => {

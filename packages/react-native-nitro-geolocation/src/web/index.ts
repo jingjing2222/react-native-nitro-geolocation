@@ -4,6 +4,11 @@ import type {
   LocationSettingsOptions,
   PermissionStatus
 } from "../NitroGeolocation.nitro";
+import {
+  readLastKnownPosition,
+  rememberPosition,
+  selectCachedPosition
+} from "../api/positionCache";
 import type {
   AccuracyAuthorization,
   GeocodedLocation,
@@ -15,7 +20,7 @@ import type {
   LocationProviderStatus,
   ReverseGeocodedAddress
 } from "../publicTypes";
-import { LocationErrorCode, createLocationError } from "../utils/errors";
+import { LocationErrorCode } from "../utils/errors";
 import {
   createUnsupportedError,
   getGeolocation,
@@ -128,27 +133,23 @@ export function getCurrentPosition(
 
   return new Promise((resolve, reject) => {
     geolocation.getCurrentPosition(
-      (position) => resolve(normalizePosition(position)),
+      (position) => resolve(rememberPosition(normalizePosition(position))),
       (error) => reject(mapBrowserError(error)),
       toPositionOptions(options)
     );
   });
 }
 
-export function getLastKnownPosition(
+export function getLastKnownPosition(): GeolocationResponse | undefined {
+  return readLastKnownPosition();
+}
+
+export function getLastKnownPositionAsync(
   options?: LocationRequestOptions
-): Promise<GeolocationResponse> {
+): Promise<GeolocationResponse | undefined> {
   const maximumAge = options?.maximumAge ?? Number.POSITIVE_INFINITY;
-  return getCurrentPosition({ ...options, maximumAge, timeout: 0 }).catch(
-    (error) => {
-      if ((error as LocationError).code === LocationErrorCode.TIMEOUT) {
-        throw createLocationError(
-          LocationErrorCode.POSITION_UNAVAILABLE,
-          "No cached browser location is available."
-        );
-      }
-      throw error;
-    }
+  return Promise.resolve(
+    selectCachedPosition(readLastKnownPosition(), maximumAge)
   );
 }
 

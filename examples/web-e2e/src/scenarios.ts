@@ -40,6 +40,39 @@ export const scenarios: Scenario[] = [
     status: "idle"
   },
   {
+    id: "last-known-cold-cache",
+    title: "getLastKnownPosition cold cache",
+    detail:
+      "Sync read returns undefined before any Modern position is observed.",
+    status: "idle"
+  },
+  {
+    id: "last-known-async-cold-cache",
+    title: "getLastKnownPositionAsync cold cache",
+    detail:
+      "Async read returns undefined without prompting or querying browser geolocation.",
+    status: "idle"
+  },
+  {
+    id: "last-known-module-cache",
+    title: "getLastKnownPosition module cache",
+    detail:
+      "Sync read returns the latest observed position without a platform query.",
+    status: "idle"
+  },
+  {
+    id: "last-known-async-cache",
+    title: "getLastKnownPositionAsync module cache",
+    detail: "Async read applies cache filters without a browser query.",
+    status: "idle"
+  },
+  {
+    id: "last-known-stale-cache",
+    title: "getLastKnownPositionAsync stale cache",
+    detail: "maximumAge=0 returns undefined without a browser query.",
+    status: "idle"
+  },
+  {
     id: "watch-position",
     title: "watchPosition emits update",
     detail: "Starts real browser watch and receives normalized coords.",

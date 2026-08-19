@@ -3,7 +3,7 @@ import { Platform } from "react-native";
 import {
   LocationErrorCode,
   getCurrentPosition,
-  getLastKnownPosition,
+  getLastKnownPositionAsync,
   unwatch,
   watchHeading,
   watchPosition
@@ -245,29 +245,18 @@ export const useIOSReleaseOptionsBridgeScenario = () => {
         })
       );
 
-      try {
-        await runWithNativeGeolocation(() =>
-          getLastKnownPosition({ maximumAge: 0 })
-        );
-        setResult(
-          "maximumAgeZero",
-          createScenarioResult(
-            "failed",
-            "maximumAge=0 unexpectedly resolved cached data; caller options were dropped before reaching Swift."
-          )
-        );
-      } catch (error) {
-        const locationError = captureLocationError(error);
-        setResult(
-          "maximumAgeZero",
-          createScenarioResult(
-            locationError.code === LocationErrorCode.POSITION_UNAVAILABLE
-              ? "passed"
-              : "failed",
-            `${locationError.name}: ${locationError.message}`
-          )
-        );
-      }
+      const cached = await runWithNativeGeolocation(() =>
+        getLastKnownPositionAsync({ maximumAge: 0 })
+      );
+      setResult(
+        "maximumAgeZero",
+        createScenarioResult(
+          cached ? "failed" : "passed",
+          cached
+            ? "maximumAge=0 unexpectedly returned cached data; caller options may have been dropped before reaching Swift."
+            : "maximumAge=0 reached Swift and returned undefined for stale cache."
+        )
+      );
     } catch (error) {
       setResult(
         "maximumAgeZero",

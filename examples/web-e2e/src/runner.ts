@@ -1,20 +1,25 @@
 import {
+  type GeolocationResponse,
+  type PermissionStatus,
   checkPermission,
   getCurrentPosition,
+  getLastKnownPosition,
+  getLastKnownPositionAsync,
   requestPermission,
   stopObserving,
   unwatch,
   watchPosition
-} from "react-native-nitro-geolocation";
-import type {
-  GeolocationResponse,
-  PermissionStatus
 } from "react-native-nitro-geolocation";
 import {
   runCompatApiAvailabilityCheck,
   runCompatScenarios
 } from "./compatRunner";
 import { setScenario } from "./dom";
+import {
+  expectCacheMiss,
+  expectLatestCachedPosition,
+  expectValidCachedPosition
+} from "./lastKnownAssertions";
 import {
   type ExpectedLocation,
   assertPosition,
@@ -209,6 +214,8 @@ export async function runSuccessSuite() {
     checkPermission: typeof checkPermission,
     requestPermission: typeof requestPermission,
     getCurrentPosition: typeof getCurrentPosition,
+    getLastKnownPosition: typeof getLastKnownPosition,
+    getLastKnownPositionAsync: typeof getLastKnownPositionAsync,
     watchPosition: typeof watchPosition,
     unwatch: typeof unwatch,
     stopObserving: typeof stopObserving
@@ -220,6 +227,23 @@ export async function runSuccessSuite() {
   }
 
   runCompatApiAvailabilityCheck();
+
+  await runStep(
+    "last-known-cold-cache",
+    async () => getLastKnownPosition(),
+    (cached) =>
+      expectCacheMiss(cached, "Cold browser module cache should be empty.")
+  );
+
+  await runStep(
+    "last-known-async-cold-cache",
+    () => getLastKnownPositionAsync(),
+    (cached) =>
+      expectCacheMiss(
+        cached,
+        "Cold async browser module cache should be empty."
+      )
+  );
 
   await runStep<PermissionStatus>(
     "check-permission",
@@ -259,6 +283,35 @@ export async function runSuccessSuite() {
       });
     },
     (result) => assertPosition(result.position)
+  );
+
+  await runStep(
+    "last-known-module-cache",
+    async () => getLastKnownPosition(),
+    (cached) =>
+      expectLatestCachedPosition(
+        cached,
+        position.position.timestamp,
+        assertPosition
+      )
+  );
+
+  await runStep(
+    "last-known-async-cache",
+    () => getLastKnownPositionAsync({ maximumAge: 30_000 }),
+    (cached) =>
+      expectValidCachedPosition(
+        cached,
+        "Async browser module cache did not return a position.",
+        assertPosition
+      )
+  );
+
+  await runStep(
+    "last-known-stale-cache",
+    () => getLastKnownPositionAsync({ maximumAge: 0 }),
+    (cached) =>
+      expectCacheMiss(cached, "maximumAge=0 should reject the observed cache.")
   );
 
   await runStep(
@@ -443,6 +496,11 @@ export async function runSuccessSuite() {
         "check-permission",
         "request-permission",
         "get-current-position",
+        "last-known-cold-cache",
+        "last-known-async-cold-cache",
+        "last-known-module-cache",
+        "last-known-async-cache",
+        "last-known-stale-cache",
         "watch-position",
         "unwatch",
         "stop-observing",

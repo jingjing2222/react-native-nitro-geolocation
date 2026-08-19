@@ -1,6 +1,6 @@
 appId: nitrogeolocation.example
 ---
-# getLastKnownPosition(): prove cached success plus stale-cache and permission-denied rejections.
+# Sync/async last-known APIs: prove cold/seeded module cache plus platform cache edges.
 
 - launchApp:
     clearState: true
@@ -45,12 +45,24 @@ appId: nitrogeolocation.example
 - waitForAnimationToEnd
 
 - extendedWaitUntil:
-    visible: "Cached location API contract with rejection paths"
+    visible: "Synchronous module cache and asynchronous platform cache contracts"
     timeout: 10000
 
 - setLocation:
     latitude: 37.5665
     longitude: 126.978
+
+- tapOn:
+    id: "e2e-action-last-known-position-run-cold-button"
+
+- extendedWaitUntil:
+    visible: "Cold module cache: passed"
+    timeout: 10000
+
+- assertVisible:
+    id: "last-known-position-cold-result"
+- assertVisible:
+    text: ".*returned undefined without querying native location sources.*"
 
 - tapOn:
     id: "e2e-action-last-known-position-run-stale-button"
@@ -62,9 +74,7 @@ appId: nitrogeolocation.example
 - assertVisible:
     id: "last-known-position-stale-result"
 - assertVisible:
-    text: ".*POSITION_UNAVAILABLE.*"
-- assertVisible:
-    text: ".*without starting a fresh request.*"
+    text: ".*returned undefined without starting a fresh request.*"
 
 - tapOn:
     id: "e2e-action-last-known-position-run-system-button"
@@ -84,7 +94,7 @@ appId: nitrogeolocation.example
 - assertVisible:
     text: ".*37.566500, 126.978000.*"
 - assertVisible:
-    text: ".*timestamp delta.*cache read.*ms.*"
+    text: ".*sync module cache.*timestamp delta.*cache read.*ms.*"
 
 - stopApp
 
@@ -130,7 +140,7 @@ appId: nitrogeolocation.example
 - waitForAnimationToEnd
 
 - extendedWaitUntil:
-    visible: "Cached location API contract with rejection paths"
+    visible: "Synchronous module cache and asynchronous platform cache contracts"
     timeout: 10000
 
 - tapOn:
