@@ -123,9 +123,18 @@ internal class AndroidLocationSettings(
         }
     }
 
-    fun getProviderStatus(success: (LocationProviderStatus) -> Unit) {
-        getGoogleLocationAccuracyEnabled { googleLocationAccuracyEnabled ->
-            success(createProviderStatus(googleLocationAccuracyEnabled))
+    fun getProviderStatus(
+        failure: (Exception) -> Unit = { throw it },
+        success: (LocationProviderStatus) -> Unit
+    ) {
+        runLocationSettingsOperation(onFailure = failure) {
+            getGoogleLocationAccuracyEnabled providerStatus@{ googleLocationAccuracyEnabled ->
+                val status = runLocationSettingsOperation(onFailure = failure) {
+                    createProviderStatus(googleLocationAccuracyEnabled)
+                } ?: return@providerStatus
+
+                success(status)
+            }
         }
     }
 
@@ -164,7 +173,18 @@ internal class AndroidLocationSettings(
             return
         }
 
-        if (!isGooglePlayServicesAvailable()) {
+        val playServicesAvailable = runLocationSettingsOperation(
+            onFailure = { exception ->
+                rejectRequest(
+                    pendingRequest,
+                    "Failed to inspect Google Play Services: ${exception.message ?: exception.javaClass.simpleName}"
+                )
+            }
+        ) {
+            isGooglePlayServicesAvailable()
+        } ?: return
+
+        if (!playServicesAvailable) {
             completeRequest(pendingRequest, LocationSettingsOutcome.UNAVAILABLE)
             return
         }
@@ -268,14 +288,24 @@ internal class AndroidLocationSettings(
     ) {
         if (!locationSettingsRequestGate.beginCompleting(pendingRequest)) return
 
-        getProviderStatus { providerStatus ->
-            if (!locationSettingsRequestGate.finish(pendingRequest)) return@getProviderStatus
+        getProviderStatus(
+            success = { providerStatus ->
+                if (!locationSettingsRequestGate.finish(pendingRequest)) {
+                    return@getProviderStatus
+                }
 
-            pendingRequest.success(LocationSettingsResult(
-                outcome = outcome,
-                providerStatus = providerStatus
-            ))
-        }
+                pendingRequest.success(LocationSettingsResult(
+                    outcome = outcome,
+                    providerStatus = providerStatus
+                ))
+            },
+            failure = { exception ->
+                rejectRequest(
+                    pendingRequest,
+                    "Failed to read location provider status: ${exception.message ?: exception.javaClass.simpleName}"
+                )
+            }
+        )
     }
 
     private fun rejectRequest(
@@ -497,4 +527,16 @@ internal fun classifyLocationSettingsFailure(
     }
 
     return LocationSettingsFailureKind.UNEXPECTED
+}
+
+internal fun <T : Any> runLocationSettingsOperation(
+    onFailure: (Exception) -> Unit,
+    operation: () -> T
+): T? {
+    return try {
+        operation()
+    } catch (exception: Exception) {
+        onFailure(exception)
+        null
+    }
 }

@@ -47,6 +47,21 @@ class AndroidLocationSettingsTest {
     }
 
     @Test
+    fun synchronousOperationFailureIsReportedInsteadOfEscaping() {
+        val expected = IllegalStateException("manifest unavailable")
+        var reported: Exception? = null
+
+        val result = runLocationSettingsOperation(
+            onFailure = { reported = it }
+        ) {
+            throw expected
+        }
+
+        assertNull(result)
+        assertSame(expected, reported)
+    }
+
+    @Test
     fun resolvableFailureWithActivityShowsResolution() {
         assertEquals(
             LocationSettingsFailureAction.SHOW_RESOLUTION,
