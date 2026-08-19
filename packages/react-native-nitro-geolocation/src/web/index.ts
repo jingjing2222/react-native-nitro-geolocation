@@ -4,7 +4,11 @@ import type {
   LocationSettingsOptions,
   PermissionStatus
 } from "../NitroGeolocation.nitro";
-import { readLastKnownPosition, rememberPosition } from "../api/positionCache";
+import {
+  readLastKnownPosition,
+  rememberPosition,
+  selectCachedPosition
+} from "../api/positionCache";
 import type {
   AccuracyAuthorization,
   GeocodedLocation,
@@ -16,7 +20,6 @@ import type {
   LocationProviderStatus,
   ReverseGeocodedAddress
 } from "../publicTypes";
-import { LocationErrorCode } from "../utils/errors";
 import {
   createUnsupportedError,
   getGeolocation,
@@ -144,17 +147,8 @@ export function getLastKnownPositionAsync(
   options?: LocationRequestOptions
 ): Promise<GeolocationResponse | undefined> {
   const maximumAge = options?.maximumAge ?? Number.POSITIVE_INFINITY;
-  return getCurrentPosition({ ...options, maximumAge, timeout: 0 }).catch(
-    (error) => {
-      const code = (error as LocationError).code;
-      if (
-        code === LocationErrorCode.POSITION_UNAVAILABLE ||
-        code === LocationErrorCode.TIMEOUT
-      ) {
-        return undefined;
-      }
-      throw error;
-    }
+  return Promise.resolve(
+    selectCachedPosition(readLastKnownPosition(), maximumAge)
   );
 }
 

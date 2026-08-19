@@ -47,6 +47,13 @@ export const scenarios: Scenario[] = [
     status: "idle"
   },
   {
+    id: "last-known-async-cold-cache",
+    title: "getLastKnownPositionAsync cold cache",
+    detail:
+      "Async read returns undefined without prompting or querying browser geolocation.",
+    status: "idle"
+  },
+  {
     id: "last-known-module-cache",
     title: "getLastKnownPosition module cache",
     detail:
@@ -54,9 +61,15 @@ export const scenarios: Scenario[] = [
     status: "idle"
   },
   {
-    id: "last-known-platform-cache",
-    title: "getLastKnownPositionAsync platform cache",
-    detail: "Async read may query the browser cached location source.",
+    id: "last-known-async-cache",
+    title: "getLastKnownPositionAsync module cache",
+    detail: "Async read applies cache filters without a browser query.",
+    status: "idle"
+  },
+  {
+    id: "last-known-stale-cache",
+    title: "getLastKnownPositionAsync stale cache",
+    detail: "maximumAge=0 returns undefined without a browser query.",
     status: "idle"
   },
   {

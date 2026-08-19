@@ -1,4 +1,6 @@
 import {
+  type GeolocationResponse,
+  type PermissionStatus,
   checkPermission,
   getCurrentPosition,
   getLastKnownPosition,
@@ -8,15 +10,16 @@ import {
   unwatch,
   watchPosition
 } from "react-native-nitro-geolocation";
-import type {
-  GeolocationResponse,
-  PermissionStatus
-} from "react-native-nitro-geolocation";
 import {
   runCompatApiAvailabilityCheck,
   runCompatScenarios
 } from "./compatRunner";
 import { setScenario } from "./dom";
+import {
+  expectCacheMiss,
+  expectLatestCachedPosition,
+  expectValidCachedPosition
+} from "./lastKnownAssertions";
 import {
   type ExpectedLocation,
   assertPosition,
@@ -228,11 +231,18 @@ export async function runSuccessSuite() {
   await runStep(
     "last-known-cold-cache",
     async () => getLastKnownPosition(),
-    (cached) => {
-      if (cached !== undefined) {
-        throw new Error("Cold browser module cache should be empty.");
-      }
-    }
+    (cached) =>
+      expectCacheMiss(cached, "Cold browser module cache should be empty.")
+  );
+
+  await runStep(
+    "last-known-async-cold-cache",
+    () => getLastKnownPositionAsync(),
+    (cached) =>
+      expectCacheMiss(
+        cached,
+        "Cold async browser module cache should be empty."
+      )
   );
 
   await runStep<PermissionStatus>(
@@ -278,28 +288,30 @@ export async function runSuccessSuite() {
   await runStep(
     "last-known-module-cache",
     async () => getLastKnownPosition(),
-    (cached) => {
-      if (!cached) {
-        throw new Error("Sync module cache did not return a position.");
-      }
-      assertPosition(cached);
-      if (cached.timestamp !== position.position.timestamp) {
-        throw new Error(
-          "Sync module cache did not return the latest position."
-        );
-      }
-    }
+    (cached) =>
+      expectLatestCachedPosition(
+        cached,
+        position.position.timestamp,
+        assertPosition
+      )
   );
 
   await runStep(
-    "last-known-platform-cache",
-    () => getLastKnownPositionAsync(),
-    (cached) => {
-      if (!cached) {
-        throw new Error("Browser platform cache did not return a position.");
-      }
-      assertPosition(cached);
-    }
+    "last-known-async-cache",
+    () => getLastKnownPositionAsync({ maximumAge: 30_000 }),
+    (cached) =>
+      expectValidCachedPosition(
+        cached,
+        "Async browser module cache did not return a position.",
+        assertPosition
+      )
+  );
+
+  await runStep(
+    "last-known-stale-cache",
+    () => getLastKnownPositionAsync({ maximumAge: 0 }),
+    (cached) =>
+      expectCacheMiss(cached, "maximumAge=0 should reject the observed cache.")
   );
 
   await runStep(
@@ -485,8 +497,10 @@ export async function runSuccessSuite() {
         "request-permission",
         "get-current-position",
         "last-known-cold-cache",
+        "last-known-async-cold-cache",
         "last-known-module-cache",
-        "last-known-platform-cache",
+        "last-known-async-cache",
+        "last-known-stale-cache",
         "watch-position",
         "unwatch",
         "stop-observing",
