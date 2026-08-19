@@ -1,6 +1,7 @@
 [
   "index",
   "quick-start",
+  "swift-package-manager",
   "migration-assistance",
   "community-migration",
   "service-migration",

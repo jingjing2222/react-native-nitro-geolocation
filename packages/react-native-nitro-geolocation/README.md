@@ -139,8 +139,15 @@ npm install react-native-nitro-modules react-native-nitro-geolocation
 Rebuild your native app:
 
 ```bash
-cd ios && pod install
+cd ios && bundle exec pod install
 ```
+
+Use `pod install` directly when your app does not check in a `Gemfile`.
+React Native 0.87's optional Swift Package Manager path is not yet compatible
+with the required Nitro Modules mixed-language native target. Keep CocoaPods
+for iOS and read the
+[Swift Package Manager guide](https://react-native-nitro-geolocation.pages.dev/guide/swift-package-manager)
+before migrating an RN 0.87 app.
 
 Released npm builds try to use the matching GitHub Release prebuilts first:
 Android downloads the release AAR and reuses its native `.so` files, while iOS
@@ -226,6 +233,7 @@ for setup, presets, troubleshooting, and the demo.
 Use the docs site for the detailed flows:
 
 - [Quick Start](https://react-native-nitro-geolocation.pages.dev/guide/quick-start) - install, set native permissions, and read your first location.
+- [Swift Package Manager](https://react-native-nitro-geolocation.pages.dev/guide/swift-package-manager) - RN 0.87 compatibility and migration gate.
 - [Modern API](https://react-native-nitro-geolocation.pages.dev/guide/modern-api) - accuracy presets, watches, Android settings, cached reads, geocoding, heading, and iOS accuracy authorization.
 - [Compat API](https://react-native-nitro-geolocation.pages.dev/guide/compat-api) - callback compatibility and web behavior.
 - [Background Location](https://react-native-nitro-geolocation.pages.dev/background/overview) - native background tracking, geofencing, storage recovery, Headless JS, HTTP sync, and delivery diagnosis.
@@ -237,6 +245,7 @@ Use the docs site for the detailed flows:
 
 - [Introduction](https://react-native-nitro-geolocation.pages.dev/guide/)
 - [Quick Start Guide](https://react-native-nitro-geolocation.pages.dev/guide/quick-start)
+- [Swift Package Manager Guide](https://react-native-nitro-geolocation.pages.dev/guide/swift-package-manager)
 - [Modern API Reference](https://react-native-nitro-geolocation.pages.dev/guide/modern-api)
 - [Compat API Reference](https://react-native-nitro-geolocation.pages.dev/guide/compat-api)
 - [Migration Skills](https://react-native-nitro-geolocation.pages.dev/guide/migration-assistance)

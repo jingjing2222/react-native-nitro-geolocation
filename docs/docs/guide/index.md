@@ -23,6 +23,8 @@ for tracking, geofencing, storage recovery, Headless JS, and HTTP sync.
 | New Architecture / Nitro-based app | Recommended |
 | Expo development build or custom native build | Supported with native setup |
 | Expo managed app without native rebuild | Use `expo-location` |
+| React Native 0.87 app using CocoaPods | Supported |
+| React Native 0.87 SwiftPM-only app | Wait for official Nitro Modules SwiftPM support |
 | Web support required | Use the Modern API root import or `/compat` callback API |
 | Full background tracking / geofencing | Use `react-native-nitro-geolocation/background` |
 
