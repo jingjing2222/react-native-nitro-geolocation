@@ -164,7 +164,8 @@ function PermissionButton() {
 
 ### Android Provider and Settings
 
-Available since `v1.2`.
+The provider/settings snapshot helpers are available since `v1.2`.
+`watchProviderStatus()` is available since `v1.5`.
 
 Use these helpers before user-facing precise-location flows where the app needs
 to know whether Android device settings can satisfy the request.
@@ -218,7 +219,7 @@ unwatch(providerToken);
   it.
 - `watchProviderStatus(callback): string` - Delivers an asynchronous initial
   provider snapshot and then only distinct readiness changes. Pass its token to
-  `unwatch()` for cleanup.
+  `unwatch()` for cleanup. Available since `v1.5`.
 - `getLocationAvailability(): Promise<{ available: boolean; reason?: string }>` -
   Available since `v1.2`. Android reads Fused Location availability when
   `locationProvider: 'auto'` or `locationProvider: 'playServices'` is
