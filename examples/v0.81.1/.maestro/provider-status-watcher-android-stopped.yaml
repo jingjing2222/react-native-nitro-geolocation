@@ -1,6 +1,6 @@
 appId: nitrogeolocation.example
 ---
-# The Android runner re-enables location after unwatch. No third event may be
+# The Android runner re-enables location after unwatch. No fourth event may be
 # delivered, while an explicit snapshot must see the new enabled state.
 
 - assertVisible: "Listener: stopped"

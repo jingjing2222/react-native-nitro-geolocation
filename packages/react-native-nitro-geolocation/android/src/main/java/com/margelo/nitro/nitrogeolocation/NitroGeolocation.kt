@@ -533,7 +533,7 @@ class NitroGeolocation(
     override fun unwatch(token: String) {
         val didRemoveLocationSubscription = watchSubscriptions.remove(token) != null
         headingManager.unwatch(token)
-        providerStatusWatcher.unwatch(token)
+        providerStatusWatcherDelegate.takeIf { it.isInitialized() }?.value?.unwatch(token)
 
         if (!didRemoveLocationSubscription) {
             return
@@ -550,7 +550,7 @@ class NitroGeolocation(
     override fun stopObserving() {
         watchSubscriptions.clear()
         headingManager.stopObserving()
-        providerStatusWatcher.stopObserving()
+        providerStatusWatcherDelegate.takeIf { it.isInitialized() }?.value?.stopObserving()
         stopWatchingLocation()
     }
     override fun dispose() {
