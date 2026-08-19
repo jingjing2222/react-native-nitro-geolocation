@@ -4,6 +4,7 @@
   "setup-ios",
   "permissions",
   "start-stop",
+  "location-lifecycle",
   "geofencing",
   "activity-recognition",
   "headless-js",

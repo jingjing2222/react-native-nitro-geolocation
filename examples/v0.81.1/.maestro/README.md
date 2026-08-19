@@ -181,6 +181,13 @@ When adding a flow:
 - Mixes one expected failure case with configure/start-stop/geofence/storage/sync success checks
 - Included in `all-tests.yaml` because it does not require long background waits or reboot
 
+### `location-lifecycle.yaml`
+- Registers the public Core Location lifecycle listener through the real native bridge
+- Verifies registration does not fabricate an automatic pause/resume event
+- Removes the subscription twice to cover idempotent cleanup
+- Runs on Android too, where the removable subscription intentionally emits no iOS-only events
+- Leaves OS-controlled pause/resume delivery to the documented real-device session
+
 ### `background-long-run-android.yaml`
 - Android-only long-run contract for background delivery
 - Starts tracking, sends the app home, injects outside/inside/outside movement with native processing waits, then verifies post-marker stored location events, Headless JS delivery, and geofence enter/exit events

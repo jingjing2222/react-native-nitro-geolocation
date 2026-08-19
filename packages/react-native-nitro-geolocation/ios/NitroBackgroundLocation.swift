@@ -12,11 +12,13 @@ class NitroBackgroundLocation: HybridNitroBackgroundLocationSpec {
     private let optionsKey = "nitro.background.options"
     var options: BackgroundLocationOptions?
     private var state: BackgroundLocationState = .idle
-    var isRunning = false
-    var eventListeners: [String: (BackgroundEventEnvelope) -> Void] = [:]
-    var locationListeners: [String: (BackgroundLocation) -> Void] = [:]
-    var errorListeners: [String: (LocationError) -> Void] = [:]
-    var storedLocations: [StoredBackgroundLocation] = []
+    private var isRunning = false
+    private var eventListeners: [String: (BackgroundEventEnvelope) -> Void] = [:]
+    private var locationListeners: [String: (BackgroundLocation) -> Void] = [:]
+    private var errorListeners: [String: (LocationError) -> Void] = [:]
+    private var lifecycleListeners: [String: (LocationLifecycleEvent) -> Void] = [:]
+    private let lifecycleListenerLock = NSLock()
+    private var storedLocations: [StoredBackgroundLocation] = []
     private var storedEvents: [StoredBackgroundEventEnvelope] = []
     private var geofences: [GeofenceRegion] = []
     private let storeLock = NSRecursiveLock()
@@ -227,6 +229,64 @@ class NitroBackgroundLocation: HybridNitroBackgroundLocationSpec {
                 )
             }
         }
+    }
+
+    func addBackgroundEventListener(listener: @escaping (BackgroundEventEnvelope) -> Void) throws -> String {
+        let token = UUID().uuidString
+        eventListeners[token] = listener
+        return token
+    }
+
+    func removeBackgroundEventListener(token: String) throws {
+        eventListeners.removeValue(forKey: token)
+    }
+
+    func addBackgroundLocationListener(listener: @escaping (BackgroundLocation) -> Void) throws -> String {
+        let token = UUID().uuidString
+        locationListeners[token] = listener
+        return token
+    }
+
+    func removeBackgroundLocationListener(token: String) throws {
+        locationListeners.removeValue(forKey: token)
+    }
+
+    func addBackgroundErrorListener(listener: @escaping (LocationError) -> Void) throws -> String {
+        let token = UUID().uuidString
+        errorListeners[token] = listener
+        return token
+    }
+
+    func removeBackgroundErrorListener(token: String) throws {
+        errorListeners.removeValue(forKey: token)
+    }
+
+    func addLocationLifecycleListener(
+        listener: @escaping (LocationLifecycleEvent) -> Void
+    ) throws -> String {
+        let token = UUID().uuidString
+        lifecycleListenerLock.lock()
+        lifecycleListeners[token] = listener
+        lifecycleListenerLock.unlock()
+        return token
+    }
+
+    func removeLocationLifecycleListener(token: String) throws {
+        lifecycleListenerLock.lock()
+        lifecycleListeners.removeValue(forKey: token)
+        lifecycleListenerLock.unlock()
+    }
+
+    func handleLocationLifecycleChange(_ state: LocationLifecycleState) {
+        lifecycleListenerLock.lock()
+        let listeners = Array(lifecycleListeners.values)
+        lifecycleListenerLock.unlock()
+
+        let event = LocationLifecycleEvent(
+            state: state,
+            timestamp: Date().timeIntervalSince1970 * 1000
+        )
+        listeners.forEach { $0(event) }
     }
 
     func getStoredBackgroundLocations(

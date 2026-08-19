@@ -25,6 +25,8 @@ namespace margelo::nitro::nitrogeolocation { struct BackgroundEventEnvelope; }
 namespace margelo::nitro::nitrogeolocation { struct BackgroundLocation; }
 // Forward declaration of `LocationError` to properly resolve imports.
 namespace margelo::nitro::nitrogeolocation { struct LocationError; }
+// Forward declaration of `LocationLifecycleEvent` to properly resolve imports.
+namespace margelo::nitro::nitrogeolocation { struct LocationLifecycleEvent; }
 // Forward declaration of `StoredBackgroundLocation` to properly resolve imports.
 namespace margelo::nitro::nitrogeolocation { struct StoredBackgroundLocation; }
 // Forward declaration of `GetStoredBackgroundLocationsOptions` to properly resolve imports.
@@ -52,6 +54,7 @@ namespace margelo::nitro::nitrogeolocation { struct BackgroundHttpSyncResult; }
 #include <functional>
 #include "BackgroundLocation.hpp"
 #include "LocationError.hpp"
+#include "LocationLifecycleEvent.hpp"
 #include "StoredBackgroundLocation.hpp"
 #include <vector>
 #include "GetStoredBackgroundLocationsOptions.hpp"
@@ -89,7 +92,7 @@ namespace margelo::nitro::nitrogeolocation {
 
     public:
       // Properties
-      
+
 
     public:
       // Methods
@@ -108,6 +111,8 @@ namespace margelo::nitro::nitrogeolocation {
       virtual void removeBackgroundLocationListener(const std::string& token) = 0;
       virtual std::string addBackgroundErrorListener(const std::function<void(const LocationError& /* error */)>& listener) = 0;
       virtual void removeBackgroundErrorListener(const std::string& token) = 0;
+      virtual std::string addLocationLifecycleListener(const std::function<void(const LocationLifecycleEvent& /* event */)>& listener) = 0;
+      virtual void removeLocationLifecycleListener(const std::string& token) = 0;
       virtual std::shared_ptr<Promise<std::vector<StoredBackgroundLocation>>> getStoredBackgroundLocations(const std::optional<GetStoredBackgroundLocationsOptions>& options) = 0;
       virtual std::shared_ptr<Promise<void>> clearStoredBackgroundLocations(const std::optional<std::vector<std::string>>& ids) = 0;
       virtual std::shared_ptr<Promise<void>> markStoredBackgroundLocationsDelivered(const std::vector<std::string>& ids) = 0;

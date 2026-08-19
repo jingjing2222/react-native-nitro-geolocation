@@ -84,6 +84,7 @@ appId: nitrogeolocation.example
     when:
       platform: iOS
     file: ios-release-options-bridge.yaml
+- runFlow: location-lifecycle.yaml
 - runFlow:
     when:
       platform: Android

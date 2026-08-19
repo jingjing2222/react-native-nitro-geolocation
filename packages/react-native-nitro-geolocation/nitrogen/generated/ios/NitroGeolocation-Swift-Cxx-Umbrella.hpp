@@ -118,6 +118,10 @@ namespace margelo::nitro::nitrogeolocation { struct LocationAvailability; }
 namespace margelo::nitro::nitrogeolocation { enum class LocationErrorCode; }
 // Forward declaration of `LocationError` to properly resolve imports.
 namespace margelo::nitro::nitrogeolocation { struct LocationError; }
+// Forward declaration of `LocationLifecycleEvent` to properly resolve imports.
+namespace margelo::nitro::nitrogeolocation { struct LocationLifecycleEvent; }
+// Forward declaration of `LocationLifecycleState` to properly resolve imports.
+namespace margelo::nitro::nitrogeolocation { enum class LocationLifecycleState; }
 // Forward declaration of `LocationProviderInternal` to properly resolve imports.
 namespace margelo::nitro::nitrogeolocation { enum class LocationProviderInternal; }
 // Forward declaration of `LocationProviderStatus` to properly resolve imports.
@@ -198,7 +202,8 @@ namespace margelo::nitro::nitrogeolocation { struct StoredBackgroundLocation; }
 #include "LocationAccuracyOptions.hpp"
 #include "LocationAvailability.hpp"
 #include "LocationError.hpp"
-#include "LocationErrorCode.hpp"
+#include "LocationLifecycleEvent.hpp"
+#include "LocationLifecycleState.hpp"
 #include "LocationProvider.hpp"
 #include "LocationProviderInternal.hpp"
 #include "LocationProviderStatus.hpp"

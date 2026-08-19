@@ -208,6 +208,14 @@ namespace margelo::nitro::nitrogeolocation::bridge::swift {
     };
   }
 
+  // pragma MARK: std::function<void(const LocationLifecycleEvent& /* event */)>
+  Func_void_LocationLifecycleEvent create_Func_void_LocationLifecycleEvent(void* NON_NULL swiftClosureWrapper) noexcept {
+    auto swiftClosure = NitroGeolocation::Func_void_LocationLifecycleEvent::fromUnsafe(swiftClosureWrapper);
+    return [swiftClosure = std::move(swiftClosure)](const LocationLifecycleEvent& event) mutable -> void {
+      swiftClosure.call(event);
+    };
+  }
+
   // pragma MARK: std::function<void(const std::vector<StoredBackgroundLocation>& /* result */)>
   Func_void_std__vector_StoredBackgroundLocation_ create_Func_void_std__vector_StoredBackgroundLocation_(void* NON_NULL swiftClosureWrapper) noexcept {
     auto swiftClosure = NitroGeolocation::Func_void_std__vector_StoredBackgroundLocation_::fromUnsafe(swiftClosureWrapper);

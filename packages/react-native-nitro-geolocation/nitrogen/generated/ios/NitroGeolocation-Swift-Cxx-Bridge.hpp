@@ -108,6 +108,10 @@ namespace margelo::nitro::nitrogeolocation { struct LocationAvailability; }
 namespace margelo::nitro::nitrogeolocation { enum class LocationErrorCode; }
 // Forward declaration of `LocationError` to properly resolve imports.
 namespace margelo::nitro::nitrogeolocation { struct LocationError; }
+// Forward declaration of `LocationLifecycleEvent` to properly resolve imports.
+namespace margelo::nitro::nitrogeolocation { struct LocationLifecycleEvent; }
+// Forward declaration of `LocationLifecycleState` to properly resolve imports.
+namespace margelo::nitro::nitrogeolocation { enum class LocationLifecycleState; }
 // Forward declaration of `LocationProviderInternal` to properly resolve imports.
 namespace margelo::nitro::nitrogeolocation { enum class LocationProviderInternal; }
 // Forward declaration of `LocationProviderStatus` to properly resolve imports.
@@ -187,7 +191,8 @@ namespace NitroGeolocation { class HybridNitroGeolocationSpec_cxx; }
 #include "LocationAccuracyOptions.hpp"
 #include "LocationAvailability.hpp"
 #include "LocationError.hpp"
-#include "LocationErrorCode.hpp"
+#include "LocationLifecycleEvent.hpp"
+#include "LocationLifecycleState.hpp"
 #include "LocationProvider.hpp"
 #include "LocationProviderInternal.hpp"
 #include "LocationProviderStatus.hpp"
@@ -1638,6 +1643,28 @@ namespace margelo::nitro::nitrogeolocation::bridge::swift {
   Func_void_BackgroundLocation create_Func_void_BackgroundLocation(void* NON_NULL swiftClosureWrapper) noexcept;
   inline Func_void_BackgroundLocation_Wrapper wrap_Func_void_BackgroundLocation(Func_void_BackgroundLocation value) noexcept {
     return Func_void_BackgroundLocation_Wrapper(std::move(value));
+  }
+
+  // pragma MARK: std::function<void(const LocationLifecycleEvent& /* event */)>
+  /**
+   * Specialized version of `std::function<void(const LocationLifecycleEvent&)>`.
+   */
+  using Func_void_LocationLifecycleEvent = std::function<void(const LocationLifecycleEvent& /* event */)>;
+  /**
+   * Wrapper class for a `std::function<void(const LocationLifecycleEvent& / * event * /)>`, this can be used from Swift.
+   */
+  class Func_void_LocationLifecycleEvent_Wrapper final {
+  public:
+    explicit Func_void_LocationLifecycleEvent_Wrapper(std::function<void(const LocationLifecycleEvent& /* event */)>&& func): _function(std::make_unique<std::function<void(const LocationLifecycleEvent& /* event */)>>(std::move(func))) {}
+    inline void call(LocationLifecycleEvent event) const noexcept {
+      _function->operator()(event);
+    }
+  private:
+    std::unique_ptr<std::function<void(const LocationLifecycleEvent& /* event */)>> _function;
+  } SWIFT_NONCOPYABLE;
+  Func_void_LocationLifecycleEvent create_Func_void_LocationLifecycleEvent(void* NON_NULL swiftClosureWrapper) noexcept;
+  inline Func_void_LocationLifecycleEvent_Wrapper wrap_Func_void_LocationLifecycleEvent(Func_void_LocationLifecycleEvent value) noexcept {
+    return Func_void_LocationLifecycleEvent_Wrapper(std::move(value));
   }
 
   // pragma MARK: std::vector<StoredBackgroundLocation>

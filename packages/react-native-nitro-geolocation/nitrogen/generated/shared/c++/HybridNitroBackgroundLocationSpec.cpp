@@ -29,6 +29,8 @@ namespace margelo::nitro::nitrogeolocation {
       prototype.registerHybridMethod("removeBackgroundLocationListener", &HybridNitroBackgroundLocationSpec::removeBackgroundLocationListener);
       prototype.registerHybridMethod("addBackgroundErrorListener", &HybridNitroBackgroundLocationSpec::addBackgroundErrorListener);
       prototype.registerHybridMethod("removeBackgroundErrorListener", &HybridNitroBackgroundLocationSpec::removeBackgroundErrorListener);
+      prototype.registerHybridMethod("addLocationLifecycleListener", &HybridNitroBackgroundLocationSpec::addLocationLifecycleListener);
+      prototype.registerHybridMethod("removeLocationLifecycleListener", &HybridNitroBackgroundLocationSpec::removeLocationLifecycleListener);
       prototype.registerHybridMethod("getStoredBackgroundLocations", &HybridNitroBackgroundLocationSpec::getStoredBackgroundLocations);
       prototype.registerHybridMethod("clearStoredBackgroundLocations", &HybridNitroBackgroundLocationSpec::clearStoredBackgroundLocations);
       prototype.registerHybridMethod("markStoredBackgroundLocationsDelivered", &HybridNitroBackgroundLocationSpec::markStoredBackgroundLocationsDelivered);

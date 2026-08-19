@@ -1,0 +1,55 @@
+appId: nitrogeolocation.example
+---
+# Registers and removes the public lifecycle listener through the real Nitro bridge.
+# Core Location decides when automatic pause callbacks occur, so this
+# deterministic flow verifies that subscribing does not fabricate an event.
+
+- launchApp:
+    clearState: true
+
+- extendedWaitUntil:
+    visible: "Geolocation API"
+    timeout: 10000
+
+- stopApp
+
+- openLink:
+    link: nitrogeolocation://app/ios-location-lifecycle
+- runFlow:
+    when:
+      platform: iOS
+      visible: "Cancel|취소"
+    commands:
+      - tapOn:
+          text: "Open|열기"
+- runFlow:
+    when:
+      platform: iOS
+    commands:
+      - openLink:
+          link: nitrogeolocation://app/ios-location-lifecycle
+- waitForAnimationToEnd
+
+- extendedWaitUntil:
+    visible: "Real Core Location pause and app-triggered resume callbacks"
+    timeout: 10000
+
+- tapOn:
+    id: "e2e-action-ios-location-lifecycle-register-button"
+
+- extendedWaitUntil:
+    visible: "Subscription: passed"
+    timeout: 10000
+
+- assertVisible:
+    text: "Events: 0"
+
+- tapOn:
+    id: "e2e-action-ios-location-lifecycle-remove-button"
+
+- extendedWaitUntil:
+    visible: "Removal: passed"
+    timeout: 10000
+
+- assertVisible:
+    text: ".*remove twice without an error.*"
