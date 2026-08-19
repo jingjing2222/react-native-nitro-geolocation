@@ -1,0 +1,27 @@
+appId: nitrogeolocation.example
+---
+# Android runner marks both location permissions user-fixed before this flow.
+
+- stopApp
+
+- openLink:
+    link: nitrogeolocation://app/location-readiness
+- runFlow:
+    when:
+      visible: ".*isn't responding|.*응답하지 않.*"
+    commands:
+      - tapOn:
+          text: "Wait|대기"
+- waitForAnimationToEnd
+
+- tapOn:
+    id: "e2e-action-location-readiness-run-denied-button"
+
+- extendedWaitUntil:
+    visible: "Permission diagnosis: passed"
+    timeout: 20000
+
+- assertVisible:
+    id: "location-readiness-denied-result"
+- assertVisible:
+    text: ".*permission=denied.*requestPermissionOrReviewSettings.*"

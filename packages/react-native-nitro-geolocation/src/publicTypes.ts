@@ -71,6 +71,7 @@ export type LocationAvailability = SchemaLocationAvailability;
 
 export type LocationReadinessRemediation =
   | "requestPermission"
+  | "requestPermissionOrReviewSettings"
   | "reviewPermissionSettings"
   | "enableLocationServices"
   | "enableLocationProvider"

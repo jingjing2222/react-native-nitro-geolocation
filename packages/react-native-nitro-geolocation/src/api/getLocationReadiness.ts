@@ -5,6 +5,7 @@ import { getLocationAvailability } from "./getLocationAvailability";
 import { getProviderStatus } from "./getProviderStatus";
 import { buildLocationReadiness } from "./locationReadiness";
 import { readLastKnownPosition } from "./positionCache";
+import { getConfiguredLocationProvider } from "./setConfiguration";
 
 /**
  * Diagnose whether the current device is ready to provide a location.
@@ -22,7 +23,10 @@ export async function getLocationReadiness(): Promise<LocationReadiness> {
 
   return buildLocationReadiness({
     permission,
-    canRequestDeniedPermission: Platform.OS === "android",
+    deniedPermissionIsAmbiguous: Platform.OS === "android",
+    includeGooglePlayServicesRemediations:
+      Platform.OS === "android" &&
+      getConfiguredLocationProvider() === "playServices",
     providerStatus,
     availability,
     cachedPosition: readLastKnownPosition(),

@@ -37,7 +37,7 @@ appId: nitrogeolocation.example
           visible: "Permission diagnosis: passed"
           timeout: 20000
       - assertVisible:
-          text: ".*permission=denied.*requestPermission.*"
+          text: ".*permission=denied.*requestPermissionOrReviewSettings.*"
       - stopApp
 
 - launchApp:
@@ -160,7 +160,7 @@ appId: nitrogeolocation.example
       platform: Android
     commands:
       - assertVisible:
-          text: ".*requestPermission.*"
+          text: ".*requestPermissionOrReviewSettings.*"
 - runFlow:
     when:
       platform: iOS

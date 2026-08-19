@@ -1,10 +1,20 @@
 import type { NitroGeolocation } from "../NitroGeolocation.nitro";
 import { NitroGeolocationHybridObject } from "../NitroGeolocationModule";
-import type { GeolocationConfiguration } from "../publicTypes";
+import type {
+  GeolocationConfiguration,
+  LocationProvider
+} from "../publicTypes";
 
 type NitroGeolocationConfiguration = Parameters<
   NitroGeolocation["setConfiguration"]
 >[0];
+
+let configuredLocationProvider: LocationProvider | undefined;
+
+/** @internal Current Modern API provider preference for JS-level diagnosis. */
+export function getConfiguredLocationProvider(): LocationProvider | undefined {
+  return configuredLocationProvider;
+}
 
 /**
  * Set global geolocation configuration.
@@ -32,4 +42,5 @@ export function setConfiguration(config: GeolocationConfiguration): void {
   };
 
   NitroGeolocationHybridObject.setConfiguration(nativeConfig);
+  configuredLocationProvider = config.locationProvider;
 }

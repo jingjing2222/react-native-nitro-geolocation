@@ -88,7 +88,7 @@ export default function LocationReadinessScreen() {
   const runDeniedScenario = async () => {
     const expectedRemediation =
       Platform.OS === "android"
-        ? "requestPermission"
+        ? "requestPermissionOrReviewSettings"
         : "reviewPermissionSettings";
     setResult("denied", {
       status: "running",

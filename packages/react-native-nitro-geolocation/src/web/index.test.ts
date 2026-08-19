@@ -12,7 +12,7 @@ import {
   watchPosition
 } from ".";
 import { clearLastKnownPositionCache } from "../api/positionCache";
-import { LocationErrorCode } from "../utils/errors";
+import { clearWebPermissionEvidence } from "./permissionEvidence";
 
 type TestNavigator = {
   geolocation?: {
@@ -50,6 +50,7 @@ function createPosition(latitude = 37.5665, longitude = 126.978) {
 afterEach(() => {
   stopObserving();
   clearLastKnownPositionCache();
+  clearWebPermissionEvidence();
   vi.restoreAllMocks();
   Reflect.deleteProperty(globalThis, "navigator");
 });
@@ -299,7 +300,7 @@ describe("web Modern API", () => {
     expect(getCurrentPositionMock).not.toHaveBeenCalled();
   });
 
-  it("keeps permission undetermined after an observation when Permissions API is unavailable", async () => {
+  it("uses a recent successful observation as bounded permission evidence", async () => {
     const getCurrentPositionMock = vi.fn((success) => {
       success({ ...createPosition(), timestamp: Date.now() });
     });
@@ -313,12 +314,36 @@ describe("web Modern API", () => {
 
     await getCurrentPosition();
     await expect(getLocationReadiness()).resolves.toMatchObject({
+      ready: true,
+      permission: "granted",
+      cache: { available: true },
+      remediations: []
+    });
+    expect(getCurrentPositionMock).toHaveBeenCalledTimes(1);
+  });
+
+  it("expires successful observation evidence instead of trusting historical cache", async () => {
+    const now = vi.spyOn(Date, "now").mockReturnValue(1_000);
+    const getCurrentPositionMock = vi.fn((success) => {
+      success({ ...createPosition(), timestamp: 1_000 });
+    });
+    setNavigator({
+      geolocation: {
+        getCurrentPosition: getCurrentPositionMock,
+        watchPosition: vi.fn(),
+        clearWatch: vi.fn()
+      }
+    });
+
+    await getCurrentPosition();
+    now.mockReturnValue(31_001);
+
+    await expect(getLocationReadiness()).resolves.toMatchObject({
       ready: false,
       permission: "undetermined",
       cache: { available: true },
       remediations: ["requestPermission"]
     });
-    expect(getCurrentPositionMock).toHaveBeenCalledTimes(1);
   });
 
   it("diagnoses a missing Web Geolocation API as an unsupported environment", async () => {

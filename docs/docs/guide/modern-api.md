@@ -225,11 +225,17 @@ async function prepareAccurateLocation() {
   permission, services, provider, availability, Play Services, Google Location
   Accuracy, and observed module-cache state into one read-only diagnosis. It
   returns stable remediation codes such as `requestPermission`,
-  `enableLocationServices`, `useSupportedEnvironment`, and `acquirePosition`;
-  it never requests
+  `requestPermissionOrReviewSettings`, `enableLocationServices`,
+  `useSupportedEnvironment`, and `acquirePosition`; it never requests
   permission, opens settings, starts location acquisition, or changes
   configuration. On Web, `useSupportedEnvironment` means reopening the app in
   a secure context and a browser or WebView that exposes the Geolocation API.
+  Android uses `requestPermissionOrReviewSettings` because its existing
+  permission status cannot distinguish a first request from permanent denial;
+  request permission first, then offer app settings if it remains denied.
+  Google Play Services remediations are returned only when
+  `locationProvider: 'playServices'` is explicitly configured; the default
+  `auto` and `android` routes can continue through Android platform providers.
 - `requestLocationSettings(options?): Promise<LocationProviderStatus>` -
   Checks the requested Android location settings and shows Android's native
   resolution dialog when available. It resolves with the updated provider

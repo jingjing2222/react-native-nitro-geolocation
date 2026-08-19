@@ -91,17 +91,17 @@ describe("buildLocationReadiness", () => {
     ).toEqual(["requestPermission"]);
   });
 
-  it("keeps Android denied permission requestable because first-run state is indistinguishable", () => {
+  it("preserves Android denied ambiguity because first-run and permanent denial are indistinguishable", () => {
     expect(
       buildLocationReadiness({
         permission: "denied",
-        canRequestDeniedPermission: true,
+        deniedPermissionIsAmbiguous: true,
         providerStatus,
         availability: { available: false, reason: "permissionDenied" },
         cachedPosition: undefined,
         now: 10_000
       }).remediations
-    ).toEqual(["requestPermission"]);
+    ).toEqual(["requestPermissionOrReviewSettings"]);
   });
 
   it("uses one actionable remediation for an unsupported environment", () => {
@@ -133,6 +133,7 @@ describe("buildLocationReadiness", () => {
           googleLocationAccuracyEnabled: false
         },
         availability: { available: false, reason: "providerUnavailable" },
+        includeGooglePlayServicesRemediations: true,
         cachedPosition: undefined,
         now: 10_000
       }).remediations
@@ -141,6 +142,25 @@ describe("buildLocationReadiness", () => {
       "installOrUpdatePlayServices",
       "enableGoogleLocationAccuracy"
     ]);
+  });
+
+  it("omits Play Services remediations when the configured route uses Android platform providers", () => {
+    expect(
+      buildLocationReadiness({
+        permission: "granted",
+        providerStatus: {
+          ...providerStatus,
+          gpsAvailable: false,
+          networkAvailable: false,
+          passiveAvailable: false,
+          googlePlayServicesAvailable: false,
+          googleLocationAccuracyEnabled: false
+        },
+        availability: { available: false, reason: "providerUnavailable" },
+        cachedPosition: undefined,
+        now: 10_000
+      }).remediations
+    ).toEqual(["enableLocationProvider"]);
   });
 
   it("uses a generic retry when availability fails without a specific platform signal", () => {

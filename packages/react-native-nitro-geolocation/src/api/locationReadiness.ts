@@ -9,8 +9,9 @@ import type {
 
 export interface LocationReadinessSnapshot {
   permission: PermissionStatus;
-  canRequestDeniedPermission?: boolean;
+  deniedPermissionIsAmbiguous?: boolean;
   environmentSupported?: boolean;
+  includeGooglePlayServicesRemediations?: boolean;
   providerStatus: LocationProviderStatus;
   availability: LocationAvailability;
   cachedPosition: GeolocationResponse | undefined;
@@ -35,8 +36,9 @@ const getCacheReadiness = (
 /** @internal Pure classifier used by native, Web, and unit tests. */
 export function buildLocationReadiness({
   permission,
-  canRequestDeniedPermission = false,
+  deniedPermissionIsAmbiguous = false,
   environmentSupported = true,
+  includeGooglePlayServicesRemediations = false,
   providerStatus,
   availability,
   cachedPosition,
@@ -63,8 +65,8 @@ export function buildLocationReadiness({
     remediations.push("requestPermission");
   } else if (permission !== "granted") {
     remediations.push(
-      canRequestDeniedPermission
-        ? "requestPermission"
+      deniedPermissionIsAmbiguous
+        ? "requestPermissionOrReviewSettings"
         : "reviewPermissionSettings"
     );
   }
@@ -84,10 +86,16 @@ export function buildLocationReadiness({
     ) {
       remediations.push("enableLocationProvider");
     }
-    if (providerStatus.googlePlayServicesAvailable === false) {
+    if (
+      includeGooglePlayServicesRemediations &&
+      providerStatus.googlePlayServicesAvailable === false
+    ) {
       remediations.push("installOrUpdatePlayServices");
     }
-    if (providerStatus.googleLocationAccuracyEnabled === false) {
+    if (
+      includeGooglePlayServicesRemediations &&
+      providerStatus.googleLocationAccuracyEnabled === false
+    ) {
       remediations.push("enableGoogleLocationAccuracy");
     }
     if (remediations.length === 0) {
