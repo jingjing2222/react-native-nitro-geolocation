@@ -46,6 +46,18 @@ export const scenarios: Scenario[] = [
     status: "idle"
   },
   {
+    id: "get-current-position-pre-aborted",
+    title: "getCurrentPosition pre-aborted",
+    detail: "Rejects with the exact abort reason without starting a request.",
+    status: "idle"
+  },
+  {
+    id: "get-current-position-cancelled",
+    title: "getCurrentPosition in-flight cancellation",
+    detail: "Cancels an active one-shot request with AbortSignal.",
+    status: "idle"
+  },
+  {
     id: "last-known-cold-cache",
     title: "getLastKnownPosition cold cache",
     detail:

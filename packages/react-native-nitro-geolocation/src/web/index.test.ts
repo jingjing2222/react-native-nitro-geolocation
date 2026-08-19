@@ -180,6 +180,92 @@ describe("web Modern API", () => {
     });
   });
 
+  it("does not start browser geolocation for a pre-aborted request", async () => {
+    const getCurrentPositionMock = vi.fn();
+    const watchPositionMock = vi.fn();
+    setNavigator({
+      geolocation: {
+        getCurrentPosition: getCurrentPositionMock,
+        watchPosition: watchPositionMock,
+        clearWatch: vi.fn()
+      }
+    });
+    const controller = new AbortController();
+    const reason = new Error("cancel before start");
+    controller.abort(reason);
+
+    await expect(
+      getCurrentPosition({ signal: controller.signal })
+    ).rejects.toBe(reason);
+    expect(getCurrentPositionMock).not.toHaveBeenCalled();
+    expect(watchPositionMock).not.toHaveBeenCalled();
+  });
+
+  it("rejects a pre-aborted request before checking browser support", async () => {
+    setNavigator(undefined);
+    const controller = new AbortController();
+    const reason = new Error("cancel without browser support");
+    controller.abort(reason);
+
+    await expect(
+      getCurrentPosition({ signal: controller.signal })
+    ).rejects.toBe(reason);
+  });
+
+  it("clears an in-flight browser request when its signal aborts", async () => {
+    let lateSuccess:
+      | ((position: ReturnType<typeof createPosition>) => void)
+      | undefined;
+    const clearWatch = vi.fn();
+    setNavigator({
+      geolocation: {
+        getCurrentPosition: vi.fn(),
+        watchPosition: vi.fn((success) => {
+          lateSuccess = success;
+          return 41;
+        }),
+        clearWatch
+      }
+    });
+    const controller = new AbortController();
+    const reason = new Error("cancel active request");
+
+    const request = getCurrentPosition({ signal: controller.signal });
+    controller.abort(reason);
+
+    await expect(request).rejects.toBe(reason);
+    expect(clearWatch).toHaveBeenCalledTimes(1);
+    expect(clearWatch).toHaveBeenCalledWith(41);
+    lateSuccess?.(createPosition());
+    expect(clearWatch).toHaveBeenCalledTimes(1);
+  });
+
+  it("clears the browser watch after a cancellable request succeeds", async () => {
+    const clearWatch = vi.fn();
+    setNavigator({
+      geolocation: {
+        getCurrentPosition: vi.fn(),
+        watchPosition: vi.fn((success) => {
+          success(createPosition());
+          return 42;
+        }),
+        clearWatch
+      }
+    });
+    const controller = new AbortController();
+
+    await expect(
+      getCurrentPosition({ signal: controller.signal })
+    ).resolves.toMatchObject({
+      coords: { latitude: 37.5665, longitude: 126.978 }
+    });
+    expect(clearWatch).toHaveBeenCalledTimes(1);
+    expect(clearWatch).toHaveBeenCalledWith(42);
+
+    controller.abort();
+    expect(clearWatch).toHaveBeenCalledTimes(1);
+  });
+
   it("returns an async cache miss without querying or requiring browser geolocation", async () => {
     const getCurrentPositionMock = vi.fn();
     setNavigator({

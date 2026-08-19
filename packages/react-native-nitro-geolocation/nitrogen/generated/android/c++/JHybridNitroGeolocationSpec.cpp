@@ -257,6 +257,14 @@ namespace margelo::nitro::nitrogeolocation {
     static const auto method = _javaPart->javaClassStatic()->getMethod<void(jni::alias_ref<JFunc_void_GeolocationResponse::javaobject> /* success */, jni::alias_ref<JLocationRequestOptions> /* options */, jni::alias_ref<JFunc_void_LocationError::javaobject> /* error */)>("getCurrentPosition_cxx");
     method(_javaPart, JFunc_void_GeolocationResponse_cxx::fromCpp(success), JLocationRequestOptions::fromCpp(options), error.has_value() ? JFunc_void_LocationError_cxx::fromCpp(error.value()) : nullptr);
   }
+  void JHybridNitroGeolocationSpec::getCurrentPositionCancellable(const std::string& requestId, const std::function<void(const GeolocationResponse& /* position */)>& success, const LocationRequestOptions& options, const std::optional<std::function<void(const LocationError& /* error */)>>& error) {
+    static const auto method = _javaPart->javaClassStatic()->getMethod<void(jni::alias_ref<jni::JString> /* requestId */, jni::alias_ref<JFunc_void_GeolocationResponse::javaobject> /* success */, jni::alias_ref<JLocationRequestOptions> /* options */, jni::alias_ref<JFunc_void_LocationError::javaobject> /* error */)>("getCurrentPositionCancellable_cxx");
+    method(_javaPart, jni::make_jstring(requestId), JFunc_void_GeolocationResponse_cxx::fromCpp(success), JLocationRequestOptions::fromCpp(options), error.has_value() ? JFunc_void_LocationError_cxx::fromCpp(error.value()) : nullptr);
+  }
+  void JHybridNitroGeolocationSpec::cancelCurrentPositionRequest(const std::string& requestId) {
+    static const auto method = _javaPart->javaClassStatic()->getMethod<void(jni::alias_ref<jni::JString> /* requestId */)>("cancelCurrentPositionRequest");
+    method(_javaPart, jni::make_jstring(requestId));
+  }
   void JHybridNitroGeolocationSpec::getLastKnownPosition(const std::function<void(const GeolocationResponse& /* position */)>& success, const LocationRequestOptions& options, const std::optional<std::function<void(const LocationError& /* error */)>>& error) {
     static const auto method = _javaPart->javaClassStatic()->getMethod<void(jni::alias_ref<JFunc_void_GeolocationResponse::javaobject> /* success */, jni::alias_ref<JLocationRequestOptions> /* options */, jni::alias_ref<JFunc_void_LocationError::javaobject> /* error */)>("getLastKnownPosition_cxx");
     method(_javaPart, JFunc_void_GeolocationResponse_cxx::fromCpp(success), JLocationRequestOptions::fromCpp(options), error.has_value() ? JFunc_void_LocationError_cxx::fromCpp(error.value()) : nullptr);

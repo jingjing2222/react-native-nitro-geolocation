@@ -8,6 +8,7 @@ export { requestLocationSettings } from "./requestLocationSettings";
 export { getAccuracyAuthorization } from "./getAccuracyAuthorization";
 export { requestTemporaryFullAccuracy } from "./requestTemporaryFullAccuracy";
 export { getCurrentPosition } from "./getCurrentPosition";
+export type { CurrentPositionOptions } from "./currentPositionOptions";
 export {
   getLastKnownPosition,
   getLastKnownPositionAsync

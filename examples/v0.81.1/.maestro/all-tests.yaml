@@ -64,6 +64,7 @@ appId: nitrogeolocation.example
       platform: Android
     file: gps-only-recipe-coarse.yaml
 - runFlow: current-position.yaml
+- runFlow: cancellable-current-position.yaml
 - runFlow: watch-position.yaml
 - runFlow: location-simulation.yaml
 - runFlow: accuracy-presets.yaml

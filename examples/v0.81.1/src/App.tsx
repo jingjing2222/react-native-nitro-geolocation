@@ -14,6 +14,7 @@ import AndroidRequestOptionsScreen, {
 } from "./screens/AndroidRequestOptionsScreen";
 import ApiErrorsScreen from "./screens/ApiErrorsScreen";
 import BackgroundE2EScreen from "./screens/BackgroundE2EScreen";
+import CancellableCurrentPositionScreen from "./screens/CancellableCurrentPositionScreen";
 import CompatScreen from "./screens/CompatScreen";
 import CurrentPositionScreen from "./screens/CurrentPositionScreen";
 import DefaultScreen from "./screens/DefaultScreen";
@@ -49,6 +50,7 @@ const linking = {
       Compat: "compat",
       PermissionCheck: "permission-check",
       CurrentPosition: "current-position",
+      CancellableCurrentPosition: "cancellable-current-position",
       WatchPosition: "watch-position",
       LocationSimulation: "location-simulation",
       MockedMetadata: "mocked-metadata",
@@ -130,6 +132,11 @@ export default function App() {
           <Tab.Screen
             name="CurrentPosition"
             component={CurrentPositionScreen}
+            options={hiddenTabOptions}
+          />
+          <Tab.Screen
+            name="CancellableCurrentPosition"
+            component={CancellableCurrentPositionScreen}
             options={hiddenTabOptions}
           />
           <Tab.Screen

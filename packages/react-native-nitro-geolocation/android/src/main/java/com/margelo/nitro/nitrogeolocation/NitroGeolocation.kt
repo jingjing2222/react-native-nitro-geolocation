@@ -86,7 +86,9 @@ class NitroGeolocation(
     private val pendingPermissionResolvers = mutableListOf<(PermissionStatus) -> Unit>()
 
     // getCurrentPosition requests
-    private val pendingPositionRequests = ConcurrentHashMap<UUID, PositionRequest>()
+    private val pendingPositionRequests = ConcurrentHashMap<String, PositionRequest>()
+    private val cancellablePositionRequests =
+        ConcurrentHashMap<String, CurrentPositionCancellationState>()
 
     // Watch subscriptions (token -> callback)
     private val watchSubscriptions = ConcurrentHashMap<String, WatchSubscription>()
@@ -247,6 +249,53 @@ class NitroGeolocation(
         options: LocationRequestOptions,
         error: ((LocationError) -> Unit)?
     ): Unit {
+        getCurrentPositionInternal(success, options, error, null, null)
+    }
+
+    override fun getCurrentPositionCancellable(
+        requestId: String,
+        success: (GeolocationResponse) -> Unit,
+        options: LocationRequestOptions,
+        error: ((LocationError) -> Unit)?
+    ) {
+        val cancellationState = CurrentPositionCancellationState()
+        cancellablePositionRequests.put(requestId, cancellationState)?.cancel()
+
+        val finishRequest = {
+            cancellablePositionRequests.remove(requestId)
+        }
+        getCurrentPositionInternal(
+            success = { position ->
+                if (cancellationState.finish()) {
+                    finishRequest()
+                    success(position)
+                }
+            },
+            options = options,
+            error = { locationError ->
+                if (cancellationState.finish()) {
+                    finishRequest()
+                    error?.invoke(locationError)
+                }
+            },
+            requestId = requestId,
+            cancellationState = cancellationState
+        )
+    }
+
+    override fun cancelCurrentPositionRequest(requestId: String) {
+        cancellablePositionRequests.remove(requestId)?.cancel()
+    }
+
+    private fun getCurrentPositionInternal(
+        success: (GeolocationResponse) -> Unit,
+        options: LocationRequestOptions,
+        error: ((LocationError) -> Unit)?,
+        requestId: String?,
+        cancellationState: CurrentPositionCancellationState?
+    ) {
+        if (cancellationState?.isActive() == false) return
+
         // Check permission
         if (!hasLocationPermission()) {
             error?.invoke(createLocationError(
@@ -272,6 +321,7 @@ class NitroGeolocation(
             fusedLocationProvider.getCurrentPosition(
                 success,
                 { fusedError ->
+                    if (cancellationState?.isActive() == false) return@getCurrentPosition
                     runAndroidCurrentPositionFallbackAfterFusedFailure(
                         locationProvider = configuration?.locationProvider,
                         runPlatformFallback = {
@@ -279,7 +329,9 @@ class NitroGeolocation(
                                 success,
                                 error,
                                 parsedOptions,
-                                deadlineElapsedRealtime
+                                deadlineElapsedRealtime,
+                                requestId,
+                                cancellationState
                             )
                         },
                         failWithoutFallback = {
@@ -288,20 +340,34 @@ class NitroGeolocation(
                     )
                 },
                 parsedOptions,
-                deadlineElapsedRealtime
+                deadlineElapsedRealtime,
+                onCancellationReady = { action ->
+                    cancellationState?.setCancellationAction(action)
+                }
             )
             return
         }
 
-        getCurrentPositionWithPlatform(success, error, parsedOptions, deadlineElapsedRealtime)
+        getCurrentPositionWithPlatform(
+            success,
+            error,
+            parsedOptions,
+            deadlineElapsedRealtime,
+            requestId,
+            cancellationState
+        )
     }
 
     private fun getCurrentPositionWithPlatform(
         success: (GeolocationResponse) -> Unit,
         error: ((LocationError) -> Unit)?,
         parsedOptions: ParsedOptions,
-        deadlineElapsedRealtime: Long = createRequestDeadlineElapsedRealtime(parsedOptions.timeout)
+        deadlineElapsedRealtime: Long = createRequestDeadlineElapsedRealtime(parsedOptions.timeout),
+        requestId: String? = null,
+        cancellationState: CurrentPositionCancellationState? = null
     ) {
+        if (cancellationState?.isActive() == false) return
+
         val providers = getValidProviders(parsedOptions)
         if (providers.isEmpty()) {
             error?.invoke(createNoLocationProviderError(parsedOptions))
@@ -320,12 +386,21 @@ class NitroGeolocation(
         }
 
         // Request fresh location
-        requestFreshLocation(providers, parsedOptions, deadlineElapsedRealtime) { result ->
-            when (result) {
-                is PositionResult.Success -> success(result.position)
-                is PositionResult.Failure -> error?.invoke(result.error)
+        requestFreshLocation(
+            providers,
+            parsedOptions,
+            deadlineElapsedRealtime,
+            { result ->
+                when (result) {
+                    is PositionResult.Success -> success(result.position)
+                    is PositionResult.Failure -> error?.invoke(result.error)
+                }
+            },
+            requestId,
+            onCancellationReady = { action ->
+                cancellationState?.setCancellationAction(action)
             }
-        }
+        )
     }
 
     override fun getLastKnownPosition(
@@ -602,75 +677,6 @@ class NitroGeolocation(
         }
     }
 
-    private fun validateParsedOptions(options: ParsedOptions): LocationError? {
-        if (!options.timeout.isFinite() || options.timeout < 0.0) {
-            return createLocationError(
-                INTERNAL_ERROR,
-                "timeout must be a finite number greater than or equal to 0."
-            )
-        }
-
-        if (!options.maximumAge.isFinite() && options.maximumAge != Double.POSITIVE_INFINITY) {
-            return createLocationError(
-                INTERNAL_ERROR,
-                "maximumAge must be a finite number greater than or equal to 0."
-            )
-        }
-
-        if (options.maximumAge < 0.0) {
-            return createLocationError(
-                INTERNAL_ERROR,
-                "maximumAge must be greater than or equal to 0."
-            )
-        }
-
-        if (!options.interval.isFinite() || options.interval <= 0.0) {
-            return createLocationError(
-                INTERNAL_ERROR,
-                "interval must be a finite number greater than 0."
-            )
-        }
-
-        if (!options.fastestInterval.isFinite() || options.fastestInterval <= 0.0) {
-            return createLocationError(
-                INTERNAL_ERROR,
-                "fastestInterval must be a finite number greater than 0."
-            )
-        }
-
-        if (!options.distanceFilter.isFinite() || options.distanceFilter < 0.0) {
-            return createLocationError(
-                INTERNAL_ERROR,
-                "distanceFilter must be a finite number greater than or equal to 0."
-            )
-        }
-
-        val maxUpdateAge = options.maxUpdateAge
-        if (maxUpdateAge != null && (!maxUpdateAge.isFinite() || maxUpdateAge < 0.0)) {
-            return createLocationError(
-                INTERNAL_ERROR,
-                "maxUpdateAge must be a finite number greater than or equal to 0."
-            )
-        }
-
-        if (!options.maxUpdateDelay.isFinite() || options.maxUpdateDelay < 0.0) {
-            return createLocationError(
-                INTERNAL_ERROR,
-                "maxUpdateDelay must be a finite number greater than or equal to 0."
-            )
-        }
-
-        val maxUpdates = options.maxUpdates
-        if (maxUpdates != null && maxUpdates < 1) {
-            return createLocationError(
-                INTERNAL_ERROR,
-                "maxUpdates must be greater than or equal to 1."
-            )
-        }
-
-        return null
-    }
-
     private fun validateRequestPermission(options: ParsedOptions): LocationError? {
         if (options.granularity == AndroidGranularity.FINE && !hasFineLocationPermission()) {
             return createLocationError(
@@ -840,9 +846,11 @@ class NitroGeolocation(
         providers: List<String>,
         options: ParsedOptions,
         deadlineElapsedRealtime: Long = createRequestDeadlineElapsedRealtime(options.timeout),
-        resolver: (PositionResult) -> Unit
+        resolver: (PositionResult) -> Unit,
+        requestId: String? = null,
+        onCancellationReady: ((() -> Unit) -> Unit)? = null
     ) {
-        val id = UUID.randomUUID()
+        val id = requestId ?: UUID.randomUUID().toString()
         val handler = Handler(Looper.getMainLooper())
 
         val request = PositionRequest(
@@ -855,10 +863,18 @@ class NitroGeolocation(
         )
 
         pendingPositionRequests[id] = request
+        onCancellationReady?.invoke { cancelPlatformCurrentPositionRequest(id) }
         requestFreshLocationForCurrentProvider(id)
     }
 
-    private fun requestFreshLocationForCurrentProvider(requestId: UUID) {
+    private fun cancelPlatformCurrentPositionRequest(requestId: String) {
+        val request = pendingPositionRequests.remove(requestId) ?: return
+        request.handler.removeCallbacksAndMessages(null)
+        request.cancellationAction?.invoke()
+        request.cancellationAction = null
+    }
+
+    private fun requestFreshLocationForCurrentProvider(requestId: String) {
         val request = pendingPositionRequests[requestId] ?: return
         val provider = request.providers.getOrNull(request.providerIndex)
         val remainingTimeoutMillis = request.remainingTimeoutMillis()
@@ -889,7 +905,7 @@ class NitroGeolocation(
     @androidx.annotation.RequiresApi(Build.VERSION_CODES.R)
     private fun requestCurrentLocationModern(
         provider: String,
-        requestId: UUID,
+        requestId: String,
         handler: Handler,
         timeoutMillis: Long
     ) {
@@ -932,7 +948,17 @@ class NitroGeolocation(
 
             handler.postDelayed(timeoutRunnable, timeoutMillis)
 
-            pendingPositionRequests[requestId]?.cancellationSignal = cancellationSignal
+            val cleanup = {
+                handler.removeCallbacksAndMessages(null)
+                cancellationSignal.cancel()
+            }
+            val request = pendingPositionRequests[requestId]
+            if (request != null) {
+                request.cancellationAction = cleanup
+                if (pendingPositionRequests[requestId] !== request) cleanup()
+            } else {
+                cleanup()
+            }
 
         } catch (e: SecurityException) {
             handler.removeCallbacks(timeoutRunnable)
@@ -945,12 +971,12 @@ class NitroGeolocation(
 
     private fun retryCurrentLocationLegacyAfterStaleModern(
         provider: String,
-        requestId: UUID,
+        requestId: String,
         handler: Handler,
         request: PositionRequest
     ) {
-        request.cancellationSignal?.cancel()
-        request.cancellationSignal = null
+        request.cancellationAction?.invoke()
+        request.cancellationAction = null
 
         val remainingTimeoutMillis = request.remainingTimeoutMillis()
         if (remainingTimeoutMillis <= 0L) {
@@ -963,7 +989,7 @@ class NitroGeolocation(
 
     private fun requestCurrentLocationLegacy(
         provider: String,
-        requestId: UUID,
+        requestId: String,
         handler: Handler,
         timeoutMillis: Long
     ) {
@@ -1028,6 +1054,25 @@ class NitroGeolocation(
 
             handler.postDelayed(timeoutRunnable, timeoutMillis)
 
+            val cleanup = {
+                synchronized(listener) {
+                    isResolved = true
+                    handler.removeCallbacksAndMessages(null)
+                    try {
+                        locationManager.removeUpdates(listener)
+                    } catch (_: Exception) {
+                        // Ignore cleanup races.
+                    }
+                }
+            }
+            val request = pendingPositionRequests[requestId]
+            if (request != null) {
+                request.cancellationAction = cleanup
+                if (pendingPositionRequests[requestId] !== request) cleanup()
+            } else {
+                cleanup()
+            }
+
         } catch (e: SecurityException) {
             handleProviderFailure(requestId, createLocationError(
                 PERMISSION_DENIED,
@@ -1036,11 +1081,11 @@ class NitroGeolocation(
         }
     }
 
-    private fun handleProviderFailure(requestId: UUID, error: LocationError) {
+    private fun handleProviderFailure(requestId: String, error: LocationError) {
         val request = pendingPositionRequests[requestId] ?: return
 
-        request.cancellationSignal?.cancel()
-        request.cancellationSignal = null
+        request.cancellationAction?.invoke()
+        request.cancellationAction = null
         request.providerIndex += 1
 
         if (request.providerIndex < request.providers.size) {
@@ -1058,42 +1103,12 @@ class NitroGeolocation(
         pendingPositionRequests.remove(requestId)?.resolver(PositionResult.Failure(error))
     }
 
-    private fun selectBestLocation(newLocation: Location, currentBest: Location?): Location {
-        if (currentBest == null) return newLocation
-
-        val timeDelta = newLocation.time - currentBest.time
-        val isSignificantlyNewer = timeDelta > TWO_MINUTES_MS
-        val isSignificantlyOlder = timeDelta < -TWO_MINUTES_MS
-
-        if (isSignificantlyNewer) return newLocation
-        if (isSignificantlyOlder) return currentBest
-
-        val accuracyDelta = (newLocation.accuracy - currentBest.accuracy).toInt()
-        val isMoreAccurate = accuracyDelta < 0
-        val isSignificantlyLessAccurate = accuracyDelta > 200
-        val isNewer = timeDelta > 0
-        val isLessAccurate = accuracyDelta > 0
-        val isFromSameProvider = newLocation.provider == currentBest.provider
-
-        return when {
-            isMoreAccurate -> newLocation
-            isNewer && !isLessAccurate -> newLocation
-            isNewer && !isSignificantlyLessAccurate && isFromSameProvider -> newLocation
-            else -> currentBest
-        }
-    }
-
-    private fun handlePositionTimeout(requestId: UUID) {
-        val request = pendingPositionRequests[requestId]
-        if (request != null) {
-            request.handler.removeCallbacksAndMessages(null)
-            request.cancellationSignal?.cancel()
-            request.cancellationSignal = null
-
-            pendingPositionRequests.remove(requestId)?.resolver(
-                PositionResult.Failure(createPositionTimeoutError(request.options))
-            )
-        }
+    private fun handlePositionTimeout(requestId: String) {
+        val request = pendingPositionRequests.remove(requestId) ?: return
+        request.handler.removeCallbacksAndMessages(null)
+        request.cancellationAction?.invoke()
+        request.cancellationAction = null
+        request.resolver(PositionResult.Failure(createPositionTimeoutError(request.options)))
     }
 
     // MARK: - Helper Functions - Watch Position
@@ -1326,14 +1341,6 @@ class NitroGeolocation(
         }
     }
 
-    private fun mergeNullableMinimum(current: Double?, next: Double?): Double? {
-        return when {
-            current == null -> next
-            next == null -> current
-            else -> minOf(current, next)
-        }
-    }
-
     private fun stopWatchingLocation() {
         watchLocationGeneration.incrementAndGet()
         removePlatformWatchLocationListener()
@@ -1437,6 +1444,5 @@ class NitroGeolocation(
     companion object {
         private const val PERMISSION_REQUEST_CODE = 8947
         private const val GEOCODER_MAX_RESULTS = 5
-        private const val TWO_MINUTES_MS = 2 * 60 * 1000L
     }
 }

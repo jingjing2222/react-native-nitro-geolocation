@@ -1,9 +1,7 @@
 package com.margelo.nitro.nitrogeolocation
 
-import android.os.CancellationSignal
 import android.os.Handler
 import android.os.SystemClock
-import java.util.UUID
 
 internal data class ParsedOptions(
     val timeout: Double,
@@ -76,16 +74,54 @@ internal sealed interface PositionResult {
 }
 
 internal data class PositionRequest(
-    val id: UUID,
+    val id: String,
     val resolver: (PositionResult) -> Unit,
     val options: ParsedOptions,
     val handler: Handler,
     val providers: List<String>,
     val deadlineElapsedRealtime: Long,
     var providerIndex: Int = 0,
-    var cancellationSignal: CancellationSignal? = null
+    @Volatile
+    var cancellationAction: (() -> Unit)? = null
 ) {
     fun remainingTimeoutMillis(): Long {
         return (deadlineElapsedRealtime - SystemClock.elapsedRealtime()).coerceAtLeast(0L)
+    }
+}
+
+internal class CurrentPositionCancellationState {
+    private val lock = Any()
+    private var active = true
+    private var cancellationAction: (() -> Unit)? = null
+
+    fun isActive(): Boolean = synchronized(lock) { active }
+
+    fun setCancellationAction(action: () -> Unit) {
+        val shouldCancel = synchronized(lock) {
+            if (active) {
+                cancellationAction = action
+                false
+            } else {
+                true
+            }
+        }
+
+        if (shouldCancel) action()
+    }
+
+    fun finish(): Boolean = synchronized(lock) {
+        if (!active) return@synchronized false
+        active = false
+        cancellationAction = null
+        true
+    }
+
+    fun cancel() {
+        val action = synchronized(lock) {
+            if (!active) return@synchronized null
+            active = false
+            cancellationAction.also { cancellationAction = null }
+        }
+        action?.invoke()
     }
 }

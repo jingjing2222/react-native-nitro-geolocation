@@ -8,7 +8,7 @@ import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationCallback
 import com.google.android.gms.location.LocationResult
 import com.google.android.gms.tasks.CancellationTokenSource
-import java.util.concurrent.atomic.AtomicBoolean
+import java.util.concurrent.atomic.AtomicReference
 
 private const val FUSED_ATTEMPT_TIMEOUT_MS = 15_000L
 private const val FUSED_FALLBACK_RESERVED_TIMEOUT_MS = 10_000L
@@ -23,25 +23,45 @@ internal class AndroidFusedLocationProvider(
         success: (GeolocationResponse) -> Unit,
         error: ((LocationError) -> Unit)?,
         options: ParsedOptions,
-        deadlineElapsedRealtime: Long
+        deadlineElapsedRealtime: Long,
+        onCancellationReady: ((() -> Unit) -> Unit)? = null
     ) {
+        val cancellationState = CurrentPositionCancellationState()
+        onCancellationReady?.invoke(cancellationState::cancel)
+
         if (effectiveMaximumAge(options) > 0.0) {
             getCachedLocation(options) { cachedLocation, fusedError ->
                 if (cachedLocation != null) {
-                    success(locationToPosition(cachedLocation, LocationProviderUsed.FUSED))
+                    if (cancellationState.finish()) {
+                        success(locationToPosition(cachedLocation, LocationProviderUsed.FUSED))
+                    }
                     return@getCachedLocation
                 }
                 if (fusedError != null) {
-                    error?.invoke(fusedError)
+                    if (cancellationState.finish()) error?.invoke(fusedError)
                     return@getCachedLocation
                 }
 
-                requestFreshLocation(success, error, options, deadlineElapsedRealtime)
+                if (cancellationState.isActive()) {
+                    requestFreshLocation(
+                        success,
+                        error,
+                        options,
+                        deadlineElapsedRealtime,
+                        cancellationState
+                    )
+                }
             }
             return
         }
 
-        requestFreshLocation(success, error, options, deadlineElapsedRealtime)
+        requestFreshLocation(
+            success,
+            error,
+            options,
+            deadlineElapsedRealtime,
+            cancellationState
+        )
     }
 
     fun getLastKnownPosition(
@@ -125,37 +145,43 @@ internal class AndroidFusedLocationProvider(
         success: (GeolocationResponse) -> Unit,
         error: ((LocationError) -> Unit)?,
         options: ParsedOptions,
-        deadlineElapsedRealtime: Long
+        deadlineElapsedRealtime: Long,
+        cancellationState: CurrentPositionCancellationState
     ) {
         val handler = Handler(Looper.getMainLooper())
-        val didComplete = AtomicBoolean(false)
         val remainingTimeoutMillis = remainingTimeoutMillis(deadlineElapsedRealtime)
 
         if (remainingTimeoutMillis <= 0L) {
-            error?.invoke(createPositionTimeoutError(options))
+            if (cancellationState.finish()) error?.invoke(createPositionTimeoutError(options))
             return
         }
         val fusedAttemptTimeoutMillis = fusedAttemptTimeoutMillis(remainingTimeoutMillis)
         val cancellationTokenSource = CancellationTokenSource()
-        var locationUpdateCallback: LocationCallback? = null
+        val locationUpdateCallback = AtomicReference<LocationCallback?>(null)
 
-        fun complete(result: PositionResult) {
-            if (!didComplete.compareAndSet(false, true)) return
-
+        fun cleanup() {
             handler.removeCallbacksAndMessages(null)
-            locationUpdateCallback?.let { callback ->
+            locationUpdateCallback.getAndSet(null)?.let { callback ->
                 try {
                     fusedLocationClient.removeLocationUpdates(callback)
                 } catch (_: Exception) {
                     // Ignore cleanup races.
                 }
             }
-            locationUpdateCallback = null
             try {
                 cancellationTokenSource.cancel()
             } catch (_: Exception) {
                 // Ignore cleanup races.
             }
+        }
+
+        cancellationState.setCancellationAction(::cleanup)
+        if (!cancellationState.isActive()) return
+
+        fun complete(result: PositionResult) {
+            if (!cancellationState.finish()) return
+
+            cleanup()
 
             when (result) {
                 is PositionResult.Success -> success(result.position)
@@ -165,6 +191,11 @@ internal class AndroidFusedLocationProvider(
 
         val timeoutRunnable = Runnable {
             complete(PositionResult.Failure(createPositionTimeoutError(options)))
+        }
+        handler.postDelayed(timeoutRunnable, fusedAttemptTimeoutMillis)
+        if (!cancellationState.isActive()) {
+            handler.removeCallbacks(timeoutRunnable)
+            return
         }
 
         try {
@@ -193,23 +224,30 @@ internal class AndroidFusedLocationProvider(
                         }
                     }
                 }
-                locationUpdateCallback = callback
+                locationUpdateCallback.set(callback)
 
-                fusedLocationClient.requestLocationUpdates(
+                val requestTask = fusedLocationClient.requestLocationUpdates(
                     request,
                     callback,
                     Looper.getMainLooper()
                 )
-                    .addOnFailureListener { exception ->
-                        complete(PositionResult.Failure(
-                            createFusedRequestFailureError(exception)
-                        ))
+                if (!cancellationState.isActive()) {
+                    try {
+                        fusedLocationClient.removeLocationUpdates(callback)
+                    } catch (_: Exception) {
+                        // Ignore a cancellation race before registration completed.
                     }
+                    return
+                }
+                requestTask.addOnFailureListener { exception ->
+                    complete(PositionResult.Failure(
+                        createFusedRequestFailureError(exception)
+                    ))
+                }
                     .addOnCanceledListener {
                         complete(PositionResult.Failure(createPositionTimeoutError(options)))
                     }
 
-                handler.postDelayed(timeoutRunnable, fusedAttemptTimeoutMillis)
                 return
             }
 
@@ -248,8 +286,6 @@ internal class AndroidFusedLocationProvider(
                 .addOnCanceledListener {
                     complete(PositionResult.Failure(createPositionTimeoutError(options)))
                 }
-
-            handler.postDelayed(timeoutRunnable, fusedAttemptTimeoutMillis)
         } catch (e: SecurityException) {
             complete(PositionResult.Failure(createFusedSecurityError(e.message)))
         } catch (e: Exception) {

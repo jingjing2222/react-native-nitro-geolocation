@@ -85,6 +85,8 @@ export type {
   LocationError
 } from "./NitroGeolocation.nitro";
 
+export type { CurrentPositionOptions } from "./api/currentPositionOptions";
+
 export type {
   GeolocationResponse,
   GeolocationCoordinates,

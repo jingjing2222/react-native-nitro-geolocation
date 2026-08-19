@@ -24,7 +24,7 @@ class NitroGeolocation: HybridNitroGeolocationSpec {
     private var pendingPermissionResolvers: [(PermissionStatus) -> Void] = []
 
     // getCurrentPosition promise resolvers with timeout
-    private var pendingPositionRequests: [UUID: PositionRequest] = [:]
+    internal var pendingPositionRequests: [String: PositionRequest] = [:]
 
     // Watch subscriptions (token -> callback)
     private var watchSubscriptions: [String: WatchSubscription] = [:]
@@ -182,11 +182,12 @@ class NitroGeolocation: HybridNitroGeolocationSpec {
 
     // MARK: - Get Current Position
 
-    func getCurrentPosition(
+    internal func getCurrentPositionInternal(
+        requestId: String,
         success: @escaping (GeolocationResponse) -> Void,
         options: LocationRequestOptions,
         error: ((LocationError) -> Void)?
-    ) throws -> Void {
+    ) {
         // Check permission
         let status = CLLocationManager.authorizationStatus()
         if status == .denied || status == .restricted {
@@ -221,7 +222,6 @@ class NitroGeolocation: HybridNitroGeolocationSpec {
         }
 
         // Create position request
-        let id = UUID()
         var request = PositionRequest(
             success: success,
             error: { locationError in
@@ -235,12 +235,12 @@ class NitroGeolocation: HybridNitroGeolocationSpec {
         let timer = DispatchSource.makeTimerSource(queue: .main)
         timer.schedule(deadline: .now() + parsedOptions.timeout / 1000.0)
         timer.setEventHandler { [weak self] in
-            self?.handlePositionTimeout(requestId: id)
+            self?.handlePositionTimeout(requestId: requestId)
         }
         timer.resume()
         request.timer = timer
 
-        self.pendingPositionRequests[id] = request
+        self.pendingPositionRequests[requestId] = request
 
         // Update configuration and start monitoring
         self.updateLocationManagerConfiguration()
@@ -530,7 +530,7 @@ class NitroGeolocation: HybridNitroGeolocationSpec {
         let position = locationToPosition(location)
 
         // 1. Resolve all pending getCurrentPosition requests
-        for (id, request) in pendingPositionRequests {
+        for (_, request) in pendingPositionRequests {
             request.timer?.cancel()
             request.success(position)
         }
@@ -900,17 +900,6 @@ class NitroGeolocation: HybridNitroGeolocationSpec {
         }
     }
 
-    private func isCachedLocationValid(_ location: CLLocation, options: ParsedOptions) -> Bool {
-        // maximumAge is infinity
-        if options.maximumAge.isInfinite {
-            return true
-        }
-
-        // Check age
-        let age = Date().timeIntervalSince(location.timestamp) * 1000  // ms
-        return age < options.maximumAge
-    }
-
     private func getBestCachedLocation(options: ParsedOptions) -> CLLocation? {
         initializeLocationManagerIfNeeded()
 
@@ -920,7 +909,7 @@ class NitroGeolocation: HybridNitroGeolocationSpec {
             .max { $0.timestamp < $1.timestamp }
     }
 
-    private func handlePositionTimeout(requestId: UUID) {
+    private func handlePositionTimeout(requestId: String) {
         guard let request = pendingPositionRequests.removeValue(forKey: requestId) else {
             return
         }
@@ -933,6 +922,10 @@ class NitroGeolocation: HybridNitroGeolocationSpec {
 
         request.error(error)
 
+        updateMonitoringAfterPositionRequestRemoval()
+    }
+
+    internal func updateMonitoringAfterPositionRequestRemoval() {
         // Stop monitoring if no more watches or pending requests
         if watchSubscriptions.isEmpty && pendingPositionRequests.isEmpty {
             stopMonitoring()

@@ -24,6 +24,8 @@ namespace margelo::nitro::nitrogeolocation {
       prototype.registerHybridMethod("getAccuracyAuthorization", &HybridNitroGeolocationSpec::getAccuracyAuthorization);
       prototype.registerHybridMethod("requestTemporaryFullAccuracy", &HybridNitroGeolocationSpec::requestTemporaryFullAccuracy);
       prototype.registerHybridMethod("getCurrentPosition", &HybridNitroGeolocationSpec::getCurrentPosition);
+      prototype.registerHybridMethod("getCurrentPositionCancellable", &HybridNitroGeolocationSpec::getCurrentPositionCancellable);
+      prototype.registerHybridMethod("cancelCurrentPositionRequest", &HybridNitroGeolocationSpec::cancelCurrentPositionRequest);
       prototype.registerHybridMethod("getLastKnownPosition", &HybridNitroGeolocationSpec::getLastKnownPosition);
       prototype.registerHybridMethod("geocode", &HybridNitroGeolocationSpec::geocode);
       prototype.registerHybridMethod("reverseGeocode", &HybridNitroGeolocationSpec::reverseGeocode);

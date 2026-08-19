@@ -347,6 +347,17 @@ export interface NitroGeolocation
     error?: (error: LocationError) => void
   ): void;
 
+  /** @internal Start a request that can be cancelled by its JS-owned ID. */
+  getCurrentPositionCancellable(
+    requestId: string,
+    success: (position: GeolocationResponse) => void,
+    options: LocationRequestOptions,
+    error?: (error: LocationError) => void
+  ): void;
+
+  /** @internal Cancel one matching current-position request. */
+  cancelCurrentPositionRequest(requestId: string): void;
+
   /**
    * Get the best cached location without starting a fresh location request.
    *

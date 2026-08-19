@@ -248,7 +248,9 @@ Supported on web:
   Permissions API is available.
 - `requestPermission()` performs a one-shot browser geolocation request because
   browsers do not expose a standalone geolocation permission request API.
-- `getCurrentPosition()` wraps `navigator.geolocation.getCurrentPosition()`.
+- `getCurrentPosition()` uses `navigator.geolocation.getCurrentPosition()` for
+  ordinary requests. When `signal` is provided, it uses a one-shot browser
+  watch so aborting can call `clearWatch()` immediately.
 - `watchPosition()` wraps `navigator.geolocation.watchPosition()` and returns a
   string token.
 - `unwatch()` and `stopObserving()` clear browser watch IDs.
@@ -321,12 +323,16 @@ function LocationButton() {
 }
 ```
 
-**Parameters**: `options?: LocationRequestOptions`
+**Parameters**: `options?: CurrentPositionOptions`
 
 **Options**:
 
 - `timeout?: number` - Request timeout in ms (default: 600000 / 10 min)
 - `maximumAge?: number` - Max age of cached location in ms (default: 0)
+- `signal?: AbortSignal` - Cancels only this request. A signal that is already
+  aborted prevents native or browser location work from starting. The promise
+  rejects with the exact `signal.reason`; runtimes without a reason receive an
+  `AbortError` fallback.
 - `enableHighAccuracy?: boolean` - Deprecated since `v1.2`. Kept for v1 compatibility only; prefer `accuracy`. It is expected to be removed from the Modern API in v2.
 - `accuracy?: { android?: 'high' | 'balanced' | 'low' | 'passive'; ios?: 'bestForNavigation' | 'best' | 'nearestTenMeters' | 'hundredMeters' | 'kilometer' | 'threeKilometers' | 'reduced' }` - Platform-specific accuracy preset, available since `v1.2`. When a preset is provided for the current platform, it takes precedence over `enableHighAccuracy`.
 - `granularity?: 'permission' | 'coarse' | 'fine'` - Android-only request granularity, available since `v1.2`. `permission` follows the granted permission level, `coarse` avoids fine GPS-only requests, and `fine` requires fine location permission.
@@ -351,6 +357,28 @@ await getCurrentPosition({
   timeout: 15000
 });
 ```
+
+Use an `AbortController` when the screen or operation that owns a one-shot
+request can end before location arrives:
+
+```tsx
+const controller = new AbortController();
+
+const request = getCurrentPosition({
+  accuracy: { android: 'high', ios: 'best' },
+  maximumAge: 0,
+  timeout: 30000,
+  signal: controller.signal
+});
+
+controller.abort(new Error('Screen closed'));
+await request;
+```
+
+Cancellation is isolated by request ID: aborting one concurrent request does
+not cancel another request or an active watch. Omitting `signal` keeps the
+existing one-shot native/browser path. The callback-based `/compat` API is
+unchanged.
 
 Android maps the presets to native accuracy/priority intent. With `auto` or
 `playServices`, requests prefer Google Play Services fused location and use the
@@ -880,6 +908,7 @@ All Modern API exports are fully typed:
 ```typescript
 import type {
   PermissionStatus,
+  CurrentPositionOptions,
   LocationRequestOptions,
   LocationErrorCode,
   LocationError,
