@@ -7,7 +7,7 @@ appId: nitrogeolocation.example
     visible: "Services: disabled"
     timeout: 10000
 - extendedWaitUntil:
-    visible: "Events: 2"
+    visible: "Events: 3"
     timeout: 10000
 - tapOn:
     id: "e2e-action-provider-status-watcher-stop-button"

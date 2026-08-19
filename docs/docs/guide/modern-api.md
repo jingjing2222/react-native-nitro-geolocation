@@ -171,6 +171,7 @@ Use these helpers before user-facing precise-location flows where the app needs
 to know whether Android device settings can satisfy the request.
 
 ```tsx
+import { useEffect } from 'react';
 import {
   getCurrentPosition,
   getLocationAvailability,
@@ -200,12 +201,17 @@ async function prepareAccurateLocation() {
   });
 }
 
-const providerToken = watchProviderStatus((status) => {
-  console.log('Location services:', status.locationServicesEnabled);
-});
+function ProviderStatusObserver() {
+  useEffect(() => {
+    const providerToken = watchProviderStatus((status) => {
+      console.log('Location services:', status.locationServicesEnabled);
+    });
 
-// Stop when this readiness observer is no longer needed.
-unwatch(providerToken);
+    return () => unwatch(providerToken);
+  }, []);
+
+  return null;
+}
 ```
 
 **Functions**:

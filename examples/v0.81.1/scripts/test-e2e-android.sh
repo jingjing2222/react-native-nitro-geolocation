@@ -9,7 +9,7 @@ ADB_BIN="${ADB:-adb}"
 MAESTRO_BIN="${MAESTRO:-maestro}"
 NODE_BIN="${NODE:-node}"
 DISABLED_LAUNCHER_PACKAGE=""
-LOCATION_WAS_ENABLED=""
+EXAMPLE_APP_ID="nitrogeolocation.example"
 
 adb_cmd() {
   if [[ -n "${ANDROID_SERIAL:-}" ]]; then
@@ -21,6 +21,26 @@ adb_cmd() {
 
 set_location_enabled() {
   adb_cmd shell cmd location set-location-enabled "$1" >/dev/null
+}
+
+prepare_provider_watcher_permissions() {
+  adb_cmd shell am force-stop "$EXAMPLE_APP_ID" >/dev/null
+  adb_cmd shell pm clear "$EXAMPLE_APP_ID" >/dev/null
+  adb_cmd shell pm grant \
+    "$EXAMPLE_APP_ID" android.permission.ACCESS_COARSE_LOCATION
+  adb_cmd shell pm grant \
+    "$EXAMPLE_APP_ID" android.permission.ACCESS_FINE_LOCATION
+  adb_cmd shell pm revoke \
+    "$EXAMPLE_APP_ID" android.permission.ACCESS_BACKGROUND_LOCATION \
+    >/dev/null 2>&1 || true
+}
+
+grant_background_permission_and_pause_host() {
+  adb_cmd shell pm grant \
+    "$EXAMPLE_APP_ID" android.permission.ACCESS_BACKGROUND_LOCATION
+  adb_cmd shell am start \
+    -a android.settings.APPLICATION_DETAILS_SETTINGS \
+    -d "package:$EXAMPLE_APP_ID" >/dev/null
 }
 
 disable_emulator_launcher() {
@@ -154,9 +174,14 @@ run_maestro_flows \
   "android GPS stale-readiness setup" \
   gps-only-recipe-stale-readiness-prepare.yaml || status=1
 
+prepare_provider_watcher_permissions
 run_maestro_flows \
   "android provider watcher started" \
   provider-status-watcher-android-start.yaml || status=1
+grant_background_permission_and_pause_host
+run_maestro_flows \
+  "android provider watcher resumed" \
+  provider-status-watcher-android-resumed.yaml || status=1
 set_location_enabled false
 run_maestro_flows \
   "android provider watcher changed" \

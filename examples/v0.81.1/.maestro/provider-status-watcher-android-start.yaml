@@ -3,11 +3,6 @@ appId: nitrogeolocation.example
 # Start with location services enabled and leave the listener active so the
 # shell-controlled settings change can be observed by the same subscription.
 
-- launchApp:
-    clearState: true
-    permissions:
-      all: allow
-- stopApp
 - openLink:
     link: nitrogeolocation://app/provider-status-watcher
 - extendedWaitUntil:
@@ -20,3 +15,4 @@ appId: nitrogeolocation.example
     timeout: 10000
 - assertVisible: "Listener: listening"
 - assertVisible: "Services: enabled"
+- assertVisible: "Background: disabled"

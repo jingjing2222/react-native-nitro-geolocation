@@ -85,6 +85,11 @@ export default function ProviderStatusWatcherScreen() {
               testID: "provider-status-watcher-services"
             },
             {
+              label: "Background",
+              value: formatBoolean(status?.backgroundModeEnabled),
+              testID: "provider-status-watcher-background"
+            },
+            {
               label: "GPS",
               value: formatBoolean(status?.gpsAvailable),
               testID: "provider-status-watcher-gps"
