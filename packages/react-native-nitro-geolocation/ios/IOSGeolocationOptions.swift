@@ -20,11 +20,7 @@ struct ParsedOptions {
     ) -> ParsedOptions {
         let timeout = options?.timeout ?? DEFAULT_TIMEOUT
         let maximumAge = options?.maximumAge ?? defaultMaximumAge
-        let enableHighAccuracy = options?.enableHighAccuracy ?? false
-        let accuracy = resolveAccuracy(
-            preset: options?.accuracy?.ios,
-            enableHighAccuracy: enableHighAccuracy
-        )
+        let accuracy = resolveAccuracy(preset: options?.accuracy?.ios)
         let distanceFilter = options?.distanceFilter ?? kCLDistanceFilterNone
         let useSignificantChanges = options?.useSignificantChanges ?? false
 
@@ -44,14 +40,9 @@ struct ParsedOptions {
         return parse(from: options, defaultMaximumAge: Double.infinity)
     }
 
-    private static func resolveAccuracy(
-        preset: IOSAccuracyPreset?,
-        enableHighAccuracy: Bool
-    ) -> CLLocationAccuracy {
+    private static func resolveAccuracy(preset: IOSAccuracyPreset?) -> CLLocationAccuracy {
         guard let preset else {
-            return enableHighAccuracy
-                ? kCLLocationAccuracyBest
-                : kCLLocationAccuracyHundredMeters
+            return kCLLocationAccuracyHundredMeters
         }
 
         switch preset {

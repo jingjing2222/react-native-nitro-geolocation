@@ -26,9 +26,6 @@ data class LocationRequestOptions(
   val maximumAge: Double?,
   @DoNotStrip
   @Keep
-  val enableHighAccuracy: Boolean?,
-  @DoNotStrip
-  @Keep
   val accuracy: LocationAccuracyOptions?,
   @DoNotStrip
   @Keep
@@ -74,7 +71,6 @@ data class LocationRequestOptions(
     if (other !is LocationRequestOptions) return false
     return Objects.deepEquals(this.timeout, other.timeout)
       && Objects.deepEquals(this.maximumAge, other.maximumAge)
-      && Objects.deepEquals(this.enableHighAccuracy, other.enableHighAccuracy)
       && Objects.deepEquals(this.accuracy, other.accuracy)
       && Objects.deepEquals(this.interval, other.interval)
       && Objects.deepEquals(this.fastestInterval, other.fastestInterval)
@@ -94,7 +90,6 @@ data class LocationRequestOptions(
     return arrayOf<Any?>(
       timeout,
       maximumAge,
-      enableHighAccuracy,
       accuracy,
       interval,
       fastestInterval,
@@ -119,8 +114,8 @@ data class LocationRequestOptions(
     @Keep
     @Suppress("unused")
     @JvmStatic
-    private fun fromCpp(timeout: Double?, maximumAge: Double?, enableHighAccuracy: Boolean?, accuracy: LocationAccuracyOptions?, interval: Double?, fastestInterval: Double?, distanceFilter: Double?, granularity: AndroidGranularity?, waitForAccurateLocation: Boolean?, maxUpdateAge: Double?, maxUpdateDelay: Double?, maxUpdates: Double?, useSignificantChanges: Boolean?, activityType: IOSActivityType?, pausesLocationUpdatesAutomatically: Boolean?, showsBackgroundLocationIndicator: Boolean?): LocationRequestOptions {
-      return LocationRequestOptions(timeout, maximumAge, enableHighAccuracy, accuracy, interval, fastestInterval, distanceFilter, granularity, waitForAccurateLocation, maxUpdateAge, maxUpdateDelay, maxUpdates, useSignificantChanges, activityType, pausesLocationUpdatesAutomatically, showsBackgroundLocationIndicator)
+    private fun fromCpp(timeout: Double?, maximumAge: Double?, accuracy: LocationAccuracyOptions?, interval: Double?, fastestInterval: Double?, distanceFilter: Double?, granularity: AndroidGranularity?, waitForAccurateLocation: Boolean?, maxUpdateAge: Double?, maxUpdateDelay: Double?, maxUpdates: Double?, useSignificantChanges: Boolean?, activityType: IOSActivityType?, pausesLocationUpdatesAutomatically: Boolean?, showsBackgroundLocationIndicator: Boolean?): LocationRequestOptions {
+      return LocationRequestOptions(timeout, maximumAge, accuracy, interval, fastestInterval, distanceFilter, granularity, waitForAccurateLocation, maxUpdateAge, maxUpdateDelay, maxUpdates, useSignificantChanges, activityType, pausesLocationUpdatesAutomatically, showsBackgroundLocationIndicator)
     }
   }
 }

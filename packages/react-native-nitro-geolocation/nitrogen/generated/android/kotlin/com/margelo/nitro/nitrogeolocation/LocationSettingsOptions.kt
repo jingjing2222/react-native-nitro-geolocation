@@ -20,9 +20,6 @@ import java.util.Objects
 data class LocationSettingsOptions(
   @DoNotStrip
   @Keep
-  val enableHighAccuracy: Boolean?,
-  @DoNotStrip
-  @Keep
   val accuracy: LocationAccuracyOptions?,
   @DoNotStrip
   @Keep
@@ -45,8 +42,7 @@ data class LocationSettingsOptions(
   override fun equals(other: Any?): Boolean {
     if (this === other) return true
     if (other !is LocationSettingsOptions) return false
-    return Objects.deepEquals(this.enableHighAccuracy, other.enableHighAccuracy)
-      && Objects.deepEquals(this.accuracy, other.accuracy)
+    return Objects.deepEquals(this.accuracy, other.accuracy)
       && Objects.deepEquals(this.interval, other.interval)
       && Objects.deepEquals(this.fastestInterval, other.fastestInterval)
       && Objects.deepEquals(this.distanceFilter, other.distanceFilter)
@@ -56,7 +52,6 @@ data class LocationSettingsOptions(
 
   override fun hashCode(): Int {
     return arrayOf<Any?>(
-      enableHighAccuracy,
       accuracy,
       interval,
       fastestInterval,
@@ -74,8 +69,8 @@ data class LocationSettingsOptions(
     @Keep
     @Suppress("unused")
     @JvmStatic
-    private fun fromCpp(enableHighAccuracy: Boolean?, accuracy: LocationAccuracyOptions?, interval: Double?, fastestInterval: Double?, distanceFilter: Double?, alwaysShow: Boolean?, needBle: Boolean?): LocationSettingsOptions {
-      return LocationSettingsOptions(enableHighAccuracy, accuracy, interval, fastestInterval, distanceFilter, alwaysShow, needBle)
+    private fun fromCpp(accuracy: LocationAccuracyOptions?, interval: Double?, fastestInterval: Double?, distanceFilter: Double?, alwaysShow: Boolean?, needBle: Boolean?): LocationSettingsOptions {
+      return LocationSettingsOptions(accuracy, interval, fastestInterval, distanceFilter, alwaysShow, needBle)
     }
   }
 }

@@ -20,7 +20,7 @@ type AndroidPermissionState = {
 };
 
 const LOW_ACCURACY_OPTIONS = {
-  enableHighAccuracy: false,
+  accuracy: { android: "balanced" } as const,
   timeout: 12000,
   maximumAge: 120000
 };
@@ -149,7 +149,7 @@ export default function Issue67Screen() {
       <ScenarioSection
         index={2}
         title="Low Accuracy Request"
-        description="Calls getCurrentPosition with enableHighAccuracy=false, timeout=12000, maximumAge=120000."
+        description="Calls getCurrentPosition with Android balanced accuracy, timeout=12000, maximumAge=120000."
         divided
       >
         <ScenarioButton

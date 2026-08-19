@@ -89,7 +89,7 @@ export default function ProviderSettingsScreen() {
       }
 
       const status = await requestLocationSettings({
-        enableHighAccuracy: true,
+        accuracy: { android: "high" },
         interval: 5000,
         fastestInterval: 1000,
         alwaysShow: true
@@ -113,7 +113,7 @@ export default function ProviderSettingsScreen() {
 
     try {
       const currentPosition = await getCurrentPosition({
-        enableHighAccuracy: true,
+        accuracy: { android: "high", ios: "best" },
         maximumAge: 0,
         timeout: 15000
       });

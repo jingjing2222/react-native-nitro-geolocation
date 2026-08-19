@@ -63,7 +63,10 @@ describe("web Modern API", () => {
     });
 
     await expect(
-      getCurrentPosition({ enableHighAccuracy: true, timeout: 1234 })
+      getCurrentPosition({
+        accuracy: { android: "high" },
+        timeout: 1234
+      })
     ).resolves.toEqual({
       coords: {
         latitude: 37.5665,
@@ -104,7 +107,7 @@ describe("web Modern API", () => {
     });
   });
 
-  it("lets explicit Android accuracy override legacy enableHighAccuracy", async () => {
+  it("maps Modern Android accuracy presets to browser accuracy", async () => {
     const getCurrentPositionMock = vi.fn((success) => {
       success(createPosition());
     });
@@ -117,7 +120,6 @@ describe("web Modern API", () => {
     });
 
     await getCurrentPosition({
-      enableHighAccuracy: false,
       accuracy: { android: "high" }
     });
     expect(getCurrentPositionMock.mock.calls[0][2]).toMatchObject({
@@ -125,7 +127,6 @@ describe("web Modern API", () => {
     });
 
     await getCurrentPosition({
-      enableHighAccuracy: true,
       accuracy: { android: "low" }
     });
     expect(getCurrentPositionMock.mock.calls[1][2]).toMatchObject({

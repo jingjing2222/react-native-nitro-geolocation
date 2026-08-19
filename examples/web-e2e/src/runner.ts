@@ -488,7 +488,7 @@ export async function runUnavailableCheck() {
   setScenario("position-unavailable", "running");
   try {
     const positionResult = await getCurrentPosition({
-      enableHighAccuracy: true,
+      accuracy: { android: "high" },
       maximumAge: 0,
       timeout: 10000
     });
@@ -517,7 +517,7 @@ export async function runTimeoutCheck() {
   setScenario("timeout", "running");
   try {
     await getCurrentPosition({
-      enableHighAccuracy: true,
+      accuracy: { android: "high" },
       maximumAge: 0,
       timeout: 1
     });

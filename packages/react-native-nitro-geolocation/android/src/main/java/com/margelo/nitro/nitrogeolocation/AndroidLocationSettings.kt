@@ -45,11 +45,10 @@ internal class AndroidLocationSettings(
             private const val DEFAULT_DISTANCE_FILTER_METERS = 0.0
 
             fun parse(options: LocationSettingsOptions?): ParsedSettingsOptions {
-                val enableHighAccuracy = options?.enableHighAccuracy ?: true
                 return ParsedSettingsOptions(
                     androidAccuracy = resolveAndroidAccuracy(
                         options?.accuracy,
-                        enableHighAccuracy
+                        enableHighAccuracy = true
                     ),
                     intervalMillis = coercePositiveMillis(
                         options?.interval,

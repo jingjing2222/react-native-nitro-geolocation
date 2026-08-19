@@ -2,8 +2,8 @@
  * Represents a location request with its configuration options.
  */
 export interface LocationRequest {
-  /** Whether high accuracy mode is enabled */
-  enableHighAccuracy: boolean;
+  /** Explicit accuracy level requested by the caller. */
+  accuracy: AccuracyLevel;
   /** Minimum distance change (in meters) for updates */
   distanceFilter: number;
 }
@@ -46,9 +46,9 @@ export interface MergedConfiguration {
  * @example
  * ```ts
  * const requests = [
- *   { enableHighAccuracy: false, distanceFilter: 100 },
- *   { enableHighAccuracy: true, distanceFilter: 10 },
- *   { enableHighAccuracy: false, distanceFilter: 50 }
+ *   { accuracy: "low", distanceFilter: 100 },
+ *   { accuracy: "high", distanceFilter: 10 },
+ *   { accuracy: "medium", distanceFilter: 50 }
  * ];
  *
  * const merged = mergeConfigurations(requests);
@@ -71,9 +71,8 @@ export function mergeConfigurations(
 
   // Iterate through all requests to find the most demanding settings
   for (const request of requests) {
-    // If any request needs high accuracy, use high accuracy
-    if (request.enableHighAccuracy) {
-      bestAccuracy = "high";
+    if (accuracyRank(request.accuracy) > accuracyRank(bestAccuracy)) {
+      bestAccuracy = request.accuracy;
     }
 
     // Use the smallest distance filter
@@ -90,4 +89,15 @@ export function mergeConfigurations(
         ? 0
         : smallestDistanceFilter
   };
+}
+
+function accuracyRank(accuracy: AccuracyLevel): number {
+  switch (accuracy) {
+    case "low":
+      return 0;
+    case "medium":
+      return 1;
+    case "high":
+      return 2;
+  }
 }

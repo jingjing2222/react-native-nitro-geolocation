@@ -24,7 +24,7 @@ import {
 import type { CapturedLocationError } from "./scenario";
 
 const TIMEOUT_CONTRACT_OPTIONS = {
-  enableHighAccuracy: true,
+  accuracy: { android: "high", ios: "best" } as const,
   maximumAge: 0,
   timeout: 0
 };
@@ -94,7 +94,7 @@ export default function ApiErrorsScreen() {
     try {
       const nextPosition = await runWithNativeGeolocation(() =>
         getCurrentPosition({
-          enableHighAccuracy: true,
+          accuracy: { android: "high", ios: "best" },
           timeout: 15000
         })
       );

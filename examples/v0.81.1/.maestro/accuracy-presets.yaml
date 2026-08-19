@@ -81,11 +81,11 @@ appId: nitrogeolocation.example
 - assertVisible:
     id: "accuracy-presets-scenario-2"
 - assertVisible:
-    text: ".*(iOS bestForNavigation overrides enableHighAccuracy=false|Android high overrides enableHighAccuracy=false).*"
+    text: ".*(iOS bestForNavigation for turn-by-turn navigation|Android high accuracy for turn-by-turn navigation).*"
 - assertVisible:
-    text: ".*(iOS nearestTenMeters returns fixture coordinates|Android balanced overrides enableHighAccuracy=true).*"
+    text: ".*(iOS nearestTenMeters for nearby search|Android balanced accuracy for nearby search).*"
 - assertVisible:
-    text: ".*(iOS reduced overrides enableHighAccuracy=true|Android low overrides enableHighAccuracy=true).*"
+    text: ".*(iOS reduced accuracy for weather refresh|Android low accuracy for weather refresh).*"
 - assertVisible:
     text: ".*37.566500, 126.978000.*"
 

@@ -18,14 +18,8 @@ public extension LocationSettingsOptions {
   /**
    * Create a new instance of `LocationSettingsOptions`.
    */
-  init(enableHighAccuracy: Bool?, accuracy: LocationAccuracyOptions?, interval: Double?, fastestInterval: Double?, distanceFilter: Double?, alwaysShow: Bool?, needBle: Bool?) {
-    self.init({ () -> bridge.std__optional_bool_ in
-      if let __unwrappedValue = enableHighAccuracy {
-        return bridge.create_std__optional_bool_(__unwrappedValue)
-      } else {
-        return .init()
-      }
-    }(), { () -> bridge.std__optional_LocationAccuracyOptions_ in
+  init(accuracy: LocationAccuracyOptions?, interval: Double?, fastestInterval: Double?, distanceFilter: Double?, alwaysShow: Bool?, needBle: Bool?) {
+    self.init({ () -> bridge.std__optional_LocationAccuracyOptions_ in
       if let __unwrappedValue = accuracy {
         return bridge.create_std__optional_LocationAccuracyOptions_(__unwrappedValue)
       } else {
@@ -65,22 +59,10 @@ public extension LocationSettingsOptions {
   }
 
   @inline(__always)
-  var enableHighAccuracy: Bool? {
-    return { () -> Bool? in
-      if bridge.has_value_std__optional_bool_(self.__enableHighAccuracy) {
-        let __unwrapped = bridge.get_std__optional_bool_(self.__enableHighAccuracy)
-        return __unwrapped
-      } else {
-        return nil
-      }
-    }()
-  }
-  
-  @inline(__always)
   var accuracy: LocationAccuracyOptions? {
     return self.__accuracy.value
   }
-  
+
   @inline(__always)
   var interval: Double? {
     return { () -> Double? in
@@ -92,7 +74,7 @@ public extension LocationSettingsOptions {
       }
     }()
   }
-  
+
   @inline(__always)
   var fastestInterval: Double? {
     return { () -> Double? in
@@ -104,7 +86,7 @@ public extension LocationSettingsOptions {
       }
     }()
   }
-  
+
   @inline(__always)
   var distanceFilter: Double? {
     return { () -> Double? in
@@ -116,7 +98,7 @@ public extension LocationSettingsOptions {
       }
     }()
   }
-  
+
   @inline(__always)
   var alwaysShow: Bool? {
     return { () -> Bool? in
@@ -128,7 +110,7 @@ public extension LocationSettingsOptions {
       }
     }()
   }
-  
+
   @inline(__always)
   var needBle: Bool? {
     return { () -> Bool? in
