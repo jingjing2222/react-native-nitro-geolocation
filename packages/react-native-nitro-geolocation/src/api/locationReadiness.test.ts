@@ -91,6 +91,35 @@ describe("buildLocationReadiness", () => {
     ).toEqual(["requestPermission"]);
   });
 
+  it("keeps Android denied permission requestable because first-run state is indistinguishable", () => {
+    expect(
+      buildLocationReadiness({
+        permission: "denied",
+        canRequestDeniedPermission: true,
+        providerStatus,
+        availability: { available: false, reason: "permissionDenied" },
+        cachedPosition: undefined,
+        now: 10_000
+      }).remediations
+    ).toEqual(["requestPermission"]);
+  });
+
+  it("uses one actionable remediation for an unsupported environment", () => {
+    expect(
+      buildLocationReadiness({
+        permission: "denied",
+        environmentSupported: false,
+        providerStatus: {
+          ...providerStatus,
+          locationServicesEnabled: false
+        },
+        availability: { available: false, reason: "unsupported" },
+        cachedPosition: undefined,
+        now: 10_000
+      }).remediations
+    ).toEqual(["useSupportedEnvironment"]);
+  });
+
   it("returns actionable Android provider and Play Services remediations", () => {
     expect(
       buildLocationReadiness({
@@ -135,6 +164,10 @@ describe("buildLocationReadiness", () => {
       now: 10_000
     });
 
+    expect(readiness.cache.available).toBe(true);
+    if (!readiness.cache.available) {
+      throw new Error("Expected cache metadata for the observed position.");
+    }
     expect(readiness.cache.ageMs).toBe(0);
   });
 });

@@ -299,7 +299,7 @@ describe("web Modern API", () => {
     expect(getCurrentPositionMock).not.toHaveBeenCalled();
   });
 
-  it("uses an observed position as permission evidence when Permissions API is unavailable", async () => {
+  it("keeps permission undetermined after an observation when Permissions API is unavailable", async () => {
     const getCurrentPositionMock = vi.fn((success) => {
       success({ ...createPosition(), timestamp: Date.now() });
     });
@@ -313,12 +313,23 @@ describe("web Modern API", () => {
 
     await getCurrentPosition();
     await expect(getLocationReadiness()).resolves.toMatchObject({
-      ready: true,
-      permission: "granted",
+      ready: false,
+      permission: "undetermined",
       cache: { available: true },
-      remediations: []
+      remediations: ["requestPermission"]
     });
     expect(getCurrentPositionMock).toHaveBeenCalledTimes(1);
+  });
+
+  it("diagnoses a missing Web Geolocation API as an unsupported environment", async () => {
+    setNavigator({});
+
+    await expect(getLocationReadiness()).resolves.toMatchObject({
+      ready: false,
+      providerStatus: { locationServicesEnabled: false },
+      availability: { available: false },
+      remediations: ["useSupportedEnvironment"]
+    });
   });
 
   it("diagnoses denied browser permission without prompting", async () => {

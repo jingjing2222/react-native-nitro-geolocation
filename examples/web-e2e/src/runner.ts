@@ -34,7 +34,7 @@ import {
   isNearExpected
 } from "./locationAssertions";
 import { postNativeStatus } from "./nativeBridge";
-import { expectReadyWithCache } from "./readinessAssertions";
+import { expectReadyOrRequestableWithCache } from "./readinessAssertions";
 import { scenarios, successScenarioIds } from "./scenarios";
 
 function wait(ms: number) {
@@ -310,7 +310,7 @@ export async function runSuccessSuite() {
   await runStep(
     "location-readiness",
     () => getLocationReadiness(),
-    expectReadyWithCache
+    expectReadyOrRequestableWithCache
   );
 
   await runStep(

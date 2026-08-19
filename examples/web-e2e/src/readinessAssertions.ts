@@ -1,14 +1,27 @@
 import type { LocationReadiness } from "react-native-nitro-geolocation";
 
-export function expectReadyWithCache(readiness: LocationReadiness) {
-  if (!readiness.ready || !readiness.cache.available) {
+export function expectReadyOrRequestableWithCache(
+  readiness: LocationReadiness
+) {
+  if (!readiness.cache.available) {
     throw new Error(
-      `Expected ready browser diagnosis with cache, got ${JSON.stringify(readiness)}.`
+      `Expected browser diagnosis with observed cache, got ${JSON.stringify(readiness)}.`
     );
   }
-  if (readiness.remediations.length > 0) {
+
+  const isReady =
+    readiness.ready &&
+    readiness.permission === "granted" &&
+    readiness.remediations.length === 0;
+  const needsPermissionIntrospection =
+    !readiness.ready &&
+    readiness.permission === "undetermined" &&
+    readiness.remediations.length === 1 &&
+    readiness.remediations[0] === "requestPermission";
+
+  if (!isReady && !needsPermissionIntrospection) {
     throw new Error(
-      `Ready browser diagnosis returned remediations: ${readiness.remediations.join(",")}.`
+      `Expected ready or conservatively requestable browser diagnosis, got ${JSON.stringify(readiness)}.`
     );
   }
 }

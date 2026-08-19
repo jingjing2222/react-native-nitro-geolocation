@@ -76,14 +76,13 @@ export type LocationReadinessRemediation =
   | "enableLocationProvider"
   | "installOrUpdatePlayServices"
   | "enableGoogleLocationAccuracy"
+  | "useSupportedEnvironment"
   | "acquirePosition"
   | "retryLocation";
 
-export interface LocationCacheReadiness {
-  available: boolean;
-  timestamp?: number;
-  ageMs?: number;
-}
+export type LocationCacheReadiness =
+  | { available: false }
+  | { available: true; timestamp: number; ageMs: number };
 
 /**
  * Read-only location diagnosis assembled from permission, service, provider,

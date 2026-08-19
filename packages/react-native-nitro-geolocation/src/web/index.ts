@@ -114,11 +114,10 @@ export async function getLocationReadiness(): Promise<LocationReadiness> {
     getLocationAvailability()
   ]);
   const cachedPosition = readLastKnownPosition();
-  const observedPermission =
-    permission === "undetermined" && cachedPosition ? "granted" : permission;
 
   return buildLocationReadiness({
-    permission: observedPermission,
+    permission,
+    environmentSupported: Boolean(getGeolocation()),
     providerStatus,
     availability,
     cachedPosition,

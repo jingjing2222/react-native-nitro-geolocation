@@ -181,12 +181,10 @@ import {
 
 async function inspectLocation() {
   const readiness = await getLocationReadiness();
-  if (!readiness.ready) {
-    // Show an app-owned action for readiness.remediations.
-    // The diagnosis itself never prompts or opens settings.
-    return readiness.remediations;
-  }
-  return [];
+  // Show app-owned actions for every remediation, including acquirePosition
+  // when the device is ready but the module cache is still cold.
+  // The diagnosis itself never prompts or opens settings.
+  return readiness.remediations;
 }
 
 async function prepareAccurateLocation() {
@@ -227,9 +225,11 @@ async function prepareAccurateLocation() {
   permission, services, provider, availability, Play Services, Google Location
   Accuracy, and observed module-cache state into one read-only diagnosis. It
   returns stable remediation codes such as `requestPermission`,
-  `enableLocationServices`, and `acquirePosition`; it never requests
+  `enableLocationServices`, `useSupportedEnvironment`, and `acquirePosition`;
+  it never requests
   permission, opens settings, starts location acquisition, or changes
-  configuration.
+  configuration. On Web, `useSupportedEnvironment` means reopening the app in
+  a secure context and a browser or WebView that exposes the Geolocation API.
 - `requestLocationSettings(options?): Promise<LocationProviderStatus>` -
   Checks the requested Android location settings and shows Android's native
   resolution dialog when available. It resolves with the updated provider

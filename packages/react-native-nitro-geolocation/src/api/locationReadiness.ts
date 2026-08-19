@@ -9,6 +9,8 @@ import type {
 
 export interface LocationReadinessSnapshot {
   permission: PermissionStatus;
+  canRequestDeniedPermission?: boolean;
+  environmentSupported?: boolean;
   providerStatus: LocationProviderStatus;
   availability: LocationAvailability;
   cachedPosition: GeolocationResponse | undefined;
@@ -33,6 +35,8 @@ const getCacheReadiness = (
 /** @internal Pure classifier used by native, Web, and unit tests. */
 export function buildLocationReadiness({
   permission,
+  canRequestDeniedPermission = false,
+  environmentSupported = true,
   providerStatus,
   availability,
   cachedPosition,
@@ -44,10 +48,25 @@ export function buildLocationReadiness({
     availability.available;
   const remediations: LocationReadinessRemediation[] = [];
 
+  if (!environmentSupported) {
+    return {
+      ready: false,
+      permission,
+      providerStatus,
+      availability,
+      cache: getCacheReadiness(cachedPosition, now),
+      remediations: ["useSupportedEnvironment"]
+    };
+  }
+
   if (permission === "undetermined") {
     remediations.push("requestPermission");
   } else if (permission !== "granted") {
-    remediations.push("reviewPermissionSettings");
+    remediations.push(
+      canRequestDeniedPermission
+        ? "requestPermission"
+        : "reviewPermissionSettings"
+    );
   }
 
   if (!providerStatus.locationServicesEnabled) {

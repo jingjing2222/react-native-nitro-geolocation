@@ -1,4 +1,5 @@
 import React from "react";
+import { Platform } from "react-native";
 import {
   type LocationReadiness,
   getCurrentPosition,
@@ -85,9 +86,13 @@ export default function LocationReadinessScreen() {
   };
 
   const runDeniedScenario = async () => {
+    const expectedRemediation =
+      Platform.OS === "android"
+        ? "requestPermission"
+        : "reviewPermissionSettings";
     setResult("denied", {
       status: "running",
-      message: "Reading denied permission state without opening a prompt"
+      message: "Reading missing permission state without opening a prompt"
     });
 
     try {
@@ -95,15 +100,15 @@ export default function LocationReadinessScreen() {
       if (readiness.ready || readiness.permission === "granted") {
         throw new Error(`Expected denied diagnosis; ${summarize(readiness)}`);
       }
-      if (!readiness.remediations.includes("reviewPermissionSettings")) {
+      if (!readiness.remediations.includes(expectedRemediation)) {
         throw new Error(
-          `Expected reviewPermissionSettings; ${summarize(readiness)}`
+          `Expected ${expectedRemediation}; ${summarize(readiness)}`
         );
       }
 
       setResult("denied", {
         status: "passed",
-        message: `Denied state was diagnosed without prompting; ${summarize(readiness)}`
+        message: `Missing permission was diagnosed without prompting; ${summarize(readiness)}`
       });
     } catch (error) {
       setResult("denied", {
@@ -172,9 +177,9 @@ export default function LocationReadinessScreen() {
         />
       </ScenarioSection>
 
-      <ScenarioSection index={3} title="Permission Denied" divided>
+      <ScenarioSection index={3} title="Missing Permission" divided>
         <ScenarioButton
-          title="Diagnose Denied Permission"
+          title="Diagnose Missing Permission"
           onPress={runDeniedScenario}
           color="#7B1FA2"
           testID={`${PREFIX}-run-denied-button`}
@@ -182,7 +187,7 @@ export default function LocationReadinessScreen() {
         <ResultBlock
           prefix={PREFIX}
           id="denied"
-          label="Denied diagnosis"
+          label="Permission diagnosis"
           result={results.denied}
         />
       </ScenarioSection>

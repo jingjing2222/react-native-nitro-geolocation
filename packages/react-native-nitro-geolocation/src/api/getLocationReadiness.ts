@@ -1,3 +1,4 @@
+import { Platform } from "react-native";
 import type { LocationReadiness } from "../publicTypes";
 import { checkPermission } from "./checkPermission";
 import { getLocationAvailability } from "./getLocationAvailability";
@@ -21,6 +22,7 @@ export async function getLocationReadiness(): Promise<LocationReadiness> {
 
   return buildLocationReadiness({
     permission,
+    canRequestDeniedPermission: Platform.OS === "android",
     providerStatus,
     availability,
     cachedPosition: readLastKnownPosition(),
