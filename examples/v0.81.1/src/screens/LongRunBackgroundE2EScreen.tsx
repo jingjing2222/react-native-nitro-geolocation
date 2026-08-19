@@ -19,6 +19,7 @@ export function LongRunBackgroundE2EScreen() {
     snapshot,
     refreshSnapshot,
     runPrepare,
+    armBackgroundProbe,
     armRebootProbe,
     validateBackgroundLocation,
     validateHeadless,
@@ -94,6 +95,11 @@ export function LongRunBackgroundE2EScreen() {
               testID: `${PREFIX}-post-prepare-location-events`
             },
             {
+              label: "Proof locations (inside/outside):",
+              value: `${snapshot.proofInsideLocations}/${snapshot.proofOutsideLocations}`,
+              testID: `${PREFIX}-proof-locations`
+            },
+            {
               label: "Delivered events:",
               value: snapshot.deliveredEvents,
               testID: `${PREFIX}-delivered-events`
@@ -144,6 +150,11 @@ export function LongRunBackgroundE2EScreen() {
               testID: `${PREFIX}-prepared-at`
             },
             {
+              label: "Background proof after:",
+              value: snapshot.backgroundProofAfter,
+              testID: `${PREFIX}-background-proof-after`
+            },
+            {
               label: "Reboot proof after:",
               value: snapshot.rebootProofAfter,
               testID: `${PREFIX}-reboot-proof-after`
@@ -184,6 +195,11 @@ export function LongRunBackgroundE2EScreen() {
           testID={`${PREFIX}-prepare-button`}
         />
         <ScenarioButton
+          title="Arm Background Proof"
+          onPress={armBackgroundProbe}
+          testID={`${PREFIX}-arm-background-button`}
+        />
+        <ScenarioButton
           title="Arm Reboot Probe"
           onPress={armRebootProbe}
           testID={`${PREFIX}-arm-reboot-button`}
@@ -193,6 +209,11 @@ export function LongRunBackgroundE2EScreen() {
           results={results}
           items={[
             { id: "prepare", label: "Prepare" },
+            {
+              id: "background-probe",
+              resultKey: "backgroundProbe",
+              label: "Background probe"
+            },
             {
               id: "reboot-probe",
               resultKey: "rebootProbe",

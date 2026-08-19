@@ -1,7 +1,7 @@
 appId: nitrogeolocation.example
 ---
 # iOS long-run flow. iOS has no Headless JS or boot receiver contract, so this
-# verifies background/significant-change storage drain and platform limits.
+# verifies significant-change/region storage drain and platform limits.
 
 - launchApp:
     clearState: true
@@ -58,6 +58,12 @@ appId: nitrogeolocation.example
 - setLocation:
     latitude: 37.563
     longitude: 126.97
+- runScript: scripts/wait-15s.js
+- tapOn:
+    id: "e2e-action-background-long-run-arm-background-button"
+- extendedWaitUntil:
+    visible: "Background probe: passed"
+    timeout: 15000
 - pressKey: Home
 - setLocation:
     latitude: 37.5665

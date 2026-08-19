@@ -15,9 +15,11 @@ terminated, force-stopped, or constrained by battery policy.
 | User force-stop / force-quit | Android stops the service and suppresses receivers until the user launches the app again. No library option overrides force-stop. | Treat user force-quit as stopped. Do not depend on background relaunch until the user opens the app again. |
 | Device reboot | With `startOnBoot: true`, persisted configuration, `RECEIVE_BOOT_COMPLETED`, and valid permissions, the boot receiver attempts to restore geofences and tracking. OS/OEM policy can delay or reject the start. | There is no `startOnBoot` contract or boot receiver. Re-establish the desired tracking session after the app is launched. |
 
-`stopOnTerminate` and `startOnBoot` keep their existing defaults. This API does
-not silently enable foreground services, Headless JS, storage, boot restore, or
-persistence.
+The new status fields do not change existing behavior or defaults. Native
+storage remains enabled unless `persist: false`; Android
+`stopOnTerminate` defaults to `true` and `startOnBoot` defaults to `false`.
+Starting Android tracking continues to use the existing foreground service and
+Headless fallback.
 
 ## Status timestamps
 
@@ -44,9 +46,10 @@ the counters alone.
 | Scenario | Android automation | iOS automation | Physical-device/manual proof |
 | --- | --- | --- | --- |
 | Foreground start/stop and invalid configuration | `background-e2e.yaml` | `background-e2e.yaml` | Confirm permission and notification UX on the target OS versions. |
-| Background delivery with React UI inactive | `background-long-run-android.yaml` injects movement after Home and requires retained locations/events plus fresh status timestamps. | `background-long-run-ios.yaml` injects movement after Home and requires native storage drain plus fresh status timestamps. | Lock the screen and walk/drive long enough to exceed the configured distance and interval filters. |
-| JS unavailable | Android long-run requires delivered Headless JS event flags. | iOS has no Headless JS contract; verify storage drain after reopening. | Terminate the React runtime without force-stopping the app, then inspect native storage and logs. |
-| Geofence enter/exit | Android long-run injects outside → inside → outside and requires both transitions. | Not part of the simulator reliability gate. | Cross the boundary on real hardware; account for OS batching and region limits. |
+| Background delivery with React UI inactive | After a foreground baseline, `background-long-run-android.yaml` arms a new marker, presses Home, injects inside/outside coordinates, and requires both retained coordinates plus fresh status timestamps. | After a foreground baseline, the iOS flow arms a new marker, presses Home, and requires post-marker region enter/exit records plus a fresh event timestamp. Simulator location rows are not claimed. | Lock the screen and walk/drive long enough to exceed the configured distance and interval filters. |
+| No in-process background listener | Android long-run requires the registered Headless task to mark the post-marker inside event delivered. | iOS has no Headless JS contract; the flow verifies storage drain after reopening. | Inspect task receipts and native logs for the exact test run. |
+| React runtime unavailable | Not automated by the Home-key flow. | Not automated by the Home-key flow. | Terminate the React runtime without force-stopping/force-quitting the app, then inspect native storage and logs after relaunch. |
+| Geofence enter/exit | Android long-run injects outside → inside → outside and requires both transitions. | The iOS simulator gate requires both post-marker transitions from the same path. | Cross the boundary on real hardware; account for OS batching and region limits. |
 | Reboot restore | Optional `RUN_REBOOT=1` emulator pass verifies post-boot locations and geofences after a new proof marker. | Not supported. | Test reboot on each Android OEM targeted by the app; keep failures visible. |
 | User force-stop / force-quit | Not asserted as recoverable. Relaunch is required. | Not asserted as recoverable. Relaunch is required. | Verify the app reports stopped/stale state after the user reopens it. |
 

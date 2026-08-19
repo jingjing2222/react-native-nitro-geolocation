@@ -59,6 +59,12 @@ appId: nitrogeolocation.example
 - setLocation:
     latitude: 37.563
     longitude: 126.97
+- runScript: scripts/wait-15s.js
+- tapOn:
+    id: "e2e-action-background-long-run-arm-background-button"
+- extendedWaitUntil:
+    visible: "Background probe: passed"
+    timeout: 15000
 - pressKey: Home
 - setLocation:
     latitude: 37.5665

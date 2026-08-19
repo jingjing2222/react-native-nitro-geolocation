@@ -26,6 +26,14 @@ import com.margelo.nitro.core.NullType
 import org.json.JSONArray
 import org.json.JSONObject
 
+internal data class NitroBackgroundStoreSnapshot(
+    val storedLocationCount: Double,
+    val storedEventCount: Double,
+    val lastLocationAt: Double?,
+    val lastEventAt: Double?,
+    val geofenceCount: Double
+)
+
 class NitroBackgroundStore(context: Context) :
     SQLiteOpenHelper(context, "nitro_background_location.db", null, 3) {
 
@@ -335,15 +343,29 @@ class NitroBackgroundStore(context: Context) :
         }
     }
 
-    fun count(table: String): Double {
-        val cursor = readableDatabase.rawQuery("SELECT COUNT(*) FROM $table", null)
+    internal fun snapshot(): NitroBackgroundStoreSnapshot {
+        val cursor = readableDatabase.rawQuery(
+            """
+            SELECT
+              (SELECT COUNT(*) FROM background_locations),
+              (SELECT COUNT(*) FROM background_events),
+              (SELECT MAX(recorded_at) FROM background_locations),
+              (SELECT MAX(timestamp) FROM background_events),
+              (SELECT COUNT(*) FROM geofences)
+            """.trimIndent(),
+            null
+        )
         return cursor.use {
-            if (it.moveToFirst()) it.getLong(0).toDouble() else 0.0
+            check(it.moveToFirst()) { "Failed to read background store snapshot" }
+            NitroBackgroundStoreSnapshot(
+                it.getLong(0).toDouble(),
+                it.getLong(1).toDouble(),
+                if (it.isNull(2)) null else it.getDouble(2),
+                if (it.isNull(3)) null else it.getDouble(3),
+                it.getLong(4).toDouble()
+            )
         }
     }
-
-    fun lastLocationAt(): Double? = maxValue("background_locations", "recorded_at")
-    fun lastEventAt(): Double? = maxValue("background_events", "timestamp")
 
     fun markSynced(ids: List<String>) {
         if (ids.isEmpty()) return
@@ -368,13 +390,6 @@ class NitroBackgroundStore(context: Context) :
             """.trimIndent(),
             arrayOf(limit.toString())
         )
-    }
-
-    private fun maxValue(table: String, column: String): Double? {
-        val cursor = readableDatabase.rawQuery("SELECT MAX($column) FROM $table", null)
-        return cursor.use {
-            if (it.moveToFirst() && !it.isNull(0)) it.getDouble(0) else null
-        }
     }
 
     private fun getLocationById(id: String): StoredBackgroundLocation? {

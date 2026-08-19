@@ -168,8 +168,9 @@ class NitroBackgroundLocationController private constructor(
         val providerEnabled = runCatching {
             val manager = appContext.getSystemService(Context.LOCATION_SERVICE) as LocationManager
             manager.isProviderEnabled(LocationManager.GPS_PROVIDER) ||
-                manager.isProviderEnabled(LocationManager.NETWORK_PROVIDER)
+            manager.isProviderEnabled(LocationManager.NETWORK_PROVIDER)
         }.getOrDefault(false)
+        val storeSnapshot = store.snapshot()
 
         return BackgroundLocationStatus(
             state,
@@ -180,11 +181,11 @@ class NitroBackgroundLocationController private constructor(
             permissions.accuracyAuthorization(),
             providerEnabled,
             null,
-            store.count("background_locations"),
-            store.count("background_events"),
-            store.lastLocationAt(),
-            store.lastEventAt(),
-            store.count("geofences"),
+            storeSnapshot.storedLocationCount,
+            storeSnapshot.storedEventCount,
+            storeSnapshot.lastLocationAt,
+            storeSnapshot.lastEventAt,
+            storeSnapshot.geofenceCount,
             AndroidBackgroundLocationStatus(
                 prefs.getBoolean("running", false),
                 null,
