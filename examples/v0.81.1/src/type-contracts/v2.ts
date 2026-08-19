@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 // @ts-expect-error v2 removes the duplicate Modern configuration alias.
 import type { ModernGeolocationConfiguration } from "react-native-nitro-geolocation";
 import type {
@@ -6,6 +5,7 @@ import type {
   LocationSettingsOptions,
   LocationRequest as MergedLocationRequest
 } from "react-native-nitro-geolocation";
+import { selectProvider } from "react-native-nitro-geolocation";
 import type { GeolocationOptions as CompatGeolocationOptions } from "react-native-nitro-geolocation/compat";
 
 void (undefined as unknown as ModernGeolocationConfiguration);
@@ -34,6 +34,10 @@ const legacyMergedRequest: MergedLocationRequest = {
   enableHighAccuracy: true,
   distanceFilter: 10
 };
+
+selectProvider("high", true, true);
+// @ts-expect-error v2 advanced provider selection uses an explicit accuracy preset.
+selectProvider(true, true, true);
 
 void [
   modernRequest,

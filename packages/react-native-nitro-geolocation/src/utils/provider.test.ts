@@ -2,8 +2,29 @@ import { describe, expect, it } from "vitest";
 import {
   getAndroidProviderOrder,
   resolveAndroidAccuracy,
+  selectProvider,
   selectProviderForAndroidPermissions
 } from "./provider";
+
+describe("selectProvider", () => {
+  it("prefers GPS for high accuracy and falls back to network", () => {
+    expect(selectProvider("high", true, true)).toBe("gps");
+    expect(selectProvider("high", false, true)).toBe("network");
+  });
+
+  it("uses only providers compatible with explicit lower-power presets", () => {
+    expect(selectProvider("balanced", true, true)).toBe("network");
+    expect(selectProvider("balanced", true, false)).toBeNull();
+    expect(selectProvider("low", true, false, true)).toBe("passive");
+    expect(selectProvider("passive", true, true, true)).toBe("passive");
+  });
+
+  it("returns null when no compatible provider is available", () => {
+    expect(selectProvider("high", false, false)).toBeNull();
+    expect(selectProvider("low", true, false, false)).toBeNull();
+    expect(selectProvider("passive", true, true, false)).toBeNull();
+  });
+});
 
 describe("resolveAndroidAccuracy", () => {
   it("keeps enableHighAccuracy as the legacy default", () => {

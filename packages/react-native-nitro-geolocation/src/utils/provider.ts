@@ -26,60 +26,53 @@ export interface AndroidProviderSelectionInput {
 }
 
 /**
- * Selects the best available location provider based on user preferences
- * and provider availability.
+ * Selects the best available location provider for an explicit Android
+ * accuracy preset and the providers currently available on the device.
  *
  * This function implements a fallback strategy:
- * - If high accuracy is requested, prefer GPS, fallback to Network
- * - If low power is preferred, prefer Network, fallback to GPS
+ * - High accuracy prefers GPS and falls back to Network
+ * - Balanced accuracy uses Network
+ * - Low accuracy prefers Network and falls back to Passive
+ * - Passive accuracy uses Passive only
  *
- * @param enableHighAccuracy - Whether high accuracy mode is requested
+ * @param accuracy - The Android accuracy preset requested by the caller
  * @param gpsAvailable - Whether GPS provider is available and enabled
  * @param networkAvailable - Whether Network provider is available and enabled
+ * @param passiveAvailable - Whether Passive provider is available and enabled
  * @returns The selected provider, or null if no providers are available
  *
  * @example
  * ```ts
- * // High accuracy mode with both providers available
- * selectProvider(true, true, true); // 'gps'
+ * // Turn-by-turn navigation with both providers available
+ * selectProvider('high', true, true); // 'gps'
  *
- * // High accuracy mode but GPS is disabled
- * selectProvider(true, false, true); // 'network'
+ * // Nearby search prefers the network provider
+ * selectProvider('balanced', true, true); // 'network'
  *
- * // Low power mode with both providers available
- * selectProvider(false, true, true); // 'network'
+ * // A low-power refresh can fall back to the passive provider
+ * selectProvider('low', true, false, true); // 'passive'
  *
- * // No providers available
- * selectProvider(true, false, false); // null
+ * // No compatible providers are available
+ * selectProvider('high', false, false); // null
  * ```
  */
 export function selectProvider(
-  enableHighAccuracy: boolean,
+  accuracy: AndroidAccuracyPreset,
   gpsAvailable: boolean,
-  networkAvailable: boolean
+  networkAvailable: boolean,
+  passiveAvailable = false
 ): Provider {
-  // Determine preferred and fallback providers based on accuracy requirement
-  const preferredProvider = enableHighAccuracy ? "gps" : "network";
-  const fallbackProvider = enableHighAccuracy ? "network" : "gps";
+  const providers = {
+    gps: gpsAvailable,
+    network: networkAvailable,
+    passive: passiveAvailable
+  };
+  const providerOrder = getAndroidProviderOrder({
+    mode: accuracy,
+    explicitPreset: accuracy
+  });
 
-  // Check if preferred provider is available
-  const isPreferredAvailable =
-    preferredProvider === "gps" ? gpsAvailable : networkAvailable;
-
-  // Check if fallback provider is available
-  const isFallbackAvailable =
-    fallbackProvider === "gps" ? gpsAvailable : networkAvailable;
-
-  // Return the best available provider
-  if (isPreferredAvailable) {
-    return preferredProvider;
-  }
-
-  if (isFallbackAvailable) {
-    return fallbackProvider;
-  }
-
-  return null;
+  return providerOrder.find((provider) => providers[provider]) ?? null;
 }
 
 export function resolveAndroidAccuracy(
