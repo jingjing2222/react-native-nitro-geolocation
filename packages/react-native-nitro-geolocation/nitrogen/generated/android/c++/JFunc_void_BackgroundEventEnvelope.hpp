@@ -49,6 +49,8 @@
 #include <vector>
 #include "LocationError.hpp"
 #include "JLocationError.hpp"
+#include "LocationErrorCode.hpp"
+#include "JLocationErrorCode.hpp"
 #include "BackgroundEventType.hpp"
 #include "JBackgroundEventType.hpp"
 

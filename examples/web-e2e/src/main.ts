@@ -2,10 +2,10 @@ import { runCompatSuite } from "./compatRunner";
 import { render } from "./dom";
 import {
   runDeniedCheck,
-  runSuccessSuite,
   runTimeoutCheck,
   runUnavailableCheck
-} from "./runner";
+} from "./errorRunner";
+import { runSuccessSuite } from "./runner";
 import { scenarios } from "./scenarios";
 import "./styles.css";
 

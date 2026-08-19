@@ -8,6 +8,7 @@ export {
   LocationErrorCode,
   createLocationError,
   getLocationErrorCodeName,
+  isLocationErrorCode,
   mapCLErrorCode,
   mapAndroidException
 } from "./errors";

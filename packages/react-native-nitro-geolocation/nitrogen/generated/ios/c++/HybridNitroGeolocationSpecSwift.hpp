@@ -22,6 +22,8 @@ namespace margelo::nitro::nitrogeolocation { enum class LocationProvider; }
 namespace margelo::nitro::nitrogeolocation { enum class PermissionStatus; }
 // Forward declaration of `LocationError` to properly resolve imports.
 namespace margelo::nitro::nitrogeolocation { struct LocationError; }
+// Forward declaration of `LocationErrorCode` to properly resolve imports.
+namespace margelo::nitro::nitrogeolocation { enum class LocationErrorCode; }
 // Forward declaration of `LocationProviderStatus` to properly resolve imports.
 namespace margelo::nitro::nitrogeolocation { struct LocationProviderStatus; }
 // Forward declaration of `LocationAvailability` to properly resolve imports.
@@ -71,6 +73,7 @@ namespace margelo::nitro::nitrogeolocation { struct HeadingOptions; }
 #include <NitroModules/Promise.hpp>
 #include <functional>
 #include "LocationError.hpp"
+#include "LocationErrorCode.hpp"
 #include <string>
 #include "LocationProviderStatus.hpp"
 #include "LocationAvailability.hpp"

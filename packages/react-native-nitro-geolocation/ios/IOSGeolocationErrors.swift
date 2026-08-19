@@ -1,17 +1,17 @@
 import CoreLocation
 import Foundation
 
-let INTERNAL_ERROR = -1
-let PERMISSION_DENIED = 1
-let POSITION_UNAVAILABLE = 2
-let TIMEOUT = 3
-let PLAY_SERVICE_NOT_AVAILABLE = 4
-let SETTINGS_NOT_SATISFIED = 5
+let INTERNAL_ERROR = LocationErrorCode.internalerror
+let PERMISSION_DENIED = LocationErrorCode.permissiondenied
+let POSITION_UNAVAILABLE = LocationErrorCode.positionunavailable
+let TIMEOUT = LocationErrorCode.timeout
+let PLAY_SERVICE_NOT_AVAILABLE = LocationErrorCode.playservicesunavailable
+let SETTINGS_NOT_SATISFIED = LocationErrorCode.settingsnotsatisfied
 let DEFAULT_HEADING_TIMEOUT_MS: Double = 10_000
 
-func createLocationError(code: Int, message: String) -> LocationError {
+func createLocationError(code: LocationErrorCode, message: String) -> LocationError {
     return LocationError(
-        code: Double(code),
+        code: code,
         message: message
     )
 }

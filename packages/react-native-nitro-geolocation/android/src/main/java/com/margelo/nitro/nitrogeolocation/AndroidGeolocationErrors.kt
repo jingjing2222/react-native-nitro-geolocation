@@ -7,12 +7,12 @@ internal const val NO_APPROXIMATE_LOCATION_PROVIDER_AVAILABLE_MESSAGE =
     "No location provider is available for approximate location. " +
         "ACCESS_COARSE_LOCATION is granted, but no enabled coarse-compatible provider is available."
 
-internal const val INTERNAL_ERROR = -1.0
-internal const val PERMISSION_DENIED = 1.0
-internal const val POSITION_UNAVAILABLE = 2.0
-internal const val TIMEOUT = 3.0
-internal const val PLAY_SERVICE_NOT_AVAILABLE = 4.0
-internal const val SETTINGS_NOT_SATISFIED = 5.0
+internal val INTERNAL_ERROR = LocationErrorCode.INTERNALERROR
+internal val PERMISSION_DENIED = LocationErrorCode.PERMISSIONDENIED
+internal val POSITION_UNAVAILABLE = LocationErrorCode.POSITIONUNAVAILABLE
+internal val TIMEOUT = LocationErrorCode.TIMEOUT
+internal val PLAY_SERVICE_NOT_AVAILABLE = LocationErrorCode.PLAYSERVICESUNAVAILABLE
+internal val SETTINGS_NOT_SATISFIED = LocationErrorCode.SETTINGSNOTSATISFIED
 
 internal fun createLocationAvailability(
     available: Boolean,
@@ -24,7 +24,7 @@ internal fun createLocationAvailability(
     )
 }
 
-internal fun createLocationError(code: Double, message: String): LocationError {
+internal fun createLocationError(code: LocationErrorCode, message: String): LocationError {
     return LocationError(
         code = code,
         message = message

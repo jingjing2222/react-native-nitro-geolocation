@@ -17,7 +17,7 @@ private const val DEFAULT_HEADING_TIMEOUT_MS = 10_000L
 
 internal class AndroidHeadingManager(
     context: Context,
-    private val createLocationError: (Double, String) -> LocationError,
+    private val createLocationError: (LocationErrorCode, String) -> LocationError,
     private val getReferenceLocation: () -> Location?
 ) {
     private data class PendingHeadingRequest(
@@ -306,8 +306,8 @@ internal class AndroidHeadingManager(
     }
 
     private companion object {
-        private const val INTERNAL_ERROR = -1.0
-        private const val POSITION_UNAVAILABLE = 2.0
-        private const val TIMEOUT = 3.0
+        private val INTERNAL_ERROR = LocationErrorCode.INTERNALERROR
+        private val POSITION_UNAVAILABLE = LocationErrorCode.POSITIONUNAVAILABLE
+        private val TIMEOUT = LocationErrorCode.TIMEOUT
     }
 }

@@ -18,15 +18,15 @@ public extension LocationError {
   /**
    * Create a new instance of `LocationError`.
    */
-  init(code: Double, message: String) {
+  init(code: LocationErrorCode, message: String) {
     self.init(code, std.string(message))
   }
 
   @inline(__always)
-  var code: Double {
+  var code: LocationErrorCode {
     return self.__code
   }
-  
+
   @inline(__always)
   var message: String {
     return String(self.__message)

@@ -128,7 +128,7 @@ export default function ApiErrorsScreen() {
     <ScenarioScreen
       prefix="api-errors"
       title="API Errors"
-      subtitle="Modern API error contract"
+      subtitle="Readable Modern API errors without numeric lookup tables"
     >
       <ScenarioSection
         index={1}
@@ -192,7 +192,7 @@ export default function ApiErrorsScreen() {
       <ScenarioSection
         index={3}
         title="Error Handling"
-        description="Trigger a native timeout and compare it with the Modern API error code contract below."
+        description="Trigger a native timeout edge case and compare its string code with the Modern API contract below."
         divided
       >
         <ScenarioButton

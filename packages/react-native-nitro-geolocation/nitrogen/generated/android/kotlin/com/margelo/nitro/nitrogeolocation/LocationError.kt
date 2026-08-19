@@ -20,7 +20,7 @@ import java.util.Objects
 data class LocationError(
   @DoNotStrip
   @Keep
-  val code: Double,
+  val code: LocationErrorCode,
   @DoNotStrip
   @Keep
   val message: String
@@ -49,7 +49,7 @@ data class LocationError(
     @Keep
     @Suppress("unused")
     @JvmStatic
-    private fun fromCpp(code: Double, message: String): LocationError {
+    private fun fromCpp(code: LocationErrorCode, message: String): LocationError {
       return LocationError(code, message)
     }
   }

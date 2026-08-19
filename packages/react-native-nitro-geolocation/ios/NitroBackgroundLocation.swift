@@ -585,7 +585,79 @@ class NitroBackgroundLocation: HybridNitroBackgroundLocationSpec {
         dispatchInProcess(event: event, runGeneration: runGeneration)
     }
 
-    private func validateBackgroundLocationMode() throws {
+    private func stopMotionUpdatesIfRunning() {
+        guard isMotionUpdatesRunning else { return }
+        motionManager.stopActivityUpdates()
+        isMotionUpdatesRunning = false
+    }
+
+    private func handleMotionActivity(_ activity: CMMotionActivity) {
+        let detected = DetectedActivity(
+            type: motionActivityType(activity),
+            confidence: motionConfidence(activity.confidence),
+            timestamp: activity.startDate.timeIntervalSince1970 * 1000
+        )
+        let event = BackgroundEventEnvelope(
+            location: nil,
+            geofence: nil,
+            activity: detected,
+            providerStatus: nil,
+            result: nil,
+            error: nil,
+            id: UUID().uuidString,
+            type: .activity,
+            timestamp: Date().timeIntervalSince1970 * 1000,
+            deliveredToJS: false
+        )
+        appendStoredEvent(
+            StoredBackgroundEventEnvelope(
+                event: event,
+                createdAt: Date().timeIntervalSince1970 * 1000,
+                id: event.id,
+                type: event.type,
+                timestamp: event.timestamp,
+                deliveredToJS: false
+            )
+        )
+        persistStore()
+        eventListeners.values.forEach { $0(event) }
+        applyActivityAwareTracking(detected)
+    }
+
+    func handleAuthorizationChange() {
+        permissionSemaphore?.signal()
+    }
+
+    func handleError(_ error: Error) {
+        // kCLErrorLocationUnknown is transient — CoreLocation couldn't get a fix right now but keeps
+        // trying (very common on the Simulator and during brief GPS gaps). Apple's guidance is to
+        // ignore it; forwarding it would pollute the consumer's error stream with benign noise.
+        if let clError = error as? CLError, clError.code == .locationUnknown {
+            return
+        }
+        let locationError = LocationError(
+            code: LocationErrorCode.internalerror,
+            message: error.localizedDescription
+        )
+        errorListeners.values.forEach { $0(locationError) }
+    }
+
+    private func ensureManager() {
+        if manager != nil { return }
+        if Thread.isMainThread == false {
+            DispatchQueue.main.sync {
+                self.ensureManager()
+            }
+            return
+        }
+        let manager = CLLocationManager()
+        let delegate = NitroBackgroundLocationDelegate(owner: self)
+        manager.delegate = delegate
+        self.manager = manager
+        self.delegate = delegate
+    }
+
+    private func apply(_ options: BackgroundLocationOptions) throws {
         guard hasBackgroundLocationMode() else {
             withStoreLock { state = .error }
             throw RuntimeError.error(

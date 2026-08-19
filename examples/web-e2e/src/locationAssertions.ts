@@ -1,7 +1,4 @@
-import type {
-  GeolocationResponse,
-  LocationError
-} from "react-native-nitro-geolocation";
+import type { GeolocationResponse } from "react-native-nitro-geolocation";
 
 export type ExpectedLocation = {
   latitude: number;
@@ -35,49 +32,8 @@ export function assertPosition(position: GeolocationResponse) {
   }
 }
 
-export function assertLocationMetadata(
-  position: GeolocationResponse,
-  expectedSource:
-    | "currentPosition"
-    | "watchPosition"
-    | "platformCache"
-    | "moduleCache"
-) {
-  const metadata = position.metadata;
-  if (!metadata) {
-    throw new Error("Modern position missing location metadata.");
-  }
-  if (metadata.source !== expectedSource) {
-    throw new Error(
-      `Expected metadata source ${expectedSource}, got ${metadata.source}.`
-    );
-  }
-  if (
-    metadata.age === undefined ||
-    !Number.isFinite(metadata.age) ||
-    metadata.age < 0
-  ) {
-    throw new Error(`Modern position has invalid age: ${metadata.age}.`);
-  }
-  if (
-    !(["high", "medium", "low", "unknown"] as const).includes(metadata.quality)
-  ) {
-    throw new Error(
-      `Modern position has invalid quality: ${metadata.quality}.`
-    );
-  }
-}
-
-export function assertModernPosition(
-  position: GeolocationResponse,
-  source: NonNullable<GeolocationResponse["metadata"]>["source"]
-) {
-  assertPosition(position);
-  assertLocationMetadata(position, source);
-}
-
-export function getErrorCode(error: unknown): number | undefined {
-  return (error as Partial<LocationError>).code;
+export function getErrorCode(error: unknown): unknown {
+  return (error as { code?: unknown }).code;
 }
 
 export function isNearExpected(

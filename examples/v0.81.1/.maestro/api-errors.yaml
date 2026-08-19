@@ -46,7 +46,7 @@ appId: nitrogeolocation.example
 - waitForAnimationToEnd
 
 - extendedWaitUntil:
-    visible: "Modern API error contract"
+    visible: "Readable Modern API errors without numeric lookup tables"
     timeout: 10000
 
 - tapOn:
@@ -54,7 +54,7 @@ appId: nitrogeolocation.example
 - assertVisible:
     id: "api-error-details"
 - assertVisible:
-    text: "Code: 1"
+    text: "Code: permissionDenied"
 - assertVisible:
     text: "Name: PERMISSION_DENIED"
 - assertVisible:
@@ -102,7 +102,7 @@ appId: nitrogeolocation.example
 - waitForAnimationToEnd
 
 - extendedWaitUntil:
-    visible: "Modern API error contract"
+    visible: "Readable Modern API errors without numeric lookup tables"
     timeout: 10000
 
 - tapOn:
@@ -138,7 +138,7 @@ appId: nitrogeolocation.example
 - assertVisible:
     id: "api-error-details"
 - assertVisible:
-    text: "Code: 3"
+    text: "Code: timeout"
 - assertVisible:
     text: "Name: TIMEOUT"
 - assertVisible:

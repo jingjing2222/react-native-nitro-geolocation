@@ -12,6 +12,7 @@ import {
   watchPosition
 } from ".";
 import { clearLastKnownPositionCache } from "../api/positionCache";
+import { LocationErrorCode } from "../utils/errors";
 
 type TestNavigator = {
   geolocation?: {
@@ -174,7 +175,7 @@ describe("web Modern API", () => {
     });
 
     await expect(getCurrentPosition()).rejects.toEqual({
-      code: 1,
+      code: LocationErrorCode.PERMISSION_DENIED,
       message: "denied"
     });
   });

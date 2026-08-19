@@ -1,3 +1,5 @@
+import type { LocationErrorCode } from "react-native-nitro-geolocation";
+
 /**
  * Lifecycle state for one E2E scenario result.
  *
@@ -39,21 +41,21 @@ export type ScenarioResult = {
  * @example
  * ```ts
  * const error: CapturedLocationError = {
- *   code: 1,
+ *   code: "permissionDenied",
  *   name: "PERMISSION_DENIED",
  *   message: "Location permission was denied."
  * };
  * ```
  *
- * @property {number} code - Numeric native `LocationErrorCode`, or
- * `INTERNAL_ERROR` when a caught value does not expose a numeric code.
+ * @property {LocationErrorCode} code - Modern API string error code, or
+ * `internalError` when a caught value does not expose a known code.
  * @property {string} name - Human-readable name for `code`.
  * @property {string} message - Error message captured from the native
  * exception.
  */
 export type CapturedLocationError = {
-  /** Numeric native `LocationErrorCode`, or `INTERNAL_ERROR` fallback. */
-  code: number;
+  /** Modern API string `LocationErrorCode`, or `internalError` fallback. */
+  code: LocationErrorCode;
   /** Human-readable name for `code`. */
   name: string;
   /** Error message captured from the native exception. */

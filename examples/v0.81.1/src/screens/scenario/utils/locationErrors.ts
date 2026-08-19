@@ -1,34 +1,34 @@
 import {
   LocationErrorCode,
-  getLocationErrorCodeName
+  getLocationErrorCodeName,
+  isLocationErrorCode
 } from "react-native-nitro-geolocation";
 import type { CapturedLocationError } from "../types";
 
 /**
  * Normalizes unknown native errors into the E2E error shape.
  *
- * Missing numeric codes are treated as `INTERNAL_ERROR` so screens can render a
+ * Missing or unknown codes are treated as `internalError` so screens can render a
  * stable code/name/message card.
  *
  * @example
  * ```ts
  * const error = captureLocationError(caught);
- * // { code: 1, name: "PERMISSION_DENIED", message: "..." }
+ * // { code: "permissionDenied", name: "PERMISSION_DENIED", message: "..." }
  * ```
  *
  * @param {unknown} error - Unknown value caught from a native geolocation call.
- * If it has a numeric `code` property, that code is used; otherwise the helper
+ * If it has a known string `code` property, that code is used; otherwise the helper
  * falls back to `LocationErrorCode.INTERNAL_ERROR`.
- * @returns {CapturedLocationError} Normalized location error with numeric
+ * @returns {CapturedLocationError} Normalized location error with string
  * `code`, human-readable `name` from `getLocationErrorCodeName`, and a string
  * `message` suitable for rendering in scenario UI.
  */
 export const captureLocationError = (error: unknown): CapturedLocationError => {
   const maybeError = error as { code?: unknown; message?: unknown };
-  const code =
-    typeof maybeError.code === "number"
-      ? maybeError.code
-      : LocationErrorCode.INTERNAL_ERROR;
+  const code = isLocationErrorCode(maybeError.code)
+    ? maybeError.code
+    : LocationErrorCode.INTERNAL_ERROR;
   const message =
     typeof maybeError.message === "string" ? maybeError.message : String(error);
 

@@ -3,18 +3,23 @@ import {
   LocationErrorCode,
   createLocationError,
   getLocationErrorCodeName,
+  isLocationErrorCode,
   mapAndroidException,
   mapCLErrorCode
 } from "./errors";
 
 describe("LocationErrorCode", () => {
-  it("keeps legacy-compatible codes and adds modern-only error codes", () => {
-    expect(LocationErrorCode.INTERNAL_ERROR).toBe(-1);
-    expect(LocationErrorCode.PERMISSION_DENIED).toBe(1);
-    expect(LocationErrorCode.POSITION_UNAVAILABLE).toBe(2);
-    expect(LocationErrorCode.TIMEOUT).toBe(3);
-    expect(LocationErrorCode.PLAY_SERVICE_NOT_AVAILABLE).toBe(4);
-    expect(LocationErrorCode.SETTINGS_NOT_SATISFIED).toBe(5);
+  it("uses readable, platform-independent Modern API codes", () => {
+    expect(LocationErrorCode.INTERNAL_ERROR).toBe("internalError");
+    expect(LocationErrorCode.PERMISSION_DENIED).toBe("permissionDenied");
+    expect(LocationErrorCode.POSITION_UNAVAILABLE).toBe("positionUnavailable");
+    expect(LocationErrorCode.TIMEOUT).toBe("timeout");
+    expect(LocationErrorCode.PLAY_SERVICE_NOT_AVAILABLE).toBe(
+      "playServicesUnavailable"
+    );
+    expect(LocationErrorCode.SETTINGS_NOT_SATISFIED).toBe(
+      "settingsNotSatisfied"
+    );
   });
 
   it("creates the same plain LocationError shape native sends to JS", () => {
@@ -43,7 +48,7 @@ describe("LocationErrorCode", () => {
     );
   });
 
-  it("returns stable names for code display", () => {
+  it("returns stable names for known codes and rejects legacy numbers", () => {
     expect(getLocationErrorCodeName(LocationErrorCode.INTERNAL_ERROR)).toBe(
       "INTERNAL_ERROR"
     );
@@ -60,6 +65,12 @@ describe("LocationErrorCode", () => {
     expect(
       getLocationErrorCodeName(LocationErrorCode.SETTINGS_NOT_SATISFIED)
     ).toBe("SETTINGS_NOT_SATISFIED");
-    expect(getLocationErrorCodeName(999)).toBe("UNKNOWN_LOCATION_ERROR");
+    expect(getLocationErrorCodeName(1)).toBe("UNKNOWN_LOCATION_ERROR");
+  });
+
+  it("accepts only known string discriminants", () => {
+    expect(isLocationErrorCode("timeout")).toBe(true);
+    expect(isLocationErrorCode("madeUpFailure")).toBe(false);
+    expect(isLocationErrorCode(3)).toBe(false);
   });
 });

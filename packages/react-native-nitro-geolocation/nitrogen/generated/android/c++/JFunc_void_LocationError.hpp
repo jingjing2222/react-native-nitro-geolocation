@@ -14,6 +14,8 @@
 #include <functional>
 #include <NitroModules/JNICallable.hpp>
 #include "JLocationError.hpp"
+#include "LocationErrorCode.hpp"
+#include "JLocationErrorCode.hpp"
 #include <string>
 
 namespace margelo::nitro::nitrogeolocation {
