@@ -6,6 +6,7 @@ import { NitroGeolocationHybridObject } from "../NitroGeolocationModule";
 import { isDevtoolsEnabled } from "../devtools";
 import { devtoolsWatchPosition } from "../devtools/watchPosition";
 import type { GeolocationResponse } from "../publicTypes";
+import { rememberPosition } from "./positionCache";
 
 /**
  * Start watching for continuous location updates.
@@ -36,11 +37,15 @@ export function watchPosition(
   error?: (error: LocationError) => void,
   options?: LocationRequestOptions
 ): string {
+  const rememberAndNotify = (position: GeolocationResponse) => {
+    success(rememberPosition(position));
+  };
+
   if (isDevtoolsEnabled()) {
-    return devtoolsWatchPosition(success, error);
+    return devtoolsWatchPosition(rememberAndNotify, error);
   }
   return NitroGeolocationHybridObject.watchPosition(
-    success,
+    rememberAndNotify,
     options ?? {},
     error
   );

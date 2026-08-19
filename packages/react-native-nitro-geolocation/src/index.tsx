@@ -61,6 +61,7 @@ export {
   requestTemporaryFullAccuracy,
   getCurrentPosition,
   getLastKnownPosition,
+  getLastKnownPositionAsync,
   geocode,
   reverseGeocode,
   getHeading,

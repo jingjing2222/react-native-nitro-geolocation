@@ -3,30 +3,53 @@ import { NitroGeolocationHybridObject } from "../NitroGeolocationModule";
 import { isDevtoolsEnabled } from "../devtools";
 import { getDevtoolsCurrentPosition } from "../devtools/getCurrentPosition";
 import type { GeolocationResponse } from "../publicTypes";
+import { LocationErrorCode } from "../utils/errors";
+import { readLastKnownPosition, rememberPosition } from "./positionCache";
 
 /**
- * Get the best cached location without starting a fresh native location
+ * Return the latest position observed by this JavaScript module.
+ *
+ * This synchronous read never calls a native or browser location source.
+ * It returns `undefined` until a Modern current, watch, or async cache call
+ * observes a position.
+ */
+export function getLastKnownPosition(): GeolocationResponse | undefined {
+  return readLastKnownPosition();
+}
+
+/**
+ * Query cached platform/provider sources without starting a fresh location
  * request.
  *
  * @param options - Cache filtering and provider selection options
- * @returns Promise resolving to a cached position
- * @throws LocationError if permission is denied or no cached location exists
+ * @returns A cached position, or `undefined` when no cache satisfies options
+ * @throws LocationError if permission is denied or the cache query fails
  */
-export function getLastKnownPosition(
+export function getLastKnownPositionAsync(
   options?: LocationRequestOptions
-): Promise<GeolocationResponse> {
+): Promise<GeolocationResponse | undefined> {
   if (isDevtoolsEnabled()) {
     const devtoolsResult = getDevtoolsCurrentPosition();
     if (devtoolsResult) {
-      return devtoolsResult;
+      return devtoolsResult.then(rememberPosition);
     }
   }
 
-  return new Promise((resolve, reject) => {
+  return new Promise<GeolocationResponse>((resolve, reject) => {
     NitroGeolocationHybridObject.getLastKnownPosition(
-      resolve,
+      (position) => resolve(rememberPosition(position)),
       options ?? {},
       reject
     );
+  }).catch((error: unknown) => {
+    if (
+      typeof error === "object" &&
+      error !== null &&
+      "code" in error &&
+      error.code === LocationErrorCode.POSITION_UNAVAILABLE
+    ) {
+      return undefined;
+    }
+    throw error;
   });
 }

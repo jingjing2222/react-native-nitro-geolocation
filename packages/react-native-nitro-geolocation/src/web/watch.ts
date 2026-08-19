@@ -2,6 +2,7 @@ import type {
   LocationError,
   LocationRequestOptions
 } from "../NitroGeolocation.nitro";
+import { rememberPosition } from "../api/positionCache";
 import type {
   GeolocationResponse,
   Heading,
@@ -52,8 +53,8 @@ export function watchPosition(
         !lastEmitted ||
         distanceMeters(lastEmitted, normalizedPosition) >= filter
       ) {
-        lastEmitted = normalizedPosition;
-        success(normalizedPosition);
+        lastEmitted = rememberPosition(normalizedPosition);
+        success(lastEmitted);
       }
     },
     (browserError) => error?.(mapBrowserError(browserError)),

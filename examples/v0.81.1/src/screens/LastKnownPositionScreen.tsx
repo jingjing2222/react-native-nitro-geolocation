@@ -2,7 +2,8 @@ import React from "react";
 import {
   LocationErrorCode,
   getCurrentPosition,
-  getLastKnownPosition
+  getLastKnownPosition,
+  getLastKnownPositionAsync
 } from "react-native-nitro-geolocation";
 import {
   PermissionStatusBlock,
@@ -12,7 +13,6 @@ import {
   ScenarioSection,
   assertFixtureCoordinates,
   assertLocationErrorCode,
-  captureLocationError,
   createScenarioResults,
   getDisplayErrorMessage,
   runWithNativeGeolocation,
@@ -25,6 +25,7 @@ const SYSTEM_CACHE_RETRY_TIMEOUT_MS = 10000;
 const SYSTEM_CACHE_RETRY_INTERVAL_MS = 500;
 
 const initialResults = createScenarioResults([
+  "cold",
   "stale",
   "system",
   "cache",
@@ -43,61 +44,60 @@ export default function LastKnownPositionScreen() {
 
   const readSystemCacheOnly = async () => {
     const startedAt = Date.now();
-    let lastUnavailableMessage = "No cached location available.";
 
     while (Date.now() - startedAt <= SYSTEM_CACHE_RETRY_TIMEOUT_MS) {
-      try {
-        const position = await runWithNativeGeolocation(() =>
-          getLastKnownPosition()
-        );
+      const position = await runWithNativeGeolocation(() =>
+        getLastKnownPositionAsync()
+      );
+      if (position) {
         return {
           elapsedMs: Date.now() - startedAt,
           position
         };
-      } catch (error) {
-        const locationError = captureLocationError(error);
-        if (locationError.code !== LocationErrorCode.POSITION_UNAVAILABLE) {
-          throw error;
-        }
-
-        lastUnavailableMessage = locationError.message;
-        await sleep(SYSTEM_CACHE_RETRY_INTERVAL_MS);
       }
+
+      await sleep(SYSTEM_CACHE_RETRY_INTERVAL_MS);
     }
 
-    throw new Error(lastUnavailableMessage);
+    throw new Error("No platform cached location became available.");
+  };
+
+  const runColdModuleCacheScenario = () => {
+    setResult("cold", {
+      status: "running",
+      message: "Reading the in-memory cache before requesting a location"
+    });
+
+    const cached = getLastKnownPosition();
+    setResult("cold", {
+      status: cached ? "failed" : "passed",
+      message: cached
+        ? "Cold module cache unexpectedly contained a position."
+        : "Cold module cache returned undefined without querying native location sources."
+    });
   };
 
   const runStaleCacheScenario = async () => {
     setResult("stale", {
       status: "running",
-      message: "Rejecting cached reads that cannot satisfy maximumAge"
+      message: "Filtering out platform cache that cannot satisfy maximumAge"
     });
 
     try {
-      await runWithNativeGeolocation(() =>
-        getLastKnownPosition({ maximumAge: 0 })
+      const cached = await runWithNativeGeolocation(() =>
+        getLastKnownPositionAsync({ maximumAge: 0 })
       );
       setResult("stale", {
-        status: "failed",
-        message: "Stale cache filter unexpectedly resolved."
+        status: cached ? "failed" : "passed",
+        message: cached
+          ? "Stale cache filter unexpectedly returned a position."
+          : "Stale or empty platform cache returned undefined without starting a fresh request."
       });
     } catch (error) {
-      try {
-        const locationError = assertLocationErrorCode(
-          error,
-          LocationErrorCode.POSITION_UNAVAILABLE
-        );
-        setResult("stale", {
-          status: "passed",
-          message: `${locationError.name}: stale or empty cache was rejected without starting a fresh request.`
-        });
-      } catch (assertionError) {
-        setResult("stale", {
-          status: "failed",
-          message: getDisplayErrorMessage(assertionError)
-        });
-      }
+      setResult("stale", {
+        status: "failed",
+        message: getDisplayErrorMessage(error)
+      });
     }
   };
 
@@ -154,10 +154,11 @@ export default function LastKnownPositionScreen() {
       );
       const freshCoordinates = assertFixtureCoordinates(fresh);
       const startedAt = Date.now();
-      const cached = await runWithNativeGeolocation(() =>
-        getLastKnownPosition()
-      );
+      const cached = getLastKnownPosition();
       const elapsedMs = Date.now() - startedAt;
+      if (!cached) {
+        throw new Error("Seeded module cache unexpectedly returned undefined.");
+      }
       const cachedCoordinates = assertFixtureCoordinates(cached);
       const timestampDelta = Math.abs(cached.timestamp - fresh.timestamp);
 
@@ -175,7 +176,7 @@ export default function LastKnownPositionScreen() {
 
       setResult("cache", {
         status: "passed",
-        message: `Seeded ${freshCoordinates}; cached ${cachedCoordinates}; timestamp delta ${timestampDelta}ms; cache read ${elapsedMs}ms.`
+        message: `Seeded ${freshCoordinates}; sync module cache ${cachedCoordinates}; timestamp delta ${timestampDelta}ms; cache read ${elapsedMs}ms.`
       });
     } catch (error) {
       setResult("cache", {
@@ -194,7 +195,7 @@ export default function LastKnownPositionScreen() {
     });
 
     try {
-      await runWithNativeGeolocation(() => getLastKnownPosition());
+      await runWithNativeGeolocation(() => getLastKnownPositionAsync());
       setResult("denied", {
         status: "failed",
         message: "Permission-denied cached read unexpectedly resolved."
@@ -224,13 +225,28 @@ export default function LastKnownPositionScreen() {
     <ScenarioScreen
       prefix={PREFIX}
       title="Last Known Position"
-      subtitle="Cached location API contract with rejection paths"
+      subtitle="Synchronous module cache and asynchronous platform cache contracts"
     >
       <ScenarioSection index={1} title="Permission">
         <PermissionStatusBlock prefix={PREFIX} status={permissionStatus} />
       </ScenarioSection>
 
-      <ScenarioSection index={2} title="Stale Cache Rejection" divided>
+      <ScenarioSection index={2} title="Cold Module Cache" divided>
+        <ScenarioButton
+          title="Read Cold Module Cache"
+          onPress={runColdModuleCacheScenario}
+          color="#546E7A"
+          testID={`${PREFIX}-run-cold-button`}
+        />
+        <ResultBlock
+          prefix={PREFIX}
+          id="cold"
+          label="Cold module cache"
+          result={results.cold}
+        />
+      </ScenarioSection>
+
+      <ScenarioSection index={3} title="Stale Platform Cache" divided>
         <ScenarioButton
           title="Reject Stale Cache"
           onPress={runStaleCacheScenario}
@@ -245,7 +261,7 @@ export default function LastKnownPositionScreen() {
         />
       </ScenarioSection>
 
-      <ScenarioSection index={3} title="System Cache Read" divided>
+      <ScenarioSection index={4} title="Platform Cache Read" divided>
         <ScenarioButton
           title="Read System Cache"
           onPress={runSystemCacheReadScenario}
@@ -260,7 +276,7 @@ export default function LastKnownPositionScreen() {
         />
       </ScenarioSection>
 
-      <ScenarioSection index={4} title="Seeded Cache Read" divided>
+      <ScenarioSection index={5} title="Seeded Module Cache Read" divided>
         <ScenarioButton
           title="Seed And Read Cache"
           onPress={runCacheReadScenario}
@@ -274,7 +290,7 @@ export default function LastKnownPositionScreen() {
         />
       </ScenarioSection>
 
-      <ScenarioSection index={5} title="Permission Denied" divided>
+      <ScenarioSection index={6} title="Permission Denied" divided>
         <ScenarioButton
           title="Run Denied Cache Read"
           onPress={runPermissionDeniedScenario}

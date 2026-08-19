@@ -3,12 +3,14 @@ import {
   checkPermission,
   getCurrentPosition,
   getLastKnownPosition,
+  getLastKnownPositionAsync,
   getLocationAvailability,
   requestPermission,
   stopObserving,
   unwatch,
   watchPosition
 } from ".";
+import { clearLastKnownPositionCache } from "../api/positionCache";
 
 type TestNavigator = {
   geolocation?: {
@@ -45,11 +47,26 @@ function createPosition(latitude = 37.5665, longitude = 126.978) {
 
 afterEach(() => {
   stopObserving();
+  clearLastKnownPositionCache();
   vi.restoreAllMocks();
   Reflect.deleteProperty(globalThis, "navigator");
 });
 
 describe("web Modern API", () => {
+  it("returns undefined from a cold sync module cache without querying the browser", () => {
+    const getCurrentPositionMock = vi.fn();
+    setNavigator({
+      geolocation: {
+        getCurrentPosition: getCurrentPositionMock,
+        watchPosition: vi.fn(),
+        clearWatch: vi.fn()
+      }
+    });
+
+    expect(getLastKnownPosition()).toBeUndefined();
+    expect(getCurrentPositionMock).not.toHaveBeenCalled();
+  });
+
   it("wraps navigator.geolocation.getCurrentPosition and normalizes nullable coords", async () => {
     const getCurrentPositionMock = vi.fn((success) => {
       success(createPosition());
@@ -84,6 +101,10 @@ describe("web Modern API", () => {
       enableHighAccuracy: true,
       timeout: 1234,
       maximumAge: 0
+    });
+    expect(getLastKnownPosition()).toMatchObject({
+      coords: { latitude: 37.5665, longitude: 126.978 },
+      timestamp: 1779015190000
     });
   });
 
@@ -151,7 +172,7 @@ describe("web Modern API", () => {
     });
   });
 
-  it("maps getLastKnownPosition cache miss to POSITION_UNAVAILABLE", async () => {
+  it("maps an async browser cache miss to undefined", async () => {
     const getCurrentPositionMock = vi.fn((_success, error) => {
       error({ code: 3, message: "Timeout expired" });
     });
@@ -163,14 +184,55 @@ describe("web Modern API", () => {
       }
     });
 
-    await expect(getLastKnownPosition()).rejects.toEqual({
-      code: 2,
-      message: "No cached browser location is available."
-    });
+    await expect(getLastKnownPositionAsync()).resolves.toBeUndefined();
     expect(getCurrentPositionMock.mock.calls[0][2]).toMatchObject({
       maximumAge: Number.POSITIVE_INFINITY,
       timeout: 0
     });
+  });
+
+  it("queries the browser cache asynchronously and updates the sync module cache", async () => {
+    const getCurrentPositionMock = vi.fn((success) => {
+      success(createPosition(37.57, 126.99));
+    });
+    setNavigator({
+      geolocation: {
+        getCurrentPosition: getCurrentPositionMock,
+        watchPosition: vi.fn(),
+        clearWatch: vi.fn()
+      }
+    });
+
+    await expect(
+      getLastKnownPositionAsync({ maximumAge: 30_000 })
+    ).resolves.toMatchObject({
+      coords: { latitude: 37.57, longitude: 126.99 }
+    });
+    expect(getCurrentPositionMock.mock.calls[0][2]).toMatchObject({
+      maximumAge: 30_000,
+      timeout: 0
+    });
+    expect(getLastKnownPosition()).toMatchObject({
+      coords: { latitude: 37.57, longitude: 126.99 }
+    });
+  });
+
+  it("preserves permission errors from async browser cache queries", async () => {
+    setNavigator({
+      geolocation: {
+        getCurrentPosition: vi.fn((_success, error) => {
+          error({ code: 1, message: "denied" });
+        }),
+        watchPosition: vi.fn(),
+        clearWatch: vi.fn()
+      }
+    });
+
+    await expect(getLastKnownPositionAsync()).rejects.toEqual({
+      code: 1,
+      message: "denied"
+    });
+    expect(getLastKnownPosition()).toBeUndefined();
   });
 
   it("uses permissions.query when checkPermission can read geolocation state", async () => {

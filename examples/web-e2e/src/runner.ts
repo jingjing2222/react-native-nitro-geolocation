@@ -1,6 +1,8 @@
 import {
   checkPermission,
   getCurrentPosition,
+  getLastKnownPosition,
+  getLastKnownPositionAsync,
   requestPermission,
   stopObserving,
   unwatch,
@@ -209,6 +211,8 @@ export async function runSuccessSuite() {
     checkPermission: typeof checkPermission,
     requestPermission: typeof requestPermission,
     getCurrentPosition: typeof getCurrentPosition,
+    getLastKnownPosition: typeof getLastKnownPosition,
+    getLastKnownPositionAsync: typeof getLastKnownPositionAsync,
     watchPosition: typeof watchPosition,
     unwatch: typeof unwatch,
     stopObserving: typeof stopObserving
@@ -220,6 +224,16 @@ export async function runSuccessSuite() {
   }
 
   runCompatApiAvailabilityCheck();
+
+  await runStep(
+    "last-known-cold-cache",
+    async () => getLastKnownPosition(),
+    (cached) => {
+      if (cached !== undefined) {
+        throw new Error("Cold browser module cache should be empty.");
+      }
+    }
+  );
 
   await runStep<PermissionStatus>(
     "check-permission",
@@ -259,6 +273,33 @@ export async function runSuccessSuite() {
       });
     },
     (result) => assertPosition(result.position)
+  );
+
+  await runStep(
+    "last-known-module-cache",
+    async () => getLastKnownPosition(),
+    (cached) => {
+      if (!cached) {
+        throw new Error("Sync module cache did not return a position.");
+      }
+      assertPosition(cached);
+      if (cached.timestamp !== position.position.timestamp) {
+        throw new Error(
+          "Sync module cache did not return the latest position."
+        );
+      }
+    }
+  );
+
+  await runStep(
+    "last-known-platform-cache",
+    () => getLastKnownPositionAsync(),
+    (cached) => {
+      if (!cached) {
+        throw new Error("Browser platform cache did not return a position.");
+      }
+      assertPosition(cached);
+    }
   );
 
   await runStep(
@@ -443,6 +484,9 @@ export async function runSuccessSuite() {
         "check-permission",
         "request-permission",
         "get-current-position",
+        "last-known-cold-cache",
+        "last-known-module-cache",
+        "last-known-platform-cache",
         "watch-position",
         "unwatch",
         "stop-observing",
