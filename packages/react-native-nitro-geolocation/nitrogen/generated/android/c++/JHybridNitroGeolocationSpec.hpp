@@ -71,6 +71,7 @@ namespace margelo::nitro::nitrogeolocation {
     std::string watchHeading(const std::function<void(const Heading& /* heading */)>& success, const HeadingOptions& options, const std::optional<std::function<void(const LocationError& /* error */)>>& error) override;
     std::string watchPosition(const std::function<void(const GeolocationResponse& /* position */)>& success, const LocationRequestOptions& options, const std::optional<std::function<void(const LocationError& /* error */)>>& error) override;
     void unwatch(const std::string& token) override;
+    std::vector<ActiveWatch> getActiveWatches() override;
     void stopObserving() override;
 
   private:

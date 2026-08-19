@@ -5,6 +5,7 @@ import type {
 import { decoratePositionWithMetadata } from "../api/locationMetadata";
 import { rememberPosition } from "../api/positionCache";
 import type {
+  ActiveWatch,
   GeolocationResponse,
   Heading,
   HeadingOptions
@@ -82,6 +83,12 @@ export function unwatch(token: string): void {
 
   getGeolocation()?.clearWatch(watchId);
   activeWatches.delete(token);
+}
+
+export function getActiveWatches(): ActiveWatch[] {
+  return [...activeWatches.keys()]
+    .sort((first, second) => first.localeCompare(second))
+    .map((token) => ({ token, kind: "position" }));
 }
 
 export function stopObserving(): void {

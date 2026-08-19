@@ -2,6 +2,8 @@ import type { NitroGeolocation } from "./NitroGeolocation.nitro";
 import type { CompatGeolocationConfigurationInternal } from "./NitroGeolocationCompat.nitro";
 import type {
   AccuracyAuthorization as SchemaAccuracyAuthorization,
+  ActiveWatch as SchemaActiveWatch,
+  ActiveWatchKind as SchemaActiveWatchKind,
   AndroidAccuracyPreset as SchemaAndroidAccuracyPreset,
   AndroidGranularity as SchemaAndroidGranularity,
   CompatGeolocationError as SchemaCompatGeolocationError,
@@ -76,6 +78,8 @@ export type IOSActivityType = SchemaIOSActivityType;
 export type LocationAccuracyOptions = SchemaLocationAccuracyOptions;
 export type Heading = SchemaHeading;
 export type HeadingOptions = SchemaHeadingOptions;
+export type ActiveWatch = SchemaActiveWatch;
+export type ActiveWatchKind = SchemaActiveWatchKind;
 
 export type CompatGeolocationResponse = SchemaCompatGeolocationResponse;
 

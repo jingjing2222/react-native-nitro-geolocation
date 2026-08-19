@@ -10,6 +10,10 @@
 // Forward declarations of C++ defined types
 // Forward declaration of `AccuracyAuthorization` to properly resolve imports.
 namespace margelo::nitro::nitrogeolocation { enum class AccuracyAuthorization; }
+// Forward declaration of `ActiveWatchKind` to properly resolve imports.
+namespace margelo::nitro::nitrogeolocation { enum class ActiveWatchKind; }
+// Forward declaration of `ActiveWatch` to properly resolve imports.
+namespace margelo::nitro::nitrogeolocation { struct ActiveWatch; }
 // Forward declaration of `ActivityRecognitionOptions` to properly resolve imports.
 namespace margelo::nitro::nitrogeolocation { struct ActivityRecognitionOptions; }
 // Forward declaration of `AndroidAccuracyPreset` to properly resolve imports.
@@ -145,6 +149,8 @@ namespace margelo::nitro::nitrogeolocation { struct StoredBackgroundLocation; }
 
 // Include C++ defined types
 #include "AccuracyAuthorization.hpp"
+#include "ActiveWatch.hpp"
+#include "ActiveWatchKind.hpp"
 #include "ActivityRecognitionOptions.hpp"
 #include "AndroidAccuracyPreset.hpp"
 #include "AndroidBackgroundLocationOptions.hpp"

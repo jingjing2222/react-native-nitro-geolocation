@@ -124,3 +124,12 @@ struct HeadingSubscription {
     let options: ParsedHeadingOptions
     var lastDeliveredHeading: Double?
 }
+
+func isCachedLocationValid(_ location: CLLocation, options: ParsedOptions) -> Bool {
+    if options.maximumAge.isInfinite {
+        return true
+    }
+
+    let age = Date().timeIntervalSince(location.timestamp) * 1000
+    return age < options.maximumAge
+}

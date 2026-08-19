@@ -30,6 +30,7 @@ public protocol HybridNitroGeolocationSpec_protocol: HybridObject {
   func watchHeading(success: @escaping (_ heading: Heading) -> Void, options: HeadingOptions, error: ((_ error: LocationError) -> Void)?) throws -> String
   func watchPosition(success: @escaping (_ position: GeolocationResponse) -> Void, options: LocationRequestOptions, error: ((_ error: LocationError) -> Void)?) throws -> String
   func unwatch(token: String) throws -> Void
+  func getActiveWatches() throws -> [ActiveWatch]
   func stopObserving() throws -> Void
 }
 

@@ -536,6 +536,24 @@ open class HybridNitroGeolocationSpec_cxx {
   }
 
   @inline(__always)
+  public final func getActiveWatches() -> bridge.Result_std__vector_ActiveWatch__ {
+    do {
+      let __result = try self.__implementation.getActiveWatches()
+      let __resultCpp = { () -> bridge.std__vector_ActiveWatch_ in
+        var __vector = bridge.create_std__vector_ActiveWatch_(__result.count)
+        for __item in __result {
+          __vector.push_back(__item)
+        }
+        return __vector
+      }()
+      return bridge.create_Result_std__vector_ActiveWatch__(__resultCpp)
+    } catch (let __error) {
+      let __exceptionPtr = __error.toCpp()
+      return bridge.create_Result_std__vector_ActiveWatch__(__exceptionPtr)
+    }
+  }
+
+  @inline(__always)
   public final func stopObserving() -> bridge.Result_void_ {
     do {
       try self.__implementation.stopObserving()

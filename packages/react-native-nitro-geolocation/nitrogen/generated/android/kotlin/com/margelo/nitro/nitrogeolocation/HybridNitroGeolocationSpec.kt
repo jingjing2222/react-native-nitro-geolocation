@@ -58,7 +58,7 @@ abstract class HybridNitroGeolocationSpec: HybridObject() {
   @Keep
   abstract fun getLocationAvailability(): Promise<LocationAvailability>
 
-  abstract fun requestLocationSettings(success: (result: LocationSettingsResult) -> Unit, options: LocationSettingsOptions, error: ((error: LocationError) -> Unit)?): Unit
+  abstract fun requestLocationSettings(success: (status: LocationProviderStatus) -> Unit, options: LocationSettingsOptions, error: ((error: LocationError) -> Unit)?): Unit
 
   @DoNotStrip
   @Keep
@@ -146,6 +146,10 @@ abstract class HybridNitroGeolocationSpec: HybridObject() {
   @DoNotStrip
   @Keep
   abstract fun unwatch(token: String): Unit
+
+  @DoNotStrip
+  @Keep
+  abstract fun getActiveWatches(): Array<ActiveWatch>
 
   @DoNotStrip
   @Keep

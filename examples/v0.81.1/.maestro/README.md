@@ -140,9 +140,16 @@ When adding a flow:
 ### `heading.yaml`
 - Dispatches to `heading-android.yaml` or `heading-ios.yaml` based on platform
 - Android verifies `getHeading()` and `watchHeading()` with real heading sensor updates
+- Android verifies a live heading token appears as `kind: "heading"` and disappears after cleanup
 - Android verifies invalid `headingFilter` rejects before emitting updates
 - iOS simulator verifies Core Location reports heading unavailable through `POSITION_UNAVAILABLE`
 - Both platform contracts relaunch with location permission denied and verify `PERMISSION_DENIED`
+
+### `watch-observability.yaml`
+- Reads an idle snapshot through the public `getActiveWatches()` API
+- Starts two real native position watches with different options and verifies both tokens are visible
+- Calls `unwatch()` twice for one token plus once for an unknown token and verifies the other watch remains
+- Calls `stopObserving()` and verifies the native snapshot is empty
 
 ### `android-request-options.yaml`
 - Android-only contract for `granularity`, `waitForAccurateLocation`, `maxUpdateAge`, `maxUpdateDelay`, and `maxUpdates`

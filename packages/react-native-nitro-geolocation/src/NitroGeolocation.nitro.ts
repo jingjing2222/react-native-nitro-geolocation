@@ -1,6 +1,7 @@
 import type { HybridObject } from "react-native-nitro-modules";
 import type {
   AccuracyAuthorization,
+  ActiveWatch,
   AndroidGranularity,
   GeocodedLocation,
   GeocodingCoordinates,
@@ -431,6 +432,9 @@ export interface NitroGeolocation
    * @param token - Subscription token from watchPosition()
    */
   unwatch(token: string): void;
+
+  /** Return a point-in-time snapshot of active location and heading watches. */
+  getActiveWatches(): ActiveWatch[];
 
   /**
    * Stop ALL watch subscriptions immediately.

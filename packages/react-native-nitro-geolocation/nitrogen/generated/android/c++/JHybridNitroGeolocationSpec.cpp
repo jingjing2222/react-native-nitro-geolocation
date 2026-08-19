@@ -15,6 +15,10 @@ namespace margelo::nitro::nitrogeolocation { struct LocationProviderStatus; }
 namespace margelo::nitro::nitrogeolocation { struct LocationAvailability; }
 // Forward declaration of `AccuracyAuthorization` to properly resolve imports.
 namespace margelo::nitro::nitrogeolocation { enum class AccuracyAuthorization; }
+// Forward declaration of `ActiveWatch` to properly resolve imports.
+namespace margelo::nitro::nitrogeolocation { struct ActiveWatch; }
+// Forward declaration of `ActiveWatchKind` to properly resolve imports.
+namespace margelo::nitro::nitrogeolocation { enum class ActiveWatchKind; }
 // Forward declaration of `GeolocationConfiguration` to properly resolve imports.
 namespace margelo::nitro::nitrogeolocation { struct GeolocationConfiguration; }
 // Forward declaration of `AuthorizationLevel` to properly resolve imports.
@@ -68,6 +72,11 @@ namespace margelo::nitro::nitrogeolocation { struct HeadingOptions; }
 #include <string>
 #include "AccuracyAuthorization.hpp"
 #include "JAccuracyAuthorization.hpp"
+#include "ActiveWatch.hpp"
+#include <vector>
+#include "JActiveWatch.hpp"
+#include "ActiveWatchKind.hpp"
+#include "JActiveWatchKind.hpp"
 #include "GeolocationConfiguration.hpp"
 #include "JGeolocationConfiguration.hpp"
 #include "AuthorizationLevel.hpp"
@@ -110,7 +119,6 @@ namespace margelo::nitro::nitrogeolocation { struct HeadingOptions; }
 #include "IOSActivityType.hpp"
 #include "JIOSActivityType.hpp"
 #include "GeocodedLocation.hpp"
-#include <vector>
 #include "JFunc_void_std__vector_GeocodedLocation_.hpp"
 #include "JGeocodedLocation.hpp"
 #include "GeocodingCoordinates.hpp"
@@ -286,6 +294,20 @@ namespace margelo::nitro::nitrogeolocation {
   void JHybridNitroGeolocationSpec::unwatch(const std::string& token) {
     static const auto method = _javaPart->javaClassStatic()->getMethod<void(jni::alias_ref<jni::JString> /* token */)>("unwatch");
     method(_javaPart, jni::make_jstring(token));
+  }
+  std::vector<ActiveWatch> JHybridNitroGeolocationSpec::getActiveWatches() {
+    static const auto method = _javaPart->javaClassStatic()->getMethod<jni::local_ref<jni::JArrayClass<JActiveWatch>>()>("getActiveWatches");
+    auto __result = method(_javaPart);
+    return [&](auto&& __input) {
+      size_t __size = __input->size();
+      std::vector<ActiveWatch> __vector;
+      __vector.reserve(__size);
+      for (size_t __i = 0; __i < __size; __i++) {
+        auto __element = __input->getElement(__i);
+        __vector.push_back(__element->toCpp());
+      }
+      return __vector;
+    }(__result);
   }
   void JHybridNitroGeolocationSpec::stopObserving() {
     static const auto method = _javaPart->javaClassStatic()->getMethod<void()>("stopObserving");

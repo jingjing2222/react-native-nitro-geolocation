@@ -67,7 +67,7 @@ appId: nitrogeolocation.example
 - assertVisible:
     id: "heading-watch-result"
 - assertVisible:
-    text: ".*Watch delivered 2 real heading updates.*"
+    text: ".*Watch snapshot exposed kind heading, delivered 2 real updates.*"
 
 - tapOn:
     id: "e2e-action-heading-run-invalid-button"

@@ -33,6 +33,8 @@ export type {
   LocationAccuracyOptions,
   Heading,
   HeadingOptions,
+  ActiveWatch,
+  ActiveWatchKind,
   AuthorizationLevel,
   LocationProvider,
   LocationProviderUsed,

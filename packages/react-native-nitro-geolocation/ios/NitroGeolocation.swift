@@ -27,10 +27,12 @@ class NitroGeolocation: HybridNitroGeolocationSpec {
     private var pendingPositionRequests: [UUID: PositionRequest] = [:]
 
     // Watch subscriptions (token -> callback)
+    @ActiveWatchRegistry(kind: .position)
     private var watchSubscriptions: [String: WatchSubscription] = [:]
 
     // Heading requests/subscriptions
     private var pendingHeadingRequests: [UUID: HeadingRequest] = [:]
+    @ActiveWatchRegistry(kind: .heading)
     private var headingSubscriptions: [String: HeadingSubscription] = [:]
     private var activeGeocoders: [UUID: CLGeocoder] = [:]
 
@@ -215,7 +217,7 @@ class NitroGeolocation: HybridNitroGeolocationSpec {
         // Check cached location
         if let cached = self.getBestCachedLocation(options: parsedOptions) {
             self.lastLocation = cached
-            let position = self.locationToPosition(cached)
+            let position = cached.toGeolocationResponse()
             success(position)
             return
         }
@@ -274,7 +276,7 @@ class NitroGeolocation: HybridNitroGeolocationSpec {
         }
 
         self.lastLocation = cached
-        success(self.locationToPosition(cached))
+        success(cached.toGeolocationResponse())
     }
 
     // MARK: - Geocoding
@@ -485,6 +487,11 @@ class NitroGeolocation: HybridNitroGeolocationSpec {
         }
     }
 
+    func getActiveWatches() -> [ActiveWatch] {
+        let watches = $watchSubscriptions.snapshot() + $headingSubscriptions.snapshot()
+        return watches.sorted { $0.token < $1.token }
+    }
+
     func stopObserving() {
         watchSubscriptions.removeAll()
         headingSubscriptions.removeAll()
@@ -527,7 +534,7 @@ class NitroGeolocation: HybridNitroGeolocationSpec {
         guard let location = locations.last else { return }
 
         lastLocation = location
-        let position = locationToPosition(location)
+        let position = location.toGeolocationResponse()
 
         // 1. Resolve all pending getCurrentPosition requests
         for (id, request) in pendingPositionRequests {
@@ -614,8 +621,9 @@ class NitroGeolocation: HybridNitroGeolocationSpec {
             if shouldDeliver {
                 var nextSubscription = subscription
                 nextSubscription.lastDeliveredHeading = heading.magneticHeading
-                headingSubscriptions[token] = nextSubscription
-                nextSubscription.success(heading)
+                if $headingSubscriptions.updateIfPresent(token: token, value: nextSubscription) {
+                    nextSubscription.success(heading)
+                }
             }
         }
 
@@ -737,18 +745,25 @@ class NitroGeolocation: HybridNitroGeolocationSpec {
             return
         }
 
-        for (_, request) in pendingHeadingRequests {
+        let requests = pendingHeadingRequests
+        pendingHeadingRequests.removeAll()
+        let subscriptions = $headingSubscriptions.drain()
+
+        for (_, request) in requests {
             request.timer?.cancel()
             request.error(locationError)
         }
-        pendingHeadingRequests.removeAll()
 
-        for (_, subscription) in headingSubscriptions {
+        for (_, subscription) in subscriptions {
             subscription.error?(locationError)
         }
-        headingSubscriptions.removeAll()
 
-        stopHeadingMonitoring()
+        if pendingHeadingRequests.isEmpty && headingSubscriptions.isEmpty {
+            stopHeadingMonitoring()
+        } else {
+            updateHeadingConfiguration()
+            startHeadingMonitoring()
+        }
     }
 
     private func updateLocationManagerConfiguration() {
@@ -900,17 +915,6 @@ class NitroGeolocation: HybridNitroGeolocationSpec {
         }
     }
 
-    private func isCachedLocationValid(_ location: CLLocation, options: ParsedOptions) -> Bool {
-        // maximumAge is infinity
-        if options.maximumAge.isInfinite {
-            return true
-        }
-
-        // Check age
-        let age = Date().timeIntervalSince(location.timestamp) * 1000  // ms
-        return age < options.maximumAge
-    }
-
     private func getBestCachedLocation(options: ParsedOptions) -> CLLocation? {
         initializeLocationManagerIfNeeded()
 
@@ -1034,10 +1038,6 @@ class NitroGeolocation: HybridNitroGeolocationSpec {
         return DispatchQueue.main.sync {
             getCurrentAccuracyAuthorization()
         }
-    }
-
-    private func locationToPosition(_ location: CLLocation) -> GeolocationResponse {
-        return location.toGeolocationResponse()
     }
 
     private func validateGeocodingCoordinates(_ coords: GeocodingCoordinates) -> LocationError? {

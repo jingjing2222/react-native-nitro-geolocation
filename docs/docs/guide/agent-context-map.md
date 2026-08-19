@@ -10,6 +10,7 @@ Pick the smallest entry point that matches your change:
 | Task | Read first | Then read |
 | --- | --- | --- |
 | Public foreground API behavior | `packages/react-native-nitro-geolocation/src/api/` | `packages/react-native-nitro-geolocation/src/NitroGeolocation.nitro.ts`, then platform files below |
+| Active watch snapshots and cleanup semantics | `packages/react-native-nitro-geolocation/src/api/getActiveWatches.ts` | `docs/docs/guide/watch-observability.md`, then platform watch registries |
 | Community compatibility behavior | `packages/react-native-nitro-geolocation/src/compat/` | `packages/react-native-nitro-geolocation/src/NitroGeolocationCompat.nitro.ts` |
 | Background API shape | `packages/react-native-nitro-geolocation/src/background/index.ts` | `packages/react-native-nitro-geolocation/src/background/NitroBackgroundLocation.nitro.ts` |
 | Android foreground native bug | `packages/react-native-nitro-geolocation/android/src/main/java/com/margelo/nitro/nitrogeolocation/NitroGeolocation.kt` | Nearby Android helper for the specific feature |

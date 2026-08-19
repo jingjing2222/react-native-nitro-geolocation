@@ -10,6 +10,10 @@
 // Forward declarations of C++ defined types
 // Forward declaration of `AccuracyAuthorization` to properly resolve imports.
 namespace margelo::nitro::nitrogeolocation { enum class AccuracyAuthorization; }
+// Forward declaration of `ActiveWatchKind` to properly resolve imports.
+namespace margelo::nitro::nitrogeolocation { enum class ActiveWatchKind; }
+// Forward declaration of `ActiveWatch` to properly resolve imports.
+namespace margelo::nitro::nitrogeolocation { struct ActiveWatch; }
 // Forward declaration of `ActivityRecognitionOptions` to properly resolve imports.
 namespace margelo::nitro::nitrogeolocation { struct ActivityRecognitionOptions; }
 // Forward declaration of `AndroidAccuracyPreset` to properly resolve imports.
@@ -139,6 +143,8 @@ namespace NitroGeolocation { class HybridNitroGeolocationSpec_cxx; }
 
 // Include C++ defined types
 #include "AccuracyAuthorization.hpp"
+#include "ActiveWatch.hpp"
+#include "ActiveWatchKind.hpp"
 #include "ActivityRecognitionOptions.hpp"
 #include "AndroidAccuracyPreset.hpp"
 #include "AndroidBackgroundLocationOptions.hpp"
@@ -787,6 +793,17 @@ namespace margelo::nitro::nitrogeolocation::bridge::swift {
     return Func_void_Heading_Wrapper(std::move(value));
   }
 
+  // pragma MARK: std::vector<ActiveWatch>
+  /**
+   * Specialized version of `std::vector<ActiveWatch>`.
+   */
+  using std__vector_ActiveWatch_ = std::vector<ActiveWatch>;
+  inline std::vector<ActiveWatch> create_std__vector_ActiveWatch_(size_t size) noexcept {
+    std::vector<ActiveWatch> vector;
+    vector.reserve(size);
+    return vector;
+  }
+
   // pragma MARK: std::shared_ptr<HybridNitroGeolocationSpec>
   /**
    * Specialized version of `std::shared_ptr<HybridNitroGeolocationSpec>`.
@@ -860,6 +877,15 @@ namespace margelo::nitro::nitrogeolocation::bridge::swift {
   }
   inline Result_std__string_ create_Result_std__string_(const std::exception_ptr& error) noexcept {
     return Result<std::string>::withError(error);
+  }
+
+  // pragma MARK: Result<std::vector<ActiveWatch>>
+  using Result_std__vector_ActiveWatch__ = Result<std::vector<ActiveWatch>>;
+  inline Result_std__vector_ActiveWatch__ create_Result_std__vector_ActiveWatch__(const std::vector<ActiveWatch>& value) noexcept {
+    return Result<std::vector<ActiveWatch>>::withValue(value);
+  }
+  inline Result_std__vector_ActiveWatch__ create_Result_std__vector_ActiveWatch__(const std::exception_ptr& error) noexcept {
+    return Result<std::vector<ActiveWatch>>::withError(error);
   }
 
   // pragma MARK: std::optional<AuthorizationLevelInternal>

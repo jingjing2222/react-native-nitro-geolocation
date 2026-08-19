@@ -1,7 +1,14 @@
 import type { LocationError } from "../NitroGeolocation.nitro";
 import type { GeolocationResponse } from "../publicTypes";
+import type { ActiveWatch } from "../publicTypes";
 import { LocationErrorCode } from "../utils/errors";
 import { getDevtoolsState } from "./index";
+
+function nextDevtoolsWatchToken(): string {
+  const globals = globalThis as any;
+  globals.__devtoolsWatchSequence = (globals.__devtoolsWatchSequence ?? 0) + 1;
+  return `devtools-${globals.__devtoolsWatchSequence}`;
+}
 
 export function devtoolsWatchPosition(
   success: (position: GeolocationResponse) => void,
@@ -36,7 +43,7 @@ export function devtoolsWatchPosition(
   }, 100);
 
   // Return a cleanup token
-  const token = `devtools-${Date.now()}`;
+  const token = nextDevtoolsWatchToken();
   (globalThis as any).__devtoolsWatchers =
     (globalThis as any).__devtoolsWatchers || {};
   (globalThis as any).__devtoolsWatchers[token] = interval;
@@ -62,4 +69,18 @@ export function devtoolsUnwatch(token: string): boolean {
   }
 
   return false;
+}
+
+export function getDevtoolsActiveWatches(): ActiveWatch[] {
+  const watchers = (globalThis as any).__devtoolsWatchers;
+  return Object.keys(watchers ?? {}).map((token) => ({
+    token,
+    kind: "position"
+  }));
+}
+
+export function devtoolsStopObserving(): void {
+  for (const { token } of getDevtoolsActiveWatches()) {
+    devtoolsUnwatch(token);
+  }
 }

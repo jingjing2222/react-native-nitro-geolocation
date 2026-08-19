@@ -63,6 +63,16 @@ export interface HeadingOptions {
   headingFilter?: number;
 }
 
+export type ActiveWatchKind = "position" | "heading";
+
+/** Snapshot entry returned by getActiveWatches(). */
+export interface ActiveWatch {
+  /** Subscription token accepted by unwatch(). */
+  token: string;
+  /** Sensor stream owned by the subscription. */
+  kind: ActiveWatchKind;
+}
+
 export interface GeocodingCoordinates {
   latitude: number;
   longitude: number;
