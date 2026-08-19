@@ -27,7 +27,7 @@ class NitroGeolocation: HybridNitroGeolocationSpec {
     internal var pendingPositionRequests: [String: PositionRequest] = [:]
 
     // Watch subscriptions (token -> callback)
-    private var watchSubscriptions: [String: WatchSubscription] = [:]
+    internal var watchSubscriptions: [String: WatchSubscription] = [:]
 
     // Heading requests/subscriptions
     private var pendingHeadingRequests: [UUID: HeadingRequest] = [:]
@@ -444,42 +444,17 @@ class NitroGeolocation: HybridNitroGeolocationSpec {
         return token
     }
 
-    // MARK: - Watch Position (Callback-based with tokens)
-
-    func watchPosition(
-        success: @escaping (GeolocationResponse) -> Void,
-        options: LocationRequestOptions,
-        error: ((LocationError) -> Void)?
-    ) -> String {
-        let token = UUID().uuidString
-        let parsedOptions = ParsedOptions.parse(from: options)
-
-        let subscription = WatchSubscription(
-            success: success,
-            error: error,
-            options: parsedOptions
-        )
-
-        watchSubscriptions[token] = subscription
-
-        initializeLocationManagerIfNeeded()
-        updateLocationManagerConfiguration()
-        startMonitoring()
-
-        return token
-    }
-
     func unwatch(token: String) {
-        watchSubscriptions.removeValue(forKey: token)
-        headingSubscriptions.removeValue(forKey: token)
-
-        // Stop monitoring if no more subscriptions or pending requests
-        if watchSubscriptions.isEmpty && pendingPositionRequests.isEmpty {
-            stopMonitoring()
-        } else {
-            updateLocationManagerConfiguration()
+        runLocationOperationOnMain {
+            self.watchSubscriptions.removeValue(forKey: token)
+            if self.watchSubscriptions.isEmpty && self.pendingPositionRequests.isEmpty {
+                self.stopMonitoring()
+            } else {
+                self.updateLocationManagerConfiguration()
+            }
         }
 
+        headingSubscriptions.removeValue(forKey: token)
         if headingSubscriptions.isEmpty && pendingHeadingRequests.isEmpty {
             stopHeadingMonitoring()
         } else {
@@ -488,16 +463,16 @@ class NitroGeolocation: HybridNitroGeolocationSpec {
     }
 
     func stopObserving() {
-        watchSubscriptions.removeAll()
-        headingSubscriptions.removeAll()
-
-        // Stop monitoring if no pending requests
-        if pendingPositionRequests.isEmpty {
-            stopMonitoring()
-        } else {
-            updateLocationManagerConfiguration()
+        runLocationOperationOnMain {
+            self.watchSubscriptions.removeAll()
+            if self.pendingPositionRequests.isEmpty {
+                self.stopMonitoring()
+            } else {
+                self.updateLocationManagerConfiguration()
+            }
         }
 
+        headingSubscriptions.removeAll()
         if pendingHeadingRequests.isEmpty {
             stopHeadingMonitoring()
         } else {
@@ -630,7 +605,7 @@ class NitroGeolocation: HybridNitroGeolocationSpec {
 
     // MARK: - Helper Functions
 
-    private func initializeLocationManagerIfNeeded() {
+    internal func initializeLocationManagerIfNeeded() {
         guard locationManager == nil else { return }
 
         if Thread.isMainThread {
@@ -753,7 +728,7 @@ class NitroGeolocation: HybridNitroGeolocationSpec {
         stopHeadingMonitoring()
     }
 
-    private func updateLocationManagerConfiguration() {
+    internal func updateLocationManagerConfiguration() {
         guard let manager = locationManager else { return }
 
         // Merge configurations from all pending requests and watches
@@ -886,7 +861,7 @@ class NitroGeolocation: HybridNitroGeolocationSpec {
         return min(current, next)
     }
 
-    private func startMonitoring() {
+    internal func startMonitoring() {
         if usingSignificantChanges {
             locationManager?.startMonitoringSignificantLocationChanges()
         } else {

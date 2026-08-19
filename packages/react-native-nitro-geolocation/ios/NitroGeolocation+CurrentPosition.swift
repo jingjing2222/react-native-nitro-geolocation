@@ -7,7 +7,7 @@ extension NitroGeolocation {
         options: LocationRequestOptions,
         error: ((LocationError) -> Void)?
     ) throws -> Void {
-        runCurrentPositionOperationOnMain {
+        runLocationOperationOnMain {
             self.getCurrentPositionInternal(
                 requestId: UUID().uuidString,
                 success: success,
@@ -23,7 +23,7 @@ extension NitroGeolocation {
         options: LocationRequestOptions,
         error: ((LocationError) -> Void)?
     ) throws -> Void {
-        runCurrentPositionOperationOnMain {
+        runLocationOperationOnMain {
             self.cancelCurrentPositionRequestOnMain(requestId: requestId)
             self.getCurrentPositionInternal(
                 requestId: requestId,
@@ -35,9 +35,31 @@ extension NitroGeolocation {
     }
 
     func cancelCurrentPositionRequest(requestId: String) {
-        runCurrentPositionOperationOnMain {
+        runLocationOperationOnMain {
             self.cancelCurrentPositionRequestOnMain(requestId: requestId)
         }
+    }
+
+    func watchPosition(
+        success: @escaping (GeolocationResponse) -> Void,
+        options: LocationRequestOptions,
+        error: ((LocationError) -> Void)?
+    ) -> String {
+        let token = UUID().uuidString
+        let subscription = WatchSubscription(
+            success: success,
+            error: error,
+            options: ParsedOptions.parse(from: options)
+        )
+
+        runLocationOperationOnMain {
+            self.watchSubscriptions[token] = subscription
+            self.initializeLocationManagerIfNeeded()
+            self.updateLocationManagerConfiguration()
+            self.startMonitoring()
+        }
+
+        return token
     }
 
     private func cancelCurrentPositionRequestOnMain(requestId: String) {
@@ -49,7 +71,7 @@ extension NitroGeolocation {
         updateMonitoringAfterPositionRequestRemoval()
     }
 
-    private func runCurrentPositionOperationOnMain(_ operation: @escaping () -> Void) {
+    internal func runLocationOperationOnMain(_ operation: @escaping () -> Void) {
         if Thread.isMainThread {
             operation()
         } else {

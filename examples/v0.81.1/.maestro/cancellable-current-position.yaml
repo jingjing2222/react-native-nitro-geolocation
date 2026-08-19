@@ -1,7 +1,7 @@
 appId: nitrogeolocation.example
 ---
 # AbortSignal contract: pre-aborted requests preserve their reason, and
-# cancelling one active request does not cancel a concurrent survivor.
+# cancelling one active request does not cancel concurrent one-shot or watch survivors.
 
 - launchApp:
     clearState: true
@@ -78,3 +78,22 @@ appId: nitrogeolocation.example
     id: "cancellable-current-position-isolation-result"
 - assertVisible:
     text: ".*cancelled first only.*survivor 37.566500, 126.978000.*"
+
+- tapOn:
+    id: "e2e-action-cancellable-current-position-run-watch-isolation-button"
+
+- extendedWaitUntil:
+    visible: ".*(One-shot cancelled; move location for the active watch.|Watch isolation: passed).*"
+    timeout: 10000
+
+- setLocation:
+    latitude: 37.5665
+    longitude: 126.978
+
+- extendedWaitUntil:
+    visible: "Watch isolation: passed"
+    timeout: 60000
+- assertVisible:
+    id: "cancellable-current-position-watch-isolation-result"
+- assertVisible:
+    text: ".*One-shot cancellation kept watch active at 37.566500, 126.978000.*"

@@ -1,5 +1,10 @@
 import React from "react";
-import { getCurrentPosition } from "react-native-nitro-geolocation";
+import {
+  getCurrentPosition,
+  unwatch,
+  watchPosition
+} from "react-native-nitro-geolocation";
+import type { GeolocationResponse } from "react-native-nitro-geolocation";
 import {
   PermissionStatusBlock,
   ResultBlock,
@@ -18,7 +23,8 @@ const PREFIX = "cancellable-current-position";
 
 const initialResults = createScenarioResults([
   "preAborted",
-  "isolation"
+  "isolation",
+  "watchIsolation"
 ] as const);
 
 function abortWithReason(controller: AbortController, reason: unknown) {
@@ -150,6 +156,110 @@ export default function CancellableCurrentPositionScreen() {
     }
   };
 
+  const runWatchIsolationScenario = async () => {
+    setResult("watchIsolation", {
+      status: "running",
+      message: "Starting a watch and cancelling a one-shot request"
+    });
+
+    const controller = new AbortController();
+    const cancellationReason = new Error("cancel one-shot, keep watch");
+
+    try {
+      const permission = await requestLocationPermission();
+      if (permission !== "granted") {
+        throw new Error(`Permission was not granted: ${permission}`);
+      }
+
+      const watchedPosition = await runWithNativeGeolocation(
+        () =>
+          new Promise<GeolocationResponse>((resolve, reject) => {
+            let token = "";
+            let didFinish = false;
+            let cancelledAt = Number.POSITIVE_INFINITY;
+            const timeout = setTimeout(() => {
+              finish(() =>
+                reject(
+                  new Error(
+                    "Watch did not deliver after the one-shot request was cancelled."
+                  )
+                )
+              );
+            }, 30000);
+            const finish = (callback: () => void) => {
+              if (didFinish) return;
+              didFinish = true;
+              clearTimeout(timeout);
+              if (token) unwatch(token);
+              callback();
+            };
+            const requestOptions = {
+              accuracy: { android: "high" as const, ios: "best" as const },
+              maximumAge: 0,
+              timeout: 30000
+            };
+
+            token = watchPosition(
+              (position) => {
+                if (position.timestamp < cancelledAt) return;
+                finish(() => resolve(position));
+              },
+              (error) => finish(() => reject(error)),
+              requestOptions
+            );
+
+            const cancelledRequest = getCurrentPosition({
+              ...requestOptions,
+              signal: controller.signal
+            });
+            abortWithReason(controller, cancellationReason);
+
+            cancelledRequest.then(
+              () =>
+                finish(() =>
+                  reject(
+                    new Error(
+                      "Cancelled one-shot request unexpectedly resolved."
+                    )
+                  )
+                ),
+              (error) => {
+                try {
+                  assertAbortOutcome(
+                    error,
+                    controller.signal,
+                    cancellationReason
+                  );
+                  cancelledAt = Date.now();
+                  setResult("watchIsolation", {
+                    status: "running",
+                    message:
+                      "One-shot cancelled; move location for the active watch."
+                  });
+                } catch (assertionError) {
+                  finish(() => reject(assertionError));
+                }
+              }
+            );
+          })
+      );
+
+      const coordinates = assertFixtureCoordinates(watchedPosition);
+      setResult("watchIsolation", {
+        status: "passed",
+        message: `One-shot cancellation kept watch active at ${coordinates}.`
+      });
+    } catch (error) {
+      setResult("watchIsolation", {
+        status: "failed",
+        message: getDisplayErrorMessage(error)
+      });
+    } finally {
+      controller.abort();
+      await refreshPermission();
+    }
+  };
+
   return (
     <ScenarioScreen
       prefix={PREFIX}
@@ -186,6 +296,21 @@ export default function CancellableCurrentPositionScreen() {
           id="isolation"
           label="Isolated cancellation"
           result={results.isolation}
+        />
+      </ScenarioSection>
+
+      <ScenarioSection index={4} title="Active Watch" divided>
+        <ScenarioButton
+          title="Cancel One-shot While Watching"
+          onPress={runWatchIsolationScenario}
+          color="#00695C"
+          testID={`${PREFIX}-run-watch-isolation-button`}
+        />
+        <ResultBlock
+          prefix={PREFIX}
+          id="watch-isolation"
+          label="Watch isolation"
+          result={results.watchIsolation}
         />
       </ScenarioSection>
     </ScenarioScreen>
