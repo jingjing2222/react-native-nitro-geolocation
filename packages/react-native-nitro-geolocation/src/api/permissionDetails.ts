@@ -37,11 +37,14 @@ function resolveCanAskAgain({
   return foreground === "undetermined" ? null : false;
 }
 
-function resolveSettingsGuidance({
-  platform,
-  foreground,
-  environmentSupported = true
-}: PermissionDetailsSignals): PermissionSettingsGuidance {
+function resolveSettingsGuidance(
+  {
+    platform,
+    foreground,
+    environmentSupported = true
+  }: PermissionDetailsSignals,
+  canAskAgain: boolean | null
+): PermissionSettingsGuidance {
   if (!environmentSupported) {
     return "useSupportedEnvironment";
   }
@@ -54,6 +57,9 @@ function resolveSettingsGuidance({
   if (foreground === "undetermined") {
     return "requestPermission";
   }
+  if (canAskAgain === true) {
+    return "requestPermission";
+  }
   return platform === "android"
     ? "requestPermissionOrReviewSettings"
     : "reviewSettings";
@@ -64,6 +70,7 @@ export function buildPermissionDetails(
   signals: PermissionDetailsSignals
 ): PermissionDetails {
   const hasForeground = signals.foreground === "granted";
+  const canAskAgain = resolveCanAskAgain(signals);
   const scope = hasForeground
     ? signals.background === "granted"
       ? "background"
@@ -74,7 +81,7 @@ export function buildPermissionDetails(
     status: signals.foreground,
     scope,
     accuracy: hasForeground ? signals.accuracy : "unknown",
-    canAskAgain: resolveCanAskAgain(signals),
-    settingsGuidance: resolveSettingsGuidance(signals)
+    canAskAgain,
+    settingsGuidance: resolveSettingsGuidance(signals, canAskAgain)
   };
 }

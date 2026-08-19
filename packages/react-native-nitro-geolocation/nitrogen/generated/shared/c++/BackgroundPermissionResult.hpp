@@ -52,10 +52,11 @@ namespace margelo::nitro::nitrogeolocation {
     std::optional<AccuracyAuthorization> accuracyAuthorization     SWIFT_PRIVATE;
     std::optional<bool> canRequestBackgroundInline     SWIFT_PRIVATE;
     std::optional<bool> needsSettingsRedirect     SWIFT_PRIVATE;
+    std::optional<bool> canAskAgain     SWIFT_PRIVATE;
 
   public:
     BackgroundPermissionResult() = default;
-    explicit BackgroundPermissionResult(PermissionStatus foreground, BackgroundPermissionStatus background, std::optional<AccuracyAuthorization> accuracyAuthorization, std::optional<bool> canRequestBackgroundInline, std::optional<bool> needsSettingsRedirect): foreground(foreground), background(background), accuracyAuthorization(accuracyAuthorization), canRequestBackgroundInline(canRequestBackgroundInline), needsSettingsRedirect(needsSettingsRedirect) {}
+    explicit BackgroundPermissionResult(PermissionStatus foreground, BackgroundPermissionStatus background, std::optional<AccuracyAuthorization> accuracyAuthorization, std::optional<bool> canRequestBackgroundInline, std::optional<bool> needsSettingsRedirect, std::optional<bool> canAskAgain): foreground(foreground), background(background), accuracyAuthorization(accuracyAuthorization), canRequestBackgroundInline(canRequestBackgroundInline), needsSettingsRedirect(needsSettingsRedirect), canAskAgain(canAskAgain) {}
 
   public:
     friend bool operator==(const BackgroundPermissionResult& lhs, const BackgroundPermissionResult& rhs) = default;
@@ -75,7 +76,8 @@ namespace margelo::nitro {
         JSIConverter<margelo::nitro::nitrogeolocation::BackgroundPermissionStatus>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "background"))),
         JSIConverter<std::optional<margelo::nitro::nitrogeolocation::AccuracyAuthorization>>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "accuracyAuthorization"))),
         JSIConverter<std::optional<bool>>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "canRequestBackgroundInline"))),
-        JSIConverter<std::optional<bool>>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "needsSettingsRedirect")))
+        JSIConverter<std::optional<bool>>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "needsSettingsRedirect"))),
+        JSIConverter<std::optional<bool>>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "canAskAgain")))
       );
     }
     static inline jsi::Value toJSI(jsi::Runtime& runtime, const margelo::nitro::nitrogeolocation::BackgroundPermissionResult& arg) {
@@ -85,6 +87,7 @@ namespace margelo::nitro {
       obj.setProperty(runtime, PropNameIDCache::get(runtime, "accuracyAuthorization"), JSIConverter<std::optional<margelo::nitro::nitrogeolocation::AccuracyAuthorization>>::toJSI(runtime, arg.accuracyAuthorization));
       obj.setProperty(runtime, PropNameIDCache::get(runtime, "canRequestBackgroundInline"), JSIConverter<std::optional<bool>>::toJSI(runtime, arg.canRequestBackgroundInline));
       obj.setProperty(runtime, PropNameIDCache::get(runtime, "needsSettingsRedirect"), JSIConverter<std::optional<bool>>::toJSI(runtime, arg.needsSettingsRedirect));
+      obj.setProperty(runtime, PropNameIDCache::get(runtime, "canAskAgain"), JSIConverter<std::optional<bool>>::toJSI(runtime, arg.canAskAgain));
       return obj;
     }
     static inline bool canConvert(jsi::Runtime& runtime, const jsi::Value& value) {
@@ -100,6 +103,7 @@ namespace margelo::nitro {
       if (!JSIConverter<std::optional<margelo::nitro::nitrogeolocation::AccuracyAuthorization>>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "accuracyAuthorization")))) return false;
       if (!JSIConverter<std::optional<bool>>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "canRequestBackgroundInline")))) return false;
       if (!JSIConverter<std::optional<bool>>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "needsSettingsRedirect")))) return false;
+      if (!JSIConverter<std::optional<bool>>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "canAskAgain")))) return false;
       return true;
     }
   };

@@ -12,7 +12,7 @@ import {
   watchPosition
 } from ".";
 import { clearLastKnownPositionCache } from "../api/positionCache";
-import { LocationErrorCode } from "../utils/errors";
+import { clearWebPermissionDetailsEvidence } from "./permissionDetailsEvidence";
 
 type TestNavigator = {
   geolocation?: {
@@ -50,6 +50,7 @@ function createPosition(latitude = 37.5665, longitude = 126.978) {
 afterEach(() => {
   stopObserving();
   clearLastKnownPositionCache();
+  clearWebPermissionDetailsEvidence();
   vi.restoreAllMocks();
   Reflect.deleteProperty(globalThis, "navigator");
 });
@@ -345,6 +346,113 @@ describe("web Modern API", () => {
       accuracy: "unknown",
       canAskAgain: false,
       settingsGuidance: "useSupportedEnvironment"
+    });
+  });
+
+  it("uses a recent successful acquisition as permission evidence", async () => {
+    setNavigator({
+      geolocation: {
+        getCurrentPosition: vi.fn((success) => success(createPosition())),
+        watchPosition: vi.fn(),
+        clearWatch: vi.fn()
+      }
+    });
+
+    await getCurrentPosition();
+
+    await expect(getPermissionDetails()).resolves.toEqual({
+      status: "granted",
+      scope: "foreground",
+      accuracy: "unknown",
+      canAskAgain: false,
+      settingsGuidance: "none"
+    });
+  });
+
+  it("uses a recent permission error as denial evidence", async () => {
+    setNavigator({
+      geolocation: {
+        getCurrentPosition: vi.fn((_success, error) =>
+          error({ code: 1, message: "denied" })
+        ),
+        watchPosition: vi.fn(),
+        clearWatch: vi.fn()
+      }
+    });
+
+    await expect(getCurrentPosition()).rejects.toMatchObject({ code: 1 });
+
+    await expect(getPermissionDetails()).resolves.toEqual({
+      status: "denied",
+      scope: "none",
+      accuracy: "unknown",
+      canAskAgain: false,
+      settingsGuidance: "reviewSettings"
+    });
+  });
+
+  it("expires Web permission evidence after 30 seconds", async () => {
+    const now = vi.spyOn(Date, "now").mockReturnValue(1_000);
+    setNavigator({
+      geolocation: {
+        getCurrentPosition: vi.fn((success) => success(createPosition())),
+        watchPosition: vi.fn(),
+        clearWatch: vi.fn()
+      }
+    });
+
+    await getCurrentPosition();
+    now.mockReturnValue(31_001);
+
+    await expect(getPermissionDetails()).resolves.toMatchObject({
+      status: "undetermined",
+      scope: "none",
+      canAskAgain: null
+    });
+  });
+
+  it("discards Web permission evidence after a system clock rollback", async () => {
+    const now = vi.spyOn(Date, "now").mockReturnValue(1_000);
+    setNavigator({
+      geolocation: {
+        getCurrentPosition: vi.fn((success) => success(createPosition())),
+        watchPosition: vi.fn(),
+        clearWatch: vi.fn()
+      }
+    });
+
+    await getCurrentPosition();
+    now.mockReturnValue(999);
+    await expect(getPermissionDetails()).resolves.toMatchObject({
+      status: "undetermined"
+    });
+
+    now.mockReturnValue(1_001);
+    await expect(getPermissionDetails()).resolves.toMatchObject({
+      status: "undetermined"
+    });
+  });
+
+  it("does not resurrect evidence after the Permissions API overrides it", async () => {
+    const query = vi.fn().mockResolvedValue({ state: "denied" });
+    setNavigator({
+      geolocation: {
+        getCurrentPosition: vi.fn((success) => success(createPosition())),
+        watchPosition: vi.fn(),
+        clearWatch: vi.fn()
+      },
+      permissions: { query }
+    });
+
+    await getCurrentPosition();
+    await expect(getPermissionDetails()).resolves.toMatchObject({
+      status: "denied"
+    });
+
+    query.mockResolvedValue({ state: "prompt" });
+    await expect(getPermissionDetails()).resolves.toMatchObject({
+      status: "undetermined",
+      canAskAgain: true
     });
   });
 

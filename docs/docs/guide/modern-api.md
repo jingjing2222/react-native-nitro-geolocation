@@ -157,11 +157,15 @@ interface PermissionDetails {
 - Android exposes the same denied state before the first request and after
   permanent denial through this read-only API. In that ambiguous state,
   `canAskAgain` is `null` and `settingsGuidance` is
-  `requestPermissionOrReviewSettings`.
+  `requestPermissionOrReviewSettings`. After a normal denial, Android's
+  permission-rationale signal makes the state known requestable, so
+  `canAskAgain` is `true` and guidance is `requestPermission`.
 - iOS returns `requestPermission` for `undetermined`, `reviewSettings` for
   `denied`, and `managedRestriction` for `restricted`.
-- Web uses the Permissions API when available. Without it, foreground prompt
-  capability is unknown; without `navigator.geolocation`, guidance is
+- Web uses the Permissions API when available. Without it, a successful
+  position/watch callback or permission-denied error is used as bounded
+  evidence for at most 30 seconds; otherwise foreground prompt capability is
+  unknown. Without `navigator.geolocation`, guidance is
   `useSupportedEnvironment`.
 
 

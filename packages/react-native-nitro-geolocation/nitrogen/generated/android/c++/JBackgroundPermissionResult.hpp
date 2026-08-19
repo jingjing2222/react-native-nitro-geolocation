@@ -47,12 +47,15 @@ namespace margelo::nitro::nitrogeolocation {
       jni::local_ref<jni::JBoolean> canRequestBackgroundInline = this->getFieldValue(fieldCanRequestBackgroundInline);
       static const auto fieldNeedsSettingsRedirect = clazz->getField<jni::JBoolean>("needsSettingsRedirect");
       jni::local_ref<jni::JBoolean> needsSettingsRedirect = this->getFieldValue(fieldNeedsSettingsRedirect);
+      static const auto fieldCanAskAgain = clazz->getField<jni::JBoolean>("canAskAgain");
+      jni::local_ref<jni::JBoolean> canAskAgain = this->getFieldValue(fieldCanAskAgain);
       return BackgroundPermissionResult(
         foreground->toCpp(),
         background->toCpp(),
         accuracyAuthorization != nullptr ? std::make_optional(accuracyAuthorization->toCpp()) : std::nullopt,
         canRequestBackgroundInline != nullptr ? std::make_optional(static_cast<bool>(canRequestBackgroundInline->value())) : std::nullopt,
-        needsSettingsRedirect != nullptr ? std::make_optional(static_cast<bool>(needsSettingsRedirect->value())) : std::nullopt
+        needsSettingsRedirect != nullptr ? std::make_optional(static_cast<bool>(needsSettingsRedirect->value())) : std::nullopt,
+        canAskAgain != nullptr ? std::make_optional(static_cast<bool>(canAskAgain->value())) : std::nullopt
       );
     }
 
@@ -62,7 +65,7 @@ namespace margelo::nitro::nitrogeolocation {
      */
     [[maybe_unused]]
     static jni::local_ref<JBackgroundPermissionResult::javaobject> fromCpp(const BackgroundPermissionResult& value) {
-      using JSignature = JBackgroundPermissionResult(jni::alias_ref<JPermissionStatus>, jni::alias_ref<JBackgroundPermissionStatus>, jni::alias_ref<JAccuracyAuthorization>, jni::alias_ref<jni::JBoolean>, jni::alias_ref<jni::JBoolean>);
+      using JSignature = JBackgroundPermissionResult(jni::alias_ref<JPermissionStatus>, jni::alias_ref<JBackgroundPermissionStatus>, jni::alias_ref<JAccuracyAuthorization>, jni::alias_ref<jni::JBoolean>, jni::alias_ref<jni::JBoolean>, jni::alias_ref<jni::JBoolean>);
       static const auto clazz = javaClassStatic();
       static const auto create = clazz->getStaticMethod<JSignature>("fromCpp");
       return create(
@@ -71,7 +74,8 @@ namespace margelo::nitro::nitrogeolocation {
         JBackgroundPermissionStatus::fromCpp(value.background),
         value.accuracyAuthorization.has_value() ? JAccuracyAuthorization::fromCpp(value.accuracyAuthorization.value()) : nullptr,
         value.canRequestBackgroundInline.has_value() ? jni::JBoolean::valueOf(value.canRequestBackgroundInline.value()) : nullptr,
-        value.needsSettingsRedirect.has_value() ? jni::JBoolean::valueOf(value.needsSettingsRedirect.value()) : nullptr
+        value.needsSettingsRedirect.has_value() ? jni::JBoolean::valueOf(value.needsSettingsRedirect.value()) : nullptr,
+        value.canAskAgain.has_value() ? jni::JBoolean::valueOf(value.canAskAgain.value()) : nullptr
       );
     }
   };

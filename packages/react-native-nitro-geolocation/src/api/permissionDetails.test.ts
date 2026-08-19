@@ -138,6 +138,24 @@ describe("buildPermissionDetails", () => {
     });
   });
 
+  it("reports a normal Android denial as requestable when rationale is available", () => {
+    expect(
+      buildPermissionDetails({
+        platform: "android",
+        foreground: "denied",
+        background: "denied",
+        accuracy: "unknown",
+        canAskAgain: true
+      })
+    ).toEqual({
+      status: "denied",
+      scope: "none",
+      accuracy: "unknown",
+      canAskAgain: true,
+      settingsGuidance: "requestPermission"
+    });
+  });
+
   it("reports an unsupported Web environment without implying a prompt", () => {
     expect(
       buildPermissionDetails({

@@ -94,34 +94,9 @@ class NitroBackgroundLocationController private constructor(
     private val lifecycleLock = Any()
     private val storageLock = Any()
 
-    @Volatile
-    private var runGeneration = prefs.getLong(PREF_RUN_GENERATION, 0L)
-    @Volatile
-    private var configRevision = 0L
-    private val syncCoordinator = NitroBackgroundSyncCoordinator(
-        store,
-        httpSync,
-        syncGate,
-        lifecycleLock,
-        storageLock,
-        { runGeneration },
-        { configRevision },
-        { requireConfig().sync },
-        { generation -> configForGeneration(generation)?.sync },
-        ::isActiveLocationRegistration
-    )
-    private val errorState = NitroBackgroundErrorState(prefs)
-    private val eventDispatcher = NitroBackgroundEventDispatcher(
-        appContext,
-        eventHub,
-        { runGeneration },
-        registrations::currentServiceGeneration
-    )
-    private val registrationDispatcher = NitroBackgroundRegistrationDispatcher(
-        registrations,
-        eventDispatcher,
-        ::activeServiceGeneration
-    )
+    fun checkBackgroundPermission(reactContext: ReactApplicationContext): BackgroundPermissionResult {
+        return permissions.checkBackgroundPermission(reactContext.currentActivity)
+    }
 
     fun checkBackgroundPermission(): BackgroundPermissionResult = permissions.checkBackgroundPermission()
 

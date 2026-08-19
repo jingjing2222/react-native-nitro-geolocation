@@ -43,7 +43,7 @@ export const scenarios: Scenario[] = [
     id: "permission-details-after-request",
     title: "getPermissionDetails after request",
     detail:
-      "Reads granted browser scope, or honest unknown state without Permissions API.",
+      "Reads a recent granted browser observation without prompting again.",
     status: "idle"
   },
   {
@@ -130,8 +130,7 @@ export const scenarios: Scenario[] = [
   {
     id: "permission-details-after-denial",
     title: "getPermissionDetails after denial",
-    detail:
-      "Reads denied state, or honest unknown state without Permissions API.",
+    detail: "Reads a recent browser denial and settings guidance.",
     status: "idle"
   },
   {

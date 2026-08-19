@@ -14,6 +14,7 @@ export async function getPermissionDetails(): Promise<PermissionDetails> {
     platform: Platform.OS === "ios" ? "ios" : "android",
     foreground: permission.foreground,
     background: permission.background,
-    accuracy: permission.accuracyAuthorization ?? "unknown"
+    accuracy: permission.accuracyAuthorization ?? "unknown",
+    canAskAgain: permission.canAskAgain
   });
 }

@@ -58,6 +58,19 @@ appId: nitrogeolocation.example
     commands:
       - assertVisible:
           text: ".*status=undetermined.*canAskAgain=true.*requestPermission.*unchanged=true.*"
+- runFlow:
+    when:
+      platform: Android
+    commands:
+      - tapOn:
+          id: "e2e-action-permission-details-run-retryable-denial-button"
+      - tapOn:
+          text: "Don’t allow|Don't allow|허용 안함|허용 안 함|허용하지 않음"
+      - extendedWaitUntil:
+          visible: "Retryable denial: passed"
+          timeout: 20000
+      - assertVisible:
+          text: ".*status=denied.*canAskAgain=true.*settings=requestPermission.*"
 
 - launchApp:
     clearState: true

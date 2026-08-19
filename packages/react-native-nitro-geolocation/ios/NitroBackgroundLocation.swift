@@ -803,4 +803,143 @@ class NitroBackgroundLocation: HybridNitroBackgroundLocationSpec {
         defaults.set(backgroundOptionsDictionary(options), forKey: optionsKey)
     }
 
+    private func scheduleSyncIfNeeded() {
+        guard let sync = options?.sync else { return }
+        let threshold = positiveFiniteInt(sync.syncThreshold, defaultValue: 1)
+        let unsyncedCount = storedLocations.filter { !$0.synced }.count
+        guard unsyncedCount >= threshold else { return }
+
+        let now = Date().timeIntervalSince1970 * 1000
+        let interval = sync.syncInterval ?? 0
+        guard interval <= 0 || now - lastSyncAt >= interval else { return }
+        lastSyncAt = now
+
+        syncQueue.async {
+            let result = self.performSyncStoredLocations()
+            let event = BackgroundEventEnvelope(
+                location: nil,
+                geofence: nil,
+                activity: nil,
+                providerStatus: nil,
+                result: result,
+                error: nil,
+                id: UUID().uuidString,
+                type: .httpsync,
+                timestamp: Date().timeIntervalSince1970 * 1000,
+                deliveredToJS: false
+            )
+            self.appendStoredEvent(
+                StoredBackgroundEventEnvelope(
+                    event: event,
+                    createdAt: Date().timeIntervalSince1970 * 1000,
+                    id: event.id,
+                    type: event.type,
+                    timestamp: event.timestamp,
+                    deliveredToJS: false
+                )
+            )
+            self.persistStore()
+            self.eventListeners.values.forEach { $0(event) }
+        }
+    }
+
+    private func performSyncStoredLocations() -> BackgroundHttpSyncResult {
+        let allUnsynced = storedLocations.filter { !$0.synced }
+        let unsynced = allUnsynced.prefix(safePrefixCount(
+            options?.sync?.batchSize,
+            defaultValue: 50,
+            upperBound: allUnsynced.count
+        ))
+        let ids = unsynced.map(\.id)
+        if ids.isEmpty {
+            return BackgroundHttpSyncResult(
+                success: true,
+                statusCode: nil,
+                syncedLocationIds: [],
+                failedLocationIds: [],
+                error: nil
+            )
+        }
+        guard let sync = options?.sync else {
+            return BackgroundHttpSyncResult(
+                success: true,
+                statusCode: nil,
+                syncedLocationIds: [],
+                failedLocationIds: [],
+                error: nil
+            )
+        }
+        let result = httpSync.uploadWithRetry(locations: Array(unsynced), sync: sync)
+        if !result.success && result.syncedLocationIds.isEmpty {
+            return result
+        }
+        let syncedIds = result.syncedLocationIds
+        storedLocations = storedLocations.map { location in
+            syncedIds.contains(location.id)
+                ? StoredBackgroundLocation(
+                    id: location.id,
+                    deliveredToJS: location.deliveredToJS,
+                    synced: true,
+                    createdAt: location.createdAt,
+                    source: location.source,
+                    isFromBackground: location.isFromBackground,
+                    provider: location.provider,
+                    mocked: location.mocked,
+                    recordedAt: location.recordedAt,
+                    activity: location.activity,
+                    battery: location.battery,
+                    coords: location.coords,
+                    timestamp: location.timestamp
+                )
+                : location
+        }
+        if options?.sync?.autoClear == true {
+            storedLocations.removeAll { syncedIds.contains($0.id) }
+        }
+        persistStore()
+        return result
+    }
+
+    private func permissionResult() -> BackgroundPermissionResult {
+        ensureManager()
+        let status = CLLocationManager.authorizationStatus()
+        let foreground: PermissionStatus
+        let background: BackgroundPermissionStatus
+        switch status {
+        case .authorizedAlways:
+            foreground = .granted
+            background = .granted
+        case .authorizedWhenInUse:
+            foreground = .granted
+            background = .denied
+        case .denied:
+            foreground = .denied
+            background = .denied
+        case .restricted:
+            foreground = .restricted
+            background = .restricted
+        case .notDetermined:
+            foreground = .undetermined
+            background = .undetermined
+        @unknown default:
+            foreground = .undetermined
+            background = .undetermined
+        }
+
+        let accuracy: AccuracyAuthorization
+        if #available(iOS 14.0, *) {
+            accuracy = manager?.accuracyAuthorization == .fullAccuracy ? .full : .reduced
+        } else {
+            accuracy = .unknown
+        }
+
+        return BackgroundPermissionResult(
+            foreground: foreground,
+            background: background,
+            accuracyAuthorization: accuracy,
+            canRequestBackgroundInline: true,
+            needsSettingsRedirect: background != .granted,
+            canAskAgain: foreground == .undetermined
+        )
+    }
 }

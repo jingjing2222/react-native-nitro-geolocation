@@ -16,7 +16,7 @@ class NitroBackgroundLocation(
     }
 
     override fun checkBackgroundPermission(): Promise<BackgroundPermissionResult> {
-        return Promise.async { controller.checkBackgroundPermission() }
+        return Promise.async { controller.checkBackgroundPermission(reactContext) }
     }
 
     override fun requestBackgroundPermission(): Promise<BackgroundPermissionResult> {

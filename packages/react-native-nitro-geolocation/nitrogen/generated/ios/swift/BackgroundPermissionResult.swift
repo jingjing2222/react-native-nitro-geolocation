@@ -18,7 +18,7 @@ public extension BackgroundPermissionResult {
   /**
    * Create a new instance of `BackgroundPermissionResult`.
    */
-  init(foreground: PermissionStatus, background: BackgroundPermissionStatus, accuracyAuthorization: AccuracyAuthorization?, canRequestBackgroundInline: Bool?, needsSettingsRedirect: Bool?) {
+  init(foreground: PermissionStatus, background: BackgroundPermissionStatus, accuracyAuthorization: AccuracyAuthorization?, canRequestBackgroundInline: Bool?, needsSettingsRedirect: Bool?, canAskAgain: Bool?) {
     self.init(foreground, background, { () -> bridge.std__optional_AccuracyAuthorization_ in
       if let __unwrappedValue = accuracyAuthorization {
         return bridge.create_std__optional_AccuracyAuthorization_(__unwrappedValue)
@@ -37,6 +37,12 @@ public extension BackgroundPermissionResult {
       } else {
         return .init()
       }
+    }(), { () -> bridge.std__optional_bool_ in
+      if let __unwrappedValue = canAskAgain {
+        return bridge.create_std__optional_bool_(__unwrappedValue)
+      } else {
+        return .init()
+      }
     }())
   }
 
@@ -44,17 +50,17 @@ public extension BackgroundPermissionResult {
   var foreground: PermissionStatus {
     return self.__foreground
   }
-  
+
   @inline(__always)
   var background: BackgroundPermissionStatus {
     return self.__background
   }
-  
+
   @inline(__always)
   var accuracyAuthorization: AccuracyAuthorization? {
     return self.__accuracyAuthorization.value
   }
-  
+
   @inline(__always)
   var canRequestBackgroundInline: Bool? {
     return { () -> Bool? in
@@ -66,12 +72,24 @@ public extension BackgroundPermissionResult {
       }
     }()
   }
-  
+
   @inline(__always)
   var needsSettingsRedirect: Bool? {
     return { () -> Bool? in
       if bridge.has_value_std__optional_bool_(self.__needsSettingsRedirect) {
         let __unwrapped = bridge.get_std__optional_bool_(self.__needsSettingsRedirect)
+        return __unwrapped
+      } else {
+        return nil
+      }
+    }()
+  }
+
+  @inline(__always)
+  var canAskAgain: Bool? {
+    return { () -> Bool? in
+      if bridge.has_value_std__optional_bool_(self.__canAskAgain) {
+        let __unwrapped = bridge.get_std__optional_bool_(self.__canAskAgain)
         return __unwrapped
       } else {
         return nil

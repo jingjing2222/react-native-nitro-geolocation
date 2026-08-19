@@ -9,6 +9,7 @@ import type {
   Heading,
   HeadingOptions
 } from "../publicTypes";
+import { LocationErrorCode } from "../utils/errors";
 import {
   createUnsupportedError,
   distanceMeters,
@@ -17,6 +18,10 @@ import {
   normalizePosition,
   toPositionOptions
 } from "./browser";
+import {
+  clearWebPermissionDetailsEvidence,
+  rememberWebPermissionDetailsEvidence
+} from "./permissionDetailsEvidence";
 
 const activeWatches = new Map<string, number>();
 let nextWatchId = 1;
@@ -40,6 +45,7 @@ export function watchPosition(
   const token = `web-${nextWatchId++}`;
 
   if (!geolocation) {
+    clearWebPermissionDetailsEvidence();
     error?.(createUnsupportedError());
     return token;
   }
@@ -48,14 +54,8 @@ export function watchPosition(
   const requestedAt = Date.now();
   const watchId = geolocation.watchPosition(
     (position) => {
-      const normalizedPosition = decoratePositionWithMetadata(
-        normalizePosition(position),
-        {
-          source: "watchPosition",
-          maximumAge: options?.maximumAge ?? 0,
-          requestedAt
-        }
-      );
+      rememberWebPermissionDetailsEvidence("granted");
+      const normalizedPosition = normalizePosition(position);
       const filter = options?.distanceFilter ?? 0;
       if (
         filter <= 0 ||
@@ -66,7 +66,13 @@ export function watchPosition(
         success(lastEmitted);
       }
     },
-    (browserError) => error?.(mapBrowserError(browserError)),
+    (browserError) => {
+      const mappedError = mapBrowserError(browserError);
+      if (mappedError.code === LocationErrorCode.PERMISSION_DENIED) {
+        rememberWebPermissionDetailsEvidence("denied");
+      }
+      error?.(mappedError);
+    },
     toPositionOptions(options)
   );
 

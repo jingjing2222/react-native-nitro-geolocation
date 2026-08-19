@@ -33,6 +33,11 @@ import {
   rejectUnsupported,
   toPositionOptions
 } from "./browser";
+import {
+  clearWebPermissionDetailsEvidence,
+  readRecentWebPermissionDetailsEvidence,
+  rememberWebPermissionDetailsEvidence
+} from "./permissionDetailsEvidence";
 export { stopObserving, unwatch, watchHeading, watchPosition } from "./watch";
 export {
   useWatchPosition,
@@ -62,6 +67,7 @@ export async function checkPermission(): Promise<PermissionStatus> {
 export async function getPermissionDetails(): Promise<PermissionDetails> {
   const browserNavigator = getNavigator();
   if (!browserNavigator?.geolocation) {
+    clearWebPermissionDetailsEvidence();
     return buildPermissionDetails({
       platform: "web",
       foreground: "denied",
@@ -76,23 +82,35 @@ export async function getPermissionDetails(): Promise<PermissionDetails> {
     const permission = await browserNavigator.permissions?.query({
       name: "geolocation"
     });
-    const status = permission
-      ? mapPermissionState(permission.state)
-      : "undetermined";
+    if (permission) {
+      clearWebPermissionDetailsEvidence();
+      const status = mapPermissionState(permission.state);
+      return buildPermissionDetails({
+        platform: "web",
+        foreground: status,
+        background: "unsupported",
+        accuracy: "unknown",
+        canAskAgain: status === "undetermined"
+      });
+    }
+
+    const observed = readRecentWebPermissionDetailsEvidence();
+    const status = observed ?? "undetermined";
     return buildPermissionDetails({
       platform: "web",
       foreground: status,
       background: "unsupported",
       accuracy: "unknown",
-      canAskAgain: permission ? status === "undetermined" : null
+      canAskAgain: observed ? false : null
     });
   } catch {
+    const observed = readRecentWebPermissionDetailsEvidence();
     return buildPermissionDetails({
       platform: "web",
-      foreground: "undetermined",
+      foreground: observed ?? "undetermined",
       background: "unsupported",
       accuracy: "unknown",
-      canAskAgain: null
+      canAskAgain: observed ? false : null
     });
   }
 }
@@ -179,17 +197,17 @@ export function getCurrentPosition(
   const requestedAt = Date.now();
   return new Promise((resolve, reject) => {
     geolocation.getCurrentPosition(
-      (position) =>
-        resolve(
-          rememberPosition(
-            decoratePositionWithMetadata(normalizePosition(position), {
-              source: "currentPosition",
-              maximumAge: options?.maximumAge ?? 0,
-              requestedAt
-            })
-          )
-        ),
-      (error) => reject(mapBrowserError(error)),
+      (position) => {
+        rememberWebPermissionDetailsEvidence("granted");
+        resolve(rememberPosition(normalizePosition(position)));
+      },
+      (error) => {
+        const mappedError = mapBrowserError(error);
+        if (mappedError.code === LocationErrorCode.PERMISSION_DENIED) {
+          rememberWebPermissionDetailsEvidence("denied");
+        }
+        reject(mappedError);
+      },
       toPositionOptions(options)
     );
   });

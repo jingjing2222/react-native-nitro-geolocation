@@ -2,7 +2,8 @@ import React from "react";
 import { Platform } from "react-native";
 import {
   checkPermission,
-  getPermissionDetails
+  getPermissionDetails,
+  requestPermission
 } from "react-native-nitro-geolocation";
 import type { PermissionDetails } from "react-native-nitro-geolocation";
 import {
@@ -18,6 +19,7 @@ import {
 const PREFIX = "permission-details";
 const initialResults = createScenarioResults([
   "initial",
+  "retryableDenial",
   "granted",
   "coarse",
   "denied"
@@ -102,6 +104,19 @@ function assertDenied(details: PermissionDetails) {
   }
 }
 
+function assertRetryableDenial(details: PermissionDetails) {
+  if (
+    details.status !== "denied" ||
+    details.scope !== "none" ||
+    details.canAskAgain !== true ||
+    details.settingsGuidance !== "requestPermission"
+  ) {
+    throw new Error(
+      `Unexpected retryable denial: ${formatDetails(details, true)}`
+    );
+  }
+}
+
 export default function PermissionDetailsScreen() {
   const { results, setResult } = useScenarioResults(initialResults);
 
@@ -138,6 +153,39 @@ export default function PermissionDetailsScreen() {
     }
   };
 
+  const runRetryableDenial = async () => {
+    setResult("retryableDenial", {
+      status: "running",
+      message: "Requesting foreground permission once, then reading its state"
+    });
+
+    try {
+      const requested = await requestPermission();
+      if (requested !== "denied") {
+        throw new Error(`Expected denial, received ${requested}`);
+      }
+      const before = await checkPermission();
+      const details = await getPermissionDetails();
+      const after = await checkPermission();
+      const unchanged = before === after && details.status === after;
+      if (!unchanged) {
+        throw new Error(
+          `Read changed retryable denial: before=${before}; after=${after}`
+        );
+      }
+      assertRetryableDenial(details);
+      setResult("retryableDenial", {
+        status: "passed",
+        message: formatDetails(details, unchanged)
+      });
+    } catch (error) {
+      setResult("retryableDenial", {
+        status: "failed",
+        message: getDisplayErrorMessage(error)
+      });
+    }
+  };
+
   return (
     <ScenarioScreen
       prefix={PREFIX}
@@ -158,7 +206,27 @@ export default function PermissionDetailsScreen() {
         />
       </ScenarioSection>
 
-      <ScenarioSection index={2} title="Granted Scope" divided>
+      {Platform.OS === "android" ? (
+        <ScenarioSection index={2} title="Retryable Denial" divided>
+          <ScenarioButton
+            title="Request Once"
+            onPress={runRetryableDenial}
+            testID={`${PREFIX}-run-retryable-denial-button`}
+          />
+          <ResultBlock
+            prefix={PREFIX}
+            id="retryableDenial"
+            label="Retryable denial"
+            result={results.retryableDenial}
+          />
+        </ScenarioSection>
+      ) : null}
+
+      <ScenarioSection
+        index={Platform.OS === "android" ? 3 : 2}
+        title="Granted Scope"
+        divided
+      >
         <ScenarioButton
           title="Read Granted Details"
           onPress={() => runScenario("granted", assertGranted)}
@@ -173,7 +241,7 @@ export default function PermissionDetailsScreen() {
       </ScenarioSection>
 
       {Platform.OS === "android" ? (
-        <ScenarioSection index={3} title="Approximate Scope" divided>
+        <ScenarioSection index={4} title="Approximate Scope" divided>
           <ScenarioButton
             title="Read Coarse Details"
             onPress={() => runScenario("coarse", assertCoarse)}
@@ -189,7 +257,7 @@ export default function PermissionDetailsScreen() {
       ) : null}
 
       <ScenarioSection
-        index={Platform.OS === "android" ? 4 : 3}
+        index={Platform.OS === "android" ? 5 : 3}
         title="Denied State"
         divided
       >
