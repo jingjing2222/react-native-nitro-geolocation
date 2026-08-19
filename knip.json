@@ -95,6 +95,7 @@
         "index.js",
         "src/App.tsx",
         "src/backgroundLongRunTask.ts",
+        "src/type-contracts/*.ts",
         ".maestro/scripts/wait-15s.js"
       ],
       "project": ["src/**/*.{ts,tsx}", "index.js", ".maestro/scripts/*.js"],
