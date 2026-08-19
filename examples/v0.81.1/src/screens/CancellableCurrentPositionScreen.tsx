@@ -1,6 +1,7 @@
 import React from "react";
 import {
   getCurrentPosition,
+  getLastKnownPositionAsync,
   unwatch,
   watchPosition
 } from "react-native-nitro-geolocation";
@@ -20,12 +21,33 @@ import {
 } from "./scenario";
 
 const PREFIX = "cancellable-current-position";
+const CONCURRENCY_FIXTURE = {
+  latitude: 37.6123,
+  longitude: 127.0456
+};
+const COORDINATE_TOLERANCE = 0.0001;
 
 const initialResults = createScenarioResults([
   "preAborted",
+  "cacheIsolation",
   "isolation",
   "watchIsolation"
 ] as const);
+
+function isConcurrencyFixture(position: GeolocationResponse) {
+  return (
+    Math.abs(position.coords.latitude - CONCURRENCY_FIXTURE.latitude) <=
+      COORDINATE_TOLERANCE &&
+    Math.abs(position.coords.longitude - CONCURRENCY_FIXTURE.longitude) <=
+      COORDINATE_TOLERANCE
+  );
+}
+
+function formatCoordinates(position: GeolocationResponse) {
+  return `${position.coords.latitude.toFixed(
+    6
+  )}, ${position.coords.longitude.toFixed(6)}`;
+}
 
 function abortWithReason(controller: AbortController, reason: unknown) {
   (controller.abort as (reason?: unknown) => void)(reason);
@@ -156,6 +178,81 @@ export default function CancellableCurrentPositionScreen() {
     }
   };
 
+  const runCacheIsolationScenario = async () => {
+    setResult("cacheIsolation", {
+      status: "running",
+      message: "Starting a watch and an immediate cache read"
+    });
+
+    try {
+      const watchedPosition = await runWithNativeGeolocation(
+        () =>
+          new Promise<GeolocationResponse>((resolve, reject) => {
+            let token = "";
+            let didFinish = false;
+            let cacheReadFinished = false;
+            const timeout = setTimeout(() => {
+              finish(() =>
+                reject(
+                  new Error(
+                    "Watch did not deliver after the concurrent cache read."
+                  )
+                )
+              );
+            }, 30000);
+            const finish = (callback: () => void) => {
+              if (didFinish) return;
+              didFinish = true;
+              clearTimeout(timeout);
+              if (token) unwatch(token);
+              callback();
+            };
+
+            token = watchPosition(
+              (position) => {
+                if (!cacheReadFinished || !isConcurrencyFixture(position)) {
+                  return;
+                }
+                finish(() => resolve(position));
+              },
+              (error) => finish(() => reject(error)),
+              {
+                accuracy: { android: "high", ios: "best" },
+                maximumAge: 0,
+                timeout: 30000
+              }
+            );
+
+            getLastKnownPositionAsync({ maximumAge: 0 }).then(
+              () => {
+                cacheReadFinished = true;
+                setResult("cacheIsolation", {
+                  status: "running",
+                  message:
+                    "Cache read completed; move location for the active watch."
+                });
+              },
+              (error) => finish(() => reject(error))
+            );
+          })
+      );
+
+      setResult("cacheIsolation", {
+        status: "passed",
+        message: `Cache read kept watch active at ${formatCoordinates(
+          watchedPosition
+        )}.`
+      });
+    } catch (error) {
+      setResult("cacheIsolation", {
+        status: "failed",
+        message: getDisplayErrorMessage(error)
+      });
+    } finally {
+      await refreshPermission();
+    }
+  };
+
   const runWatchIsolationScenario = async () => {
     setResult("watchIsolation", {
       status: "running",
@@ -176,7 +273,8 @@ export default function CancellableCurrentPositionScreen() {
           new Promise<GeolocationResponse>((resolve, reject) => {
             let token = "";
             let didFinish = false;
-            let cancelledAt = Number.POSITIVE_INFINITY;
+            let oneShotStarted = false;
+            let cancellationConfirmed = false;
             const timeout = setTimeout(() => {
               finish(() =>
                 reject(
@@ -201,50 +299,56 @@ export default function CancellableCurrentPositionScreen() {
 
             token = watchPosition(
               (position) => {
-                if (position.timestamp < cancelledAt) return;
+                if (!oneShotStarted) {
+                  oneShotStarted = true;
+                  const cancelledRequest = getCurrentPosition({
+                    ...requestOptions,
+                    signal: controller.signal
+                  });
+                  abortWithReason(controller, cancellationReason);
+
+                  cancelledRequest.then(
+                    () =>
+                      finish(() =>
+                        reject(
+                          new Error(
+                            "Cancelled one-shot request unexpectedly resolved."
+                          )
+                        )
+                      ),
+                    (error) => {
+                      try {
+                        assertAbortOutcome(
+                          error,
+                          controller.signal,
+                          cancellationReason
+                        );
+                        cancellationConfirmed = true;
+                        setResult("watchIsolation", {
+                          status: "running",
+                          message:
+                            "One-shot cancelled; move location for the active watch."
+                        });
+                      } catch (assertionError) {
+                        finish(() => reject(assertionError));
+                      }
+                    }
+                  );
+                  return;
+                }
+
+                if (!cancellationConfirmed || !isConcurrencyFixture(position)) {
+                  return;
+                }
                 finish(() => resolve(position));
               },
               (error) => finish(() => reject(error)),
               requestOptions
             );
-
-            const cancelledRequest = getCurrentPosition({
-              ...requestOptions,
-              signal: controller.signal
-            });
-            abortWithReason(controller, cancellationReason);
-
-            cancelledRequest.then(
-              () =>
-                finish(() =>
-                  reject(
-                    new Error(
-                      "Cancelled one-shot request unexpectedly resolved."
-                    )
-                  )
-                ),
-              (error) => {
-                try {
-                  assertAbortOutcome(
-                    error,
-                    controller.signal,
-                    cancellationReason
-                  );
-                  cancelledAt = Date.now();
-                  setResult("watchIsolation", {
-                    status: "running",
-                    message:
-                      "One-shot cancelled; move location for the active watch."
-                  });
-                } catch (assertionError) {
-                  finish(() => reject(assertionError));
-                }
-              }
-            );
           })
       );
 
-      const coordinates = assertFixtureCoordinates(watchedPosition);
+      const coordinates = formatCoordinates(watchedPosition);
       setResult("watchIsolation", {
         status: "passed",
         message: `One-shot cancellation kept watch active at ${coordinates}.`
@@ -284,7 +388,22 @@ export default function CancellableCurrentPositionScreen() {
         />
       </ScenarioSection>
 
-      <ScenarioSection index={3} title="Concurrent Requests" divided>
+      <ScenarioSection index={3} title="Concurrent Cache Read" divided>
+        <ScenarioButton
+          title="Read Cache While Starting Watch"
+          onPress={runCacheIsolationScenario}
+          color="#455A64"
+          testID={`${PREFIX}-run-cache-isolation-button`}
+        />
+        <ResultBlock
+          prefix={PREFIX}
+          id="cache-isolation"
+          label="Cache read isolation"
+          result={results.cacheIsolation}
+        />
+      </ScenarioSection>
+
+      <ScenarioSection index={4} title="Concurrent Requests" divided>
         <ScenarioButton
           title="Run Isolated Cancellation"
           onPress={runIsolationScenario}
@@ -299,7 +418,7 @@ export default function CancellableCurrentPositionScreen() {
         />
       </ScenarioSection>
 
-      <ScenarioSection index={4} title="Active Watch" divided>
+      <ScenarioSection index={5} title="Active Watch" divided>
         <ScenarioButton
           title="Cancel One-shot While Watching"
           onPress={runWatchIsolationScenario}

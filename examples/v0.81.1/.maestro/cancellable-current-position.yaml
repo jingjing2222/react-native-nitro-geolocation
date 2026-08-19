@@ -61,6 +61,29 @@ appId: nitrogeolocation.example
     text: ".*preserved the (exact reason|AbortError fallback).*"
 
 - setLocation:
+    latitude: 37.5
+    longitude: 126.9
+
+- tapOn:
+    id: "e2e-action-cancellable-current-position-run-cache-isolation-button"
+
+- extendedWaitUntil:
+    visible: "Cache read completed; move location for the active watch."
+    timeout: 10000
+
+- setLocation:
+    latitude: 37.6123
+    longitude: 127.0456
+
+- extendedWaitUntil:
+    visible: "Cache read isolation: passed"
+    timeout: 60000
+- assertVisible:
+    id: "cancellable-current-position-cache-isolation-result"
+- assertVisible:
+    text: ".*Cache read kept watch active at 37.612300, 127.045600.*"
+
+- setLocation:
     latitude: 37.5665
     longitude: 126.978
 
@@ -79,16 +102,20 @@ appId: nitrogeolocation.example
 - assertVisible:
     text: ".*cancelled first only.*survivor 37.566500, 126.978000.*"
 
+- setLocation:
+    latitude: 37.5
+    longitude: 126.9
+
 - tapOn:
     id: "e2e-action-cancellable-current-position-run-watch-isolation-button"
 
 - extendedWaitUntil:
-    visible: ".*(One-shot cancelled; move location for the active watch.|Watch isolation: passed).*"
-    timeout: 10000
+    visible: "One-shot cancelled; move location for the active watch."
+    timeout: 60000
 
 - setLocation:
-    latitude: 37.5665
-    longitude: 126.978
+    latitude: 37.6123
+    longitude: 127.0456
 
 - extendedWaitUntil:
     visible: "Watch isolation: passed"
@@ -96,4 +123,4 @@ appId: nitrogeolocation.example
 - assertVisible:
     id: "cancellable-current-position-watch-isolation-result"
 - assertVisible:
-    text: ".*One-shot cancellation kept watch active at 37.566500, 126.978000.*"
+    text: ".*One-shot cancellation kept watch active at 37.612300, 127.045600.*"

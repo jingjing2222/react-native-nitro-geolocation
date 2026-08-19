@@ -37,7 +37,9 @@ class NitroGeolocation: HybridNitroGeolocationSpec {
     // MARK: - Configuration
 
     func setConfiguration(config: GeolocationConfiguration) {
-        self.configuration = config
+        runLocationOperationOnMain {
+            self.configuration = config
+        }
     }
 
     // MARK: - Permission API
@@ -53,23 +55,18 @@ class NitroGeolocation: HybridNitroGeolocationSpec {
         success: @escaping (PermissionStatus) -> Void,
         error: ((LocationError) -> Void)?
     ) throws -> Void {
-        self.initializeLocationManagerIfNeeded()
+        runLocationOperationOnMain {
+            self.initializeLocationManagerIfNeeded()
 
-        let currentStatus = CLLocationManager.authorizationStatus()
+            let currentStatus = CLLocationManager.authorizationStatus()
+            if currentStatus != .notDetermined {
+                success(self.mapCLAuthorizationStatus(currentStatus))
+                return
+            }
 
-        // Already determined
-        if currentStatus != .notDetermined {
-            let status = self.mapCLAuthorizationStatus(currentStatus)
-            success(status)
-            return
+            self.pendingPermissionResolvers.append(success)
+            self.requestSystemPermission(for: self.determineAuthorizationLevel())
         }
-
-        // Queue resolver
-        self.pendingPermissionResolvers.append(success)
-
-        // Request permission
-        let authLevel = self.determineAuthorizationLevel()
-        self.requestSystemPermission(for: authLevel)
     }
 
     // MARK: - Provider/Settings API
@@ -151,9 +148,8 @@ class NitroGeolocation: HybridNitroGeolocationSpec {
             return
         }
 
-        initializeLocationManagerIfNeeded()
-
-        DispatchQueue.main.async {
+        runLocationOperationOnMain {
+            self.initializeLocationManagerIfNeeded()
             guard #available(iOS 14.0, *), let manager = self.locationManager else {
                 success(.unknown)
                 return
@@ -167,15 +163,17 @@ class NitroGeolocation: HybridNitroGeolocationSpec {
             manager.requestTemporaryFullAccuracyAuthorization(
                 withPurposeKey: trimmedPurposeKey
             ) { requestError in
-                if let requestError {
-                    error?(createLocationError(
-                        code: INTERNAL_ERROR,
-                        message: "Unable to request temporary full accuracy: \(requestError.localizedDescription)"
-                    ))
-                    return
-                }
+                self.runLocationOperationOnMain {
+                    if let requestError {
+                        error?(createLocationError(
+                            code: INTERNAL_ERROR,
+                            message: "Unable to request temporary full accuracy: \(requestError.localizedDescription)"
+                        ))
+                        return
+                    }
 
-                success(self.getCurrentAccuracyAuthorization())
+                    success(self.getCurrentAccuracyAuthorization())
+                }
             }
         }
     }
@@ -254,29 +252,28 @@ class NitroGeolocation: HybridNitroGeolocationSpec {
         options: LocationRequestOptions,
         error: ((LocationError) -> Void)?
     ) throws -> Void {
-        let status = CLLocationManager.authorizationStatus()
-        if status == .denied || status == .restricted {
-            let message = status == .restricted
-                ? "This application is not authorized to use location services"
-                : "User denied access to location services."
-            error?(createLocationError(
-                code: PERMISSION_DENIED,
-                message: message
-            ))
-            return
-        }
-
         let parsedOptions = ParsedOptions.parseLastKnown(from: options)
-        guard let cached = self.getBestCachedLocation(options: parsedOptions) else {
-            error?(createLocationError(
-                code: POSITION_UNAVAILABLE,
-                message: "No cached location available."
-            ))
-            return
-        }
+        runLocationOperationOnMain {
+            let status = CLLocationManager.authorizationStatus()
+            if status == .denied || status == .restricted {
+                let message = status == .restricted
+                    ? "This application is not authorized to use location services"
+                    : "User denied access to location services."
+                error?(createLocationError(code: PERMISSION_DENIED, message: message))
+                return
+            }
 
-        self.lastLocation = cached
-        success(self.locationToPosition(cached))
+            guard let cached = self.getBestCachedLocation(options: parsedOptions) else {
+                error?(createLocationError(
+                    code: POSITION_UNAVAILABLE,
+                    message: "No cached location available."
+                ))
+                return
+            }
+
+            self.lastLocation = cached
+            success(self.locationToPosition(cached))
+        }
     }
 
     // MARK: - Geocoding
@@ -382,30 +379,28 @@ class NitroGeolocation: HybridNitroGeolocationSpec {
         success: @escaping (Heading) -> Void,
         error: ((LocationError) -> Void)?
     ) throws -> Void {
-        guard validateHeadingAvailability(error: error) else { return }
+        runLocationOperationOnMain {
+            guard self.validateHeadingAvailability(error: error) else { return }
+            self.initializeLocationManagerIfNeeded()
 
-        initializeLocationManagerIfNeeded()
+            let id = UUID()
+            var request = HeadingRequest(
+                success: success,
+                error: { headingError in error?(headingError) },
+                timer: nil
+            )
+            let timer = DispatchSource.makeTimerSource(queue: .main)
+            timer.schedule(deadline: .now() + DEFAULT_HEADING_TIMEOUT_MS / 1000.0)
+            timer.setEventHandler { [weak self] in
+                self?.handleHeadingTimeout(requestId: id)
+            }
+            timer.resume()
+            request.timer = timer
 
-        let id = UUID()
-        var request = HeadingRequest(
-            success: success,
-            error: { headingError in
-                error?(headingError)
-            },
-            timer: nil
-        )
-
-        let timer = DispatchSource.makeTimerSource(queue: .main)
-        timer.schedule(deadline: .now() + DEFAULT_HEADING_TIMEOUT_MS / 1000.0)
-        timer.setEventHandler { [weak self] in
-            self?.handleHeadingTimeout(requestId: id)
+            self.pendingHeadingRequests[id] = request
+            self.updateHeadingConfiguration()
+            self.startHeadingMonitoring()
         }
-        timer.resume()
-        request.timer = timer
-
-        pendingHeadingRequests[id] = request
-        updateHeadingConfiguration()
-        startHeadingMonitoring()
     }
 
     func watchHeading(
@@ -424,10 +419,6 @@ class NitroGeolocation: HybridNitroGeolocationSpec {
             return token
         }
 
-        guard validateHeadingAvailability(error: error) else {
-            return token
-        }
-
         let subscription = HeadingSubscription(
             success: success,
             error: error,
@@ -435,11 +426,13 @@ class NitroGeolocation: HybridNitroGeolocationSpec {
             lastDeliveredHeading: nil
         )
 
-        headingSubscriptions[token] = subscription
-
-        initializeLocationManagerIfNeeded()
-        updateHeadingConfiguration()
-        startHeadingMonitoring()
+        runLocationOperationOnMain {
+            guard self.validateHeadingAvailability(error: error) else { return }
+            self.headingSubscriptions[token] = subscription
+            self.initializeLocationManagerIfNeeded()
+            self.updateHeadingConfiguration()
+            self.startHeadingMonitoring()
+        }
 
         return token
     }
@@ -452,13 +445,13 @@ class NitroGeolocation: HybridNitroGeolocationSpec {
             } else {
                 self.updateLocationManagerConfiguration()
             }
-        }
 
-        headingSubscriptions.removeValue(forKey: token)
-        if headingSubscriptions.isEmpty && pendingHeadingRequests.isEmpty {
-            stopHeadingMonitoring()
-        } else {
-            updateHeadingConfiguration()
+            self.headingSubscriptions.removeValue(forKey: token)
+            if self.headingSubscriptions.isEmpty && self.pendingHeadingRequests.isEmpty {
+                self.stopHeadingMonitoring()
+            } else {
+                self.updateHeadingConfiguration()
+            }
         }
     }
 
@@ -470,13 +463,13 @@ class NitroGeolocation: HybridNitroGeolocationSpec {
             } else {
                 self.updateLocationManagerConfiguration()
             }
-        }
 
-        headingSubscriptions.removeAll()
-        if pendingHeadingRequests.isEmpty {
-            stopHeadingMonitoring()
-        } else {
-            updateHeadingConfiguration()
+            self.headingSubscriptions.removeAll()
+            if self.pendingHeadingRequests.isEmpty {
+                self.stopHeadingMonitoring()
+            } else {
+                self.updateHeadingConfiguration()
+            }
         }
     }
 
@@ -506,19 +499,18 @@ class NitroGeolocation: HybridNitroGeolocationSpec {
         lastLocation = location
         let position = locationToPosition(location)
 
-        // 1. Resolve all pending getCurrentPosition requests
-        for (_, request) in pendingPositionRequests {
+        let positionRequests = Array(pendingPositionRequests.values)
+        pendingPositionRequests.removeAll()
+        for request in positionRequests {
             request.timer?.cancel()
             request.success(position)
         }
-        pendingPositionRequests.removeAll()
 
-        // 2. Notify all watch subscriptions (success)
-        for (_, subscription) in watchSubscriptions {
+        let subscriptions = Array(watchSubscriptions.values)
+        for subscription in subscriptions {
             subscription.success(position)
         }
 
-        // 3. Stop monitoring if no more subscriptions or pending requests
         if watchSubscriptions.isEmpty && pendingPositionRequests.isEmpty {
             stopMonitoring()
         } else {
@@ -552,15 +544,15 @@ class NitroGeolocation: HybridNitroGeolocationSpec {
             )
         }
 
-        // 1. Reject all pending getCurrentPosition requests
-        for (_, request) in pendingPositionRequests {
+        let positionRequests = Array(pendingPositionRequests.values)
+        pendingPositionRequests.removeAll()
+        for request in positionRequests {
             request.timer?.cancel()
             request.error(locationError)
         }
-        pendingPositionRequests.removeAll()
 
-        // 2. Notify all watch subscriptions (error)
-        for (_, subscription) in watchSubscriptions {
+        let subscriptions = Array(watchSubscriptions.values)
+        for subscription in subscriptions {
             subscription.error?(locationError)
         }
 
@@ -606,19 +598,24 @@ class NitroGeolocation: HybridNitroGeolocationSpec {
     // MARK: - Helper Functions
 
     internal func initializeLocationManagerIfNeeded() {
-        guard locationManager == nil else { return }
-
         if Thread.isMainThread {
-            locationManager = CLLocationManager()
-            locationManagerDelegate = LocationManagerDelegate(geolocation: self)
-            locationManager?.delegate = locationManagerDelegate
+            initializeLocationManagerOnMainIfNeeded()
         } else {
             DispatchQueue.main.sync {
-                locationManager = CLLocationManager()
-                locationManagerDelegate = LocationManagerDelegate(geolocation: self)
-                locationManager?.delegate = locationManagerDelegate
+                self.initializeLocationManagerOnMainIfNeeded()
             }
         }
+    }
+
+    private func initializeLocationManagerOnMainIfNeeded() {
+        dispatchPrecondition(condition: .onQueue(.main))
+        guard locationManager == nil else { return }
+
+        let manager = CLLocationManager()
+        let delegate = LocationManagerDelegate(geolocation: self)
+        manager.delegate = delegate
+        locationManagerDelegate = delegate
+        locationManager = manager
     }
 
     private func validateHeadingAvailability(
@@ -714,16 +711,18 @@ class NitroGeolocation: HybridNitroGeolocationSpec {
             return
         }
 
-        for (_, request) in pendingHeadingRequests {
+        let headingRequests = Array(pendingHeadingRequests.values)
+        pendingHeadingRequests.removeAll()
+        for request in headingRequests {
             request.timer?.cancel()
             request.error(locationError)
         }
-        pendingHeadingRequests.removeAll()
 
-        for (_, subscription) in headingSubscriptions {
+        let subscriptions = Array(headingSubscriptions.values)
+        headingSubscriptions.removeAll()
+        for subscription in subscriptions {
             subscription.error?(locationError)
         }
-        headingSubscriptions.removeAll()
 
         stopHeadingMonitoring()
     }
