@@ -12,8 +12,9 @@ iOS. It is optional: CocoaPods remains the supported iOS installation path for
 
 Do not run `npx react-native spm` in an app that installs this package yet.
 The React Native 0.87 SwiftPM autolinker requires every native dependency to
-ship a compatible `Package.swift`. The required
-`react-native-nitro-modules` peer dependency does not currently ship one.
+resolve through a compatible `Package.swift`, either shipped by the library or
+generated from a supported podspec. The required `react-native-nitro-modules`
+peer dependency does not currently ship one.
 
 This package and Nitro Modules also contain a mixed Swift, Objective-C++, and
 C++ target with Swift/C++ interop. React Native's generated SwiftPM scaffold
@@ -48,7 +49,8 @@ the package's JavaScript API.
 Do not:
 
 - disable iOS autolinking for `react-native-nitro-modules`;
-- add an empty or generated `Package.swift` to `node_modules`;
+- add an empty manifest or use a generated scaffold for these mixed-language
+  Nitro targets in `node_modules`;
 - split the generated Nitro target into independent Swift and C++ targets;
 - link the same React or Nitro native symbols through both CocoaPods and
   SwiftPM.
