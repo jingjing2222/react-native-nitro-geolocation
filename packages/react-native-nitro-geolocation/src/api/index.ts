@@ -4,6 +4,7 @@ export { requestPermission } from "./requestPermission";
 export { hasServicesEnabled } from "./hasServicesEnabled";
 export { getProviderStatus } from "./getProviderStatus";
 export { getLocationAvailability } from "./getLocationAvailability";
+export { getLocationReadiness } from "./getLocationReadiness";
 export { requestLocationSettings } from "./requestLocationSettings";
 export { getAccuracyAuthorization } from "./getAccuracyAuthorization";
 export { requestTemporaryFullAccuracy } from "./requestTemporaryFullAccuracy";

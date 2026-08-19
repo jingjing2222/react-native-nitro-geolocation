@@ -6,7 +6,7 @@ import {
   getCurrentPosition,
   getLastKnownPosition,
   getLastKnownPositionAsync,
-  requestLocationSettings,
+  getLocationReadiness,
   requestPermission,
   stopObserving,
   unwatch,
@@ -34,7 +34,8 @@ import {
   isNearExpected
 } from "./locationAssertions";
 import { postNativeStatus } from "./nativeBridge";
-import { scenarios } from "./scenarios";
+import { expectReadyWithCache } from "./readinessAssertions";
+import { scenarios, successScenarioIds } from "./scenarios";
 
 function wait(ms: number) {
   return new Promise((resolve) => setTimeout(resolve, ms));
@@ -223,7 +224,23 @@ async function getCurrentPositionUntilExpected({
 }
 
 export async function runSuccessSuite() {
-  assertModernApiAvailability();
+  setScenario("api-availability", "running");
+  const apiShape = {
+    checkPermission: typeof checkPermission,
+    requestPermission: typeof requestPermission,
+    getCurrentPosition: typeof getCurrentPosition,
+    getLastKnownPosition: typeof getLastKnownPosition,
+    getLastKnownPositionAsync: typeof getLastKnownPositionAsync,
+    getLocationReadiness: typeof getLocationReadiness,
+    watchPosition: typeof watchPosition,
+    unwatch: typeof unwatch,
+    stopObserving: typeof stopObserving
+  };
+  const apiReady = Object.values(apiShape).every((type) => type === "function");
+  setScenario("api-availability", apiReady ? "pass" : "fail", apiShape);
+  if (!apiReady) {
+    throw new Error("Modern API browser export is incomplete.");
+  }
 
   runCompatApiAvailabilityCheck();
 
@@ -288,6 +305,12 @@ export async function runSuccessSuite() {
       });
     },
     (result) => assertModernPosition(result.position, "currentPosition")
+  );
+
+  await runStep(
+    "location-readiness",
+    () => getLocationReadiness(),
+    expectReadyWithCache
   );
 
   await runStep(
@@ -495,25 +518,7 @@ export async function runSuccessSuite() {
 
   const failedScenarios = scenarios.filter(
     (scenario) =>
-      [
-        "api-availability",
-        "compat-api-availability",
-        "request-location-settings",
-        "check-permission",
-        "request-permission",
-        "get-current-position",
-        "last-known-cold-cache",
-        "last-known-async-cold-cache",
-        "last-known-module-cache",
-        "last-known-async-cache",
-        "last-known-stale-cache",
-        "watch-position",
-        "unwatch",
-        "stop-observing",
-        "compat-get-current-position",
-        "compat-watch-position",
-        "compat-stop-observing"
-      ].includes(scenario.id) && scenario.status !== "pass"
+      successScenarioIds.has(scenario.id) && scenario.status !== "pass"
   );
   if (failedScenarios.length > 0) {
     throw new Error(

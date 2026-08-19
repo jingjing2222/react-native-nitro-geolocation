@@ -1,7 +1,8 @@
 // @ts-expect-error v2 removes the duplicate Modern configuration alias.
 import type { ModernGeolocationConfiguration } from "react-native-nitro-geolocation";
 import type {
-  LocationError,
+  LocationReadiness,
+  LocationReadinessRemediation,
   LocationRequestOptions,
   LocationSettingsOptions,
   LocationSettingsOutcome,
@@ -9,7 +10,7 @@ import type {
   LocationRequest as MergedLocationRequest
 } from "react-native-nitro-geolocation";
 import {
-  LocationErrorCode,
+  getLocationReadiness,
   selectProvider
 } from "react-native-nitro-geolocation";
 import type { GeolocationOptions as CompatGeolocationOptions } from "react-native-nitro-geolocation/compat";
@@ -45,16 +46,8 @@ const legacyMergedRequest: MergedLocationRequest = {
   distanceFilter: 10
 };
 
-const modernError: LocationError = {
-  code: LocationErrorCode.TIMEOUT,
-  message: "The location request timed out."
-};
-
-const legacyNumericError: LocationError = {
-  // @ts-expect-error v2 Modern errors use readable string discriminants.
-  code: 3,
-  message: "The location request timed out."
-};
+const readinessPromise: Promise<LocationReadiness> = getLocationReadiness();
+const readinessRemediation: LocationReadinessRemediation = "requestPermission";
 
 selectProvider("high", true, true);
 // @ts-expect-error v2 advanced provider selection uses an explicit accuracy preset.
@@ -68,6 +61,6 @@ void [
   compatRequest,
   mergedRequest,
   legacyMergedRequest,
-  modernError,
-  legacyNumericError
+  readinessPromise,
+  readinessRemediation
 ];

@@ -5,7 +5,7 @@ import {
   getLastKnownPosition,
   getLastKnownPositionAsync,
   getLocationAvailability,
-  requestLocationSettings,
+  getLocationReadiness,
   requestPermission,
   stopObserving,
   unwatch,
@@ -275,34 +275,72 @@ describe("web Modern API", () => {
     });
   });
 
-  it("reports satisfied settings when browser geolocation is available", async () => {
+  it("diagnoses a ready browser without starting location acquisition", async () => {
+    const getCurrentPositionMock = vi.fn();
     setNavigator({
       geolocation: {
-        getCurrentPosition: vi.fn(),
+        getCurrentPosition: getCurrentPositionMock,
+        watchPosition: vi.fn(),
+        clearWatch: vi.fn()
+      },
+      permissions: {
+        query: vi.fn(async () => ({ state: "granted" }))
+      }
+    });
+
+    await expect(getLocationReadiness()).resolves.toMatchObject({
+      ready: true,
+      permission: "granted",
+      providerStatus: { locationServicesEnabled: true },
+      availability: { available: true },
+      cache: { available: false },
+      remediations: ["acquirePosition"]
+    });
+    expect(getCurrentPositionMock).not.toHaveBeenCalled();
+  });
+
+  it("uses an observed position as permission evidence when Permissions API is unavailable", async () => {
+    const getCurrentPositionMock = vi.fn((success) => {
+      success({ ...createPosition(), timestamp: Date.now() });
+    });
+    setNavigator({
+      geolocation: {
+        getCurrentPosition: getCurrentPositionMock,
         watchPosition: vi.fn(),
         clearWatch: vi.fn()
       }
     });
 
-    await expect(requestLocationSettings()).resolves.toEqual({
-      outcome: "satisfied",
-      providerStatus: {
-        locationServicesEnabled: true,
-        backgroundModeEnabled: false
-      }
+    await getCurrentPosition();
+    await expect(getLocationReadiness()).resolves.toMatchObject({
+      ready: true,
+      permission: "granted",
+      cache: { available: true },
+      remediations: []
     });
+    expect(getCurrentPositionMock).toHaveBeenCalledTimes(1);
   });
 
-  it("reports unavailable settings when browser geolocation is absent", async () => {
-    setNavigator(undefined);
-
-    await expect(requestLocationSettings()).resolves.toEqual({
-      outcome: "unavailable",
-      providerStatus: {
-        locationServicesEnabled: false,
-        backgroundModeEnabled: false
+  it("diagnoses denied browser permission without prompting", async () => {
+    const getCurrentPositionMock = vi.fn();
+    setNavigator({
+      geolocation: {
+        getCurrentPosition: getCurrentPositionMock,
+        watchPosition: vi.fn(),
+        clearWatch: vi.fn()
+      },
+      permissions: {
+        query: vi.fn(async () => ({ state: "denied" }))
       }
     });
+
+    await expect(getLocationReadiness()).resolves.toMatchObject({
+      ready: false,
+      permission: "denied",
+      availability: { available: false },
+      remediations: ["reviewPermissionSettings"]
+    });
+    expect(getCurrentPositionMock).not.toHaveBeenCalled();
   });
 
   it("requests permission with a one-shot geolocation call", async () => {

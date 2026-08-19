@@ -173,10 +173,21 @@ to know whether Android device settings can satisfy the request.
 import {
   getCurrentPosition,
   getLocationAvailability,
+  getLocationReadiness,
   getProviderStatus,
   hasServicesEnabled,
   requestLocationSettings
 } from 'react-native-nitro-geolocation';
+
+async function inspectLocation() {
+  const readiness = await getLocationReadiness();
+  if (!readiness.ready) {
+    // Show an app-owned action for readiness.remediations.
+    // The diagnosis itself never prompts or opens settings.
+    return readiness.remediations;
+  }
+  return [];
+}
 
 async function prepareAccurateLocation() {
   const availability = await getLocationAvailability();
@@ -212,6 +223,13 @@ async function prepareAccurateLocation() {
   `locationProvider: 'auto'` or `locationProvider: 'playServices'` is
   configured, then falls back to platform provider/service checks. iOS maps Core
   Location service and authorization state.
+- `getLocationReadiness(): Promise<LocationReadiness>` - Combines current
+  permission, services, provider, availability, Play Services, Google Location
+  Accuracy, and observed module-cache state into one read-only diagnosis. It
+  returns stable remediation codes such as `requestPermission`,
+  `enableLocationServices`, and `acquirePosition`; it never requests
+  permission, opens settings, starts location acquisition, or changes
+  configuration.
 - `requestLocationSettings(options?): Promise<LocationProviderStatus>` -
   Checks the requested Android location settings and shows Android's native
   resolution dialog when available. It resolves with the updated provider
@@ -886,6 +904,8 @@ import type {
   GeolocationResponse,
   GeolocationCoordinates,
   LocationProviderUsed,
+  LocationReadiness,
+  LocationReadinessRemediation,
   GeolocationConfiguration
 } from 'react-native-nitro-geolocation';
 ```

@@ -71,6 +71,7 @@ appId: nitrogeolocation.example
 - runFlow: location-quality-metadata.yaml
 - runFlow: geocoding.yaml
 - runFlow: location-availability.yaml
+- runFlow: location-readiness.yaml
 - runFlow: heading.yaml
 - runFlow:
     when:

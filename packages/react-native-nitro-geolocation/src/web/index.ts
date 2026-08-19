@@ -4,7 +4,7 @@ import type {
   LocationSettingsOptions,
   PermissionStatus
 } from "../NitroGeolocation.nitro";
-import { decoratePositionWithMetadata } from "../api/locationMetadata";
+import { buildLocationReadiness } from "../api/locationReadiness";
 import {
   readLastKnownPosition,
   rememberPosition,
@@ -19,7 +19,7 @@ import type {
   Heading,
   LocationAvailability,
   LocationProviderStatus,
-  LocationSettingsResult,
+  LocationReadiness,
   ReverseGeocodedAddress
 } from "../publicTypes";
 import { LocationErrorCode } from "../utils/errors";
@@ -105,6 +105,25 @@ export async function getLocationAvailability(): Promise<LocationAvailability> {
   }
 
   return { available: true };
+}
+
+export async function getLocationReadiness(): Promise<LocationReadiness> {
+  const [permission, providerStatus, availability] = await Promise.all([
+    checkPermission(),
+    getProviderStatus(),
+    getLocationAvailability()
+  ]);
+  const cachedPosition = readLastKnownPosition();
+  const observedPermission =
+    permission === "undetermined" && cachedPosition ? "granted" : permission;
+
+  return buildLocationReadiness({
+    permission: observedPermission,
+    providerStatus,
+    availability,
+    cachedPosition,
+    now: Date.now()
+  });
 }
 
 export function requestLocationSettings(

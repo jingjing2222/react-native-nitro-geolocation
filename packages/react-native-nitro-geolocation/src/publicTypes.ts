@@ -1,4 +1,7 @@
-import type { NitroGeolocation } from "./NitroGeolocation.nitro";
+import type {
+  NitroGeolocation,
+  PermissionStatus
+} from "./NitroGeolocation.nitro";
 import type { CompatGeolocationConfigurationInternal } from "./NitroGeolocationCompat.nitro";
 import type {
   AccuracyAuthorization as SchemaAccuracyAuthorization,
@@ -65,6 +68,35 @@ export type LocationProviderStatus = SchemaLocationProviderStatus;
 export type LocationSettingsOutcome = SchemaLocationSettingsOutcome;
 export type LocationSettingsResult = SchemaLocationSettingsResult;
 export type LocationAvailability = SchemaLocationAvailability;
+
+export type LocationReadinessRemediation =
+  | "requestPermission"
+  | "reviewPermissionSettings"
+  | "enableLocationServices"
+  | "enableLocationProvider"
+  | "installOrUpdatePlayServices"
+  | "enableGoogleLocationAccuracy"
+  | "acquirePosition"
+  | "retryLocation";
+
+export interface LocationCacheReadiness {
+  available: boolean;
+  timestamp?: number;
+  ageMs?: number;
+}
+
+/**
+ * Read-only location diagnosis assembled from permission, service, provider,
+ * availability, and module-cache state.
+ */
+export interface LocationReadiness {
+  ready: boolean;
+  permission: PermissionStatus;
+  providerStatus: LocationProviderStatus;
+  availability: LocationAvailability;
+  cache: LocationCacheReadiness;
+  remediations: LocationReadinessRemediation[];
+}
 export type GeocodingCoordinates = SchemaGeocodingCoordinates;
 export type GeocodedLocation = SchemaGeocodedLocation;
 export type ReverseGeocodedAddress = SchemaReverseGeocodedAddress;

@@ -1,0 +1,80 @@
+appId: nitrogeolocation.example
+---
+# getLocationReadiness(): prove a seeded real position produces a ready/cache
+# diagnosis, then prove denied permission is reported without another prompt.
+
+- launchApp:
+    clearState: true
+    permissions:
+      all: allow
+
+- extendedWaitUntil:
+    visible: "Geolocation API"
+    timeout: 10000
+
+- stopApp
+
+- openLink:
+    link: nitrogeolocation://app/location-readiness
+- runFlow:
+    when:
+      platform: iOS
+    commands:
+      - openLink:
+          link: nitrogeolocation://app/location-readiness
+- waitForAnimationToEnd
+
+- extendedWaitUntil:
+    visible: "Read-only permission, services, provider, Play Services, and cache diagnosis"
+    timeout: 10000
+
+- setLocation:
+    latitude: 37.5665
+    longitude: 126.978
+
+- tapOn:
+    id: "e2e-action-location-readiness-run-ready-button"
+
+- extendedWaitUntil:
+    visible: "Ready diagnosis: passed"
+    timeout: 60000
+
+- assertVisible:
+    id: "location-readiness-ready-result"
+- assertVisible:
+    text: ".*ready=true.*cache=true.*remediations=none.*"
+
+- stopApp
+
+- launchApp:
+    clearState: true
+    permissions:
+      all: deny
+
+- extendedWaitUntil:
+    visible: "Geolocation API"
+    timeout: 10000
+
+- stopApp
+
+- openLink:
+    link: nitrogeolocation://app/location-readiness
+- runFlow:
+    when:
+      platform: iOS
+    commands:
+      - openLink:
+          link: nitrogeolocation://app/location-readiness
+- waitForAnimationToEnd
+
+- tapOn:
+    id: "e2e-action-location-readiness-run-denied-button"
+
+- extendedWaitUntil:
+    visible: "Denied diagnosis: passed"
+    timeout: 20000
+
+- assertVisible:
+    id: "location-readiness-denied-result"
+- assertVisible:
+    text: ".*reviewPermissionSettings.*"

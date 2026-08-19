@@ -31,7 +31,7 @@ import Issue122Screen from "./screens/Issue122Screen";
 import Issue132Screen from "./screens/Issue132Screen";
 import LastKnownPositionScreen from "./screens/LastKnownPositionScreen";
 import LocationAvailabilityScreen from "./screens/LocationAvailabilityScreen";
-import LocationQualityMetadataScreen from "./screens/LocationQualityMetadataScreen";
+import LocationReadinessScreen from "./screens/LocationReadinessScreen";
 import LocationSimulationScreen from "./screens/LocationSimulationScreen";
 import { LongRunBackgroundE2EScreen } from "./screens/LongRunBackgroundE2EScreen";
 import MockedMetadataScreen from "./screens/MockedMetadataScreen";
@@ -60,6 +60,7 @@ const linking = {
       Geocoding: "geocoding",
       GpsOfflineRecipe: "gps-offline-recipe",
       LocationAvailability: "location-availability",
+      LocationReadiness: "location-readiness",
       Heading: "heading",
       AndroidRequestOptions: "android-request-options",
       AndroidRequestOptionsProviders: "android-request-options/providers",
@@ -185,6 +186,11 @@ export default function App() {
           <Tab.Screen
             name="LocationAvailability"
             component={LocationAvailabilityScreen}
+            options={hiddenTabOptions}
+          />
+          <Tab.Screen
+            name="LocationReadiness"
+            component={LocationReadinessScreen}
             options={hiddenTabOptions}
           />
           <Tab.Screen
