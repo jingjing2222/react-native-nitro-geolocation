@@ -7,11 +7,13 @@ extension NitroGeolocation {
         options: LocationRequestOptions,
         error: ((LocationError) -> Void)?
     ) throws -> Void {
+        let locationServicesEnabled = CLLocationManager.locationServicesEnabled()
         runLocationOperationOnMain {
             self.getCurrentPositionInternal(
                 requestId: UUID().uuidString,
                 success: success,
                 options: options,
+                locationServicesEnabled: locationServicesEnabled,
                 error: error
             )
         }
@@ -23,12 +25,14 @@ extension NitroGeolocation {
         options: LocationRequestOptions,
         error: ((LocationError) -> Void)?
     ) throws -> Void {
+        let locationServicesEnabled = CLLocationManager.locationServicesEnabled()
         runLocationOperationOnMain {
             self.cancelCurrentPositionRequestOnMain(requestId: requestId)
             self.getCurrentPositionInternal(
                 requestId: requestId,
                 success: success,
                 options: options,
+                locationServicesEnabled: locationServicesEnabled,
                 error: error
             )
         }

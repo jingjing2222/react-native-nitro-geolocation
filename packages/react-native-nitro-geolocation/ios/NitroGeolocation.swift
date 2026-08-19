@@ -184,6 +184,7 @@ class NitroGeolocation: HybridNitroGeolocationSpec {
         requestId: String,
         success: @escaping (GeolocationResponse) -> Void,
         options: LocationRequestOptions,
+        locationServicesEnabled: Bool,
         error: ((LocationError) -> Void)?
     ) {
         dispatchPrecondition(condition: .onQueue(.main))
@@ -201,7 +202,7 @@ class NitroGeolocation: HybridNitroGeolocationSpec {
             return
         }
 
-        if !CLLocationManager.locationServicesEnabled() {
+        if !locationServicesEnabled {
             error?(createLocationError(
                 code: SETTINGS_NOT_SATISFIED,
                 message: "Location services disabled."
@@ -379,8 +380,12 @@ class NitroGeolocation: HybridNitroGeolocationSpec {
         success: @escaping (Heading) -> Void,
         error: ((LocationError) -> Void)?
     ) throws -> Void {
+        let locationServicesEnabled = CLLocationManager.locationServicesEnabled()
         runLocationOperationOnMain {
-            guard self.validateHeadingAvailability(error: error) else { return }
+            guard self.validateHeadingAvailability(
+                locationServicesEnabled: locationServicesEnabled,
+                error: error
+            ) else { return }
             self.initializeLocationManagerIfNeeded()
 
             let id = UUID()
@@ -419,6 +424,8 @@ class NitroGeolocation: HybridNitroGeolocationSpec {
             return token
         }
 
+        let locationServicesEnabled = CLLocationManager.locationServicesEnabled()
+
         let subscription = HeadingSubscription(
             success: success,
             error: error,
@@ -427,7 +434,10 @@ class NitroGeolocation: HybridNitroGeolocationSpec {
         )
 
         runLocationOperationOnMain {
-            guard self.validateHeadingAvailability(error: error) else { return }
+            guard self.validateHeadingAvailability(
+                locationServicesEnabled: locationServicesEnabled,
+                error: error
+            ) else { return }
             self.headingSubscriptions[token] = subscription
             self.initializeLocationManagerIfNeeded()
             self.updateHeadingConfiguration()
@@ -619,6 +629,7 @@ class NitroGeolocation: HybridNitroGeolocationSpec {
     }
 
     private func validateHeadingAvailability(
+        locationServicesEnabled: Bool,
         error: ((LocationError) -> Void)?
     ) -> Bool {
         let status = CLLocationManager.authorizationStatus()
@@ -633,7 +644,7 @@ class NitroGeolocation: HybridNitroGeolocationSpec {
             return false
         }
 
-        if !CLLocationManager.locationServicesEnabled() {
+        if !locationServicesEnabled {
             error?(createLocationError(
                 code: SETTINGS_NOT_SATISFIED,
                 message: "Location services disabled."
