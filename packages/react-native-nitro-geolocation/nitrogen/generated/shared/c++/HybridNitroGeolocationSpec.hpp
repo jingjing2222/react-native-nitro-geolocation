@@ -23,6 +23,8 @@ namespace margelo::nitro::nitrogeolocation { struct LocationError; }
 namespace margelo::nitro::nitrogeolocation { struct LocationProviderStatus; }
 // Forward declaration of `LocationAvailability` to properly resolve imports.
 namespace margelo::nitro::nitrogeolocation { struct LocationAvailability; }
+// Forward declaration of `LocationSettingsResult` to properly resolve imports.
+namespace margelo::nitro::nitrogeolocation { struct LocationSettingsResult; }
 // Forward declaration of `LocationSettingsOptions` to properly resolve imports.
 namespace margelo::nitro::nitrogeolocation { struct LocationSettingsOptions; }
 // Forward declaration of `AccuracyAuthorization` to properly resolve imports.
@@ -50,6 +52,7 @@ namespace margelo::nitro::nitrogeolocation { struct HeadingOptions; }
 #include <optional>
 #include "LocationProviderStatus.hpp"
 #include "LocationAvailability.hpp"
+#include "LocationSettingsResult.hpp"
 #include "LocationSettingsOptions.hpp"
 #include "AccuracyAuthorization.hpp"
 #include <string>
@@ -89,7 +92,7 @@ namespace margelo::nitro::nitrogeolocation {
 
     public:
       // Properties
-      
+
 
     public:
       // Methods
@@ -99,7 +102,7 @@ namespace margelo::nitro::nitrogeolocation {
       virtual std::shared_ptr<Promise<bool>> hasServicesEnabled() = 0;
       virtual std::shared_ptr<Promise<LocationProviderStatus>> getProviderStatus() = 0;
       virtual std::shared_ptr<Promise<LocationAvailability>> getLocationAvailability() = 0;
-      virtual void requestLocationSettings(const std::function<void(const LocationProviderStatus& /* status */)>& success, const LocationSettingsOptions& options, const std::optional<std::function<void(const LocationError& /* error */)>>& error) = 0;
+      virtual void requestLocationSettings(const std::function<void(const LocationSettingsResult& /* result */)>& success, const LocationSettingsOptions& options, const std::optional<std::function<void(const LocationError& /* error */)>>& error) = 0;
       virtual std::shared_ptr<Promise<AccuracyAuthorization>> getAccuracyAuthorization() = 0;
       virtual void requestTemporaryFullAccuracy(const std::string& purposeKey, const std::function<void(AccuracyAuthorization /* authorization */)>& success, const std::optional<std::function<void(const LocationError& /* error */)>>& error) = 0;
       virtual void getCurrentPosition(const std::function<void(const GeolocationResponse& /* position */)>& success, const LocationRequestOptions& options, const std::optional<std::function<void(const LocationError& /* error */)>>& error) = 0;

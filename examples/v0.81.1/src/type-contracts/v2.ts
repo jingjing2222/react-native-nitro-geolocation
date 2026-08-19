@@ -3,8 +3,11 @@ import type { ModernGeolocationConfiguration } from "react-native-nitro-geolocat
 import type {
   LocationRequestOptions,
   LocationSettingsOptions,
+  LocationSettingsOutcome,
+  LocationSettingsResult,
   LocationRequest as MergedLocationRequest
 } from "react-native-nitro-geolocation";
+import { requestLocationSettings } from "react-native-nitro-geolocation";
 import { selectProvider } from "react-native-nitro-geolocation";
 import type { GeolocationOptions as CompatGeolocationOptions } from "react-native-nitro-geolocation/compat";
 
@@ -19,6 +22,10 @@ const modernSettings: LocationSettingsOptions = {
   // @ts-expect-error v2 Modern settings use accuracy.android.
   enableHighAccuracy: true
 };
+
+const settingsResultPromise: Promise<LocationSettingsResult> =
+  requestLocationSettings();
+const settingsOutcome: LocationSettingsOutcome = "activityMissing";
 
 const compatRequest: CompatGeolocationOptions = {
   enableHighAccuracy: true
@@ -42,6 +49,8 @@ selectProvider(true, true, true);
 void [
   modernRequest,
   modernSettings,
+  settingsResultPromise,
+  settingsOutcome,
   compatRequest,
   mergedRequest,
   legacyMergedRequest

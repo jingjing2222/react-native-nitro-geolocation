@@ -5,6 +5,7 @@ import {
   getLastKnownPosition,
   getLastKnownPositionAsync,
   getLocationAvailability,
+  requestLocationSettings,
   requestPermission,
   stopObserving,
   unwatch,
@@ -264,6 +265,36 @@ describe("web Modern API", () => {
     await expect(getLocationAvailability()).resolves.toEqual({
       available: false,
       reason: "Browser geolocation permission is denied."
+    });
+  });
+
+  it("reports satisfied settings when browser geolocation is available", async () => {
+    setNavigator({
+      geolocation: {
+        getCurrentPosition: vi.fn(),
+        watchPosition: vi.fn(),
+        clearWatch: vi.fn()
+      }
+    });
+
+    await expect(requestLocationSettings()).resolves.toEqual({
+      outcome: "satisfied",
+      providerStatus: {
+        locationServicesEnabled: true,
+        backgroundModeEnabled: false
+      }
+    });
+  });
+
+  it("reports unavailable settings when browser geolocation is absent", async () => {
+    setNavigator(undefined);
+
+    await expect(requestLocationSettings()).resolves.toEqual({
+      outcome: "unavailable",
+      providerStatus: {
+        locationServicesEnabled: false,
+        backgroundModeEnabled: false
+      }
     });
   });
 

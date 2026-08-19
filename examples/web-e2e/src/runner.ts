@@ -5,6 +5,7 @@ import {
   getCurrentPosition,
   getLastKnownPosition,
   getLastKnownPositionAsync,
+  requestLocationSettings,
   requestPermission,
   stopObserving,
   unwatch,
@@ -213,6 +214,7 @@ export async function runSuccessSuite() {
   const apiShape = {
     checkPermission: typeof checkPermission,
     requestPermission: typeof requestPermission,
+    requestLocationSettings: typeof requestLocationSettings,
     getCurrentPosition: typeof getCurrentPosition,
     getLastKnownPosition: typeof getLastKnownPosition,
     getLastKnownPositionAsync: typeof getLastKnownPositionAsync,
@@ -227,6 +229,21 @@ export async function runSuccessSuite() {
   }
 
   runCompatApiAvailabilityCheck();
+
+  await runStep(
+    "request-location-settings",
+    () => requestLocationSettings(),
+    (result) => {
+      if (
+        result.outcome !== "satisfied" ||
+        !result.providerStatus.locationServicesEnabled
+      ) {
+        throw new Error(
+          `Expected satisfied browser settings, got ${result.outcome}.`
+        );
+      }
+    }
+  );
 
   await runStep(
     "last-known-cold-cache",
@@ -493,6 +510,7 @@ export async function runSuccessSuite() {
       [
         "api-availability",
         "compat-api-availability",
+        "request-location-settings",
         "check-permission",
         "request-permission",
         "get-current-position",

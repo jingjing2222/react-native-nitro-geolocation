@@ -28,6 +28,14 @@ func createLocationProviderStatus() -> LocationProviderStatus {
     )
 }
 
+func createLocationSettingsResult() -> LocationSettingsResult {
+    let providerStatus = createLocationProviderStatus()
+    return LocationSettingsResult(
+        outcome: providerStatus.locationServicesEnabled ? .satisfied : .unavailable,
+        providerStatus: providerStatus
+    )
+}
+
 func isLocationBackgroundModeEnabled() -> Bool {
     guard let backgroundModes = Bundle.main.object(
         forInfoDictionaryKey: "UIBackgroundModes"

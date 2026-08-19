@@ -23,6 +23,10 @@ namespace margelo::nitro::nitrogeolocation { enum class AuthorizationLevel; }
 namespace margelo::nitro::nitrogeolocation { enum class LocationProvider; }
 // Forward declaration of `LocationError` to properly resolve imports.
 namespace margelo::nitro::nitrogeolocation { struct LocationError; }
+// Forward declaration of `LocationSettingsResult` to properly resolve imports.
+namespace margelo::nitro::nitrogeolocation { struct LocationSettingsResult; }
+// Forward declaration of `LocationSettingsOutcome` to properly resolve imports.
+namespace margelo::nitro::nitrogeolocation { enum class LocationSettingsOutcome; }
 // Forward declaration of `LocationSettingsOptions` to properly resolve imports.
 namespace margelo::nitro::nitrogeolocation { struct LocationSettingsOptions; }
 // Forward declaration of `LocationAccuracyOptions` to properly resolve imports.
@@ -78,7 +82,11 @@ namespace margelo::nitro::nitrogeolocation { struct HeadingOptions; }
 #include "LocationError.hpp"
 #include "JFunc_void_LocationError.hpp"
 #include "JLocationError.hpp"
-#include "JFunc_void_LocationProviderStatus.hpp"
+#include "LocationSettingsResult.hpp"
+#include "JFunc_void_LocationSettingsResult.hpp"
+#include "JLocationSettingsResult.hpp"
+#include "LocationSettingsOutcome.hpp"
+#include "JLocationSettingsOutcome.hpp"
 #include "LocationSettingsOptions.hpp"
 #include "JLocationSettingsOptions.hpp"
 #include "LocationAccuracyOptions.hpp"
@@ -150,7 +158,7 @@ namespace margelo::nitro::nitrogeolocation {
   }
 
   // Properties
-  
+
 
   // Methods
   void JHybridNitroGeolocationSpec::setConfiguration(const GeolocationConfiguration& config) {
@@ -225,9 +233,9 @@ namespace margelo::nitro::nitrogeolocation {
       return __promise;
     }();
   }
-  void JHybridNitroGeolocationSpec::requestLocationSettings(const std::function<void(const LocationProviderStatus& /* status */)>& success, const LocationSettingsOptions& options, const std::optional<std::function<void(const LocationError& /* error */)>>& error) {
-    static const auto method = _javaPart->javaClassStatic()->getMethod<void(jni::alias_ref<JFunc_void_LocationProviderStatus::javaobject> /* success */, jni::alias_ref<JLocationSettingsOptions> /* options */, jni::alias_ref<JFunc_void_LocationError::javaobject> /* error */)>("requestLocationSettings_cxx");
-    method(_javaPart, JFunc_void_LocationProviderStatus_cxx::fromCpp(success), JLocationSettingsOptions::fromCpp(options), error.has_value() ? JFunc_void_LocationError_cxx::fromCpp(error.value()) : nullptr);
+  void JHybridNitroGeolocationSpec::requestLocationSettings(const std::function<void(const LocationSettingsResult& /* result */)>& success, const LocationSettingsOptions& options, const std::optional<std::function<void(const LocationError& /* error */)>>& error) {
+    static const auto method = _javaPart->javaClassStatic()->getMethod<void(jni::alias_ref<JFunc_void_LocationSettingsResult::javaobject> /* success */, jni::alias_ref<JLocationSettingsOptions> /* options */, jni::alias_ref<JFunc_void_LocationError::javaobject> /* error */)>("requestLocationSettings_cxx");
+    method(_javaPart, JFunc_void_LocationSettingsResult_cxx::fromCpp(success), JLocationSettingsOptions::fromCpp(options), error.has_value() ? JFunc_void_LocationError_cxx::fromCpp(error.value()) : nullptr);
   }
   std::shared_ptr<Promise<AccuracyAuthorization>> JHybridNitroGeolocationSpec::getAccuracyAuthorization() {
     static const auto method = _javaPart->javaClassStatic()->getMethod<jni::local_ref<JPromise::javaobject>()>("getAccuracyAuthorization");

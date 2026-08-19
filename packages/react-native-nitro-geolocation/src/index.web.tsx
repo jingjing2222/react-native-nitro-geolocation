@@ -19,6 +19,8 @@ export type {
   GeolocationResponse,
   GeolocationCoordinates,
   LocationProviderStatus,
+  LocationSettingsOutcome,
+  LocationSettingsResult,
   LocationAvailability,
   GeocodingCoordinates,
   GeocodedLocation,

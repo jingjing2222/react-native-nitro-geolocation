@@ -71,11 +71,10 @@ appId: nitrogeolocation.example
     text: "No thanks|Cancel|취소|아니요|거부"
 
 - extendedWaitUntil:
-    visible: "Settings: blocked"
+    visible: "Settings: cancelled"
     timeout: 10000
 
-- extendedWaitUntil:
-    visible:
-      id: "provider-settings-error-name"
-    timeout: 10000
+- assertVisible: "Outcome: cancelled"
+- assertVisible:
+    id: "provider-settings-outcome"
 - assertVisible: "Provider readiness: not ready"

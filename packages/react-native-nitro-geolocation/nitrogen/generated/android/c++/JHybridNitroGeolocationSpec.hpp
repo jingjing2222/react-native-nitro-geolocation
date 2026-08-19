@@ -50,7 +50,7 @@ namespace margelo::nitro::nitrogeolocation {
 
   public:
     // Properties
-    
+
 
   public:
     // Methods
@@ -60,7 +60,7 @@ namespace margelo::nitro::nitrogeolocation {
     std::shared_ptr<Promise<bool>> hasServicesEnabled() override;
     std::shared_ptr<Promise<LocationProviderStatus>> getProviderStatus() override;
     std::shared_ptr<Promise<LocationAvailability>> getLocationAvailability() override;
-    void requestLocationSettings(const std::function<void(const LocationProviderStatus& /* status */)>& success, const LocationSettingsOptions& options, const std::optional<std::function<void(const LocationError& /* error */)>>& error) override;
+    void requestLocationSettings(const std::function<void(const LocationSettingsResult& /* result */)>& success, const LocationSettingsOptions& options, const std::optional<std::function<void(const LocationError& /* error */)>>& error) override;
     std::shared_ptr<Promise<AccuracyAuthorization>> getAccuracyAuthorization() override;
     void requestTemporaryFullAccuracy(const std::string& purposeKey, const std::function<void(AccuracyAuthorization /* authorization */)>& success, const std::optional<std::function<void(const LocationError& /* error */)>>& error) override;
     void getCurrentPosition(const std::function<void(const GeolocationResponse& /* position */)>& success, const LocationRequestOptions& options, const std::optional<std::function<void(const LocationError& /* error */)>>& error) override;

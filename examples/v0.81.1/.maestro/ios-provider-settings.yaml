@@ -1,0 +1,66 @@
+appId: nitrogeolocation.example
+---
+# User flow: an iOS field worker confirms that Core Location settings satisfy
+# check-in requirements without expecting a settings resolution dialog.
+
+- launchApp:
+    clearState: true
+    permissions:
+      all: allow
+
+- extendedWaitUntil:
+    visible: "Geolocation API"
+    timeout: 10000
+
+- stopApp
+
+- openLink:
+    link: nitrogeolocation://app/provider-settings
+- runFlow:
+    when:
+      visible: "Cancel|취소"
+    commands:
+      - tapOn:
+          text: "Open|열기"
+- openLink:
+    link: nitrogeolocation://app/provider-settings
+- waitForAnimationToEnd
+
+- extendedWaitUntil:
+    visible: "Accurate Check-In"
+    timeout: 10000
+
+- tapOn:
+    id: "e2e-action-provider-settings-check-device-button"
+- extendedWaitUntil:
+    visible: "Services: enabled"
+    timeout: 10000
+
+- tapOn:
+    id: "e2e-action-provider-settings-prepare-check-in-button"
+- extendedWaitUntil:
+    visible: "Settings: ready"
+    timeout: 10000
+
+- assertVisible: "Outcome: satisfied"
+- assertVisible: "Provider readiness: ready"
+- assertVisible:
+    id: "provider-settings-outcome"
+
+- setLocation:
+    latitude: 37.5665
+    longitude: 126.978
+- waitForAnimationToEnd
+
+- tapOn:
+    id: "e2e-action-provider-settings-confirm-location-button"
+- assertVisible:
+    id: "provider-position"
+- assertVisible:
+    id: "provider-latitude"
+- assertVisible:
+    id: "provider-longitude"
+- assertVisible:
+    id: "provider-accuracy"
+- assertVisible:
+    id: "provider-used"

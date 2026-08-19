@@ -22,6 +22,12 @@ export const scenarios: Scenario[] = [
     status: "idle"
   },
   {
+    id: "request-location-settings",
+    title: "requestLocationSettings result",
+    detail: "Returns a deterministic outcome and current provider status.",
+    status: "idle"
+  },
+  {
     id: "check-permission",
     title: "checkPermission",
     detail: "Reads browser permission state when Permissions API exists.",

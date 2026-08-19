@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { Platform } from "react-native";
 import {
   LocationErrorCode,
   getCurrentPosition,
@@ -9,7 +10,8 @@ import {
 } from "react-native-nitro-geolocation";
 import type {
   GeolocationResponse,
-  LocationProviderStatus
+  LocationProviderStatus,
+  LocationSettingsOutcome
 } from "react-native-nitro-geolocation";
 import {
   DumpedText,
@@ -36,14 +38,17 @@ export default function ProviderSettingsScreen() {
   const [providerStatus, setProviderStatus] =
     useState<LocationProviderStatus | null>(null);
   const [settingsStatus, setSettingsStatus] = useState("not requested");
+  const [settingsOutcome, setSettingsOutcome] =
+    useState<LocationSettingsOutcome | null>(null);
   const [position, setPosition] = useState<GeolocationResponse | null>(null);
   const [error, setError] = useState<CapturedLocationError | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const providerReady =
     servicesEnabled === true &&
     providerStatus?.locationServicesEnabled === true &&
-    providerStatus.gpsAvailable === true &&
-    providerStatus.networkAvailable === true;
+    (Platform.OS !== "android" ||
+      (providerStatus.gpsAvailable === true &&
+        providerStatus.networkAvailable === true));
 
   const refreshReadiness = async () => {
     const [permission, enabled, status] = await Promise.all([
@@ -74,6 +79,7 @@ export default function ProviderSettingsScreen() {
     setIsLoading(true);
     setError(null);
     setSettingsStatus("checking");
+    setSettingsOutcome(null);
 
     try {
       const permission = await requestLocationPermission();
@@ -88,16 +94,19 @@ export default function ProviderSettingsScreen() {
         return;
       }
 
-      const status = await requestLocationSettings({
+      const result = await requestLocationSettings({
         accuracy: { android: "high" },
         interval: 5000,
         fastestInterval: 1000,
         alwaysShow: true
       });
 
-      setProviderStatus(status);
-      setServicesEnabled(status.locationServicesEnabled);
-      setSettingsStatus("ready");
+      setProviderStatus(result.providerStatus);
+      setServicesEnabled(result.providerStatus.locationServicesEnabled);
+      setSettingsOutcome(result.outcome);
+      setSettingsStatus(
+        result.outcome === "satisfied" ? "ready" : result.outcome
+      );
     } catch (err) {
       setSettingsStatus("blocked");
       setError(captureLocationError(err));
@@ -134,7 +143,7 @@ export default function ProviderSettingsScreen() {
     <ScenarioScreen
       prefix="provider-settings"
       title="Accurate Check-In"
-      subtitle="Android provider readiness contract"
+      subtitle="Location settings readiness contract"
     >
       <ScenarioSection
         index={1}
@@ -188,7 +197,7 @@ export default function ProviderSettingsScreen() {
       <ScenarioSection
         index={2}
         title="Prepare Check-In"
-        description="Ask Android to enable the settings required for a high-accuracy check-in location."
+        description="Confirm the settings required for a high-accuracy check-in. Android may show a native resolution dialog."
         divided
       >
         <DumpedText
@@ -197,6 +206,13 @@ export default function ProviderSettingsScreen() {
           testID="provider-settings-result"
         >
           Settings: {settingsStatus}
+        </DumpedText>
+        <DumpedText
+          dumpText={`Outcome: ${settingsOutcome ?? "not requested"}`}
+          style={sharedStyles.resultStatus}
+          testID="provider-settings-outcome"
+        >
+          Outcome: {settingsOutcome ?? "not requested"}
         </DumpedText>
         <ScenarioButton
           title={isLoading ? "Preparing..." : "Prepare Check-In"}

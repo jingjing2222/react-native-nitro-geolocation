@@ -71,12 +71,16 @@ appId: nitrogeolocation.example
     visible: "Settings: ready"
     timeout: 15000
 
+- assertVisible: "Outcome: satisfied"
+
 - assertVisible: "Services: enabled"
 - assertVisible: "GPS: enabled"
 - assertVisible: "Network: enabled"
 - assertVisible: "Provider readiness: ready"
 - assertVisible:
     id: "provider-settings-result"
+- assertVisible:
+    id: "provider-settings-outcome"
 
 - setLocation:
     latitude: 37.5665
