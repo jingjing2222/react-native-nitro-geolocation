@@ -29,6 +29,10 @@ namespace margelo::nitro::nitrogeolocation { enum class AndroidAccuracyPreset; }
 namespace margelo::nitro::nitrogeolocation { enum class IOSAccuracyPreset; }
 // Forward declaration of `IOSActivityType` to properly resolve imports.
 namespace margelo::nitro::nitrogeolocation { enum class IOSActivityType; }
+// Forward declaration of `CompatGeolocationResponseWithMetadataInternal` to properly resolve imports.
+namespace margelo::nitro::nitrogeolocation { struct CompatGeolocationResponseWithMetadataInternal; }
+// Forward declaration of `LocationProviderUsed` to properly resolve imports.
+namespace margelo::nitro::nitrogeolocation { enum class LocationProviderUsed; }
 
 #include "CompatGeolocationConfigurationInternal.hpp"
 #include "JCompatGeolocationConfigurationInternal.hpp"
@@ -63,6 +67,11 @@ namespace margelo::nitro::nitrogeolocation { enum class IOSActivityType; }
 #include "JIOSAccuracyPreset.hpp"
 #include "IOSActivityType.hpp"
 #include "JIOSActivityType.hpp"
+#include "CompatGeolocationResponseWithMetadataInternal.hpp"
+#include "JFunc_void_CompatGeolocationResponseWithMetadataInternal.hpp"
+#include "JCompatGeolocationResponseWithMetadataInternal.hpp"
+#include "LocationProviderUsed.hpp"
+#include "JLocationProviderUsed.hpp"
 
 namespace margelo::nitro::nitrogeolocation {
 
@@ -109,9 +118,18 @@ namespace margelo::nitro::nitrogeolocation {
     static const auto method = _javaPart->javaClassStatic()->getMethod<void(jni::alias_ref<JFunc_void_CompatGeolocationResponse::javaobject> /* success */, jni::alias_ref<JCompatGeolocationOptions> /* options */, jni::alias_ref<JFunc_void_CompatGeolocationError::javaobject> /* error */)>("getCurrentPosition_cxx");
     method(_javaPart, JFunc_void_CompatGeolocationResponse_cxx::fromCpp(success), JCompatGeolocationOptions::fromCpp(options), error.has_value() ? JFunc_void_CompatGeolocationError_cxx::fromCpp(error.value()) : nullptr);
   }
+  void JHybridNitroGeolocationCompatSpec::getCurrentPositionWithMetadata(const std::function<void(const CompatGeolocationResponseWithMetadataInternal& /* position */)>& success, const CompatGeolocationOptions& options, const std::optional<std::function<void(const CompatGeolocationError& /* error */)>>& error) {
+    static const auto method = _javaPart->javaClassStatic()->getMethod<void(jni::alias_ref<JFunc_void_CompatGeolocationResponseWithMetadataInternal::javaobject> /* success */, jni::alias_ref<JCompatGeolocationOptions> /* options */, jni::alias_ref<JFunc_void_CompatGeolocationError::javaobject> /* error */)>("getCurrentPositionWithMetadata_cxx");
+    method(_javaPart, JFunc_void_CompatGeolocationResponseWithMetadataInternal_cxx::fromCpp(success), JCompatGeolocationOptions::fromCpp(options), error.has_value() ? JFunc_void_CompatGeolocationError_cxx::fromCpp(error.value()) : nullptr);
+  }
   double JHybridNitroGeolocationCompatSpec::watchPosition(const std::function<void(const CompatGeolocationResponse& /* position */)>& success, const CompatGeolocationOptions& options, const std::optional<std::function<void(const CompatGeolocationError& /* error */)>>& error) {
     static const auto method = _javaPart->javaClassStatic()->getMethod<double(jni::alias_ref<JFunc_void_CompatGeolocationResponse::javaobject> /* success */, jni::alias_ref<JCompatGeolocationOptions> /* options */, jni::alias_ref<JFunc_void_CompatGeolocationError::javaobject> /* error */)>("watchPosition_cxx");
     auto __result = method(_javaPart, JFunc_void_CompatGeolocationResponse_cxx::fromCpp(success), JCompatGeolocationOptions::fromCpp(options), error.has_value() ? JFunc_void_CompatGeolocationError_cxx::fromCpp(error.value()) : nullptr);
+    return __result;
+  }
+  double JHybridNitroGeolocationCompatSpec::watchPositionWithMetadata(const std::function<void(const CompatGeolocationResponseWithMetadataInternal& /* position */)>& success, const CompatGeolocationOptions& options, const std::optional<std::function<void(const CompatGeolocationError& /* error */)>>& error) {
+    static const auto method = _javaPart->javaClassStatic()->getMethod<double(jni::alias_ref<JFunc_void_CompatGeolocationResponseWithMetadataInternal::javaobject> /* success */, jni::alias_ref<JCompatGeolocationOptions> /* options */, jni::alias_ref<JFunc_void_CompatGeolocationError::javaobject> /* error */)>("watchPositionWithMetadata_cxx");
+    auto __result = method(_javaPart, JFunc_void_CompatGeolocationResponseWithMetadataInternal_cxx::fromCpp(success), JCompatGeolocationOptions::fromCpp(options), error.has_value() ? JFunc_void_CompatGeolocationError_cxx::fromCpp(error.value()) : nullptr);
     return __result;
   }
   void JHybridNitroGeolocationCompatSpec::clearWatch(double watchId) {

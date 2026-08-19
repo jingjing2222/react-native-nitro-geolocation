@@ -2,7 +2,8 @@ import type { HybridObject } from "react-native-nitro-modules";
 import type {
   CompatGeolocationError,
   CompatGeolocationOptions,
-  CompatGeolocationResponse
+  CompatGeolocationResponse,
+  CompatGeolocationResponseWithMetadataInternal
 } from "./types";
 
 // Configuration - Internal (for C++ codegen, avoiding ANDROID macro conflict)
@@ -31,8 +32,18 @@ export interface NitroGeolocationCompat
     options: CompatGeolocationOptions,
     error?: (error: CompatGeolocationError) => void
   ): void;
+  getCurrentPositionWithMetadata(
+    success: (position: CompatGeolocationResponseWithMetadataInternal) => void,
+    options: CompatGeolocationOptions,
+    error?: (error: CompatGeolocationError) => void
+  ): void;
   watchPosition(
     success: (position: CompatGeolocationResponse) => void,
+    options: CompatGeolocationOptions,
+    error?: (error: CompatGeolocationError) => void
+  ): number;
+  watchPositionWithMetadata(
+    success: (position: CompatGeolocationResponseWithMetadataInternal) => void,
     options: CompatGeolocationOptions,
     error?: (error: CompatGeolocationError) => void
   ): number;

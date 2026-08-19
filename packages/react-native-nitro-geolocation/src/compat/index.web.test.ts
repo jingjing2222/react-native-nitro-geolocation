@@ -80,6 +80,43 @@ describe("compat web API", () => {
     });
   });
 
+  it("getCurrentPosition exposes metadata only when explicitly requested", () => {
+    const mock = vi.fn((success) => success(createBrowserPosition()));
+    setNavigator({
+      geolocation: {
+        getCurrentPosition: mock,
+        watchPosition: vi.fn(),
+        clearWatch: vi.fn()
+      }
+    });
+
+    const success = vi.fn();
+    getCurrentPosition(success, undefined, {
+      includeExtraMetadata: true,
+      enableHighAccuracy: true
+    });
+
+    expect(success).toHaveBeenCalledWith({
+      coords: {
+        latitude: 37.5665,
+        longitude: 126.978,
+        altitude: null,
+        accuracy: 11,
+        altitudeAccuracy: null,
+        heading: null,
+        speed: null
+      },
+      timestamp: 1779015190000,
+      provider: "unknown"
+    });
+    expect(Object.hasOwn(success.mock.calls[0][0], "mocked")).toBe(false);
+    expect(mock.mock.calls[0][2]).toEqual({
+      enableHighAccuracy: true,
+      timeout: undefined,
+      maximumAge: undefined
+    });
+  });
+
   it("getCurrentPosition forwards mapped error to error callback", () => {
     setNavigator({
       geolocation: {
@@ -220,6 +257,58 @@ describe("compat web API", () => {
         speed: null
       },
       timestamp: 1779015190000
+    });
+  });
+
+  it("watchPosition exposes metadata only for the opted-in subscription", () => {
+    const callbacks: Array<
+      (position: ReturnType<typeof createBrowserPosition>) => void
+    > = [];
+    const watchMock = vi.fn((success) => {
+      callbacks.push(success);
+      return callbacks.length;
+    });
+    setNavigator({
+      geolocation: {
+        getCurrentPosition: vi.fn(),
+        watchPosition: watchMock,
+        clearWatch: vi.fn()
+      }
+    });
+
+    const defaultSuccess = vi.fn();
+    const metadataSuccess = vi.fn();
+    watchPosition(defaultSuccess);
+    watchPosition(metadataSuccess, undefined, { includeExtraMetadata: true });
+
+    const position = createBrowserPosition(35.0, 135.0);
+    callbacks[0]?.(position);
+    callbacks[1]?.(position);
+
+    expect(Object.keys(defaultSuccess.mock.calls[0][0])).toEqual([
+      "coords",
+      "timestamp"
+    ]);
+    expect(metadataSuccess).toHaveBeenCalledWith({
+      coords: {
+        latitude: 35.0,
+        longitude: 135.0,
+        altitude: null,
+        accuracy: 11,
+        altitudeAccuracy: null,
+        heading: null,
+        speed: null
+      },
+      timestamp: 1779015190000,
+      provider: "unknown"
+    });
+    expect(Object.hasOwn(metadataSuccess.mock.calls[0][0], "mocked")).toBe(
+      false
+    );
+    expect(watchMock.mock.calls[1][2]).toEqual({
+      enableHighAccuracy: undefined,
+      timeout: undefined,
+      maximumAge: undefined
     });
   });
 

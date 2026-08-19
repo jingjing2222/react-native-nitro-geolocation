@@ -305,6 +305,13 @@ against the device OS and the returned sample.
 - Opens the real Compat API screen
 - Requests authorization, simulates a user location, then verifies the callback API renders a current position
 
+### `compat-metadata.yaml`
+- Verifies the opt-in `/compat` integrity metadata contract on native builds
+- Confirms default current and watch responses have exactly `coords,timestamp`
+- Confirms opted-in current and watch responses expose simulated-location metadata
+- Runs default and opted-in watches concurrently to prove their response shapes stay independent
+- Uses `setLocation`, so it covers the `mocked: true` simulator path; physical-device false/absence checks remain manual
+
 ### `all-tests.yaml`
 - Master flow that runs all platform-compatible tests sequentially
 - Includes Android-only contracts with `when.platform`

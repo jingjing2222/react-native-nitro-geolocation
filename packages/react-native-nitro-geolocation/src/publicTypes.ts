@@ -12,6 +12,7 @@ import type {
   CompatGeolocationError as SchemaCompatGeolocationError,
   CompatGeolocationOptions as SchemaCompatGeolocationOptions,
   CompatGeolocationResponse as SchemaCompatGeolocationResponse,
+  CompatGeolocationResponseWithMetadataInternal as SchemaCompatGeolocationResponseWithMetadataInternal,
   GeocodedLocation as SchemaGeocodedLocation,
   GeocodingCoordinates as SchemaGeocodingCoordinates,
   GeolocationResponse as SchemaGeolocationResponse,
@@ -106,10 +107,36 @@ export type ActiveWatchKind = SchemaActiveWatchKind;
 
 export type CompatGeolocationResponse = SchemaCompatGeolocationResponse;
 
+/**
+ * Compat response returned only when `includeExtraMetadata: true` is passed.
+ * Metadata remains optional because platform/runtime support can vary.
+ */
+export type CompatGeolocationResponseWithMetadata =
+  SchemaCompatGeolocationResponse &
+    Partial<
+      Pick<
+        SchemaCompatGeolocationResponseWithMetadataInternal,
+        "mocked" | "provider"
+      >
+    >;
+
 export type GeolocationCoordinates = GeolocationResponse["coords"];
 export type LocationProviderUsed = SchemaLocationProviderUsed;
 export type CompatGeolocationError = SchemaCompatGeolocationError;
-export type CompatGeolocationOptions = SchemaCompatGeolocationOptions;
+export type CompatGeolocationOptions = SchemaCompatGeolocationOptions & {
+  /**
+   * Include mock/provider metadata for this call or watch only.
+   * Omitted and `false` preserve the exact community response shape.
+   * @default false
+   */
+  includeExtraMetadata?: boolean;
+};
+export type CompatGeolocationOptionsWithMetadata = Omit<
+  CompatGeolocationOptions,
+  "includeExtraMetadata"
+> & {
+  includeExtraMetadata: true;
+};
 
 export type AuthorizationLevel = NonNullable<
   NativeGeolocationConfiguration["authorizationLevel"]

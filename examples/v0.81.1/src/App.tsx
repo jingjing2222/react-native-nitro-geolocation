@@ -15,6 +15,7 @@ import AndroidRequestOptionsScreen, {
 import ApiErrorsScreen from "./screens/ApiErrorsScreen";
 import BackgroundE2EScreen from "./screens/BackgroundE2EScreen";
 import CancellableCurrentPositionScreen from "./screens/CancellableCurrentPositionScreen";
+import CompatMetadataScreen from "./screens/CompatMetadataScreen";
 import CompatScreen from "./screens/CompatScreen";
 import CurrentPositionScreen from "./screens/CurrentPositionScreen";
 import DefaultScreen from "./screens/DefaultScreen";
@@ -51,6 +52,7 @@ const linking = {
     screens: {
       Default: "",
       Compat: "compat",
+      CompatMetadata: "compat-metadata",
       PermissionCheck: "permission-check",
       PermissionDetails: "permission-details",
       CurrentPosition: "current-position",
@@ -305,6 +307,11 @@ export default function App() {
           <Tab.Screen
             name="WebE2E"
             component={WebE2EScreen}
+            options={hiddenTabOptions}
+          />
+          <Tab.Screen
+            name="CompatMetadata"
+            component={CompatMetadataScreen}
             options={hiddenTabOptions}
           />
           <Tab.Screen

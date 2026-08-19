@@ -34,6 +34,10 @@ namespace margelo::nitro::nitrogeolocation { enum class AndroidAccuracyPreset; }
 namespace margelo::nitro::nitrogeolocation { enum class IOSAccuracyPreset; }
 // Forward declaration of `IOSActivityType` to properly resolve imports.
 namespace margelo::nitro::nitrogeolocation { enum class IOSActivityType; }
+// Forward declaration of `CompatGeolocationResponseWithMetadataInternal` to properly resolve imports.
+namespace margelo::nitro::nitrogeolocation { struct CompatGeolocationResponseWithMetadataInternal; }
+// Forward declaration of `LocationProviderUsed` to properly resolve imports.
+namespace margelo::nitro::nitrogeolocation { enum class LocationProviderUsed; }
 
 #include "CompatGeolocationConfigurationInternal.hpp"
 #include "AuthorizationLevelInternal.hpp"
@@ -51,6 +55,8 @@ namespace margelo::nitro::nitrogeolocation { enum class IOSActivityType; }
 #include "AndroidAccuracyPreset.hpp"
 #include "IOSAccuracyPreset.hpp"
 #include "IOSActivityType.hpp"
+#include "CompatGeolocationResponseWithMetadataInternal.hpp"
+#include "LocationProviderUsed.hpp"
 
 #include "NitroGeolocation-Swift-Cxx-Umbrella.hpp"
 
@@ -120,8 +126,22 @@ namespace margelo::nitro::nitrogeolocation {
         std::rethrow_exception(__result.error());
       }
     }
+    inline void getCurrentPositionWithMetadata(const std::function<void(const CompatGeolocationResponseWithMetadataInternal& /* position */)>& success, const CompatGeolocationOptions& options, const std::optional<std::function<void(const CompatGeolocationError& /* error */)>>& error) override {
+      auto __result = _swiftPart.getCurrentPositionWithMetadata(success, std::forward<decltype(options)>(options), error);
+      if (__result.hasError()) [[unlikely]] {
+        std::rethrow_exception(__result.error());
+      }
+    }
     inline double watchPosition(const std::function<void(const CompatGeolocationResponse& /* position */)>& success, const CompatGeolocationOptions& options, const std::optional<std::function<void(const CompatGeolocationError& /* error */)>>& error) override {
       auto __result = _swiftPart.watchPosition(success, std::forward<decltype(options)>(options), error);
+      if (__result.hasError()) [[unlikely]] {
+        std::rethrow_exception(__result.error());
+      }
+      auto __value = std::move(__result.value());
+      return __value;
+    }
+    inline double watchPositionWithMetadata(const std::function<void(const CompatGeolocationResponseWithMetadataInternal& /* position */)>& success, const CompatGeolocationOptions& options, const std::optional<std::function<void(const CompatGeolocationError& /* error */)>>& error) override {
+      auto __result = _swiftPart.watchPositionWithMetadata(success, std::forward<decltype(options)>(options), error);
       if (__result.hasError()) [[unlikely]] {
         std::rethrow_exception(__result.error());
       }

@@ -21,6 +21,8 @@ namespace margelo::nitro::nitrogeolocation { struct CompatGeolocationError; }
 namespace margelo::nitro::nitrogeolocation { struct CompatGeolocationResponse; }
 // Forward declaration of `CompatGeolocationOptions` to properly resolve imports.
 namespace margelo::nitro::nitrogeolocation { struct CompatGeolocationOptions; }
+// Forward declaration of `CompatGeolocationResponseWithMetadataInternal` to properly resolve imports.
+namespace margelo::nitro::nitrogeolocation { struct CompatGeolocationResponseWithMetadataInternal; }
 
 #include "CompatGeolocationConfigurationInternal.hpp"
 #include <functional>
@@ -28,6 +30,7 @@ namespace margelo::nitro::nitrogeolocation { struct CompatGeolocationOptions; }
 #include "CompatGeolocationError.hpp"
 #include "CompatGeolocationResponse.hpp"
 #include "CompatGeolocationOptions.hpp"
+#include "CompatGeolocationResponseWithMetadataInternal.hpp"
 
 namespace margelo::nitro::nitrogeolocation {
 
@@ -63,7 +66,9 @@ namespace margelo::nitro::nitrogeolocation {
       virtual void setRNConfiguration(const CompatGeolocationConfigurationInternal& config) = 0;
       virtual void requestAuthorization(const std::optional<std::function<void()>>& success, const std::optional<std::function<void(const CompatGeolocationError& /* error */)>>& error) = 0;
       virtual void getCurrentPosition(const std::function<void(const CompatGeolocationResponse& /* position */)>& success, const CompatGeolocationOptions& options, const std::optional<std::function<void(const CompatGeolocationError& /* error */)>>& error) = 0;
+      virtual void getCurrentPositionWithMetadata(const std::function<void(const CompatGeolocationResponseWithMetadataInternal& /* position */)>& success, const CompatGeolocationOptions& options, const std::optional<std::function<void(const CompatGeolocationError& /* error */)>>& error) = 0;
       virtual double watchPosition(const std::function<void(const CompatGeolocationResponse& /* position */)>& success, const CompatGeolocationOptions& options, const std::optional<std::function<void(const CompatGeolocationError& /* error */)>>& error) = 0;
+      virtual double watchPositionWithMetadata(const std::function<void(const CompatGeolocationResponseWithMetadataInternal& /* position */)>& success, const CompatGeolocationOptions& options, const std::optional<std::function<void(const CompatGeolocationError& /* error */)>>& error) = 0;
       virtual void clearWatch(double watchId) = 0;
       virtual void stopObserving() = 0;
 

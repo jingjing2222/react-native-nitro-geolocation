@@ -66,6 +66,8 @@ namespace margelo::nitro::nitrogeolocation { struct CompatGeolocationConfigurati
 namespace margelo::nitro::nitrogeolocation { struct CompatGeolocationError; }
 // Forward declaration of `CompatGeolocationOptions` to properly resolve imports.
 namespace margelo::nitro::nitrogeolocation { struct CompatGeolocationOptions; }
+// Forward declaration of `CompatGeolocationResponseWithMetadataInternal` to properly resolve imports.
+namespace margelo::nitro::nitrogeolocation { struct CompatGeolocationResponseWithMetadataInternal; }
 // Forward declaration of `CompatGeolocationResponse` to properly resolve imports.
 namespace margelo::nitro::nitrogeolocation { struct CompatGeolocationResponse; }
 // Forward declaration of `DetectedActivityType` to properly resolve imports.
@@ -182,6 +184,7 @@ namespace margelo::nitro::nitrogeolocation { struct StoredBackgroundLocation; }
 #include "CompatGeolocationError.hpp"
 #include "CompatGeolocationOptions.hpp"
 #include "CompatGeolocationResponse.hpp"
+#include "CompatGeolocationResponseWithMetadataInternal.hpp"
 #include "DetectedActivity.hpp"
 #include "DetectedActivityType.hpp"
 #include "GeocodedLocation.hpp"

@@ -616,7 +616,8 @@ reading the platform cache.
 
 The `/compat` entry point keeps the
 `@react-native-community/geolocation` response shape and does not include these
-fields.
+fields. Compat callers can opt into equivalent metadata by setting
+`includeExtraMetadata: true` on compat `getCurrentPosition()` / `watchPosition()` calls.
 
 #### Testing the signal naturally
 
