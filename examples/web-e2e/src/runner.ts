@@ -6,7 +6,7 @@ import {
   getCurrentPosition,
   getLastKnownPosition,
   getLastKnownPositionAsync,
-  requestLocationSettings,
+  getPermissionDetails,
   requestPermission,
   stopObserving,
   unwatch,
@@ -34,6 +34,7 @@ import {
   isNearExpected
 } from "./locationAssertions";
 import { postNativeStatus } from "./nativeBridge";
+import { expectPostRequestPermissionDetails } from "./permissionDetailsAssertions";
 import { scenarios } from "./scenarios";
 
 function wait(ms: number) {
@@ -223,7 +224,23 @@ async function getCurrentPositionUntilExpected({
 }
 
 export async function runSuccessSuite() {
-  assertModernApiAvailability();
+  setScenario("api-availability", "running");
+  const apiShape = {
+    checkPermission: typeof checkPermission,
+    getPermissionDetails: typeof getPermissionDetails,
+    requestPermission: typeof requestPermission,
+    getCurrentPosition: typeof getCurrentPosition,
+    getLastKnownPosition: typeof getLastKnownPosition,
+    getLastKnownPositionAsync: typeof getLastKnownPositionAsync,
+    watchPosition: typeof watchPosition,
+    unwatch: typeof unwatch,
+    stopObserving: typeof stopObserving
+  };
+  const apiReady = Object.values(apiShape).every((type) => type === "function");
+  setScenario("api-availability", apiReady ? "pass" : "fail", apiShape);
+  if (!apiReady) {
+    throw new Error("Modern API browser export is incomplete.");
+  }
 
   runCompatApiAvailabilityCheck();
 
@@ -270,6 +287,12 @@ export async function runSuccessSuite() {
         throw new Error(`Expected granted permission, got ${status}.`);
       }
     }
+  );
+
+  await runStep(
+    "permission-details-after-request",
+    () => getPermissionDetails(),
+    expectPostRequestPermissionDetails
   );
 
   const position = await runStep(
@@ -501,6 +524,7 @@ export async function runSuccessSuite() {
         "request-location-settings",
         "check-permission",
         "request-permission",
+        "permission-details-after-request",
         "get-current-position",
         "last-known-cold-cache",
         "last-known-async-cold-cache",

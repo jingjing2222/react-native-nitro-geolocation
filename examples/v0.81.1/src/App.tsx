@@ -36,6 +36,7 @@ import LocationSimulationScreen from "./screens/LocationSimulationScreen";
 import { LongRunBackgroundE2EScreen } from "./screens/LongRunBackgroundE2EScreen";
 import MockedMetadataScreen from "./screens/MockedMetadataScreen";
 import PermissionCheckScreen from "./screens/PermissionCheckScreen";
+import PermissionDetailsScreen from "./screens/PermissionDetailsScreen";
 import ProviderSettingsScreen from "./screens/ProviderSettingsScreen";
 import WatchPositionScreen from "./screens/WatchPositionScreen";
 import WebE2EScreen from "./screens/WebE2EScreen";
@@ -48,6 +49,7 @@ const linking = {
       Default: "",
       Compat: "compat",
       PermissionCheck: "permission-check",
+      PermissionDetails: "permission-details",
       CurrentPosition: "current-position",
       WatchPosition: "watch-position",
       LocationSimulation: "location-simulation",
@@ -125,6 +127,11 @@ export default function App() {
           <Tab.Screen
             name="PermissionCheck"
             component={PermissionCheckScreen}
+            options={hiddenTabOptions}
+          />
+          <Tab.Screen
+            name="PermissionDetails"
+            component={PermissionDetailsScreen}
             options={hiddenTabOptions}
           />
           <Tab.Screen

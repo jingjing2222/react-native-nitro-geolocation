@@ -106,6 +106,64 @@ async function checkLocationPermission() {
 - `'restricted'` - Permission restricted (iOS parental controls)
 - `'undetermined'` - Permission not yet requested
 
+### getPermissionDetails()
+
+Read the current foreground status, granted scope, accuracy authorization, and
+the next appropriate permission action without showing a prompt, opening
+settings, or acquiring a location.
+
+```tsx
+import { getPermissionDetails } from 'react-native-nitro-geolocation';
+
+async function prepareLocationPermission() {
+  const details = await getPermissionDetails();
+
+  if (details.settingsGuidance === 'requestPermission') {
+    // Show your in-app rationale before calling requestPermission().
+  } else if (details.settingsGuidance === 'reviewSettings') {
+    // Explain why the user may want to review the app's system settings.
+  }
+
+  return details;
+}
+```
+
+**Returns**: `Promise<PermissionDetails>`
+
+```typescript
+interface PermissionDetails {
+  status: PermissionStatus;
+  scope: 'none' | 'foreground' | 'background';
+  accuracy: 'full' | 'reduced' | 'unknown';
+  canAskAgain: boolean | null;
+  settingsGuidance:
+    | 'none'
+    | 'requestPermission'
+    | 'requestPermissionOrReviewSettings'
+    | 'reviewSettings'
+    | 'managedRestriction'
+    | 'useSupportedEnvironment';
+}
+```
+
+- `scope` is `background` only when both foreground and background access are
+  granted. Browser access is always `foreground`.
+- `accuracy` reports iOS precise/reduced and Android fine/approximate access.
+  Browsers do not expose this distinction and return `unknown`.
+- `canAskAgain` describes whether another **foreground** system permission
+  prompt is known to be possible. It does not describe a later background
+  permission upgrade. `null` means the platform cannot determine the answer
+  without attempting a request.
+- Android exposes the same denied state before the first request and after
+  permanent denial through this read-only API. In that ambiguous state,
+  `canAskAgain` is `null` and `settingsGuidance` is
+  `requestPermissionOrReviewSettings`.
+- iOS returns `requestPermission` for `undetermined`, `reviewSettings` for
+  `denied`, and `managedRestriction` for `restricted`.
+- Web uses the Permissions API when available. Without it, foreground prompt
+  capability is unknown; without `navigator.geolocation`, guidance is
+  `useSupportedEnvironment`.
+
 
 ### requestPermission()
 
@@ -246,6 +304,8 @@ Supported on web:
 - `checkPermission()` maps `navigator.permissions.query({ name:
   'geolocation' })` to `granted`, `denied`, or `undetermined` when the
   Permissions API is available.
+- `getPermissionDetails()` enriches that read-only state with foreground scope
+  and settings guidance. Browser accuracy authorization remains `unknown`.
 - `requestPermission()` performs a one-shot browser geolocation request because
   browsers do not expose a standalone geolocation permission request API.
 - `getCurrentPosition()` wraps `navigator.geolocation.getCurrentPosition()`.
@@ -880,6 +940,9 @@ All Modern API exports are fully typed:
 ```typescript
 import type {
   PermissionStatus,
+  PermissionDetails,
+  PermissionScope,
+  PermissionSettingsGuidance,
   LocationRequestOptions,
   LocationErrorCode,
   LocationError,

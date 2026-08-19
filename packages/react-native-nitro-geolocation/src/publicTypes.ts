@@ -1,4 +1,7 @@
-import type { NitroGeolocation } from "./NitroGeolocation.nitro";
+import type {
+  NitroGeolocation,
+  PermissionStatus
+} from "./NitroGeolocation.nitro";
 import type { CompatGeolocationConfigurationInternal } from "./NitroGeolocationCompat.nitro";
 import type {
   AccuracyAuthorization as SchemaAccuracyAuthorization,
@@ -65,6 +68,26 @@ export type LocationProviderStatus = SchemaLocationProviderStatus;
 export type LocationSettingsOutcome = SchemaLocationSettingsOutcome;
 export type LocationSettingsResult = SchemaLocationSettingsResult;
 export type LocationAvailability = SchemaLocationAvailability;
+
+export type PermissionScope = "none" | "foreground" | "background";
+export type PermissionSettingsGuidance =
+  | "none"
+  | "requestPermission"
+  | "requestPermissionOrReviewSettings"
+  | "reviewSettings"
+  | "managedRestriction"
+  | "useSupportedEnvironment";
+
+/** Detailed, read-only location permission state. */
+export interface PermissionDetails {
+  status: PermissionStatus;
+  scope: PermissionScope;
+  accuracy: SchemaAccuracyAuthorization;
+  /** Whether another foreground system prompt is known to be possible. */
+  canAskAgain: boolean | null;
+  settingsGuidance: PermissionSettingsGuidance;
+}
+
 export type GeocodingCoordinates = SchemaGeocodingCoordinates;
 export type GeocodedLocation = SchemaGeocodedLocation;
 export type ReverseGeocodedAddress = SchemaReverseGeocodedAddress;

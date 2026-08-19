@@ -40,6 +40,13 @@ export const scenarios: Scenario[] = [
     status: "idle"
   },
   {
+    id: "permission-details-after-request",
+    title: "getPermissionDetails after request",
+    detail:
+      "Reads granted browser scope, or honest unknown state without Permissions API.",
+    status: "idle"
+  },
+  {
     id: "get-current-position",
     title: "getCurrentPosition",
     detail: "Returns coords and timestamp from navigator.geolocation.",
@@ -118,6 +125,13 @@ export const scenarios: Scenario[] = [
     id: "permission-denied",
     title: "permission denied -> PERMISSION_DENIED",
     detail: "Run with browser geolocation permission blocked.",
+    status: "idle"
+  },
+  {
+    id: "permission-details-after-denial",
+    title: "getPermissionDetails after denial",
+    detail:
+      "Reads denied state, or honest unknown state without Permissions API.",
     status: "idle"
   },
   {

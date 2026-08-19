@@ -1,0 +1,185 @@
+appId: nitrogeolocation.example
+---
+# Read-only detailed permission states: first run, granted scope/accuracy,
+# Android approximate permission, and explicit denial.
+
+- launchApp:
+    clearState: true
+    permissions:
+      all: unset
+- runFlow:
+    when:
+      platform: Android
+      visible: ".*isn't responding|.*응답하지 않.*"
+    commands:
+      - tapOn:
+          text: "Wait|대기"
+- extendedWaitUntil:
+    visible: "Geolocation API"
+    timeout: 10000
+- stopApp
+- openLink:
+    link: nitrogeolocation://app/permission-details
+- runFlow:
+    when:
+      platform: Android
+      visible: ".*isn't responding|.*응답하지 않.*"
+    commands:
+      - tapOn:
+          text: "Wait|대기"
+- runFlow:
+    when:
+      platform: iOS
+      visible: "Cancel|취소"
+    commands:
+      - tapOn:
+          text: "Open|열기"
+- runFlow:
+    when:
+      platform: iOS
+    commands:
+      - openLink:
+          link: nitrogeolocation://app/permission-details
+- waitForAnimationToEnd
+- tapOn:
+    id: "e2e-action-permission-details-run-initial-button"
+- extendedWaitUntil:
+    visible: "Initial details: passed"
+    timeout: 20000
+- runFlow:
+    when:
+      platform: Android
+    commands:
+      - assertVisible:
+          text: ".*status=denied.*canAskAgain=unknown.*requestPermissionOrReviewSettings.*unchanged=true.*"
+- runFlow:
+    when:
+      platform: iOS
+    commands:
+      - assertVisible:
+          text: ".*status=undetermined.*canAskAgain=true.*requestPermission.*unchanged=true.*"
+
+- launchApp:
+    clearState: true
+    permissions:
+      all: allow
+- runFlow:
+    when:
+      platform: Android
+      visible: ".*isn't responding|.*응답하지 않.*"
+    commands:
+      - tapOn:
+          text: "Wait|대기"
+- extendedWaitUntil:
+    visible: "Geolocation API"
+    timeout: 10000
+- stopApp
+- openLink:
+    link: nitrogeolocation://app/permission-details
+- runFlow:
+    when:
+      platform: Android
+      visible: ".*isn't responding|.*응답하지 않.*"
+    commands:
+      - tapOn:
+          text: "Wait|대기"
+- runFlow:
+    when:
+      platform: iOS
+    commands:
+      - openLink:
+          link: nitrogeolocation://app/permission-details
+- waitForAnimationToEnd
+- tapOn:
+    id: "e2e-action-permission-details-run-granted-button"
+- extendedWaitUntil:
+    visible: "Granted details: passed"
+    timeout: 20000
+- assertVisible:
+    text: ".*status=granted.*scope=(foreground|background).*canAskAgain=false.*settings=none.*unchanged=true.*"
+
+- runFlow:
+    when:
+      platform: Android
+    commands:
+      - launchApp:
+          clearState: true
+          permissions:
+            all: deny
+            android.permission.ACCESS_COARSE_LOCATION: allow
+            android.permission.ACCESS_FINE_LOCATION: deny
+      - runFlow:
+          when:
+            visible: ".*isn't responding|.*응답하지 않.*"
+          commands:
+            - tapOn:
+                text: "Wait|대기"
+      - extendedWaitUntil:
+          visible: "Geolocation API"
+          timeout: 10000
+      - stopApp
+      - openLink:
+          link: nitrogeolocation://app/permission-details
+      - runFlow:
+          when:
+            visible: ".*isn't responding|.*응답하지 않.*"
+          commands:
+            - tapOn:
+                text: "Wait|대기"
+      - waitForAnimationToEnd
+      - tapOn:
+          id: "e2e-action-permission-details-run-coarse-button"
+      - extendedWaitUntil:
+          visible: "Coarse details: passed"
+          timeout: 20000
+      - assertVisible:
+          text: ".*status=granted.*scope=foreground.*accuracy=reduced.*unchanged=true.*"
+
+- launchApp:
+    clearState: true
+    permissions:
+      all: deny
+- runFlow:
+    when:
+      platform: Android
+      visible: ".*isn't responding|.*응답하지 않.*"
+    commands:
+      - tapOn:
+          text: "Wait|대기"
+- extendedWaitUntil:
+    visible: "Geolocation API"
+    timeout: 10000
+- stopApp
+- openLink:
+    link: nitrogeolocation://app/permission-details
+- runFlow:
+    when:
+      platform: Android
+      visible: ".*isn't responding|.*응답하지 않.*"
+    commands:
+      - tapOn:
+          text: "Wait|대기"
+- runFlow:
+    when:
+      platform: iOS
+    commands:
+      - openLink:
+          link: nitrogeolocation://app/permission-details
+- waitForAnimationToEnd
+- tapOn:
+    id: "e2e-action-permission-details-run-denied-button"
+- extendedWaitUntil:
+    visible: "Denied details: passed"
+    timeout: 20000
+- runFlow:
+    when:
+      platform: Android
+    commands:
+      - assertVisible:
+          text: ".*status=denied.*canAskAgain=unknown.*requestPermissionOrReviewSettings.*unchanged=true.*"
+- runFlow:
+    when:
+      platform: iOS
+    commands:
+      - assertVisible:
+          text: ".*status=denied.*canAskAgain=false.*reviewSettings.*unchanged=true.*"

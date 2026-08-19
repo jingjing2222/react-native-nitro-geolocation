@@ -4,7 +4,7 @@ import type {
   LocationSettingsOptions,
   PermissionStatus
 } from "../NitroGeolocation.nitro";
-import { decoratePositionWithMetadata } from "../api/locationMetadata";
+import { buildPermissionDetails } from "../api/permissionDetails";
 import {
   readLastKnownPosition,
   rememberPosition,
@@ -19,7 +19,7 @@ import type {
   Heading,
   LocationAvailability,
   LocationProviderStatus,
-  LocationSettingsResult,
+  PermissionDetails,
   ReverseGeocodedAddress
 } from "../publicTypes";
 import { LocationErrorCode } from "../utils/errors";
@@ -56,6 +56,44 @@ export async function checkPermission(): Promise<PermissionStatus> {
     return status ? mapPermissionState(status.state) : "undetermined";
   } catch {
     return "undetermined";
+  }
+}
+
+export async function getPermissionDetails(): Promise<PermissionDetails> {
+  const browserNavigator = getNavigator();
+  if (!browserNavigator?.geolocation) {
+    return buildPermissionDetails({
+      platform: "web",
+      foreground: "denied",
+      background: "unsupported",
+      accuracy: "unknown",
+      environmentSupported: false,
+      canAskAgain: false
+    });
+  }
+
+  try {
+    const permission = await browserNavigator.permissions?.query({
+      name: "geolocation"
+    });
+    const status = permission
+      ? mapPermissionState(permission.state)
+      : "undetermined";
+    return buildPermissionDetails({
+      platform: "web",
+      foreground: status,
+      background: "unsupported",
+      accuracy: "unknown",
+      canAskAgain: permission ? status === "undetermined" : null
+    });
+  } catch {
+    return buildPermissionDetails({
+      platform: "web",
+      foreground: "undetermined",
+      background: "unsupported",
+      accuracy: "unknown",
+      canAskAgain: null
+    });
   }
 }
 

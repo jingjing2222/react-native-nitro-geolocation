@@ -52,6 +52,7 @@
 export {
   setConfiguration,
   checkPermission,
+  getPermissionDetails,
   requestPermission,
   hasServicesEnabled,
   getProviderStatus,
@@ -92,6 +93,9 @@ export type {
   LocationSettingsOutcome,
   LocationSettingsResult,
   LocationAvailability,
+  PermissionDetails,
+  PermissionScope,
+  PermissionSettingsGuidance,
   GeocodingCoordinates,
   GeocodedLocation,
   ReverseGeocodedAddress,
