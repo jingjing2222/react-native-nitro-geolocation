@@ -386,8 +386,8 @@ describe("web Modern API", () => {
       status: "denied",
       scope: "none",
       accuracy: "unknown",
-      canAskAgain: false,
-      settingsGuidance: "reviewSettings"
+      canAskAgain: null,
+      settingsGuidance: "requestPermissionOrReviewSettings"
     });
   });
 

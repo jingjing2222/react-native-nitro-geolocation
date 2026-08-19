@@ -164,8 +164,12 @@ interface PermissionDetails {
   `denied`, and `managedRestriction` for `restricted`.
 - Web uses the Permissions API when available. Without it, a successful
   position/watch callback or permission-denied error is used as bounded
-  evidence for at most 30 seconds; otherwise foreground prompt capability is
-  unknown. Without `navigator.geolocation`, guidance is
+  evidence for at most 30 seconds. A denial proves the current state but not
+  whether the browser will prompt again, so `canAskAgain` remains `null` and
+  guidance is `requestPermissionOrReviewSettings`. An authoritative
+  Permissions API `denied` state instead returns `false` and `reviewSettings`.
+  Without observed evidence, foreground prompt capability is also unknown. Without
+  `navigator.geolocation`, guidance is
   `useSupportedEnvironment`.
 
 

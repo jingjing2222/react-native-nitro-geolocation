@@ -173,4 +173,22 @@ describe("buildPermissionDetails", () => {
       settingsGuidance: "useSupportedEnvironment"
     });
   });
+
+  it("keeps Web denial remediation ambiguous without prompt evidence", () => {
+    expect(
+      buildPermissionDetails({
+        platform: "web",
+        foreground: "denied",
+        background: "unsupported",
+        accuracy: "unknown",
+        canAskAgain: null
+      })
+    ).toEqual({
+      status: "denied",
+      scope: "none",
+      accuracy: "unknown",
+      canAskAgain: null,
+      settingsGuidance: "requestPermissionOrReviewSettings"
+    });
+  });
 });

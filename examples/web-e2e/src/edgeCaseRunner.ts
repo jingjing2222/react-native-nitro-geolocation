@@ -22,7 +22,7 @@ export async function runDeniedCheck() {
       setScenario("permission-details-after-denial", "running");
       try {
         const details = await getPermissionDetails();
-        expectPostDenialPermissionDetails(details);
+        await expectPostDenialPermissionDetails(details);
         setScenario("permission-details-after-denial", "pass", details);
       } catch (detailsError) {
         setScenario("permission-details-after-denial", "fail", detailsError);

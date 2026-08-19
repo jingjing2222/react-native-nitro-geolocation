@@ -101,7 +101,7 @@ export async function getPermissionDetails(): Promise<PermissionDetails> {
       foreground: status,
       background: "unsupported",
       accuracy: "unknown",
-      canAskAgain: observed ? false : null
+      canAskAgain: observed === "granted" ? false : null
     });
   } catch {
     const observed = readRecentWebPermissionDetailsEvidence();
@@ -110,7 +110,7 @@ export async function getPermissionDetails(): Promise<PermissionDetails> {
       foreground: observed ?? "undetermined",
       background: "unsupported",
       accuracy: "unknown",
-      canAskAgain: observed ? false : null
+      canAskAgain: observed === "granted" ? false : null
     });
   }
 }

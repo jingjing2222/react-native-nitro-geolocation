@@ -60,7 +60,7 @@ function resolveSettingsGuidance(
   if (canAskAgain === true) {
     return "requestPermission";
   }
-  return platform === "android"
+  return canAskAgain === null
     ? "requestPermissionOrReviewSettings"
     : "reviewSettings";
 }

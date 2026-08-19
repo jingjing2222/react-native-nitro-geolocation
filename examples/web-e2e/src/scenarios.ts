@@ -130,7 +130,8 @@ export const scenarios: Scenario[] = [
   {
     id: "permission-details-after-denial",
     title: "getPermissionDetails after denial",
-    detail: "Reads a recent browser denial and settings guidance.",
+    detail:
+      "Uses browser permission evidence without overclaiming prompt behavior.",
     status: "idle"
   },
   {
