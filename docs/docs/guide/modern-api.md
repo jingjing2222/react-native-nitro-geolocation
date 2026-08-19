@@ -175,7 +175,9 @@ import {
   getLocationAvailability,
   getProviderStatus,
   hasServicesEnabled,
-  requestLocationSettings
+  requestLocationSettings,
+  unwatch,
+  watchProviderStatus
 } from 'react-native-nitro-geolocation';
 
 async function prepareAccurateLocation() {
@@ -196,6 +198,13 @@ async function prepareAccurateLocation() {
     timeout: 15000
   });
 }
+
+const providerToken = watchProviderStatus((status) => {
+  console.log('Location services:', status.locationServicesEnabled);
+});
+
+// Stop when this readiness observer is no longer needed.
+unwatch(providerToken);
 ```
 
 **Functions**:
@@ -207,6 +216,9 @@ async function prepareAccurateLocation() {
   `networkAvailable`, `passiveAvailable`, Android Google Play Services
   availability, and Google Location Accuracy when Google Play Services exposes
   it.
+- `watchProviderStatus(callback): string` - Delivers an asynchronous initial
+  provider snapshot and then only distinct readiness changes. Pass its token to
+  `unwatch()` for cleanup.
 - `getLocationAvailability(): Promise<{ available: boolean; reason?: string }>` -
   Available since `v1.2`. Android reads Fused Location availability when
   `locationProvider: 'auto'` or `locationProvider: 'playServices'` is
@@ -219,6 +231,13 @@ async function prepareAccurateLocation() {
 
 `requestLocationSettings()` is Android-focused. On iOS it resolves with the
 current Core Location service status and does not show a settings dialog.
+
+`watchProviderStatus()` only observes readiness: it does not request permission,
+open settings, or start position updates. Android reacts to system provider and
+location-mode broadcasts. iOS rechecks after authorization changes and when the
+app becomes active, which covers returning from Settings. Browser builds recheck
+when the page becomes visible or active. Provider-specific optional fields stay
+`undefined` on platforms that cannot report them.
 
 ### Android Reliability Notes
 
@@ -251,7 +270,9 @@ Supported on web:
 - `getCurrentPosition()` wraps `navigator.geolocation.getCurrentPosition()`.
 - `watchPosition()` wraps `navigator.geolocation.watchPosition()` and returns a
   string token.
-- `unwatch()` and `stopObserving()` clear browser watch IDs.
+- `watchProviderStatus()` reports whether browser geolocation is available and
+  rechecks on page visibility/focus lifecycle events.
+- `unwatch()` and `stopObserving()` clear position and provider-status watches.
 
 Web option behavior:
 

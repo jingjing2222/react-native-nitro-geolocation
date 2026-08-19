@@ -154,6 +154,18 @@ run_maestro_flows \
   "android GPS stale-readiness setup" \
   gps-only-recipe-stale-readiness-prepare.yaml || status=1
 
+run_maestro_flows \
+  "android provider watcher started" \
+  provider-status-watcher-android-start.yaml || status=1
+set_location_enabled false
+run_maestro_flows \
+  "android provider watcher changed" \
+  provider-status-watcher-android-changed.yaml || status=1
+set_location_enabled true
+run_maestro_flows \
+  "android provider watcher stopped" \
+  provider-status-watcher-android-stopped.yaml || status=1
+
 set_location_enabled false
 run_maestro_flows \
   "android GPS stale-readiness verification" \

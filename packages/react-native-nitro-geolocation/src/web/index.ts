@@ -33,7 +33,13 @@ import {
   rejectUnsupported,
   toPositionOptions
 } from "./browser";
-export { stopObserving, unwatch, watchHeading, watchPosition } from "./watch";
+export {
+  stopObserving,
+  unwatch,
+  watchHeading,
+  watchPosition,
+  watchProviderStatus
+} from "./watch";
 export {
   useWatchPosition,
   type UseWatchPositionOptions

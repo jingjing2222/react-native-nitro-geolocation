@@ -51,11 +51,11 @@ namespace margelo::nitro::nitrogeolocation { struct HeadingOptions; }
 #include "LocationError.hpp"
 #include <optional>
 #include "LocationProviderStatus.hpp"
+#include <string>
 #include "LocationAvailability.hpp"
 #include "LocationSettingsResult.hpp"
 #include "LocationSettingsOptions.hpp"
 #include "AccuracyAuthorization.hpp"
-#include <string>
 #include "GeolocationResponse.hpp"
 #include "LocationRequestOptions.hpp"
 #include "GeocodedLocation.hpp"
@@ -101,6 +101,7 @@ namespace margelo::nitro::nitrogeolocation {
       virtual void requestPermission(const std::function<void(PermissionStatus /* status */)>& success, const std::optional<std::function<void(const LocationError& /* error */)>>& error) = 0;
       virtual std::shared_ptr<Promise<bool>> hasServicesEnabled() = 0;
       virtual std::shared_ptr<Promise<LocationProviderStatus>> getProviderStatus() = 0;
+      virtual std::string watchProviderStatus(const std::function<void(const LocationProviderStatus& /* status */)>& success) = 0;
       virtual std::shared_ptr<Promise<LocationAvailability>> getLocationAvailability() = 0;
       virtual void requestLocationSettings(const std::function<void(const LocationSettingsResult& /* result */)>& success, const LocationSettingsOptions& options, const std::optional<std::function<void(const LocationError& /* error */)>>& error) = 0;
       virtual std::shared_ptr<Promise<AccuracyAuthorization>> getAccuracyAuthorization() = 0;

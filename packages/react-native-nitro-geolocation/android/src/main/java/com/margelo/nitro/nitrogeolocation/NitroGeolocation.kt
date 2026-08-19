@@ -57,6 +57,7 @@ class NitroGeolocation(
             createLocationError = ::createLocationError
         )
     }
+    private val providerStatusWatcher by lazy { AndroidProviderStatusWatcher(reactContext, locationSettings) }
     private val fusedLocationClient by lazy {
         LocationServices.getFusedLocationProviderClient(reactContext)
     }
@@ -172,6 +173,10 @@ class NitroGeolocation(
             promise.resolve(status)
         }
         return promise
+    }
+
+    override fun watchProviderStatus(success: (LocationProviderStatus) -> Unit): String {
+        return providerStatusWatcher.watch(success)
     }
 
     override fun getLocationAvailability(): Promise<LocationAvailability> {
@@ -529,6 +534,7 @@ class NitroGeolocation(
     override fun unwatch(token: String) {
         val didRemoveLocationSubscription = watchSubscriptions.remove(token) != null
         headingManager.unwatch(token)
+        providerStatusWatcher.unwatch(token)
 
         if (!didRemoveLocationSubscription) {
             return
@@ -545,6 +551,7 @@ class NitroGeolocation(
     override fun stopObserving() {
         watchSubscriptions.clear()
         headingManager.stopObserving()
+        providerStatusWatcher.stopObserving()
         stopWatchingLocation()
     }
 

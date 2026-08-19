@@ -1,0 +1,51 @@
+appId: nitrogeolocation.example
+---
+# User flow: observe the initial provider snapshot, stop listening, and verify
+# an on-demand check still reports the current device state.
+
+- launchApp:
+    clearState: true
+    permissions:
+      all: allow
+- stopApp
+
+- openLink:
+    link: nitrogeolocation://app/provider-status-watcher
+- runFlow:
+    when:
+      platform: iOS
+      visible: "Cancel|취소"
+    commands:
+      - tapOn:
+          text: "Open|열기"
+- runFlow:
+    when:
+      platform: iOS
+    commands:
+      - openLink:
+          link: nitrogeolocation://app/provider-status-watcher
+- extendedWaitUntil:
+    visible: "Provider Status Watcher"
+    timeout: 10000
+
+- assertVisible: "Listener: stopped"
+- assertVisible: "Events: 0"
+- tapOn:
+    id: "e2e-action-provider-status-watcher-start-button"
+- extendedWaitUntil:
+    visible: "Listener: listening"
+    timeout: 10000
+- extendedWaitUntil:
+    visible: "Events: 1"
+    timeout: 10000
+- assertVisible: "Services: enabled"
+
+- tapOn:
+    id: "e2e-action-provider-status-watcher-stop-button"
+- assertVisible: "Listener: stopped"
+- tapOn:
+    id: "e2e-action-provider-status-watcher-refresh-button"
+- extendedWaitUntil:
+    visible: "Manual snapshot: enabled"
+    timeout: 10000
+- assertVisible: "Events: 1"

@@ -1,0 +1,14 @@
+appId: nitrogeolocation.example
+---
+# The Android runner disables location services while the listener remains
+# active. The watcher must emit one distinct disabled snapshot.
+
+- extendedWaitUntil:
+    visible: "Services: disabled"
+    timeout: 10000
+- extendedWaitUntil:
+    visible: "Events: 2"
+    timeout: 10000
+- tapOn:
+    id: "e2e-action-provider-status-watcher-stop-button"
+- assertVisible: "Listener: stopped"

@@ -278,6 +278,16 @@ export interface NitroGeolocation
   getProviderStatus(): Promise<LocationProviderStatus>;
 
   /**
+   * Observe provider/settings readiness without opening system settings.
+   *
+   * The callback receives an asynchronous initial snapshot, followed only by
+   * distinct status changes. Use `unwatch(token)` to stop the subscription.
+   */
+  watchProviderStatus(
+    success: (status: LocationProviderStatus) => void
+  ): string;
+
+  /**
    * Get whether the current platform is likely to deliver location updates.
    *
    * Android: uses Fused Location availability when the configured provider is

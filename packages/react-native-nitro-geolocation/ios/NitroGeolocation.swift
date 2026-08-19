@@ -19,8 +19,7 @@ class NitroGeolocation: HybridNitroGeolocationSpec {
     private var locationManagerDelegate: LocationManagerDelegate?
     private var lastLocation: CLLocation?
     private var usingSignificantChanges: Bool = false
-
-    // Permission callbacks
+    lazy var providerStatusWatcher = IOSProviderStatusWatcher()
     private var pendingPermissionResolvers: [(PermissionStatus) -> Void] = []
 
     // getCurrentPosition promise resolvers with timeout
@@ -470,6 +469,7 @@ class NitroGeolocation: HybridNitroGeolocationSpec {
     func unwatch(token: String) {
         watchSubscriptions.removeValue(forKey: token)
         headingSubscriptions.removeValue(forKey: token)
+        providerStatusWatcher.unwatch(token: token)
 
         // Stop monitoring if no more subscriptions or pending requests
         if watchSubscriptions.isEmpty && pendingPositionRequests.isEmpty {
@@ -488,6 +488,7 @@ class NitroGeolocation: HybridNitroGeolocationSpec {
     func stopObserving() {
         watchSubscriptions.removeAll()
         headingSubscriptions.removeAll()
+        providerStatusWatcher.stopObserving()
 
         // Stop monitoring if no pending requests
         if pendingPositionRequests.isEmpty {
@@ -502,8 +503,6 @@ class NitroGeolocation: HybridNitroGeolocationSpec {
             updateHeadingConfiguration()
         }
     }
-
-    // MARK: - Location Manager Callbacks
 
     func handleAuthorizationChange(_ manager: CLLocationManager) {
         let status = getCurrentAuthorizationStatus(from: manager)
