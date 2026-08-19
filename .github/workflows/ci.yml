@@ -114,6 +114,45 @@ jobs:
         run: |
           yarn typecheck
 
+  unit-tests:
+    name: Unit Tests
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup mise
+        uses: jdx/mise-action@v3
+        with:
+          install: false
+
+      - name: Trust and install tools via mise
+        run: |
+          mise trust --yes
+          mise install java node
+
+      - name: Enable Corepack
+        run: |
+          corepack enable
+          mise reshim node
+
+      - name: Install dependencies
+        run: |
+          yarn install
+
+      - name: Run TypeScript unit tests
+        run: |
+          yarn test:unit
+
+      - name: Run Android unit tests
+        run: |
+          ./examples/v0.81.1/android/gradlew \
+            -p examples/v0.81.1/android \
+            --no-daemon \
+            --console=plain \
+            :react-native-nitro-geolocation:testDebugUnitTest
+
   guardrails:
     name: Dead Code / Package Guardrails
     runs-on: ubuntu-latest

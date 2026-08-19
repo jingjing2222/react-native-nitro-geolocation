@@ -100,6 +100,16 @@ export function LongRunBackgroundE2EScreen() {
               testID: `${PREFIX}-proof-locations`
             },
             {
+              label: "Proof location events (inside/outside):",
+              value: `${snapshot.proofInsideLocationEvents}/${snapshot.proofOutsideLocationEvents}`,
+              testID: `${PREFIX}-proof-location-events`
+            },
+            {
+              label: "Ordered inside/outside proof:",
+              value: String(snapshot.orderedBackgroundLocationProof),
+              testID: `${PREFIX}-ordered-location-proof`
+            },
+            {
               label: "Delivered events:",
               value: snapshot.deliveredEvents,
               testID: `${PREFIX}-delivered-events`
@@ -125,6 +135,11 @@ export function LongRunBackgroundE2EScreen() {
               testID: `${PREFIX}-geofence-exit-events`
             },
             {
+              label: "Ordered geofence proof:",
+              value: String(snapshot.orderedGeofenceTransitionProof),
+              testID: `${PREFIX}-ordered-geofence-proof`
+            },
+            {
               label: "Post-reboot locations:",
               value: snapshot.postRebootLocations,
               testID: `${PREFIX}-post-reboot-locations`
@@ -138,6 +153,11 @@ export function LongRunBackgroundE2EScreen() {
               label: "Post-reboot geofence:",
               value: `${snapshot.postRebootGeofenceEnterEvents}/${snapshot.postRebootGeofenceExitEvents}`,
               testID: `${PREFIX}-post-reboot-geofence-events`
+            },
+            {
+              label: "Ordered post-reboot geofence:",
+              value: String(snapshot.orderedPostRebootGeofenceTransitionProof),
+              testID: `${PREFIX}-ordered-post-reboot-geofence-proof`
             },
             {
               label: "Geofences:",

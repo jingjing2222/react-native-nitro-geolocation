@@ -4,6 +4,7 @@ import {
   addGeofences,
   checkBackgroundPermission,
   configureBackgroundLocation,
+  getBackgroundConfiguration,
   getBackgroundLocationStatus,
   getRegisteredGeofences,
   getStoredBackgroundEvents,
@@ -37,7 +38,10 @@ const initialResults = createScenarioResults([
 ] as const);
 
 const validOptions = {
-  trackingMode: "activityAware" as const,
+  trackingMode:
+    Platform.OS === "android"
+      ? ("activityAware" as const)
+      : ("continuous" as const),
   interval: 10_000,
   fastestInterval: 5_000,
   distanceFilter: 25,
@@ -59,7 +63,7 @@ const validOptions = {
     showsBackgroundLocationIndicator: true
   },
   activityRecognition: {
-    enabled: true,
+    enabled: Platform.OS === "android",
     interval: 10_000,
     stopOnStill: true,
     minimumConfidence: 70
@@ -70,6 +74,22 @@ const shortError = (error: any) =>
   String(error?.message ?? error)
     .split("\n")[0]
     .slice(0, 140);
+
+const wait = (durationMs: number) =>
+  new Promise<void>((resolve) => setTimeout(resolve, durationMs));
+
+const waitForStoppedStatus = async () => {
+  const deadline = Date.now() + 5_000;
+  let status = await getBackgroundLocationStatus();
+  while (
+    (status.isRunning || status.android?.isForegroundServiceRunning === true) &&
+    Date.now() < deadline
+  ) {
+    await wait(250);
+    status = await getBackgroundLocationStatus();
+  }
+  return status;
+};
 
 export default function BackgroundE2EScreen() {
   const { results, setResult, resetResults } =
@@ -178,11 +198,55 @@ export default function BackgroundE2EScreen() {
     try {
       await configureBackgroundLocation(validOptions);
       await startBackgroundLocation(validOptions);
+      const first = await getBackgroundLocationStatus();
+      if (!first.isRunning || first.state !== "running") {
+        throw new Error(`Initial tracking did not start: state=${first.state}`);
+      }
+      const replacementOptions = {
+        ...validOptions,
+        trackingMode: "continuous",
+        activityRecognition: {
+          ...validOptions.activityRecognition,
+          enabled: false
+        },
+        ios: {
+          ...validOptions.ios,
+          useSignificantChanges: false
+        }
+      } as const;
+      await startBackgroundLocation(replacementOptions);
+      const [replacement, replacementConfig] = await Promise.all([
+        getBackgroundLocationStatus(),
+        getBackgroundConfiguration()
+      ]);
+      if (
+        !replacement.isRunning ||
+        replacement.state !== "running" ||
+        replacementConfig?.trackingMode !== "continuous" ||
+        (Platform.OS === "android" &&
+          replacement.android?.isForegroundServiceRunning !== true)
+      ) {
+        throw new Error(
+          `Replacement not active: state=${replacement.state}, running=${String(replacement.isRunning)}, mode=${String(replacementConfig?.trackingMode)}, foregroundService=${String(replacement.android?.isForegroundServiceRunning)}`
+        );
+      }
       await stopBackgroundLocation();
+      const stopped = await waitForStoppedStatus();
+      if (
+        stopped.isRunning ||
+        stopped.android?.isForegroundServiceRunning === true
+      ) {
+        throw new Error(
+          `Tracking still active: running=${String(stopped.isRunning)}, foregroundService=${String(stopped.android?.isForegroundServiceRunning)}`
+        );
+      }
       await refreshStatus();
       setResult(
         "startStop",
-        createScenarioResult("passed", "Start/stop contract completed")
+        createScenarioResult(
+          "passed",
+          "Replacement start stopped the previous provider and shut down cleanly"
+        )
       );
     } catch (error: any) {
       setResult("startStop", createScenarioResult("failed", shortError(error)));
@@ -209,6 +273,14 @@ export default function BackgroundE2EScreen() {
         }
       ]);
       const registered = await getRegisteredGeofences();
+      const office = registered.find(
+        (region) => region.identifier === "office"
+      );
+      if (!office || office.metadata?.kind !== "workplace") {
+        throw new Error(
+          `Expected office geofence, received: ${registered.map((region) => region.identifier).join(", ") || "none"}`
+        );
+      }
       await refreshStatus();
       setResult(
         "geofence",

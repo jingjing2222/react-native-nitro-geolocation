@@ -9,6 +9,10 @@ class NitroGeofenceReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent) {
         val event = GeofencingEvent.fromIntent(intent) ?: return
         if (event.hasError()) return
-        NitroBackgroundLocationController.getInstance(context).handleGeofenceEvent(event)
+        val controller = NitroBackgroundLocationController.getInstance(context)
+        controller.handleGeofenceEvent(
+            event,
+            intent.getLongExtra(EXTRA_RUN_GENERATION, MISSING_RUN_GENERATION)
+        )
     }
 }

@@ -1,53 +1,31 @@
 package com.margelo.nitro.nitrogeolocation.background
 
-import android.Manifest
 import android.annotation.SuppressLint
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
-import android.content.pm.PackageManager
 import android.location.Location
 import android.location.LocationManager
 import android.os.Build
 import androidx.core.content.ContextCompat
-import com.facebook.react.HeadlessJsTaskService
 import com.facebook.react.bridge.ReactApplicationContext
 import com.google.android.gms.location.Geofence
 import com.google.android.gms.location.ActivityRecognition
 import com.google.android.gms.location.ActivityRecognitionResult
 import com.google.android.gms.location.GeofencingEvent
-import com.google.android.gms.location.GeofencingRequest
 import com.google.android.gms.location.LocationRequest
 import com.google.android.gms.location.LocationServices
-import com.google.android.gms.location.Priority
-import com.google.android.gms.tasks.Task
 import com.margelo.nitro.nitrogeolocation.*
-import java.util.concurrent.CountDownLatch
-import java.util.concurrent.Executors
-import java.util.concurrent.TimeUnit
+import java.util.concurrent.CompletableFuture
 import java.util.UUID
-
-private const val ACTION_LOCATION_UPDATE =
-    "com.margelo.nitro.nitrogeolocation.background.LOCATION_UPDATE"
-private const val ACTION_GEOFENCE_UPDATE =
-    "com.margelo.nitro.nitrogeolocation.background.GEOFENCE_UPDATE"
-private const val ACTION_ACTIVITY_UPDATE =
-    "com.margelo.nitro.nitrogeolocation.background.ACTIVITY_UPDATE"
-
-// LocationError codes mirror the W3C GeolocationPositionError contract.
-private const val ERROR_CODE_PERMISSION_DENIED = 1
-private const val ERROR_CODE_POSITION_UNAVAILABLE = 2
-
-// Default store caps so an unconfigured store cannot grow without bound over a long trip.
-private const val DEFAULT_MAX_STORED_LOCATIONS = 10_000
-private const val DEFAULT_MAX_STORED_EVENTS = 10_000
+import java.util.concurrent.locks.ReentrantLock
+import kotlin.concurrent.withLock
 
 class NitroBackgroundLocationController private constructor(
     private val context: Context
 ) {
     val eventHub = NitroBackgroundEventHub()
     val store = NitroBackgroundStore(context)
-
     private val appContext = context.applicationContext
     private val fusedLocationClient by lazy {
         LocationServices.getFusedLocationProviderClient(appContext)
@@ -62,14 +40,37 @@ class NitroBackgroundLocationController private constructor(
         appContext.getSystemService(Context.LOCATION_SERVICE) as LocationManager
     }
     private val prefs =
-        appContext.getSharedPreferences("nitro_background_location", Context.MODE_PRIVATE)
+        appContext.getSharedPreferences(BACKGROUND_LOCATION_PREFS, Context.MODE_PRIVATE)
     private val permissions = AndroidBackgroundPermissions(appContext) { getConfigOrNull() }
     private val httpSync = AndroidBackgroundHttpSync()
-    private val taskExecutor = Executors.newSingleThreadExecutor()
-
-    // Serializes HTTP-sync uploads: a burst of locations queues onto one worker instead of
-    // spawning an unbounded number of raw threads.
-    private val syncExecutor = Executors.newSingleThreadExecutor()
+    private val configStore = NitroBackgroundConfigStore(prefs)
+    private val pendingIntents by lazy { NitroBackgroundPendingIntents(appContext) }
+    private val registrations = NitroBackgroundRegistrations(prefs)
+    private val serviceStartup = NitroBackgroundServiceStartup()
+    private val syncGate = NitroBackgroundSyncGate(registrations, prefs)
+    private val serviceCommandLock = ReentrantLock()
+    private val geofenceCoordinator by lazy {
+        NitroBackgroundGeofenceCoordinator(
+            geofencingClient,
+            pendingIntents,
+            store,
+            permissions::backgroundPermission,
+            { runGeneration },
+            ::activeServiceGeneration,
+            ::recordError
+        )
+    }
+    private val activityCoordinator by lazy {
+        NitroBackgroundActivityCoordinator(
+            pendingIntents,
+            registrations,
+            { runGeneration },
+            { interval, callback ->
+                activityRecognitionClient.requestActivityUpdates(interval, callback)
+            },
+            { callback -> activityRecognitionClient.removeActivityUpdates(callback) }
+        )
+    }
 
     @Volatile
     private var config: BackgroundLocationOptions? = null
@@ -77,35 +78,56 @@ class NitroBackgroundLocationController private constructor(
     @Volatile
     private var state = BackgroundLocationState.IDLE
 
-    @Volatile
-    private var lastError: LocationError? = null
-
-    // Serializes lifecycle transitions (configure/start/stop/reset), which are invoked from
-    // Nitro Promise.async worker threads and must not interleave on the shared singleton.
+    // Promise workers must not interleave lifecycle transitions on the singleton.
     private val lifecycleLock = Any()
+    private val storageLock = Any()
 
-    fun checkBackgroundPermission(): BackgroundPermissionResult {
-        return permissions.checkBackgroundPermission()
-    }
+    @Volatile
+    private var runGeneration = prefs.getLong(PREF_RUN_GENERATION, 0L)
+    @Volatile
+    private var configRevision = 0L
+    private val syncCoordinator = NitroBackgroundSyncCoordinator(
+        store,
+        httpSync,
+        syncGate,
+        lifecycleLock,
+        storageLock,
+        { runGeneration },
+        { configRevision },
+        { requireConfig().sync },
+        { generation -> configForGeneration(generation)?.sync },
+        ::isActiveLocationRegistration
+    )
+    private val errorState = NitroBackgroundErrorState(prefs)
+    private val eventDispatcher = NitroBackgroundEventDispatcher(
+        appContext,
+        eventHub,
+        { runGeneration },
+        registrations::currentServiceGeneration
+    )
+    private val registrationDispatcher = NitroBackgroundRegistrationDispatcher(
+        registrations,
+        eventDispatcher,
+        ::activeServiceGeneration
+    )
 
-    fun requestBackgroundPermission(reactContext: ReactApplicationContext): BackgroundPermissionResult {
-        return permissions.requestBackgroundPermission(reactContext)
-    }
+    fun checkBackgroundPermission(): BackgroundPermissionResult = permissions.checkBackgroundPermission()
 
-    fun openAppLocationSettings() {
-        permissions.openAppLocationSettings()
-    }
+    fun requestBackgroundPermission(reactContext: ReactApplicationContext): BackgroundPermissionResult = permissions.requestBackgroundPermission(reactContext)
 
-    fun configure(options: BackgroundLocationOptions) {
+    fun openAppLocationSettings() = permissions.openAppLocationSettings()
+
+    fun configure(options: BackgroundLocationOptions) = serviceCommandLock.withLock {
         synchronized(lifecycleLock) {
-            validate(options)
+            validateAndroidBackgroundOptions(options)
+            configRevision += 1L
             config = options
-            persistConfig(options)
+            configStore.persist(options)
         }
     }
 
-    fun getConfigOrNull(): BackgroundLocationOptions? {
-        return config ?: restoreConfig()?.also { config = it }
+    fun getConfigOrNull(): BackgroundLocationOptions? = synchronized(lifecycleLock) {
+        config ?: configStore.restore()?.also { config = it }
     }
 
     fun requireConfig(): BackgroundLocationOptions {
@@ -114,11 +136,25 @@ class NitroBackgroundLocationController private constructor(
         )
     }
 
-    fun start(options: BackgroundLocationOptions?) {
+    internal fun activeServiceGeneration(): Long? = synchronized(lifecycleLock) {
+        runningServiceGeneration()?.takeIf { getConfigOrNull() != null }
+    }
+
+    internal fun runningServiceGeneration(): Long? = registrations.currentServiceGeneration().takeIf { prefs.getBoolean("running", false) }
+
+    fun start(options: BackgroundLocationOptions?) = serviceCommandLock.withLock {
+        awaitServiceStart(requestServiceStart(options))
+    }
+
+    internal fun startFromBoot() = serviceCommandLock.withLock {
+        requestServiceStart(null)
+    }
+
+    private fun requestServiceStart(options: BackgroundLocationOptions?): Long =
         synchronized(lifecycleLock) {
             options?.let(::configure)
             val current = requireConfig()
-            validate(current)
+            validateAndroidBackgroundOptions(current)
             NitroGeoLog.d(
                 "start(): provider=${current.android?.locationProvider} interval=${current.interval} state=$state"
             )
@@ -129,167 +165,286 @@ class NitroBackgroundLocationController private constructor(
                 permissions.backgroundPermission() != BackgroundPermissionStatus.GRANTED) {
                 throw SecurityException("Background location permission is required")
             }
+            activeServiceGeneration()?.let { previousGeneration ->
+                stopNativeLocationUpdates(previousGeneration)
+                stopActivityRecognition(previousGeneration)
+            }
+            val nextServiceGeneration = registrations.nextServiceGeneration()
             state = BackgroundLocationState.STARTING
-            prefs.edit().putBoolean("running", true).apply()
-            ContextCompat.startForegroundService(
-                appContext,
-                Intent(appContext, NitroBackgroundLocationService::class.java)
+            prefs.edit().putBoolean("running", true).commit()
+            serviceStartup.begin(
+                nextServiceGeneration,
+                requiresActivityRecognition(current)
             )
+            try {
+                ContextCompat.startForegroundService(
+                    appContext,
+                    backgroundServiceIntent(
+                        appContext,
+                        nextServiceGeneration,
+                        current.android!!.foregroundService
+                    )
+                )
+            } catch (error: Exception) {
+                serviceStartup.discard(nextServiceGeneration)
+                failStartup(
+                    nextServiceGeneration,
+                    ERROR_CODE_POSITION_UNAVAILABLE,
+                    "Failed to launch foreground location service: ${error.message}",
+                    error
+                )
+                throw error
+            }
             // State stays STARTING until the service actually registers updates and the provider
             // confirms (see startNativeLocationUpdates) — only then do we report RUNNING.
             NitroGeoLog.d("start(): foreground service requested, state=STARTING")
+            nextServiceGeneration
+        }
+
+    private fun awaitServiceStart(serviceGeneration: Long) {
+        val failure = try {
+            serviceStartup.await(serviceGeneration, SERVICE_START_TIMEOUT_MS)
+        } catch (error: Exception) {
+            failStartup(
+                serviceGeneration,
+                ERROR_CODE_POSITION_UNAVAILABLE,
+                "Foreground location service did not start: ${error.message}",
+                error
+            )
+            throw error
+        }
+        if (failure != null) {
+            failStartup(
+                serviceGeneration,
+                ERROR_CODE_POSITION_UNAVAILABLE,
+                "Foreground location service failed to start: ${failure.message}",
+                failure
+            )
+            throw IllegalStateException("Foreground location service failed to start", failure)
         }
     }
 
-    fun stop() {
+    fun stop(expectedGeneration: Long? = null) = serviceCommandLock.withLock {
+        stopFromService(expectedGeneration)
+    }
+
+    internal fun stopFromService(expectedGeneration: Long? = null) {
         synchronized(lifecycleLock) {
+            val activeGeneration = runningServiceGeneration()
+            if (expectedGeneration != null && activeGeneration != expectedGeneration) return
+            if (expectedGeneration != null && state == BackgroundLocationState.STARTING) {
+                serviceStartup.stopped(expectedGeneration)
+            }
+            val serviceGeneration = expectedGeneration
+                ?: registrations.currentServiceGeneration()
             NitroGeoLog.d("stop(): tearing down location updates")
             state = BackgroundLocationState.STOPPING
-            stopNativeLocationUpdates()
-            stopActivityRecognition()
+            prefs.edit().putBoolean("running", false).commit()
+            stopNativeLocationUpdates(serviceGeneration)
+            stopActivityRecognition(serviceGeneration)
             appContext.stopService(Intent(appContext, NitroBackgroundLocationService::class.java))
-            prefs.edit().putBoolean("running", false).apply()
             state = BackgroundLocationState.STOPPED
         }
     }
 
-    fun reset() {
-        synchronized(lifecycleLock) {
-            stop()
-            removeGeofences(null)
-            config = null
-            prefs.edit().clear().apply()
-            store.clearEvents(null)
-            store.clearLocations(null)
+    fun reset() = serviceCommandLock.withLock {
+        stopFromService()
+        stopActivityRecognition()
+        activityCoordinator.awaitIdle()
+        geofenceCoordinator.reset {
+            synchronized(lifecycleLock) {
+                val nextGeneration = runGeneration + 1L
+                val editor = prefs.edit().clear().putLong(PREF_RUN_GENERATION, nextGeneration)
+                registrations.invalidateForReset(editor)
+                synchronized(storageLock) {
+                    runGeneration = nextGeneration
+                    config = null
+                    errorState.clear()
+                    editor.commit()
+                    store.clearEvents(null)
+                    store.clearLocations(null)
+                    store.removeGeofences(null)
+                }
+            }
         }
+        eventDispatcher.awaitIdle()
     }
 
-    fun getStatus(): BackgroundLocationStatus {
-        val providerEnabled = runCatching {
-            val manager = appContext.getSystemService(Context.LOCATION_SERVICE) as LocationManager
-            manager.isProviderEnabled(LocationManager.GPS_PROVIDER) ||
-            manager.isProviderEnabled(LocationManager.NETWORK_PROVIDER)
-        }.getOrDefault(false)
-        val storeSnapshot = store.snapshot()
+    internal fun serviceForegroundDidPromote(serviceGeneration: Long) = serviceStartup.foregroundPromoted(serviceGeneration)
 
-        return BackgroundLocationStatus(
+    internal fun prepareRecoveredService(serviceGeneration: Long, activityRequired: Boolean) =
+        synchronized(lifecycleLock) {
+            if (activeServiceGeneration() != serviceGeneration) return@synchronized
+            serviceStartup.beginIfAbsent(serviceGeneration, activityRequired)
+            state = BackgroundLocationState.STARTING
+        }
+
+    internal fun serviceProviderDidRegister(serviceGeneration: Long) =
+        serviceStartup.providerRegistered(serviceGeneration).also { ready ->
+            if (ready) markServiceRunning(serviceGeneration)
+        }
+
+    internal fun serviceActivityDidRegister(serviceGeneration: Long) =
+        serviceStartup.activityProviderRegistered(serviceGeneration).also { ready ->
+            if (ready) markServiceRunning(serviceGeneration)
+        }
+
+    fun getStatus(): BackgroundLocationStatus = readBackgroundLocationStatus(
+            appContext,
+            prefs,
+            store,
+            permissions,
             state,
-            prefs.getBoolean("running", false),
-            config != null || prefs.getBoolean("configured", false),
-            permissions.foregroundPermission(),
-            permissions.backgroundPermission(),
-            permissions.accuracyAuthorization(),
-            providerEnabled,
-            null,
-            storeSnapshot.storedLocationCount,
-            storeSnapshot.storedEventCount,
-            storeSnapshot.lastLocationAt,
-            storeSnapshot.lastEventAt,
-            storeSnapshot.geofenceCount,
-            AndroidBackgroundLocationStatus(
-                prefs.getBoolean("running", false),
-                null,
-                permissions.notificationPermission()
-            ),
-            null,
-            currentLastError()
+            config != null,
+            errorState.current()
         )
-    }
 
-    internal fun recordError(code: Int, message: String, throwable: Throwable? = null) {
-        val error = LocationError(code.toDouble(), message)
-        lastError = error
-        prefs.edit()
-            .putInt("lastErrorCode", code)
-            .putString("lastErrorMessage", message)
-            .putLong("lastErrorAt", System.currentTimeMillis())
-            .apply()
+    internal fun recordError(
+        code: Int,
+        message: String,
+        throwable: Throwable? = null,
+        expectedServiceGeneration: Long? = null
+    ) {
+        val dispatch = synchronized(lifecycleLock) {
+            if (expectedServiceGeneration != null &&
+                activeServiceGeneration() != expectedServiceGeneration) return
+            runGeneration to errorState.store(code, message)
+        }
         NitroGeoLog.e("background location error [$code]: $message", throwable)
         runCatching {
             dispatchEvent(
-                BackgroundEventEnvelope(
-                    null,
-                    null,
-                    null,
-                    null,
-                    null,
-                    error,
-                    UUID.randomUUID().toString(),
-                    BackgroundEventType.ERROR,
-                    System.currentTimeMillis().toDouble(),
-                    false
-                )
+                dispatch.second,
+                dispatch.first,
+                expectedServiceGeneration
             )
         }
     }
 
-    internal fun recordError(message: String, throwable: Throwable) =
-        recordError(ERROR_CODE_POSITION_UNAVAILABLE, message, throwable)
-
-    private fun clearError() {
-        lastError = null
-        prefs.edit()
-            .remove("lastErrorCode")
-            .remove("lastErrorMessage")
-            .remove("lastErrorAt")
-            .apply()
+    internal fun failStartup(
+        serviceGeneration: Long,
+        code: Int,
+        message: String,
+        throwable: Throwable? = null
+    ) {
+        serviceStartup.fail(
+            serviceGeneration,
+            throwable ?: IllegalStateException(message)
+        )
+        val dispatch = synchronized(lifecycleLock) {
+            if (!shouldApplyStartupFailure(runningServiceGeneration(), serviceGeneration)) {
+                return
+            }
+            val errorDispatch = runGeneration to errorState.store(code, message)
+            prefs.edit().putBoolean("running", false).commit()
+            stopNativeLocationUpdates(serviceGeneration)
+            stopActivityRecognition(serviceGeneration)
+            appContext.stopService(Intent(appContext, NitroBackgroundLocationService::class.java))
+            state = BackgroundLocationState.ERROR
+            errorDispatch
+        }
+        NitroGeoLog.e("background location error [$code]: $message", throwable)
+        runCatching { dispatchEvent(dispatch.second, dispatch.first, serviceGeneration) }
     }
 
-    private fun currentLastError(): LocationError? {
-        lastError?.let { return it }
-        val message = prefs.getString("lastErrorMessage", null) ?: return null
-        return LocationError(prefs.getInt("lastErrorCode", 0).toDouble(), message)
-            .also { lastError = it }
-    }
+    internal fun recordError(
+        message: String,
+        throwable: Throwable,
+        expectedServiceGeneration: Long? = null
+    ) = recordError(
+        ERROR_CODE_POSITION_UNAVAILABLE,
+        message,
+        throwable,
+        expectedServiceGeneration
+    )
 
     @SuppressLint("MissingPermission")
-    fun startNativeLocationUpdates() {
-        val current = requireConfig()
-        if (current.android?.locationProvider == AndroidBackgroundProvider.ANDROID_PLATFORM) {
-            NitroGeoLog.d("startNativeLocationUpdates(): ANDROID_PLATFORM LocationManager path")
-            startPlatformLocationUpdates(current)
-            return
-        }
-        NitroGeoLog.d("startNativeLocationUpdates(): FUSED provider, registering broadcast PendingIntent")
-        val request = LocationRequest.Builder(
-            resolvePriority(current),
-            current.interval?.toLong() ?: 10_000L
-        )
-            .setMinUpdateIntervalMillis(current.fastestInterval?.toLong() ?: 5_000L)
-            .setMinUpdateDistanceMeters((current.distanceFilter ?: 0.0).toFloat())
-            .setWaitForAccurateLocation(current.waitForAccurateLocation == true)
-            .setMaxUpdateDelayMillis(current.maxUpdateDelay?.toLong() ?: 0L)
-            .build()
+    fun startNativeLocationUpdates(expectedGeneration: Long? = null) {
+        synchronized(lifecycleLock) {
+            val serviceGeneration = expectedGeneration ?: activeServiceGeneration() ?: return
+            if (activeServiceGeneration() != serviceGeneration) return
+            val current = requireConfig()
+            val callbackGeneration = runGeneration
+            val (previous, registration) = registrations.replaceLocation(serviceGeneration)
+            previous?.let {
+                removeLocationUpdates(pendingIntents.location(callbackGeneration, it.generation))
+            }
+            if (current.android?.locationProvider == AndroidBackgroundProvider.ANDROID_PLATFORM) {
+                NitroGeoLog.d("startNativeLocationUpdates(): ANDROID_PLATFORM LocationManager path")
+                startPlatformLocationUpdates(current, callbackGeneration, registration)
+                return
+            }
+            NitroGeoLog.d("startNativeLocationUpdates(): FUSED provider, registering broadcast PendingIntent")
+            val request = LocationRequest.Builder(
+                resolvePriority(current),
+                current.interval?.toLong() ?: 10_000L
+            )
+                .setMinUpdateIntervalMillis(current.fastestInterval?.toLong() ?: 5_000L)
+                .setMinUpdateDistanceMeters((current.distanceFilter ?: 0.0).toFloat())
+                .setWaitForAccurateLocation(current.waitForAccurateLocation == true)
+                .setMaxUpdateDelayMillis(current.maxUpdateDelay?.toLong() ?: 0L)
+                .build()
+            val callback = pendingIntents.location(callbackGeneration, registration.generation)
 
-        try {
-            fusedLocationClient.requestLocationUpdates(request, locationPendingIntent())
-                .addOnSuccessListener {
-                    NitroGeoLog.d("startNativeLocationUpdates(): fused registration accepted")
-                    state = BackgroundLocationState.RUNNING
-                    clearError()
-                }
-                .addOnFailureListener { error ->
-                    recordError(
-                        ERROR_CODE_POSITION_UNAVAILABLE,
-                        "Failed to register fused location updates: ${error.message}",
+            removeLegacyLocationUpdates()
+            try {
+                fusedLocationClient.requestLocationUpdates(request, callback)
+                    .addOnSuccessListener {
+                        synchronized(lifecycleLock) {
+                            if (!isActiveLocationRegistration(
+                                    callbackGeneration,
+                                    registration
+                                )) {
+                                removeLocationUpdates(callback)
+                                return@synchronized
+                            }
+                            NitroGeoLog.d("startNativeLocationUpdates(): fused registration accepted")
+                            serviceProviderDidRegister(serviceGeneration)
+                        }
+                    }
+                    .addOnFailureListener { error ->
+                        if (!isActiveLocationRegistration(
+                                callbackGeneration,
+                                registration
+                            )) return@addOnFailureListener
+                        failStartup(
+                            serviceGeneration,
+                            ERROR_CODE_POSITION_UNAVAILABLE,
+                            "Failed to register fused location updates: ${error.message}",
+                            error
+                        )
+                    }
+            } catch (error: SecurityException) {
+                if (isActiveLocationRegistration(callbackGeneration, registration)) {
+                    failStartup(
+                        serviceGeneration,
+                        ERROR_CODE_PERMISSION_DENIED,
+                        "Missing location permission for fused updates: ${error.message}",
                         error
                     )
                 }
-        } catch (error: SecurityException) {
-            recordError(
-                ERROR_CODE_PERMISSION_DENIED,
-                "Missing location permission for fused updates: ${error.message}",
-                error
-            )
+            }
         }
     }
 
-    fun stopNativeLocationUpdates() {
-        fusedLocationClient.removeLocationUpdates(locationPendingIntent())
-        runCatching { platformLocationManager.removeUpdates(locationPendingIntent()) }
+    fun stopNativeLocationUpdates(expectedGeneration: Long? = null) {
+        synchronized(lifecycleLock) {
+            registrations.removeLocation(expectedGeneration)?.let { registration ->
+                removeLocationUpdates(
+                    pendingIntents.location(runGeneration, registration.generation)
+                )
+            }
+            removeLegacyLocationUpdates()
+        }
     }
 
-    fun handleNativeLocation(location: Location, source: BackgroundLocationSource) {
+    fun handleNativeLocation(
+        location: Location,
+        source: BackgroundLocationSource,
+        callbackGeneration: Long,
+        registrationGeneration: Long
+    ) {
+        if (!isActiveLocationRegistration(callbackGeneration, registrationGeneration)) return
+        val serviceGeneration = activeServiceGeneration() ?: return
         NitroGeoLog.d("handleNativeLocation(): src=$source lat=${location.latitude} lng=${location.longitude}")
         val id = UUID.randomUUID().toString()
         val backgroundLocation = BackgroundLocation(
@@ -324,17 +479,30 @@ class NitroBackgroundLocationController private constructor(
             System.currentTimeMillis().toDouble(),
             false
         )
-        if (shouldPersist()) {
-            store.insertLocation(backgroundLocation)
-            store.pruneLocations(currentMaxStoredLocations())
-            store.insertEvent(event)
-            store.pruneEvents(currentMaxStoredEvents())
-        }
-        dispatchEvent(event)
-        scheduleSyncIfNeeded()
+        val current = configForGeneration(callbackGeneration)
+        if (!registrationDispatcher.dispatchLocation(
+                event,
+                callbackGeneration,
+                registrationGeneration
+            ) {
+                synchronized(storageLock) {
+                    if (!shouldPersist(current, callbackGeneration)) return@synchronized
+                store.insertLocation(backgroundLocation)
+                store.pruneLocations(maxStoredLocations(current))
+                store.insertEvent(event)
+                store.pruneEvents(maxStoredEvents(current))
+                }
+            }
+        ) return
+        scheduleSyncIfNeeded(
+            callbackGeneration,
+            registrationGeneration,
+            serviceGeneration
+        )
     }
 
-    fun handleGeofenceEvent(geofencingEvent: GeofencingEvent) {
+    fun handleGeofenceEvent(geofencingEvent: GeofencingEvent, callbackGeneration: Long) {
+        if (!isCurrentGeneration(callbackGeneration)) return
         val transition = when (geofencingEvent.geofenceTransition) {
             Geofence.GEOFENCE_TRANSITION_ENTER -> GeofenceTransition.ENTER
             Geofence.GEOFENCE_TRANSITION_EXIT -> GeofenceTransition.EXIT
@@ -357,31 +525,67 @@ class NitroBackgroundLocationController private constructor(
                 now,
                 false
             )
-            persistEventIfNeeded(event)
-            dispatchEvent(event)
+            persistEventIfNeeded(event, callbackGeneration, allowUnconfigured = true)
+            if (!isCurrentGeneration(callbackGeneration)) return
+            dispatchEvent(event, callbackGeneration)
         }
     }
 
     @SuppressLint("MissingPermission")
-    fun startActivityRecognition(options: ActivityRecognitionOptions?) {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q &&
-            ContextCompat.checkSelfPermission(
-                appContext,
-                Manifest.permission.ACTIVITY_RECOGNITION
-            ) != PackageManager.PERMISSION_GRANTED) {
-            throw SecurityException("Activity recognition permission is required")
+    fun startActivityRecognition(
+        options: ActivityRecognitionOptions?,
+        expectedGeneration: Long? = null
+    ) {
+        if (expectedGeneration == null) {
+            serviceCommandLock.withLock {
+                val future = prepareActivityRecognition(options, null) ?: return@withLock
+                try {
+                    awaitActivityCommand(future)
+                } catch (error: Exception) {
+                    recordError(
+                        "Failed to register activity recognition: ${error.message}",
+                        error
+                    )
+                    throw error
+                }
+            }
+            return
         }
-        activityRecognitionClient.requestActivityUpdates(
-            (options?.interval ?: 10_000.0).toLong(),
-            activityPendingIntent()
-        )
+
+        val future = prepareActivityRecognition(options, expectedGeneration) ?: return
+        future.whenComplete { _, error ->
+            if (error == null && activeServiceGeneration() == expectedGeneration) {
+                serviceActivityDidRegister(expectedGeneration)
+            } else if (error == null) {
+                activityCoordinator.stop(expectedGeneration)
+            } else {
+                val cause = unwrapActivityCommandError(error)
+                failStartup(
+                    expectedGeneration,
+                    ERROR_CODE_POSITION_UNAVAILABLE,
+                    "Failed to register activity recognition: ${cause.message}",
+                    cause
+                )
+            }
+        }
     }
 
-    fun stopActivityRecognition() {
-        activityRecognitionClient.removeActivityUpdates(activityPendingIntent())
+    fun stopActivityRecognition(expectedGeneration: Long? = null) {
+        if (expectedGeneration == null) {
+            serviceCommandLock.withLock {
+                awaitActivityCommand(activityCoordinator.stop(null))
+            }
+        } else {
+            activityCoordinator.stop(expectedGeneration)
+        }
     }
 
-    fun handleActivityRecognition(intent: Intent) {
+    fun handleActivityRecognition(
+        intent: Intent,
+        callbackGeneration: Long,
+        registrationGeneration: Long
+    ) {
+        if (!isActiveActivityRegistration(callbackGeneration, registrationGeneration)) return
         val result = ActivityRecognitionResult.extractResult(intent) ?: return
         val activity = result.mostProbableActivity ?: return
         val detected = DetectedActivity(
@@ -401,84 +605,51 @@ class NitroBackgroundLocationController private constructor(
             detected.timestamp,
             false
         )
-        persistEventIfNeeded(event)
-        dispatchEvent(event)
-        applyActivityAwareTracking(detected)
-    }
-
-    fun addGeofences(regions: Array<GeofenceRegion>, options: GeofencingOptions?) {
-        if (permissions.backgroundPermission() != BackgroundPermissionStatus.GRANTED) {
-            throw SecurityException("Background location permission is required to register geofences")
-        }
-        val geofences = regions.map { region ->
-            Geofence.Builder()
-                .setRequestId(region.identifier)
-                .setCircularRegion(region.latitude, region.longitude, region.radius.toFloat())
-                .setTransitionTypes(region.toTransitionTypes())
-                .setLoiteringDelay(region.loiteringDelay?.toInt() ?: 0)
-                .setExpirationDuration(region.expirationDuration?.toLong() ?: Geofence.NEVER_EXPIRE)
-                .apply {
-                    options?.notificationResponsiveness?.toInt()?.takeIf { it >= 0 }?.let {
-                        setNotificationResponsiveness(it)
+        val current = configForGeneration(callbackGeneration)
+        if (!registrationDispatcher.dispatchActivity(
+                event,
+                callbackGeneration,
+                registrationGeneration
+            ) {
+                synchronized(storageLock) {
+                    if (!shouldPersist(current, callbackGeneration, allowUnconfigured = true)) {
+                        return@synchronized
                     }
+                    store.insertEvent(event)
+                    store.pruneEvents(maxStoredEvents(current))
                 }
-                .build()
-        }
-        if (geofences.isEmpty()) return
-
-        waitForTask(geofencingClient.addGeofences(
-            GeofencingRequest.Builder()
-                .setInitialTrigger(options.toInitialTrigger())
-                .addGeofences(geofences)
-                .build(),
-            geofencePendingIntent()
-        ))
-        store.saveGeofences(regions)
-    }
-
-    fun removeGeofences(identifiers: Array<String>?) {
-        waitForTask(if (identifiers == null) {
-            geofencingClient.removeGeofences(geofencePendingIntent())
-        } else {
-            geofencingClient.removeGeofences(identifiers.toList())
-        })
-        store.removeGeofences(identifiers)
-    }
-
-    fun registerPersistedGeofencesIfNeeded() {
-        val geofences = store.getGeofences()
-        if (geofences.isNotEmpty()) {
-            addGeofences(geofences, null)
+            }
+        ) return
+        synchronized(lifecycleLock) {
+            if (isActiveActivityRegistration(callbackGeneration, registrationGeneration)) {
+                applyActivityAwareTracking(detected)
+            }
         }
     }
+
+    fun addGeofences(regions: Array<GeofenceRegion>, options: GeofencingOptions?) =
+        geofenceCoordinator.add(regions, options)
+
+    fun removeGeofences(identifiers: Array<String>?) = geofenceCoordinator.remove(identifiers)
+
+    fun registerPersistedGeofencesIfNeeded(expectedGeneration: Long? = null) =
+        geofenceCoordinator.restore(expectedGeneration)
+
+    internal fun registerPersistedGeofencesBlockingIfNeeded() =
+        geofenceCoordinator.restoreBlocking()
 
     fun syncStoredLocations(): BackgroundHttpSyncResult {
-        val sync = requireConfig().sync
-        val locations = store.getLocations(
-            GetStoredBackgroundLocationsOptions(
-                sync?.batchSize ?: 50.0,
-                null,
-                true,
-                false
-            )
-        )
-        val ids = locations.map { it.id }
-        if (ids.isEmpty()) {
-            return BackgroundHttpSyncResult(true, null, emptyArray(), emptyArray(), null)
-        }
-        if (sync == null) {
-            return BackgroundHttpSyncResult(true, null, emptyArray(), emptyArray(), null)
-        }
-        val result = httpSync.uploadLocationsWithRetry(sync, locations)
-        store.markSynced(result.syncedLocationIds.toList())
-        if (sync.autoClear == true) {
-            store.clearLocations(result.syncedLocationIds)
-        }
-        return result
+        val callbackGeneration = runGeneration
+        return syncCoordinator.syncManual(callbackGeneration)
     }
 
-    private fun scheduleSyncIfNeeded() {
-        val sync = getConfigOrNull()?.sync ?: return
+    private fun scheduleSyncIfNeeded(
+        callbackGeneration: Long,
+        registrationGeneration: Long,
+        serviceGeneration: Long
+    ) {
+        if (!isActiveLocationRegistration(callbackGeneration, registrationGeneration)) return
+        val sync = configForGeneration(callbackGeneration)?.sync ?: return
         val threshold = sync.syncThreshold?.toInt()?.takeIf { it > 0 } ?: 1
         val unsynced = store.getLocations(
             GetStoredBackgroundLocationsOptions(
@@ -490,67 +661,116 @@ class NitroBackgroundLocationController private constructor(
         )
         if (unsynced.size < threshold) return
 
-        val now = System.currentTimeMillis()
-        val interval = sync.syncInterval?.toLong()?.takeIf { it > 0 } ?: 0L
-        val lastSyncAt = prefs.getLong("lastSyncAt", 0L)
-        if (interval > 0 && now - lastSyncAt < interval) return
-        prefs.edit().putLong("lastSyncAt", now).apply()
-
-        syncExecutor.execute {
-            val result = runCatching { syncStoredLocations() }.getOrElse { error ->
-                BackgroundHttpSyncResult(
-                    false,
+        syncCoordinator.scheduleAutomatic(
+            callbackGeneration,
+            registrationGeneration,
+            serviceGeneration,
+            onResult = { result ->
+                val event = BackgroundEventEnvelope(
                     null,
-                    emptyArray(),
-                    unsynced.map { it.id }.toTypedArray(),
-                    error.message ?: "HTTP sync failed"
+                    null,
+                    null,
+                    null,
+                    result,
+                    null,
+                    UUID.randomUUID().toString(),
+                    BackgroundEventType.HTTPSYNC,
+                    System.currentTimeMillis().toDouble(),
+                    false
+                )
+                val current = configForGeneration(callbackGeneration)
+                registrationDispatcher.dispatchLocation(
+                    event,
+                    callbackGeneration,
+                    registrationGeneration
+                ) {
+                    synchronized(storageLock) {
+                        if (!shouldPersist(current, callbackGeneration)) return@synchronized
+                        store.insertEvent(event)
+                        store.pruneEvents(maxStoredEvents(current))
+                    }
+                }
+            },
+            onFailure = { error ->
+                recordError(
+                    "Automatic background HTTP sync failed: ${error.message}",
+                    error,
+                    serviceGeneration
                 )
             }
-            val event = BackgroundEventEnvelope(
-                null,
-                null,
-                null,
-                null,
-                result,
-                null,
-                UUID.randomUUID().toString(),
-                BackgroundEventType.HTTPSYNC,
-                System.currentTimeMillis().toDouble(),
-                false
-            )
-            persistEventIfNeeded(event)
-            dispatchEvent(event)
+        )
+    }
+
+    private fun isCurrentGeneration(callbackGeneration: Long): Boolean =
+        runGeneration == callbackGeneration
+
+    private fun isActiveLocationRegistration(
+        callbackGeneration: Long,
+        registration: BackgroundRegistration
+    ): Boolean = isActiveLocationRegistration(callbackGeneration, registration.generation)
+
+    private fun isActiveLocationRegistration(
+        callbackGeneration: Long,
+        registrationGeneration: Long
+    ): Boolean = synchronized(lifecycleLock) {
+        val serviceGeneration = activeServiceGeneration() ?: return@synchronized false
+        isCurrentGeneration(callbackGeneration) &&
+            registrations.isCurrentLocation(registrationGeneration, serviceGeneration)
+    }
+
+    private fun isActiveActivityRegistration(
+        callbackGeneration: Long,
+        registrationGeneration: Long
+    ): Boolean = synchronized(lifecycleLock) {
+        if (!isCurrentGeneration(callbackGeneration)) return@synchronized false
+        registrations.isCurrentActivity(
+            registrationGeneration,
+            activeServiceGeneration()
+        )
+    }
+
+    private fun configForGeneration(callbackGeneration: Long): BackgroundLocationOptions? {
+        if (!isCurrentGeneration(callbackGeneration)) return null
+        return getConfigOrNull()
+    }
+
+    private fun shouldPersist(
+        current: BackgroundLocationOptions?,
+        callbackGeneration: Long,
+        allowUnconfigured: Boolean = false
+    ): Boolean {
+        return shouldPersistForGeneration(
+            current != null,
+            current?.persist,
+            runGeneration,
+            callbackGeneration,
+            allowUnconfigured
+        )
+    }
+
+    private fun persistEventIfNeeded(
+        event: BackgroundEventEnvelope,
+        callbackGeneration: Long,
+        allowUnconfigured: Boolean = false
+    ) {
+        val current = configForGeneration(callbackGeneration)
+        synchronized(storageLock) {
+            if (!shouldPersist(current, callbackGeneration, allowUnconfigured)) return
+            store.insertEvent(event)
+            store.pruneEvents(maxStoredEvents(current))
         }
     }
 
-    private fun shouldPersist(): Boolean {
-        return getConfigOrNull()?.persist != false
-    }
-
-    private fun persistEventIfNeeded(event: BackgroundEventEnvelope) {
-        if (!shouldPersist()) return
-        store.insertEvent(event)
-        store.pruneEvents(currentMaxStoredEvents())
-    }
-
-    private fun currentMaxStoredLocations(): Int {
-        return resolveMaxStored(
-            getConfigOrNull()?.maxStoredLocations?.toInt(),
-            DEFAULT_MAX_STORED_LOCATIONS
-        )
-    }
-
-    private fun currentMaxStoredEvents(): Int {
-        return resolveMaxStored(
-            getConfigOrNull()?.maxStoredEvents?.toInt(),
-            DEFAULT_MAX_STORED_EVENTS
-        )
-    }
-
     @SuppressLint("MissingPermission")
-    private fun startPlatformLocationUpdates(options: BackgroundLocationOptions) {
+    private fun startPlatformLocationUpdates(
+        options: BackgroundLocationOptions,
+        callbackGeneration: Long,
+        registration: BackgroundRegistration
+    ) {
         val interval = options.interval?.toLong() ?: 10_000L
         val distance = (options.distanceFilter ?: 0.0).toFloat()
+        val callback = pendingIntents.location(callbackGeneration, registration.generation)
+        removeLegacyLocationUpdates()
         val providers = listOf(LocationManager.GPS_PROVIDER, LocationManager.NETWORK_PROVIDER)
             .filter { provider -> runCatching { platformLocationManager.isProviderEnabled(provider) }.getOrDefault(false) }
             .ifEmpty { listOf(LocationManager.GPS_PROVIDER) }
@@ -561,273 +781,80 @@ class NitroBackgroundLocationController private constructor(
                     provider,
                     interval,
                     distance,
-                    locationPendingIntent()
+                    callback
                 )
                 registered = true
             } catch (error: SecurityException) {
                 recordError(
                     ERROR_CODE_PERMISSION_DENIED,
                     "Missing location permission for $provider updates: ${error.message}",
-                    error
+                    error,
+                    registration.ownerServiceGeneration
                 )
             }
         }
         if (registered) {
-            state = BackgroundLocationState.RUNNING
+            registration.ownerServiceGeneration?.let(::serviceProviderDidRegister)
+        } else {
+            failStartup(
+                registration.ownerServiceGeneration
+                    ?: registrations.currentServiceGeneration(),
+                ERROR_CODE_POSITION_UNAVAILABLE,
+                "No Android location provider accepted background updates"
+            )
         }
     }
 
     private fun applyActivityAwareTracking(activity: DetectedActivity) {
         val current = getConfigOrNull() ?: return
-        val options = current.activityRecognition
-        if (current.trackingMode != BackgroundTrackingMode.ACTIVITYAWARE &&
-            options?.stopOnStill != true) {
-            return
-        }
-        val stopOnStill = options?.stopOnStill ?: (current.trackingMode == BackgroundTrackingMode.ACTIVITYAWARE)
-        val minimumConfidence = options?.minimumConfidence ?: 0.0
-        if (activity.confidence < minimumConfidence) return
-        if (activity.type == DetectedActivityType.STILL && stopOnStill) {
-            stopNativeLocationUpdates()
-            return
-        }
-        if (activity.type != DetectedActivityType.STILL &&
-            activity.type != DetectedActivityType.UNKNOWN &&
-            prefs.getBoolean("running", false)) {
-            runCatching { startNativeLocationUpdates() }
+        when (activityTrackingAction(current, activity, prefs.getBoolean("running", false))) {
+            ActivityTrackingAction.STOP -> stopNativeLocationUpdates()
+            ActivityTrackingAction.START -> runCatching { startNativeLocationUpdates() }
+            ActivityTrackingAction.NONE -> Unit
         }
     }
 
-    private fun validate(options: BackgroundLocationOptions) {
-        if (options.android?.foregroundService == null) {
-            throw IllegalArgumentException(
-                "Android background tracking requires android.foregroundService notification options"
-            )
+    private fun markServiceRunning(serviceGeneration: Long) = synchronized(lifecycleLock) {
+        if (activeServiceGeneration() == serviceGeneration &&
+            state == BackgroundLocationState.STARTING) {
+            state = BackgroundLocationState.RUNNING
+            errorState.clear()
         }
     }
 
-    private fun dispatchEvent(event: BackgroundEventEnvelope) {
-        val deliveredToInProcessListener = eventHub.emit(event)
-        if (!shouldDispatchHeadlessTask(deliveredToInProcessListener)) return
-        // The in-process eventHub already delivered to any live JS listeners; the headless task is
-        // the fallback for when JS is dead. Guard its start: startService from the background can be
-        // rejected (ForegroundServiceStartNotAllowed / IllegalState), which must not crash the
-        // broadcast receiver thread that drives delivery.
-        runCatching {
-            val intent = Intent(appContext, NitroBackgroundHeadlessTaskService::class.java)
-                .putExtra("event", event.toJson().toString())
-            appContext.startService(intent)
-            HeadlessJsTaskService.acquireWakeLockNow(appContext)
-        }.onFailure { NitroGeoLog.w("dispatchEvent: headless task dispatch failed", it) }
-    }
-
-    private fun waitForTask(task: Task<Void>) {
-        val latch = CountDownLatch(1)
-        var failure: Exception? = null
-        task.addOnCompleteListener(taskExecutor) {
-            failure = it.exception
-            latch.countDown()
+    @SuppressLint("MissingPermission")
+    private fun prepareActivityRecognition(
+        options: ActivityRecognitionOptions?,
+        expectedGeneration: Long?
+    ): CompletableFuture<Void>? = synchronized(lifecycleLock) {
+        if (expectedGeneration != null && activeServiceGeneration() != expectedGeneration) {
+            return@synchronized null
         }
-        latch.await(30, TimeUnit.SECONDS)
-        failure?.let { throw it }
-        if (!task.isSuccessful) {
-            throw IllegalStateException("Google Play services task failed")
-        }
-    }
-
-    private fun persistConfig(options: BackgroundLocationOptions) {
-        val service = options.android?.foregroundService
-        prefs.edit()
-            .putBoolean("configured", true)
-            .putBoolean("running", prefs.getBoolean("running", false))
-            .putBoolean("startOnBoot", options.startOnBoot == true)
-            .putBoolean("stopOnTerminate", options.stopOnTerminate != false)
-            .putString("trackingMode", options.trackingMode?.name)
-            .putString("accuracyAndroid", options.accuracy?.android?.name)
-            .putString("accuracyIos", options.accuracy?.ios?.name)
-            .putString("granularity", options.granularity?.name)
-            .putString("androidLocationProvider", options.android?.locationProvider?.name)
-            .putBoolean(
-                "androidRequestNotificationPermission",
-                options.android?.requestNotificationPermission != false
-            )
-            .putBoolean(
-                "androidRequestIgnoreBatteryOptimizations",
-                options.android?.requestIgnoreBatteryOptimizations == true
-            )
-            .putFloat("interval", (options.interval ?: 10_000.0).toFloat())
-            .putFloat("fastestInterval", (options.fastestInterval ?: 5_000.0).toFloat())
-            .putFloat("distanceFilter", (options.distanceFilter ?: 0.0).toFloat())
-            .putFloat("maxUpdateDelay", (options.maxUpdateDelay ?: 0.0).toFloat())
-            .putBoolean("waitForAccurateLocation", options.waitForAccurateLocation == true)
-            .putBoolean("persist", options.persist != false)
-            .putFloat("maxStoredLocations", (options.maxStoredLocations ?: 0.0).toFloat())
-            .putFloat("maxStoredEvents", (options.maxStoredEvents ?: 0.0).toFloat())
-            .putBoolean("activityConfigured", options.activityRecognition != null)
-            .putBoolean("activityEnabled", options.activityRecognition?.enabled == true)
-            .putFloat("activityInterval", (options.activityRecognition?.interval ?: 10_000.0).toFloat())
-            .putBoolean("activityStopOnStill", options.activityRecognition?.stopOnStill == true)
-            .putFloat(
-                "activityMinimumConfidence",
-                (options.activityRecognition?.minimumConfidence ?: 0.0).toFloat()
-            )
-            .putFloat("notificationId", (service?.notificationId ?: 9471.0).toFloat())
-            .putString("notificationTitle", service?.notificationTitle)
-            .putString("notificationText", service?.notificationText)
-            .putString("notificationChannelId", service?.notificationChannelId)
-            .putString("notificationChannelName", service?.notificationChannelName)
-            .putString("notificationChannelDescription", service?.notificationChannelDescription)
-            .putString("notificationIcon", service?.notificationIcon)
-            .putString("notificationColor", service?.notificationColor)
-            .putString("stopActionTitle", service?.stopActionTitle)
-            .putString("syncUrl", options.sync?.url)
-            .putString("syncMethod", options.sync?.method?.name)
-            .putString("syncHeaders", options.sync?.headers?.let(::stringMapToJson))
-            .putString("syncBodyTemplate", options.sync?.bodyTemplate?.let(::variantMapToJson))
-            .putBoolean("syncBatchConfigured", options.sync?.batch != null)
-            .putFloat("syncBatchSize", (options.sync?.batchSize ?: 50.0).toFloat())
-            .putFloat("syncThreshold", (options.sync?.syncThreshold ?: 1.0).toFloat())
-            .putFloat("syncInterval", (options.sync?.syncInterval ?: 0.0).toFloat())
-            .putBoolean("syncBatch", options.sync?.batch == true)
-            .putBoolean("syncRetry", options.sync?.retry == true)
-            .putFloat("syncMaxRetries", (options.sync?.maxRetries ?: 3.0).toFloat())
-            .putBoolean("syncAutoClear", options.sync?.autoClear == true)
-            .apply()
-    }
-
-    private fun restoreConfig(): BackgroundLocationOptions? {
-        if (!prefs.getBoolean("configured", false)) return null
-        val title = prefs.getString("notificationTitle", null) ?: return null
-        val text = prefs.getString("notificationText", null) ?: return null
-        val service = AndroidForegroundServiceOptions(
-            prefs.getFloat("notificationId", 9471f).toDouble(),
-            title,
-            text,
-            prefs.getString("notificationChannelId", null),
-            prefs.getString("notificationChannelName", null),
-            prefs.getString("notificationChannelDescription", null),
-            prefs.getString("notificationIcon", null),
-            prefs.getString("notificationColor", null),
-            prefs.getString("stopActionTitle", null)
-        )
-        val sync = prefs.getString("syncUrl", null)?.let { url ->
-            BackgroundHttpSyncOptions(
-                url,
-                prefs.getString("syncMethod", null)?.let {
-                    runCatching { enumValueOf<BackgroundHttpMethod>(it) }.getOrNull()
-                },
-                prefs.getString("syncHeaders", null)?.let(::jsonToStringMap),
-                if (prefs.getBoolean("syncBatchConfigured", false)) {
-                    prefs.getBoolean("syncBatch", false)
-                } else {
-                    null
-                },
-                prefs.getFloat("syncBatchSize", 50f).toDouble(),
-                prefs.getFloat("syncThreshold", 1f).toDouble(),
-                prefs.getFloat("syncInterval", 0f).toDouble(),
-                prefs.getBoolean("syncRetry", false),
-                prefs.getFloat("syncMaxRetries", 3f).toDouble(),
-                prefs.getString("syncBodyTemplate", null)?.let(::jsonToVariantMap),
-                prefs.getBoolean("syncAutoClear", false)
-            )
-        }
-        val accuracyAndroid = prefs.getString("accuracyAndroid", null)?.let {
-            runCatching { enumValueOf<AndroidAccuracyPreset>(it) }.getOrNull()
-        }
-        val accuracyIos = prefs.getString("accuracyIos", null)?.let {
-            runCatching { enumValueOf<IOSAccuracyPreset>(it) }.getOrNull()
-        }
-        val accuracy = if (accuracyAndroid != null || accuracyIos != null) {
-            LocationAccuracyOptions(accuracyAndroid, accuracyIos)
-        } else {
-            null
-        }
-        val activityRecognition = if (prefs.getBoolean("activityConfigured", false)) {
-            ActivityRecognitionOptions(
-                prefs.getBoolean("activityEnabled", false),
-                prefs.getFloat("activityInterval", 10_000f).toDouble(),
-                prefs.getBoolean("activityStopOnStill", false),
-                prefs.getFloat("activityMinimumConfidence", 0f).toDouble()
-            )
-        } else {
-            null
-        }
-        return BackgroundLocationOptions(
-            prefs.getString("trackingMode", null)?.let {
-                runCatching { enumValueOf<BackgroundTrackingMode>(it) }.getOrNull()
-            },
-            accuracy,
-            prefs.getString("granularity", null)?.let {
-                runCatching { enumValueOf<AndroidGranularity>(it) }.getOrNull()
-            },
-            prefs.getFloat("interval", 10_000f).toDouble(),
-            prefs.getFloat("fastestInterval", 5_000f).toDouble(),
-            prefs.getFloat("distanceFilter", 0f).toDouble(),
-            prefs.getFloat("maxUpdateDelay", 0f).toDouble(),
-            prefs.getBoolean("waitForAccurateLocation", false),
-            prefs.getBoolean("persist", true),
-            prefs.getFloat("maxStoredLocations", 0f).toDouble().takeIf { it > 0 },
-            prefs.getFloat("maxStoredEvents", 0f).toDouble().takeIf { it > 0 },
-            prefs.getBoolean("stopOnTerminate", true),
-            prefs.getBoolean("startOnBoot", false),
-            AndroidBackgroundLocationOptions(
-                prefs.getString("androidLocationProvider", null)?.let {
-                    runCatching { enumValueOf<AndroidBackgroundProvider>(it) }.getOrNull()
-                } ?: AndroidBackgroundProvider.AUTO,
-                service,
-                prefs.getBoolean("androidRequestNotificationPermission", true),
-                prefs.getBoolean("androidRequestIgnoreBatteryOptimizations", false)
-            ),
-            null,
-            null,
-            activityRecognition,
-            sync
+        requireActivityRecognitionPermission(appContext)
+        activityCoordinator.start(
+            (options?.interval ?: 10_000.0).toLong(),
+            expectedGeneration
         )
     }
 
-    private fun locationPendingIntent(): PendingIntent {
-        val intent = Intent(appContext, NitroLocationUpdateReceiver::class.java)
-            .setAction(ACTION_LOCATION_UPDATE)
-        return PendingIntent.getBroadcast(
-            appContext,
-            1001,
-            intent,
-            mutablePendingIntentFlags(Build.VERSION.SDK_INT)
-        )
+    private fun dispatchEvent(
+        event: BackgroundEventEnvelope,
+        callbackGeneration: Long,
+        callbackServiceGeneration: Long? = null
+    ) = eventDispatcher.dispatch(event, callbackGeneration, callbackServiceGeneration)
+
+    private fun removeLocationUpdates(callback: PendingIntent) {
+        runCatching { platformLocationManager.removeUpdates(callback) }
+        fusedLocationClient.removeLocationUpdates(callback)
+            .addOnCompleteListener { callback.cancel() }
     }
 
-    private fun geofencePendingIntent(): PendingIntent {
-        val intent = Intent(appContext, NitroGeofenceReceiver::class.java)
-            .setAction(ACTION_GEOFENCE_UPDATE)
-        return PendingIntent.getBroadcast(
-            appContext,
-            1002,
-            intent,
-            mutablePendingIntentFlags(Build.VERSION.SDK_INT)
-        )
-    }
-
-    private fun activityPendingIntent(): PendingIntent {
-        val intent = Intent(appContext, NitroActivityRecognitionReceiver::class.java)
-            .setAction(ACTION_ACTIVITY_UPDATE)
-        return PendingIntent.getBroadcast(
-            appContext,
-            1003,
-            intent,
-            mutablePendingIntentFlags(Build.VERSION.SDK_INT)
-        )
-    }
-
-    private fun resolvePriority(options: BackgroundLocationOptions): Int {
-        return when (options.accuracy?.android) {
-            AndroidAccuracyPreset.HIGH -> Priority.PRIORITY_HIGH_ACCURACY
-            AndroidAccuracyPreset.LOW -> Priority.PRIORITY_LOW_POWER
-            AndroidAccuracyPreset.PASSIVE -> Priority.PRIORITY_PASSIVE
-            else -> Priority.PRIORITY_BALANCED_POWER_ACCURACY
-        }
-    }
+    private fun removeLegacyLocationUpdates() =
+        pendingIntents.legacyLocation()?.let(::removeLocationUpdates)
 
     companion object {
+        private const val SERVICE_START_TIMEOUT_MS = 10_000L
+
         @Volatile
         private var instance: NitroBackgroundLocationController? = null
 

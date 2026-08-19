@@ -21,6 +21,13 @@ storage remains enabled unless `persist: false`; Android
 Starting Android tracking continues to use the existing foreground service and
 Headless fallback.
 
+On Android, a successful `startBackgroundLocation()` resolves only after the
+foreground service and location provider are active. Activity-aware sessions
+also wait for Activity Recognition registration. A failed replacement leaves a
+previously confirmed standalone Activity Recognition registration intact.
+`android.isForegroundServiceRunning` observes the actual process-local service
+lifecycle; it is not an alias for the desired `isRunning` state.
+
 ## Status timestamps
 
 `getBackgroundLocationStatus()` includes two optional native-storage fields:
@@ -50,7 +57,7 @@ the counters alone.
 | No in-process background listener | Android long-run requires the registered Headless task to mark the post-marker inside event delivered. | iOS has no Headless JS contract; the flow verifies storage drain after reopening. | Inspect task receipts and native logs for the exact test run. |
 | React runtime unavailable | Not automated by the Home-key flow. | Not automated by the Home-key flow. | Terminate the React runtime without force-stopping/force-quitting the app, then inspect native storage and logs after relaunch. |
 | Geofence enter/exit | Android long-run injects outside → inside → outside and requires both transitions. | The iOS simulator gate requires both post-marker transitions from the same path. | Cross the boundary on real hardware; account for OS batching and region limits. |
-| Reboot restore | Optional `RUN_REBOOT=1` emulator pass verifies post-boot locations and geofences after a new proof marker. | Not supported. | Test reboot on each Android OEM targeted by the app; keep failures visible. |
+| Reboot restore | `RUN_REBOOT=1` waits for Android's boot-complete signal, then verifies post-marker outside → inside → outside native measurement order for both retained locations and events, plus ordered geofence transitions. The receiver requests `startOnBoot` tracking immediately and delegates persisted geofence restoration to an OS-owned `JobService`, including when tracking itself is not restarted. | Not supported. | Test reboot on each Android OEM targeted by the app; keep failures visible. |
 | User force-stop / force-quit | Not asserted as recoverable. Relaunch is required. | Not asserted as recoverable. Relaunch is required. | Verify the app reports stopped/stale state after the user reopens it. |
 
 See [Long-Run Background E2E](/background/long-run-e2e) for commands and

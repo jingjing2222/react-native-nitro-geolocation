@@ -5,66 +5,75 @@ import com.margelo.nitro.nitrogeolocation.BackgroundEventType
 import com.margelo.nitro.nitrogeolocation.BackgroundLocation
 import com.margelo.nitro.nitrogeolocation.LocationError
 import java.util.UUID
-import java.util.concurrent.ConcurrentHashMap
 
 class NitroBackgroundEventHub {
-    private val eventListeners =
-        ConcurrentHashMap<String, (BackgroundEventEnvelope) -> Unit>()
-    private val locationListeners =
-        ConcurrentHashMap<String, (BackgroundLocation) -> Unit>()
-    private val errorListeners =
-        ConcurrentHashMap<String, (LocationError) -> Unit>()
+    private val listenerLock = Any()
+    private val eventListeners = mutableMapOf<String, (BackgroundEventEnvelope) -> Unit>()
+    private val locationListeners = mutableMapOf<String, (BackgroundLocation) -> Unit>()
+    private val errorListeners = mutableMapOf<String, (LocationError) -> Unit>()
 
     fun addEventListener(listener: (BackgroundEventEnvelope) -> Unit): String {
         val token = UUID.randomUUID().toString()
-        eventListeners[token] = listener
+        synchronized(listenerLock) { eventListeners[token] = listener }
         return token
     }
 
     fun removeEventListener(token: String) {
-        eventListeners.remove(token)
+        synchronized(listenerLock) { eventListeners.remove(token) }
     }
 
     fun addLocationListener(listener: (BackgroundLocation) -> Unit): String {
         val token = UUID.randomUUID().toString()
-        locationListeners[token] = listener
+        synchronized(listenerLock) { locationListeners[token] = listener }
         return token
     }
 
     fun removeLocationListener(token: String) {
-        locationListeners.remove(token)
+        synchronized(listenerLock) { locationListeners.remove(token) }
     }
 
     fun addErrorListener(listener: (LocationError) -> Unit): String {
         val token = UUID.randomUUID().toString()
-        errorListeners[token] = listener
+        synchronized(listenerLock) { errorListeners[token] = listener }
         return token
     }
 
     fun removeErrorListener(token: String) {
-        errorListeners.remove(token)
+        synchronized(listenerLock) { errorListeners.remove(token) }
     }
 
     fun emit(event: BackgroundEventEnvelope): Boolean {
-        var delivered = eventListeners.isNotEmpty()
-        eventListeners.values.forEach { listener -> dispatch { listener(event) } }
+        return synchronized(listenerLock) {
+            var delivered = dispatchCurrent(eventListeners) { it(event) }
 
-        when (event.type) {
-            BackgroundEventType.LOCATION -> {
-                event.location?.let { location ->
-                    delivered = delivered || locationListeners.isNotEmpty()
-                    locationListeners.values.forEach { listener -> dispatch { listener(location) } }
+            when (event.type) {
+                BackgroundEventType.LOCATION -> {
+                    event.location?.let { location ->
+                        delivered = dispatchCurrent(locationListeners) { it(location) } || delivered
+                    }
                 }
-            }
-            BackgroundEventType.ERROR -> {
-                event.error?.let { error ->
-                    delivered = delivered || errorListeners.isNotEmpty()
-                    errorListeners.values.forEach { listener -> dispatch { listener(error) } }
+                BackgroundEventType.ERROR -> {
+                    event.error?.let { error ->
+                        delivered = dispatchCurrent(errorListeners) { it(error) } || delivered
+                    }
                 }
+                else -> Unit
             }
-            else -> Unit
+
+            delivered
         }
+    }
 
+    private inline fun <T> dispatchCurrent(
+        listeners: Map<String, T>,
+        invoke: (T) -> Unit
+    ): Boolean {
+        var delivered = false
+        listeners.keys.toList().forEach { token ->
+            val listener = listeners[token] ?: return@forEach
+            delivered = true
+            dispatch { invoke(listener) }
+        }
         return delivered
     }
 

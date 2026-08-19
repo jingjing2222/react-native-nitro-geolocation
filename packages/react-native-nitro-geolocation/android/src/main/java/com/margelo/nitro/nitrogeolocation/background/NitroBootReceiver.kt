@@ -13,25 +13,20 @@ class NitroBootReceiver : BroadcastReceiver() {
             return
         }
 
-        // registerPersistedGeofencesIfNeeded() blocks (waitForTask, up to 30s) and start() does
-        // disk I/O; running them inline would block the broadcast's main thread and risk an ANR.
-        // Hand off to a worker thread and keep the broadcast alive with goAsync() until it finishes.
-        val appContext = context.applicationContext
-        val pendingResult = goAsync()
-        Thread {
-            try {
-                val prefs = appContext.getSharedPreferences(
-                    "nitro_background_location",
-                    Context.MODE_PRIVATE
-                )
-                val controller = NitroBackgroundLocationController.getInstance(appContext)
-                runCatching { controller.registerPersistedGeofencesIfNeeded() }
-                if (prefs.getBoolean("startOnBoot", false)) {
-                    runCatching { controller.start(null) }
-                }
-            } finally {
-                pendingResult.finish()
+        if (!NitroBootRestoreJobService.schedule(context.applicationContext)) {
+            NitroGeoLog.e("Failed to schedule background restoration after boot")
+        }
+        val prefs = context.getSharedPreferences(
+            BACKGROUND_LOCATION_PREFS,
+            Context.MODE_PRIVATE
+        )
+        if (prefs.getBoolean("startOnBoot", false)) {
+            runCatching {
+                NitroBackgroundLocationController.getInstance(context.applicationContext)
+                    .startFromBoot()
+            }.onFailure { error ->
+                NitroGeoLog.e("Failed to request background tracking after boot", error)
             }
-        }.start()
+        }
     }
 }

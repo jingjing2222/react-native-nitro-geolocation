@@ -9,6 +9,11 @@ FLOW_DIR="$EXAMPLE_DIR/.maestro"
 MAESTRO_BIN="${MAESTRO:-maestro}"
 WEB_E2E_PORT="${WEB_E2E_PORT:-4173}"
 WEB_SERVER_PID=""
+MAESTRO_ARGS=(--platform ios)
+
+if [[ -n "${IOS_UDID:-}" ]]; then
+  MAESTRO_ARGS+=(--device "$IOS_UDID")
+fi
 
 cleanup() {
   if [[ -n "$WEB_SERVER_PID" ]]; then
@@ -47,4 +52,4 @@ if ! curl -fsS "http://127.0.0.1:$WEB_E2E_PORT" | grep -q "Nitro Geolocation Web
   exit 1
 fi
 
-"$MAESTRO_BIN" test --platform ios "$FLOW_DIR/web-e2e.yaml"
+"$MAESTRO_BIN" test "${MAESTRO_ARGS[@]}" "$FLOW_DIR/web-e2e.yaml"
