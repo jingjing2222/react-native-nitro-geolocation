@@ -1,5 +1,9 @@
 package com.margelo.nitro.nitrogeolocation
 
+import com.google.android.gms.common.api.ApiException
+import com.google.android.gms.common.api.CommonStatusCodes
+import com.google.android.gms.common.api.Status
+import com.google.android.gms.location.LocationSettingsStatusCodes
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertSame
@@ -31,7 +35,7 @@ class AndroidLocationSettingsTest {
             LocationSettingsFailureAction.SHOW_RESOLUTION,
             selectLocationSettingsFailureAction(
                 shouldShowResolution = true,
-                isResolvable = true,
+                failureKind = LocationSettingsFailureKind.RESOLVABLE,
                 hasActivity = true
             )
         )
@@ -43,19 +47,19 @@ class AndroidLocationSettingsTest {
             LocationSettingsFailureAction.COMPLETE_ACTIVITY_MISSING,
             selectLocationSettingsFailureAction(
                 shouldShowResolution = true,
-                isResolvable = true,
+                failureKind = LocationSettingsFailureKind.RESOLVABLE,
                 hasActivity = false
             )
         )
     }
 
     @Test
-    fun unresolvableFailureReportsUnavailable() {
+    fun settingsChangeUnavailableReportsUnavailable() {
         assertEquals(
             LocationSettingsFailureAction.COMPLETE_UNAVAILABLE,
             selectLocationSettingsFailureAction(
                 shouldShowResolution = true,
-                isResolvable = false,
+                failureKind = LocationSettingsFailureKind.SETTINGS_CHANGE_UNAVAILABLE,
                 hasActivity = true
             )
         )
@@ -67,9 +71,49 @@ class AndroidLocationSettingsTest {
             LocationSettingsFailureAction.COMPLETE_UNAVAILABLE,
             selectLocationSettingsFailureAction(
                 shouldShowResolution = false,
-                isResolvable = true,
+                failureKind = LocationSettingsFailureKind.RESOLVABLE,
                 hasActivity = true
             )
+        )
+    }
+
+    @Test
+    fun cancelledSettingsCheckRejectsTheRequest() {
+        assertEquals(
+            LocationSettingsFailureAction.REJECT_REQUEST,
+            selectLocationSettingsFailureAction(
+                shouldShowResolution = true,
+                failureKind = LocationSettingsFailureKind.CANCELLED,
+                hasActivity = true
+            )
+        )
+    }
+
+    @Test
+    fun unexpectedApiFailureRejectsTheRequest() {
+        assertEquals(
+            LocationSettingsFailureAction.REJECT_REQUEST,
+            selectLocationSettingsFailureAction(
+                shouldShowResolution = true,
+                failureKind = LocationSettingsFailureKind.UNEXPECTED,
+                hasActivity = true
+            )
+        )
+    }
+
+    @Test
+    fun onlySettingsChangeUnavailableIsAnExpectedUnavailableResult() {
+        assertEquals(
+            LocationSettingsFailureKind.SETTINGS_CHANGE_UNAVAILABLE,
+            classifyLocationSettingsFailure(ApiException(Status(
+                LocationSettingsStatusCodes.SETTINGS_CHANGE_UNAVAILABLE
+            )))
+        )
+        assertEquals(
+            LocationSettingsFailureKind.UNEXPECTED,
+            classifyLocationSettingsFailure(ApiException(Status(
+                CommonStatusCodes.INTERNAL_ERROR
+            )))
         )
     }
 }

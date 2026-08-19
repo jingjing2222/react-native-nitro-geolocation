@@ -15,10 +15,12 @@ import com.facebook.react.bridge.BaseActivityEventListener
 import com.facebook.react.bridge.ReactApplicationContext
 import com.google.android.gms.common.ConnectionResult
 import com.google.android.gms.common.GoogleApiAvailability
+import com.google.android.gms.common.api.ApiException
 import com.google.android.gms.common.api.ResolvableApiException
 import com.google.android.gms.location.LocationRequest as GmsLocationRequest
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.location.LocationSettingsRequest
+import com.google.android.gms.location.LocationSettingsStatusCodes
 import com.google.android.gms.location.Priority
 import java.util.concurrent.atomic.AtomicBoolean
 
@@ -79,6 +81,7 @@ internal class AndroidLocationSettings(
 
     private data class PendingLocationSettingsRequest(
         val success: (LocationSettingsResult) -> Unit,
+        val error: ((LocationError) -> Unit)?,
         val options: ParsedSettingsOptions
     )
 
@@ -148,6 +151,7 @@ internal class AndroidLocationSettings(
     ) {
         val pendingRequest = PendingLocationSettingsRequest(
             success = success,
+            error = error,
             options = ParsedSettingsOptions.parse(options)
         )
 
@@ -179,35 +183,67 @@ internal class AndroidLocationSettings(
                     completeRequest(pendingRequest, LocationSettingsOutcome.SATISFIED)
                 }
                 .addOnFailureListener { exception ->
-                    val activity = reactContext.currentActivity
-                    when (selectLocationSettingsFailureAction(
+                    handleLocationSettingsFailure(
+                        pendingRequest = pendingRequest,
                         shouldShowResolution = shouldShowResolution,
-                        isResolvable = exception is ResolvableApiException,
-                        hasActivity = activity != null
-                    )) {
-                        LocationSettingsFailureAction.SHOW_RESOLUTION -> {
-                            showResolutionDialog(
-                                exception as ResolvableApiException,
-                                activity!!,
-                                pendingRequest
-                            )
-                        }
-                        LocationSettingsFailureAction.COMPLETE_ACTIVITY_MISSING -> {
-                            completeRequest(
-                                pendingRequest,
-                                LocationSettingsOutcome.ACTIVITYMISSING
-                            )
-                        }
-                        LocationSettingsFailureAction.COMPLETE_UNAVAILABLE -> {
-                            completeRequest(
-                                pendingRequest,
-                                LocationSettingsOutcome.UNAVAILABLE
-                            )
-                        }
-                    }
+                        failureKind = classifyLocationSettingsFailure(exception),
+                        exception = exception
+                    )
                 }
-        } catch (_: Exception) {
-            completeRequest(pendingRequest, LocationSettingsOutcome.UNAVAILABLE)
+                .addOnCanceledListener {
+                    handleLocationSettingsFailure(
+                        pendingRequest = pendingRequest,
+                        shouldShowResolution = shouldShowResolution,
+                        failureKind = LocationSettingsFailureKind.CANCELLED
+                    )
+                }
+        } catch (exception: Exception) {
+            rejectRequest(
+                pendingRequest,
+                "Failed to start the location settings check: ${exception.message ?: exception.javaClass.simpleName}"
+            )
+        }
+    }
+
+    private fun handleLocationSettingsFailure(
+        pendingRequest: PendingLocationSettingsRequest,
+        shouldShowResolution: Boolean,
+        failureKind: LocationSettingsFailureKind,
+        exception: Exception? = null
+    ) {
+        val activity = reactContext.currentActivity
+        when (selectLocationSettingsFailureAction(
+            shouldShowResolution = shouldShowResolution,
+            failureKind = failureKind,
+            hasActivity = activity != null
+        )) {
+            LocationSettingsFailureAction.SHOW_RESOLUTION -> {
+                showResolutionDialog(
+                    exception as ResolvableApiException,
+                    activity!!,
+                    pendingRequest
+                )
+            }
+            LocationSettingsFailureAction.COMPLETE_ACTIVITY_MISSING -> {
+                completeRequest(
+                    pendingRequest,
+                    LocationSettingsOutcome.ACTIVITYMISSING
+                )
+            }
+            LocationSettingsFailureAction.COMPLETE_UNAVAILABLE -> {
+                completeRequest(
+                    pendingRequest,
+                    LocationSettingsOutcome.UNAVAILABLE
+                )
+            }
+            LocationSettingsFailureAction.REJECT_REQUEST -> {
+                val message = if (failureKind == LocationSettingsFailureKind.CANCELLED) {
+                    "The location settings check was cancelled before it completed."
+                } else {
+                    "Failed to check location settings: ${exception?.message ?: exception?.javaClass?.simpleName ?: "unknown error"}"
+                }
+                rejectRequest(pendingRequest, message)
+            }
         }
     }
 
@@ -235,6 +271,15 @@ internal class AndroidLocationSettings(
                 providerStatus = providerStatus
             ))
         }
+    }
+
+    private fun rejectRequest(
+        pendingRequest: PendingLocationSettingsRequest,
+        message: String
+    ) {
+        if (!locationSettingsRequestGate.finish(pendingRequest)) return
+
+        pendingRequest.error?.invoke(createLocationError(INTERNAL_ERROR, message))
     }
 
     private fun buildLocationSettingsRequest(
@@ -354,15 +399,29 @@ internal class LocationSettingsRequestGate<T : Any> {
 internal enum class LocationSettingsFailureAction {
     SHOW_RESOLUTION,
     COMPLETE_UNAVAILABLE,
-    COMPLETE_ACTIVITY_MISSING
+    COMPLETE_ACTIVITY_MISSING,
+    REJECT_REQUEST
+}
+
+internal enum class LocationSettingsFailureKind {
+    RESOLVABLE,
+    SETTINGS_CHANGE_UNAVAILABLE,
+    CANCELLED,
+    UNEXPECTED
 }
 
 internal fun selectLocationSettingsFailureAction(
     shouldShowResolution: Boolean,
-    isResolvable: Boolean,
+    failureKind: LocationSettingsFailureKind,
     hasActivity: Boolean
 ): LocationSettingsFailureAction {
-    if (!shouldShowResolution || !isResolvable) {
+    if (failureKind == LocationSettingsFailureKind.CANCELLED ||
+        failureKind == LocationSettingsFailureKind.UNEXPECTED) {
+        return LocationSettingsFailureAction.REJECT_REQUEST
+    }
+
+    if (failureKind == LocationSettingsFailureKind.SETTINGS_CHANGE_UNAVAILABLE ||
+        !shouldShowResolution) {
         return LocationSettingsFailureAction.COMPLETE_UNAVAILABLE
     }
 
@@ -371,4 +430,19 @@ internal fun selectLocationSettingsFailureAction(
     } else {
         LocationSettingsFailureAction.COMPLETE_ACTIVITY_MISSING
     }
+}
+
+internal fun classifyLocationSettingsFailure(
+    exception: Exception
+): LocationSettingsFailureKind {
+    if (exception is ResolvableApiException) {
+        return LocationSettingsFailureKind.RESOLVABLE
+    }
+
+    if (exception is ApiException &&
+        exception.statusCode == LocationSettingsStatusCodes.SETTINGS_CHANGE_UNAVAILABLE) {
+        return LocationSettingsFailureKind.SETTINGS_CHANGE_UNAVAILABLE
+    }
+
+    return LocationSettingsFailureKind.UNEXPECTED
 }
