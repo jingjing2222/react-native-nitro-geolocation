@@ -20,6 +20,7 @@ import type {
   LocationProviderStatus,
   ReverseGeocodedAddress
 } from "../publicTypes";
+import { LocationErrorCode } from "../utils/errors";
 import {
   createUnsupportedError,
   getGeolocation,
