@@ -12,6 +12,10 @@ import {
   watchPosition
 } from "react-native-nitro-geolocation";
 import {
+  assertModernApiAvailability,
+  expectSatisfiedLocationSettings
+} from "./apiAssertions";
+import {
   runCompatApiAvailabilityCheck,
   runCompatScenarios
 } from "./compatRunner";
@@ -210,39 +214,14 @@ async function getCurrentPositionUntilExpected({
 }
 
 export async function runSuccessSuite() {
-  setScenario("api-availability", "running");
-  const apiShape = {
-    checkPermission: typeof checkPermission,
-    requestPermission: typeof requestPermission,
-    requestLocationSettings: typeof requestLocationSettings,
-    getCurrentPosition: typeof getCurrentPosition,
-    getLastKnownPosition: typeof getLastKnownPosition,
-    getLastKnownPositionAsync: typeof getLastKnownPositionAsync,
-    watchPosition: typeof watchPosition,
-    unwatch: typeof unwatch,
-    stopObserving: typeof stopObserving
-  };
-  const apiReady = Object.values(apiShape).every((type) => type === "function");
-  setScenario("api-availability", apiReady ? "pass" : "fail", apiShape);
-  if (!apiReady) {
-    throw new Error("Modern API browser export is incomplete.");
-  }
+  assertModernApiAvailability();
 
   runCompatApiAvailabilityCheck();
 
   await runStep(
     "request-location-settings",
     () => requestLocationSettings(),
-    (result) => {
-      if (
-        result.outcome !== "satisfied" ||
-        !result.providerStatus.locationServicesEnabled
-      ) {
-        throw new Error(
-          `Expected satisfied browser settings, got ${result.outcome}.`
-        );
-      }
-    }
+    expectSatisfiedLocationSettings
   );
 
   await runStep(

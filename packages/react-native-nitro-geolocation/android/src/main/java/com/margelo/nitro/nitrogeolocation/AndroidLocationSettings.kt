@@ -98,7 +98,8 @@ internal class AndroidLocationSettings(
         ) {
             if (requestCode != LOCATION_SETTINGS_REQUEST_CODE) return
 
-            val pendingRequest = locationSettingsRequestGate.current() ?: return
+            val pendingRequest =
+                locationSettingsRequestGate.consumeResolutionResult() ?: return
 
             if (resultCode == Activity.RESULT_OK) {
                 checkLocationSettings(pendingRequest, shouldShowResolution = false)
@@ -252,6 +253,8 @@ internal class AndroidLocationSettings(
         activity: Activity,
         pendingRequest: PendingLocationSettingsRequest
     ) {
+        if (!locationSettingsRequestGate.beginAwaitingResolution(pendingRequest)) return
+
         try {
             exception.startResolutionForResult(activity, LOCATION_SETTINGS_REQUEST_CODE)
         } catch (_: IntentSender.SendIntentException) {
@@ -263,6 +266,8 @@ internal class AndroidLocationSettings(
         pendingRequest: PendingLocationSettingsRequest,
         outcome: LocationSettingsOutcome
     ) {
+        if (!locationSettingsRequestGate.beginCompleting(pendingRequest)) return
+
         getProviderStatus { providerStatus ->
             if (!locationSettingsRequestGate.finish(pendingRequest)) return@getProviderStatus
 
@@ -374,26 +379,73 @@ internal class AndroidLocationSettings(
 }
 
 internal class LocationSettingsRequestGate<T : Any> {
-    private var pendingRequest: T? = null
+    private data class ActiveRequest<T>(
+        val request: T,
+        var phase: LocationSettingsRequestPhase
+    )
+
+    private var activeRequest: ActiveRequest<T>? = null
 
     @Synchronized
     fun tryBegin(request: T): Boolean {
-        if (pendingRequest != null) return false
+        if (activeRequest != null) return false
 
-        pendingRequest = request
+        activeRequest = ActiveRequest(
+            request = request,
+            phase = LocationSettingsRequestPhase.CHECKING
+        )
         return true
     }
 
     @Synchronized
-    fun current(): T? = pendingRequest
+    fun current(): T? = activeRequest?.request
+
+    @Synchronized
+    fun beginAwaitingResolution(request: T): Boolean {
+        val active = activeRequest ?: return false
+        if (active.request !== request ||
+            active.phase != LocationSettingsRequestPhase.CHECKING) {
+            return false
+        }
+
+        active.phase = LocationSettingsRequestPhase.AWAITING_RESOLUTION
+        return true
+    }
+
+    @Synchronized
+    fun consumeResolutionResult(): T? {
+        val active = activeRequest ?: return null
+        if (active.phase != LocationSettingsRequestPhase.AWAITING_RESOLUTION) return null
+
+        active.phase = LocationSettingsRequestPhase.CHECKING
+        return active.request
+    }
+
+    @Synchronized
+    fun beginCompleting(request: T): Boolean {
+        val active = activeRequest ?: return false
+        if (active.request !== request ||
+            active.phase == LocationSettingsRequestPhase.COMPLETING) {
+            return false
+        }
+
+        active.phase = LocationSettingsRequestPhase.COMPLETING
+        return true
+    }
 
     @Synchronized
     fun finish(request: T): Boolean {
-        if (pendingRequest !== request) return false
+        if (activeRequest?.request !== request) return false
 
-        pendingRequest = null
+        activeRequest = null
         return true
     }
+}
+
+internal enum class LocationSettingsRequestPhase {
+    CHECKING,
+    AWAITING_RESOLUTION,
+    COMPLETING
 }
 
 internal enum class LocationSettingsFailureAction {

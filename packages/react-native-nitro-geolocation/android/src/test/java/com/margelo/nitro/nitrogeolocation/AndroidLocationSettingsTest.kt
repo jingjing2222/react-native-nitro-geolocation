@@ -6,6 +6,7 @@ import com.google.android.gms.common.api.Status
 import com.google.android.gms.location.LocationSettingsStatusCodes
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
+import org.junit.Assert.assertNull
 import org.junit.Assert.assertSame
 import org.junit.Assert.assertTrue
 import org.junit.Test
@@ -27,6 +28,22 @@ class AndroidLocationSettingsTest {
         assertFalse(gate.finish(firstRequest))
         assertTrue(gate.tryBegin(secondRequest))
         assertSame(secondRequest, gate.current())
+    }
+
+    @Test
+    fun activityResultIsConsumedOnlyWhileAwaitingResolution() {
+        val gate = LocationSettingsRequestGate<Any>()
+        val request = Any()
+        val unrelatedRequest = Any()
+
+        assertTrue(gate.tryBegin(request))
+        assertNull(gate.consumeResolutionResult())
+        assertFalse(gate.beginAwaitingResolution(unrelatedRequest))
+        assertTrue(gate.beginAwaitingResolution(request))
+        assertSame(request, gate.consumeResolutionResult())
+        assertNull(gate.consumeResolutionResult())
+        assertTrue(gate.beginCompleting(request))
+        assertNull(gate.consumeResolutionResult())
     }
 
     @Test
