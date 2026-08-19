@@ -30,7 +30,6 @@ internal data class ParsedOptions(
             options: LocationRequestOptions?,
             defaultMaximumAge: Double = DEFAULT_MAXIMUM_AGE
         ): ParsedOptions {
-            val enableHighAccuracy = options?.enableHighAccuracy ?: false
             val maxUpdates = options?.maxUpdates?.let { value ->
                 if (!value.isFinite()) {
                     0
@@ -44,7 +43,7 @@ internal data class ParsedOptions(
                 maximumAge = options?.maximumAge ?: defaultMaximumAge,
                 androidAccuracy = resolveAndroidAccuracy(
                     options?.accuracy,
-                    enableHighAccuracy
+                    enableHighAccuracy = false
                 ),
                 interval = options?.interval ?: DEFAULT_INTERVAL,
                 fastestInterval = options?.fastestInterval ?: DEFAULT_FASTEST_INTERVAL,

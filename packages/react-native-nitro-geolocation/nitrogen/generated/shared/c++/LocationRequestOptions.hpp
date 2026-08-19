@@ -49,7 +49,6 @@ namespace margelo::nitro::nitrogeolocation {
   public:
     std::optional<double> timeout     SWIFT_PRIVATE;
     std::optional<double> maximumAge     SWIFT_PRIVATE;
-    std::optional<bool> enableHighAccuracy     SWIFT_PRIVATE;
     std::optional<LocationAccuracyOptions> accuracy     SWIFT_PRIVATE;
     std::optional<double> interval     SWIFT_PRIVATE;
     std::optional<double> fastestInterval     SWIFT_PRIVATE;
@@ -66,7 +65,7 @@ namespace margelo::nitro::nitrogeolocation {
 
   public:
     LocationRequestOptions() = default;
-    explicit LocationRequestOptions(std::optional<double> timeout, std::optional<double> maximumAge, std::optional<bool> enableHighAccuracy, std::optional<LocationAccuracyOptions> accuracy, std::optional<double> interval, std::optional<double> fastestInterval, std::optional<double> distanceFilter, std::optional<AndroidGranularity> granularity, std::optional<bool> waitForAccurateLocation, std::optional<double> maxUpdateAge, std::optional<double> maxUpdateDelay, std::optional<double> maxUpdates, std::optional<bool> useSignificantChanges, std::optional<IOSActivityType> activityType, std::optional<bool> pausesLocationUpdatesAutomatically, std::optional<bool> showsBackgroundLocationIndicator): timeout(timeout), maximumAge(maximumAge), enableHighAccuracy(enableHighAccuracy), accuracy(accuracy), interval(interval), fastestInterval(fastestInterval), distanceFilter(distanceFilter), granularity(granularity), waitForAccurateLocation(waitForAccurateLocation), maxUpdateAge(maxUpdateAge), maxUpdateDelay(maxUpdateDelay), maxUpdates(maxUpdates), useSignificantChanges(useSignificantChanges), activityType(activityType), pausesLocationUpdatesAutomatically(pausesLocationUpdatesAutomatically), showsBackgroundLocationIndicator(showsBackgroundLocationIndicator) {}
+    explicit LocationRequestOptions(std::optional<double> timeout, std::optional<double> maximumAge, std::optional<LocationAccuracyOptions> accuracy, std::optional<double> interval, std::optional<double> fastestInterval, std::optional<double> distanceFilter, std::optional<AndroidGranularity> granularity, std::optional<bool> waitForAccurateLocation, std::optional<double> maxUpdateAge, std::optional<double> maxUpdateDelay, std::optional<double> maxUpdates, std::optional<bool> useSignificantChanges, std::optional<IOSActivityType> activityType, std::optional<bool> pausesLocationUpdatesAutomatically, std::optional<bool> showsBackgroundLocationIndicator): timeout(timeout), maximumAge(maximumAge), accuracy(accuracy), interval(interval), fastestInterval(fastestInterval), distanceFilter(distanceFilter), granularity(granularity), waitForAccurateLocation(waitForAccurateLocation), maxUpdateAge(maxUpdateAge), maxUpdateDelay(maxUpdateDelay), maxUpdates(maxUpdates), useSignificantChanges(useSignificantChanges), activityType(activityType), pausesLocationUpdatesAutomatically(pausesLocationUpdatesAutomatically), showsBackgroundLocationIndicator(showsBackgroundLocationIndicator) {}
 
   public:
     friend bool operator==(const LocationRequestOptions& lhs, const LocationRequestOptions& rhs) = default;
@@ -84,7 +83,6 @@ namespace margelo::nitro {
       return margelo::nitro::nitrogeolocation::LocationRequestOptions(
         JSIConverter<std::optional<double>>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "timeout"))),
         JSIConverter<std::optional<double>>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "maximumAge"))),
-        JSIConverter<std::optional<bool>>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "enableHighAccuracy"))),
         JSIConverter<std::optional<margelo::nitro::nitrogeolocation::LocationAccuracyOptions>>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "accuracy"))),
         JSIConverter<std::optional<double>>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "interval"))),
         JSIConverter<std::optional<double>>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "fastestInterval"))),
@@ -104,7 +102,6 @@ namespace margelo::nitro {
       jsi::Object obj(runtime);
       obj.setProperty(runtime, PropNameIDCache::get(runtime, "timeout"), JSIConverter<std::optional<double>>::toJSI(runtime, arg.timeout));
       obj.setProperty(runtime, PropNameIDCache::get(runtime, "maximumAge"), JSIConverter<std::optional<double>>::toJSI(runtime, arg.maximumAge));
-      obj.setProperty(runtime, PropNameIDCache::get(runtime, "enableHighAccuracy"), JSIConverter<std::optional<bool>>::toJSI(runtime, arg.enableHighAccuracy));
       obj.setProperty(runtime, PropNameIDCache::get(runtime, "accuracy"), JSIConverter<std::optional<margelo::nitro::nitrogeolocation::LocationAccuracyOptions>>::toJSI(runtime, arg.accuracy));
       obj.setProperty(runtime, PropNameIDCache::get(runtime, "interval"), JSIConverter<std::optional<double>>::toJSI(runtime, arg.interval));
       obj.setProperty(runtime, PropNameIDCache::get(runtime, "fastestInterval"), JSIConverter<std::optional<double>>::toJSI(runtime, arg.fastestInterval));
@@ -130,7 +127,6 @@ namespace margelo::nitro {
       }
       if (!JSIConverter<std::optional<double>>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "timeout")))) return false;
       if (!JSIConverter<std::optional<double>>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "maximumAge")))) return false;
-      if (!JSIConverter<std::optional<bool>>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "enableHighAccuracy")))) return false;
       if (!JSIConverter<std::optional<margelo::nitro::nitrogeolocation::LocationAccuracyOptions>>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "accuracy")))) return false;
       if (!JSIConverter<std::optional<double>>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "interval")))) return false;
       if (!JSIConverter<std::optional<double>>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "fastestInterval")))) return false;

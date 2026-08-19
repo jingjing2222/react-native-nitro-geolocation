@@ -79,9 +79,7 @@ export function toPositionOptions(
 
   return {
     enableHighAccuracy:
-      androidAccuracy !== undefined
-        ? androidAccuracy === "high"
-        : options?.enableHighAccuracy,
+      androidAccuracy !== undefined ? androidAccuracy === "high" : undefined,
     timeout: options?.timeout ?? defaultTimeoutMs,
     maximumAge: options?.maximumAge ?? 0
   };

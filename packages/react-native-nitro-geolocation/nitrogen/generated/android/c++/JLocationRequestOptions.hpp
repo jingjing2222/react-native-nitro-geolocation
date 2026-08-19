@@ -45,8 +45,6 @@ namespace margelo::nitro::nitrogeolocation {
       jni::local_ref<jni::JDouble> timeout = this->getFieldValue(fieldTimeout);
       static const auto fieldMaximumAge = clazz->getField<jni::JDouble>("maximumAge");
       jni::local_ref<jni::JDouble> maximumAge = this->getFieldValue(fieldMaximumAge);
-      static const auto fieldEnableHighAccuracy = clazz->getField<jni::JBoolean>("enableHighAccuracy");
-      jni::local_ref<jni::JBoolean> enableHighAccuracy = this->getFieldValue(fieldEnableHighAccuracy);
       static const auto fieldAccuracy = clazz->getField<JLocationAccuracyOptions>("accuracy");
       jni::local_ref<JLocationAccuracyOptions> accuracy = this->getFieldValue(fieldAccuracy);
       static const auto fieldInterval = clazz->getField<jni::JDouble>("interval");
@@ -76,7 +74,6 @@ namespace margelo::nitro::nitrogeolocation {
       return LocationRequestOptions(
         timeout != nullptr ? std::make_optional(timeout->value()) : std::nullopt,
         maximumAge != nullptr ? std::make_optional(maximumAge->value()) : std::nullopt,
-        enableHighAccuracy != nullptr ? std::make_optional(static_cast<bool>(enableHighAccuracy->value())) : std::nullopt,
         accuracy != nullptr ? std::make_optional(accuracy->toCpp()) : std::nullopt,
         interval != nullptr ? std::make_optional(interval->value()) : std::nullopt,
         fastestInterval != nullptr ? std::make_optional(fastestInterval->value()) : std::nullopt,
@@ -99,14 +96,13 @@ namespace margelo::nitro::nitrogeolocation {
      */
     [[maybe_unused]]
     static jni::local_ref<JLocationRequestOptions::javaobject> fromCpp(const LocationRequestOptions& value) {
-      using JSignature = JLocationRequestOptions(jni::alias_ref<jni::JDouble>, jni::alias_ref<jni::JDouble>, jni::alias_ref<jni::JBoolean>, jni::alias_ref<JLocationAccuracyOptions>, jni::alias_ref<jni::JDouble>, jni::alias_ref<jni::JDouble>, jni::alias_ref<jni::JDouble>, jni::alias_ref<JAndroidGranularity>, jni::alias_ref<jni::JBoolean>, jni::alias_ref<jni::JDouble>, jni::alias_ref<jni::JDouble>, jni::alias_ref<jni::JDouble>, jni::alias_ref<jni::JBoolean>, jni::alias_ref<JIOSActivityType>, jni::alias_ref<jni::JBoolean>, jni::alias_ref<jni::JBoolean>);
+      using JSignature = JLocationRequestOptions(jni::alias_ref<jni::JDouble>, jni::alias_ref<jni::JDouble>, jni::alias_ref<JLocationAccuracyOptions>, jni::alias_ref<jni::JDouble>, jni::alias_ref<jni::JDouble>, jni::alias_ref<jni::JDouble>, jni::alias_ref<JAndroidGranularity>, jni::alias_ref<jni::JBoolean>, jni::alias_ref<jni::JDouble>, jni::alias_ref<jni::JDouble>, jni::alias_ref<jni::JDouble>, jni::alias_ref<jni::JBoolean>, jni::alias_ref<JIOSActivityType>, jni::alias_ref<jni::JBoolean>, jni::alias_ref<jni::JBoolean>);
       static const auto clazz = javaClassStatic();
       static const auto create = clazz->getStaticMethod<JSignature>("fromCpp");
       return create(
         clazz,
         value.timeout.has_value() ? jni::JDouble::valueOf(value.timeout.value()) : nullptr,
         value.maximumAge.has_value() ? jni::JDouble::valueOf(value.maximumAge.value()) : nullptr,
-        value.enableHighAccuracy.has_value() ? jni::JBoolean::valueOf(value.enableHighAccuracy.value()) : nullptr,
         value.accuracy.has_value() ? JLocationAccuracyOptions::fromCpp(value.accuracy.value()) : nullptr,
         value.interval.has_value() ? jni::JDouble::valueOf(value.interval.value()) : nullptr,
         value.fastestInterval.has_value() ? jni::JDouble::valueOf(value.fastestInterval.value()) : nullptr,

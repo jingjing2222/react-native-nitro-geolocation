@@ -60,7 +60,7 @@ export type ScenarioMessageListProps = {
  *   messages={[
  *     {
  *       id: "android-high-overrides-false",
- *       title: "Android high overrides enableHighAccuracy=false",
+ *       title: "Android high accuracy for navigation",
  *       message: "contract passed with injected location 37.566500, 126.978000"
  *     }
  *   ]}

@@ -18,7 +18,7 @@ public extension LocationRequestOptions {
   /**
    * Create a new instance of `LocationRequestOptions`.
    */
-  init(timeout: Double?, maximumAge: Double?, enableHighAccuracy: Bool?, accuracy: LocationAccuracyOptions?, interval: Double?, fastestInterval: Double?, distanceFilter: Double?, granularity: AndroidGranularity?, waitForAccurateLocation: Bool?, maxUpdateAge: Double?, maxUpdateDelay: Double?, maxUpdates: Double?, useSignificantChanges: Bool?, activityType: IOSActivityType?, pausesLocationUpdatesAutomatically: Bool?, showsBackgroundLocationIndicator: Bool?) {
+  init(timeout: Double?, maximumAge: Double?, accuracy: LocationAccuracyOptions?, interval: Double?, fastestInterval: Double?, distanceFilter: Double?, granularity: AndroidGranularity?, waitForAccurateLocation: Bool?, maxUpdateAge: Double?, maxUpdateDelay: Double?, maxUpdates: Double?, useSignificantChanges: Bool?, activityType: IOSActivityType?, pausesLocationUpdatesAutomatically: Bool?, showsBackgroundLocationIndicator: Bool?) {
     self.init({ () -> bridge.std__optional_double_ in
       if let __unwrappedValue = timeout {
         return bridge.create_std__optional_double_(__unwrappedValue)
@@ -28,12 +28,6 @@ public extension LocationRequestOptions {
     }(), { () -> bridge.std__optional_double_ in
       if let __unwrappedValue = maximumAge {
         return bridge.create_std__optional_double_(__unwrappedValue)
-      } else {
-        return .init()
-      }
-    }(), { () -> bridge.std__optional_bool_ in
-      if let __unwrappedValue = enableHighAccuracy {
-        return bridge.create_std__optional_bool_(__unwrappedValue)
       } else {
         return .init()
       }
@@ -129,7 +123,7 @@ public extension LocationRequestOptions {
       }
     }()
   }
-  
+
   @inline(__always)
   var maximumAge: Double? {
     return { () -> Double? in
@@ -141,24 +135,12 @@ public extension LocationRequestOptions {
       }
     }()
   }
-  
-  @inline(__always)
-  var enableHighAccuracy: Bool? {
-    return { () -> Bool? in
-      if bridge.has_value_std__optional_bool_(self.__enableHighAccuracy) {
-        let __unwrapped = bridge.get_std__optional_bool_(self.__enableHighAccuracy)
-        return __unwrapped
-      } else {
-        return nil
-      }
-    }()
-  }
-  
+
   @inline(__always)
   var accuracy: LocationAccuracyOptions? {
     return self.__accuracy.value
   }
-  
+
   @inline(__always)
   var interval: Double? {
     return { () -> Double? in
@@ -170,7 +152,7 @@ public extension LocationRequestOptions {
       }
     }()
   }
-  
+
   @inline(__always)
   var fastestInterval: Double? {
     return { () -> Double? in
@@ -182,7 +164,7 @@ public extension LocationRequestOptions {
       }
     }()
   }
-  
+
   @inline(__always)
   var distanceFilter: Double? {
     return { () -> Double? in
@@ -194,12 +176,12 @@ public extension LocationRequestOptions {
       }
     }()
   }
-  
+
   @inline(__always)
   var granularity: AndroidGranularity? {
     return self.__granularity.value
   }
-  
+
   @inline(__always)
   var waitForAccurateLocation: Bool? {
     return { () -> Bool? in
@@ -211,7 +193,7 @@ public extension LocationRequestOptions {
       }
     }()
   }
-  
+
   @inline(__always)
   var maxUpdateAge: Double? {
     return { () -> Double? in
@@ -223,7 +205,7 @@ public extension LocationRequestOptions {
       }
     }()
   }
-  
+
   @inline(__always)
   var maxUpdateDelay: Double? {
     return { () -> Double? in
@@ -235,7 +217,7 @@ public extension LocationRequestOptions {
       }
     }()
   }
-  
+
   @inline(__always)
   var maxUpdates: Double? {
     return { () -> Double? in
@@ -247,7 +229,7 @@ public extension LocationRequestOptions {
       }
     }()
   }
-  
+
   @inline(__always)
   var useSignificantChanges: Bool? {
     return { () -> Bool? in
@@ -259,12 +241,12 @@ public extension LocationRequestOptions {
       }
     }()
   }
-  
+
   @inline(__always)
   var activityType: IOSActivityType? {
     return self.__activityType.value
   }
-  
+
   @inline(__always)
   var pausesLocationUpdatesAutomatically: Bool? {
     return { () -> Bool? in
@@ -276,7 +258,7 @@ public extension LocationRequestOptions {
       }
     }()
   }
-  
+
   @inline(__always)
   var showsBackgroundLocationIndicator: Bool? {
     return { () -> Bool? in

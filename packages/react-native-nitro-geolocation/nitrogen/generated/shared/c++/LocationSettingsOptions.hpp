@@ -31,8 +31,8 @@
 // Forward declaration of `LocationAccuracyOptions` to properly resolve imports.
 namespace margelo::nitro::nitrogeolocation { struct LocationAccuracyOptions; }
 
-#include <optional>
 #include "LocationAccuracyOptions.hpp"
+#include <optional>
 
 namespace margelo::nitro::nitrogeolocation {
 
@@ -41,7 +41,6 @@ namespace margelo::nitro::nitrogeolocation {
    */
   struct LocationSettingsOptions final {
   public:
-    std::optional<bool> enableHighAccuracy     SWIFT_PRIVATE;
     std::optional<LocationAccuracyOptions> accuracy     SWIFT_PRIVATE;
     std::optional<double> interval     SWIFT_PRIVATE;
     std::optional<double> fastestInterval     SWIFT_PRIVATE;
@@ -51,7 +50,7 @@ namespace margelo::nitro::nitrogeolocation {
 
   public:
     LocationSettingsOptions() = default;
-    explicit LocationSettingsOptions(std::optional<bool> enableHighAccuracy, std::optional<LocationAccuracyOptions> accuracy, std::optional<double> interval, std::optional<double> fastestInterval, std::optional<double> distanceFilter, std::optional<bool> alwaysShow, std::optional<bool> needBle): enableHighAccuracy(enableHighAccuracy), accuracy(accuracy), interval(interval), fastestInterval(fastestInterval), distanceFilter(distanceFilter), alwaysShow(alwaysShow), needBle(needBle) {}
+    explicit LocationSettingsOptions(std::optional<LocationAccuracyOptions> accuracy, std::optional<double> interval, std::optional<double> fastestInterval, std::optional<double> distanceFilter, std::optional<bool> alwaysShow, std::optional<bool> needBle): accuracy(accuracy), interval(interval), fastestInterval(fastestInterval), distanceFilter(distanceFilter), alwaysShow(alwaysShow), needBle(needBle) {}
 
   public:
     friend bool operator==(const LocationSettingsOptions& lhs, const LocationSettingsOptions& rhs) = default;
@@ -67,7 +66,6 @@ namespace margelo::nitro {
     static inline margelo::nitro::nitrogeolocation::LocationSettingsOptions fromJSI(jsi::Runtime& runtime, const jsi::Value& arg) {
       jsi::Object obj = arg.asObject(runtime);
       return margelo::nitro::nitrogeolocation::LocationSettingsOptions(
-        JSIConverter<std::optional<bool>>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "enableHighAccuracy"))),
         JSIConverter<std::optional<margelo::nitro::nitrogeolocation::LocationAccuracyOptions>>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "accuracy"))),
         JSIConverter<std::optional<double>>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "interval"))),
         JSIConverter<std::optional<double>>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "fastestInterval"))),
@@ -78,7 +76,6 @@ namespace margelo::nitro {
     }
     static inline jsi::Value toJSI(jsi::Runtime& runtime, const margelo::nitro::nitrogeolocation::LocationSettingsOptions& arg) {
       jsi::Object obj(runtime);
-      obj.setProperty(runtime, PropNameIDCache::get(runtime, "enableHighAccuracy"), JSIConverter<std::optional<bool>>::toJSI(runtime, arg.enableHighAccuracy));
       obj.setProperty(runtime, PropNameIDCache::get(runtime, "accuracy"), JSIConverter<std::optional<margelo::nitro::nitrogeolocation::LocationAccuracyOptions>>::toJSI(runtime, arg.accuracy));
       obj.setProperty(runtime, PropNameIDCache::get(runtime, "interval"), JSIConverter<std::optional<double>>::toJSI(runtime, arg.interval));
       obj.setProperty(runtime, PropNameIDCache::get(runtime, "fastestInterval"), JSIConverter<std::optional<double>>::toJSI(runtime, arg.fastestInterval));
@@ -95,7 +92,6 @@ namespace margelo::nitro {
       if (!nitro::isPlainObject(runtime, obj)) {
         return false;
       }
-      if (!JSIConverter<std::optional<bool>>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "enableHighAccuracy")))) return false;
       if (!JSIConverter<std::optional<margelo::nitro::nitrogeolocation::LocationAccuracyOptions>>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "accuracy")))) return false;
       if (!JSIConverter<std::optional<double>>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "interval")))) return false;
       if (!JSIConverter<std::optional<double>>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "fastestInterval")))) return false;

@@ -106,10 +106,9 @@ const getPositiveScenarios = (): AccuracyScenario[] => {
   if (Platform.OS === "android") {
     return [
       {
-        id: "android-high-overrides-false",
-        title: "Android high overrides enableHighAccuracy=false",
+        id: "android-high",
+        title: "Android high accuracy for turn-by-turn navigation",
         options: {
-          enableHighAccuracy: false,
           accuracy: {
             android: "high"
           },
@@ -118,10 +117,9 @@ const getPositiveScenarios = (): AccuracyScenario[] => {
         }
       },
       {
-        id: "android-balanced-overrides-true",
-        title: "Android balanced overrides enableHighAccuracy=true",
+        id: "android-balanced",
+        title: "Android balanced accuracy for nearby search",
         options: {
-          enableHighAccuracy: true,
           accuracy: {
             android: "balanced"
           },
@@ -130,10 +128,9 @@ const getPositiveScenarios = (): AccuracyScenario[] => {
         }
       },
       {
-        id: "android-low-overrides-true",
-        title: "Android low overrides enableHighAccuracy=true",
+        id: "android-low",
+        title: "Android low accuracy for weather refresh",
         options: {
-          enableHighAccuracy: true,
           accuracy: {
             android: "low"
           },
@@ -146,10 +143,9 @@ const getPositiveScenarios = (): AccuracyScenario[] => {
 
   return [
     {
-      id: "ios-best-navigation-overrides-false",
-      title: "iOS bestForNavigation overrides enableHighAccuracy=false",
+      id: "ios-best-navigation",
+      title: "iOS bestForNavigation for turn-by-turn navigation",
       options: {
-        enableHighAccuracy: false,
         accuracy: {
           ios: "bestForNavigation"
         },
@@ -161,7 +157,7 @@ const getPositiveScenarios = (): AccuracyScenario[] => {
     },
     {
       id: "ios-nearest-ten",
-      title: "iOS nearestTenMeters returns fixture coordinates",
+      title: "iOS nearestTenMeters for nearby search",
       options: {
         accuracy: {
           ios: "nearestTenMeters"
@@ -173,10 +169,9 @@ const getPositiveScenarios = (): AccuracyScenario[] => {
       }
     },
     {
-      id: "ios-reduced-overrides-true",
-      title: "iOS reduced overrides enableHighAccuracy=true",
+      id: "ios-reduced",
+      title: "iOS reduced accuracy for weather refresh",
       options: {
-        enableHighAccuracy: true,
         accuracy: {
           ios: "reduced"
         },

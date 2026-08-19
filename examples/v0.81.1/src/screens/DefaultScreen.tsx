@@ -76,7 +76,7 @@ export default function DefaultScreen({
     isWatching
   } = useWatchPosition({
     enabled: watchEnabled,
-    enableHighAccuracy: true,
+    accuracy: { android: "high", ios: "best" },
     distanceFilter: 10,
     interval: 5000
   });
@@ -109,12 +109,12 @@ export default function DefaultScreen({
       const position = await (nativeGeolocation
         ? runWithNativeGeolocation(() =>
             getCurrentPosition({
-              enableHighAccuracy: true,
+              accuracy: { android: "high", ios: "best" },
               timeout: 15000
             })
           )
         : getCurrentPosition({
-            enableHighAccuracy: true,
+            accuracy: { android: "high", ios: "best" },
             timeout: 15000
           }));
       setCurrentPosition(position);

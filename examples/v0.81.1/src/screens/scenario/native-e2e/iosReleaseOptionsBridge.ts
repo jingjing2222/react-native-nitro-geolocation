@@ -32,7 +32,7 @@ const NEARBY_MOVE_MAX_METERS = 1000;
 
 const guardedWatchOptions: LocationRequestOptions = {
   distanceFilter: DISTANCE_FILTER_METERS,
-  enableHighAccuracy: true,
+  accuracy: { ios: "best" },
   maximumAge: 0
 };
 
