@@ -74,6 +74,16 @@ export function LongRunBackgroundE2EScreen() {
               testID: `${PREFIX}-stored-events`
             },
             {
+              label: "Last location at:",
+              value: snapshot.lastLocationAt,
+              testID: `${PREFIX}-last-location-at`
+            },
+            {
+              label: "Last event at:",
+              value: snapshot.lastEventAt,
+              testID: `${PREFIX}-last-event-at`
+            },
+            {
               label: "Post-prepare locations:",
               value: snapshot.postPrepareLocations,
               testID: `${PREFIX}-post-prepare-locations`

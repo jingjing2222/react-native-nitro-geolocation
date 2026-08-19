@@ -18,14 +18,16 @@ yarn workspace react-native-nitro-geolocation-example test:e2e:background-long-r
 
 This flow:
 
-1. starts background tracking with `stopOnTerminate: false` and `startOnBoot: true`,
-2. registers a geofence,
-3. sends the app home,
-4. injects outside, inside, and outside locations,
-5. reopens the page,
-6. verifies stored background location events recorded after the run marker,
-7. verifies Headless JS delivery by checking delivered native event flags,
-8. verifies geofence enter and exit events.
+1. clears native storage and verifies both last-delivery timestamps are absent,
+2. starts background tracking with `stopOnTerminate: false` and `startOnBoot: true`,
+3. registers a geofence,
+4. sends the app home,
+5. injects outside, inside, and outside locations,
+6. reopens the page,
+7. verifies stored background location events recorded after the run marker,
+8. verifies `lastLocationAt` and `lastEventAt` are at or after that marker,
+9. verifies Headless JS delivery by checking delivered native event flags,
+10. verifies geofence enter and exit events.
 
 To include reboot restore on an emulator:
 
@@ -49,11 +51,13 @@ yarn workspace react-native-nitro-geolocation-example test:e2e:background-long-r
 
 This flow:
 
-1. starts iOS background/significant-change tracking,
-2. sends the app home,
-3. injects location changes,
-4. reopens the page,
-5. verifies native storage drain from events recorded after the run marker.
+1. clears native storage and verifies both last-delivery timestamps are absent,
+2. starts iOS background/significant-change tracking,
+3. sends the app home,
+4. injects location changes,
+5. reopens the page,
+6. verifies native storage drain from events recorded after the run marker,
+7. verifies `lastLocationAt` and `lastEventAt` are at or after that marker.
 
 iOS does not have Android Headless JS or an Android-style boot receiver. The E2E
 page reports those as platform limits instead of pretending they are supported.
@@ -97,3 +101,6 @@ Long-run background behavior is platform and device-policy dependent. If the
 screen reports a failed result, keep it failed and inspect the device state,
 permissions, battery policy, and native logs. Do not change the E2E page to pass
 without a stored native event.
+
+The supported guarantees and the full automated/manual matrix are documented
+in [Background Reliability Contract](/background/reliability-contract).

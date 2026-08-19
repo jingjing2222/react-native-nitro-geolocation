@@ -82,6 +82,8 @@ export type LongRunSnapshot = {
   foregroundService: string;
   storedLocations: number;
   storedEvents: number;
+  lastLocationAt: string;
+  lastEventAt: string;
   postPrepareLocations: number;
   postPrepareLocationEvents: number;
   deliveredEvents: number;
@@ -106,6 +108,8 @@ const emptySnapshot: LongRunSnapshot = {
   foregroundService: "unknown",
   storedLocations: 0,
   storedEvents: 0,
+  lastLocationAt: "none",
+  lastEventAt: "none",
   postPrepareLocations: 0,
   postPrepareLocationEvents: 0,
   deliveredEvents: 0,
@@ -159,6 +163,16 @@ const metadataNumber = (value: unknown) => {
     return Number.isFinite(parsed) ? parsed : undefined;
   }
   return undefined;
+};
+
+const isTimestampAtOrAfter = (value: string, marker: string) => {
+  const timestamp = metadataNumber(value);
+  const markerTimestamp = metadataNumber(marker);
+  return (
+    timestamp !== undefined &&
+    markerTimestamp !== undefined &&
+    timestamp >= markerTimestamp
+  );
 };
 
 const longRunMarker = (geofences: GeofenceRegion[]) => {
@@ -248,6 +262,12 @@ export const useLongRunBackgroundScenario = () => {
       ),
       storedLocations: status.storedLocationCount,
       storedEvents: status.storedEventCount,
+      lastLocationAt: status.lastLocationAt
+        ? String(Math.trunc(status.lastLocationAt))
+        : "none",
+      lastEventAt: status.lastEventAt
+        ? String(Math.trunc(status.lastEventAt))
+        : "none",
       postPrepareLocations: locations.length,
       postPrepareLocationEvents: postPrepareLocationEvents.length,
       deliveredEvents: events.filter((event) => event.deliveredToJS).length,
@@ -288,6 +308,18 @@ export const useLongRunBackgroundScenario = () => {
       await removeGeofences().catch(() => undefined);
       await clearStoredBackgroundEvents().catch(() => undefined);
       await clearStoredBackgroundLocations().catch(() => undefined);
+
+      const clearedStatus = await getBackgroundLocationStatus();
+      if (
+        clearedStatus.storedLocationCount !== 0 ||
+        clearedStatus.storedEventCount !== 0 ||
+        clearedStatus.lastLocationAt !== undefined ||
+        clearedStatus.lastEventAt !== undefined
+      ) {
+        throw new Error(
+          `Native store did not clear: locations=${clearedStatus.storedLocationCount}, events=${clearedStatus.storedEventCount}, lastLocationAt=${String(clearedStatus.lastLocationAt)}, lastEventAt=${String(clearedStatus.lastEventAt)}`
+        );
+      }
 
       const permission = await requestBackgroundPermission();
       if (
@@ -383,12 +415,15 @@ export const useLongRunBackgroundScenario = () => {
     try {
       const next = await refreshSnapshot();
       const passed =
-        next.postPrepareLocations > 0 && next.postPrepareLocationEvents > 0;
+        next.postPrepareLocations > 0 &&
+        next.postPrepareLocationEvents > 0 &&
+        isTimestampAtOrAfter(next.lastLocationAt, next.preparedAt) &&
+        isTimestampAtOrAfter(next.lastEventAt, next.preparedAt);
       setResult(
         "backgroundLocation",
         createScenarioResult(
           passed ? "passed" : "failed",
-          `postPrepareLocations=${next.postPrepareLocations}, postPrepareEvents=${next.postPrepareLocationEvents}`
+          `postPrepareLocations=${next.postPrepareLocations}, postPrepareEvents=${next.postPrepareLocationEvents}, lastLocationAt=${next.lastLocationAt}, lastEventAt=${next.lastEventAt}`
         )
       );
     } catch (error) {
@@ -505,12 +540,15 @@ export const useLongRunBackgroundScenario = () => {
         return;
       }
       const passed =
-        next.postPrepareLocations > 0 && next.postPrepareLocationEvents > 0;
+        next.postPrepareLocations > 0 &&
+        next.postPrepareLocationEvents > 0 &&
+        isTimestampAtOrAfter(next.lastLocationAt, next.preparedAt) &&
+        isTimestampAtOrAfter(next.lastEventAt, next.preparedAt);
       setResult(
         "iosDrain",
         createScenarioResult(
           passed ? "passed" : "failed",
-          `postPrepareLocations=${next.postPrepareLocations}, postPrepareEvents=${next.postPrepareLocationEvents}`
+          `postPrepareLocations=${next.postPrepareLocations}, postPrepareEvents=${next.postPrepareLocationEvents}, lastLocationAt=${next.lastLocationAt}, lastEventAt=${next.lastEventAt}`
         )
       );
     } catch (error) {

@@ -342,6 +342,9 @@ class NitroBackgroundStore(context: Context) :
         }
     }
 
+    fun lastLocationAt(): Double? = maxValue("background_locations", "recorded_at")
+    fun lastEventAt(): Double? = maxValue("background_events", "timestamp")
+
     fun markSynced(ids: List<String>) {
         if (ids.isEmpty()) return
         val placeholders = ids.joinToString(",") { "?" }
@@ -365,6 +368,13 @@ class NitroBackgroundStore(context: Context) :
             """.trimIndent(),
             arrayOf(limit.toString())
         )
+    }
+
+    private fun maxValue(table: String, column: String): Double? {
+        val cursor = readableDatabase.rawQuery("SELECT MAX($column) FROM $table", null)
+        return cursor.use {
+            if (it.moveToFirst() && !it.isNull(0)) it.getDouble(0) else null
+        }
     }
 
     private fun getLocationById(id: String): StoredBackgroundLocation? {

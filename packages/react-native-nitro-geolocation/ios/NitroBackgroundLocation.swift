@@ -155,6 +155,8 @@ class NitroBackgroundLocation: HybridNitroBackgroundLocationSpec {
                 providerStatus: nil,
                 storedLocationCount: Double(self.storedLocations.count),
                 storedEventCount: Double(self.storedEvents.count),
+                lastLocationAt: self.storedLocations.map(\.recordedAt).max(),
+                lastEventAt: self.storedEvents.map(\.timestamp).max(),
                 geofenceCount: Double(self.geofences.count),
                 android: nil,
                 ios: IOSBackgroundLocationStatus(

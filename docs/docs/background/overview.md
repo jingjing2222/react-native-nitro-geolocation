@@ -23,6 +23,7 @@ imports stay explicit and tree-shakable.
 - [Start And Stop](/background/start-stop) - start continuous tracking and subscribe to native updates.
 - [Troubleshooting](/background/troubleshooting) - use `diagnoseBackgroundLocation()` to interpret the native background status when delivery is silent.
 - [Storage Recovery](/background/storage) - drain events recorded while JavaScript was not running.
+- [Reliability Contract](/background/reliability-contract) - understand foreground, background, termination, reboot, iOS suspension, status timestamps, and the E2E matrix.
 - [Geofencing](/background/geofencing), [Activity Recognition](/background/activity-recognition), and [Native HTTP Sync](/background/http-sync) - add advanced background behavior.
 
 ## Diagnose Silent Background Delivery

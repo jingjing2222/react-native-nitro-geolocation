@@ -104,6 +104,8 @@ appId: nitrogeolocation.example
 - extendedWaitUntil:
     visible: "Background location: passed"
     timeout: 15000
+- assertVisible: ".*Last location at: [0-9]+.*"
+- assertVisible: ".*Last event at: [0-9]+.*"
 
 - tapOn:
     id: "e2e-action-background-long-run-validate-headless-button"

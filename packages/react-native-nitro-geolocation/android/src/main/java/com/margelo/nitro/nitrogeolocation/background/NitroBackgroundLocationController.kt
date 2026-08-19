@@ -182,6 +182,8 @@ class NitroBackgroundLocationController private constructor(
             null,
             store.count("background_locations"),
             store.count("background_events"),
+            store.lastLocationAt(),
+            store.lastEventAt(),
             store.count("geofences"),
             AndroidBackgroundLocationStatus(
                 prefs.getBoolean("running", false),
