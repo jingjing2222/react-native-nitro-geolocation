@@ -23,13 +23,39 @@ class WatchPosition(private val reactContext: ReactApplicationContext) {
     private var currentOptions: CompatGeolocationOptions? = null
 
     data class WatchCallback(
-            val success: (CompatGeolocationResponse) -> Unit,
+            val success: (Location) -> Unit,
             val error: ((CompatGeolocationError) -> Unit)?,
             val options: CompatGeolocationOptions?
     )
 
     fun watch(
             success: (CompatGeolocationResponse) -> Unit,
+            error: ((CompatGeolocationError) -> Unit)?,
+            options: CompatGeolocationOptions?
+    ): Int {
+        return watchLocation(
+                success = { location -> success(location.toCompatGeolocationResponse()) },
+                error = error,
+                options = options
+        )
+    }
+
+    fun watchWithMetadata(
+            success: (CompatGeolocationResponseWithMetadataInternal) -> Unit,
+            error: ((CompatGeolocationError) -> Unit)?,
+            options: CompatGeolocationOptions?
+    ): Int {
+        return watchLocation(
+                success = { location ->
+                    success(location.toCompatGeolocationResponseWithMetadata())
+                },
+                error = error,
+                options = options
+        )
+    }
+
+    private fun watchLocation(
+            success: (Location) -> Unit,
             error: ((CompatGeolocationError) -> Unit)?,
             options: CompatGeolocationOptions?
     ): Int {
@@ -107,9 +133,8 @@ class WatchPosition(private val reactContext: ReactApplicationContext) {
             val listener =
                     object : LocationListener {
                         override fun onLocationChanged(location: Location) {
-                            val position = locationToPosition(location)
                             // Call all watch callbacks
-                            watchCallbacks.values.forEach { callback -> callback.success(position) }
+                            watchCallbacks.values.forEach { callback -> callback.success(location) }
                         }
 
                         override fun onStatusChanged(
@@ -187,22 +212,6 @@ class WatchPosition(private val reactContext: ReactApplicationContext) {
         } else {
             coarseGranted || fineGranted
         }
-    }
-
-    private fun locationToPosition(location: Location): CompatGeolocationResponse {
-        return CompatGeolocationResponse(
-                coords =
-                        GeolocationCoordinates(
-                                latitude = location.latitude,
-                                longitude = location.longitude,
-                                altitude = location.altitudeValue(),
-                                accuracy = location.accuracy.toDouble(),
-                                altitudeAccuracy = location.altitudeAccuracyValue(),
-                                heading = location.headingValue(),
-                                speed = location.speedValue()
-                        ),
-                timestamp = location.time.toDouble()
-        )
     }
 
     private fun createError(code: Int, message: String): CompatGeolocationError {

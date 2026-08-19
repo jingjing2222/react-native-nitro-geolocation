@@ -24,6 +24,25 @@ internal fun Location.toGeolocationResponse(
     )
 }
 
+internal fun Location.toCompatGeolocationResponse(): CompatGeolocationResponse {
+    val response = toGeolocationResponse()
+    return CompatGeolocationResponse(
+        coords = response.coords,
+        timestamp = response.timestamp
+    )
+}
+
+internal fun Location.toCompatGeolocationResponseWithMetadata():
+    CompatGeolocationResponseWithMetadataInternal {
+    val response = toGeolocationResponse()
+    return CompatGeolocationResponseWithMetadataInternal(
+        coords = response.coords,
+        timestamp = response.timestamp,
+        mocked = response.mocked,
+        provider = response.provider ?: LocationProviderUsed.UNKNOWN
+    )
+}
+
 internal fun Address.toGeocodedLocation(): GeocodedLocation? {
     if (!hasLatitude() || !hasLongitude()) {
         return null
