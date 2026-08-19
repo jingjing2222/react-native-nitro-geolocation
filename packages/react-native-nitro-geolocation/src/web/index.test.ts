@@ -344,6 +344,13 @@ describe("web Modern API", () => {
       cache: { available: true },
       remediations: ["requestPermission"]
     });
+
+    now.mockReturnValue(1_001);
+    await expect(getLocationReadiness()).resolves.toMatchObject({
+      ready: false,
+      permission: "undetermined",
+      remediations: ["requestPermission"]
+    });
   });
 
   it("expires successful observation evidence when the system clock moves backward", async () => {
@@ -361,6 +368,13 @@ describe("web Modern API", () => {
     await getCurrentPosition();
     now.mockReturnValue(999);
 
+    await expect(getLocationReadiness()).resolves.toMatchObject({
+      ready: false,
+      permission: "undetermined",
+      remediations: ["requestPermission"]
+    });
+
+    now.mockReturnValue(1_001);
     await expect(getLocationReadiness()).resolves.toMatchObject({
       ready: false,
       permission: "undetermined",
@@ -465,6 +479,32 @@ describe("web Modern API", () => {
       }
     });
 
+    await expect(getLocationReadiness()).resolves.toMatchObject({
+      ready: false,
+      permission: "undetermined",
+      remediations: ["requestPermission"]
+    });
+  });
+
+  it("clears recent permission evidence when Permissions API reports denied", async () => {
+    const query = vi.fn().mockResolvedValue({ state: "denied" });
+    setNavigator({
+      geolocation: {
+        getCurrentPosition: vi.fn((success) => success(createPosition())),
+        watchPosition: vi.fn(),
+        clearWatch: vi.fn()
+      },
+      permissions: { query }
+    });
+    await getCurrentPosition();
+
+    await expect(getLocationReadiness()).resolves.toMatchObject({
+      ready: false,
+      permission: "denied",
+      remediations: ["reviewPermissionSettings"]
+    });
+
+    query.mockResolvedValue({ state: "prompt" });
     await expect(getLocationReadiness()).resolves.toMatchObject({
       ready: false,
       permission: "undetermined",

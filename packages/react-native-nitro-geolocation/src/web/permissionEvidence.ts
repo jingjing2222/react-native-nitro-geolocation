@@ -17,10 +17,18 @@ export function applyRecentWebPermissionEvidence(
 ): PermissionStatus {
   const evidenceAgeMs =
     lastGrantedAt === undefined ? undefined : now - lastGrantedAt;
+
+  if (
+    evidenceAgeMs !== undefined &&
+    (evidenceAgeMs < 0 || evidenceAgeMs > permissionEvidenceMaxAgeMs)
+  ) {
+    clearWebPermissionEvidence();
+    return permission;
+  }
+
   if (
     permission === "undetermined" &&
     evidenceAgeMs !== undefined &&
-    evidenceAgeMs >= 0 &&
     evidenceAgeMs <= permissionEvidenceMaxAgeMs
   ) {
     return "granted";
