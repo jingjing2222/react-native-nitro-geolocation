@@ -7,12 +7,14 @@ extension NitroGeolocation {
         options: LocationRequestOptions,
         error: ((LocationError) -> Void)?
     ) throws -> Void {
-        getCurrentPositionInternal(
-            requestId: UUID().uuidString,
-            success: success,
-            options: options,
-            error: error
-        )
+        runCurrentPositionOperationOnMain {
+            self.getCurrentPositionInternal(
+                requestId: UUID().uuidString,
+                success: success,
+                options: options,
+                error: error
+            )
+        }
     }
 
     func getCurrentPositionCancellable(
@@ -21,22 +23,38 @@ extension NitroGeolocation {
         options: LocationRequestOptions,
         error: ((LocationError) -> Void)?
     ) throws -> Void {
-        cancelCurrentPositionRequest(requestId: requestId)
-        getCurrentPositionInternal(
-            requestId: requestId,
-            success: success,
-            options: options,
-            error: error
-        )
+        runCurrentPositionOperationOnMain {
+            self.cancelCurrentPositionRequestOnMain(requestId: requestId)
+            self.getCurrentPositionInternal(
+                requestId: requestId,
+                success: success,
+                options: options,
+                error: error
+            )
+        }
     }
 
     func cancelCurrentPositionRequest(requestId: String) {
+        runCurrentPositionOperationOnMain {
+            self.cancelCurrentPositionRequestOnMain(requestId: requestId)
+        }
+    }
+
+    private func cancelCurrentPositionRequestOnMain(requestId: String) {
         guard let request = pendingPositionRequests.removeValue(forKey: requestId) else {
             return
         }
 
         request.timer?.cancel()
         updateMonitoringAfterPositionRequestRemoval()
+    }
+
+    private func runCurrentPositionOperationOnMain(_ operation: @escaping () -> Void) {
+        if Thread.isMainThread {
+            operation()
+        } else {
+            DispatchQueue.main.async(execute: operation)
+        }
     }
 }
 

@@ -188,6 +188,8 @@ class NitroGeolocation: HybridNitroGeolocationSpec {
         options: LocationRequestOptions,
         error: ((LocationError) -> Void)?
     ) {
+        dispatchPrecondition(condition: .onQueue(.main))
+
         // Check permission
         let status = CLLocationManager.authorizationStatus()
         if status == .denied || status == .restricted {
