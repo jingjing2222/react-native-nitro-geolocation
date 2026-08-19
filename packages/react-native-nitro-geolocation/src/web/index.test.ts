@@ -346,6 +346,132 @@ describe("web Modern API", () => {
     });
   });
 
+  it("expires successful observation evidence when the system clock moves backward", async () => {
+    const now = vi.spyOn(Date, "now").mockReturnValue(1_000);
+    setNavigator({
+      geolocation: {
+        getCurrentPosition: vi.fn((success) => {
+          success({ ...createPosition(), timestamp: 1_000 });
+        }),
+        watchPosition: vi.fn(),
+        clearWatch: vi.fn()
+      }
+    });
+
+    await getCurrentPosition();
+    now.mockReturnValue(999);
+
+    await expect(getLocationReadiness()).resolves.toMatchObject({
+      ready: false,
+      permission: "undetermined",
+      remediations: ["requestPermission"]
+    });
+  });
+
+  it("uses a successful watch observation as bounded permission evidence", async () => {
+    let observePosition:
+      | ((position: ReturnType<typeof createPosition>) => void)
+      | undefined;
+    setNavigator({
+      geolocation: {
+        getCurrentPosition: vi.fn(),
+        watchPosition: vi.fn((success) => {
+          observePosition = success;
+          return 10;
+        }),
+        clearWatch: vi.fn()
+      }
+    });
+
+    watchPosition(vi.fn());
+    observePosition?.(createPosition());
+
+    await expect(getLocationReadiness()).resolves.toMatchObject({
+      ready: true,
+      permission: "granted",
+      cache: { available: true },
+      remediations: []
+    });
+  });
+
+  it("clears recent permission evidence after a watch permission denial", async () => {
+    let rejectWatch:
+      | ((error: { code: number; message: string }) => void)
+      | undefined;
+    setNavigator({
+      geolocation: {
+        getCurrentPosition: vi.fn((success) => success(createPosition())),
+        watchPosition: vi.fn((_success, error) => {
+          rejectWatch = error;
+          return 10;
+        }),
+        clearWatch: vi.fn()
+      }
+    });
+
+    await getCurrentPosition();
+    watchPosition(vi.fn());
+    rejectWatch?.({ code: 1, message: "denied" });
+
+    await expect(getLocationReadiness()).resolves.toMatchObject({
+      ready: false,
+      permission: "undetermined",
+      remediations: ["requestPermission"]
+    });
+  });
+
+  it("clears recent permission evidence after a one-shot permission denial", async () => {
+    const getCurrentPositionMock = vi
+      .fn()
+      .mockImplementationOnce((success) => success(createPosition()))
+      .mockImplementationOnce((_success, error) =>
+        error({ code: 1, message: "denied" })
+      );
+    setNavigator({
+      geolocation: {
+        getCurrentPosition: getCurrentPositionMock,
+        watchPosition: vi.fn(),
+        clearWatch: vi.fn()
+      }
+    });
+
+    await getCurrentPosition();
+    await expect(getCurrentPosition()).rejects.toMatchObject({ code: 1 });
+
+    await expect(getLocationReadiness()).resolves.toMatchObject({
+      ready: false,
+      permission: "undetermined",
+      remediations: ["requestPermission"]
+    });
+  });
+
+  it("clears recent permission evidence when Web Geolocation disappears", async () => {
+    setNavigator({
+      geolocation: {
+        getCurrentPosition: vi.fn((success) => success(createPosition())),
+        watchPosition: vi.fn(),
+        clearWatch: vi.fn()
+      }
+    });
+    await getCurrentPosition();
+
+    setNavigator({});
+    await getLocationReadiness();
+    setNavigator({
+      geolocation: {
+        getCurrentPosition: vi.fn(),
+        watchPosition: vi.fn(),
+        clearWatch: vi.fn()
+      }
+    });
+
+    await expect(getLocationReadiness()).resolves.toMatchObject({
+      ready: false,
+      permission: "undetermined",
+      remediations: ["requestPermission"]
+    });
+  });
+
   it("diagnoses a missing Web Geolocation API as an unsupported environment", async () => {
     setNavigator({});
 
