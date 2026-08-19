@@ -4,6 +4,7 @@ import { isDevtoolsEnabled } from "../devtools";
 import { getDevtoolsLastKnownPosition } from "../devtools/getLastKnownPosition";
 import type { GeolocationResponse } from "../publicTypes";
 import { LocationErrorCode } from "../utils/errors";
+import { decoratePositionWithMetadata } from "./locationMetadata";
 import { readLastKnownPosition, rememberPosition } from "./positionCache";
 
 /**
@@ -33,14 +34,24 @@ export function getLastKnownPosition(): GeolocationResponse | undefined {
 export function getLastKnownPositionAsync(
   options?: LocationRequestOptions
 ): Promise<GeolocationResponse | undefined> {
+  const requestedAt = Date.now();
+  const rememberPlatformCache = (position: GeolocationResponse) =>
+    rememberPosition(
+      decoratePositionWithMetadata(position, {
+        source: "platformCache",
+        maximumAge: options?.maximumAge ?? Number.POSITIVE_INFINITY,
+        requestedAt
+      })
+    );
+
   if (isDevtoolsEnabled()) {
     const cached = getDevtoolsLastKnownPosition(options);
-    return Promise.resolve(cached ? rememberPosition(cached) : undefined);
+    return Promise.resolve(cached ? rememberPlatformCache(cached) : undefined);
   }
 
   return new Promise<GeolocationResponse>((resolve, reject) => {
     NitroGeolocationHybridObject.getLastKnownPosition(
-      (position) => resolve(rememberPosition(position)),
+      (position) => resolve(rememberPlatformCache(position)),
       options ?? {},
       reject
     );

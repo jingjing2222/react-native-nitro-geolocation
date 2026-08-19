@@ -30,6 +30,8 @@ export type PositionInfoTestIDs = {
   mocked?: string;
   /** Optional Maestro testID attached to the provider metadata row. */
   provider?: string;
+  /** Optional Maestro testID attached to the response metadata source row. */
+  metadataSource?: string;
   /** Optional Maestro testID attached to the altitude row. */
   altitude?: string;
   /** Optional Maestro testID attached to the speed row. */
@@ -164,6 +166,9 @@ function PositionInfoContent({
     position.provider === undefined
       ? undefined
       : `Provider: ${position.provider}`;
+  const metadataSourceText = position.metadata
+    ? `Metadata source: ${position.metadata.source}`
+    : undefined;
   const altitudeText =
     position.coords.altitude === null
       ? undefined
@@ -185,7 +190,8 @@ function PositionInfoContent({
       longitudeText,
       accuracyText,
       includeOptionalFields ? mockedText : undefined,
-      includeOptionalFields ? providerText : undefined
+      includeOptionalFields ? providerText : undefined,
+      includeOptionalFields ? metadataSourceText : undefined
     ]
       .filter(Boolean)
       .join(" "),
@@ -202,6 +208,10 @@ function PositionInfoContent({
   useE2EDumpNode(
     includeOptionalFields ? providerText : undefined,
     testIDs.provider
+  );
+  useE2EDumpNode(
+    includeOptionalFields ? metadataSourceText : undefined,
+    testIDs.metadataSource
   );
   useE2EDumpNode(
     includeOptionalFields ? altitudeText : undefined,
@@ -236,6 +246,11 @@ function PositionInfoContent({
       {includeOptionalFields && position.provider !== undefined && (
         <Text style={sharedStyles.positionText} testID={testIDs.provider}>
           {providerText}
+        </Text>
+      )}
+      {includeOptionalFields && position.metadata !== undefined && (
+        <Text style={sharedStyles.positionText} testID={testIDs.metadataSource}>
+          {metadataSourceText}
         </Text>
       )}
       {includeOptionalFields && position.coords.altitude !== null && (

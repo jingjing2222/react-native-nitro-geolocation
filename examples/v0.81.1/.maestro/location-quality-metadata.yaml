@@ -1,0 +1,79 @@
+appId: nitrogeolocation.example
+---
+# Natural response-metadata contract: request a real platform position, then
+# observe the same position through the synchronous module cache. No fixture is
+# injected into library code and no accuracy or stale response is rejected.
+
+- launchApp:
+    clearState: true
+    permissions:
+      all: allow
+
+- runFlow:
+    when:
+      platform: Android
+      visible: ".*isn't responding|.*응답하지 않.*"
+    commands:
+      - tapOn:
+          text: "Wait|대기"
+- extendedWaitUntil:
+    visible: "Geolocation API"
+    timeout: 10000
+
+- stopApp
+
+- openLink:
+    link: nitrogeolocation://app/location-quality-metadata
+- runFlow:
+    when:
+      platform: Android
+      visible: ".*isn't responding|.*응답하지 않.*"
+    commands:
+      - tapOn:
+          text: "Wait|대기"
+- runFlow:
+    when:
+      platform: iOS
+      visible: "Cancel|취소"
+    commands:
+      - tapOn:
+          text: "Open|열기"
+- runFlow:
+    when:
+      platform: iOS
+    commands:
+      - openLink:
+          link: nitrogeolocation://app/location-quality-metadata
+- waitForAnimationToEnd
+
+- extendedWaitUntil:
+    visible: "Observe delivery source, age, quality, and stale reason without filtering positions"
+    timeout: 10000
+
+- setLocation:
+    latitude: 37.5665
+    longitude: 126.978
+
+- tapOn:
+    id: "e2e-action-location-quality-metadata-run-live-button"
+
+- extendedWaitUntil:
+    visible: "Live metadata: passed"
+    timeout: 20000
+
+- assertVisible:
+    id: "location-quality-metadata-live-result"
+- assertVisible:
+    text: ".*37\\.566500, 126\\.978000.*source=currentPosition.*age=[0-9]+(\\.[0-9]+)?ms.*quality=(high|medium|low|unknown).*stale=none.*"
+
+- tapOn:
+    id: "e2e-action-location-quality-metadata-run-cache-button"
+
+- extendedWaitUntil:
+    visible: "Cache metadata: passed"
+    timeout: 10000
+
+- assertVisible:
+    id: "location-quality-metadata-cache-result"
+- assertVisible:
+    text: ".*Same timestamp.*source=moduleCache.*age advanced from [0-9]+(\\.[0-9]+)?ms to [0-9]+(\\.[0-9]+)?ms.*quality=(high|medium|low|unknown).*"

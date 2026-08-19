@@ -30,6 +30,7 @@ import Issue122Screen from "./screens/Issue122Screen";
 import Issue132Screen from "./screens/Issue132Screen";
 import LastKnownPositionScreen from "./screens/LastKnownPositionScreen";
 import LocationAvailabilityScreen from "./screens/LocationAvailabilityScreen";
+import LocationQualityMetadataScreen from "./screens/LocationQualityMetadataScreen";
 import LocationSimulationScreen from "./screens/LocationSimulationScreen";
 import { LongRunBackgroundE2EScreen } from "./screens/LongRunBackgroundE2EScreen";
 import MockedMetadataScreen from "./screens/MockedMetadataScreen";
@@ -54,6 +55,7 @@ const linking = {
       ApiErrors: "api-errors",
       AccuracyPresets: "accuracy-presets",
       LastKnownPosition: "last-known-position",
+      LocationQualityMetadata: "location-quality-metadata",
       Geocoding: "geocoding",
       LocationAvailability: "location-availability",
       Heading: "heading",
@@ -161,6 +163,11 @@ export default function App() {
           <Tab.Screen
             name="LastKnownPosition"
             component={LastKnownPositionScreen}
+            options={hiddenTabOptions}
+          />
+          <Tab.Screen
+            name="LocationQualityMetadata"
+            component={LocationQualityMetadataScreen}
             options={hiddenTabOptions}
           />
           <Tab.Screen

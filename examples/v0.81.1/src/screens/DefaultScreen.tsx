@@ -179,7 +179,8 @@ export default function DefaultScreen({
         longitude: "longitude-text",
         accuracy: "accuracy-text",
         mocked: "mocked-text",
-        provider: "provider-text"
+        provider: "provider-text",
+        metadataSource: "metadata-source-text"
       }}
     />
   );

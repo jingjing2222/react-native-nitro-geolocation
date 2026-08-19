@@ -22,7 +22,7 @@ import {
 } from "./lastKnownAssertions";
 import {
   type ExpectedLocation,
-  assertPosition,
+  assertModernPosition,
   expectedLocations,
   getErrorCode,
   isNearExpected
@@ -282,7 +282,7 @@ export async function runSuccessSuite() {
         timeoutMs: 30000
       });
     },
-    (result) => assertPosition(result.position)
+    (result) => assertModernPosition(result.position, "currentPosition")
   );
 
   await runStep(
@@ -292,7 +292,7 @@ export async function runSuccessSuite() {
       expectLatestCachedPosition(
         cached,
         position.position.timestamp,
-        assertPosition
+        (cached) => assertModernPosition(cached, "moduleCache")
       )
   );
 
@@ -303,7 +303,7 @@ export async function runSuccessSuite() {
       expectValidCachedPosition(
         cached,
         "Async browser module cache did not return a position.",
-        assertPosition
+        (cached) => assertModernPosition(cached, "moduleCache")
       )
   );
 
@@ -336,7 +336,7 @@ export async function runSuccessSuite() {
         }
       });
     },
-    (result) => assertPosition(result.position)
+    (result) => assertModernPosition(result.position, "watchPosition")
   );
 
   await runStep(

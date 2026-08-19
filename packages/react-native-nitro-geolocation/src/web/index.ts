@@ -4,6 +4,7 @@ import type {
   LocationSettingsOptions,
   PermissionStatus
 } from "../NitroGeolocation.nitro";
+import { decoratePositionWithMetadata } from "../api/locationMetadata";
 import {
   readLastKnownPosition,
   rememberPosition,
@@ -131,9 +132,19 @@ export function getCurrentPosition(
     return rejectUnsupported();
   }
 
+  const requestedAt = Date.now();
   return new Promise((resolve, reject) => {
     geolocation.getCurrentPosition(
-      (position) => resolve(rememberPosition(normalizePosition(position))),
+      (position) =>
+        resolve(
+          rememberPosition(
+            decoratePositionWithMetadata(normalizePosition(position), {
+              source: "currentPosition",
+              maximumAge: options?.maximumAge ?? 0,
+              requestedAt
+            })
+          )
+        ),
       (error) => reject(mapBrowserError(error)),
       toPositionOptions(options)
     );

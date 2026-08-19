@@ -389,6 +389,24 @@ export type LocationProviderUsed =
   | 'passive'
   | 'unknown';
 
+type LocationResponseSource =
+  | 'currentPosition'
+  | 'watchPosition'
+  | 'platformCache'
+  | 'moduleCache';
+
+type LocationQualityBand = 'high' | 'medium' | 'low' | 'unknown';
+
+interface LocationMetadata {
+  source: LocationResponseSource;
+  age?: number;
+  quality: LocationQualityBand;
+  staleReason?:
+    | 'maximumAgeExceeded'
+    | 'futureTimestamp'
+    | 'invalidTimestamp';
+}
+
 interface GeolocationResponse {
   coords: {
     latitude: number;
@@ -402,10 +420,43 @@ interface GeolocationResponse {
   timestamp: number;
   mocked?: boolean;
   provider?: LocationProviderUsed;
+  metadata?: LocationMetadata;
 }
 ```
 
-`mocked` and `provider` are optional metadata fields added to the Modern API response in v1.2. The `/compat` API keeps the `@react-native-community/geolocation` response shape and does not include these fields.
+`mocked` and `provider` are optional fields added to the Modern API response in
+v1.2. `metadata` adds descriptive location-quality information:
+
+- `source` is the API path that delivered the value. A current request, watch,
+  platform cache query, and synchronous module-cache read report
+  `currentPosition`, `watchPosition`, `platformCache`, and `moduleCache`
+  respectively.
+- `age` is `max(0, delivery time - position.timestamp)` in milliseconds. It is
+  recalculated whenever the synchronous module cache is read and is omitted
+  only when the timestamp is not finite.
+- `quality` is a portable horizontal-accuracy band derived from
+  `coords.accuracy`: `high` is over 0m and at most 10m, `medium` is over 10m and
+  at most 100m, `low` is over 100m, and `unknown` covers zero, negative, or
+  non-finite values. Android may expose zero when a native reading has no
+  accuracy estimate.
+- `staleReason` is present when a provider response was already outside the
+  request's `maximumAge` at request start, has a timestamp more than 1ms in the
+  future at delivery, or has a non-finite timestamp. The 1ms tolerance accounts
+  for native sub-millisecond timestamps compared with JavaScript's integer
+  millisecond clock. `age` continues to describe delivery-time age, so it may be
+  greater than `maximumAge` after a slow but valid request.
+
+These fields are observational. The library does not reject, retry, or replace
+a stale or low-quality response because of this metadata. Apply product-specific
+quality policy explicitly in application code. `source` describes the delivery
+path, while `provider` identifies the native provider such as fused, GPS, or
+network.
+
+The entire `metadata` object is optional for structural backward compatibility.
+Modern foreground API responses produced by this package include it. Native
+background records keep their existing background-specific `source` field. The
+`/compat` API keeps the `@react-native-community/geolocation` response shape and
+does not include Modern metadata.
 
 **Error Handling**:
 

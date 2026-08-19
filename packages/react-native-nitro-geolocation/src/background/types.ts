@@ -5,11 +5,11 @@ import type {
 import type {
   AccuracyAuthorization,
   AndroidGranularity,
-  GeolocationResponse,
   LocationAccuracyOptions,
   LocationProviderStatus,
   LocationProviderUsed
 } from "../publicTypes";
+import type { GeolocationResponse as SchemaGeolocationResponse } from "../types";
 
 export type BackgroundPermissionStatus =
   | "granted"
@@ -149,7 +149,7 @@ export interface BatterySnapshot {
   isCharging?: boolean;
 }
 
-export interface BackgroundLocation extends GeolocationResponse {
+export interface BackgroundLocation extends SchemaGeolocationResponse {
   id?: string;
   source: BackgroundLocationSource;
   isFromBackground: boolean;

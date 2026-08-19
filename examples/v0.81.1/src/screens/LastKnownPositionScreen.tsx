@@ -115,10 +115,15 @@ export default function LastKnownPositionScreen() {
 
       const { elapsedMs, position } = await readSystemCacheOnly();
       const coordinates = assertFixtureCoordinates(position);
+      if (position.metadata?.source !== "platformCache") {
+        throw new Error(
+          `Expected platformCache metadata source, received ${position.metadata?.source ?? "none"}.`
+        );
+      }
 
       setResult("system", {
         status: "passed",
-        message: `System cache ${coordinates}; cache-only read ${elapsedMs}ms without getCurrentPosition.`
+        message: `System cache ${coordinates}; source=${position.metadata.source}; cache-only read ${elapsedMs}ms without getCurrentPosition.`
       });
     } catch (error) {
       setResult("system", {
