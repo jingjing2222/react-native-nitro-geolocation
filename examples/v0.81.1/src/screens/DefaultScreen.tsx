@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Switch, Text, View } from "react-native";
 import {
   getCurrentPosition,
+  getLastKnownPosition,
   useWatchPosition
 } from "react-native-nitro-geolocation";
 import type { GeolocationResponse } from "react-native-nitro-geolocation";
@@ -9,16 +10,23 @@ import {
   ButtonRow,
   ErrorBlock,
   PositionInfo,
+  ResultBlock,
   ScenarioButton,
   ScenarioScreen,
   ScenarioSection,
   StatusBlock,
+  createIdleResult,
   runWithNativeGeolocation,
   sharedStyles,
   usePermissionStatus
 } from "./scenario";
+import type { ScenarioResult } from "./scenario";
 
-type DefaultScreenSection = "permission" | "currentPosition" | "watchPosition";
+type DefaultScreenSection =
+  | "permission"
+  | "currentPosition"
+  | "metadataCache"
+  | "watchPosition";
 
 interface DefaultScreenProps {
   nativeGeolocation?: boolean;
@@ -56,6 +64,8 @@ export default function DefaultScreen({
   const [currentPositionError, setCurrentPositionError] = useState<
     string | null
   >(null);
+  const [metadataCacheResult, setMetadataCacheResult] =
+    useState<ScenarioResult>(createIdleResult);
 
   // Watch position hook (continuous)
   const [watchEnabled, setWatchEnabled] = useState(false);
@@ -105,6 +115,7 @@ export default function DefaultScreen({
     setIsCurrentPositionLoading(true);
     setCurrentPosition(null);
     setCurrentPositionError(null);
+    setMetadataCacheResult(createIdleResult());
     try {
       const position = await (nativeGeolocation
         ? runWithNativeGeolocation(() =>
@@ -123,6 +134,40 @@ export default function DefaultScreen({
     } finally {
       setIsCurrentPositionLoading(false);
     }
+  };
+
+  const handleVerifyMetadataCache = () => {
+    const cached = getLastKnownPosition();
+
+    if (!currentPosition) {
+      setMetadataCacheResult({
+        status: cached ? "failed" : "passed",
+        message: cached
+          ? "Cold module cache unexpectedly contained a position."
+          : "Cold module cache returned undefined before any position request."
+      });
+      return;
+    }
+
+    if (!cached) {
+      setMetadataCacheResult({
+        status: "failed",
+        message: "The current position was not present in the module cache."
+      });
+      return;
+    }
+
+    const metadataMatches =
+      cached.timestamp === currentPosition.timestamp &&
+      cached.mocked === currentPosition.mocked &&
+      cached.provider === currentPosition.provider;
+
+    setMetadataCacheResult({
+      status: metadataMatches ? "passed" : "failed",
+      message: metadataMatches
+        ? "Cached sample preserved timestamp, mocked, and provider metadata."
+        : "Cached sample metadata did not match the current position."
+    });
   };
 
   const renderPermissionSection = (divided: boolean) => (
@@ -251,12 +296,36 @@ export default function DefaultScreen({
     </ScenarioSection>
   );
 
+  const renderMetadataCacheSection = (divided: boolean) => (
+    <ScenarioSection
+      index={3}
+      title="Cached Sample Metadata"
+      description="Verify the module cache preserves metadata from the position sample"
+      divided={divided}
+    >
+      <ScenarioButton
+        title="Verify Cached Metadata"
+        onPress={handleVerifyMetadataCache}
+        color="#5E35B1"
+        testID="metadata-cache-verify-button"
+      />
+      <ResultBlock
+        prefix="metadata-cache"
+        id="preservation"
+        label="Cached metadata"
+        result={metadataCacheResult}
+      />
+    </ScenarioSection>
+  );
+
   const renderSection = (section: DefaultScreenSection, divided: boolean) => {
     switch (section) {
       case "permission":
         return renderPermissionSection(divided);
       case "currentPosition":
         return renderCurrentPositionSection(divided);
+      case "metadataCache":
+        return renderMetadataCacheSection(divided);
       case "watchPosition":
         return renderWatchPositionSection(divided);
     }

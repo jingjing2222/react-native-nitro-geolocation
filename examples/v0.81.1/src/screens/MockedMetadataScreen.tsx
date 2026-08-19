@@ -5,7 +5,7 @@ export default function MockedMetadataScreen() {
   return (
     <DefaultScreen
       nativeGeolocation
-      sections={["permission", "currentPosition"]}
+      sections={["permission", "currentPosition", "metadataCache"]}
       subtitle="Mocked location metadata contract"
       title="Mocked Location Metadata"
     />

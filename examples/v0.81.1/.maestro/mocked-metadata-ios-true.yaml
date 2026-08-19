@@ -52,6 +52,17 @@ appId: nitrogeolocation.example
     timeout: 10000
 
 - tapOn:
+    id: "e2e-action-metadata-cache-verify-button"
+- extendedWaitUntil:
+    visible:
+      id: "metadata-cache-preservation-status"
+      text: "Cached metadata: passed"
+    timeout: 10000
+- assertVisible:
+    id: "metadata-cache-preservation-message"
+    text: "Cold module cache returned undefined before any position request."
+
+- tapOn:
     id: "e2e-action-permission-request-button"
 - tapOn:
     text: "Allow While Using App|앱을 사용하는 동안 허용"
@@ -85,3 +96,14 @@ appId: nitrogeolocation.example
 - assertVisible:
     id: "provider-text"
 - assertVisible: "Provider: unknown"
+
+- tapOn:
+    id: "e2e-action-metadata-cache-verify-button"
+- extendedWaitUntil:
+    visible:
+      id: "metadata-cache-preservation-status"
+      text: "Cached metadata: passed"
+    timeout: 10000
+- assertVisible:
+    id: "metadata-cache-preservation-message"
+    text: "Cached sample preserved timestamp, mocked, and provider metadata."
