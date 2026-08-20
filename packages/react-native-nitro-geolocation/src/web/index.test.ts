@@ -10,7 +10,8 @@ import {
   requestPermission,
   stopObserving,
   unwatch,
-  watchPosition
+  watchPosition,
+  watchProviderStatus
 } from ".";
 import { clearLastKnownPositionCache } from "../api/positionCache";
 import { clearWebPermissionDetailsEvidence } from "./permissionDetailsEvidence";
@@ -53,6 +54,7 @@ afterEach(() => {
   clearLastKnownPositionCache();
   clearWebPermissionDetailsEvidence();
   vi.restoreAllMocks();
+  vi.unstubAllGlobals();
   Reflect.deleteProperty(globalThis, "navigator");
 });
 
@@ -895,5 +897,89 @@ describe("web Modern API", () => {
     stopObserving();
     expect(clearWatch).toHaveBeenCalledWith(11);
     expect(getActiveWatches()).toEqual([]);
+  });
+
+  it("observes distinct provider status changes and stops by token", async () => {
+    const windowListeners = new Map<string, EventListener>();
+    const documentListeners = new Map<string, EventListener>();
+    vi.stubGlobal(
+      "addEventListener",
+      vi.fn((type: string, listener: EventListener) => {
+        windowListeners.set(type, listener);
+      })
+    );
+    vi.stubGlobal(
+      "removeEventListener",
+      vi.fn((type: string) => {
+        windowListeners.delete(type);
+      })
+    );
+    vi.stubGlobal("document", {
+      addEventListener: vi.fn((type: string, listener: EventListener) => {
+        documentListeners.set(type, listener);
+      }),
+      removeEventListener: vi.fn((type: string) => {
+        documentListeners.delete(type);
+      })
+    });
+    setNavigator({
+      geolocation: {
+        getCurrentPosition: vi.fn(),
+        watchPosition: vi.fn(),
+        clearWatch: vi.fn()
+      }
+    });
+    const success = vi.fn();
+
+    const token = watchProviderStatus(success);
+    expect(success).not.toHaveBeenCalled();
+    await Promise.resolve();
+    expect(success).toHaveBeenCalledWith({
+      locationServicesEnabled: true,
+      backgroundModeEnabled: false
+    });
+
+    windowListeners.get("focus")?.({} as Event);
+    await Promise.resolve();
+    expect(success).toHaveBeenCalledTimes(1);
+
+    setNavigator(undefined);
+    documentListeners.get("visibilitychange")?.({} as Event);
+    await Promise.resolve();
+    expect(success).toHaveBeenLastCalledWith({
+      locationServicesEnabled: false,
+      backgroundModeEnabled: false
+    });
+    expect(success).toHaveBeenCalledTimes(2);
+
+    const stalePageShowListener = windowListeners.get("pageshow");
+    unwatch(token);
+    setNavigator({
+      geolocation: {
+        getCurrentPosition: vi.fn(),
+        watchPosition: vi.fn(),
+        clearWatch: vi.fn()
+      }
+    });
+    stalePageShowListener?.({} as Event);
+    await Promise.resolve();
+    expect(success).toHaveBeenCalledTimes(2);
+  });
+
+  it("stopObserving cancels every provider status watcher", async () => {
+    setNavigator(undefined);
+    const first = vi.fn();
+    const second = vi.fn();
+
+    watchProviderStatus(first);
+    watchProviderStatus(second);
+    await Promise.resolve();
+    expect(first).toHaveBeenCalledTimes(1);
+    expect(second).toHaveBeenCalledTimes(1);
+
+    stopObserving();
+    await Promise.resolve();
+    expect(first).toHaveBeenCalledTimes(1);
+    expect(second).toHaveBeenCalledTimes(1);
   });
 });

@@ -57,6 +57,8 @@ class NitroGeolocation(
             createLocationError = ::createLocationError
         )
     }
+    private val providerStatusWatcherDelegate = lazy { AndroidProviderStatusWatcher(reactContext, locationSettings) }
+    private val providerStatusWatcher by providerStatusWatcherDelegate
     private val fusedLocationClient by lazy {
         LocationServices.getFusedLocationProviderClient(reactContext)
     }
@@ -175,6 +177,8 @@ class NitroGeolocation(
         }
         return promise
     }
+
+    override fun watchProviderStatus(success: (LocationProviderStatus) -> Unit) = providerStatusWatcher.watch(success)
 
     override fun getLocationAvailability(): Promise<LocationAvailability> {
         val promise = Promise<LocationAvailability>()
@@ -604,6 +608,7 @@ class NitroGeolocation(
     override fun unwatch(token: String) {
         val didRemoveLocationSubscription = watchSubscriptions.remove(token) != null
         headingManager.unwatch(token)
+        providerStatusWatcherDelegate.takeIf { it.isInitialized() }?.value?.unwatch(token)
 
         if (!didRemoveLocationSubscription) {
             return
@@ -630,7 +635,12 @@ class NitroGeolocation(
     override fun stopObserving() {
         watchSubscriptions.clear()
         headingManager.stopObserving()
+        providerStatusWatcherDelegate.takeIf { it.isInitialized() }?.value?.stopObserving()
         stopWatchingLocation()
+    }
+    override fun dispose() {
+        runCatching { providerStatusWatcherDelegate.takeIf { it.isInitialized() }?.value?.dispose() }
+        super.dispose()
     }
 
     // MARK: - Helper Functions - Permission

@@ -53,6 +53,15 @@ abstract class HybridNitroGeolocationSpec: HybridObject() {
   @DoNotStrip
   @Keep
   abstract fun getProviderStatus(): Promise<LocationProviderStatus>
+  
+  abstract fun watchProviderStatus(success: (status: LocationProviderStatus) -> Unit): String
+
+  @DoNotStrip
+  @Keep
+  private fun watchProviderStatus_cxx(success: Func_void_LocationProviderStatus): String {
+    val __result = watchProviderStatus(success)
+    return __result
+  }
 
   @DoNotStrip
   @Keep

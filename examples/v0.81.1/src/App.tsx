@@ -39,7 +39,7 @@ import MockedMetadataScreen from "./screens/MockedMetadataScreen";
 import PermissionCheckScreen from "./screens/PermissionCheckScreen";
 import PermissionDetailsScreen from "./screens/PermissionDetailsScreen";
 import ProviderSettingsScreen from "./screens/ProviderSettingsScreen";
-import WatchObservabilityScreen from "./screens/WatchObservabilityScreen";
+import ProviderStatusWatcherScreen from "./screens/ProviderStatusWatcherScreen";
 import WatchPositionScreen from "./screens/WatchPositionScreen";
 import WebE2EScreen from "./screens/WebE2EScreen";
 
@@ -59,6 +59,7 @@ const linking = {
       LocationSimulation: "location-simulation",
       MockedMetadata: "mocked-metadata",
       ProviderSettings: "provider-settings",
+      ProviderStatusWatcher: "provider-status-watcher",
       ApiErrors: "api-errors",
       AccuracyPresets: "accuracy-presets",
       LastKnownPosition: "last-known-position",
@@ -172,6 +173,11 @@ export default function App() {
           <Tab.Screen
             name="ProviderSettings"
             component={ProviderSettingsScreen}
+            options={hiddenTabOptions}
+          />
+          <Tab.Screen
+            name="ProviderStatusWatcher"
+            component={ProviderStatusWatcherScreen}
             options={hiddenTabOptions}
           />
           <Tab.Screen

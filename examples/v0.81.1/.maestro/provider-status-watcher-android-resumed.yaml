@@ -1,0 +1,16 @@
+appId: nitrogeolocation.example
+---
+# The Android runner grants background permission while the watcher remains
+# active, then resumes the existing host. Resume must refresh non-broadcast
+# readiness fields without replacing the subscription.
+
+- openLink:
+    link: nitrogeolocation://app/provider-status-watcher
+- extendedWaitUntil:
+    visible: "Background: enabled"
+    timeout: 10000
+- extendedWaitUntil:
+    visible: "Events: 2"
+    timeout: 10000
+- assertVisible: "Listener: listening"
+- assertVisible: "Services: enabled"

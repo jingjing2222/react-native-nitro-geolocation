@@ -18,6 +18,7 @@ public protocol HybridNitroGeolocationSpec_protocol: HybridObject {
   func requestPermission(success: @escaping (_ status: PermissionStatus) -> Void, error: ((_ error: LocationError) -> Void)?) throws -> Void
   func hasServicesEnabled() throws -> Promise<Bool>
   func getProviderStatus() throws -> Promise<LocationProviderStatus>
+  func watchProviderStatus(success: @escaping (_ status: LocationProviderStatus) -> Void) throws -> String
   func getLocationAvailability() throws -> Promise<LocationAvailability>
   func requestLocationSettings(success: @escaping (_ result: LocationSettingsResult) -> Void, options: LocationSettingsOptions, error: ((_ error: LocationError) -> Void)?) throws -> Void
   func getAccuracyAuthorization() throws -> Promise<AccuracyAuthorization>

@@ -67,9 +67,9 @@ namespace margelo::nitro::nitrogeolocation { struct HeadingOptions; }
 #include "LocationProviderStatus.hpp"
 #include "JLocationProviderStatus.hpp"
 #include <optional>
+#include <string>
 #include "LocationAvailability.hpp"
 #include "JLocationAvailability.hpp"
-#include <string>
 #include "AccuracyAuthorization.hpp"
 #include "JAccuracyAuthorization.hpp"
 #include "ActiveWatch.hpp"
@@ -220,6 +220,11 @@ namespace margelo::nitro::nitrogeolocation {
       });
       return __promise;
     }();
+  }
+  std::string JHybridNitroGeolocationSpec::watchProviderStatus(const std::function<void(const LocationProviderStatus& /* status */)>& success) {
+    static const auto method = _javaPart->javaClassStatic()->getMethod<jni::local_ref<jni::JString>(jni::alias_ref<JFunc_void_LocationProviderStatus::javaobject> /* success */)>("watchProviderStatus_cxx");
+    auto __result = method(_javaPart, JFunc_void_LocationProviderStatus_cxx::fromCpp(success));
+    return __result->toStdString();
   }
   std::shared_ptr<Promise<LocationAvailability>> JHybridNitroGeolocationSpec::getLocationAvailability() {
     static const auto method = _javaPart->javaClassStatic()->getMethod<jni::local_ref<JPromise::javaobject>()>("getLocationAvailability");

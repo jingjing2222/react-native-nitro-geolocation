@@ -74,7 +74,10 @@ appId: nitrogeolocation.example
 - runFlow: location-quality-metadata.yaml
 - runFlow: geocoding.yaml
 - runFlow: location-availability.yaml
-- runFlow: location-readiness.yaml
+- runFlow:
+    when:
+      platform: iOS
+    file: provider-status-watcher.yaml
 - runFlow: heading.yaml
 - runFlow:
     when:

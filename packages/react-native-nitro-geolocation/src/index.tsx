@@ -56,6 +56,7 @@ export {
   requestPermission,
   hasServicesEnabled,
   getProviderStatus,
+  watchProviderStatus,
   getLocationAvailability,
   getLocationReadiness,
   requestLocationSettings,

@@ -191,6 +191,14 @@ namespace margelo::nitro::nitrogeolocation {
       auto __value = std::move(__result.value());
       return __value;
     }
+    inline std::string watchProviderStatus(const std::function<void(const LocationProviderStatus& /* status */)>& success) override {
+      auto __result = _swiftPart.watchProviderStatus(success);
+      if (__result.hasError()) [[unlikely]] {
+        std::rethrow_exception(__result.error());
+      }
+      auto __value = std::move(__result.value());
+      return __value;
+    }
     inline std::shared_ptr<Promise<LocationAvailability>> getLocationAvailability() override {
       auto __result = _swiftPart.getLocationAvailability();
       if (__result.hasError()) [[unlikely]] {

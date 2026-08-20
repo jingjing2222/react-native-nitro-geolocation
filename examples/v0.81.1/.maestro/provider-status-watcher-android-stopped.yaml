@@ -1,0 +1,14 @@
+appId: nitrogeolocation.example
+---
+# The Android runner re-enables location after unwatch. No fourth event may be
+# delivered, while an explicit snapshot must see the new enabled state.
+
+- assertVisible: "Listener: stopped"
+- assertVisible: "Events: 3"
+- assertVisible: "Services: disabled"
+- tapOn:
+    id: "e2e-action-provider-status-watcher-refresh-button"
+- extendedWaitUntil:
+    visible: "Manual snapshot: enabled"
+    timeout: 10000
+- assertVisible: "Events: 3"

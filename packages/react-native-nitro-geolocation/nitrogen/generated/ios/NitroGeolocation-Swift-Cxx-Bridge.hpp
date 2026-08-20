@@ -852,6 +852,15 @@ namespace margelo::nitro::nitrogeolocation::bridge::swift {
     return Result<std::shared_ptr<Promise<LocationProviderStatus>>>::withError(error);
   }
 
+  // pragma MARK: Result<std::string>
+  using Result_std__string_ = Result<std::string>;
+  inline Result_std__string_ create_Result_std__string_(const std::string& value) noexcept {
+    return Result<std::string>::withValue(value);
+  }
+  inline Result_std__string_ create_Result_std__string_(const std::exception_ptr& error) noexcept {
+    return Result<std::string>::withError(error);
+  }
+
   // pragma MARK: Result<std::shared_ptr<Promise<LocationAvailability>>>
   using Result_std__shared_ptr_Promise_LocationAvailability___ = Result<std::shared_ptr<Promise<LocationAvailability>>>;
   inline Result_std__shared_ptr_Promise_LocationAvailability___ create_Result_std__shared_ptr_Promise_LocationAvailability___(const std::shared_ptr<Promise<LocationAvailability>>& value) noexcept {
@@ -868,24 +877,6 @@ namespace margelo::nitro::nitrogeolocation::bridge::swift {
   }
   inline Result_std__shared_ptr_Promise_AccuracyAuthorization___ create_Result_std__shared_ptr_Promise_AccuracyAuthorization___(const std::exception_ptr& error) noexcept {
     return Result<std::shared_ptr<Promise<AccuracyAuthorization>>>::withError(error);
-  }
-
-  // pragma MARK: Result<std::string>
-  using Result_std__string_ = Result<std::string>;
-  inline Result_std__string_ create_Result_std__string_(const std::string& value) noexcept {
-    return Result<std::string>::withValue(value);
-  }
-  inline Result_std__string_ create_Result_std__string_(const std::exception_ptr& error) noexcept {
-    return Result<std::string>::withError(error);
-  }
-
-  // pragma MARK: Result<std::vector<ActiveWatch>>
-  using Result_std__vector_ActiveWatch__ = Result<std::vector<ActiveWatch>>;
-  inline Result_std__vector_ActiveWatch__ create_Result_std__vector_ActiveWatch__(const std::vector<ActiveWatch>& value) noexcept {
-    return Result<std::vector<ActiveWatch>>::withValue(value);
-  }
-  inline Result_std__vector_ActiveWatch__ create_Result_std__vector_ActiveWatch__(const std::exception_ptr& error) noexcept {
-    return Result<std::vector<ActiveWatch>>::withError(error);
   }
 
   // pragma MARK: std::optional<AuthorizationLevelInternal>

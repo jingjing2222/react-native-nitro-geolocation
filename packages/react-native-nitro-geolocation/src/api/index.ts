@@ -4,6 +4,7 @@ export { getPermissionDetails } from "./getPermissionDetails";
 export { requestPermission } from "./requestPermission";
 export { hasServicesEnabled } from "./hasServicesEnabled";
 export { getProviderStatus } from "./getProviderStatus";
+export { watchProviderStatus } from "./watchProviderStatus";
 export { getLocationAvailability } from "./getLocationAvailability";
 export { getLocationReadiness } from "./getLocationReadiness";
 export { requestLocationSettings } from "./requestLocationSettings";

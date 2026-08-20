@@ -19,8 +19,7 @@ class NitroGeolocation: HybridNitroGeolocationSpec {
     private var locationManagerDelegate: LocationManagerDelegate?
     private var lastLocation: CLLocation?
     private var usingSignificantChanges: Bool = false
-
-    // Permission callbacks
+    lazy var providerStatusWatcher = IOSProviderStatusWatcher()
     private var pendingPermissionResolvers: [(PermissionStatus) -> Void] = []
 
     // getCurrentPosition promise resolvers with timeout
@@ -449,13 +448,9 @@ class NitroGeolocation: HybridNitroGeolocationSpec {
     }
 
     func unwatch(token: String) {
-        runLocationOperationOnMain {
-            self.watchSubscriptions.removeValue(forKey: token)
-            if self.watchSubscriptions.isEmpty && self.pendingPositionRequests.isEmpty {
-                self.stopMonitoring()
-            } else {
-                self.updateLocationManagerConfiguration()
-            }
+        watchSubscriptions.removeValue(forKey: token)
+        headingSubscriptions.removeValue(forKey: token)
+        providerStatusWatcher.unwatch(token: token)
 
             self.headingSubscriptions.removeValue(forKey: token)
             if self.headingSubscriptions.isEmpty && self.pendingHeadingRequests.isEmpty {
@@ -472,13 +467,9 @@ class NitroGeolocation: HybridNitroGeolocationSpec {
     }
 
     func stopObserving() {
-        runLocationOperationOnMain {
-            self.watchSubscriptions.removeAll()
-            if self.pendingPositionRequests.isEmpty {
-                self.stopMonitoring()
-            } else {
-                self.updateLocationManagerConfiguration()
-            }
+        watchSubscriptions.removeAll()
+        headingSubscriptions.removeAll()
+        providerStatusWatcher.stopObserving()
 
             self.headingSubscriptions.removeAll()
             if self.pendingHeadingRequests.isEmpty {
@@ -488,8 +479,6 @@ class NitroGeolocation: HybridNitroGeolocationSpec {
             }
         }
     }
-
-    // MARK: - Location Manager Callbacks
 
     func handleAuthorizationChange(_ manager: CLLocationManager) {
         let status = getCurrentAuthorizationStatus(from: manager)

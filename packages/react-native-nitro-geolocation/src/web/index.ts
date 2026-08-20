@@ -37,12 +37,13 @@ import {
   rejectUnsupported,
   toPositionOptions
 } from "./browser";
-import {
-  clearWebPermissionDetailsEvidence,
-  readRecentWebPermissionDetailsEvidence,
-  rememberWebPermissionDetailsEvidence
-} from "./permissionDetailsEvidence";
-export { stopObserving, unwatch, watchHeading, watchPosition } from "./watch";
+export {
+  stopObserving,
+  unwatch,
+  watchHeading,
+  watchPosition,
+  watchProviderStatus
+} from "./watch";
 export {
   useWatchPosition,
   type UseWatchPositionOptions

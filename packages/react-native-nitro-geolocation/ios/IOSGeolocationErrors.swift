@@ -17,8 +17,16 @@ func createLocationError(code: LocationErrorCode, message: String) -> LocationEr
 }
 
 func createLocationProviderStatus() -> LocationProviderStatus {
+    return createLocationProviderStatus(
+        locationServicesEnabled: CLLocationManager.locationServicesEnabled()
+    )
+}
+
+func createLocationProviderStatus(
+    locationServicesEnabled: Bool
+) -> LocationProviderStatus {
     return LocationProviderStatus(
-        locationServicesEnabled: CLLocationManager.locationServicesEnabled(),
+        locationServicesEnabled: locationServicesEnabled,
         backgroundModeEnabled: isLocationBackgroundModeEnabled(),
         gpsAvailable: nil,
         networkAvailable: nil,

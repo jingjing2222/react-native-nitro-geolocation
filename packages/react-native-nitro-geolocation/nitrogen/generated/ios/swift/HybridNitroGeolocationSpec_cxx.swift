@@ -221,6 +221,23 @@ open class HybridNitroGeolocationSpec_cxx {
   }
 
   @inline(__always)
+  public final func watchProviderStatus(success: bridge.Func_void_LocationProviderStatus) -> bridge.Result_std__string_ {
+    do {
+      let __result = try self.__implementation.watchProviderStatus(success: { () -> (LocationProviderStatus) -> Void in
+        let __wrappedFunction = bridge.wrap_Func_void_LocationProviderStatus(success)
+        return { (__status: LocationProviderStatus) -> Void in
+          __wrappedFunction.call(__status)
+        }
+      }())
+      let __resultCpp = std.string(__result)
+      return bridge.create_Result_std__string_(__resultCpp)
+    } catch (let __error) {
+      let __exceptionPtr = __error.toCpp()
+      return bridge.create_Result_std__string_(__exceptionPtr)
+    }
+  }
+
+  @inline(__always)
   public final func getLocationAvailability() -> bridge.Result_std__shared_ptr_Promise_LocationAvailability___ {
     do {
       let __result = try self.__implementation.getLocationAvailability()
