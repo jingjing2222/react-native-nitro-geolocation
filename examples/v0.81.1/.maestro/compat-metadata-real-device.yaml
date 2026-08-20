@@ -31,19 +31,21 @@ appId: nitrogeolocation.example
     visible:
       id: "compat-metadata-current-result"
     timeout: 30000
-- assertVisible: "Response keys: coords,timestamp,mocked,provider"
-- scrollUntilVisible:
-    element:
-      text: "Mocked: false"
-    direction: DOWN
-- assertVisible: "Mocked: false"
 - runFlow:
     when:
       platform: Android
     commands:
+      - assertVisible: "Response keys: coords,timestamp,mocked,provider"
+      - scrollUntilVisible:
+          element:
+            text: "Mocked: false"
+          direction: DOWN
+      - assertVisible: "Mocked: false"
       - assertVisible: "Provider: (gps|network|passive|fused|unknown)"
 - runFlow:
     when:
       platform: iOS
     commands:
+      # CLLocation.sourceInformation is only available on iOS 15+, so `mocked`
+      # is legitimately absent on older supported devices.
       - assertVisible: "Provider: unknown"
