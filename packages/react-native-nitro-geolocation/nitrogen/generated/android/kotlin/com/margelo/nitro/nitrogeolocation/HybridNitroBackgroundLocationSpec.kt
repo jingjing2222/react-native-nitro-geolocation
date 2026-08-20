@@ -26,141 +26,141 @@ import com.margelo.nitro.core.HybridObject
 )
 abstract class HybridNitroBackgroundLocationSpec: HybridObject() {
   // Properties
-  
+
 
   // Methods
   @DoNotStrip
   @Keep
   abstract fun checkBackgroundPermission(): Promise<BackgroundPermissionResult>
-  
+
   @DoNotStrip
   @Keep
   abstract fun requestBackgroundPermission(): Promise<BackgroundPermissionResult>
-  
+
   @DoNotStrip
   @Keep
   abstract fun openAppLocationSettings(): Promise<Unit>
-  
+
   @DoNotStrip
   @Keep
   abstract fun configureBackgroundLocation(options: BackgroundLocationOptions): Promise<Unit>
-  
+
   @DoNotStrip
   @Keep
   abstract fun getBackgroundConfiguration(): Promise<BackgroundLocationOptions?>
-  
+
   @DoNotStrip
   @Keep
   abstract fun startBackgroundLocation(options: BackgroundLocationOptions?): Promise<Unit>
-  
+
   @DoNotStrip
   @Keep
   abstract fun stopBackgroundLocation(): Promise<Unit>
-  
+
   @DoNotStrip
   @Keep
   abstract fun resetBackgroundLocation(): Promise<Unit>
-  
+
   @DoNotStrip
   @Keep
   abstract fun getBackgroundLocationStatus(): Promise<BackgroundLocationStatus>
-  
+
   abstract fun addBackgroundEventListener(listener: (event: BackgroundEventEnvelope) -> Unit): String
-  
+
   @DoNotStrip
   @Keep
   private fun addBackgroundEventListener_cxx(listener: Func_void_BackgroundEventEnvelope): String {
     val __result = addBackgroundEventListener(listener)
     return __result
   }
-  
+
   @DoNotStrip
   @Keep
   abstract fun removeBackgroundEventListener(token: String): Unit
-  
+
   abstract fun addBackgroundLocationListener(listener: (location: BackgroundLocation) -> Unit): String
-  
+
   @DoNotStrip
   @Keep
   private fun addBackgroundLocationListener_cxx(listener: Func_void_BackgroundLocation): String {
     val __result = addBackgroundLocationListener(listener)
     return __result
   }
-  
+
   @DoNotStrip
   @Keep
   abstract fun removeBackgroundLocationListener(token: String): Unit
-  
+
   abstract fun addBackgroundErrorListener(listener: (error: LocationError) -> Unit): String
-  
+
   @DoNotStrip
   @Keep
   private fun addBackgroundErrorListener_cxx(listener: Func_void_LocationError): String {
     val __result = addBackgroundErrorListener(listener)
     return __result
   }
-  
+
   @DoNotStrip
   @Keep
   abstract fun removeBackgroundErrorListener(token: String): Unit
-  
+
   abstract fun addLocationLifecycleListener(listener: (event: LocationLifecycleEvent) -> Unit): String
-  
+
   @DoNotStrip
   @Keep
   private fun addLocationLifecycleListener_cxx(listener: Func_void_LocationLifecycleEvent): String {
     val __result = addLocationLifecycleListener(listener)
     return __result
   }
-  
+
   @DoNotStrip
   @Keep
   abstract fun removeLocationLifecycleListener(token: String): Unit
-  
+
   @DoNotStrip
   @Keep
   abstract fun getStoredBackgroundLocations(options: GetStoredBackgroundLocationsOptions?): Promise<Array<StoredBackgroundLocation>>
-  
+
   @DoNotStrip
   @Keep
   abstract fun clearStoredBackgroundLocations(ids: Array<String>?): Promise<Unit>
-  
+
   @DoNotStrip
   @Keep
   abstract fun markStoredBackgroundLocationsDelivered(ids: Array<String>): Promise<Unit>
-  
+
   @DoNotStrip
   @Keep
   abstract fun getStoredBackgroundEvents(options: GetStoredBackgroundEventsOptions?): Promise<Array<StoredBackgroundEventEnvelope>>
-  
+
   @DoNotStrip
   @Keep
   abstract fun clearStoredBackgroundEvents(ids: Array<String>?): Promise<Unit>
-  
+
   @DoNotStrip
   @Keep
   abstract fun markStoredBackgroundEventsDelivered(ids: Array<String>): Promise<Unit>
-  
+
   @DoNotStrip
   @Keep
   abstract fun addGeofences(regions: Array<GeofenceRegion>, options: GeofencingOptions?): Promise<Unit>
-  
+
   @DoNotStrip
   @Keep
   abstract fun removeGeofences(identifiers: Array<String>?): Promise<Unit>
-  
+
   @DoNotStrip
   @Keep
   abstract fun getRegisteredGeofences(): Promise<Array<GeofenceRegion>>
-  
+
   @DoNotStrip
   @Keep
   abstract fun startActivityRecognition(options: ActivityRecognitionOptions?): Promise<Unit>
-  
+
   @DoNotStrip
   @Keep
   abstract fun stopActivityRecognition(): Promise<Unit>
-  
+
   @DoNotStrip
   @Keep
   abstract fun syncStoredLocations(): Promise<BackgroundHttpSyncResult>

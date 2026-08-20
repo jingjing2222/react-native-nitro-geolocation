@@ -237,7 +237,7 @@ namespace margelo::nitro::nitrogeolocation {
   }
 
   // Properties
-  
+
 
   // Methods
   std::shared_ptr<Promise<BackgroundPermissionResult>> JHybridNitroBackgroundLocationSpec::checkBackgroundPermission() {

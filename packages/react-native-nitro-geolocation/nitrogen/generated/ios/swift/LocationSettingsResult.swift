@@ -26,7 +26,7 @@ public extension LocationSettingsResult {
   var outcome: LocationSettingsOutcome {
     return self.__outcome
   }
-  
+
   @inline(__always)
   var providerStatus: LocationProviderStatus {
     return self.__providerStatus

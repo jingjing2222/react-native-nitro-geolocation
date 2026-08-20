@@ -171,7 +171,7 @@ namespace margelo::nitro::nitrogeolocation {
   }
 
   // Properties
-  
+
 
   // Methods
   void JHybridNitroGeolocationSpec::setConfiguration(const GeolocationConfiguration& config) {

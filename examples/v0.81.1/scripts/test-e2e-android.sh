@@ -202,6 +202,11 @@ run_maestro_flows "android location-enabled" "${ANDROID_FLOWS[@]}" || status=1
 run_maestro_flows \
   "android GPS stale-readiness setup" \
   gps-only-recipe-stale-readiness-prepare.yaml || status=1
+set_location_enabled false
+run_maestro_flows \
+  "android GPS stale-readiness verification" \
+  gps-only-recipe-stale-readiness-verify.yaml || status=1
+set_location_enabled true
 
 set_location_permission_permanently_denied
 run_maestro_flows \
@@ -230,6 +235,7 @@ set_location_enabled false
 run_maestro_flows \
   "android location-disabled" \
   provider-settings-not-ready.yaml \
-  location-readiness-disabled.yaml || status=1
+  location-readiness-disabled.yaml \
+  gps-only-recipe-not-ready.yaml || status=1
 
 exit "$status"

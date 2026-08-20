@@ -10,7 +10,7 @@ import NitroModules
 /// See ``HybridNitroGeolocationSpec``
 public protocol HybridNitroGeolocationSpec_protocol: HybridObject {
   // Properties
-  
+
 
   // Methods
   func setConfiguration(config: GeolocationConfiguration) throws -> Void
