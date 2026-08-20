@@ -109,6 +109,8 @@ namespace margelo::nitro::nitrogeolocation {
       virtual std::shared_ptr<Promise<AccuracyAuthorization>> getAccuracyAuthorization() = 0;
       virtual void requestTemporaryFullAccuracy(const std::string& purposeKey, const std::function<void(AccuracyAuthorization /* authorization */)>& success, const std::optional<std::function<void(const LocationError& /* error */)>>& error) = 0;
       virtual void getCurrentPosition(const std::function<void(const GeolocationResponse& /* position */)>& success, const LocationRequestOptions& options, const std::optional<std::function<void(const LocationError& /* error */)>>& error) = 0;
+      virtual void getCurrentPositionCancellable(const std::string& requestId, const std::function<void(const GeolocationResponse& /* position */)>& success, const LocationRequestOptions& options, const std::optional<std::function<void(const LocationError& /* error */)>>& error) = 0;
+      virtual void cancelCurrentPositionRequest(const std::string& requestId) = 0;
       virtual void getLastKnownPosition(const std::function<void(const GeolocationResponse& /* position */)>& success, const LocationRequestOptions& options, const std::optional<std::function<void(const LocationError& /* error */)>>& error) = 0;
       virtual void geocode(const std::string& address, const std::function<void(const std::vector<GeocodedLocation>& /* locations */)>& success, const std::optional<std::function<void(const LocationError& /* error */)>>& error) = 0;
       virtual void reverseGeocode(const GeocodingCoordinates& coords, const std::function<void(const std::vector<ReverseGeocodedAddress>& /* addresses */)>& success, const std::optional<std::function<void(const LocationError& /* error */)>>& error) = 0;

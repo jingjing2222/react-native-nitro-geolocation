@@ -6,6 +6,10 @@ import type {
 } from "../NitroGeolocation.nitro";
 import { buildPermissionDetails } from "../api/permissionDetails";
 import {
+  type CurrentPositionOptions,
+  getAbortReason
+} from "../api/currentPositionOptions";
+import {
   readLastKnownPosition,
   rememberPosition,
   selectCachedPosition
@@ -213,29 +217,62 @@ export function requestTemporaryFullAccuracy(
 }
 
 export function getCurrentPosition(
-  options?: LocationRequestOptions
+  options?: CurrentPositionOptions
 ): Promise<GeolocationResponse> {
+  const signal = options?.signal;
+  if (signal?.aborted) {
+    return Promise.reject(getAbortReason(signal));
+  }
+
   const geolocation = getGeolocation();
   if (!geolocation) {
     return rejectUnsupported();
   }
 
-  const requestedAt = Date.now();
+  if (!signal) {
+    return new Promise((resolve, reject) => {
+      geolocation.getCurrentPosition(
+        (position) => resolve(rememberPosition(normalizePosition(position))),
+        (error) => reject(mapBrowserError(error)),
+        toPositionOptions(options)
+      );
+    });
+  }
+
   return new Promise((resolve, reject) => {
-    geolocation.getCurrentPosition(
-      (position) => {
-        rememberWebPermissionDetailsEvidence("granted");
-        resolve(rememberPosition(normalizePosition(position)));
-      },
-      (error) => {
-        const mappedError = mapBrowserError(error);
-        if (mappedError.code === LocationErrorCode.PERMISSION_DENIED) {
-          rememberWebPermissionDetailsEvidence("denied");
-        }
-        reject(mappedError);
-      },
+    const requestWatch: { id?: number } = {};
+    let shouldClearWatch = false;
+    let didClearWatch = false;
+    let settled = false;
+
+    const clearRequestWatch = () => {
+      if (didClearWatch) return;
+      if (requestWatch.id === undefined) {
+        shouldClearWatch = true;
+        return;
+      }
+      didClearWatch = true;
+      geolocation.clearWatch(requestWatch.id);
+    };
+    const finish = (callback: () => void) => {
+      if (settled) return;
+      settled = true;
+      signal.removeEventListener("abort", handleAbort);
+      clearRequestWatch();
+      callback();
+    };
+    const handleAbort = () => finish(() => reject(getAbortReason(signal)));
+
+    signal.addEventListener("abort", handleAbort, { once: true });
+    requestWatch.id = geolocation.watchPosition(
+      (position) =>
+        finish(() => resolve(rememberPosition(normalizePosition(position)))),
+      (error) => finish(() => reject(mapBrowserError(error))),
       toPositionOptions(options)
     );
+    if (shouldClearWatch) {
+      clearRequestWatch();
+    }
   });
 }
 

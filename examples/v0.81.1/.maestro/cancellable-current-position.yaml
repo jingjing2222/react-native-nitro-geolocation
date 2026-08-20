@@ -1,0 +1,126 @@
+appId: nitrogeolocation.example
+---
+# AbortSignal contract: pre-aborted requests preserve their reason, and
+# cancelling one active request does not cancel concurrent one-shot or watch survivors.
+
+- launchApp:
+    clearState: true
+    permissions:
+      all: allow
+
+- runFlow:
+    when:
+      platform: Android
+      visible: ".*isn't responding|.*응답하지 않.*"
+    commands:
+      - tapOn:
+          text: "Wait|대기"
+- extendedWaitUntil:
+    visible: "Geolocation API"
+    timeout: 10000
+
+- stopApp
+
+- openLink:
+    link: nitrogeolocation://app/cancellable-current-position
+- runFlow:
+    when:
+      platform: Android
+      visible: ".*isn't responding|.*응답하지 않.*"
+    commands:
+      - tapOn:
+          text: "Wait|대기"
+- runFlow:
+    when:
+      platform: iOS
+      visible: "Cancel|취소"
+    commands:
+      - tapOn:
+          text: "Open|열기"
+- runFlow:
+    when:
+      platform: iOS
+    commands:
+      - openLink:
+          link: nitrogeolocation://app/cancellable-current-position
+- waitForAnimationToEnd
+
+- extendedWaitUntil:
+    visible: "AbortSignal cancellation without cross-request interference"
+    timeout: 10000
+
+- tapOn:
+    id: "e2e-action-cancellable-current-position-run-pre-aborted-button"
+
+- extendedWaitUntil:
+    visible: "Pre-aborted request: passed"
+    timeout: 10000
+- assertVisible:
+    id: "cancellable-current-position-pre-aborted-result"
+- assertVisible:
+    text: ".*preserved the (exact reason|AbortError fallback).*"
+
+- setLocation:
+    latitude: 37.5
+    longitude: 126.9
+
+- tapOn:
+    id: "e2e-action-cancellable-current-position-run-cache-isolation-button"
+
+- extendedWaitUntil:
+    visible: "Cache read completed; move location for the active watch."
+    timeout: 10000
+
+- setLocation:
+    latitude: 37.6123
+    longitude: 127.0456
+
+- extendedWaitUntil:
+    visible: "Cache read isolation: passed"
+    timeout: 60000
+- assertVisible:
+    id: "cancellable-current-position-cache-isolation-result"
+- assertVisible:
+    text: ".*Cache read kept watch active at 37.612300, 127.045600.*"
+
+- setLocation:
+    latitude: 37.5665
+    longitude: 126.978
+
+- tapOn:
+    id: "e2e-action-cancellable-current-position-run-isolation-button"
+
+- setLocation:
+    latitude: 37.5665
+    longitude: 126.978
+
+- extendedWaitUntil:
+    visible: "Isolated cancellation: passed"
+    timeout: 60000
+- assertVisible:
+    id: "cancellable-current-position-isolation-result"
+- assertVisible:
+    text: ".*cancelled first only.*survivor 37.566500, 126.978000.*"
+
+- setLocation:
+    latitude: 37.5
+    longitude: 126.9
+
+- tapOn:
+    id: "e2e-action-cancellable-current-position-run-watch-isolation-button"
+
+- extendedWaitUntil:
+    visible: "One-shot cancelled; move location for the active watch."
+    timeout: 60000
+
+- setLocation:
+    latitude: 37.6123
+    longitude: 127.0456
+
+- extendedWaitUntil:
+    visible: "Watch isolation: passed"
+    timeout: 60000
+- assertVisible:
+    id: "cancellable-current-position-watch-isolation-result"
+- assertVisible:
+    text: ".*One-shot cancellation kept watch active at 37.612300, 127.045600.*"

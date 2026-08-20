@@ -343,6 +343,45 @@ open class HybridNitroGeolocationSpec_cxx {
   }
 
   @inline(__always)
+  public final func getCurrentPositionCancellable(requestId: std.string, success: bridge.Func_void_GeolocationResponse, options: LocationRequestOptions, error: bridge.std__optional_std__function_void_const_LocationError_____error______) -> bridge.Result_void_ {
+    do {
+      try self.__implementation.getCurrentPositionCancellable(requestId: String(requestId), success: { () -> (GeolocationResponse) -> Void in
+        let __wrappedFunction = bridge.wrap_Func_void_GeolocationResponse(success)
+        return { (__position: GeolocationResponse) -> Void in
+          __wrappedFunction.call(__position)
+        }
+      }(), options: options, error: { () -> ((_ error: LocationError) -> Void)? in
+        if bridge.has_value_std__optional_std__function_void_const_LocationError_____error______(error) {
+          let __unwrapped = bridge.get_std__optional_std__function_void_const_LocationError_____error______(error)
+          return { () -> (LocationError) -> Void in
+            let __wrappedFunction = bridge.wrap_Func_void_LocationError(__unwrapped)
+            return { (__error: LocationError) -> Void in
+              __wrappedFunction.call(__error)
+            }
+          }()
+        } else {
+          return nil
+        }
+      }())
+      return bridge.create_Result_void_()
+    } catch (let __error) {
+      let __exceptionPtr = __error.toCpp()
+      return bridge.create_Result_void_(__exceptionPtr)
+    }
+  }
+
+  @inline(__always)
+  public final func cancelCurrentPositionRequest(requestId: std.string) -> bridge.Result_void_ {
+    do {
+      try self.__implementation.cancelCurrentPositionRequest(requestId: String(requestId))
+      return bridge.create_Result_void_()
+    } catch (let __error) {
+      let __exceptionPtr = __error.toCpp()
+      return bridge.create_Result_void_(__exceptionPtr)
+    }
+  }
+
+  @inline(__always)
   public final func getLastKnownPosition(success: bridge.Func_void_GeolocationResponse, options: LocationRequestOptions, error: bridge.std__optional_std__function_void_const_LocationError_____error______) -> bridge.Result_void_ {
     do {
       try self.__implementation.getLastKnownPosition(success: { () -> (GeolocationResponse) -> Void in

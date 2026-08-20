@@ -89,6 +89,19 @@ abstract class HybridNitroGeolocationSpec: HybridObject() {
     return __result
   }
 
+  abstract fun getCurrentPositionCancellable(requestId: String, success: (position: GeolocationResponse) -> Unit, options: LocationRequestOptions, error: ((error: LocationError) -> Unit)?): Unit
+
+  @DoNotStrip
+  @Keep
+  private fun getCurrentPositionCancellable_cxx(requestId: String, success: Func_void_GeolocationResponse, options: LocationRequestOptions, error: Func_void_LocationError?): Unit {
+    val __result = getCurrentPositionCancellable(requestId, success, options, error?.let { it })
+    return __result
+  }
+
+  @DoNotStrip
+  @Keep
+  abstract fun cancelCurrentPositionRequest(requestId: String): Unit
+
   abstract fun getLastKnownPosition(success: (position: GeolocationResponse) -> Unit, options: LocationRequestOptions, error: ((error: LocationError) -> Unit)?): Unit
 
   @DoNotStrip

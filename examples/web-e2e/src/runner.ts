@@ -20,6 +20,10 @@ import {
   runCompatApiAvailabilityCheck,
   runCompatScenarios
 } from "./compatRunner";
+import {
+  runCancelledCurrentPosition,
+  runPreAbortedCurrentPosition
+} from "./currentPositionCancellation";
 import { setScenario } from "./dom";
 import {
   expectCacheMiss,
@@ -34,28 +38,11 @@ import {
   isNearExpected
 } from "./locationAssertions";
 import { postNativeStatus } from "./nativeBridge";
-import { expectPostRequestPermissionDetails } from "./permissionDetailsAssertions";
+import { runStep } from "./scenarioRunner";
 import { scenarios } from "./scenarios";
 
 function wait(ms: number) {
   return new Promise((resolve) => setTimeout(resolve, ms));
-}
-
-async function runStep<T>(
-  id: string,
-  action: () => Promise<T>,
-  validate: (value: T) => void = () => undefined
-) {
-  setScenario(id, "running");
-  try {
-    const result = await action();
-    validate(result);
-    setScenario(id, "pass", result);
-    return result;
-  } catch (error) {
-    setScenario(id, "fail", error);
-    throw error;
-  }
 }
 
 async function watchUntilFirstEvent({
@@ -290,10 +277,11 @@ export async function runSuccessSuite() {
   );
 
   await runStep(
-    "permission-details-after-request",
-    () => getPermissionDetails(),
-    expectPostRequestPermissionDetails
+    "get-current-position-pre-aborted",
+    runPreAbortedCurrentPosition
   );
+
+  await runStep("get-current-position-cancelled", runCancelledCurrentPosition);
 
   const position = await runStep(
     "get-current-position",
@@ -530,7 +518,8 @@ export async function runSuccessSuite() {
         "request-location-settings",
         "check-permission",
         "request-permission",
-        "permission-details-after-request",
+        "get-current-position-pre-aborted",
+        "get-current-position-cancelled",
         "get-current-position",
         "last-known-cold-cache",
         "last-known-async-cold-cache",

@@ -225,6 +225,18 @@ namespace margelo::nitro::nitrogeolocation {
         std::rethrow_exception(__result.error());
       }
     }
+    inline void getCurrentPositionCancellable(const std::string& requestId, const std::function<void(const GeolocationResponse& /* position */)>& success, const LocationRequestOptions& options, const std::optional<std::function<void(const LocationError& /* error */)>>& error) override {
+      auto __result = _swiftPart.getCurrentPositionCancellable(requestId, success, std::forward<decltype(options)>(options), error);
+      if (__result.hasError()) [[unlikely]] {
+        std::rethrow_exception(__result.error());
+      }
+    }
+    inline void cancelCurrentPositionRequest(const std::string& requestId) override {
+      auto __result = _swiftPart.cancelCurrentPositionRequest(requestId);
+      if (__result.hasError()) [[unlikely]] {
+        std::rethrow_exception(__result.error());
+      }
+    }
     inline void getLastKnownPosition(const std::function<void(const GeolocationResponse& /* position */)>& success, const LocationRequestOptions& options, const std::optional<std::function<void(const LocationError& /* error */)>>& error) override {
       auto __result = _swiftPart.getLastKnownPosition(success, std::forward<decltype(options)>(options), error);
       if (__result.hasError()) [[unlikely]] {

@@ -23,6 +23,8 @@ public protocol HybridNitroGeolocationSpec_protocol: HybridObject {
   func getAccuracyAuthorization() throws -> Promise<AccuracyAuthorization>
   func requestTemporaryFullAccuracy(purposeKey: String, success: @escaping (_ authorization: AccuracyAuthorization) -> Void, error: ((_ error: LocationError) -> Void)?) throws -> Void
   func getCurrentPosition(success: @escaping (_ position: GeolocationResponse) -> Void, options: LocationRequestOptions, error: ((_ error: LocationError) -> Void)?) throws -> Void
+  func getCurrentPositionCancellable(requestId: String, success: @escaping (_ position: GeolocationResponse) -> Void, options: LocationRequestOptions, error: ((_ error: LocationError) -> Void)?) throws -> Void
+  func cancelCurrentPositionRequest(requestId: String) throws -> Void
   func getLastKnownPosition(success: @escaping (_ position: GeolocationResponse) -> Void, options: LocationRequestOptions, error: ((_ error: LocationError) -> Void)?) throws -> Void
   func geocode(address: String, success: @escaping (_ locations: [GeocodedLocation]) -> Void, error: ((_ error: LocationError) -> Void)?) throws -> Void
   func reverseGeocode(coords: GeocodingCoordinates, success: @escaping (_ addresses: [ReverseGeocodedAddress]) -> Void, error: ((_ error: LocationError) -> Void)?) throws -> Void
