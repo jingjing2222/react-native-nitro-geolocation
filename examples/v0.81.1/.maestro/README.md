@@ -310,12 +310,15 @@ against the device OS and the returned sample.
 - Confirms default current and watch responses have exactly `coords,timestamp`
 - Confirms explicit `includeExtraMetadata: false` current/watch calls keep that exact shape
 - Confirms opted-in current and watch responses expose simulated-location metadata
-- Runs default and opted-in watches concurrently to prove their response shapes stay independent
+- Runs omitted, explicit-false, and opted-in watches concurrently to prove their response shapes stay independent
+- Requires Android simulated samples to expose a concrete `gps`, `network`, or `passive` provider instead of accepting `unknown`
 - Uses `setLocation`, so it covers the `mocked: true` simulator path
 
 ### `compat-metadata-real-device.yaml`
 - Physical-device-only compat integrity check; it intentionally does not use `setLocation`
-- Confirms an opted-in real location reports `Mocked: false` plus a provider value
+- Confirms Android reports `Mocked: false` plus a concrete provider value
+- On iOS 15+, confirms `Mocked: false` when `CLLocation.sourceInformation` is available; an absent `mocked` key is the supported integrity-unknown result when source information is unavailable
+- Handles the iOS deep-link confirmation before reopening the route, matching the other physical-device flows
 - Not included in `all-tests.yaml` because simulators cannot supply this non-mocked contract reliably
 
 ### `all-tests.yaml`

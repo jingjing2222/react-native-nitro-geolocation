@@ -10,6 +10,19 @@ appId: nitrogeolocation.example
 
 - openLink:
     link: nitrogeolocation://app/compat-metadata
+- runFlow:
+    when:
+      platform: iOS
+      visible: "Cancel|취소"
+    commands:
+      - tapOn:
+          text: "Open|열기"
+- runFlow:
+    when:
+      platform: iOS
+    commands:
+      - openLink:
+          link: nitrogeolocation://app/compat-metadata
 - waitForAnimationToEnd
 
 - extendedWaitUntil:
@@ -35,17 +48,75 @@ appId: nitrogeolocation.example
     when:
       platform: Android
     commands:
-      - assertVisible: "Response keys: coords,timestamp,mocked,provider"
+      - assertVisible:
+          id: "compat-metadata-current-result-keys"
+          text: "Response keys: coords,timestamp,mocked,provider"
       - scrollUntilVisible:
           element:
-            text: "Mocked: false"
+            id: "compat-metadata-current-result-mocked"
           direction: DOWN
-      - assertVisible: "Mocked: false"
-      - assertVisible: "Provider: (gps|network|passive|fused|unknown)"
+      - assertVisible:
+          id: "compat-metadata-current-result-mocked"
+          text: "Mocked: false"
+      - scrollUntilVisible:
+          element:
+            id: "compat-metadata-current-result-provider"
+          direction: DOWN
+      - assertVisible:
+          id: "compat-metadata-current-result-provider"
+          text: "Provider: (gps|network|passive|fused)"
 - runFlow:
     when:
       platform: iOS
     commands:
-      # CLLocation.sourceInformation is only available on iOS 15+, so `mocked`
-      # is legitimately absent on older supported devices.
-      - assertVisible: "Provider: unknown"
+      - scrollUntilVisible:
+          element:
+            id: "compat-metadata-current-result-has-mocked"
+          direction: DOWN
+      - assertVisible:
+          id: "compat-metadata-current-result-has-mocked"
+          text: "Has mocked: (true|false)"
+- runFlow:
+    when:
+      platform: iOS
+      visible: "Has mocked: false"
+    commands:
+      # CLLocation.sourceInformation is only available on iOS 15+ and may be
+      # nil. Absence is the supported integrity-unknown result.
+      - scrollUntilVisible:
+          element:
+            id: "compat-metadata-current-result-keys"
+          direction: UP
+      - assertVisible:
+          id: "compat-metadata-current-result-keys"
+          text: "Response keys: coords,timestamp,provider"
+- runFlow:
+    when:
+      platform: iOS
+      visible: "Has mocked: true"
+    commands:
+      - scrollUntilVisible:
+          element:
+            id: "compat-metadata-current-result-mocked"
+          direction: DOWN
+      - assertVisible:
+          id: "compat-metadata-current-result-mocked"
+          text: "Mocked: false"
+      - scrollUntilVisible:
+          element:
+            id: "compat-metadata-current-result-keys"
+          direction: UP
+      - assertVisible:
+          id: "compat-metadata-current-result-keys"
+          text: "Response keys: coords,timestamp,mocked,provider"
+- runFlow:
+    when:
+      platform: iOS
+    commands:
+      - scrollUntilVisible:
+          element:
+            id: "compat-metadata-current-result-provider"
+          direction: DOWN
+      - assertVisible:
+          id: "compat-metadata-current-result-provider"
+          text: "Provider: unknown"
