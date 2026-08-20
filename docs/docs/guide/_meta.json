@@ -10,6 +10,7 @@
   "expo-development-build",
   "react-native-directory",
   "modern-api",
+  "watch-observability",
   "compat-api",
   "agent-context-map",
   "devtools",

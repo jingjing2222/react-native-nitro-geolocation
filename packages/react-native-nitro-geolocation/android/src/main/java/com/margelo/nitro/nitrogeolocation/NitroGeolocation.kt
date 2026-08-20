@@ -542,6 +542,16 @@ class NitroGeolocation(
         }
     }
 
+    override fun getActiveWatches(): Array<ActiveWatch> {
+        val watches = watchSubscriptions.keys.map {
+            ActiveWatch(token = it, kind = ActiveWatchKind.POSITION)
+        }
+        val headings = headingManager.getActiveWatchTokens().map {
+            ActiveWatch(token = it, kind = ActiveWatchKind.HEADING)
+        }
+        return (watches + headings).sortedBy { it.token }.toTypedArray()
+    }
+
     override fun stopObserving() {
         watchSubscriptions.clear()
         headingManager.stopObserving()

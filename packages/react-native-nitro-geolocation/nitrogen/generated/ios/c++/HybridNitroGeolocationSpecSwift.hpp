@@ -64,6 +64,10 @@ namespace margelo::nitro::nitrogeolocation { struct ReverseGeocodedAddress; }
 namespace margelo::nitro::nitrogeolocation { struct Heading; }
 // Forward declaration of `HeadingOptions` to properly resolve imports.
 namespace margelo::nitro::nitrogeolocation { struct HeadingOptions; }
+// Forward declaration of `ActiveWatch` to properly resolve imports.
+namespace margelo::nitro::nitrogeolocation { struct ActiveWatch; }
+// Forward declaration of `ActiveWatchKind` to properly resolve imports.
+namespace margelo::nitro::nitrogeolocation { enum class ActiveWatchKind; }
 
 #include "GeolocationConfiguration.hpp"
 #include <optional>
@@ -98,6 +102,8 @@ namespace margelo::nitro::nitrogeolocation { struct HeadingOptions; }
 #include "ReverseGeocodedAddress.hpp"
 #include "Heading.hpp"
 #include "HeadingOptions.hpp"
+#include "ActiveWatch.hpp"
+#include "ActiveWatchKind.hpp"
 
 #include "NitroGeolocation-Swift-Cxx-Umbrella.hpp"
 
@@ -264,6 +270,14 @@ namespace margelo::nitro::nitrogeolocation {
       if (__result.hasError()) [[unlikely]] {
         std::rethrow_exception(__result.error());
       }
+    }
+    inline std::vector<ActiveWatch> getActiveWatches() override {
+      auto __result = _swiftPart.getActiveWatches();
+      if (__result.hasError()) [[unlikely]] {
+        std::rethrow_exception(__result.error());
+      }
+      auto __value = std::move(__result.value());
+      return __value;
     }
     inline void stopObserving() override {
       auto __result = _swiftPart.stopObserving();

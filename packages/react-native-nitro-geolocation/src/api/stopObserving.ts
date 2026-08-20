@@ -1,4 +1,5 @@
 import { NitroGeolocationHybridObject } from "../NitroGeolocationModule";
+import { devtoolsStopObserving } from "../devtools/watchPosition";
 
 /**
  * Stop ALL watch subscriptions immediately.
@@ -18,5 +19,6 @@ import { NitroGeolocationHybridObject } from "../NitroGeolocationModule";
  * ```
  */
 export function stopObserving(): void {
+  devtoolsStopObserving();
   NitroGeolocationHybridObject.stopObserving();
 }

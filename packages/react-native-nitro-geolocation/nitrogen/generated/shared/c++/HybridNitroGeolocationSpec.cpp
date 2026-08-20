@@ -31,6 +31,7 @@ namespace margelo::nitro::nitrogeolocation {
       prototype.registerHybridMethod("watchHeading", &HybridNitroGeolocationSpec::watchHeading);
       prototype.registerHybridMethod("watchPosition", &HybridNitroGeolocationSpec::watchPosition);
       prototype.registerHybridMethod("unwatch", &HybridNitroGeolocationSpec::unwatch);
+      prototype.registerHybridMethod("getActiveWatches", &HybridNitroGeolocationSpec::getActiveWatches);
       prototype.registerHybridMethod("stopObserving", &HybridNitroGeolocationSpec::stopObserving);
     });
   }

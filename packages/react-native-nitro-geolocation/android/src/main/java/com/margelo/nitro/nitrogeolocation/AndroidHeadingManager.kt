@@ -147,6 +147,10 @@ internal class AndroidHeadingManager(
         stopIfIdle()
     }
 
+    fun getActiveWatchTokens(): List<String> {
+        return subscriptions.keys.toList()
+    }
+
     fun stopObserving() {
         pendingRequests.values.forEach { request ->
             mainHandler.removeCallbacks(request.timeoutRunnable)

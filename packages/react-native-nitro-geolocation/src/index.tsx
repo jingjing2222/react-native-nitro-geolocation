@@ -67,6 +67,7 @@ export {
   getHeading,
   watchHeading,
   watchPosition,
+  getActiveWatches,
   unwatch,
   stopObserving
 } from "./api";
@@ -103,6 +104,8 @@ export type {
   LocationAccuracyOptions,
   Heading,
   HeadingOptions,
+  ActiveWatch,
+  ActiveWatchKind,
   AuthorizationLevel,
   LocationProvider,
   LocationProviderUsed,

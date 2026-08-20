@@ -43,6 +43,8 @@ namespace margelo::nitro::nitrogeolocation { struct ReverseGeocodedAddress; }
 namespace margelo::nitro::nitrogeolocation { struct Heading; }
 // Forward declaration of `HeadingOptions` to properly resolve imports.
 namespace margelo::nitro::nitrogeolocation { struct HeadingOptions; }
+// Forward declaration of `ActiveWatch` to properly resolve imports.
+namespace margelo::nitro::nitrogeolocation { struct ActiveWatch; }
 
 #include "GeolocationConfiguration.hpp"
 #include "PermissionStatus.hpp"
@@ -64,6 +66,7 @@ namespace margelo::nitro::nitrogeolocation { struct HeadingOptions; }
 #include "ReverseGeocodedAddress.hpp"
 #include "Heading.hpp"
 #include "HeadingOptions.hpp"
+#include "ActiveWatch.hpp"
 
 namespace margelo::nitro::nitrogeolocation {
 
@@ -113,6 +116,7 @@ namespace margelo::nitro::nitrogeolocation {
       virtual std::string watchHeading(const std::function<void(const Heading& /* heading */)>& success, const HeadingOptions& options, const std::optional<std::function<void(const LocationError& /* error */)>>& error) = 0;
       virtual std::string watchPosition(const std::function<void(const GeolocationResponse& /* position */)>& success, const LocationRequestOptions& options, const std::optional<std::function<void(const LocationError& /* error */)>>& error) = 0;
       virtual void unwatch(const std::string& token) = 0;
+      virtual std::vector<ActiveWatch> getActiveWatches() = 0;
       virtual void stopObserving() = 0;
 
     protected:

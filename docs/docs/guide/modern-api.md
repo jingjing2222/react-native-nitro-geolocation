@@ -797,6 +797,21 @@ import { unwatch } from 'react-native-nitro-geolocation';
 unwatch(token);
 ```
 
+### getActiveWatches()
+
+Read the active Modern API position and heading subscriptions without starting
+or changing location services:
+
+```tsx
+import { getActiveWatches } from 'react-native-nitro-geolocation';
+
+const active = getActiveWatches();
+// [{ token: '...', kind: 'position' }]
+```
+
+See [Watch observability](/guide/watch-observability) for the native merge,
+restart, automatic `maxUpdates` removal, and cleanup contracts.
+
 ### stopObserving()
 
 Stop ALL watch subscriptions immediately.

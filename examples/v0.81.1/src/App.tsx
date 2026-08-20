@@ -37,6 +37,7 @@ import { LongRunBackgroundE2EScreen } from "./screens/LongRunBackgroundE2EScreen
 import MockedMetadataScreen from "./screens/MockedMetadataScreen";
 import PermissionCheckScreen from "./screens/PermissionCheckScreen";
 import ProviderSettingsScreen from "./screens/ProviderSettingsScreen";
+import WatchObservabilityScreen from "./screens/WatchObservabilityScreen";
 import WatchPositionScreen from "./screens/WatchPositionScreen";
 import WebE2EScreen from "./screens/WebE2EScreen";
 
@@ -50,6 +51,7 @@ const linking = {
       PermissionCheck: "permission-check",
       CurrentPosition: "current-position",
       WatchPosition: "watch-position",
+      WatchObservability: "watch-observability",
       LocationSimulation: "location-simulation",
       MockedMetadata: "mocked-metadata",
       ProviderSettings: "provider-settings",
@@ -135,6 +137,11 @@ export default function App() {
           <Tab.Screen
             name="WatchPosition"
             component={WatchPositionScreen}
+            options={hiddenTabOptions}
+          />
+          <Tab.Screen
+            name="WatchObservability"
+            component={WatchObservabilityScreen}
             options={hiddenTabOptions}
           />
           <Tab.Screen

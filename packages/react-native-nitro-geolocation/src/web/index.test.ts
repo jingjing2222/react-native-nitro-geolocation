@@ -1,6 +1,7 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import {
   checkPermission,
+  getActiveWatches,
   getCurrentPosition,
   getLastKnownPosition,
   getLastKnownPositionAsync,
@@ -357,10 +358,18 @@ describe("web Modern API", () => {
       timeout: 600000,
       maximumAge: 0
     });
+    expect(getActiveWatches()).toEqual([
+      { token: firstToken, kind: "position" },
+      { token: secondToken, kind: "position" }
+    ]);
     unwatch(firstToken);
     expect(clearWatch).toHaveBeenCalledWith(10);
+    expect(getActiveWatches()).toEqual([
+      { token: secondToken, kind: "position" }
+    ]);
 
     stopObserving();
     expect(clearWatch).toHaveBeenCalledWith(11);
+    expect(getActiveWatches()).toEqual([]);
   });
 });

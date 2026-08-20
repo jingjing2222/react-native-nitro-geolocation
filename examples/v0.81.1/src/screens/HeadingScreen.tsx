@@ -1,6 +1,7 @@
 import React from "react";
 import {
   LocationErrorCode,
+  getActiveWatches,
   getHeading,
   unwatch,
   watchHeading
@@ -133,7 +134,14 @@ export default function HeadingScreen() {
               if (readings.length >= 2) {
                 clearTimeout(timeout);
                 unwatch(token);
-                resolve();
+                const remainedActive = getActiveWatches().some(
+                  (watch) => watch.token === token
+                );
+                if (remainedActive) {
+                  reject(new Error("Heading token remained after unwatch."));
+                } else {
+                  resolve();
+                }
               }
             } catch (error) {
               clearTimeout(timeout);
@@ -154,6 +162,17 @@ export default function HeadingScreen() {
             headingFilter: 0
           }
         );
+
+        const activeHeading = getActiveWatches().some(
+          (watch) => watch.token === token && watch.kind === "heading"
+        );
+        if (!activeHeading) {
+          clearTimeout(timeout);
+          unwatch(token);
+          reject(
+            new Error("Heading token was absent from the active snapshot.")
+          );
+        }
       });
 
       if (readings[1].timestamp < readings[0].timestamp) {
@@ -164,7 +183,7 @@ export default function HeadingScreen() {
         "watch",
         createScenarioResult(
           "passed",
-          `Watch delivered ${readings.length} real heading updates and cleaned up token ${token.slice(
+          `Watch snapshot exposed kind heading, delivered ${readings.length} real updates, and cleaned up token ${token.slice(
             0,
             8
           )}.`

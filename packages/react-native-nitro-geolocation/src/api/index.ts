@@ -17,5 +17,6 @@ export { reverseGeocode } from "./reverseGeocode";
 export { getHeading } from "./getHeading";
 export { watchHeading } from "./watchHeading";
 export { watchPosition } from "./watchPosition";
+export { getActiveWatches } from "./getActiveWatches";
 export { unwatch } from "./unwatch";
 export { stopObserving } from "./stopObserving";
