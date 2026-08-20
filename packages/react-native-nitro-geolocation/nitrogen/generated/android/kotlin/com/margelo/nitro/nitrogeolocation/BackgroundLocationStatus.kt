@@ -50,6 +50,12 @@ data class BackgroundLocationStatus(
   val storedEventCount: Double,
   @DoNotStrip
   @Keep
+  val lastLocationAt: Double?,
+  @DoNotStrip
+  @Keep
+  val lastEventAt: Double?,
+  @DoNotStrip
+  @Keep
   val geofenceCount: Double,
   @DoNotStrip
   @Keep
@@ -76,6 +82,8 @@ data class BackgroundLocationStatus(
       && Objects.deepEquals(this.providerStatus, other.providerStatus)
       && Objects.deepEquals(this.storedLocationCount, other.storedLocationCount)
       && Objects.deepEquals(this.storedEventCount, other.storedEventCount)
+      && Objects.deepEquals(this.lastLocationAt, other.lastLocationAt)
+      && Objects.deepEquals(this.lastEventAt, other.lastEventAt)
       && Objects.deepEquals(this.geofenceCount, other.geofenceCount)
       && Objects.deepEquals(this.android, other.android)
       && Objects.deepEquals(this.ios, other.ios)
@@ -94,6 +102,8 @@ data class BackgroundLocationStatus(
       providerStatus,
       storedLocationCount,
       storedEventCount,
+      lastLocationAt,
+      lastEventAt,
       geofenceCount,
       android,
       ios,
@@ -109,8 +119,8 @@ data class BackgroundLocationStatus(
     @Keep
     @Suppress("unused")
     @JvmStatic
-    private fun fromCpp(state: BackgroundLocationState, isRunning: Boolean, isConfigured: Boolean, foregroundPermission: PermissionStatus, backgroundPermission: BackgroundPermissionStatus, accuracyAuthorization: AccuracyAuthorization?, locationServicesEnabled: Boolean, providerStatus: LocationProviderStatus?, storedLocationCount: Double, storedEventCount: Double, geofenceCount: Double, android: AndroidBackgroundLocationStatus?, ios: IOSBackgroundLocationStatus?, lastError: LocationError?): BackgroundLocationStatus {
-      return BackgroundLocationStatus(state, isRunning, isConfigured, foregroundPermission, backgroundPermission, accuracyAuthorization, locationServicesEnabled, providerStatus, storedLocationCount, storedEventCount, geofenceCount, android, ios, lastError)
+    private fun fromCpp(state: BackgroundLocationState, isRunning: Boolean, isConfigured: Boolean, foregroundPermission: PermissionStatus, backgroundPermission: BackgroundPermissionStatus, accuracyAuthorization: AccuracyAuthorization?, locationServicesEnabled: Boolean, providerStatus: LocationProviderStatus?, storedLocationCount: Double, storedEventCount: Double, lastLocationAt: Double?, lastEventAt: Double?, geofenceCount: Double, android: AndroidBackgroundLocationStatus?, ios: IOSBackgroundLocationStatus?, lastError: LocationError?): BackgroundLocationStatus {
+      return BackgroundLocationStatus(state, isRunning, isConfigured, foregroundPermission, backgroundPermission, accuracyAuthorization, locationServicesEnabled, providerStatus, storedLocationCount, storedEventCount, lastLocationAt, lastEventAt, geofenceCount, android, ios, lastError)
     }
   }
 }

@@ -72,6 +72,8 @@ namespace margelo::nitro::nitrogeolocation {
     std::optional<LocationProviderStatus> providerStatus     SWIFT_PRIVATE;
     double storedLocationCount     SWIFT_PRIVATE;
     double storedEventCount     SWIFT_PRIVATE;
+    std::optional<double> lastLocationAt     SWIFT_PRIVATE;
+    std::optional<double> lastEventAt     SWIFT_PRIVATE;
     double geofenceCount     SWIFT_PRIVATE;
     std::optional<AndroidBackgroundLocationStatus> android     SWIFT_PRIVATE;
     std::optional<IOSBackgroundLocationStatus> ios     SWIFT_PRIVATE;
@@ -79,7 +81,7 @@ namespace margelo::nitro::nitrogeolocation {
 
   public:
     BackgroundLocationStatus() = default;
-    explicit BackgroundLocationStatus(BackgroundLocationState state, bool isRunning, bool isConfigured, PermissionStatus foregroundPermission, BackgroundPermissionStatus backgroundPermission, std::optional<AccuracyAuthorization> accuracyAuthorization, bool locationServicesEnabled, std::optional<LocationProviderStatus> providerStatus, double storedLocationCount, double storedEventCount, double geofenceCount, std::optional<AndroidBackgroundLocationStatus> android, std::optional<IOSBackgroundLocationStatus> ios, std::optional<LocationError> lastError): state(state), isRunning(isRunning), isConfigured(isConfigured), foregroundPermission(foregroundPermission), backgroundPermission(backgroundPermission), accuracyAuthorization(accuracyAuthorization), locationServicesEnabled(locationServicesEnabled), providerStatus(providerStatus), storedLocationCount(storedLocationCount), storedEventCount(storedEventCount), geofenceCount(geofenceCount), android(android), ios(ios), lastError(lastError) {}
+    explicit BackgroundLocationStatus(BackgroundLocationState state, bool isRunning, bool isConfigured, PermissionStatus foregroundPermission, BackgroundPermissionStatus backgroundPermission, std::optional<AccuracyAuthorization> accuracyAuthorization, bool locationServicesEnabled, std::optional<LocationProviderStatus> providerStatus, double storedLocationCount, double storedEventCount, std::optional<double> lastLocationAt, std::optional<double> lastEventAt, double geofenceCount, std::optional<AndroidBackgroundLocationStatus> android, std::optional<IOSBackgroundLocationStatus> ios, std::optional<LocationError> lastError): state(state), isRunning(isRunning), isConfigured(isConfigured), foregroundPermission(foregroundPermission), backgroundPermission(backgroundPermission), accuracyAuthorization(accuracyAuthorization), locationServicesEnabled(locationServicesEnabled), providerStatus(providerStatus), storedLocationCount(storedLocationCount), storedEventCount(storedEventCount), lastLocationAt(lastLocationAt), lastEventAt(lastEventAt), geofenceCount(geofenceCount), android(android), ios(ios), lastError(lastError) {}
 
   public:
     friend bool operator==(const BackgroundLocationStatus& lhs, const BackgroundLocationStatus& rhs) = default;
@@ -105,6 +107,8 @@ namespace margelo::nitro {
         JSIConverter<std::optional<margelo::nitro::nitrogeolocation::LocationProviderStatus>>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "providerStatus"))),
         JSIConverter<double>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "storedLocationCount"))),
         JSIConverter<double>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "storedEventCount"))),
+        JSIConverter<std::optional<double>>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "lastLocationAt"))),
+        JSIConverter<std::optional<double>>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "lastEventAt"))),
         JSIConverter<double>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "geofenceCount"))),
         JSIConverter<std::optional<margelo::nitro::nitrogeolocation::AndroidBackgroundLocationStatus>>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "android"))),
         JSIConverter<std::optional<margelo::nitro::nitrogeolocation::IOSBackgroundLocationStatus>>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "ios"))),
@@ -123,6 +127,8 @@ namespace margelo::nitro {
       obj.setProperty(runtime, PropNameIDCache::get(runtime, "providerStatus"), JSIConverter<std::optional<margelo::nitro::nitrogeolocation::LocationProviderStatus>>::toJSI(runtime, arg.providerStatus));
       obj.setProperty(runtime, PropNameIDCache::get(runtime, "storedLocationCount"), JSIConverter<double>::toJSI(runtime, arg.storedLocationCount));
       obj.setProperty(runtime, PropNameIDCache::get(runtime, "storedEventCount"), JSIConverter<double>::toJSI(runtime, arg.storedEventCount));
+      obj.setProperty(runtime, PropNameIDCache::get(runtime, "lastLocationAt"), JSIConverter<std::optional<double>>::toJSI(runtime, arg.lastLocationAt));
+      obj.setProperty(runtime, PropNameIDCache::get(runtime, "lastEventAt"), JSIConverter<std::optional<double>>::toJSI(runtime, arg.lastEventAt));
       obj.setProperty(runtime, PropNameIDCache::get(runtime, "geofenceCount"), JSIConverter<double>::toJSI(runtime, arg.geofenceCount));
       obj.setProperty(runtime, PropNameIDCache::get(runtime, "android"), JSIConverter<std::optional<margelo::nitro::nitrogeolocation::AndroidBackgroundLocationStatus>>::toJSI(runtime, arg.android));
       obj.setProperty(runtime, PropNameIDCache::get(runtime, "ios"), JSIConverter<std::optional<margelo::nitro::nitrogeolocation::IOSBackgroundLocationStatus>>::toJSI(runtime, arg.ios));
@@ -147,6 +153,8 @@ namespace margelo::nitro {
       if (!JSIConverter<std::optional<margelo::nitro::nitrogeolocation::LocationProviderStatus>>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "providerStatus")))) return false;
       if (!JSIConverter<double>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "storedLocationCount")))) return false;
       if (!JSIConverter<double>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "storedEventCount")))) return false;
+      if (!JSIConverter<std::optional<double>>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "lastLocationAt")))) return false;
+      if (!JSIConverter<std::optional<double>>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "lastEventAt")))) return false;
       if (!JSIConverter<double>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "geofenceCount")))) return false;
       if (!JSIConverter<std::optional<margelo::nitro::nitrogeolocation::AndroidBackgroundLocationStatus>>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "android")))) return false;
       if (!JSIConverter<std::optional<margelo::nitro::nitrogeolocation::IOSBackgroundLocationStatus>>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "ios")))) return false;

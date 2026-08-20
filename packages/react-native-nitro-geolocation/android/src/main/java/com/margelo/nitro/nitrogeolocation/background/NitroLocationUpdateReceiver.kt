@@ -13,6 +13,14 @@ class NitroLocationUpdateReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent) {
         NitroGeoLog.d("LocationUpdateReceiver.onReceive(): action=${intent.action}")
         val controller = NitroBackgroundLocationController.getInstance(context)
+        val generation = intent.getLongExtra(
+            EXTRA_RUN_GENERATION,
+            MISSING_RUN_GENERATION
+        )
+        val registrationGeneration = intent.getLongExtra(
+            EXTRA_REGISTRATION_GENERATION,
+            MISSING_REGISTRATION_GENERATION
+        )
         val platformLocation = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             intent.getParcelableExtra(LocationManager.KEY_LOCATION_CHANGED, Location::class.java)
         } else {
@@ -22,7 +30,9 @@ class NitroLocationUpdateReceiver : BroadcastReceiver() {
         if (platformLocation != null) {
             controller.handleNativeLocation(
                 platformLocation,
-                BackgroundLocationSource.FOREGROUNDSERVICE
+                BackgroundLocationSource.FOREGROUNDSERVICE,
+                generation,
+                registrationGeneration
             )
             return
         }
@@ -40,7 +50,9 @@ class NitroLocationUpdateReceiver : BroadcastReceiver() {
         for (location in result.locations) {
             controller.handleNativeLocation(
                 location,
-                BackgroundLocationSource.FOREGROUNDSERVICE
+                BackgroundLocationSource.FOREGROUNDSERVICE,
+                generation,
+                registrationGeneration
             )
         }
     }

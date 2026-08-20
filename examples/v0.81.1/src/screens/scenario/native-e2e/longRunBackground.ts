@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { Platform } from "react-native";
 import {
-  type BackgroundEvent,
   type BackgroundLocationOptions,
   type GeofenceRegion,
   type StoredBackgroundEvent,
@@ -21,16 +20,34 @@ import {
 } from "react-native-nitro-geolocation/background";
 import { useScenarioResults } from "../hooks/useScenarioResults";
 import { createScenarioResult, createScenarioResults } from "../utils/results";
-
-const GEOFENCE_ID = "long-run-office";
-const GEOFENCE_CENTER = {
-  latitude: 37.5665,
-  longitude: 126.978
-};
+import {
+  GEOFENCE_CENTER,
+  GEOFENCE_ID,
+  GEOFENCE_OUTSIDE,
+  eventType,
+  hasOrderedBackgroundLocationProof,
+  hasOrderedGeofenceTransitionProof,
+  hasOrderedRebootLocationProof,
+  isCoordinate,
+  isDeliveredLocationEvent,
+  isGeofenceTransition,
+  isLocationEventMeasuredAtOrAfter,
+  isTimestampAtOrAfter
+} from "./longRunBackgroundProof";
+import {
+  type LongRunSnapshot,
+  emptyLongRunSnapshot
+} from "./longRunBackgroundSnapshot";
 const REBOOT_PROOF_DELAY_MS = 15_000;
+const CLEANUP_STATUS_TIMEOUT_MS = 5_000;
+const CLEANUP_STATUS_POLL_MS = 250;
+
+const wait = (durationMs: number) =>
+  new Promise<void>((resolve) => setTimeout(resolve, durationMs));
 
 export const longRunBackgroundResults = createScenarioResults([
   "prepare",
+  "backgroundProbe",
   "rebootProbe",
   "backgroundLocation",
   "headless",
@@ -40,7 +57,6 @@ export const longRunBackgroundResults = createScenarioResults([
   "platformLimits",
   "cleanup"
 ] as const);
-
 const longRunOptions: BackgroundLocationOptions = {
   trackingMode: Platform.OS === "ios" ? "significantChanges" : "continuous",
   interval: 5_000,
@@ -75,74 +91,10 @@ const longRunOptions: BackgroundLocationOptions = {
   }
 };
 
-export type LongRunSnapshot = {
-  status: string;
-  running: string;
-  configured: string;
-  foregroundService: string;
-  storedLocations: number;
-  storedEvents: number;
-  postPrepareLocations: number;
-  postPrepareLocationEvents: number;
-  deliveredEvents: number;
-  locationEvents: number;
-  deliveredLocationEvents: number;
-  geofenceEnterEvents: number;
-  geofenceExitEvents: number;
-  postRebootLocations: number;
-  postRebootLocationEvents: number;
-  postRebootGeofenceEnterEvents: number;
-  postRebootGeofenceExitEvents: number;
-  geofences: number;
-  preparedAt: string;
-  rebootProofAfter: string;
-  lastEvent: string;
-};
-
-const emptySnapshot: LongRunSnapshot = {
-  status: "not checked",
-  running: "unknown",
-  configured: "unknown",
-  foregroundService: "unknown",
-  storedLocations: 0,
-  storedEvents: 0,
-  postPrepareLocations: 0,
-  postPrepareLocationEvents: 0,
-  deliveredEvents: 0,
-  locationEvents: 0,
-  deliveredLocationEvents: 0,
-  geofenceEnterEvents: 0,
-  geofenceExitEvents: 0,
-  postRebootLocations: 0,
-  postRebootLocationEvents: 0,
-  postRebootGeofenceEnterEvents: 0,
-  postRebootGeofenceExitEvents: 0,
-  geofences: 0,
-  preparedAt: "none",
-  rebootProofAfter: "none",
-  lastEvent: "none"
-};
-
 const shortError = (error: unknown) =>
   String(error instanceof Error ? error.message : error)
     .split("\n")[0]
     .slice(0, 160);
-
-const eventType = (event: StoredBackgroundEvent) => event.event.type;
-
-const isDeliveredLocationEvent = (event: StoredBackgroundEvent) =>
-  event.deliveredToJS && eventType(event) === "location";
-
-const isGeofenceTransition = (
-  event: StoredBackgroundEvent,
-  transition: "enter" | "exit"
-) => {
-  const backgroundEvent: BackgroundEvent = event.event;
-  return (
-    backgroundEvent.type === "geofence" &&
-    backgroundEvent.geofence.transition === transition
-  );
-};
 
 const summarizeEvent = (event?: StoredBackgroundEvent) => {
   if (!event) return "none";
@@ -168,6 +120,7 @@ const longRunMarker = (geofences: GeofenceRegion[]) => {
 
   return {
     preparedAt: metadataNumber(metadata?.preparedAt),
+    backgroundProofAfter: metadataNumber(metadata?.backgroundProofAfter),
     rebootProofAfter: metadataNumber(metadata?.rebootProofAfter)
   };
 };
@@ -191,7 +144,8 @@ export const useLongRunBackgroundScenario = () => {
   const { results, setResult, resetResults } = useScenarioResults(
     longRunBackgroundResults
   );
-  const [snapshot, setSnapshot] = useState<LongRunSnapshot>(emptySnapshot);
+  const [snapshot, setSnapshot] =
+    useState<LongRunSnapshot>(emptyLongRunSnapshot);
 
   const refreshSnapshot = async () => {
     const [status, geofences] = await Promise.all([
@@ -199,7 +153,7 @@ export const useLongRunBackgroundScenario = () => {
       getRegisteredGeofences()
     ]);
     const marker = longRunMarker(geofences);
-    const preparedSince = marker.preparedAt ?? 0;
+    const preparedSince = marker.backgroundProofAfter ?? marker.preparedAt ?? 0;
     const rebootSince = marker.rebootProofAfter ?? Number.MAX_SAFE_INTEGER;
     const [locations, events, rebootLocations, rebootEvents] =
       await Promise.all([
@@ -229,6 +183,49 @@ export const useLongRunBackgroundScenario = () => {
     const postPrepareLocationEvents = events.filter(
       (event) => eventType(event) === "location"
     );
+    const proofInsideLocations = locations.filter((location) =>
+      isCoordinate(
+        location.coords.latitude,
+        location.coords.longitude,
+        GEOFENCE_CENTER
+      )
+    );
+    const proofOutsideLocations = locations.filter((location) =>
+      isCoordinate(
+        location.coords.latitude,
+        location.coords.longitude,
+        GEOFENCE_OUTSIDE
+      )
+    );
+    const deliveredProofInsideLocationEvents = events.filter(
+      (event) =>
+        isDeliveredLocationEvent(event) &&
+        isLocationEventMeasuredAtOrAfter(event, marker.backgroundProofAfter) &&
+        event.event.type === "location" &&
+        isCoordinate(
+          event.event.location.coords.latitude,
+          event.event.location.coords.longitude,
+          GEOFENCE_CENTER
+        )
+    );
+    const proofInsideLocationEvents = postPrepareLocationEvents.filter(
+      (event) =>
+        event.event.type === "location" &&
+        isCoordinate(
+          event.event.location.coords.latitude,
+          event.event.location.coords.longitude,
+          GEOFENCE_CENTER
+        )
+    );
+    const proofOutsideLocationEvents = postPrepareLocationEvents.filter(
+      (event) =>
+        event.event.type === "location" &&
+        isCoordinate(
+          event.event.location.coords.latitude,
+          event.event.location.coords.longitude,
+          GEOFENCE_OUTSIDE
+        )
+    );
     const postRebootLocationEvents = rebootEvents.filter(
       (event) => eventType(event) === "location"
     );
@@ -248,11 +245,32 @@ export const useLongRunBackgroundScenario = () => {
       ),
       storedLocations: status.storedLocationCount,
       storedEvents: status.storedEventCount,
+      lastLocationAt: status.lastLocationAt
+        ? String(Math.trunc(status.lastLocationAt))
+        : "none",
+      lastEventAt: status.lastEventAt
+        ? String(Math.trunc(status.lastEventAt))
+        : "none",
+      proofInsideLocations: proofInsideLocations.length,
+      proofOutsideLocations: proofOutsideLocations.length,
+      proofInsideLocationEvents: proofInsideLocationEvents.length,
+      proofOutsideLocationEvents: proofOutsideLocationEvents.length,
+      orderedBackgroundLocationProof: hasOrderedBackgroundLocationProof(
+        locations,
+        events,
+        marker.backgroundProofAfter
+      ),
+      orderedGeofenceTransitionProof: hasOrderedGeofenceTransitionProof(
+        events,
+        marker.backgroundProofAfter
+      ),
       postPrepareLocations: locations.length,
       postPrepareLocationEvents: postPrepareLocationEvents.length,
       deliveredEvents: events.filter((event) => event.deliveredToJS).length,
       locationEvents: postPrepareLocationEvents.length,
       deliveredLocationEvents: events.filter(isDeliveredLocationEvent).length,
+      deliveredProofInsideLocationEvents:
+        deliveredProofInsideLocationEvents.length,
       geofenceEnterEvents: events.filter((event) =>
         isGeofenceTransition(event, "enter")
       ).length,
@@ -261,11 +279,24 @@ export const useLongRunBackgroundScenario = () => {
       ).length,
       postRebootLocations: rebootLocations.length,
       postRebootLocationEvents: postRebootLocationEvents.length,
+      orderedPostRebootLocationProof: hasOrderedRebootLocationProof(
+        rebootLocations,
+        rebootEvents,
+        marker.rebootProofAfter
+      ),
       postRebootGeofenceEnterEvents: postRebootGeofenceEnterEvents.length,
       postRebootGeofenceExitEvents: postRebootGeofenceExitEvents.length,
+      orderedPostRebootGeofenceTransitionProof:
+        hasOrderedGeofenceTransitionProof(
+          rebootEvents,
+          marker.rebootProofAfter
+        ),
       geofences: geofences.length,
       preparedAt: marker.preparedAt
         ? String(Math.trunc(marker.preparedAt))
+        : "none",
+      backgroundProofAfter: marker.backgroundProofAfter
+        ? String(Math.trunc(marker.backgroundProofAfter))
         : "none",
       rebootProofAfter: marker.rebootProofAfter
         ? String(Math.trunc(marker.rebootProofAfter))
@@ -289,6 +320,18 @@ export const useLongRunBackgroundScenario = () => {
       await clearStoredBackgroundEvents().catch(() => undefined);
       await clearStoredBackgroundLocations().catch(() => undefined);
 
+      const clearedStatus = await getBackgroundLocationStatus();
+      if (
+        clearedStatus.storedLocationCount !== 0 ||
+        clearedStatus.storedEventCount !== 0 ||
+        clearedStatus.lastLocationAt !== undefined ||
+        clearedStatus.lastEventAt !== undefined
+      ) {
+        throw new Error(
+          `Native store did not clear: locations=${clearedStatus.storedLocationCount}, events=${clearedStatus.storedEventCount}, lastLocationAt=${String(clearedStatus.lastLocationAt)}, lastEventAt=${String(clearedStatus.lastEventAt)}`
+        );
+      }
+
       const permission = await requestBackgroundPermission();
       if (
         permission.foreground !== "granted" ||
@@ -308,7 +351,6 @@ export const useLongRunBackgroundScenario = () => {
           })
         ],
         {
-          initialTrigger: ["enter", "exit"],
           notificationResponsiveness: 1_000
         }
       );
@@ -324,6 +366,51 @@ export const useLongRunBackgroundScenario = () => {
       );
     } catch (error) {
       setResult("prepare", createScenarioResult("failed", shortError(error)));
+    }
+  };
+
+  const armBackgroundProbe = async () => {
+    setResult(
+      "backgroundProbe",
+      createScenarioResult(
+        "running",
+        "Recording a marker after foreground stabilization"
+      )
+    );
+    try {
+      const geofences = await getRegisteredGeofences();
+      const marker = longRunMarker(geofences);
+      if (marker.preparedAt === undefined) {
+        throw new Error("Prepare Long Run before arming background proof");
+      }
+
+      const backgroundProofAfter = Date.now();
+      await addGeofences(
+        [
+          longRunGeofence({
+            preparedAt: marker.preparedAt,
+            backgroundProofAfter,
+            runId: String(backgroundProofAfter)
+          })
+        ],
+        {
+          notificationResponsiveness: 1_000
+        }
+      );
+
+      const next = await refreshSnapshot();
+      setResult(
+        "backgroundProbe",
+        createScenarioResult(
+          next.backgroundProofAfter !== "none" ? "passed" : "failed",
+          `proofAfter=${next.backgroundProofAfter}`
+        )
+      );
+    } catch (error) {
+      setResult(
+        "backgroundProbe",
+        createScenarioResult("failed", shortError(error))
+      );
     }
   };
 
@@ -349,6 +436,9 @@ export const useLongRunBackgroundScenario = () => {
         [
           longRunGeofence({
             preparedAt: marker.preparedAt ?? Date.now(),
+            ...(marker.backgroundProofAfter === undefined
+              ? {}
+              : { backgroundProofAfter: marker.backgroundProofAfter }),
             rebootProofAfter: Date.now() + REBOOT_PROOF_DELAY_MS,
             runId: String(Date.now())
           })
@@ -383,12 +473,14 @@ export const useLongRunBackgroundScenario = () => {
     try {
       const next = await refreshSnapshot();
       const passed =
-        next.postPrepareLocations > 0 && next.postPrepareLocationEvents > 0;
+        next.orderedBackgroundLocationProof &&
+        isTimestampAtOrAfter(next.lastLocationAt, next.backgroundProofAfter) &&
+        isTimestampAtOrAfter(next.lastEventAt, next.backgroundProofAfter);
       setResult(
         "backgroundLocation",
         createScenarioResult(
           passed ? "passed" : "failed",
-          `postPrepareLocations=${next.postPrepareLocations}, postPrepareEvents=${next.postPrepareLocationEvents}`
+          `ordered=${String(next.orderedBackgroundLocationProof)}, locations=${next.proofInsideLocations}/${next.proofOutsideLocations}, events=${next.proofInsideLocationEvents}/${next.proofOutsideLocationEvents}, lastLocationAt=${next.lastLocationAt}, lastEventAt=${next.lastEventAt}`
         )
       );
     } catch (error) {
@@ -416,12 +508,12 @@ export const useLongRunBackgroundScenario = () => {
         );
         return;
       }
-      const passed = next.deliveredLocationEvents > 0;
+      const passed = next.deliveredProofInsideLocationEvents > 0;
       setResult(
         "headless",
         createScenarioResult(
           passed ? "passed" : "failed",
-          `deliveredLocationEvents=${next.deliveredLocationEvents}`
+          `deliveredInsideLocationEvents=${next.deliveredProofInsideLocationEvents}`
         )
       );
     } catch (error) {
@@ -437,12 +529,14 @@ export const useLongRunBackgroundScenario = () => {
     try {
       const next = await refreshSnapshot();
       const passed =
-        next.geofenceEnterEvents > 0 && next.geofenceExitEvents > 0;
+        next.geofenceEnterEvents > 0 &&
+        next.geofenceExitEvents > 0 &&
+        next.orderedGeofenceTransitionProof;
       setResult(
         "geofenceTransition",
         createScenarioResult(
           passed ? "passed" : "failed",
-          `enter=${next.geofenceEnterEvents}, exit=${next.geofenceExitEvents}`
+          `ordered=${String(next.orderedGeofenceTransitionProof)}, enter=${next.geofenceEnterEvents}, exit=${next.geofenceExitEvents}`
         )
       );
     } catch (error) {
@@ -473,13 +567,15 @@ export const useLongRunBackgroundScenario = () => {
         next.geofences > 0 &&
         next.postRebootLocations > 0 &&
         next.postRebootLocationEvents > 0 &&
+        next.orderedPostRebootLocationProof &&
         next.postRebootGeofenceEnterEvents > 0 &&
-        next.postRebootGeofenceExitEvents > 0;
+        next.postRebootGeofenceExitEvents > 0 &&
+        next.orderedPostRebootGeofenceTransitionProof;
       setResult(
         "rebootRestore",
         createScenarioResult(
           passed ? "passed" : "failed",
-          `running=${next.running}, locations=${next.postRebootLocations}, geofence=${next.postRebootGeofenceEnterEvents}/${next.postRebootGeofenceExitEvents}`
+          `running=${next.running}, orderedLocation=${String(next.orderedPostRebootLocationProof)}, locations=${next.postRebootLocations}, geofence=${next.postRebootGeofenceEnterEvents}/${next.postRebootGeofenceExitEvents}`
         )
       );
     } catch (error) {
@@ -505,12 +601,16 @@ export const useLongRunBackgroundScenario = () => {
         return;
       }
       const passed =
-        next.postPrepareLocations > 0 && next.postPrepareLocationEvents > 0;
+        next.lastLocationAt !== "none" &&
+        next.geofenceEnterEvents > 0 &&
+        next.geofenceExitEvents > 0 &&
+        next.orderedGeofenceTransitionProof &&
+        isTimestampAtOrAfter(next.lastEventAt, next.backgroundProofAfter);
       setResult(
         "iosDrain",
         createScenarioResult(
           passed ? "passed" : "failed",
-          `postPrepareLocations=${next.postPrepareLocations}, postPrepareEvents=${next.postPrepareLocationEvents}`
+          `ordered=${String(next.orderedGeofenceTransitionProof)}, geofence=${next.geofenceEnterEvents}/${next.geofenceExitEvents}, lastLocationAt=${next.lastLocationAt}, lastEventAt=${next.lastEventAt}`
         )
       );
     } catch (error) {
@@ -531,10 +631,27 @@ export const useLongRunBackgroundScenario = () => {
     try {
       await stopBackgroundLocation();
       await removeGeofences();
-      const next = await refreshSnapshot();
+      const deadline = Date.now() + CLEANUP_STATUS_TIMEOUT_MS;
+      let next = await refreshSnapshot();
+      while (
+        (next.running !== "false" ||
+          next.foregroundService === "true" ||
+          next.geofences !== 0) &&
+        Date.now() < deadline
+      ) {
+        await wait(CLEANUP_STATUS_POLL_MS);
+        next = await refreshSnapshot();
+      }
+      const passed =
+        next.running === "false" &&
+        next.geofences === 0 &&
+        next.foregroundService !== "true";
       setResult(
         "cleanup",
-        createScenarioResult("passed", `running=${next.running}`)
+        createScenarioResult(
+          passed ? "passed" : "failed",
+          `running=${next.running}, foregroundService=${next.foregroundService}, geofences=${next.geofences}`
+        )
       );
     } catch (error) {
       setResult("cleanup", createScenarioResult("failed", shortError(error)));
@@ -547,6 +664,7 @@ export const useLongRunBackgroundScenario = () => {
     snapshot,
     refreshSnapshot,
     runPrepare,
+    armBackgroundProbe,
     armRebootProbe,
     validateBackgroundLocation,
     validateHeadless,

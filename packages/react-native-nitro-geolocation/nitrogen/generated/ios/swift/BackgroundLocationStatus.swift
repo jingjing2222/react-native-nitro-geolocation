@@ -18,7 +18,7 @@ public extension BackgroundLocationStatus {
   /**
    * Create a new instance of `BackgroundLocationStatus`.
    */
-  init(state: BackgroundLocationState, isRunning: Bool, isConfigured: Bool, foregroundPermission: PermissionStatus, backgroundPermission: BackgroundPermissionStatus, accuracyAuthorization: AccuracyAuthorization?, locationServicesEnabled: Bool, providerStatus: LocationProviderStatus?, storedLocationCount: Double, storedEventCount: Double, geofenceCount: Double, android: AndroidBackgroundLocationStatus?, ios: IOSBackgroundLocationStatus?, lastError: LocationError?) {
+  init(state: BackgroundLocationState, isRunning: Bool, isConfigured: Bool, foregroundPermission: PermissionStatus, backgroundPermission: BackgroundPermissionStatus, accuracyAuthorization: AccuracyAuthorization?, locationServicesEnabled: Bool, providerStatus: LocationProviderStatus?, storedLocationCount: Double, storedEventCount: Double, lastLocationAt: Double?, lastEventAt: Double?, geofenceCount: Double, android: AndroidBackgroundLocationStatus?, ios: IOSBackgroundLocationStatus?, lastError: LocationError?) {
     self.init(state, isRunning, isConfigured, foregroundPermission, backgroundPermission, { () -> bridge.std__optional_AccuracyAuthorization_ in
       if let __unwrappedValue = accuracyAuthorization {
         return bridge.create_std__optional_AccuracyAuthorization_(__unwrappedValue)
@@ -31,7 +31,19 @@ public extension BackgroundLocationStatus {
       } else {
         return .init()
       }
-    }(), storedLocationCount, storedEventCount, geofenceCount, { () -> bridge.std__optional_AndroidBackgroundLocationStatus_ in
+    }(), storedLocationCount, storedEventCount, { () -> bridge.std__optional_double_ in
+      if let __unwrappedValue = lastLocationAt {
+        return bridge.create_std__optional_double_(__unwrappedValue)
+      } else {
+        return .init()
+      }
+    }(), { () -> bridge.std__optional_double_ in
+      if let __unwrappedValue = lastEventAt {
+        return bridge.create_std__optional_double_(__unwrappedValue)
+      } else {
+        return .init()
+      }
+    }(), geofenceCount, { () -> bridge.std__optional_AndroidBackgroundLocationStatus_ in
       if let __unwrappedValue = android {
         return bridge.create_std__optional_AndroidBackgroundLocationStatus_(__unwrappedValue)
       } else {
@@ -102,6 +114,30 @@ public extension BackgroundLocationStatus {
     return self.__storedEventCount
   }
   
+  @inline(__always)
+  var lastLocationAt: Double? {
+    return { () -> Double? in
+      if bridge.has_value_std__optional_double_(self.__lastLocationAt) {
+        let __unwrapped = bridge.get_std__optional_double_(self.__lastLocationAt)
+        return __unwrapped
+      } else {
+        return nil
+      }
+    }()
+  }
+
+  @inline(__always)
+  var lastEventAt: Double? {
+    return { () -> Double? in
+      if bridge.has_value_std__optional_double_(self.__lastEventAt) {
+        let __unwrapped = bridge.get_std__optional_double_(self.__lastEventAt)
+        return __unwrapped
+      } else {
+        return nil
+      }
+    }()
+  }
+
   @inline(__always)
   var geofenceCount: Double {
     return self.__geofenceCount

@@ -19,6 +19,7 @@ export function LongRunBackgroundE2EScreen() {
     snapshot,
     refreshSnapshot,
     runPrepare,
+    armBackgroundProbe,
     armRebootProbe,
     validateBackgroundLocation,
     validateHeadless,
@@ -74,6 +75,16 @@ export function LongRunBackgroundE2EScreen() {
               testID: `${PREFIX}-stored-events`
             },
             {
+              label: "Last location at:",
+              value: snapshot.lastLocationAt,
+              testID: `${PREFIX}-last-location-at`
+            },
+            {
+              label: "Last event at:",
+              value: snapshot.lastEventAt,
+              testID: `${PREFIX}-last-event-at`
+            },
+            {
               label: "Post-prepare locations:",
               value: snapshot.postPrepareLocations,
               testID: `${PREFIX}-post-prepare-locations`
@@ -82,6 +93,21 @@ export function LongRunBackgroundE2EScreen() {
               label: "Post-prepare location events:",
               value: snapshot.postPrepareLocationEvents,
               testID: `${PREFIX}-post-prepare-location-events`
+            },
+            {
+              label: "Proof locations (inside/outside):",
+              value: `${snapshot.proofInsideLocations}/${snapshot.proofOutsideLocations}`,
+              testID: `${PREFIX}-proof-locations`
+            },
+            {
+              label: "Proof location events (inside/outside):",
+              value: `${snapshot.proofInsideLocationEvents}/${snapshot.proofOutsideLocationEvents}`,
+              testID: `${PREFIX}-proof-location-events`
+            },
+            {
+              label: "Ordered inside/outside proof:",
+              value: String(snapshot.orderedBackgroundLocationProof),
+              testID: `${PREFIX}-ordered-location-proof`
             },
             {
               label: "Delivered events:",
@@ -109,6 +135,11 @@ export function LongRunBackgroundE2EScreen() {
               testID: `${PREFIX}-geofence-exit-events`
             },
             {
+              label: "Ordered geofence proof:",
+              value: String(snapshot.orderedGeofenceTransitionProof),
+              testID: `${PREFIX}-ordered-geofence-proof`
+            },
+            {
               label: "Post-reboot locations:",
               value: snapshot.postRebootLocations,
               testID: `${PREFIX}-post-reboot-locations`
@@ -124,6 +155,11 @@ export function LongRunBackgroundE2EScreen() {
               testID: `${PREFIX}-post-reboot-geofence-events`
             },
             {
+              label: "Ordered post-reboot geofence:",
+              value: String(snapshot.orderedPostRebootGeofenceTransitionProof),
+              testID: `${PREFIX}-ordered-post-reboot-geofence-proof`
+            },
+            {
               label: "Geofences:",
               value: snapshot.geofences,
               testID: `${PREFIX}-geofence-count`
@@ -132,6 +168,11 @@ export function LongRunBackgroundE2EScreen() {
               label: "Prepared at:",
               value: snapshot.preparedAt,
               testID: `${PREFIX}-prepared-at`
+            },
+            {
+              label: "Background proof after:",
+              value: snapshot.backgroundProofAfter,
+              testID: `${PREFIX}-background-proof-after`
             },
             {
               label: "Reboot proof after:",
@@ -174,6 +215,11 @@ export function LongRunBackgroundE2EScreen() {
           testID={`${PREFIX}-prepare-button`}
         />
         <ScenarioButton
+          title="Arm Background Proof"
+          onPress={armBackgroundProbe}
+          testID={`${PREFIX}-arm-background-button`}
+        />
+        <ScenarioButton
           title="Arm Reboot Probe"
           onPress={armRebootProbe}
           testID={`${PREFIX}-arm-reboot-button`}
@@ -183,6 +229,11 @@ export function LongRunBackgroundE2EScreen() {
           results={results}
           items={[
             { id: "prepare", label: "Prepare" },
+            {
+              id: "background-probe",
+              resultKey: "backgroundProbe",
+              label: "Background probe"
+            },
             {
               id: "reboot-probe",
               resultKey: "rebootProbe",

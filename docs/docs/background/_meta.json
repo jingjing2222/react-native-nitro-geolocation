@@ -9,6 +9,7 @@
   "headless-js",
   "http-sync",
   "storage",
+  "reliability-contract",
   "long-run-e2e",
   "troubleshooting"
 ]

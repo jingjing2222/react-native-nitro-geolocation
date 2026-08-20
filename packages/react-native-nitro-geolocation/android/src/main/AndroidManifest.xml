@@ -15,6 +15,11 @@
       android:name=".background.NitroBackgroundHeadlessTaskService"
       android:exported="false" />
 
+    <service
+      android:name=".background.NitroBootRestoreJobService"
+      android:exported="false"
+      android:permission="android.permission.BIND_JOB_SERVICE" />
+
     <receiver
       android:name=".background.NitroLocationUpdateReceiver"
       android:exported="false" />

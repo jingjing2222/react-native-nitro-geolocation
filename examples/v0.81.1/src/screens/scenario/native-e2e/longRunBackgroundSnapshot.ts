@@ -1,0 +1,71 @@
+export type LongRunSnapshot = {
+  status: string;
+  running: string;
+  configured: string;
+  foregroundService: string;
+  storedLocations: number;
+  storedEvents: number;
+  lastLocationAt: string;
+  lastEventAt: string;
+  proofInsideLocations: number;
+  proofOutsideLocations: number;
+  proofInsideLocationEvents: number;
+  proofOutsideLocationEvents: number;
+  orderedBackgroundLocationProof: boolean;
+  orderedGeofenceTransitionProof: boolean;
+  postPrepareLocations: number;
+  postPrepareLocationEvents: number;
+  deliveredEvents: number;
+  locationEvents: number;
+  deliveredLocationEvents: number;
+  deliveredProofInsideLocationEvents: number;
+  geofenceEnterEvents: number;
+  geofenceExitEvents: number;
+  postRebootLocations: number;
+  postRebootLocationEvents: number;
+  orderedPostRebootLocationProof: boolean;
+  postRebootGeofenceEnterEvents: number;
+  postRebootGeofenceExitEvents: number;
+  orderedPostRebootGeofenceTransitionProof: boolean;
+  geofences: number;
+  preparedAt: string;
+  backgroundProofAfter: string;
+  rebootProofAfter: string;
+  lastEvent: string;
+};
+
+export const emptyLongRunSnapshot: LongRunSnapshot = {
+  status: "not checked",
+  running: "unknown",
+  configured: "unknown",
+  foregroundService: "unknown",
+  storedLocations: 0,
+  storedEvents: 0,
+  lastLocationAt: "none",
+  lastEventAt: "none",
+  proofInsideLocations: 0,
+  proofOutsideLocations: 0,
+  proofInsideLocationEvents: 0,
+  proofOutsideLocationEvents: 0,
+  orderedBackgroundLocationProof: false,
+  orderedGeofenceTransitionProof: false,
+  postPrepareLocations: 0,
+  postPrepareLocationEvents: 0,
+  deliveredEvents: 0,
+  locationEvents: 0,
+  deliveredLocationEvents: 0,
+  deliveredProofInsideLocationEvents: 0,
+  geofenceEnterEvents: 0,
+  geofenceExitEvents: 0,
+  postRebootLocations: 0,
+  postRebootLocationEvents: 0,
+  orderedPostRebootLocationProof: false,
+  postRebootGeofenceEnterEvents: 0,
+  postRebootGeofenceExitEvents: 0,
+  orderedPostRebootGeofenceTransitionProof: false,
+  geofences: 0,
+  preparedAt: "none",
+  backgroundProofAfter: "none",
+  rebootProofAfter: "none",
+  lastEvent: "none"
+};

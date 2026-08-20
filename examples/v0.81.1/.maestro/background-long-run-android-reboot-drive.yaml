@@ -1,0 +1,16 @@
+appId: nitrogeolocation.example
+---
+# Drive one complete post-reboot route through the same device-level location
+# injection path as the rest of the Maestro suite.
+- setLocation:
+    latitude: 37.563
+    longitude: 126.97
+- runScript: scripts/wait-15s.js
+- setLocation:
+    latitude: 37.5665
+    longitude: 126.978
+- runScript: scripts/wait-15s.js
+- setLocation:
+    latitude: 37.563
+    longitude: 126.97
+- runScript: scripts/wait-15s.js

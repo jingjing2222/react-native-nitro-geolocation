@@ -35,6 +35,14 @@ class BackgroundDecisionsTest {
     }
 
     @Test
+    fun pendingIntentIdentityChangesBetweenRuns() {
+        assertFalse(
+            pendingIntentIdentityUri("location", 7L) ==
+                pendingIntentIdentityUri("location", 8L)
+        )
+    }
+
+    @Test
     fun backoffGrowsExponentiallyThenCaps() {
         assertEquals(1_000L, backoffBaseDelayMs(0, 1_000L, 30_000L))
         assertEquals(2_000L, backoffBaseDelayMs(1, 1_000L, 30_000L))
@@ -74,4 +82,49 @@ class BackgroundDecisionsTest {
     fun headlessTaskRunsWhenNoInProcessListenerReceivedEvent() {
         assertTrue(shouldDispatchHeadlessTask(false))
     }
+
+    @Test
+    fun persistenceRejectsCallbacksFromAnInvalidatedRun() {
+        assertFalse(shouldPersistForGeneration(true, true, 2L, 1L))
+    }
+
+    @Test
+    fun persistenceRejectsAnUnconfiguredRun() {
+        assertFalse(shouldPersistForGeneration(false, null, 1L, 1L))
+    }
+
+    @Test
+    fun persistenceKeepsTheConfiguredDefault() {
+        assertTrue(shouldPersistForGeneration(true, null, 1L, 1L))
+    }
+
+    @Test
+    fun standalonePersistenceKeepsTheDefaultWithoutLocationConfiguration() {
+        assertTrue(shouldPersistForGeneration(false, null, 1L, 1L, true))
+    }
+
+    @Test
+    fun standalonePersistenceStillHonorsAnExplicitOptOut() {
+        assertFalse(shouldPersistForGeneration(true, false, 1L, 1L, true))
+    }
+
+    @Test
+    fun registrationGenerationAdvancesWithinTheSameResetRun() {
+        assertEquals(8L, nextRegistrationGeneration(7L))
+    }
+
+    @Test
+    fun registrationCallbackRequiresTheCurrentRunAndRegistration() {
+        assertTrue(isCurrentRegistration(3L, 9L, 3L, 9L))
+        assertFalse(isCurrentRegistration(3L, 9L, 2L, 9L))
+        assertFalse(isCurrentRegistration(3L, 9L, 3L, 8L))
+    }
+
+    @Test
+    fun startupFailureOnlyAppliesToTheFailingActiveService() {
+        assertTrue(shouldApplyStartupFailure(9L, 9L))
+        assertFalse(shouldApplyStartupFailure(10L, 9L))
+        assertFalse(shouldApplyStartupFailure(null, 9L))
+    }
+
 }

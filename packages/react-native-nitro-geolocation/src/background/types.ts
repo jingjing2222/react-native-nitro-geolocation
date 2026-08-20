@@ -55,6 +55,10 @@ export interface BackgroundLocationStatus {
   providerStatus?: LocationProviderStatus;
   storedLocationCount: number;
   storedEventCount: number;
+  /** Native recording time of the newest retained background location. */
+  lastLocationAt?: number;
+  /** Native event time of the newest retained background event. */
+  lastEventAt?: number;
   geofenceCount: number;
   android?: AndroidBackgroundLocationStatus;
   ios?: IOSBackgroundLocationStatus;

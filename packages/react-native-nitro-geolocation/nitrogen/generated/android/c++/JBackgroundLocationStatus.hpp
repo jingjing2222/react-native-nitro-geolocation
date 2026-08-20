@@ -68,6 +68,10 @@ namespace margelo::nitro::nitrogeolocation {
       double storedLocationCount = this->getFieldValue(fieldStoredLocationCount);
       static const auto fieldStoredEventCount = clazz->getField<double>("storedEventCount");
       double storedEventCount = this->getFieldValue(fieldStoredEventCount);
+      static const auto fieldLastLocationAt = clazz->getField<jni::JDouble>("lastLocationAt");
+      jni::local_ref<jni::JDouble> lastLocationAt = this->getFieldValue(fieldLastLocationAt);
+      static const auto fieldLastEventAt = clazz->getField<jni::JDouble>("lastEventAt");
+      jni::local_ref<jni::JDouble> lastEventAt = this->getFieldValue(fieldLastEventAt);
       static const auto fieldGeofenceCount = clazz->getField<double>("geofenceCount");
       double geofenceCount = this->getFieldValue(fieldGeofenceCount);
       static const auto fieldAndroid = clazz->getField<JAndroidBackgroundLocationStatus>("android");
@@ -87,6 +91,8 @@ namespace margelo::nitro::nitrogeolocation {
         providerStatus != nullptr ? std::make_optional(providerStatus->toCpp()) : std::nullopt,
         storedLocationCount,
         storedEventCount,
+        lastLocationAt != nullptr ? std::make_optional(lastLocationAt->value()) : std::nullopt,
+        lastEventAt != nullptr ? std::make_optional(lastEventAt->value()) : std::nullopt,
         geofenceCount,
         android != nullptr ? std::make_optional(android->toCpp()) : std::nullopt,
         ios != nullptr ? std::make_optional(ios->toCpp()) : std::nullopt,
@@ -100,7 +106,7 @@ namespace margelo::nitro::nitrogeolocation {
      */
     [[maybe_unused]]
     static jni::local_ref<JBackgroundLocationStatus::javaobject> fromCpp(const BackgroundLocationStatus& value) {
-      using JSignature = JBackgroundLocationStatus(jni::alias_ref<JBackgroundLocationState>, jboolean, jboolean, jni::alias_ref<JPermissionStatus>, jni::alias_ref<JBackgroundPermissionStatus>, jni::alias_ref<JAccuracyAuthorization>, jboolean, jni::alias_ref<JLocationProviderStatus>, double, double, double, jni::alias_ref<JAndroidBackgroundLocationStatus>, jni::alias_ref<JIOSBackgroundLocationStatus>, jni::alias_ref<JLocationError>);
+      using JSignature = JBackgroundLocationStatus(jni::alias_ref<JBackgroundLocationState>, jboolean, jboolean, jni::alias_ref<JPermissionStatus>, jni::alias_ref<JBackgroundPermissionStatus>, jni::alias_ref<JAccuracyAuthorization>, jboolean, jni::alias_ref<JLocationProviderStatus>, double, double, jni::alias_ref<jni::JDouble>, jni::alias_ref<jni::JDouble>, double, jni::alias_ref<JAndroidBackgroundLocationStatus>, jni::alias_ref<JIOSBackgroundLocationStatus>, jni::alias_ref<JLocationError>);
       static const auto clazz = javaClassStatic();
       static const auto create = clazz->getStaticMethod<JSignature>("fromCpp");
       return create(
@@ -115,6 +121,8 @@ namespace margelo::nitro::nitrogeolocation {
         value.providerStatus.has_value() ? JLocationProviderStatus::fromCpp(value.providerStatus.value()) : nullptr,
         value.storedLocationCount,
         value.storedEventCount,
+        value.lastLocationAt.has_value() ? jni::JDouble::valueOf(value.lastLocationAt.value()) : nullptr,
+        value.lastEventAt.has_value() ? jni::JDouble::valueOf(value.lastEventAt.value()) : nullptr,
         value.geofenceCount,
         value.android.has_value() ? JAndroidBackgroundLocationStatus::fromCpp(value.android.value()) : nullptr,
         value.ios.has_value() ? JIOSBackgroundLocationStatus::fromCpp(value.ios.value()) : nullptr,

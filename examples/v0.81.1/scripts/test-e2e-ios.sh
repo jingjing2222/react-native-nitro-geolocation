@@ -25,9 +25,15 @@ while IFS= read -r flow; do
   IOS_FLOWS+=("$flow")
 done <<<"$ios_flow_output"
 
+DEVICE_ARGS=()
+if [[ -n "${IOS_UDID:-}" ]]; then
+  DEVICE_ARGS+=(--maestro-arg --device --maestro-arg "$IOS_UDID")
+fi
+
 "$SCRIPT_DIR/maestro-retry-flows.sh" \
   --platform ios \
   --flow-dir "$FLOW_DIR" \
   --maestro "$MAESTRO_BIN" \
   --suite-name "ios" \
+  "${DEVICE_ARGS[@]}" \
   -- "${IOS_FLOWS[@]}"

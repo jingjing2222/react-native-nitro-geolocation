@@ -15,7 +15,7 @@ Pick the smallest entry point that matches your change:
 | Android foreground native bug | `packages/react-native-nitro-geolocation/android/src/main/java/com/margelo/nitro/nitrogeolocation/NitroGeolocation.kt` | Nearby Android helper for the specific feature |
 | Android background native bug | `packages/react-native-nitro-geolocation/android/src/main/java/com/margelo/nitro/nitrogeolocation/NitroBackgroundLocation.kt` | `packages/react-native-nitro-geolocation/android/src/main/java/com/margelo/nitro/nitrogeolocation/background/` |
 | iOS foreground native bug | `packages/react-native-nitro-geolocation/ios/NitroGeolocation.swift` | Nearby iOS helper for the specific feature |
-| iOS background native bug | `packages/react-native-nitro-geolocation/ios/NitroBackgroundLocation.swift` | `IOSBackgroundLocationDelegate.swift`, `IOSBackgroundMotion.swift`, `IOSBackgroundHttpSync.swift` |
+| iOS background native bug | `packages/react-native-nitro-geolocation/ios/NitroBackgroundLocation.swift` | `IOSBackgroundLocationDelegate.swift`, `IOSBackgroundPermission.swift`, `IOSBackgroundRuntime.swift`, `IOSBackgroundMotion.swift`, `IOSBackgroundSync.swift`, `IOSBackgroundSyncScheduler.swift`, `IOSBackgroundHttpSync.swift` |
 | E2E failure | Matching `examples/v0.81.1/.maestro/*.yaml` file | Matching `examples/v0.81.1/src/screens/*Screen.tsx` file |
 | E2E shared UI or selectors | `examples/v0.81.1/src/screens/scenario/` | `examples/v0.81.1/src/App.tsx` for route names |
 
@@ -59,7 +59,7 @@ Avoid these until needed:
 | Nitro background module entry point | `android/src/main/java/com/margelo/nitro/nitrogeolocation/NitroBackgroundLocation.kt` |
 | Background orchestration | `android/src/main/java/com/margelo/nitro/nitrogeolocation/background/NitroBackgroundLocationController.kt` |
 | Foreground service tracking | `NitroBackgroundLocationService.kt`, `NitroBackgroundNotificationFactory.kt` |
-| Location delivery from system callbacks | `NitroLocationUpdateReceiver.kt` |
+| Location delivery and run-scoped PendingIntents | `NitroLocationUpdateReceiver.kt`, `NitroBackgroundPendingIntents.kt` |
 | Event fan-out to JS listeners | `NitroBackgroundEventHub.kt` |
 | Native persistence | `NitroBackgroundStore.kt`, `AndroidBackgroundSerialization.kt` |
 | Background permission contract | `AndroidBackgroundPermissions.kt` |
@@ -67,7 +67,8 @@ Avoid these until needed:
 | Android Headless JS | `NitroBackgroundHeadlessTaskService.kt` |
 | Start on boot | `NitroBootReceiver.kt` |
 | Activity recognition | `NitroActivityRecognitionReceiver.kt` |
-| HTTP sync | `AndroidBackgroundHttpSync.kt` |
+| HTTP sync scheduling, serial admission, and batch ownership | `NitroBackgroundSyncCoordinator.kt`, `NitroBackgroundSyncQueue.kt`, `NitroBackgroundSyncGate.kt` |
+| HTTP transport and retry | `AndroidBackgroundHttpSync.kt` |
 
 ### iOS Foreground
 
@@ -86,8 +87,11 @@ Avoid these until needed:
 | --- | --- |
 | Nitro background module, storage, status, geofences, and Core Location start/stop | `ios/NitroBackgroundLocation.swift` |
 | Background Core Location delegate | `ios/IOSBackgroundLocationDelegate.swift` |
+| Background permission reporting | `ios/IOSBackgroundPermission.swift` |
+| Background manager lifecycle, listener registration, and errors | `ios/IOSBackgroundRuntime.swift` |
 | Activity recognition conversion | `ios/IOSBackgroundMotion.swift` |
-| Native HTTP sync | `ios/IOSBackgroundHttpSync.swift` |
+| HTTP sync scheduling, batch ownership, and store marking | `ios/IOSBackgroundSync.swift`, `ios/IOSBackgroundSyncScheduler.swift` |
+| HTTP transport and retry | `ios/IOSBackgroundHttpSync.swift` |
 | Persistence serialization | `ios/IOSBackgroundSerialization.swift` |
 
 ## E2E Scenario File Map
@@ -121,7 +125,9 @@ permission helpers, and location assertions live in
 | Background API smoke | `background-e2e.yaml` | `BackgroundE2EScreen.tsx` |
 | Android long-run background | `background-long-run-android.yaml` | `LongRunBackgroundE2EScreen.tsx`, `backgroundLongRunTask.ts` |
 | Android long-run reboot arming | `background-long-run-android-arm-reboot.yaml` | `LongRunBackgroundE2EScreen.tsx` |
+| Android long-run reboot route drive | `background-long-run-android-reboot-drive.yaml` | Native store proof only; the app remains backgrounded |
 | Android long-run reboot proof | `background-long-run-android-reboot.yaml` | `LongRunBackgroundE2EScreen.tsx`, `backgroundLongRunTask.ts` |
+| Long-run cleanup | `background-long-run-cleanup.yaml` | `LongRunBackgroundE2EScreen.tsx` |
 | iOS long-run background | `background-long-run-ios.yaml` | `LongRunBackgroundE2EScreen.tsx` |
 | Mocked metadata Android true | `mocked-metadata-android-true.yaml` | `MockedMetadataScreen.tsx` |
 | Mocked metadata Android false | `mocked-metadata-android-false.yaml` | `MockedMetadataScreen.tsx` |

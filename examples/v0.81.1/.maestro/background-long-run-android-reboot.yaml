@@ -1,7 +1,7 @@
 appId: nitrogeolocation.example
 ---
 # Run after background-long-run-android.yaml and an external adb reboot.
-# The shell script injects one post-boot emulator location before this flow.
+# The shell wrapper first runs the post-boot recovery and ordered-location drive.
 
 - openLink:
     link: nitrogeolocation://app/background-long-run

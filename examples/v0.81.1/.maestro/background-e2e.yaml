@@ -55,13 +55,31 @@ appId: nitrogeolocation.example
 
 - tapOn:
     id: "e2e-action-background-e2e-invalid-config-button"
+- extendedWaitUntil:
+    visible: "Missing notification: passed"
+    timeout: 10000
 - tapOn:
     id: "e2e-action-background-e2e-configure-button"
+- extendedWaitUntil:
+    visible: "Configure: passed"
+    timeout: 10000
 - tapOn:
     id: "e2e-action-background-e2e-start-stop-button"
+- extendedWaitUntil:
+    visible: "Start stop: passed"
+    timeout: 20000
 - tapOn:
     id: "e2e-action-background-e2e-geofence-button"
+- extendedWaitUntil:
+    visible: "Geofence: passed"
+    timeout: 15000
 - tapOn:
     id: "e2e-action-background-e2e-storage-button"
+- extendedWaitUntil:
+    visible: "Storage: passed"
+    timeout: 10000
 - tapOn:
     id: "e2e-action-background-e2e-sync-button"
+- extendedWaitUntil:
+    visible: "Sync: passed"
+    timeout: 30000

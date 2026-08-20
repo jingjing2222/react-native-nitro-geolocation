@@ -32,4 +32,7 @@ Android 11+, `requestBackgroundPermission()` can open the app settings screen
 because the platform no longer allows inline background-location prompts. On
 iOS, it can also remain true until Always authorization is granted; use
 `openAppLocationSettings()` after explaining why Always access is required.
+When the current iOS status is When In Use, the OS may keep that status without
+delivering another authorization callback. The request therefore returns the
+current result instead of waiting for a callback that may never arrive.
 Call `checkBackgroundPermission()` again from your app-resume path.

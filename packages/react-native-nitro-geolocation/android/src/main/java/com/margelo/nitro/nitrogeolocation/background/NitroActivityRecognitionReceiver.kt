@@ -6,8 +6,14 @@ import android.content.Intent
 
 class NitroActivityRecognitionReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent) {
-        NitroBackgroundLocationController
-            .getInstance(context)
-            .handleActivityRecognition(intent)
+        val controller = NitroBackgroundLocationController.getInstance(context)
+        controller.handleActivityRecognition(
+            intent,
+            intent.getLongExtra(EXTRA_RUN_GENERATION, MISSING_RUN_GENERATION),
+            intent.getLongExtra(
+                EXTRA_REGISTRATION_GENERATION,
+                MISSING_REGISTRATION_GENERATION
+            )
+        )
     }
 }
