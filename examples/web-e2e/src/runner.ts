@@ -6,7 +6,9 @@ import {
   getCurrentPosition,
   getLastKnownPosition,
   getLastKnownPositionAsync,
+  getLocationReadiness,
   getPermissionDetails,
+  requestLocationSettings,
   requestPermission,
   stopObserving,
   unwatch,
@@ -38,8 +40,10 @@ import {
   isNearExpected
 } from "./locationAssertions";
 import { postNativeStatus } from "./nativeBridge";
+import { expectPostRequestPermissionDetails } from "./permissionDetailsAssertions";
+import { expectReadyWithCache } from "./readinessAssertions";
 import { runStep } from "./scenarioRunner";
-import { scenarios } from "./scenarios";
+import { scenarios, successScenarioIds } from "./scenarios";
 
 function wait(ms: number) {
   return new Promise((resolve) => setTimeout(resolve, ms));
@@ -212,22 +216,7 @@ async function getCurrentPositionUntilExpected({
 
 export async function runSuccessSuite() {
   setScenario("api-availability", "running");
-  const apiShape = {
-    checkPermission: typeof checkPermission,
-    getPermissionDetails: typeof getPermissionDetails,
-    requestPermission: typeof requestPermission,
-    getCurrentPosition: typeof getCurrentPosition,
-    getLastKnownPosition: typeof getLastKnownPosition,
-    getLastKnownPositionAsync: typeof getLastKnownPositionAsync,
-    watchPosition: typeof watchPosition,
-    unwatch: typeof unwatch,
-    stopObserving: typeof stopObserving
-  };
-  const apiReady = Object.values(apiShape).every((type) => type === "function");
-  setScenario("api-availability", apiReady ? "pass" : "fail", apiShape);
-  if (!apiReady) {
-    throw new Error("Modern API browser export is incomplete.");
-  }
+  assertModernApiAvailability();
 
   runCompatApiAvailabilityCheck();
 
@@ -274,6 +263,12 @@ export async function runSuccessSuite() {
         throw new Error(`Expected granted permission, got ${status}.`);
       }
     }
+  );
+
+  await runStep(
+    "permission-details-after-request",
+    () => getPermissionDetails(),
+    expectPostRequestPermissionDetails
   );
 
   await runStep(
@@ -512,27 +507,7 @@ export async function runSuccessSuite() {
 
   const failedScenarios = scenarios.filter(
     (scenario) =>
-      [
-        "api-availability",
-        "compat-api-availability",
-        "request-location-settings",
-        "check-permission",
-        "request-permission",
-        "get-current-position-pre-aborted",
-        "get-current-position-cancelled",
-        "get-current-position",
-        "last-known-cold-cache",
-        "last-known-async-cold-cache",
-        "last-known-module-cache",
-        "last-known-async-cache",
-        "last-known-stale-cache",
-        "watch-position",
-        "unwatch",
-        "stop-observing",
-        "compat-get-current-position",
-        "compat-watch-position",
-        "compat-stop-observing"
-      ].includes(scenario.id) && scenario.status !== "pass"
+      successScenarioIds.has(scenario.id) && scenario.status !== "pass"
   );
   if (failedScenarios.length > 0) {
     throw new Error(

@@ -12,13 +12,13 @@ class NitroBackgroundLocation: HybridNitroBackgroundLocationSpec {
     private let optionsKey = "nitro.background.options"
     var options: BackgroundLocationOptions?
     private var state: BackgroundLocationState = .idle
-    private var isRunning = false
-    private var eventListeners: [String: (BackgroundEventEnvelope) -> Void] = [:]
-    private var locationListeners: [String: (BackgroundLocation) -> Void] = [:]
-    private var errorListeners: [String: (LocationError) -> Void] = [:]
+    var isRunning = false
+    var eventListeners: [String: (BackgroundEventEnvelope) -> Void] = [:]
+    var locationListeners: [String: (BackgroundLocation) -> Void] = [:]
+    var errorListeners: [String: (LocationError) -> Void] = [:]
     private var lifecycleListeners: [String: (LocationLifecycleEvent) -> Void] = [:]
     private let lifecycleListenerLock = NSLock()
-    private var storedLocations: [StoredBackgroundLocation] = []
+    var storedLocations: [StoredBackgroundLocation] = []
     private var storedEvents: [StoredBackgroundEventEnvelope] = []
     private var geofences: [GeofenceRegion] = []
     private let storeLock = NSRecursiveLock()
@@ -229,36 +229,6 @@ class NitroBackgroundLocation: HybridNitroBackgroundLocationSpec {
                 )
             }
         }
-    }
-
-    func addBackgroundEventListener(listener: @escaping (BackgroundEventEnvelope) -> Void) throws -> String {
-        let token = UUID().uuidString
-        eventListeners[token] = listener
-        return token
-    }
-
-    func removeBackgroundEventListener(token: String) throws {
-        eventListeners.removeValue(forKey: token)
-    }
-
-    func addBackgroundLocationListener(listener: @escaping (BackgroundLocation) -> Void) throws -> String {
-        let token = UUID().uuidString
-        locationListeners[token] = listener
-        return token
-    }
-
-    func removeBackgroundLocationListener(token: String) throws {
-        locationListeners.removeValue(forKey: token)
-    }
-
-    func addBackgroundErrorListener(listener: @escaping (LocationError) -> Void) throws -> String {
-        let token = UUID().uuidString
-        errorListeners[token] = listener
-        return token
-    }
-
-    func removeBackgroundErrorListener(token: String) throws {
-        errorListeners.removeValue(forKey: token)
     }
 
     func addLocationLifecycleListener(
@@ -645,79 +615,7 @@ class NitroBackgroundLocation: HybridNitroBackgroundLocationSpec {
         dispatchInProcess(event: event, runGeneration: runGeneration)
     }
 
-    private func stopMotionUpdatesIfRunning() {
-        guard isMotionUpdatesRunning else { return }
-        motionManager.stopActivityUpdates()
-        isMotionUpdatesRunning = false
-    }
-
-    private func handleMotionActivity(_ activity: CMMotionActivity) {
-        let detected = DetectedActivity(
-            type: motionActivityType(activity),
-            confidence: motionConfidence(activity.confidence),
-            timestamp: activity.startDate.timeIntervalSince1970 * 1000
-        )
-        let event = BackgroundEventEnvelope(
-            location: nil,
-            geofence: nil,
-            activity: detected,
-            providerStatus: nil,
-            result: nil,
-            error: nil,
-            id: UUID().uuidString,
-            type: .activity,
-            timestamp: Date().timeIntervalSince1970 * 1000,
-            deliveredToJS: false
-        )
-        appendStoredEvent(
-            StoredBackgroundEventEnvelope(
-                event: event,
-                createdAt: Date().timeIntervalSince1970 * 1000,
-                id: event.id,
-                type: event.type,
-                timestamp: event.timestamp,
-                deliveredToJS: false
-            )
-        )
-        persistStore()
-        eventListeners.values.forEach { $0(event) }
-        applyActivityAwareTracking(detected)
-    }
-
-    func handleAuthorizationChange() {
-        permissionSemaphore?.signal()
-    }
-
-    func handleError(_ error: Error) {
-        // kCLErrorLocationUnknown is transient — CoreLocation couldn't get a fix right now but keeps
-        // trying (very common on the Simulator and during brief GPS gaps). Apple's guidance is to
-        // ignore it; forwarding it would pollute the consumer's error stream with benign noise.
-        if let clError = error as? CLError, clError.code == .locationUnknown {
-            return
-        }
-        let locationError = LocationError(
-            code: LocationErrorCode.internalerror,
-            message: error.localizedDescription
-        )
-        errorListeners.values.forEach { $0(locationError) }
-    }
-
-    private func ensureManager() {
-        if manager != nil { return }
-        if Thread.isMainThread == false {
-            DispatchQueue.main.sync {
-                self.ensureManager()
-            }
-            return
-        }
-        let manager = CLLocationManager()
-        let delegate = NitroBackgroundLocationDelegate(owner: self)
-        manager.delegate = delegate
-        self.manager = manager
-        self.delegate = delegate
-    }
-
-    private func apply(_ options: BackgroundLocationOptions) throws {
+    private func validateBackgroundLocationMode() throws {
         guard hasBackgroundLocationMode() else {
             withStoreLock { state = .error }
             throw RuntimeError.error(
@@ -804,26 +702,6 @@ class NitroBackgroundLocation: HybridNitroBackgroundLocationSpec {
         return options.persist != false
     }
 
-    func safePrefixCount(
-        _ value: Double?,
-        defaultValue: Int,
-        upperBound: Int
-    ) -> Int {
-        let requested = value ?? Double(defaultValue)
-        guard requested.isFinite, requested > 0 else { return 0 }
-        return Int(min(requested.rounded(.down), Double(upperBound)))
-    }
-
-    func positiveFiniteInt(_ value: Double?, defaultValue: Int) -> Int {
-        guard let value, value.isFinite, value > 0 else {
-            return defaultValue
-        }
-        if value >= Double(Int.max) {
-            return Int.max
-        }
-        return max(Int(value.rounded(.down)), 1)
-    }
-
     // Default store cap (rows) applied when maxStored* is unset, matching the Android side. An
     // explicit value <= 0 means UNBOUNDED (no cap), preserving the library's original opt-out.
     private static let defaultMaxStoredRows = 10_000
@@ -863,143 +741,4 @@ class NitroBackgroundLocation: HybridNitroBackgroundLocationSpec {
         defaults.set(backgroundOptionsDictionary(options), forKey: optionsKey)
     }
 
-    private func scheduleSyncIfNeeded() {
-        guard let sync = options?.sync else { return }
-        let threshold = positiveFiniteInt(sync.syncThreshold, defaultValue: 1)
-        let unsyncedCount = storedLocations.filter { !$0.synced }.count
-        guard unsyncedCount >= threshold else { return }
-
-        let now = Date().timeIntervalSince1970 * 1000
-        let interval = sync.syncInterval ?? 0
-        guard interval <= 0 || now - lastSyncAt >= interval else { return }
-        lastSyncAt = now
-
-        syncQueue.async {
-            let result = self.performSyncStoredLocations()
-            let event = BackgroundEventEnvelope(
-                location: nil,
-                geofence: nil,
-                activity: nil,
-                providerStatus: nil,
-                result: result,
-                error: nil,
-                id: UUID().uuidString,
-                type: .httpsync,
-                timestamp: Date().timeIntervalSince1970 * 1000,
-                deliveredToJS: false
-            )
-            self.appendStoredEvent(
-                StoredBackgroundEventEnvelope(
-                    event: event,
-                    createdAt: Date().timeIntervalSince1970 * 1000,
-                    id: event.id,
-                    type: event.type,
-                    timestamp: event.timestamp,
-                    deliveredToJS: false
-                )
-            )
-            self.persistStore()
-            self.eventListeners.values.forEach { $0(event) }
-        }
-    }
-
-    private func performSyncStoredLocations() -> BackgroundHttpSyncResult {
-        let allUnsynced = storedLocations.filter { !$0.synced }
-        let unsynced = allUnsynced.prefix(safePrefixCount(
-            options?.sync?.batchSize,
-            defaultValue: 50,
-            upperBound: allUnsynced.count
-        ))
-        let ids = unsynced.map(\.id)
-        if ids.isEmpty {
-            return BackgroundHttpSyncResult(
-                success: true,
-                statusCode: nil,
-                syncedLocationIds: [],
-                failedLocationIds: [],
-                error: nil
-            )
-        }
-        guard let sync = options?.sync else {
-            return BackgroundHttpSyncResult(
-                success: true,
-                statusCode: nil,
-                syncedLocationIds: [],
-                failedLocationIds: [],
-                error: nil
-            )
-        }
-        let result = httpSync.uploadWithRetry(locations: Array(unsynced), sync: sync)
-        if !result.success && result.syncedLocationIds.isEmpty {
-            return result
-        }
-        let syncedIds = result.syncedLocationIds
-        storedLocations = storedLocations.map { location in
-            syncedIds.contains(location.id)
-                ? StoredBackgroundLocation(
-                    id: location.id,
-                    deliveredToJS: location.deliveredToJS,
-                    synced: true,
-                    createdAt: location.createdAt,
-                    source: location.source,
-                    isFromBackground: location.isFromBackground,
-                    provider: location.provider,
-                    mocked: location.mocked,
-                    recordedAt: location.recordedAt,
-                    activity: location.activity,
-                    battery: location.battery,
-                    coords: location.coords,
-                    timestamp: location.timestamp
-                )
-                : location
-        }
-        if options?.sync?.autoClear == true {
-            storedLocations.removeAll { syncedIds.contains($0.id) }
-        }
-        persistStore()
-        return result
-    }
-
-    private func permissionResult() -> BackgroundPermissionResult {
-        ensureManager()
-        let status = CLLocationManager.authorizationStatus()
-        let foreground: PermissionStatus
-        let background: BackgroundPermissionStatus
-        switch status {
-        case .authorizedAlways:
-            foreground = .granted
-            background = .granted
-        case .authorizedWhenInUse:
-            foreground = .granted
-            background = .denied
-        case .denied:
-            foreground = .denied
-            background = .denied
-        case .restricted:
-            foreground = .restricted
-            background = .restricted
-        case .notDetermined:
-            foreground = .undetermined
-            background = .undetermined
-        @unknown default:
-            foreground = .undetermined
-            background = .undetermined
-        }
-
-        let accuracy: AccuracyAuthorization
-        if #available(iOS 14.0, *) {
-            accuracy = manager?.accuracyAuthorization == .fullAccuracy ? .full : .reduced
-        } else {
-            accuracy = .unknown
-        }
-
-        return BackgroundPermissionResult(
-            foreground: foreground,
-            background: background,
-            accuracyAuthorization: accuracy,
-            canRequestBackgroundInline: true,
-            needsSettingsRedirect: background != .granted,
-            canAskAgain: foreground == .undetermined
-        )
-    }
 }

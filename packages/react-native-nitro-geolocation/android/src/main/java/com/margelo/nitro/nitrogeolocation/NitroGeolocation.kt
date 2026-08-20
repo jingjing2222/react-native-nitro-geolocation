@@ -3,7 +3,6 @@ package com.margelo.nitro.nitrogeolocation
 import android.Manifest
 import android.content.Context
 import android.content.pm.PackageManager
-import android.location.Geocoder
 import android.location.Location
 import android.location.LocationListener
 import android.location.LocationManager as AndroidLocationManager
@@ -24,8 +23,6 @@ import com.google.android.gms.location.LocationResult
 import com.google.android.gms.location.LocationServices
 import com.margelo.nitro.NitroModules
 import com.margelo.nitro.core.Promise
-import java.io.IOException
-import java.util.Locale
 import java.util.UUID
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.atomic.AtomicLong
@@ -82,6 +79,7 @@ class NitroGeolocation(
             }
         )
     }
+    private val geocoder by lazy { AndroidGeocoder(reactContext) }
     private var lastLocation: Location? = null
 
     // Permission callbacks
@@ -483,23 +481,7 @@ class NitroGeolocation(
         success: (Array<GeocodedLocation>) -> Unit,
         error: ((LocationError) -> Unit)?
     ) {
-        val query = address.trim()
-        if (query.isEmpty()) {
-            error?.invoke(createLocationError(
-                INTERNAL_ERROR,
-                "address must not be empty."
-            ))
-            return
-        }
-
-        runGeocoderOperation(success, error, "Unable to geocode address") {
-            val geocoder = Geocoder(reactContext, Locale.getDefault())
-            @Suppress("DEPRECATION")
-            geocoder.getFromLocationName(query, GEOCODER_MAX_RESULTS)
-                .orEmpty()
-                .mapNotNull { it.toGeocodedLocation() }
-                .toTypedArray()
-        }
+        geocoder.geocode(address, success, error)
     }
 
     override fun reverseGeocode(
@@ -507,24 +489,7 @@ class NitroGeolocation(
         success: (Array<ReverseGeocodedAddress>) -> Unit,
         error: ((LocationError) -> Unit)?
     ) {
-        val validationError = validateGeocodingCoordinates(coords)
-        if (validationError != null) {
-            error?.invoke(validationError)
-            return
-        }
-
-        runGeocoderOperation(success, error, "Unable to reverse geocode coordinates") {
-            val geocoder = Geocoder(reactContext, Locale.getDefault())
-            @Suppress("DEPRECATION")
-            geocoder.getFromLocation(
-                coords.latitude,
-                coords.longitude,
-                GEOCODER_MAX_RESULTS
-            )
-                .orEmpty()
-                .map { it.toReverseGeocodedAddress() }
-                .toTypedArray()
-        }
+        geocoder.reverseGeocode(coords, success, error)
     }
 
     // MARK: - Watch Position (Callback-based with tokens)
@@ -1405,64 +1370,7 @@ class NitroGeolocation(
         return location.toGeolocationResponse(providerOverride)
     }
 
-    private fun validateGeocodingCoordinates(coords: GeocodingCoordinates): LocationError? {
-        if (!coords.latitude.isFinite() || coords.latitude < -90.0 || coords.latitude > 90.0) {
-            return createLocationError(
-                INTERNAL_ERROR,
-                "latitude must be a finite number between -90 and 90."
-            )
-        }
-
-        if (!coords.longitude.isFinite() || coords.longitude < -180.0 || coords.longitude > 180.0) {
-            return createLocationError(
-                INTERNAL_ERROR,
-                "longitude must be a finite number between -180 and 180."
-            )
-        }
-
-        return null
-    }
-
-    private fun <T> runGeocoderOperation(
-        success: (Array<T>) -> Unit,
-        error: ((LocationError) -> Unit)?,
-        failurePrefix: String,
-        operation: () -> Array<T>
-    ) {
-        if (!Geocoder.isPresent()) {
-            error?.invoke(createLocationError(
-                POSITION_UNAVAILABLE,
-                "Platform geocoder is not available."
-            ))
-            return
-        }
-
-        val handler = Handler(Looper.getMainLooper())
-
-        Thread {
-            try {
-                val results = operation()
-                handler.post { success(results) }
-            } catch (e: IOException) {
-                handler.post {
-                    error?.invoke(createLocationError(
-                        POSITION_UNAVAILABLE,
-                        "$failurePrefix: ${e.message ?: "geocoder service unavailable"}"
-                    ))
-                }
-            } catch (e: Exception) {
-                handler.post {
-                    error?.invoke(createLocationError(
-                        INTERNAL_ERROR,
-                        "$failurePrefix: ${e.message ?: "unknown error"}"
-                    ))
-                }
-            }
-        }.start()
-    }
-
     companion object {
         private const val PERMISSION_REQUEST_CODE = 8947
-        private const val GEOCODER_MAX_RESULTS = 5
     }
 }

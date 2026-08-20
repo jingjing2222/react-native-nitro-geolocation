@@ -57,9 +57,7 @@ export function assertLocationMetadata(
     throw new Error(`Modern position has invalid age: ${metadata.age}.`);
   }
   if (
-    !(["high", "medium", "low", "unknown"] as const).includes(
-      metadata.quality
-    )
+    !(["high", "medium", "low", "unknown"] as const).includes(metadata.quality)
   ) {
     throw new Error(
       `Modern position has invalid quality: ${metadata.quality}.`

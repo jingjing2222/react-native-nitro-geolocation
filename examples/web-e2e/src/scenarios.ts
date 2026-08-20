@@ -11,8 +11,12 @@ export type Scenario = {
 export const successScenarioIds = new Set([
   "api-availability",
   "compat-api-availability",
+  "request-location-settings",
   "check-permission",
   "request-permission",
+  "permission-details-after-request",
+  "get-current-position-pre-aborted",
+  "get-current-position-cancelled",
   "get-current-position",
   "location-readiness",
   "last-known-cold-cache",
@@ -70,6 +74,13 @@ export const scenarios: Scenario[] = [
     id: "get-current-position",
     title: "getCurrentPosition",
     detail: "Returns coords and timestamp from navigator.geolocation.",
+    status: "idle"
+  },
+  {
+    id: "location-readiness",
+    title: "getLocationReadiness",
+    detail:
+      "Combines permission, service, availability, and observed cache state without prompting.",
     status: "idle"
   },
   {
@@ -164,6 +175,13 @@ export const scenarios: Scenario[] = [
     title: "getPermissionDetails after denial",
     detail:
       "Uses browser permission evidence without overclaiming prompt behavior.",
+    status: "idle"
+  },
+  {
+    id: "location-readiness-after-denial",
+    title: "getLocationReadiness after denial",
+    detail:
+      "Uses bounded denial evidence when browser permission state is unavailable.",
     status: "idle"
   },
   {

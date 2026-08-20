@@ -5,13 +5,26 @@ const native = vi.hoisted(() => ({
   getCurrentPosition: vi.fn(),
   getCurrentPositionCancellable: vi.fn()
 }));
+const devtools = vi.hoisted(() => ({
+  enabled: false,
+  getCurrentPosition: vi.fn()
+}));
 
 vi.mock("../NitroGeolocationModule", () => ({
   NitroGeolocationHybridObject: native
 }));
-vi.mock("../devtools", () => ({ isDevtoolsEnabled: () => false }));
+vi.mock("../devtools", () => ({
+  isDevtoolsEnabled: () => devtools.enabled
+}));
+vi.mock("../devtools/getCurrentPosition", () => ({
+  getDevtoolsCurrentPosition: devtools.getCurrentPosition
+}));
 
 import { getCurrentPosition } from "./getCurrentPosition";
+import {
+  clearLastKnownPositionCache,
+  readLastKnownPosition
+} from "./positionCache";
 
 const position = {
   coords: {
@@ -29,15 +42,30 @@ const position = {
 
 beforeEach(() => {
   vi.clearAllMocks();
+  devtools.enabled = false;
+  clearLastKnownPositionCache();
 });
 
 describe("getCurrentPosition cancellation", () => {
+  it("adds current-position metadata to the native result", async () => {
+    native.getCurrentPosition.mockImplementation((success) =>
+      success(position)
+    );
+
+    await expect(getCurrentPosition({ maximumAge: 0 })).resolves.toMatchObject({
+      metadata: {
+        source: "currentPosition",
+        quality: "high"
+      }
+    });
+  });
+
   it("keeps the existing native path when no signal is provided", async () => {
     native.getCurrentPosition.mockImplementation((success) =>
       success(position)
     );
 
-    await expect(getCurrentPosition({ timeout: 1234 })).resolves.toEqual(
+    await expect(getCurrentPosition({ timeout: 1234 })).resolves.toMatchObject(
       position
     );
 
@@ -88,7 +116,7 @@ describe("getCurrentPosition cancellation", () => {
     );
 
     callbacks.get(requestIds[1])?.success(position);
-    await expect(second).resolves.toEqual(position);
+    await expect(second).resolves.toMatchObject(position);
   });
 
   it("removes abort handling after the request completes", async () => {
@@ -99,9 +127,23 @@ describe("getCurrentPosition cancellation", () => {
 
     await expect(
       getCurrentPosition({ signal: controller.signal })
-    ).resolves.toEqual(position);
+    ).resolves.toMatchObject(position);
     controller.abort();
 
     expect(native.cancelCurrentPositionRequest).not.toHaveBeenCalled();
+  });
+
+  it("does not cache a DevTools result after its request is aborted", async () => {
+    devtools.enabled = true;
+    devtools.getCurrentPosition.mockReturnValue(Promise.resolve(position));
+    const controller = new AbortController();
+    const reason = new Error("cancel DevTools request");
+
+    const request = getCurrentPosition({ signal: controller.signal });
+    controller.abort(reason);
+
+    await expect(request).rejects.toBe(reason);
+    await Promise.resolve();
+    expect(readLastKnownPosition()).toBeUndefined();
   });
 });

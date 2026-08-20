@@ -208,6 +208,7 @@ namespace margelo::nitro::nitrogeolocation { struct StoredBackgroundLocation; }
 #include "LocationAccuracyOptions.hpp"
 #include "LocationAvailability.hpp"
 #include "LocationError.hpp"
+#include "LocationErrorCode.hpp"
 #include "LocationLifecycleEvent.hpp"
 #include "LocationLifecycleState.hpp"
 #include "LocationProvider.hpp"

@@ -68,52 +68,52 @@ public extension BackgroundLocationStatus {
   var state: BackgroundLocationState {
     return self.__state
   }
-  
+
   @inline(__always)
   var isRunning: Bool {
     return self.__isRunning
   }
-  
+
   @inline(__always)
   var isConfigured: Bool {
     return self.__isConfigured
   }
-  
+
   @inline(__always)
   var foregroundPermission: PermissionStatus {
     return self.__foregroundPermission
   }
-  
+
   @inline(__always)
   var backgroundPermission: BackgroundPermissionStatus {
     return self.__backgroundPermission
   }
-  
+
   @inline(__always)
   var accuracyAuthorization: AccuracyAuthorization? {
     return self.__accuracyAuthorization.value
   }
-  
+
   @inline(__always)
   var locationServicesEnabled: Bool {
     return self.__locationServicesEnabled
   }
-  
+
   @inline(__always)
   var providerStatus: LocationProviderStatus? {
     return self.__providerStatus.value
   }
-  
+
   @inline(__always)
   var storedLocationCount: Double {
     return self.__storedLocationCount
   }
-  
+
   @inline(__always)
   var storedEventCount: Double {
     return self.__storedEventCount
   }
-  
+
   @inline(__always)
   var lastLocationAt: Double? {
     return { () -> Double? in
@@ -142,17 +142,17 @@ public extension BackgroundLocationStatus {
   var geofenceCount: Double {
     return self.__geofenceCount
   }
-  
+
   @inline(__always)
   var android: AndroidBackgroundLocationStatus? {
     return self.__android.value
   }
-  
+
   @inline(__always)
   var ios: IOSBackgroundLocationStatus? {
     return self.__ios.value
   }
-  
+
   @inline(__always)
   var lastError: LocationError? {
     return self.__lastError.value

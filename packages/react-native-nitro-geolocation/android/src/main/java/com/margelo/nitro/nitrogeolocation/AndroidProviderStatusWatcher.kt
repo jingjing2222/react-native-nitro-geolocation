@@ -23,10 +23,12 @@ internal class AndroidProviderStatusWatcher(
     private val refreshGeneration = AtomicLong(0L)
     private var receiverRegistered = false
     private var lifecycleRegistered = false
+    private val broadcastRefresh = Runnable { refresh() }
 
     private val receiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent?) {
-            refresh()
+            mainHandler.removeCallbacks(broadcastRefresh)
+            mainHandler.postDelayed(broadcastRefresh, BROADCAST_SETTLE_DELAY_MS)
         }
     }
 
@@ -116,6 +118,7 @@ internal class AndroidProviderStatusWatcher(
     }
 
     private fun stopObservingSources() {
+        mainHandler.removeCallbacks(broadcastRefresh)
         if (lifecycleRegistered) {
             reactContext.removeLifecycleEventListener(this)
             lifecycleRegistered = false
@@ -124,5 +127,9 @@ internal class AndroidProviderStatusWatcher(
             reactContext.unregisterReceiver(receiver)
             receiverRegistered = false
         }
+    }
+
+    private companion object {
+        const val BROADCAST_SETTLE_DELAY_MS = 250L
     }
 }

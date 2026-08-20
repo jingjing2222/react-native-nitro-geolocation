@@ -6,6 +6,7 @@ import {
   getLastKnownPosition,
   getLastKnownPositionAsync,
   getLocationAvailability,
+  getLocationReadiness,
   getPermissionDetails,
   requestPermission,
   stopObserving,
@@ -14,7 +15,9 @@ import {
   watchProviderStatus
 } from ".";
 import { clearLastKnownPositionCache } from "../api/positionCache";
+import { LocationErrorCode } from "../utils/errors";
 import { clearWebPermissionDetailsEvidence } from "./permissionDetailsEvidence";
+import { clearWebPermissionEvidence } from "./permissionEvidence";
 
 type TestNavigator = {
   geolocation?: {
@@ -53,6 +56,7 @@ afterEach(() => {
   stopObserving();
   clearLastKnownPositionCache();
   clearWebPermissionDetailsEvidence();
+  clearWebPermissionEvidence();
   vi.restoreAllMocks();
   vi.unstubAllGlobals();
   Reflect.deleteProperty(globalThis, "navigator");
@@ -74,7 +78,8 @@ describe("web Modern API", () => {
   });
 
   it("wraps navigator.geolocation.getCurrentPosition and normalizes nullable coords", async () => {
-    const timestamp = Date.now();
+    const timestamp = 1_000;
+    vi.spyOn(Date, "now").mockReturnValue(timestamp);
     const getCurrentPositionMock = vi.fn((success) => {
       success({ ...createPosition(), timestamp });
     });
@@ -117,6 +122,26 @@ describe("web Modern API", () => {
       coords: { latitude: 37.5665, longitude: 126.978 },
       metadata: { source: "moduleCache" },
       timestamp
+    });
+  });
+
+  it("marks a browser result stale when it exceeds maximumAge", async () => {
+    const timestamp = Date.now() - 10_000;
+    setNavigator({
+      geolocation: {
+        getCurrentPosition: vi.fn((success) => {
+          success({ ...createPosition(), timestamp });
+        }),
+        watchPosition: vi.fn(),
+        clearWatch: vi.fn()
+      }
+    });
+
+    await expect(getCurrentPosition({ maximumAge: 0 })).resolves.toMatchObject({
+      metadata: {
+        source: "currentPosition",
+        staleReason: "maximumAgeExceeded"
+      }
     });
   });
 
@@ -469,7 +494,9 @@ describe("web Modern API", () => {
       }
     });
 
-    await expect(getCurrentPosition()).rejects.toMatchObject({ code: 1 });
+    await expect(getCurrentPosition()).rejects.toMatchObject({
+      code: LocationErrorCode.PERMISSION_DENIED
+    });
 
     await expect(getPermissionDetails()).resolves.toEqual({
       status: "denied",
@@ -695,7 +722,7 @@ describe("web Modern API", () => {
     });
   });
 
-  it("clears recent permission evidence after a watch permission denial", async () => {
+  it("uses a watch permission denial as bounded readiness evidence", async () => {
     let rejectWatch:
       | ((error: { code: number; message: string }) => void)
       | undefined;
@@ -716,12 +743,13 @@ describe("web Modern API", () => {
 
     await expect(getLocationReadiness()).resolves.toMatchObject({
       ready: false,
-      permission: "undetermined",
-      remediations: ["requestPermission"]
+      permission: "denied",
+      availability: { available: false },
+      remediations: ["requestPermissionOrReviewSettings"]
     });
   });
 
-  it("clears recent permission evidence after a one-shot permission denial", async () => {
+  it("uses a one-shot permission denial as bounded readiness evidence", async () => {
     const getCurrentPositionMock = vi
       .fn()
       .mockImplementationOnce((success) => success(createPosition()))
@@ -737,12 +765,15 @@ describe("web Modern API", () => {
     });
 
     await getCurrentPosition();
-    await expect(getCurrentPosition()).rejects.toMatchObject({ code: 1 });
+    await expect(getCurrentPosition()).rejects.toMatchObject({
+      code: LocationErrorCode.PERMISSION_DENIED
+    });
 
     await expect(getLocationReadiness()).resolves.toMatchObject({
       ready: false,
-      permission: "undetermined",
-      remediations: ["requestPermission"]
+      permission: "denied",
+      availability: { available: false },
+      remediations: ["requestPermissionOrReviewSettings"]
     });
   });
 

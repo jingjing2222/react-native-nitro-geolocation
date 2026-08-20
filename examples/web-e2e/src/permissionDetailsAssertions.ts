@@ -1,4 +1,7 @@
-import type { PermissionDetails } from "react-native-nitro-geolocation";
+import type {
+  LocationReadiness,
+  PermissionDetails
+} from "react-native-nitro-geolocation";
 
 export function expectPostRequestPermissionDetails(details: PermissionDetails) {
   if (
@@ -43,6 +46,26 @@ export async function expectPostDenialPermissionDetails(
   ) {
     throw new Error(
       `Unexpected post-denial browser permission details: ${JSON.stringify(details)}`
+    );
+  }
+}
+
+export async function expectPostDenialLocationReadiness(
+  readiness: LocationReadiness
+) {
+  const hasAuthoritativeDenial = await hasAuthoritativeDeniedPermissionState();
+  const expectedRemediation = hasAuthoritativeDenial
+    ? "reviewPermissionSettings"
+    : "requestPermissionOrReviewSettings";
+
+  if (
+    readiness.ready ||
+    readiness.permission !== "denied" ||
+    readiness.availability.available ||
+    !readiness.remediations.includes(expectedRemediation)
+  ) {
+    throw new Error(
+      `Unexpected post-denial browser readiness: ${JSON.stringify(readiness)}`
     );
   }
 }

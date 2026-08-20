@@ -8,14 +8,14 @@ import com.margelo.nitro.nitrogeolocation.BackgroundLocationOptions
 import com.margelo.nitro.nitrogeolocation.BackgroundTrackingMode
 import com.margelo.nitro.nitrogeolocation.DetectedActivity
 import com.margelo.nitro.nitrogeolocation.DetectedActivityType
+import com.margelo.nitro.nitrogeolocation.LocationErrorCode
 
 internal const val DEFAULT_MAX_STORED_LOCATIONS = 10_000
 internal const val DEFAULT_MAX_STORED_EVENTS = 10_000
 internal const val PREF_RUN_GENERATION = "runGeneration"
 
-// LocationError codes mirror the W3C GeolocationPositionError contract.
-internal const val ERROR_CODE_PERMISSION_DENIED = 1
-internal const val ERROR_CODE_POSITION_UNAVAILABLE = 2
+internal val ERROR_CODE_PERMISSION_DENIED = LocationErrorCode.PERMISSIONDENIED
+internal val ERROR_CODE_POSITION_UNAVAILABLE = LocationErrorCode.POSITIONUNAVAILABLE
 
 internal enum class ActivityTrackingAction { NONE, START, STOP }
 

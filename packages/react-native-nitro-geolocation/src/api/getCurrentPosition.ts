@@ -7,6 +7,7 @@ import {
   getAbortReason,
   getNativeCurrentPositionOptions
 } from "./currentPositionOptions";
+import { decoratePositionWithMetadata } from "./locationMetadata";
 import { rememberPosition } from "./positionCache";
 
 let nextCurrentPositionRequestId = 1;
@@ -19,7 +20,8 @@ function createCurrentPositionRequestId(): string {
 
 function raceDevtoolsRequestWithSignal(
   request: Promise<GeolocationResponse>,
-  signal: AbortSignal
+  signal: AbortSignal,
+  observePosition: (position: GeolocationResponse) => GeolocationResponse
 ): Promise<GeolocationResponse> {
   return new Promise((resolve, reject) => {
     let settled = false;
@@ -33,7 +35,7 @@ function raceDevtoolsRequestWithSignal(
 
     signal.addEventListener("abort", handleAbort, { once: true });
     request.then(
-      (position) => finish(() => resolve(rememberPosition(position))),
+      (position) => finish(() => resolve(observePosition(position))),
       (error) => finish(() => reject(error))
     );
   });
@@ -73,13 +75,27 @@ export function getCurrentPosition(
     return Promise.reject(getAbortReason(signal));
   }
 
+  const requestedAt = Date.now();
+  const rememberCurrentPosition = (position: GeolocationResponse) =>
+    rememberPosition(
+      decoratePositionWithMetadata(position, {
+        source: "currentPosition",
+        maximumAge: options?.maximumAge ?? 0,
+        requestedAt
+      })
+    );
+
   if (isDevtoolsEnabled()) {
     const devtoolsResult = getDevtoolsCurrentPosition();
     if (devtoolsResult) {
       if (signal) {
-        return raceDevtoolsRequestWithSignal(devtoolsResult, signal);
+        return raceDevtoolsRequestWithSignal(
+          devtoolsResult,
+          signal,
+          rememberCurrentPosition
+        );
       }
-      return devtoolsResult.then(rememberPosition);
+      return devtoolsResult.then(rememberCurrentPosition);
     }
   }
 
@@ -87,7 +103,7 @@ export function getCurrentPosition(
   if (!signal) {
     return new Promise((resolve, reject) => {
       NitroGeolocationHybridObject.getCurrentPosition(
-        (position) => resolve(rememberPosition(position)),
+        (position) => resolve(rememberCurrentPosition(position)),
         nativeOptions,
         reject
       );
@@ -113,7 +129,7 @@ export function getCurrentPosition(
     signal.addEventListener("abort", handleAbort, { once: true });
     NitroGeolocationHybridObject.getCurrentPositionCancellable(
       requestId,
-      (position) => finish(() => resolve(rememberPosition(position))),
+      (position) => finish(() => resolve(rememberCurrentPosition(position))),
       nativeOptions,
       (error) => finish(() => reject(error))
     );

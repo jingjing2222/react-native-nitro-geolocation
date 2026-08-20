@@ -51,7 +51,10 @@ extension NitroBackgroundLocation {
         if let clError = error as? CLError, clError.code == .locationUnknown {
             return
         }
-        let locationError = LocationError(code: -1, message: error.localizedDescription)
+        let locationError = LocationError(
+            code: .internalerror,
+            message: error.localizedDescription
+        )
         withListenerLock {
             guard withStoreLock({
                 isCurrentLocationSession(runGeneration, locationSessionGeneration)

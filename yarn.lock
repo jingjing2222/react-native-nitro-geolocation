@@ -7025,6 +7025,7 @@ __metadata:
   dependencies:
     "@rspress/core": "npm:2.0.10"
     "@types/node": "npm:20.19.0"
+    typescript: "npm:5.9.3"
   languageName: unknown
   linkType: soft
 
@@ -12742,6 +12743,7 @@ __metadata:
     react-native-safe-area-context: "npm:^5.5.2"
     react-native-screens: "npm:4.19.0"
     react-native-webview: "npm:13.16.1"
+    typescript: "npm:5.9.3"
   languageName: unknown
   linkType: soft
 

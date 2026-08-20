@@ -10,6 +10,10 @@ MAESTRO_BIN="${MAESTRO:-maestro}"
 NODE_BIN="${NODE:-node}"
 DISABLED_LAUNCHER_PACKAGE=""
 EXAMPLE_APP_ID="nitrogeolocation.example"
+LOCATION_PERMISSIONS=(
+  android.permission.ACCESS_FINE_LOCATION
+  android.permission.ACCESS_COARSE_LOCATION
+)
 
 adb_cmd() {
   if [[ -n "${ANDROID_SERIAL:-}" ]]; then
@@ -21,6 +25,32 @@ adb_cmd() {
 
 set_location_enabled() {
   adb_cmd shell cmd location set-location-enabled "$1" >/dev/null
+}
+
+clear_location_permission_flags() {
+  local permission
+  for permission in "${LOCATION_PERMISSIONS[@]}"; do
+    adb_cmd shell pm clear-permission-flags \
+      --user 0 \
+      "$EXAMPLE_APP_ID" \
+      "$permission" \
+      user-set user-fixed >/dev/null 2>&1 || true
+  done
+}
+
+set_location_permission_permanently_denied() {
+  local permission
+  for permission in "${LOCATION_PERMISSIONS[@]}"; do
+    adb_cmd shell pm revoke \
+      --user 0 \
+      "$EXAMPLE_APP_ID" \
+      "$permission" >/dev/null 2>&1 || true
+    adb_cmd shell pm set-permission-flags \
+      --user 0 \
+      "$EXAMPLE_APP_ID" \
+      "$permission" \
+      user-set user-fixed >/dev/null
+  done
 }
 
 prepare_provider_watcher_permissions() {
@@ -172,6 +202,17 @@ run_maestro_flows "android location-enabled" "${ANDROID_FLOWS[@]}" || status=1
 run_maestro_flows \
   "android GPS stale-readiness setup" \
   gps-only-recipe-stale-readiness-prepare.yaml || status=1
+set_location_enabled false
+run_maestro_flows \
+  "android GPS stale-readiness verification" \
+  gps-only-recipe-stale-readiness-verify.yaml || status=1
+set_location_enabled true
+
+set_location_permission_permanently_denied
+run_maestro_flows \
+  "android permanently-denied permission" \
+  location-readiness-permanently-denied.yaml || status=1
+clear_location_permission_flags
 
 prepare_provider_watcher_permissions
 run_maestro_flows \
@@ -194,6 +235,7 @@ set_location_enabled false
 run_maestro_flows \
   "android location-disabled" \
   provider-settings-not-ready.yaml \
-  location-readiness-disabled.yaml || status=1
+  location-readiness-disabled.yaml \
+  gps-only-recipe-not-ready.yaml || status=1
 
 exit "$status"

@@ -197,6 +197,7 @@ namespace NitroGeolocation { class HybridNitroGeolocationSpec_cxx; }
 #include "LocationAccuracyOptions.hpp"
 #include "LocationAvailability.hpp"
 #include "LocationError.hpp"
+#include "LocationErrorCode.hpp"
 #include "LocationLifecycleEvent.hpp"
 #include "LocationLifecycleState.hpp"
 #include "LocationProvider.hpp"
@@ -882,6 +883,15 @@ namespace margelo::nitro::nitrogeolocation::bridge::swift {
   }
   inline Result_std__shared_ptr_Promise_AccuracyAuthorization___ create_Result_std__shared_ptr_Promise_AccuracyAuthorization___(const std::exception_ptr& error) noexcept {
     return Result<std::shared_ptr<Promise<AccuracyAuthorization>>>::withError(error);
+  }
+
+  // pragma MARK: Result<std::vector<ActiveWatch>>
+  using Result_std__vector_ActiveWatch__ = Result<std::vector<ActiveWatch>>;
+  inline Result_std__vector_ActiveWatch__ create_Result_std__vector_ActiveWatch__(const std::vector<ActiveWatch>& value) noexcept {
+    return Result<std::vector<ActiveWatch>>::withValue(value);
+  }
+  inline Result_std__vector_ActiveWatch__ create_Result_std__vector_ActiveWatch__(const std::exception_ptr& error) noexcept {
+    return Result<std::vector<ActiveWatch>>::withError(error);
   }
 
   // pragma MARK: std::optional<AuthorizationLevelInternal>

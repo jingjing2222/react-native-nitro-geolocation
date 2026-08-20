@@ -24,6 +24,11 @@ import {
   clearWebPermissionDetailsEvidence,
   rememberWebPermissionDetailsEvidence
 } from "./permissionDetailsEvidence";
+import {
+  clearWebPermissionEvidence,
+  rememberWebPermissionDenial,
+  rememberWebPermissionGrant
+} from "./permissionEvidence";
 
 const activeWatches = new Map<string, number>();
 type ProviderStatusSubscription = {
@@ -123,6 +128,7 @@ export function watchPosition(
   const token = `web-${nextWatchId++}`;
 
   if (!geolocation) {
+    clearWebPermissionEvidence();
     clearWebPermissionDetailsEvidence();
     error?.(createUnsupportedError());
     return token;
@@ -132,8 +138,16 @@ export function watchPosition(
   const requestedAt = Date.now();
   const watchId = geolocation.watchPosition(
     (position) => {
+      rememberWebPermissionGrant();
       rememberWebPermissionDetailsEvidence("granted");
-      const normalizedPosition = normalizePosition(position);
+      const normalizedPosition = decoratePositionWithMetadata(
+        normalizePosition(position),
+        {
+          source: "watchPosition",
+          maximumAge: options?.maximumAge ?? 0,
+          requestedAt
+        }
+      );
       const filter = options?.distanceFilter ?? 0;
       if (
         filter <= 0 ||
@@ -147,6 +161,7 @@ export function watchPosition(
     (browserError) => {
       const mappedError = mapBrowserError(browserError);
       if (mappedError.code === LocationErrorCode.PERMISSION_DENIED) {
+        rememberWebPermissionDenial();
         rememberWebPermissionDetailsEvidence("denied");
       }
       error?.(mappedError);
