@@ -42,27 +42,30 @@ appId: nitrogeolocation.example
 - waitForAnimationToEnd
 
 - extendedWaitUntil:
-    visible: "Use your location"
+    visible:
+      id: "consumer-location-screen"
     timeout: 10000
 
 - tapOn:
     id: "consumer-location-run"
 
 - extendedWaitUntil:
-    visible: "Status: permission-required"
+    visible:
+      id: "consumer-location-status-permission-required"
     timeout: 10000
 
 - assertVisible:
-    id: "consumer-location-status"
-- assertVisible: "Permission: denied"
-- assertVisible: "Native requests: 0"
+    id: "consumer-location-permission-denied"
+- assertVisible:
+    id: "consumer-location-api-attempts-0"
 - assertNotVisible:
-    id: "consumer-location-position"
+    id: ".*consumer-location-position-.*"
 - assertVisible:
     id: "consumer-location-open-settings"
 
 - tapOn:
     id: "consumer-location-open-settings"
 - extendedWaitUntil:
-    notVisible: "Use your location"
+    notVisible:
+      id: "consumer-location-screen"
     timeout: 10000

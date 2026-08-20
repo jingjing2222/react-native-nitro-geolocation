@@ -11,8 +11,7 @@ import {
 import {
   getCurrentPosition,
   getPermissionDetails,
-  requestPermission,
-  setConfiguration
+  requestPermission
 } from "react-native-nitro-geolocation";
 import type {
   GeolocationResponse,
@@ -72,7 +71,7 @@ export default function ConsumerLocationContractScreen() {
   const [permissionGuidance, setPermissionGuidance] =
     useState<PermissionSettingsGuidance>("requestPermission");
   const [position, setPosition] = useState<GeolocationResponse>();
-  const [nativeRequestCount, setNativeRequestCount] = useState(0);
+  const [locationApiAttempts, setLocationApiAttempts] = useState(0);
   const [error, setError] = useState<string>();
 
   const useLocation = async () => {
@@ -89,7 +88,7 @@ export default function ConsumerLocationContractScreen() {
         return;
       }
 
-      setNativeRequestCount((count) => count + 1);
+      setLocationApiAttempts((count) => count + 1);
       const currentPosition = await getCurrentPosition({
         accuracy: { android: "high", ios: "best" },
         maximumAge: 0,
@@ -113,7 +112,6 @@ export default function ConsumerLocationContractScreen() {
     setError(undefined);
 
     try {
-      setConfiguration({ authorizationLevel: "whenInUse" });
       const nextPermission = await requestPermission();
       const details = await getPermissionDetails();
       setPermission(details.status);
@@ -155,15 +153,23 @@ export default function ConsumerLocationContractScreen() {
         </Text>
 
         <View style={styles.card}>
-          <Text testID="consumer-location-status">Status: {status}</Text>
-          <Text testID="consumer-location-permission">
+          <Text testID={`consumer-location-status-${status}`}>
+            Status: {status}
+          </Text>
+          <Text testID={`consumer-location-permission-${permission}`}>
             Permission: {permission}
           </Text>
-          <Text testID="consumer-location-native-requests">
-            Native requests: {nativeRequestCount}
+          <Text
+            testID={`consumer-location-api-attempts-${locationApiAttempts}`}
+          >
+            Location API calls: {locationApiAttempts}
           </Text>
           {position ? (
-            <Text testID="consumer-location-position">
+            <Text
+              testID={`consumer-location-position-${Math.round(
+                position.coords.latitude * 1_000_000
+              )}-${Math.round(position.coords.longitude * 1_000_000)}`}
+            >
               Coordinates: {position.coords.latitude.toFixed(6)},{" "}
               {position.coords.longitude.toFixed(6)}
             </Text>

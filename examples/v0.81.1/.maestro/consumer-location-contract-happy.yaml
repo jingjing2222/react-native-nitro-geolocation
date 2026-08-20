@@ -41,7 +41,8 @@ appId: nitrogeolocation.example
 - waitForAnimationToEnd
 
 - extendedWaitUntil:
-    visible: "Use your location"
+    visible:
+      id: "consumer-location-screen"
     timeout: 10000
 
 - setLocation:
@@ -56,11 +57,13 @@ appId: nitrogeolocation.example
     longitude: 126.978
 
 - extendedWaitUntil:
-    visible: "Status: passed"
+    visible:
+      id: "consumer-location-status-passed"
     timeout: 60000
 
 - assertVisible:
-    id: "consumer-location-status"
-- assertVisible: "Permission: granted"
-- assertVisible: "Native requests: 1"
-- assertVisible: "Coordinates: 37.566500, 126.978000"
+    id: "consumer-location-permission-granted"
+- assertVisible:
+    id: "consumer-location-api-attempts-1"
+- assertVisible:
+    id: "consumer-location-position-37566500-126978000"

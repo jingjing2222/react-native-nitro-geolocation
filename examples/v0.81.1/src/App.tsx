@@ -5,6 +5,7 @@ import {
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { NavigationContainer } from "@react-navigation/native";
 import React from "react";
+import { setConfiguration } from "react-native-nitro-geolocation";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import AccuracyPresetsScreen from "./screens/AccuracyPresetsScreen";
 import AndroidRequestOptionsScreen, {
@@ -47,6 +48,12 @@ import ProviderStatusWatcherScreen from "./screens/ProviderStatusWatcherScreen";
 import WatchObservabilityScreen from "./screens/WatchObservabilityScreen";
 import WatchPositionScreen from "./screens/WatchPositionScreen";
 import WebE2EScreen from "./screens/WebE2EScreen";
+
+setConfiguration({
+  authorizationLevel: "whenInUse",
+  enableBackgroundLocationUpdates: false,
+  locationProvider: "auto"
+});
 
 const Tab = createBottomTabNavigator();
 const linking = {
