@@ -225,7 +225,8 @@ yarn test:e2e:background-long-run:ios
 ### `mocked-metadata-android-true.yaml`
 - Android-only contract for `mocked=true` and `provider` response metadata
 - Opens the dedicated mocked metadata page
-- Uses Maestro `setLocation`, then verifies the public result surfaces `Mocked: true` and `Provider: gps`
+- Uses Maestro `setLocation`, then verifies the public result surfaces `Mocked: true` and a native Android provider
+- Verifies the empty-cache edge case before requesting a position, then proves the current sample's timestamp, `mocked`, and `provider` values survive the synchronous module-cache read
 - Included in `all-tests.yaml` because Maestro controls the location fixture deterministically
 - Uses a cold deep-link open after `stopApp` so the hidden metadata route is the screen under test
 
@@ -234,6 +235,7 @@ yarn test:e2e:background-long-run:ios
 - Opens the same mocked metadata page, but does not call Maestro `setLocation`
 - Run this separately on a physical Android device, or on an emulator whose location is not currently backed by a test provider
 - Not included in `all-tests.yaml` because emulator mock state can persist across flows and would make `Mocked: false` environment-dependent
+- Verifies the same empty-cache and cached-sample preservation contracts without injecting coordinates
 - Uses a cold deep-link open after `stopApp` so the hidden metadata route is the screen under test
 
 Run both metadata cases when you need to compare the visible contract:
@@ -247,21 +249,29 @@ The two Android cases intentionally differ like this:
 
 | Case | Uses `setLocation` | Expected metadata | Coordinate assertions |
 | --- | --- | --- | --- |
-| `mocked-metadata-android-true.yaml` | Yes | `Mocked: true`, `Provider: gps` | Presence only |
+| `mocked-metadata-android-true.yaml` | Yes | `Mocked: true`, native provider | Presence only |
 | `mocked-metadata-android-false.yaml` | No | `Mocked: false` | None |
+
+`mocked` belongs to the returned sample, not to a live global trust state. A
+cached sample remains mocked after the test provider is disabled. Acquire a new
+sample when testing a state transition instead of expecting old cache metadata
+to change.
 
 ### `mocked-metadata-ios-true.yaml`
 - iOS-only contract for `mocked=true` and `provider` response metadata
 - Opens the dedicated mocked metadata page
 - Uses Maestro `setLocation`, then verifies the public result surfaces `Mocked: true` and `Provider: unknown`
+- Verifies the empty-cache edge case before requesting a position, then proves the current sample's timestamp, `mocked`, and `provider` values survive the synchronous module-cache read
 - Included in `all-tests.yaml` because Maestro controls the simulator location fixture deterministically
 - Uses a cold deep-link open after `stopApp` so the hidden metadata route is the screen under test
 
 ### `mocked-metadata-ios-false.yaml`
 - iOS-only contract for the non-simulated provider branch, `mocked=false`
 - Opens the same mocked metadata page, but does not call Maestro `setLocation`
-- Run this separately on a physical iOS device using a real location provider
+- Run this separately on an iOS 15+ physical device using a real location provider, and only when the returned `CLLocation` includes `sourceInformation`
+- Skip this false-specific proof when `sourceInformation` is absent; `mocked` is then correctly omitted instead of set to `false`
 - Not included in `all-tests.yaml` because simulator location state can persist across flows and would make `Mocked: false` environment-dependent
+- Verifies the same empty-cache and cached-sample preservation contracts without injecting coordinates
 - Uses a cold deep-link open after `stopApp` so the hidden metadata route is the screen under test
 
 Run both metadata cases when you need to compare the visible iOS contract:
@@ -277,6 +287,11 @@ The two iOS cases intentionally differ like this:
 | --- | --- | --- | --- |
 | `mocked-metadata-ios-true.yaml` | Yes | `Mocked: true`, `Provider: unknown` | Presence only |
 | `mocked-metadata-ios-false.yaml` | No | `Mocked: false`, `Provider: unknown` | None |
+
+On iOS versions where `CLLocation.sourceInformation` is unavailable, `mocked`
+can be absent instead of `false`. The automated true flow therefore targets a
+current simulator runtime; the physical-device false flow must be interpreted
+against the device OS and the returned sample.
 
 ### `api-errors.yaml`
 - Opens the API Errors screen and triggers real native Modern API errors.

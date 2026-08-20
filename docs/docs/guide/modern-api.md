@@ -576,39 +576,57 @@ interface GeolocationResponse {
 }
 ```
 
-`mocked` and `provider` are optional fields added to the Modern API response in
-v1.2. `metadata` adds descriptive location-quality information:
+### Mock and provider metadata
 
-- `source` is the API path that delivered the value. A current request, watch,
-  platform cache query, and synchronous module-cache read report
-  `currentPosition`, `watchPosition`, `platformCache`, and `moduleCache`
-  respectively.
-- `age` is `max(0, delivery time - position.timestamp)` in milliseconds. It is
-  recalculated whenever the synchronous module cache is read and is omitted
-  only when the timestamp is not finite.
-- `quality` is a portable horizontal-accuracy band derived from
-  `coords.accuracy`: `high` is over 0m and at most 10m, `medium` is over 10m and
-  at most 100m, `low` is over 100m, and `unknown` covers zero, negative, or
-  non-finite values. Android may expose zero when a native reading has no
-  accuracy estimate.
-- `staleReason` is present when a provider response was already outside the
-  request's `maximumAge` at request start, has a timestamp more than 1ms in the
-  future at delivery, or has a non-finite timestamp. The 1ms tolerance accounts
-  for native sub-millisecond timestamps compared with JavaScript's integer
-  millisecond clock. `age` continues to describe delivery-time age, so it may be
-  greater than `maximumAge` after a slow but valid request.
+`mocked` and `provider` are optional Modern API metadata fields added in v1.2.
+They describe the source of that particular position sample:
 
-These fields are observational. The library does not reject, retry, or replace
-a stale or low-quality response because of this metadata. Apply product-specific
-quality policy explicitly in application code. `source` describes the delivery
-path, while `provider` identifies the native provider such as fused, GPS, or
-network.
+- `mocked` reports whether the sample source identified it as simulated or
+  supplied by a test provider. Native Android responses use `Location.isMock`
+  (or `isFromMockProvider` on older Android versions). Native iOS responses use
+  `CLLocation.sourceInformation` when it is available on iOS 15 and later;
+  otherwise the field can be absent.
+- `provider` identifies the Android provider route as `fused`, `gps`,
+  `network`, or `passive`. iOS and web return `unknown` because those platforms
+  do not expose an equivalent provider name through this API.
+- Web positions omit `mocked` because the browser Geolocation API does not
+  expose trustworthy simulation metadata.
+- The optional development-tools integration returns `mocked: true` for its
+  injected JavaScript samples. That value identifies the tooling source; it is
+  not native platform attestation.
 
-The entire `metadata` object is optional for structural backward compatibility.
-Modern foreground API responses produced by this package include it. Native
-background records keep their existing background-specific `source` field. The
-`/compat` API keeps the `@react-native-community/geolocation` response shape and
-does not include Modern metadata.
+Treat `mocked` as per-sample diagnostic evidence, not as an anti-fraud or
+device-integrity guarantee. A missing value means the platform did not expose
+the signal; it does not mean `false`. Likewise, `provider` describes the route
+used for the sample and does not establish whether the coordinates should be
+trusted.
+
+The synchronous module cache returned by `getLastKnownPosition()` preserves
+the metadata attached to the last position observed by this JavaScript module.
+Disabling a mock-location app or simulator fixture cannot rewrite that cached
+response, so it may still contain `mocked: true`. By contrast,
+`getLastKnownPositionAsync()` converts a native cached sample when it is read
+on Android or iOS; platform metadata is derived again and Android `provider`
+can reflect the current query route. On web it filters the JavaScript module
+cache, while the optional development-tools integration filters its configured
+mock cache. Do not require an asynchronous native-cache response to be
+identical to an earlier JavaScript response. Request or observe a newer sample
+when application policy requires fresher evidence, and apply `maximumAge` when
+reading the platform cache.
+
+The `/compat` entry point keeps the
+`@react-native-community/geolocation` response shape and does not include these
+fields.
+
+#### Testing the signal naturally
+
+- Test `mocked: true` with an emulator or simulator location fixture such as
+  Maestro `setLocation`.
+- Test `mocked: false` only on a physical device receiving a real provider
+  location, without coordinate injection. Do not manufacture the false branch
+  by changing or hiding returned metadata.
+- Assert absence separately on platforms that cannot provide the signal; do
+  not convert an unavailable value to `false`.
 
 **Error Handling**:
 

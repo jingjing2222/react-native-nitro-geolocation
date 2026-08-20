@@ -2,9 +2,11 @@ appId: nitrogeolocation.example
 ---
 # iOS contract: mocked=false
 #
-# Run this on a physical iOS device/provider that is not using simulated
-# location. It is intentionally not included in all-tests.yaml because
-# simulator setLocation() state can persist outside app state.
+# Run this on an iOS 15+ physical device/provider that is not using simulated
+# location and whose CLLocation sample includes sourceInformation. It is
+# intentionally not included in all-tests.yaml because simulator setLocation()
+# state can persist outside app state. If sourceInformation is absent, mocked
+# is correctly omitted and this false-specific proof must be skipped.
 #
 # Do not add setLocation() to this flow. For mocked=false, the contract is about
 # source metadata from a real/non-simulated provider; injected coordinates must
@@ -51,6 +53,17 @@ appId: nitrogeolocation.example
     timeout: 10000
 
 - tapOn:
+    id: "e2e-action-metadata-cache-verify-button"
+- extendedWaitUntil:
+    visible:
+      id: "metadata-cache-preservation-status"
+      text: "Cached metadata: passed"
+    timeout: 10000
+- assertVisible:
+    id: "metadata-cache-preservation-message"
+    text: "Cold module cache returned undefined before any position request."
+
+- tapOn:
     id: "e2e-action-permission-request-button"
 - tapOn:
     text: "Allow While Using App|앱을 사용하는 동안 허용"
@@ -76,3 +89,14 @@ appId: nitrogeolocation.example
 - assertVisible:
     id: "provider-text"
 - assertVisible: "Provider: unknown"
+
+- tapOn:
+    id: "e2e-action-metadata-cache-verify-button"
+- extendedWaitUntil:
+    visible:
+      id: "metadata-cache-preservation-status"
+      text: "Cached metadata: passed"
+    timeout: 10000
+- assertVisible:
+    id: "metadata-cache-preservation-message"
+    text: "Cached sample preserved timestamp, mocked, and provider metadata."
