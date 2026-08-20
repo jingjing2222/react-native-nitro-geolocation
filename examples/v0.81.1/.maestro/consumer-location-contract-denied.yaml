@@ -1,6 +1,8 @@
 appId: nitrogeolocation.example
 env:
-  CONSUMER_APP_DISPLAY_NAME: NitroGeolocationExample
+  CONSUMER_APP_DISPLAY_NAME_PATTERN: NitroGeolocationExample
+  ANDROID_APP_SETTINGS_TITLE_PATTERN: App info|앱 정보
+  IOS_SETTINGS_TITLE_PATTERN: Settings|설정
 ---
 # Copyable consumer edge contract: denied permission never starts a request and
 # leaves the user with an explicit permission action.
@@ -86,14 +88,16 @@ env:
       platform: Android
     commands:
       - extendedWaitUntil:
-          visible: "${CONSUMER_APP_DISPLAY_NAME}"
+          visible: "${ANDROID_APP_SETTINGS_TITLE_PATTERN}"
           timeout: 10000
+      - assertVisible: "${CONSUMER_APP_DISPLAY_NAME_PATTERN}"
 - runFlow:
     when:
       platform: iOS
     commands:
       - extendedWaitUntil:
-          visible:
-            id: "breadcrumb"
-            text: ".*${CONSUMER_APP_DISPLAY_NAME}.*"
+          visible: "${IOS_SETTINGS_TITLE_PATTERN}"
           timeout: 10000
+      - assertVisible:
+          id: "breadcrumb"
+          text: ".*${CONSUMER_APP_DISPLAY_NAME_PATTERN}.*"

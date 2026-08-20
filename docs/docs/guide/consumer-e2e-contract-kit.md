@@ -91,16 +91,18 @@ Copy the two Maestro flows:
 - [`consumer-location-contract-denied.yaml`](https://github.com/jingjing2222/react-native-nitro-geolocation/blob/main/examples/v0.81.1/.maestro/consumer-location-contract-denied.yaml)
 
 In both flows, change `appId` and the `nitrogeolocation://app` deep-link prefix
-to the consumer app's registered values. Also set
-`CONSUMER_APP_DISPLAY_NAME` in the denied flow. The flows reset unrelated
+to the consumer app's registered values. In the denied flow, also set
+`CONSUMER_APP_DISPLAY_NAME_PATTERN`, `ANDROID_APP_SETTINGS_TITLE_PATTERN`, and
+`IOS_SETTINGS_TITLE_PATTERN`. These values are regular expressions, so escape
+metacharacters in app names such as `Foo \(Dev\)`. The flows reset unrelated
 permissions to `unset`, then select only the location boundary under test:
 Android `allow`/`deny` and iOS `inuse`/`never`. Keep the location injection,
 API-attempt count, and coordinate ID assertion in the happy flow: asserting only
 a passed status can hide a page that never rendered the native result. Keep the
 denied flow separate so CI proves this page never called the public position API
-and reports which contract failed. Its final platform-specific assertion must
-identify the consumer app in the system settings UI; adapt that selector if the
-consumer's display name or supported OS UI differs.
+and reports which contract failed. Its final platform-specific assertions must
+identify both the system Settings UI and the consumer app; adapt the title
+patterns for every OS locale the consumer supports.
 
 ## RED to GREEN
 
