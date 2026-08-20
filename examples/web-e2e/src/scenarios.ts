@@ -8,6 +8,26 @@ export type Scenario = {
   raw?: unknown;
 };
 
+export const successScenarioIds = new Set([
+  "api-availability",
+  "compat-api-availability",
+  "check-permission",
+  "request-permission",
+  "get-current-position",
+  "location-readiness",
+  "last-known-cold-cache",
+  "last-known-async-cold-cache",
+  "last-known-module-cache",
+  "last-known-async-cache",
+  "last-known-stale-cache",
+  "watch-position",
+  "unwatch",
+  "stop-observing",
+  "compat-get-current-position",
+  "compat-watch-position",
+  "compat-stop-observing"
+]);
+
 export const scenarios: Scenario[] = [
   {
     id: "api-availability",
@@ -43,6 +63,13 @@ export const scenarios: Scenario[] = [
     id: "get-current-position",
     title: "getCurrentPosition",
     detail: "Returns coords and timestamp from navigator.geolocation.",
+    status: "idle"
+  },
+  {
+    id: "location-readiness",
+    title: "getLocationReadiness",
+    detail:
+      "Combines permission, service, availability, and observed cache state without prompting.",
     status: "idle"
   },
   {

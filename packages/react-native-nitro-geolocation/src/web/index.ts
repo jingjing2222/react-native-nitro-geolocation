@@ -4,7 +4,7 @@ import type {
   LocationSettingsOptions,
   PermissionStatus
 } from "../NitroGeolocation.nitro";
-import { decoratePositionWithMetadata } from "../api/locationMetadata";
+import { buildLocationReadiness } from "../api/locationReadiness";
 import {
   readLastKnownPosition,
   rememberPosition,
@@ -19,7 +19,7 @@ import type {
   Heading,
   LocationAvailability,
   LocationProviderStatus,
-  LocationSettingsResult,
+  LocationReadiness,
   ReverseGeocodedAddress
 } from "../publicTypes";
 import { LocationErrorCode } from "../utils/errors";
@@ -33,13 +33,12 @@ import {
   rejectUnsupported,
   toPositionOptions
 } from "./browser";
-export {
-  getActiveWatches,
-  stopObserving,
-  unwatch,
-  watchHeading,
-  watchPosition
-} from "./watch";
+import {
+  applyRecentWebPermissionEvidence,
+  clearWebPermissionEvidence,
+  rememberWebPermissionGrant
+} from "./permissionEvidence";
+export { stopObserving, unwatch, watchHeading, watchPosition } from "./watch";
 export {
   useWatchPosition,
   type UseWatchPositionOptions
@@ -52,6 +51,7 @@ export function setConfiguration(_config: GeolocationConfiguration): void {
 export async function checkPermission(): Promise<PermissionStatus> {
   const browserNavigator = getNavigator();
   if (!browserNavigator?.geolocation) {
+    clearWebPermissionEvidence();
     return "denied";
   }
 
@@ -59,7 +59,13 @@ export async function checkPermission(): Promise<PermissionStatus> {
     const status = await browserNavigator.permissions?.query({
       name: "geolocation"
     });
-    return status ? mapPermissionState(status.state) : "undetermined";
+    const permission = status
+      ? mapPermissionState(status.state)
+      : "undetermined";
+    if (permission === "denied") {
+      clearWebPermissionEvidence();
+    }
+    return permission;
   } catch {
     return "undetermined";
   }
@@ -113,6 +119,25 @@ export async function getLocationAvailability(): Promise<LocationAvailability> {
   return { available: true };
 }
 
+export async function getLocationReadiness(): Promise<LocationReadiness> {
+  const [permission, providerStatus, availability] = await Promise.all([
+    checkPermission(),
+    getProviderStatus(),
+    getLocationAvailability()
+  ]);
+  const cachedPosition = readLastKnownPosition();
+  const now = Date.now();
+
+  return buildLocationReadiness({
+    permission: applyRecentWebPermissionEvidence(permission, now),
+    environmentSupported: Boolean(getGeolocation()),
+    providerStatus,
+    availability,
+    cachedPosition,
+    now
+  });
+}
+
 export function requestLocationSettings(
   _options?: LocationSettingsOptions
 ): Promise<LocationSettingsResult> {
@@ -147,17 +172,17 @@ export function getCurrentPosition(
   const requestedAt = Date.now();
   return new Promise((resolve, reject) => {
     geolocation.getCurrentPosition(
-      (position) =>
-        resolve(
-          rememberPosition(
-            decoratePositionWithMetadata(normalizePosition(position), {
-              source: "currentPosition",
-              maximumAge: options?.maximumAge ?? 0,
-              requestedAt
-            })
-          )
-        ),
-      (error) => reject(mapBrowserError(error)),
+      (position) => {
+        rememberWebPermissionGrant();
+        resolve(rememberPosition(normalizePosition(position)));
+      },
+      (error) => {
+        const mappedError = mapBrowserError(error);
+        if (mappedError.code === LocationErrorCode.PERMISSION_DENIED) {
+          clearWebPermissionEvidence();
+        }
+        reject(mappedError);
+      },
       toPositionOptions(options)
     );
   });

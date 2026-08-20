@@ -1,0 +1,42 @@
+appId: nitrogeolocation.example
+---
+# Android runner disables the system location switch before this flow.
+
+- launchApp:
+    clearState: true
+    permissions:
+      all: allow
+
+- runFlow:
+    when:
+      visible: ".*isn't responding|.*응답하지 않.*"
+    commands:
+      - tapOn:
+          text: "Wait|대기"
+- extendedWaitUntil:
+    visible: "Geolocation API"
+    timeout: 10000
+
+- stopApp
+
+- openLink:
+    link: nitrogeolocation://app/location-readiness
+- runFlow:
+    when:
+      visible: ".*isn't responding|.*응답하지 않.*"
+    commands:
+      - tapOn:
+          text: "Wait|대기"
+- waitForAnimationToEnd
+
+- tapOn:
+    id: "e2e-action-location-readiness-run-services-disabled-button"
+
+- extendedWaitUntil:
+    visible: "Services disabled diagnosis: passed"
+    timeout: 20000
+
+- assertVisible:
+    id: "location-readiness-services-disabled-result"
+- assertVisible:
+    text: ".*services=false.*enableLocationServices.*"

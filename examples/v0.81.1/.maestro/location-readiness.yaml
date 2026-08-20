@@ -1,0 +1,169 @@
+appId: nitrogeolocation.example
+---
+# getLocationReadiness(): prove Android first-run permission remains requestable,
+# a seeded real position produces a ready/cache diagnosis, and denied permission
+# is reported without another prompt.
+
+- runFlow:
+    when:
+      platform: Android
+    commands:
+      - launchApp:
+          clearState: true
+          permissions:
+            all: unset
+      - runFlow:
+          when:
+            visible: ".*isn't responding|.*응답하지 않.*"
+          commands:
+            - tapOn:
+                text: "Wait|대기"
+      - extendedWaitUntil:
+          visible: "Geolocation API"
+          timeout: 10000
+      - stopApp
+      - openLink:
+          link: nitrogeolocation://app/location-readiness
+      - runFlow:
+          when:
+            visible: ".*isn't responding|.*응답하지 않.*"
+          commands:
+            - tapOn:
+                text: "Wait|대기"
+      - waitForAnimationToEnd
+      - tapOn:
+          id: "e2e-action-location-readiness-run-denied-button"
+      - extendedWaitUntil:
+          visible: "Permission diagnosis: passed"
+          timeout: 20000
+      - assertVisible:
+          text: ".*permission=denied.*requestPermissionOrReviewSettings.*"
+      - stopApp
+
+- launchApp:
+    clearState: true
+    permissions:
+      all: allow
+
+- runFlow:
+    when:
+      platform: Android
+      visible: ".*isn't responding|.*응답하지 않.*"
+    commands:
+      - tapOn:
+          text: "Wait|대기"
+- extendedWaitUntil:
+    visible: "Geolocation API"
+    timeout: 10000
+
+- stopApp
+
+- openLink:
+    link: nitrogeolocation://app/location-readiness
+- runFlow:
+    when:
+      platform: Android
+      visible: ".*isn't responding|.*응답하지 않.*"
+    commands:
+      - tapOn:
+          text: "Wait|대기"
+- runFlow:
+    when:
+      platform: iOS
+      visible: "Cancel|취소"
+    commands:
+      - tapOn:
+          text: "Open|열기"
+- runFlow:
+    when:
+      platform: iOS
+    commands:
+      - openLink:
+          link: nitrogeolocation://app/location-readiness
+- waitForAnimationToEnd
+
+- extendedWaitUntil:
+    visible: "Read-only permission, services, provider, Play Services, and cache diagnosis"
+    timeout: 10000
+
+- setLocation:
+    latitude: 37.5665
+    longitude: 126.978
+
+- tapOn:
+    id: "e2e-action-location-readiness-run-ready-button"
+
+- extendedWaitUntil:
+    visible: "Ready diagnosis: passed"
+    timeout: 60000
+
+- assertVisible:
+    id: "location-readiness-ready-result"
+- assertVisible:
+    text: ".*ready=true.*cache=true.*remediations=none.*"
+
+- stopApp
+
+- launchApp:
+    clearState: true
+    permissions:
+      all: deny
+
+- runFlow:
+    when:
+      platform: Android
+      visible: ".*isn't responding|.*응답하지 않.*"
+    commands:
+      - tapOn:
+          text: "Wait|대기"
+- extendedWaitUntil:
+    visible: "Geolocation API"
+    timeout: 10000
+
+- stopApp
+
+- openLink:
+    link: nitrogeolocation://app/location-readiness
+- runFlow:
+    when:
+      platform: Android
+      visible: ".*isn't responding|.*응답하지 않.*"
+    commands:
+      - tapOn:
+          text: "Wait|대기"
+- runFlow:
+    when:
+      platform: iOS
+      visible: "Cancel|취소"
+    commands:
+      - tapOn:
+          text: "Open|열기"
+- runFlow:
+    when:
+      platform: iOS
+    commands:
+      - openLink:
+          link: nitrogeolocation://app/location-readiness
+- waitForAnimationToEnd
+
+- tapOn:
+    id: "e2e-action-location-readiness-run-denied-button"
+
+- extendedWaitUntil:
+    visible: "Permission diagnosis: passed"
+    timeout: 20000
+
+- assertVisible:
+    id: "location-readiness-denied-result"
+- runFlow:
+    when:
+      platform: Android
+    commands:
+      - assertVisible:
+          text: ".*requestPermissionOrReviewSettings.*"
+- runFlow:
+    when:
+      platform: iOS
+    commands:
+      - assertVisible:
+          text: ".*reviewPermissionSettings.*"

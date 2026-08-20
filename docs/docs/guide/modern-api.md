@@ -173,10 +173,19 @@ to know whether Android device settings can satisfy the request.
 import {
   getCurrentPosition,
   getLocationAvailability,
+  getLocationReadiness,
   getProviderStatus,
   hasServicesEnabled,
   requestLocationSettings
 } from 'react-native-nitro-geolocation';
+
+async function inspectLocation() {
+  const readiness = await getLocationReadiness();
+  // Show app-owned actions for every remediation, including acquirePosition
+  // when the device is ready but the module cache is still cold.
+  // The diagnosis itself never prompts or opens settings.
+  return readiness.remediations;
+}
 
 async function prepareAccurateLocation() {
   const availability = await getLocationAvailability();
@@ -212,6 +221,25 @@ async function prepareAccurateLocation() {
   `locationProvider: 'auto'` or `locationProvider: 'playServices'` is
   configured, then falls back to platform provider/service checks. iOS maps Core
   Location service and authorization state.
+- `getLocationReadiness(): Promise<LocationReadiness>` - Combines current
+  permission, services, provider, availability, Play Services, Google Location
+  Accuracy, and observed module-cache state into one read-only diagnosis. It
+  returns stable remediation codes such as `requestPermission`,
+  `requestPermissionOrReviewSettings`, `enableLocationServices`,
+  `useSupportedEnvironment`, and `acquirePosition`; it never requests
+  permission, opens settings, starts location acquisition, or changes
+  configuration. On Web, `useSupportedEnvironment` means reopening the app in
+  a secure context and a browser or WebView that exposes the Geolocation API.
+  When the Permissions API cannot report state, Web treats a successful
+  position observation as best-effort granted evidence for at most 30 seconds;
+  a denial, missing Geolocation API, clock rollback, or expiry clears that
+  inference.
+  Android uses `requestPermissionOrReviewSettings` because its existing
+  permission status cannot distinguish a first request from permanent denial;
+  request permission first, then offer app settings if it remains denied.
+  Google Play Services remediations are returned only when
+  `locationProvider: 'playServices'` is explicitly configured; the default
+  `auto` and `android` routes can continue through Android platform providers.
 - `requestLocationSettings(options?): Promise<LocationProviderStatus>` -
   Checks the requested Android location settings and shows Android's native
   resolution dialog when available. It resolves with the updated provider
@@ -901,6 +929,8 @@ import type {
   GeolocationResponse,
   GeolocationCoordinates,
   LocationProviderUsed,
+  LocationReadiness,
+  LocationReadinessRemediation,
   GeolocationConfiguration
 } from 'react-native-nitro-geolocation';
 ```
