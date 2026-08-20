@@ -2,6 +2,7 @@ import type {
   LocationError,
   LocationRequestOptions
 } from "../NitroGeolocation.nitro";
+import { decoratePositionWithMetadata } from "../api/locationMetadata";
 import { rememberPosition } from "../api/positionCache";
 import type {
   GeolocationResponse,
@@ -44,9 +45,17 @@ export function watchPosition(
   }
 
   let lastEmitted: GeolocationResponse | null = null;
+  const requestedAt = Date.now();
   const watchId = geolocation.watchPosition(
     (position) => {
-      const normalizedPosition = normalizePosition(position);
+      const normalizedPosition = decoratePositionWithMetadata(
+        normalizePosition(position),
+        {
+          source: "watchPosition",
+          maximumAge: options?.maximumAge ?? 0,
+          requestedAt
+        }
+      );
       const filter = options?.distanceFilter ?? 0;
       if (
         filter <= 0 ||

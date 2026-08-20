@@ -3,6 +3,7 @@ import { NitroGeolocationHybridObject } from "../NitroGeolocationModule";
 import { isDevtoolsEnabled } from "../devtools";
 import { getDevtoolsCurrentPosition } from "../devtools/getCurrentPosition";
 import type { GeolocationResponse } from "../publicTypes";
+import { decoratePositionWithMetadata } from "./locationMetadata";
 import { rememberPosition } from "./positionCache";
 
 /**
@@ -34,15 +35,25 @@ import { rememberPosition } from "./positionCache";
 export function getCurrentPosition(
   options?: LocationRequestOptions
 ): Promise<GeolocationResponse> {
+  const requestedAt = Date.now();
+  const rememberCurrentPosition = (position: GeolocationResponse) =>
+    rememberPosition(
+      decoratePositionWithMetadata(position, {
+        source: "currentPosition",
+        maximumAge: options?.maximumAge ?? 0,
+        requestedAt
+      })
+    );
+
   if (isDevtoolsEnabled()) {
     const devtoolsResult = getDevtoolsCurrentPosition();
     if (devtoolsResult) {
-      return devtoolsResult.then(rememberPosition);
+      return devtoolsResult.then(rememberCurrentPosition);
     }
   }
   return new Promise((resolve, reject) => {
     NitroGeolocationHybridObject.getCurrentPosition(
-      (position) => resolve(rememberPosition(position)),
+      (position) => resolve(rememberCurrentPosition(position)),
       options ?? {},
       reject
     );

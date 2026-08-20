@@ -1,4 +1,5 @@
 import type { GeolocationResponse } from "../publicTypes";
+import { decoratePositionWithMetadata } from "./locationMetadata";
 
 let lastKnownPosition: GeolocationResponse | undefined;
 
@@ -9,8 +10,15 @@ export function rememberPosition(
   return position;
 }
 
-export function readLastKnownPosition(): GeolocationResponse | undefined {
-  return lastKnownPosition;
+export function readLastKnownPosition(
+  currentTime = Date.now()
+): GeolocationResponse | undefined {
+  return lastKnownPosition
+    ? decoratePositionWithMetadata(lastKnownPosition, {
+        source: "moduleCache",
+        observedAt: currentTime
+      })
+    : undefined;
 }
 
 export function selectCachedPosition(

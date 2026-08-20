@@ -80,6 +80,10 @@ appId: nitrogeolocation.example
     id: "longitude-text"
 - assertVisible:
     text: "Longitude: 126\\.978000"
+- assertVisible:
+    id: "metadata-source-text"
+- assertVisible:
+    text: "Metadata source: watchPosition"
 
 # Wait 5 seconds to see if position updates
 - waitForAnimationToEnd

@@ -36,6 +36,10 @@ export type {
   AuthorizationLevel,
   LocationProvider,
   LocationProviderUsed,
+  LocationMetadata,
+  LocationQualityBand,
+  LocationResponseSource,
+  LocationStaleReason,
   GeolocationConfiguration
 } from "./publicTypes";
 

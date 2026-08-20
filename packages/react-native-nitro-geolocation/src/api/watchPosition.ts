@@ -6,6 +6,7 @@ import { NitroGeolocationHybridObject } from "../NitroGeolocationModule";
 import { isDevtoolsEnabled } from "../devtools";
 import { devtoolsWatchPosition } from "../devtools/watchPosition";
 import type { GeolocationResponse } from "../publicTypes";
+import { decoratePositionWithMetadata } from "./locationMetadata";
 import { rememberPosition } from "./positionCache";
 
 /**
@@ -37,8 +38,17 @@ export function watchPosition(
   error?: (error: LocationError) => void,
   options?: LocationRequestOptions
 ): string {
+  const requestedAt = Date.now();
   const rememberAndNotify = (position: GeolocationResponse) => {
-    success(rememberPosition(position));
+    success(
+      rememberPosition(
+        decoratePositionWithMetadata(position, {
+          source: "watchPosition",
+          maximumAge: options?.maximumAge ?? 0,
+          requestedAt
+        })
+      )
+    );
   };
 
   if (isDevtoolsEnabled()) {

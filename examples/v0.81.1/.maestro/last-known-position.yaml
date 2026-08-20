@@ -84,6 +84,8 @@ appId: nitrogeolocation.example
 - assertVisible:
     text: ".*37.566500, 126.978000.*"
 - assertVisible:
+    text: ".*source=platformCache.*"
+- assertVisible:
     text: ".*without getCurrentPosition.*"
 
 - tapOn:

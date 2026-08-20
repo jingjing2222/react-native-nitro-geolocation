@@ -29,7 +29,25 @@ describe("positionCache", () => {
 
   it("returns the latest observed position synchronously", () => {
     expect(rememberPosition(position)).toBe(position);
-    expect(readLastKnownPosition()).toBe(position);
+    expect(readLastKnownPosition(position.timestamp + 2_000)).toMatchObject({
+      ...position,
+      metadata: {
+        source: "moduleCache",
+        age: 2_000,
+        quality: "high"
+      }
+    });
+  });
+
+  it("recomputes cache age for every synchronous read", () => {
+    rememberPosition(position);
+
+    expect(
+      readLastKnownPosition(position.timestamp + 2_000)?.metadata?.age
+    ).toBe(2_000);
+    expect(
+      readLastKnownPosition(position.timestamp + 8_000)?.metadata?.age
+    ).toBe(8_000);
   });
 
   it("selects only positions within maximumAge", () => {

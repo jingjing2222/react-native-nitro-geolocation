@@ -69,8 +69,9 @@ describe("web Modern API", () => {
   });
 
   it("wraps navigator.geolocation.getCurrentPosition and normalizes nullable coords", async () => {
+    const timestamp = Date.now();
     const getCurrentPositionMock = vi.fn((success) => {
-      success(createPosition());
+      success({ ...createPosition(), timestamp });
     });
     setNavigator({
       geolocation: {
@@ -80,12 +81,11 @@ describe("web Modern API", () => {
       }
     });
 
-    await expect(
-      getCurrentPosition({
-        accuracy: { android: "high" },
-        timeout: 1234
-      })
-    ).resolves.toEqual({
+    const position = await getCurrentPosition({
+      accuracy: { android: "high" },
+      timeout: 1234
+    });
+    expect(position).toEqual({
       coords: {
         latitude: 37.5665,
         longitude: 126.978,
@@ -95,7 +95,12 @@ describe("web Modern API", () => {
         heading: null,
         speed: null
       },
-      timestamp: 1779015190000,
+      timestamp,
+      metadata: {
+        age: expect.any(Number),
+        quality: "medium",
+        source: "currentPosition"
+      },
       provider: "unknown"
     });
     expect(getCurrentPositionMock.mock.calls[0][2]).toEqual({
@@ -105,7 +110,8 @@ describe("web Modern API", () => {
     });
     expect(getLastKnownPosition()).toMatchObject({
       coords: { latitude: 37.5665, longitude: 126.978 },
-      timestamp: 1779015190000
+      metadata: { source: "moduleCache" },
+      timestamp
     });
   });
 
@@ -314,6 +320,7 @@ describe("web Modern API", () => {
 
   it("tracks web watch tokens and clears individual/all watchers", () => {
     const clearWatch = vi.fn();
+    const firstSuccess = vi.fn();
     const watchPositionMock = vi
       .fn()
       .mockReturnValueOnce(10)
@@ -326,8 +333,21 @@ describe("web Modern API", () => {
       }
     });
 
-    const firstToken = watchPosition(vi.fn());
+    const firstToken = watchPosition(firstSuccess);
     const secondToken = watchPosition(vi.fn());
+
+    watchPositionMock.mock.calls[0][0]({
+      ...createPosition(),
+      timestamp: Date.now()
+    });
+    expect(firstSuccess).toHaveBeenCalledWith(
+      expect.objectContaining({
+        metadata: expect.objectContaining({
+          source: "watchPosition",
+          quality: "medium"
+        })
+      })
+    );
 
     expect(firstToken).toMatch(/^web-/);
     expect(secondToken).toMatch(/^web-/);

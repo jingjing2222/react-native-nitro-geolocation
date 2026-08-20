@@ -77,8 +77,16 @@ if (status === "granted") {
     accuracy: { android: "high", ios: "best" },
     timeout: 15_000,
   });
+  console.log(position.metadata);
+  // { source, age, quality, staleReason? }
 }
 ```
+
+Modern foreground responses include optional observational metadata for the
+delivery source, age, horizontal-accuracy quality band, and stale reason. This
+metadata never causes the library to reject a stale or low-accuracy position;
+applications can apply their own policy. The `/compat` response shape is
+unchanged.
 
 See the [Modern API guide](https://react-native-nitro-geolocation.pages.dev/guide/modern-api)
 for watches, geocoding, heading, cached reads, Android settings, and iOS

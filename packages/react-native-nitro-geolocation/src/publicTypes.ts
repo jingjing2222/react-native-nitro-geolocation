@@ -30,7 +30,37 @@ type NativeLocationProvider = NonNullable<
   NativeGeolocationConfiguration["locationProvider"]
 >;
 
-export type GeolocationResponse = SchemaGeolocationResponse;
+/** API path that delivered a Modern location response. */
+export type LocationResponseSource =
+  | "currentPosition"
+  | "watchPosition"
+  | "platformCache"
+  | "moduleCache";
+
+/** Descriptive horizontal-accuracy band. It is not an acceptance policy. */
+export type LocationQualityBand = "high" | "medium" | "low" | "unknown";
+
+/** Why a delivered response cannot satisfy its timestamp freshness contract. */
+export type LocationStaleReason =
+  | "maximumAgeExceeded"
+  | "futureTimestamp"
+  | "invalidTimestamp";
+
+export interface LocationMetadata {
+  /** API path that delivered this response. */
+  source: LocationResponseSource;
+  /** Milliseconds elapsed between the location timestamp and this delivery. */
+  age?: number;
+  /** `high` is >0m and <=10m, `medium` is <=100m, and `low` is >100m. */
+  quality: LocationQualityBand;
+  /** Present when timestamp freshness is invalid or violates `maximumAge`. */
+  staleReason?: LocationStaleReason;
+}
+
+export type GeolocationResponse = SchemaGeolocationResponse & {
+  /** Descriptive delivery, age, accuracy, and freshness metadata. */
+  metadata?: LocationMetadata;
+};
 export type LocationProviderStatus = SchemaLocationProviderStatus;
 export type LocationSettingsOutcome = SchemaLocationSettingsOutcome;
 export type LocationSettingsResult = SchemaLocationSettingsResult;
