@@ -18,8 +18,14 @@ npm install react-native-nitro-modules react-native-nitro-geolocation
 After installation, rebuild your native app to ensure the new module is linked.
 
 ```bash
-cd ios && pod install
+cd ios && bundle exec pod install
 ```
+
+Use `pod install` directly when your app does not check in a `Gemfile`.
+React Native 0.87's Swift Package Manager workflow is not yet compatible with
+the required Nitro Modules native target. Keep CocoaPods for iOS and see the
+[Swift Package Manager compatibility guide](/guide/swift-package-manager)
+before migrating an RN 0.87 app.
 
 Released npm builds try to use the matching GitHub Release prebuilts first:
 Android downloads the release AAR and reuses its native `.so` files, while iOS
@@ -129,6 +135,7 @@ const cached = await getLastKnownPosition({
 ## Next Steps
 
 - [Modern API Reference](/guide/modern-api) — Complete documentation
+- [Swift Package Manager](/guide/swift-package-manager) — RN 0.87 compatibility and migration gate
 - [Compat API Reference](/guide/compat-api) — Compatibility methods
 - [Background Location](/background/overview) — Native background tracking, geofencing, and storage recovery
 - [Migration Guides](/guide/migration-assistance) — Move from community/service geolocation packages
