@@ -74,7 +74,8 @@ yarn test:e2e:android
 `test:e2e:ios` runs `.maestro/all-tests.yaml` with the iOS platform flag.
 `test:e2e:android` runs the same master flow with the Android platform flag,
 then runs `provider-settings-not-ready.yaml` after disabling Android location
-services and restores the device state afterward. Set
+services, verifies the GPS recipe's not-ready edge case, and restores the
+device state afterward. Set
 `RUN_ANDROID_PROVIDER_SELECTION=1` on a physical Android device to include the
 live provider-selection proof. The wrapper rejects emulators for this proof and
 requires `ANDROID_SERIAL` when multiple Android devices are connected.
@@ -160,6 +161,15 @@ When adding a flow:
 - Verifies `auto` and `playServices` return a live non-mocked fix through the fused API route
 - Verifies explicit `android` and native `android_platform` stay on the platform provider path
 - Included from `all-tests.yaml` when `RUN_ANDROID_PROVIDER_SELECTION=1`
+
+### GPS-only / offline recipe flows
+- `gps-only-recipe.yaml` injects a deterministic GPS fix and proves the Android platform route accepts `provider=gps` with `mocked=true`; it is included in `all-tests.yaml`
+- `gps-only-recipe-coarse.yaml` grants only coarse permission and proves `accuracy=reduced` keeps the GPS result contract blocked
+- `gps-only-recipe-stale-readiness-prepare.yaml` and `gps-only-recipe-stale-readiness-verify.yaml` are a runner-orchestrated pair: the Android wrapper confirms readiness, disables location services between the flows, then proves runtime revalidation disables the request again
+- `gps-only-recipe-not-ready.yaml` runs with Android location services disabled and proves readiness blocks the request
+- `gps-offline-emulator.yaml` is selected by `yarn test:e2e:gps-offline:android` on an emulator after its wrapper verifies validated internet, then disables Wi-Fi and mobile data; start online so the wrapper can prove both disconnection and restoration
+- `gps-offline-physical.yaml` is selected on a physical device only when `GPS_OFFLINE_NETWORK_PREPARED=1`; it requires `provider=gps` and `mocked=false`
+- Injected emulator locations prove provider routing, not real satellite acquisition; use the physical flow for the offline field matrix
 
 ### `issue-67-android-coarse-location.yaml`
 - Android-only contract for approximate/coarse permission handling
@@ -312,6 +322,8 @@ London: 51.5074, -0.1278
    yarn ios:release  # or yarn android:release
    yarn test:e2e:ios  # or yarn test:e2e:android
    RUN_ANDROID_PROVIDER_SELECTION=1 yarn test:e2e:android  # physical Android live provider proof
+   yarn test:e2e:gps-offline:android  # emulator network-off provider-routing proof
+   GPS_OFFLINE_NETWORK_PREPARED=1 ANDROID_SERIAL=<serial> yarn test:e2e:gps-offline:android  # physical offline GPS proof
    ```
 
 2. Copy the terminal output
@@ -326,6 +338,10 @@ London: 51.5074, -0.1278
 
 ✅ Run permission-check.yaml
 ✅ Run android-provider-selection.yaml (physical Android with RUN_ANDROID_PROVIDER_SELECTION=1)
+✅ Run gps-only-recipe.yaml
+✅ Run gps-only-recipe-coarse.yaml
+✅ Run gps-only-recipe-stale-readiness-prepare.yaml + gps-only-recipe-stale-readiness-verify.yaml
+✅ Run gps-only-recipe-not-ready.yaml
 ✅ Run current-position.yaml
 ✅ Run watch-position.yaml
 ✅ Run location-simulation.yaml

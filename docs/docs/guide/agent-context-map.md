@@ -114,6 +114,7 @@ permission helpers, and location assertions live in
 | Android request options | `android-request-options.yaml` | `AndroidRequestOptionsScreen.tsx` |
 | Android provider selection | `android-provider-selection.yaml` | `AndroidRequestOptionsScreen.tsx` |
 | Android provider settings | `provider-settings.yaml`, `provider-settings-not-ready.yaml` | `ProviderSettingsScreen.tsx` |
+| GPS-only / offline recipe | `gps-only-recipe.yaml`, `gps-only-recipe-coarse.yaml`, runner-orchestrated `gps-only-recipe-stale-readiness-prepare.yaml` + `gps-only-recipe-stale-readiness-verify.yaml`, `gps-only-recipe-not-ready.yaml`, `gps-offline-emulator.yaml`, `gps-offline-physical.yaml` | `GpsOfflineRecipeScreen.tsx` |
 | iOS location tuning | `ios-location-tuning.yaml` | `IOSLocationTuningScreen.tsx` |
 | iOS accuracy authorization | `ios-accuracy-authorization.yaml` | `IOSAccuracyAuthorizationScreen.tsx` |
 | iOS release bridge options | `ios-release-options-bridge.yaml` | `IOSReleaseOptionsBridgeScreen.tsx` |
@@ -139,6 +140,7 @@ Run from repo root with the matching workspace script:
 | Target | Command |
 | --- | --- |
 | Android native smoke suite | `yarn workspace react-native-nitro-geolocation-example test:e2e:android` |
+| Android GPS/offline verification | `yarn workspace react-native-nitro-geolocation-example test:e2e:gps-offline:android` |
 | iOS native smoke suite | `yarn workspace react-native-nitro-geolocation-example test:e2e:ios` |
 | Android long-run background | `yarn workspace react-native-nitro-geolocation-example test:e2e:background-long-run:android` |
 | Android long-run background with reboot | `RUN_REBOOT=1 yarn workspace react-native-nitro-geolocation-example test:e2e:background-long-run:android` |
