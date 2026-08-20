@@ -16,7 +16,8 @@ export const expectedLocations = {
   compatWatchPositionInitial: { latitude: 37.572, longitude: 126.9835 },
   compatWatchPositionAfterClear: { latitude: 37.5727, longitude: 126.9842 },
   compatStopObservingInitial: { latitude: 37.5734, longitude: 126.9849 },
-  compatStopObservingAfterClear: { latitude: 37.5741, longitude: 126.9856 }
+  compatStopObservingAfterClear: { latitude: 37.5741, longitude: 126.9856 },
+  compatMetadataWatch: { latitude: 37.5748, longitude: 126.9863 }
 } as const;
 
 const expectedLocationTolerance = 0.00015;

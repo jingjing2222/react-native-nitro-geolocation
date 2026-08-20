@@ -29,7 +29,11 @@ export function getCurrentPosition(
 ): void {
   const nativeOptions = toNativeCompatOptions(options);
 
-  if (options?.includeExtraMetadata === true) {
+  if (
+    options?.includeExtraMetadata === true &&
+    typeof NitroGeolocationHybridCompatObject.getCurrentPositionWithMetadata ===
+      "function"
+  ) {
     NitroGeolocationHybridCompatObject.getCurrentPositionWithMetadata(
       (position) => success(toCompatResponseWithMetadata(position)),
       nativeOptions,

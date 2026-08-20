@@ -256,8 +256,12 @@ The opt-in response adds:
 The option is per call/subscription rather than global. A default watch and an
 opted-in watch can run concurrently without changing each other's response
 shape. Native apps must rebuild after upgrading because the opted-in path uses
-new native methods. On web, `mocked` is omitted because browser geolocation does
-not expose that signal, and `provider` is `unknown`.
+new native methods. If newer JavaScript is delivered OTA to an older native
+binary, the option safely falls back to the default `{ coords, timestamp }`
+shape. Gate any code that requires metadata on rollout of the matching native
+binary; the metadata fields remain optional for this reason. On web, `mocked`
+is omitted because browser geolocation does not expose that signal, and
+`provider` is `unknown`.
 
 ### `clearWatch()`
 

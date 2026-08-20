@@ -38,7 +38,11 @@ export function watchPosition(
 ): number {
   const nativeOptions = toNativeCompatOptions(options);
 
-  if (options?.includeExtraMetadata === true) {
+  if (
+    options?.includeExtraMetadata === true &&
+    typeof NitroGeolocationHybridCompatObject.watchPositionWithMetadata ===
+      "function"
+  ) {
     return NitroGeolocationHybridCompatObject.watchPositionWithMetadata(
       (position) => success(toCompatResponseWithMetadata(position)),
       nativeOptions,

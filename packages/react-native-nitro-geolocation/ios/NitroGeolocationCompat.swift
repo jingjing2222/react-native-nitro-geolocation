@@ -44,7 +44,7 @@ class NitroGeolocationCompat: HybridNitroGeolocationCompatSpec {
 
         if let cached = locationManager.lastLocation,
            locationManager.isCachedLocationValid(cached, options: parsedOptions) {
-            success(locationManager.locationToPosition(cached))
+            success(LocationManager.locationToPosition(cached))
             return
         }
 
@@ -61,7 +61,7 @@ class NitroGeolocationCompat: HybridNitroGeolocationCompatSpec {
 
         if let cached = locationManager.lastLocation,
            locationManager.isCachedLocationValid(cached, options: parsedOptions) {
-            success(locationManager.locationToPositionWithMetadata(cached))
+            success(LocationManager.locationToPositionWithMetadata(cached))
             return
         }
 

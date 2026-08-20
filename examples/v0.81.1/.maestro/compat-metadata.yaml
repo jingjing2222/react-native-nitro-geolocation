@@ -72,7 +72,29 @@ appId: nitrogeolocation.example
 - assertVisible: "Has mocked: false"
 - assertVisible: "Has provider: false"
 
+# Explicit false is a public-call contract, not just the same runtime branch by
+# implication. It must also retain the exact drop-in response shape.
+- scrollUntilVisible:
+    element:
+      id: "compat-false-current-button"
+    direction: DOWN
+- tapOn:
+    id: "compat-false-current-button"
+- extendedWaitUntil:
+    visible:
+      id: "compat-false-current-result"
+    timeout: 15000
+- assertVisible:
+    id: "compat-false-current-result"
+- assertVisible: "Response keys: coords,timestamp"
+- assertVisible: "Has mocked: false"
+- assertVisible: "Has provider: false"
+
 # Explicit opt-in exposes the native mock/provider metadata.
+- scrollUntilVisible:
+    element:
+      id: "compat-metadata-current-button"
+    direction: DOWN
 - tapOn:
     id: "compat-metadata-current-button"
 - extendedWaitUntil:
@@ -143,6 +165,16 @@ appId: nitrogeolocation.example
     timeout: 15000
 - assertVisible: "Response keys: coords,timestamp,mocked,provider"
 - assertVisible: "Mocked: true"
+- runFlow:
+    when:
+      platform: Android
+    commands:
+      - assertVisible: "Provider: (gps|network|passive|fused|unknown)"
+- runFlow:
+    when:
+      platform: iOS
+    commands:
+      - assertVisible: "Provider: unknown"
 - scrollUntilVisible:
     element:
       id: "compat-default-watch-result"

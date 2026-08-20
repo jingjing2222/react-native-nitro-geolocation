@@ -206,7 +206,7 @@ class LocationManager: NSObject, CLLocationManagerDelegate {
         options: CompatGeolocationOptions?
     ) {
         getCurrentLocation(
-            success: { location in success(self.locationToPosition(location)) },
+            success: { location in success(LocationManager.locationToPosition(location)) },
             error: error,
             options: options
         )
@@ -218,7 +218,9 @@ class LocationManager: NSObject, CLLocationManagerDelegate {
         options: CompatGeolocationOptions?
     ) {
         getCurrentLocation(
-            success: { location in success(self.locationToPositionWithMetadata(location)) },
+            success: { location in
+                success(LocationManager.locationToPositionWithMetadata(location))
+            },
             error: error,
             options: options
         )
@@ -281,7 +283,7 @@ class LocationManager: NSObject, CLLocationManagerDelegate {
         options: CompatGeolocationOptions?
     ) -> Double {
         return watchLocation(
-            success: { location in success(self.locationToPosition(location)) },
+            success: { location in success(LocationManager.locationToPosition(location)) },
             error: error,
             options: options
         )
@@ -293,7 +295,9 @@ class LocationManager: NSObject, CLLocationManagerDelegate {
         options: CompatGeolocationOptions?
     ) -> Double {
         return watchLocation(
-            success: { location in success(self.locationToPositionWithMetadata(location)) },
+            success: { location in
+                success(LocationManager.locationToPositionWithMetadata(location))
+            },
             error: error,
             options: options
         )
@@ -684,7 +688,7 @@ class LocationManager: NSObject, CLLocationManagerDelegate {
         queuedAuthorizationCallbacks.removeAll()
     }
 
-    func locationToPosition(_ location: CLLocation) -> CompatGeolocationResponse {
+    static func locationToPosition(_ location: CLLocation) -> CompatGeolocationResponse {
         let coordsObj = GeolocationCoordinates(
             latitude: location.coordinate.latitude,
             longitude: location.coordinate.longitude,
@@ -703,10 +707,10 @@ class LocationManager: NSObject, CLLocationManagerDelegate {
         return position
     }
 
-    func locationToPositionWithMetadata(_ location: CLLocation)
+    static func locationToPositionWithMetadata(_ location: CLLocation)
         -> CompatGeolocationResponseWithMetadataInternal
     {
-        let position = locationToPosition(location)
+        let position = LocationManager.locationToPosition(location)
         return CompatGeolocationResponseWithMetadataInternal(
             coords: position.coords,
             timestamp: position.timestamp,
