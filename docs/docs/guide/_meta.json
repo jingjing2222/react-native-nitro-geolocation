@@ -3,6 +3,7 @@
   "quick-start",
   "swift-package-manager",
   "migration-assistance",
+  "v2-error-migration",
   "community-migration",
   "service-migration",
   "gps-offline-recipe",

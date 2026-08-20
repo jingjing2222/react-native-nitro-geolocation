@@ -21,9 +21,11 @@
 #include "JBackgroundPermissionStatus.hpp"
 #include "JIOSBackgroundLocationStatus.hpp"
 #include "JLocationError.hpp"
+#include "JLocationErrorCode.hpp"
 #include "JLocationProviderStatus.hpp"
 #include "JPermissionStatus.hpp"
 #include "LocationError.hpp"
+#include "LocationErrorCode.hpp"
 #include "LocationProviderStatus.hpp"
 #include "PermissionStatus.hpp"
 #include <optional>

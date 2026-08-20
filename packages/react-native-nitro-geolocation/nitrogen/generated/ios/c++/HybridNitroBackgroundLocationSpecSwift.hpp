@@ -64,6 +64,8 @@ namespace margelo::nitro::nitrogeolocation { struct AndroidBackgroundLocationSta
 namespace margelo::nitro::nitrogeolocation { struct IOSBackgroundLocationStatus; }
 // Forward declaration of `LocationError` to properly resolve imports.
 namespace margelo::nitro::nitrogeolocation { struct LocationError; }
+// Forward declaration of `LocationErrorCode` to properly resolve imports.
+namespace margelo::nitro::nitrogeolocation { enum class LocationErrorCode; }
 // Forward declaration of `BackgroundEventEnvelope` to properly resolve imports.
 namespace margelo::nitro::nitrogeolocation { struct BackgroundEventEnvelope; }
 // Forward declaration of `BackgroundLocation` to properly resolve imports.
@@ -130,6 +132,7 @@ namespace margelo::nitro::nitrogeolocation { struct GetStoredBackgroundEventsOpt
 #include "AndroidBackgroundLocationStatus.hpp"
 #include "IOSBackgroundLocationStatus.hpp"
 #include "LocationError.hpp"
+#include "LocationErrorCode.hpp"
 #include "BackgroundEventEnvelope.hpp"
 #include <functional>
 #include "BackgroundLocation.hpp"
@@ -194,7 +197,7 @@ namespace margelo::nitro::nitrogeolocation {
 
   public:
     // Properties
-    
+
 
   public:
     // Methods

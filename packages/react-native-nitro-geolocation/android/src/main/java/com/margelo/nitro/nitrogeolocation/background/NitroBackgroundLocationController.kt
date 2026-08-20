@@ -18,8 +18,20 @@ import com.google.android.gms.location.LocationServices
 import com.margelo.nitro.nitrogeolocation.*
 import java.util.concurrent.CompletableFuture
 import java.util.UUID
-import java.util.concurrent.locks.ReentrantLock
-import kotlin.concurrent.withLock
+
+private const val ACTION_LOCATION_UPDATE =
+    "com.margelo.nitro.nitrogeolocation.background.LOCATION_UPDATE"
+private const val ACTION_GEOFENCE_UPDATE =
+    "com.margelo.nitro.nitrogeolocation.background.GEOFENCE_UPDATE"
+private const val ACTION_ACTIVITY_UPDATE =
+    "com.margelo.nitro.nitrogeolocation.background.ACTIVITY_UPDATE"
+
+private val ERROR_CODE_PERMISSION_DENIED = LocationErrorCode.PERMISSIONDENIED
+private val ERROR_CODE_POSITION_UNAVAILABLE = LocationErrorCode.POSITIONUNAVAILABLE
+
+// Default store caps so an unconfigured store cannot grow without bound over a long trip.
+private const val DEFAULT_MAX_STORED_LOCATIONS = 10_000
+private const val DEFAULT_MAX_STORED_EVENTS = 10_000
 
 class NitroBackgroundLocationController private constructor(
     private val context: Context
@@ -300,17 +312,21 @@ class NitroBackgroundLocationController private constructor(
         )
 
     internal fun recordError(
-        code: Int,
+        code: LocationErrorCode,
         message: String,
-        throwable: Throwable? = null,
-        expectedServiceGeneration: Long? = null
+        throwable: Throwable? = null
     ) {
-        val dispatch = synchronized(lifecycleLock) {
-            if (expectedServiceGeneration != null &&
-                activeServiceGeneration() != expectedServiceGeneration) return
-            runGeneration to errorState.store(code, message)
-        }
-        NitroGeoLog.e("background location error [$code]: $message", throwable)
+        val error = LocationError(code, message)
+        lastError = error
+        prefs.edit()
+            .putString("lastErrorCodeV2", locationErrorCodeToWireValue(code))
+            .putString("lastErrorMessage", message)
+            .putLong("lastErrorAt", System.currentTimeMillis())
+            .apply()
+        NitroGeoLog.e(
+            "background location error [${locationErrorCodeToWireValue(code)}]: $message",
+            throwable
+        )
         runCatching {
             dispatchEvent(
                 dispatch.second,
@@ -320,42 +336,28 @@ class NitroBackgroundLocationController private constructor(
         }
     }
 
-    internal fun failStartup(
-        serviceGeneration: Long,
-        code: Int,
-        message: String,
-        throwable: Throwable? = null
-    ) {
-        serviceStartup.fail(
-            serviceGeneration,
-            throwable ?: IllegalStateException(message)
-        )
-        val dispatch = synchronized(lifecycleLock) {
-            if (!shouldApplyStartupFailure(runningServiceGeneration(), serviceGeneration)) {
-                return
-            }
-            val errorDispatch = runGeneration to errorState.store(code, message)
-            prefs.edit().putBoolean("running", false).commit()
-            stopNativeLocationUpdates(serviceGeneration)
-            stopActivityRecognition(serviceGeneration)
-            appContext.stopService(Intent(appContext, NitroBackgroundLocationService::class.java))
-            state = BackgroundLocationState.ERROR
-            errorDispatch
-        }
-        NitroGeoLog.e("background location error [$code]: $message", throwable)
-        runCatching { dispatchEvent(dispatch.second, dispatch.first, serviceGeneration) }
+    internal fun recordError(message: String, throwable: Throwable) =
+        recordError(ERROR_CODE_POSITION_UNAVAILABLE, message, throwable)
+
+    private fun clearError() {
+        lastError = null
+        prefs.edit()
+            .remove("lastErrorCode")
+            .remove("lastErrorCodeV2")
+            .remove("lastErrorMessage")
+            .remove("lastErrorAt")
+            .apply()
     }
 
-    internal fun recordError(
-        message: String,
-        throwable: Throwable,
-        expectedServiceGeneration: Long? = null
-    ) = recordError(
-        ERROR_CODE_POSITION_UNAVAILABLE,
-        message,
-        throwable,
-        expectedServiceGeneration
-    )
+    private fun currentLastError(): LocationError? {
+        lastError?.let { return it }
+        val message = prefs.getString("lastErrorMessage", null) ?: return null
+        val code = prefs.getString("lastErrorCodeV2", null)
+            ?.let(::locationErrorCodeFromWireValue)
+            ?: locationErrorCodeFromLegacyValue(prefs.getInt("lastErrorCode", 0))
+            ?: return null
+        return LocationError(code, message).also { lastError = it }
+    }
 
     @SuppressLint("MissingPermission")
     fun startNativeLocationUpdates(expectedGeneration: Long? = null) {

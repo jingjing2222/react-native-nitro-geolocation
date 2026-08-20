@@ -296,11 +296,7 @@ export default function AccuracyPresetsScreen() {
         message: "Permission-denied request unexpectedly resolved."
       });
     } catch (error) {
-      const maybeError = error as { code?: unknown };
-      const code =
-        typeof maybeError.code === "number"
-          ? maybeError.code
-          : LocationErrorCode.INTERNAL_ERROR;
+      const code = captureLocationError(error).code;
 
       setResult("denied", {
         status:

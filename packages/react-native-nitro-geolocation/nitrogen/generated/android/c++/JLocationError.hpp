@@ -10,6 +10,8 @@
 #include <fbjni/fbjni.h>
 #include "LocationError.hpp"
 
+#include "JLocationErrorCode.hpp"
+#include "LocationErrorCode.hpp"
 #include <string>
 
 namespace margelo::nitro::nitrogeolocation {
@@ -31,12 +33,12 @@ namespace margelo::nitro::nitrogeolocation {
     [[nodiscard]]
     LocationError toCpp() const {
       static const auto clazz = javaClassStatic();
-      static const auto fieldCode = clazz->getField<double>("code");
-      double code = this->getFieldValue(fieldCode);
+      static const auto fieldCode = clazz->getField<JLocationErrorCode>("code");
+      jni::local_ref<JLocationErrorCode> code = this->getFieldValue(fieldCode);
       static const auto fieldMessage = clazz->getField<jni::JString>("message");
       jni::local_ref<jni::JString> message = this->getFieldValue(fieldMessage);
       return LocationError(
-        code,
+        code->toCpp(),
         message->toStdString()
       );
     }
@@ -47,12 +49,12 @@ namespace margelo::nitro::nitrogeolocation {
      */
     [[maybe_unused]]
     static jni::local_ref<JLocationError::javaobject> fromCpp(const LocationError& value) {
-      using JSignature = JLocationError(double, jni::alias_ref<jni::JString>);
+      using JSignature = JLocationError(jni::alias_ref<JLocationErrorCode>, jni::alias_ref<jni::JString>);
       static const auto clazz = javaClassStatic();
       static const auto create = clazz->getStaticMethod<JSignature>("fromCpp");
       return create(
         clazz,
-        value.code,
+        JLocationErrorCode::fromCpp(value.code),
         jni::make_jstring(value.message)
       );
     }

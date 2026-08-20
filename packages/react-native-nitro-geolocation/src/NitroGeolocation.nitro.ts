@@ -197,12 +197,24 @@ export interface LocationSettingsOptions {
 }
 
 /**
+ * Stable Modern API error codes.
+ *
+ * These string values are intentionally separate from the numeric W3C codes
+ * exposed by `/compat`.
+ */
+export type LocationErrorCode =
+  | "internalError"
+  | "permissionDenied"
+  | "positionUnavailable"
+  | "timeout"
+  | "playServicesUnavailable"
+  | "settingsNotSatisfied";
+
+/**
  * Location error structure.
  */
 export interface LocationError {
-  // -1: INTERNAL_ERROR, 1: PERMISSION_DENIED, 2: POSITION_UNAVAILABLE,
-  // 3: TIMEOUT, 4: PLAY_SERVICE_NOT_AVAILABLE, 5: SETTINGS_NOT_SATISFIED
-  code: number;
+  code: LocationErrorCode;
   message: string;
 }
 

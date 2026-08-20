@@ -28,8 +28,10 @@
 #error NitroModules cannot be found! Are you sure you installed NitroModules properly?
 #endif
 
+// Forward declaration of `LocationErrorCode` to properly resolve imports.
+namespace margelo::nitro::nitrogeolocation { enum class LocationErrorCode; }
 
-
+#include "LocationErrorCode.hpp"
 #include <string>
 
 namespace margelo::nitro::nitrogeolocation {
@@ -39,12 +41,12 @@ namespace margelo::nitro::nitrogeolocation {
    */
   struct LocationError final {
   public:
-    double code     SWIFT_PRIVATE;
+    LocationErrorCode code     SWIFT_PRIVATE;
     std::string message     SWIFT_PRIVATE;
 
   public:
     LocationError() = default;
-    explicit LocationError(double code, std::string message): code(code), message(message) {}
+    explicit LocationError(LocationErrorCode code, std::string message): code(code), message(message) {}
 
   public:
     friend bool operator==(const LocationError& lhs, const LocationError& rhs) = default;
@@ -60,13 +62,13 @@ namespace margelo::nitro {
     static inline margelo::nitro::nitrogeolocation::LocationError fromJSI(jsi::Runtime& runtime, const jsi::Value& arg) {
       jsi::Object obj = arg.asObject(runtime);
       return margelo::nitro::nitrogeolocation::LocationError(
-        JSIConverter<double>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "code"))),
+        JSIConverter<margelo::nitro::nitrogeolocation::LocationErrorCode>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "code"))),
         JSIConverter<std::string>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "message")))
       );
     }
     static inline jsi::Value toJSI(jsi::Runtime& runtime, const margelo::nitro::nitrogeolocation::LocationError& arg) {
       jsi::Object obj(runtime);
-      obj.setProperty(runtime, PropNameIDCache::get(runtime, "code"), JSIConverter<double>::toJSI(runtime, arg.code));
+      obj.setProperty(runtime, PropNameIDCache::get(runtime, "code"), JSIConverter<margelo::nitro::nitrogeolocation::LocationErrorCode>::toJSI(runtime, arg.code));
       obj.setProperty(runtime, PropNameIDCache::get(runtime, "message"), JSIConverter<std::string>::toJSI(runtime, arg.message));
       return obj;
     }
@@ -78,7 +80,7 @@ namespace margelo::nitro {
       if (!nitro::isPlainObject(runtime, obj)) {
         return false;
       }
-      if (!JSIConverter<double>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "code")))) return false;
+      if (!JSIConverter<margelo::nitro::nitrogeolocation::LocationErrorCode>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "code")))) return false;
       if (!JSIConverter<std::string>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "message")))) return false;
       return true;
     }

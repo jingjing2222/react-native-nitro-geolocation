@@ -23,10 +23,8 @@ namespace margelo::nitro::nitrogeolocation { enum class AuthorizationLevel; }
 namespace margelo::nitro::nitrogeolocation { enum class LocationProvider; }
 // Forward declaration of `LocationError` to properly resolve imports.
 namespace margelo::nitro::nitrogeolocation { struct LocationError; }
-// Forward declaration of `LocationSettingsResult` to properly resolve imports.
-namespace margelo::nitro::nitrogeolocation { struct LocationSettingsResult; }
-// Forward declaration of `LocationSettingsOutcome` to properly resolve imports.
-namespace margelo::nitro::nitrogeolocation { enum class LocationSettingsOutcome; }
+// Forward declaration of `LocationErrorCode` to properly resolve imports.
+namespace margelo::nitro::nitrogeolocation { enum class LocationErrorCode; }
 // Forward declaration of `LocationSettingsOptions` to properly resolve imports.
 namespace margelo::nitro::nitrogeolocation { struct LocationSettingsOptions; }
 // Forward declaration of `LocationAccuracyOptions` to properly resolve imports.
@@ -82,11 +80,9 @@ namespace margelo::nitro::nitrogeolocation { struct HeadingOptions; }
 #include "LocationError.hpp"
 #include "JFunc_void_LocationError.hpp"
 #include "JLocationError.hpp"
-#include "LocationSettingsResult.hpp"
-#include "JFunc_void_LocationSettingsResult.hpp"
-#include "JLocationSettingsResult.hpp"
-#include "LocationSettingsOutcome.hpp"
-#include "JLocationSettingsOutcome.hpp"
+#include "LocationErrorCode.hpp"
+#include "JLocationErrorCode.hpp"
+#include "JFunc_void_LocationProviderStatus.hpp"
 #include "LocationSettingsOptions.hpp"
 #include "JLocationSettingsOptions.hpp"
 #include "LocationAccuracyOptions.hpp"

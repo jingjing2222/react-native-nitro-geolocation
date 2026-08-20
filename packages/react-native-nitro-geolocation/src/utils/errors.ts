@@ -1,30 +1,41 @@
-import type { LocationError as NativeLocationError } from "../NitroGeolocation.nitro";
+import type {
+  LocationError as NativeLocationError,
+  LocationErrorCode as NativeLocationErrorCode
+} from "../NitroGeolocation.nitro";
 
 /**
- * Error codes for geolocation errors.
- * Codes 1-3 match the W3C Geolocation API specification. Modern API also
- * exposes native location-provider/setup failures that cannot be represented
- * by the legacy browser contract.
+ * Readable Modern API error codes.
+ *
+ * `/compat` keeps the W3C numeric codes. The Modern API uses these string
+ * discriminants so logs and serialized errors remain meaningful without a
+ * numeric lookup table.
  */
-export enum LocationErrorCode {
+export const LocationErrorCode = {
   /** Unexpected module/native failure */
-  INTERNAL_ERROR = -1,
+  INTERNAL_ERROR: "internalError",
   /** User denied the request for Geolocation */
-  PERMISSION_DENIED = 1,
+  PERMISSION_DENIED: "permissionDenied",
   /** Location provider is unavailable */
-  POSITION_UNAVAILABLE = 2,
+  POSITION_UNAVAILABLE: "positionUnavailable",
   /** The request to get location timed out */
-  TIMEOUT = 3,
+  TIMEOUT: "timeout",
   /** Android Google Play Services provider is unavailable */
-  PLAY_SERVICE_NOT_AVAILABLE = 4,
+  PLAY_SERVICE_NOT_AVAILABLE: "playServicesUnavailable",
   /** Device/provider settings do not satisfy the request */
-  SETTINGS_NOT_SATISFIED = 5
-}
+  SETTINGS_NOT_SATISFIED: "settingsNotSatisfied"
+} as const satisfies Record<string, NativeLocationErrorCode>;
+
+export type LocationErrorCode =
+  (typeof LocationErrorCode)[keyof typeof LocationErrorCode];
 
 /**
  * Geolocation error object.
  */
 export type LocationError = NativeLocationError;
+
+const locationErrorCodes = new Set<LocationErrorCode>(
+  Object.values(LocationErrorCode)
+);
 
 const locationErrorCodeNames: Record<LocationErrorCode, string> = {
   [LocationErrorCode.INTERNAL_ERROR]: "INTERNAL_ERROR",
@@ -57,7 +68,16 @@ export function createLocationError(
   return { code, message };
 }
 
-export function getLocationErrorCodeName(code: number): string {
+export function isLocationErrorCode(
+  value: unknown
+): value is LocationErrorCode {
+  return (
+    typeof value === "string" &&
+    locationErrorCodes.has(value as LocationErrorCode)
+  );
+}
+
+export function getLocationErrorCodeName(code: unknown): string {
   return (
     locationErrorCodeNames[code as LocationErrorCode] ??
     "UNKNOWN_LOCATION_ERROR"

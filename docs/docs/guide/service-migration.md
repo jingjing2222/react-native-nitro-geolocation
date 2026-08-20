@@ -88,7 +88,7 @@ Use `locationProvider: 'android'` only when the legacy app intentionally used
 | default fused provider intent | `setConfiguration({ locationProvider: 'playServices' })` |
 | `position.mocked` | `GeolocationResponse.mocked` |
 | `position.provider` | `GeolocationResponse.provider` |
-| error code `-1`, `1`, `2`, `3`, `4`, `5` | `LocationErrorCode` |
+| numeric service error code | readable 2.x `LocationErrorCode` discriminant |
 
 `forceRequestLocation` has no direct Modern option. Preserve that fallback
 behavior manually only after reviewing the intended UX.

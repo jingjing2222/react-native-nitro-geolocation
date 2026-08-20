@@ -482,10 +482,12 @@ const token = watchPosition(
 unwatch(token);
 ```
 
-Modern API errors use the following codes. The expanded modern-only native
-setup/provider codes (`INTERNAL_ERROR`, `PLAY_SERVICE_NOT_AVAILABLE`, and
-`SETTINGS_NOT_SATISFIED`) were added in v1.2; codes 1-3 remain aligned with the
-legacy browser-style contract.
+Starting in 2.0, Modern API errors use readable string discriminants. Keep
+comparisons against the `LocationErrorCode` members shown below instead of
+copying their values. The expanded modern-only native setup/provider members
+(`INTERNAL_ERROR`, `PLAY_SERVICE_NOT_AVAILABLE`, and
+`SETTINGS_NOT_SATISFIED`) were originally added in v1.2; 2.0 keeps those member
+names while replacing every Modern numeric value with a string.
 
 The code is committed by the native layer before a `LocationError` is sent to
 JS. Both `watchPosition` error callbacks and public Promise rejections from
@@ -493,16 +495,18 @@ JS. Both `watchPosition` error callbacks and public Promise rejections from
 shape; JS only relays that object and does not parse or reclassify native
 messages.
 
-| Code | Name                         | Meaning                                      |
-| ---- | ---------------------------- | -------------------------------------------- |
-| -1   | `INTERNAL_ERROR`             | Unexpected module/native failure             |
-| 1    | `PERMISSION_DENIED`          | Location permission was denied               |
-| 2    | `POSITION_UNAVAILABLE`       | A position fix is unavailable                |
-| 3    | `TIMEOUT`                    | The request timed out                        |
-| 4    | `PLAY_SERVICE_NOT_AVAILABLE` | Android Google Play Services is unavailable  |
-| 5    | `SETTINGS_NOT_SATISFIED`     | Device/provider settings do not satisfy the request |
+| Value | Name                         | Meaning                                      |
+| ----- | ---------------------------- | -------------------------------------------- |
+| `internalError` | `INTERNAL_ERROR` | Unexpected module/native failure |
+| `permissionDenied` | `PERMISSION_DENIED` | Location permission was denied |
+| `positionUnavailable` | `POSITION_UNAVAILABLE` | A position fix is unavailable |
+| `timeout` | `TIMEOUT` | The request timed out |
+| `playServicesUnavailable` | `PLAY_SERVICE_NOT_AVAILABLE` | Android Google Play Services is unavailable |
+| `settingsNotSatisfied` | `SETTINGS_NOT_SATISFIED` | Device/provider settings do not satisfy the request |
 
-The `/compat` API keeps the legacy browser-style error contract with only `PERMISSION_DENIED`, `POSITION_UNAVAILABLE`, and `TIMEOUT`.
+The `/compat` API keeps the legacy numeric browser-style contract with only
+`PERMISSION_DENIED` (`1`), `POSITION_UNAVAILABLE` (`2`), and `TIMEOUT` (`3`).
+See [2.0 Error Migration](./v2-error-migration.md) for the 1.x-to-2.x mapping.
 
 ### getLastKnownPosition()
 
