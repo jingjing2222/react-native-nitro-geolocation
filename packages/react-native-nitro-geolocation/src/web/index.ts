@@ -18,6 +18,7 @@ import type {
   Heading,
   LocationAvailability,
   LocationProviderStatus,
+  LocationSettingsResult,
   ReverseGeocodedAddress
 } from "../publicTypes";
 import { LocationErrorCode } from "../utils/errors";
@@ -107,8 +108,13 @@ export async function getLocationAvailability(): Promise<LocationAvailability> {
 
 export function requestLocationSettings(
   _options?: LocationSettingsOptions
-): Promise<LocationProviderStatus> {
-  return getProviderStatus();
+): Promise<LocationSettingsResult> {
+  return getProviderStatus().then((providerStatus) => ({
+    outcome: providerStatus.locationServicesEnabled
+      ? "satisfied"
+      : "unavailable",
+    providerStatus
+  }));
 }
 
 export function getAccuracyAuthorization(): Promise<AccuracyAuthorization> {

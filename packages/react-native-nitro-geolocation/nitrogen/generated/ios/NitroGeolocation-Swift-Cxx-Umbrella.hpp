@@ -128,6 +128,10 @@ namespace margelo::nitro::nitrogeolocation { enum class LocationProvider; }
 namespace margelo::nitro::nitrogeolocation { struct LocationRequestOptions; }
 // Forward declaration of `LocationSettingsOptions` to properly resolve imports.
 namespace margelo::nitro::nitrogeolocation { struct LocationSettingsOptions; }
+// Forward declaration of `LocationSettingsOutcome` to properly resolve imports.
+namespace margelo::nitro::nitrogeolocation { enum class LocationSettingsOutcome; }
+// Forward declaration of `LocationSettingsResult` to properly resolve imports.
+namespace margelo::nitro::nitrogeolocation { struct LocationSettingsResult; }
 // Forward declaration of `PermissionStatus` to properly resolve imports.
 namespace margelo::nitro::nitrogeolocation { enum class PermissionStatus; }
 // Forward declaration of `ReverseGeocodedAddress` to properly resolve imports.
@@ -198,6 +202,8 @@ namespace margelo::nitro::nitrogeolocation { struct StoredBackgroundLocation; }
 #include "LocationProviderUsed.hpp"
 #include "LocationRequestOptions.hpp"
 #include "LocationSettingsOptions.hpp"
+#include "LocationSettingsOutcome.hpp"
+#include "LocationSettingsResult.hpp"
 #include "PermissionStatus.hpp"
 #include "ReverseGeocodedAddress.hpp"
 #include "StoredBackgroundEventEnvelope.hpp"

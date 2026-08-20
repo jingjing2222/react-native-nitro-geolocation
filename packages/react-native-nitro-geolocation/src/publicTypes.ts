@@ -18,6 +18,8 @@ import type {
   LocationAvailability as SchemaLocationAvailability,
   LocationProviderStatus as SchemaLocationProviderStatus,
   LocationProviderUsed as SchemaLocationProviderUsed,
+  LocationSettingsOutcome as SchemaLocationSettingsOutcome,
+  LocationSettingsResult as SchemaLocationSettingsResult,
   ReverseGeocodedAddress as SchemaReverseGeocodedAddress
 } from "./types";
 
@@ -30,6 +32,8 @@ type NativeLocationProvider = NonNullable<
 
 export type GeolocationResponse = SchemaGeolocationResponse;
 export type LocationProviderStatus = SchemaLocationProviderStatus;
+export type LocationSettingsOutcome = SchemaLocationSettingsOutcome;
+export type LocationSettingsResult = SchemaLocationSettingsResult;
 export type LocationAvailability = SchemaLocationAvailability;
 export type GeocodingCoordinates = SchemaGeocodingCoordinates;
 export type GeocodedLocation = SchemaGeocodedLocation;

@@ -18,7 +18,7 @@
 #include "JHybridNitroGeolocationSpec.hpp"
 #include "JFunc_void_PermissionStatus.hpp"
 #include "JFunc_void_LocationError.hpp"
-#include "JFunc_void_LocationProviderStatus.hpp"
+#include "JFunc_void_LocationSettingsResult.hpp"
 #include "JFunc_void_AccuracyAuthorization.hpp"
 #include "JFunc_void_GeolocationResponse.hpp"
 #include "JFunc_void_std__vector_GeocodedLocation_.hpp"
@@ -74,7 +74,7 @@ void registerAllNatives() {
   margelo::nitro::nitrogeolocation::JHybridNitroGeolocationSpec::CxxPart::registerNatives();
   margelo::nitro::nitrogeolocation::JFunc_void_PermissionStatus_cxx::registerNatives();
   margelo::nitro::nitrogeolocation::JFunc_void_LocationError_cxx::registerNatives();
-  margelo::nitro::nitrogeolocation::JFunc_void_LocationProviderStatus_cxx::registerNatives();
+  margelo::nitro::nitrogeolocation::JFunc_void_LocationSettingsResult_cxx::registerNatives();
   margelo::nitro::nitrogeolocation::JFunc_void_AccuracyAuthorization_cxx::registerNatives();
   margelo::nitro::nitrogeolocation::JFunc_void_GeolocationResponse_cxx::registerNatives();
   margelo::nitro::nitrogeolocation::JFunc_void_std__vector_GeocodedLocation__cxx::registerNatives();

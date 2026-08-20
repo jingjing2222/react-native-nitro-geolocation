@@ -54,8 +54,7 @@ class NitroGeolocation(
         AndroidLocationSettings(
             reactContext = reactContext,
             locationManager = locationManager,
-            createLocationError = ::createLocationError,
-            createPlayServicesUnavailableError = ::createPlayServicesUnavailableError
+            createLocationError = ::createLocationError
         )
     }
     private val fusedLocationClient by lazy {
@@ -212,7 +211,7 @@ class NitroGeolocation(
     }
 
     override fun requestLocationSettings(
-        success: (LocationProviderStatus) -> Unit,
+        success: (LocationSettingsResult) -> Unit,
         options: LocationSettingsOptions,
         error: ((LocationError) -> Unit)?
     ) {

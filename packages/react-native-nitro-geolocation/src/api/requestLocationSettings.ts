@@ -1,6 +1,6 @@
 import type { LocationSettingsOptions } from "../NitroGeolocation.nitro";
 import { NitroGeolocationHybridObject } from "../NitroGeolocationModule";
-import type { LocationProviderStatus } from "../publicTypes";
+import type { LocationSettingsResult } from "../publicTypes";
 
 /**
  * Android-only settings resolution API.
@@ -9,17 +9,15 @@ import type { LocationProviderStatus } from "../publicTypes";
  * location requirements and shows Android's native settings resolution dialog
  * when available.
  *
- * iOS: does not show a settings dialog and ignores `options`. It resolves with
- * the current Core Location status:
- * - `locationServicesEnabled`: `CLLocationManager.locationServicesEnabled()`
- * - `backgroundModeEnabled`: whether `UIBackgroundModes` contains `location`
- * - `gpsAvailable`, `networkAvailable`, `passiveAvailable`,
- *   `googlePlayServicesAvailable`, and `googleLocationAccuracyEnabled`:
- *   `undefined`
+ * Expected settings outcomes resolve with `outcome` and the latest
+ * `providerStatus`. Only request failures such as a concurrent request reject.
+ *
+ * iOS: does not show a settings dialog and ignores `options`. It reports
+ * `satisfied` when Core Location services are enabled, otherwise `unavailable`.
  */
 export function requestLocationSettings(
   options?: LocationSettingsOptions
-): Promise<LocationProviderStatus> {
+): Promise<LocationSettingsResult> {
   return new Promise((resolve, reject) => {
     NitroGeolocationHybridObject.requestLocationSettings(
       resolve,

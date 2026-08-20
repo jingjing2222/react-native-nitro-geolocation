@@ -124,11 +124,11 @@ class NitroGeolocation: HybridNitroGeolocationSpec {
     }
 
     func requestLocationSettings(
-        success: @escaping (LocationProviderStatus) -> Void,
+        success: @escaping (LocationSettingsResult) -> Void,
         options: LocationSettingsOptions,
         error: ((LocationError) -> Void)?
     ) throws -> Void {
-        success(createLocationProviderStatus())
+        success(createLocationSettingsResult())
     }
 
     func getAccuracyAuthorization() throws -> Promise<AccuracyAuthorization> {

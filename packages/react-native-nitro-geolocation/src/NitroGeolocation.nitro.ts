@@ -11,6 +11,7 @@ import type {
   LocationAccuracyOptions,
   LocationAvailability,
   LocationProviderStatus,
+  LocationSettingsResult,
   ReverseGeocodedAddress
 } from "./types";
 
@@ -281,12 +282,11 @@ export interface NitroGeolocation
    * location requirements and shows the native settings resolution dialog when
    * Android can resolve the mismatch.
    *
-   * iOS: does not show a settings dialog and ignores `options`. It resolves
-   * with `locationServicesEnabled`, `backgroundModeEnabled`, and `undefined`
-   * Android-specific provider fields.
+   * Expected platform outcomes resolve through a deterministic result object.
+   * iOS does not show a settings dialog and ignores `options`.
    */
   requestLocationSettings(
-    success: (status: LocationProviderStatus) => void,
+    success: (result: LocationSettingsResult) => void,
     options: LocationSettingsOptions,
     error?: (error: LocationError) => void
   ): void;

@@ -31,13 +31,6 @@ internal fun createLocationError(code: Double, message: String): LocationError {
     )
 }
 
-internal fun createPlayServicesUnavailableError(): LocationError {
-    return createLocationError(
-        PLAY_SERVICE_NOT_AVAILABLE,
-        "Google Play Services location provider is not available."
-    )
-}
-
 internal fun createPositionTimeoutError(options: ParsedOptions): LocationError {
     val timeoutSeconds = options.timeout / 1000.0
     val message = String.format("Unable to fetch location within %.1fs.", timeoutSeconds)

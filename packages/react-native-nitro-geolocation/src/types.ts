@@ -122,6 +122,24 @@ export interface LocationProviderStatus {
   googleLocationAccuracyEnabled?: boolean;
 }
 
+/** Expected outcome of a location settings resolution request. */
+export type LocationSettingsOutcome =
+  | "satisfied"
+  | "cancelled"
+  | "unavailable"
+  | "activityMissing";
+
+/**
+ * Deterministic result from `requestLocationSettings()`.
+ *
+ * Expected platform outcomes resolve through this object. Errors are reserved
+ * for failures of the request itself, such as a concurrent request.
+ */
+export interface LocationSettingsResult {
+  outcome: LocationSettingsOutcome;
+  providerStatus: LocationProviderStatus;
+}
+
 export interface CompatGeolocationResponse {
   coords: GeolocationCoordinates;
   timestamp: number;

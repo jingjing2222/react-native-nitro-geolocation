@@ -10,7 +10,7 @@ import NitroModules
 /// See ``HybridNitroGeolocationSpec``
 public protocol HybridNitroGeolocationSpec_protocol: HybridObject {
   // Properties
-  
+
 
   // Methods
   func setConfiguration(config: GeolocationConfiguration) throws -> Void
@@ -19,7 +19,7 @@ public protocol HybridNitroGeolocationSpec_protocol: HybridObject {
   func hasServicesEnabled() throws -> Promise<Bool>
   func getProviderStatus() throws -> Promise<LocationProviderStatus>
   func getLocationAvailability() throws -> Promise<LocationAvailability>
-  func requestLocationSettings(success: @escaping (_ status: LocationProviderStatus) -> Void, options: LocationSettingsOptions, error: ((_ error: LocationError) -> Void)?) throws -> Void
+  func requestLocationSettings(success: @escaping (_ result: LocationSettingsResult) -> Void, options: LocationSettingsOptions, error: ((_ error: LocationError) -> Void)?) throws -> Void
   func getAccuracyAuthorization() throws -> Promise<AccuracyAuthorization>
   func requestTemporaryFullAccuracy(purposeKey: String, success: @escaping (_ authorization: AccuracyAuthorization) -> Void, error: ((_ error: LocationError) -> Void)?) throws -> Void
   func getCurrentPosition(success: @escaping (_ position: GeolocationResponse) -> Void, options: LocationRequestOptions, error: ((_ error: LocationError) -> Void)?) throws -> Void

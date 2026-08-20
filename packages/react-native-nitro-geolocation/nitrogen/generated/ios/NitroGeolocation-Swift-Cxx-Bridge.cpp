@@ -64,6 +64,14 @@ namespace margelo::nitro::nitrogeolocation::bridge::swift {
     };
   }
 
+  // pragma MARK: std::function<void(const LocationSettingsResult& /* result */)>
+  Func_void_LocationSettingsResult create_Func_void_LocationSettingsResult(void* NON_NULL swiftClosureWrapper) noexcept {
+    auto swiftClosure = NitroGeolocation::Func_void_LocationSettingsResult::fromUnsafe(swiftClosureWrapper);
+    return [swiftClosure = std::move(swiftClosure)](const LocationSettingsResult& result) mutable -> void {
+      swiftClosure.call(result);
+    };
+  }
+
   // pragma MARK: std::function<void(AccuracyAuthorization /* result */)>
   Func_void_AccuracyAuthorization create_Func_void_AccuracyAuthorization(void* NON_NULL swiftClosureWrapper) noexcept {
     auto swiftClosure = NitroGeolocation::Func_void_AccuracyAuthorization::fromUnsafe(swiftClosureWrapper);

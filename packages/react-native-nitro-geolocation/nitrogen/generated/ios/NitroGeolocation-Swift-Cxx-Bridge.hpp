@@ -114,6 +114,10 @@ namespace margelo::nitro::nitrogeolocation { struct LocationProviderStatus; }
 namespace margelo::nitro::nitrogeolocation { enum class LocationProviderUsed; }
 // Forward declaration of `LocationProvider` to properly resolve imports.
 namespace margelo::nitro::nitrogeolocation { enum class LocationProvider; }
+// Forward declaration of `LocationSettingsOutcome` to properly resolve imports.
+namespace margelo::nitro::nitrogeolocation { enum class LocationSettingsOutcome; }
+// Forward declaration of `LocationSettingsResult` to properly resolve imports.
+namespace margelo::nitro::nitrogeolocation { struct LocationSettingsResult; }
 // Forward declaration of `PermissionStatus` to properly resolve imports.
 namespace margelo::nitro::nitrogeolocation { enum class PermissionStatus; }
 // Forward declaration of `ReverseGeocodedAddress` to properly resolve imports.
@@ -185,6 +189,8 @@ namespace NitroGeolocation { class HybridNitroGeolocationSpec_cxx; }
 #include "LocationProviderInternal.hpp"
 #include "LocationProviderStatus.hpp"
 #include "LocationProviderUsed.hpp"
+#include "LocationSettingsOutcome.hpp"
+#include "LocationSettingsResult.hpp"
 #include "PermissionStatus.hpp"
 #include "ReverseGeocodedAddress.hpp"
 #include "StoredBackgroundEventEnvelope.hpp"
@@ -461,6 +467,28 @@ namespace margelo::nitro::nitrogeolocation::bridge::swift {
   Func_void_LocationAvailability create_Func_void_LocationAvailability(void* NON_NULL swiftClosureWrapper) noexcept;
   inline Func_void_LocationAvailability_Wrapper wrap_Func_void_LocationAvailability(Func_void_LocationAvailability value) noexcept {
     return Func_void_LocationAvailability_Wrapper(std::move(value));
+  }
+
+  // pragma MARK: std::function<void(const LocationSettingsResult& /* result */)>
+  /**
+   * Specialized version of `std::function<void(const LocationSettingsResult&)>`.
+   */
+  using Func_void_LocationSettingsResult = std::function<void(const LocationSettingsResult& /* result */)>;
+  /**
+   * Wrapper class for a `std::function<void(const LocationSettingsResult& / * result * /)>`, this can be used from Swift.
+   */
+  class Func_void_LocationSettingsResult_Wrapper final {
+  public:
+    explicit Func_void_LocationSettingsResult_Wrapper(std::function<void(const LocationSettingsResult& /* result */)>&& func): _function(std::make_unique<std::function<void(const LocationSettingsResult& /* result */)>>(std::move(func))) {}
+    inline void call(LocationSettingsResult result) const noexcept {
+      _function->operator()(result);
+    }
+  private:
+    std::unique_ptr<std::function<void(const LocationSettingsResult& /* result */)>> _function;
+  } SWIFT_NONCOPYABLE;
+  Func_void_LocationSettingsResult create_Func_void_LocationSettingsResult(void* NON_NULL swiftClosureWrapper) noexcept;
+  inline Func_void_LocationSettingsResult_Wrapper wrap_Func_void_LocationSettingsResult(Func_void_LocationSettingsResult value) noexcept {
+    return Func_void_LocationSettingsResult_Wrapper(std::move(value));
   }
 
   // pragma MARK: std::optional<AndroidAccuracyPreset>

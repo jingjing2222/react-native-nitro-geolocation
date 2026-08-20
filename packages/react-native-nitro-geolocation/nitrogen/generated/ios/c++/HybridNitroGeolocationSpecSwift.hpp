@@ -26,6 +26,10 @@ namespace margelo::nitro::nitrogeolocation { struct LocationError; }
 namespace margelo::nitro::nitrogeolocation { struct LocationProviderStatus; }
 // Forward declaration of `LocationAvailability` to properly resolve imports.
 namespace margelo::nitro::nitrogeolocation { struct LocationAvailability; }
+// Forward declaration of `LocationSettingsResult` to properly resolve imports.
+namespace margelo::nitro::nitrogeolocation { struct LocationSettingsResult; }
+// Forward declaration of `LocationSettingsOutcome` to properly resolve imports.
+namespace margelo::nitro::nitrogeolocation { enum class LocationSettingsOutcome; }
 // Forward declaration of `LocationSettingsOptions` to properly resolve imports.
 namespace margelo::nitro::nitrogeolocation { struct LocationSettingsOptions; }
 // Forward declaration of `LocationAccuracyOptions` to properly resolve imports.
@@ -70,6 +74,8 @@ namespace margelo::nitro::nitrogeolocation { struct HeadingOptions; }
 #include <string>
 #include "LocationProviderStatus.hpp"
 #include "LocationAvailability.hpp"
+#include "LocationSettingsResult.hpp"
+#include "LocationSettingsOutcome.hpp"
 #include "LocationSettingsOptions.hpp"
 #include "LocationAccuracyOptions.hpp"
 #include "AndroidAccuracyPreset.hpp"
@@ -136,7 +142,7 @@ namespace margelo::nitro::nitrogeolocation {
 
   public:
     // Properties
-    
+
 
   public:
     // Methods
@@ -184,7 +190,7 @@ namespace margelo::nitro::nitrogeolocation {
       auto __value = std::move(__result.value());
       return __value;
     }
-    inline void requestLocationSettings(const std::function<void(const LocationProviderStatus& /* status */)>& success, const LocationSettingsOptions& options, const std::optional<std::function<void(const LocationError& /* error */)>>& error) override {
+    inline void requestLocationSettings(const std::function<void(const LocationSettingsResult& /* result */)>& success, const LocationSettingsOptions& options, const std::optional<std::function<void(const LocationError& /* error */)>>& error) override {
       auto __result = _swiftPart.requestLocationSettings(success, std::forward<decltype(options)>(options), error);
       if (__result.hasError()) [[unlikely]] {
         std::rethrow_exception(__result.error());
