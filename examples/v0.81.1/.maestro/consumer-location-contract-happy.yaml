@@ -2,10 +2,24 @@ appId: nitrogeolocation.example
 ---
 # Copyable consumer contract: a granted user can request and render a real fix.
 
-- launchApp:
-    clearState: true
-    permissions:
-      all: allow
+- runFlow:
+    when:
+      platform: Android
+    commands:
+      - launchApp:
+          clearState: true
+          permissions:
+            all: unset
+            location: allow
+- runFlow:
+    when:
+      platform: iOS
+    commands:
+      - launchApp:
+          clearState: true
+          permissions:
+            all: unset
+            location: inuse
 
 - runFlow:
     when:
