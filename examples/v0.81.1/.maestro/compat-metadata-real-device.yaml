@@ -31,9 +31,20 @@ appId: nitrogeolocation.example
 
 - tapOn:
     id: "compat-metadata-request-permission-button"
-- tapOn:
-    text: ".*(While using the app|앱 사용 중에만 허용|Allow|OK).*"
-    optional: true
+- runFlow:
+    when:
+      platform: Android
+    commands:
+      - tapOn:
+          text: ".*(While using the app|앱 사용 중에만 허용).*"
+          optional: true
+- runFlow:
+    when:
+      platform: iOS
+    commands:
+      - tapOn:
+          text: "Allow While Using App|앱을 사용하는 동안 허용|OK"
+          optional: true
 - extendedWaitUntil:
     visible: "Granted ✅"
     timeout: 10000
