@@ -117,6 +117,31 @@ describe("compat web API", () => {
     });
   });
 
+  it("snapshots current-position metadata opt-in at registration", () => {
+    let callback:
+      | ((position: ReturnType<typeof createBrowserPosition>) => void)
+      | undefined;
+    setNavigator({
+      geolocation: {
+        getCurrentPosition: vi.fn((success) => {
+          callback = success;
+        }),
+        watchPosition: vi.fn(),
+        clearWatch: vi.fn()
+      }
+    });
+    const options = { includeExtraMetadata: true };
+    const success = vi.fn();
+
+    getCurrentPosition(success, undefined, options);
+    options.includeExtraMetadata = false;
+    callback?.(createBrowserPosition());
+
+    expect(success.mock.calls[0][0]).toEqual(
+      expect.objectContaining({ provider: "unknown" })
+    );
+  });
+
   it("getCurrentPosition forwards mapped error to error callback", () => {
     setNavigator({
       geolocation: {
@@ -310,6 +335,33 @@ describe("compat web API", () => {
       timeout: undefined,
       maximumAge: undefined
     });
+  });
+
+  it("snapshots watch metadata opt-in at registration", () => {
+    let callback:
+      | ((position: ReturnType<typeof createBrowserPosition>) => void)
+      | undefined;
+    setNavigator({
+      geolocation: {
+        getCurrentPosition: vi.fn(),
+        watchPosition: vi.fn((success) => {
+          callback = success;
+          return 101;
+        }),
+        clearWatch: vi.fn()
+      }
+    });
+    const options = { includeExtraMetadata: false };
+    const success = vi.fn();
+
+    watchPosition(success, undefined, options);
+    options.includeExtraMetadata = true;
+    callback?.(createBrowserPosition());
+
+    expect(Object.keys(success.mock.calls[0][0])).toEqual([
+      "coords",
+      "timestamp"
+    ]);
   });
 
   it("watchPosition forwards mapped error to error callback", () => {

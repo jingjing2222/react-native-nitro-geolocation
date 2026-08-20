@@ -79,6 +79,7 @@ export function getCurrentPosition(
   error?: (error: CompatGeolocationError) => void,
   options?: CompatGeolocationOptions
 ): void {
+  const includeExtraMetadata = options?.includeExtraMetadata === true;
   const geo = getGeolocation();
   if (!geo) {
     error?.({
@@ -91,7 +92,7 @@ export function getCurrentPosition(
     return;
   }
   geo.getCurrentPosition(
-    (pos) => success(mapPosition(pos, options?.includeExtraMetadata === true)),
+    (pos) => success(mapPosition(pos, includeExtraMetadata)),
     error ? (err) => error(mapError(err)) : undefined,
     options
       ? {
@@ -120,6 +121,7 @@ export function watchPosition(
   error?: (error: CompatGeolocationError) => void,
   options?: CompatGeolocationOptions
 ): number {
+  const includeExtraMetadata = options?.includeExtraMetadata === true;
   const geo = getGeolocation();
   if (!geo) {
     error?.({
@@ -132,7 +134,7 @@ export function watchPosition(
     return -1;
   }
   const watchId = geo.watchPosition(
-    (pos) => success(mapPosition(pos, options?.includeExtraMetadata === true)),
+    (pos) => success(mapPosition(pos, includeExtraMetadata)),
     error ? (err) => error(mapError(err)) : undefined,
     options
       ? {

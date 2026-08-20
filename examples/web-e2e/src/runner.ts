@@ -40,7 +40,6 @@ import {
 import { postNativeStatus } from "./nativeBridge";
 import { runStep } from "./scenarioRunner";
 import { scenarios } from "./scenarios";
-
 function wait(ms: number) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
@@ -530,8 +529,10 @@ export async function runSuccessSuite() {
         "unwatch",
         "stop-observing",
         "compat-get-current-position",
+        "compat-metadata-get-current-position",
         "compat-watch-position",
-        "compat-stop-observing"
+        "compat-stop-observing",
+        "compat-metadata-watch-position"
       ].includes(scenario.id) && scenario.status !== "pass"
   );
   if (failedScenarios.length > 0) {

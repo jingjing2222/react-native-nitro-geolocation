@@ -56,6 +56,8 @@ export default function CompatMetadataScreen() {
   const [permissionStatus, setPermissionStatus] = useState("Unknown");
   const [defaultCurrent, setDefaultCurrent] =
     useState<GeolocationResponse | null>(null);
+  const [explicitFalseCurrent, setExplicitFalseCurrent] =
+    useState<GeolocationResponse | null>(null);
   const [metadataCurrent, setMetadataCurrent] =
     useState<GeolocationResponseWithMetadata | null>(null);
   const [defaultWatch, setDefaultWatch] = useState<GeolocationResponse | null>(
@@ -119,12 +121,31 @@ export default function CompatMetadataScreen() {
     );
   };
 
+  const getExplicitFalseCurrent = () => {
+    setExplicitFalseCurrent(null);
+    Geolocation.getCurrentPosition(
+      setExplicitFalseCurrent,
+      (error) => Alert.alert("Explicit False Position Error", error.message),
+      {
+        includeExtraMetadata: false,
+        enableHighAccuracy: true,
+        timeout: 15000,
+        maximumAge: 10000
+      }
+    );
+  };
+
   const startDefaultWatch = () => {
     setDefaultWatch(null);
     const watchId = Geolocation.watchPosition(
       setDefaultWatch,
       (error) => Alert.alert("Default Watch Error", error.message),
-      { enableHighAccuracy: true, distanceFilter: 0, interval: 1000 }
+      {
+        includeExtraMetadata: false,
+        enableHighAccuracy: true,
+        distanceFilter: 0,
+        interval: 1000
+      }
     );
     defaultWatchRef.current = watchId;
     setDefaultWatchId(watchId);
@@ -191,6 +212,16 @@ export default function CompatMetadataScreen() {
           testID="compat-default-current-result"
         />
         <ScenarioButton
+          title="Get Explicit False Response"
+          onPress={getExplicitFalseCurrent}
+          color="#1976D2"
+          testID="compat-false-current-button"
+        />
+        <PositionShape
+          position={explicitFalseCurrent}
+          testID="compat-false-current-result"
+        />
+        <ScenarioButton
           title="Get Response with Metadata"
           onPress={getMetadataCurrent}
           color="#7B1FA2"
@@ -205,7 +236,7 @@ export default function CompatMetadataScreen() {
       <ScenarioSection index={3} title="Concurrent Watches" divided>
         <ButtonRow>
           <ScenarioButton
-            title="Start Default Watch"
+            title="Start Explicit False Watch"
             onPress={startDefaultWatch}
             disabled={defaultWatchId !== null}
             color="#FF9800"

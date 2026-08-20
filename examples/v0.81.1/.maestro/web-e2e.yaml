@@ -146,6 +146,14 @@ appId: nitrogeolocation.example
     longitude: 126.9856
 
 - extendedWaitUntil:
+    visible: "compat-metadata-watch-position: running: move-for-compat-metadata-watch-position"
+    timeout: 40000
+
+- setLocation:
+    latitude: 37.5748
+    longitude: 126.9863
+
+- extendedWaitUntil:
     visible: "success-suite: pass"
     timeout: 20000
 

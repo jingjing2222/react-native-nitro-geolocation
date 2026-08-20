@@ -308,9 +308,15 @@ against the device OS and the returned sample.
 ### `compat-metadata.yaml`
 - Verifies the opt-in `/compat` integrity metadata contract on native builds
 - Confirms default current and watch responses have exactly `coords,timestamp`
+- Confirms explicit `includeExtraMetadata: false` current/watch calls keep that exact shape
 - Confirms opted-in current and watch responses expose simulated-location metadata
 - Runs default and opted-in watches concurrently to prove their response shapes stay independent
-- Uses `setLocation`, so it covers the `mocked: true` simulator path; physical-device false/absence checks remain manual
+- Uses `setLocation`, so it covers the `mocked: true` simulator path
+
+### `compat-metadata-real-device.yaml`
+- Physical-device-only compat integrity check; it intentionally does not use `setLocation`
+- Confirms an opted-in real location reports `Mocked: false` plus a provider value
+- Not included in `all-tests.yaml` because simulators cannot supply this non-mocked contract reliably
 
 ### `all-tests.yaml`
 - Master flow that runs all platform-compatible tests sequentially
