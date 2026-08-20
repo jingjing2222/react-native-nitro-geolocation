@@ -11,6 +11,7 @@ import type {
 } from "react-native-nitro-geolocation";
 import {
   getLocationReadiness,
+  requestLocationSettings,
   selectProvider
 } from "react-native-nitro-geolocation";
 import type { GeolocationOptions as CompatGeolocationOptions } from "react-native-nitro-geolocation/compat";

@@ -15,6 +15,7 @@ import AndroidRequestOptionsScreen, {
 import ApiErrorsScreen from "./screens/ApiErrorsScreen";
 import BackgroundE2EScreen from "./screens/BackgroundE2EScreen";
 import CancellableCurrentPositionScreen from "./screens/CancellableCurrentPositionScreen";
+import CompatMetadataScreen from "./screens/CompatMetadataScreen";
 import CompatScreen from "./screens/CompatScreen";
 import CurrentPositionScreen from "./screens/CurrentPositionScreen";
 import DefaultScreen from "./screens/DefaultScreen";
@@ -33,6 +34,7 @@ import Issue122Screen from "./screens/Issue122Screen";
 import Issue132Screen from "./screens/Issue132Screen";
 import LastKnownPositionScreen from "./screens/LastKnownPositionScreen";
 import LocationAvailabilityScreen from "./screens/LocationAvailabilityScreen";
+import LocationQualityMetadataScreen from "./screens/LocationQualityMetadataScreen";
 import LocationReadinessScreen from "./screens/LocationReadinessScreen";
 import LocationSimulationScreen from "./screens/LocationSimulationScreen";
 import { LongRunBackgroundE2EScreen } from "./screens/LongRunBackgroundE2EScreen";
@@ -41,6 +43,7 @@ import PermissionCheckScreen from "./screens/PermissionCheckScreen";
 import PermissionDetailsScreen from "./screens/PermissionDetailsScreen";
 import ProviderSettingsScreen from "./screens/ProviderSettingsScreen";
 import ProviderStatusWatcherScreen from "./screens/ProviderStatusWatcherScreen";
+import WatchObservabilityScreen from "./screens/WatchObservabilityScreen";
 import WatchPositionScreen from "./screens/WatchPositionScreen";
 import WebE2EScreen from "./screens/WebE2EScreen";
 
@@ -51,6 +54,7 @@ const linking = {
     screens: {
       Default: "",
       Compat: "compat",
+      CompatMetadata: "compat-metadata",
       PermissionCheck: "permission-check",
       PermissionDetails: "permission-details",
       CurrentPosition: "current-position",
@@ -305,6 +309,11 @@ export default function App() {
           <Tab.Screen
             name="WebE2E"
             component={WebE2EScreen}
+            options={hiddenTabOptions}
+          />
+          <Tab.Screen
+            name="CompatMetadata"
+            component={CompatMetadataScreen}
             options={hiddenTabOptions}
           />
           <Tab.Screen

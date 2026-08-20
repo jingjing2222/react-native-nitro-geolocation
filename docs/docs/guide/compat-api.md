@@ -49,6 +49,7 @@ do not expose a standalone geolocation authorization prompt.
 - [`requestAuthorization`](#requestauthorization)
 - [`getCurrentPosition`](#getcurrentposition)
 - [`watchPosition`](#watchposition)
+- [Opt-in integrity metadata](#opt-in-integrity-metadata)
 - [`clearWatch`](#clearwatch)
 - [`stopObserving`](#stopobserving)
 
@@ -131,6 +132,7 @@ Geolocation.getCurrentPosition(
     activityType?: 'other' | 'automotiveNavigation' | 'fitness' | 'otherNavigation' | 'airborne';
     pausesLocationUpdatesAutomatically?: boolean;
     showsBackgroundLocationIndicator?: boolean;
+    includeExtraMetadata?: boolean;
   }
 );
 ```
@@ -144,6 +146,7 @@ Supported options:
 - `activityType` (iOS only) - Core Location activity type.
 - `pausesLocationUpdatesAutomatically` (iOS only) - Core Location automatic pause behavior.
 - `showsBackgroundLocationIndicator` (iOS only) - Shows the iOS background location indicator when the app has background location capability and permission.
+- `includeExtraMetadata` - Set to `true` to opt this call into the metadata response described in [Opt-in integrity metadata](#opt-in-integrity-metadata). Omit it or pass `false` to keep the exact community response shape. This JS-only flag is not forwarded to the native location request.
 
 ### `watchPosition()`
 
@@ -185,6 +188,7 @@ Geolocation.watchPosition(
     activityType?: 'other' | 'automotiveNavigation' | 'fitness' | 'otherNavigation' | 'airborne';
     pausesLocationUpdatesAutomatically?: boolean;
     showsBackgroundLocationIndicator?: boolean;
+    includeExtraMetadata?: boolean;
   }
 ) => number;
 ```
@@ -199,11 +203,65 @@ Supported options:
 - `activityType` (iOS only) - Core Location activity type.
 - `pausesLocationUpdatesAutomatically` (iOS only) - Core Location automatic pause behavior.
 - `showsBackgroundLocationIndicator` (iOS only) - Shows the iOS background location indicator when the app has background location capability and permission.
+- `includeExtraMetadata` - Set to `true` to opt this watch subscription into the metadata response described below. Other watches, including concurrent default watches, keep the exact community response shape.
 
 `timeout`, `maximumAge`, and `fastestInterval` are part of the legacy option
 type for compatibility, but native `/compat` watches do not use them. On web,
 `watchPosition()` forwards `timeout`, `maximumAge`, and `enableHighAccuracy` to
 `navigator.geolocation`.
+
+### Opt-in integrity metadata
+
+The default `/compat` response remains exactly `{ coords, timestamp }` in both
+TypeScript and at runtime. Existing callers do not receive extra own-properties,
+including properties whose value would be `undefined`.
+
+New callers can request mock/provider metadata for one current-position call or
+one watch subscription:
+
+```ts
+import Geolocation from 'react-native-nitro-geolocation/compat';
+import type {
+  GeolocationOptionsWithMetadata,
+  GeolocationResponseWithMetadata,
+} from 'react-native-nitro-geolocation/compat';
+
+const options: GeolocationOptionsWithMetadata = {
+  includeExtraMetadata: true,
+  enableHighAccuracy: true,
+};
+
+Geolocation.getCurrentPosition(
+  (position: GeolocationResponseWithMetadata) => {
+    if (position.mocked === true) {
+      console.warn('The platform marked this sample as simulated');
+    }
+
+    console.log(position.provider);
+  },
+  undefined,
+  options,
+);
+```
+
+The opt-in response adds:
+
+- `mocked?: boolean` - `true` or `false` only when the platform reports the
+  value. Absence means unknown; it must not be treated as `false`. Android uses
+  the platform mock-location marker. iOS uses `CLLocation.sourceInformation`
+  on iOS 15 and newer when it is present.
+- `provider?: 'fused' | 'gps' | 'network' | 'passive' | 'unknown'` - The native
+  provider where it can be identified. iOS and web report `unknown`.
+
+The option is per call/subscription rather than global. A default watch and an
+opted-in watch can run concurrently without changing each other's response
+shape. Native apps must rebuild after upgrading because the opted-in path uses
+new native methods. If newer JavaScript is delivered OTA to an older native
+binary, the option safely falls back to the default `{ coords, timestamp }`
+shape. Gate any code that requires metadata on rollout of the matching native
+binary; the metadata fields remain optional for this reason. On web, `mocked`
+is omitted because browser geolocation does not expose that signal, and
+`provider` is `unknown`.
 
 ### `clearWatch()`
 

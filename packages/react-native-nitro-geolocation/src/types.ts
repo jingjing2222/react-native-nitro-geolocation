@@ -155,6 +155,14 @@ export interface CompatGeolocationResponse {
   timestamp: number;
 }
 
+/** Internal Nitro response used only by explicit Compat metadata calls. */
+export interface CompatGeolocationResponseWithMetadataInternal {
+  coords: GeolocationCoordinates;
+  timestamp: number;
+  mocked?: boolean;
+  provider: LocationProviderUsed;
+}
+
 export interface CompatGeolocationError {
   code: number;
   message: string;

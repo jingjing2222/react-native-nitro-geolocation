@@ -115,3 +115,4 @@ appId: nitrogeolocation.example
     file: mocked-metadata-ios-true.yaml
 - runFlow: api-errors.yaml
 - runFlow: compat-api.yaml
+- runFlow: compat-metadata.yaml

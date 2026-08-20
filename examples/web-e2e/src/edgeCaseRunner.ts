@@ -1,4 +1,5 @@
 import {
+  LocationErrorCode,
   getCurrentPosition,
   getPermissionDetails
 } from "react-native-nitro-geolocation";
@@ -18,7 +19,7 @@ export async function runDeniedCheck() {
     );
   } catch (error) {
     const code = getErrorCode(error);
-    if (code === 1) {
+    if (code === LocationErrorCode.PERMISSION_DENIED) {
       setScenario("permission-details-after-denial", "running");
       try {
         const details = await getPermissionDetails();
@@ -37,11 +38,11 @@ export async function runDeniedCheck() {
     }
     setScenario(
       "permission-denied",
-      code === 1 ? "pass" : "fail",
+      code === LocationErrorCode.PERMISSION_DENIED ? "pass" : "fail",
       error,
-      code === 1
+      code === LocationErrorCode.PERMISSION_DENIED
         ? "Browser returned PERMISSION_DENIED."
-        : `Expected PERMISSION_DENIED code 1, got ${String(code)}.`
+        : `Expected permissionDenied, got ${String(code)}.`
     );
   }
 }
@@ -62,14 +63,19 @@ export async function runUnavailableCheck() {
     );
   } catch (error) {
     const code = getErrorCode(error);
-    const status = code === 2 ? "pass" : code === 3 ? "manual" : "fail";
+    const status =
+      code === LocationErrorCode.POSITION_UNAVAILABLE
+        ? "pass"
+        : code === LocationErrorCode.TIMEOUT
+          ? "manual"
+          : "fail";
     setScenario(
       "position-unavailable",
       status,
       error,
-      code === 2
+      code === LocationErrorCode.POSITION_UNAVAILABLE
         ? "Browser returned POSITION_UNAVAILABLE."
-        : code === 3
+        : code === LocationErrorCode.TIMEOUT
           ? "Browser returned TIMEOUT while provider/location services were disabled. Platform does not expose provider-disabled state."
           : `Expected POSITION_UNAVAILABLE or platform TIMEOUT, got ${String(code)}.`
     );
@@ -94,9 +100,9 @@ export async function runTimeoutCheck() {
     const code = getErrorCode(error);
     setScenario(
       "timeout",
-      code === 3 ? "pass" : "manual",
+      code === LocationErrorCode.TIMEOUT ? "pass" : "manual",
       error,
-      code === 3
+      code === LocationErrorCode.TIMEOUT
         ? "Browser returned TIMEOUT."
         : `Got ${String(code)}. Timeout is browser/provider timing dependent.`
     );

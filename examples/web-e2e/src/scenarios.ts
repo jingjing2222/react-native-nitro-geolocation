@@ -142,6 +142,12 @@ export const scenarios: Scenario[] = [
     status: "idle"
   },
   {
+    id: "compat-metadata-get-current-position",
+    title: "compat getCurrentPosition metadata opt-in",
+    detail: "Opt-in browser response exposes provider without mocked state.",
+    status: "idle"
+  },
+  {
     id: "compat-watch-position",
     title: "compat watchPosition + clearWatch",
     detail: "Compat watch emits coords, clearWatch stops subsequent callbacks.",
@@ -151,6 +157,13 @@ export const scenarios: Scenario[] = [
     id: "compat-stop-observing",
     title: "compat stopObserving clears all watches",
     detail: "stopObserving clears every active compat watch.",
+    status: "idle"
+  },
+  {
+    id: "compat-metadata-watch-position",
+    title: "compat watchPosition metadata opt-in",
+    detail:
+      "Opt-in browser watch keeps provider metadata for its subscription.",
     status: "idle"
   },
   {

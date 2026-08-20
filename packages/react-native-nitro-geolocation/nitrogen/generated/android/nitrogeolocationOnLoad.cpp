@@ -28,6 +28,7 @@
 #include "JFunc_void.hpp"
 #include "JFunc_void_CompatGeolocationError.hpp"
 #include "JFunc_void_CompatGeolocationResponse.hpp"
+#include "JFunc_void_CompatGeolocationResponseWithMetadataInternal.hpp"
 #include "JHybridNitroBackgroundLocationSpec.hpp"
 #include "JFunc_void_BackgroundEventEnvelope.hpp"
 #include "JFunc_void_BackgroundLocation.hpp"
@@ -85,6 +86,7 @@ void registerAllNatives() {
   margelo::nitro::nitrogeolocation::JFunc_void_cxx::registerNatives();
   margelo::nitro::nitrogeolocation::JFunc_void_CompatGeolocationError_cxx::registerNatives();
   margelo::nitro::nitrogeolocation::JFunc_void_CompatGeolocationResponse_cxx::registerNatives();
+  margelo::nitro::nitrogeolocation::JFunc_void_CompatGeolocationResponseWithMetadataInternal_cxx::registerNatives();
   margelo::nitro::nitrogeolocation::JHybridNitroBackgroundLocationSpec::CxxPart::registerNatives();
   margelo::nitro::nitrogeolocation::JFunc_void_BackgroundEventEnvelope_cxx::registerNatives();
   margelo::nitro::nitrogeolocation::JFunc_void_BackgroundLocation_cxx::registerNatives();
