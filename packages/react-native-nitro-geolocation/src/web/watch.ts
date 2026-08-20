@@ -26,6 +26,7 @@ import {
 } from "./permissionDetailsEvidence";
 import {
   clearWebPermissionEvidence,
+  rememberWebPermissionDenial,
   rememberWebPermissionGrant
 } from "./permissionEvidence";
 
@@ -160,7 +161,7 @@ export function watchPosition(
     (browserError) => {
       const mappedError = mapBrowserError(browserError);
       if (mappedError.code === LocationErrorCode.PERMISSION_DENIED) {
-        clearWebPermissionEvidence();
+        rememberWebPermissionDenial();
         rememberWebPermissionDetailsEvidence("denied");
       }
       error?.(mappedError);

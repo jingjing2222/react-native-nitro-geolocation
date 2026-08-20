@@ -204,7 +204,5 @@ appId: nitrogeolocation.example
     optional: true
 
 - extendedWaitUntil:
-    visible: "permission-denied: pass"
+    visible: "location-readiness-after-denial: pass"
     timeout: 20000
-
-- assertVisible: "permission denied -> PERMISSION_DENIED"

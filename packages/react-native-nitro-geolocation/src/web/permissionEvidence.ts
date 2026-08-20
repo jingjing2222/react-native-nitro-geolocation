@@ -1,22 +1,29 @@
 import type { PermissionStatus } from "../NitroGeolocation.nitro";
 
+type ObservedPermissionStatus = Extract<PermissionStatus, "granted" | "denied">;
+
 const permissionEvidenceMaxAgeMs = 30_000;
-let lastGrantedAt: number | undefined;
+let evidence:
+  | { status: ObservedPermissionStatus; observedAt: number }
+  | undefined;
 
 export function rememberWebPermissionGrant(now = Date.now()): void {
-  lastGrantedAt = now;
+  evidence = { status: "granted", observedAt: now };
+}
+
+export function rememberWebPermissionDenial(now = Date.now()): void {
+  evidence = { status: "denied", observedAt: now };
 }
 
 export function clearWebPermissionEvidence(): void {
-  lastGrantedAt = undefined;
+  evidence = undefined;
 }
 
 export function applyRecentWebPermissionEvidence(
   permission: PermissionStatus,
   now: number
 ): PermissionStatus {
-  const evidenceAgeMs =
-    lastGrantedAt === undefined ? undefined : now - lastGrantedAt;
+  const evidenceAgeMs = evidence ? now - evidence.observedAt : undefined;
 
   if (
     evidenceAgeMs !== undefined &&
@@ -26,12 +33,8 @@ export function applyRecentWebPermissionEvidence(
     return permission;
   }
 
-  if (
-    permission === "undetermined" &&
-    evidenceAgeMs !== undefined &&
-    evidenceAgeMs <= permissionEvidenceMaxAgeMs
-  ) {
-    return "granted";
+  if (permission === "undetermined" && evidenceAgeMs !== undefined) {
+    return evidence?.status ?? permission;
   }
 
   return permission;

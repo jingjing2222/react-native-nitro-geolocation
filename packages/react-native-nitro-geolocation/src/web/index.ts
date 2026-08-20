@@ -49,6 +49,7 @@ import {
 import {
   applyRecentWebPermissionEvidence,
   clearWebPermissionEvidence,
+  rememberWebPermissionDenial,
   rememberWebPermissionGrant
 } from "./permissionEvidence";
 export {
@@ -82,7 +83,7 @@ export async function checkPermission(): Promise<PermissionStatus> {
     const permission = status
       ? mapPermissionState(status.state)
       : "undetermined";
-    if (permission === "denied") {
+    if (status) {
       clearWebPermissionEvidence();
     }
     return permission;
@@ -179,7 +180,10 @@ export async function getLocationAvailability(): Promise<LocationAvailability> {
     };
   }
 
-  const permission = await checkPermission();
+  const permission = applyRecentWebPermissionEvidence(
+    await checkPermission(),
+    Date.now()
+  );
   if (permission === "denied" || permission === "restricted") {
     return {
       available: false,
@@ -198,9 +202,12 @@ export async function getLocationReadiness(): Promise<LocationReadiness> {
   ]);
   const cachedPosition = readLastKnownPosition();
   const now = Date.now();
+  const observedPermission = applyRecentWebPermissionEvidence(permission, now);
 
   return buildLocationReadiness({
-    permission: applyRecentWebPermissionEvidence(permission, now),
+    permission: observedPermission,
+    deniedPermissionIsAmbiguous:
+      permission === "undetermined" && observedPermission === "denied",
     environmentSupported: Boolean(getGeolocation()),
     providerStatus,
     availability,
@@ -266,7 +273,7 @@ export function getCurrentPosition(
   ): LocationError => {
     const mappedError = mapBrowserError(error);
     if (mappedError.code === LocationErrorCode.PERMISSION_DENIED) {
-      clearWebPermissionEvidence();
+      rememberWebPermissionDenial();
       rememberWebPermissionDetailsEvidence("denied");
     }
     return mappedError;

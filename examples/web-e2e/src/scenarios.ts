@@ -178,6 +178,13 @@ export const scenarios: Scenario[] = [
     status: "idle"
   },
   {
+    id: "location-readiness-after-denial",
+    title: "getLocationReadiness after denial",
+    detail:
+      "Uses bounded denial evidence when browser permission state is unavailable.",
+    status: "idle"
+  },
+  {
     id: "position-unavailable",
     title: "provider unavailable -> POSITION_UNAVAILABLE",
     detail: "Run with permission granted but no browser provider/location.",

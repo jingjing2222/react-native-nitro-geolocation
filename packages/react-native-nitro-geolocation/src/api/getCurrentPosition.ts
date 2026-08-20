@@ -20,7 +20,8 @@ function createCurrentPositionRequestId(): string {
 
 function raceDevtoolsRequestWithSignal(
   request: Promise<GeolocationResponse>,
-  signal: AbortSignal
+  signal: AbortSignal,
+  observePosition: (position: GeolocationResponse) => GeolocationResponse
 ): Promise<GeolocationResponse> {
   return new Promise((resolve, reject) => {
     let settled = false;
@@ -34,7 +35,7 @@ function raceDevtoolsRequestWithSignal(
 
     signal.addEventListener("abort", handleAbort, { once: true });
     request.then(
-      (position) => finish(() => resolve(position)),
+      (position) => finish(() => resolve(observePosition(position))),
       (error) => finish(() => reject(error))
     );
   });
@@ -87,11 +88,14 @@ export function getCurrentPosition(
   if (isDevtoolsEnabled()) {
     const devtoolsResult = getDevtoolsCurrentPosition();
     if (devtoolsResult) {
-      const decoratedResult = devtoolsResult.then(rememberCurrentPosition);
       if (signal) {
-        return raceDevtoolsRequestWithSignal(decoratedResult, signal);
+        return raceDevtoolsRequestWithSignal(
+          devtoolsResult,
+          signal,
+          rememberCurrentPosition
+        );
       }
-      return decoratedResult;
+      return devtoolsResult.then(rememberCurrentPosition);
     }
   }
 

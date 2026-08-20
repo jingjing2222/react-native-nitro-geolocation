@@ -1,11 +1,15 @@
 import {
   LocationErrorCode,
   getCurrentPosition,
+  getLocationReadiness,
   getPermissionDetails
 } from "react-native-nitro-geolocation";
 import { setScenario } from "./dom";
 import { getErrorCode } from "./locationAssertions";
-import { expectPostDenialPermissionDetails } from "./permissionDetailsAssertions";
+import {
+  expectPostDenialLocationReadiness,
+  expectPostDenialPermissionDetails
+} from "./permissionDetailsAssertions";
 
 export async function runDeniedCheck() {
   setScenario("permission-denied", "running");
@@ -19,31 +23,53 @@ export async function runDeniedCheck() {
     );
   } catch (error) {
     const code = getErrorCode(error);
-    if (code === LocationErrorCode.PERMISSION_DENIED) {
-      setScenario("permission-details-after-denial", "running");
-      try {
-        const details = await getPermissionDetails();
-        await expectPostDenialPermissionDetails(details);
-        setScenario("permission-details-after-denial", "pass", details);
-      } catch (detailsError) {
-        setScenario("permission-details-after-denial", "fail", detailsError);
-        setScenario(
-          "permission-denied",
-          "fail",
-          detailsError,
-          "Browser denied location, but detailed permission state was inconsistent."
-        );
-        return;
-      }
+    if (code !== LocationErrorCode.PERMISSION_DENIED) {
+      setScenario(
+        "permission-denied",
+        "fail",
+        error,
+        `Expected permissionDenied, got ${String(code)}.`
+      );
+      return;
     }
+
     setScenario(
       "permission-denied",
-      code === LocationErrorCode.PERMISSION_DENIED ? "pass" : "fail",
+      "pass",
       error,
-      code === LocationErrorCode.PERMISSION_DENIED
-        ? "Browser returned PERMISSION_DENIED."
-        : `Expected permissionDenied, got ${String(code)}.`
+      "Browser returned PERMISSION_DENIED."
     );
+    setScenario("permission-details-after-denial", "running");
+    try {
+      const details = await getPermissionDetails();
+      await expectPostDenialPermissionDetails(details);
+      setScenario("permission-details-after-denial", "pass", details);
+    } catch (detailsError) {
+      setScenario("permission-details-after-denial", "fail", detailsError);
+      setScenario(
+        "permission-denied",
+        "fail",
+        detailsError,
+        "Browser denied location, but detailed permission state was inconsistent."
+      );
+      return;
+    }
+
+    setScenario("location-readiness-after-denial", "running");
+    try {
+      const readiness = await getLocationReadiness();
+      await expectPostDenialLocationReadiness(readiness);
+      setScenario("location-readiness-after-denial", "pass", readiness);
+    } catch (readinessError) {
+      setScenario("location-readiness-after-denial", "fail", readinessError);
+      setScenario(
+        "permission-denied",
+        "fail",
+        readinessError,
+        "Browser denied location, but readiness was inconsistent."
+      );
+      return;
+    }
   }
 }
 
