@@ -1,0 +1,39 @@
+appId: nitrogeolocation.example
+---
+# Edge case: Android's master location switch is disabled by the E2E runner.
+# The recipe must report that GPS is unavailable and keep the request disabled.
+
+- launchApp:
+    clearState: true
+    permissions:
+      android.permission.ACCESS_COARSE_LOCATION: allow
+      android.permission.ACCESS_FINE_LOCATION: allow
+
+- stopApp
+
+- openLink:
+    link: nitrogeolocation://app/gps-offline-recipe
+- waitForAnimationToEnd
+
+- extendedWaitUntil:
+    visible: "Android GPS-preferred routing with GPS-only result acceptance"
+    timeout: 10000
+
+- tapOn:
+    id: "e2e-action-gps-offline-check-readiness-button"
+
+- extendedWaitUntil:
+    visible:
+      id: "gps-offline-readiness-message"
+      text: ".*GPS recipe: unavailable.*"
+    timeout: 10000
+
+- assertVisible:
+    id: "gps-offline-readiness-message"
+    text: ".*locationServices=false; gps=false; permission=granted; accuracy=full.*"
+- assertVisible:
+    id: "gps-offline-request-blocked"
+    text: "GPS-only request is blocked until GPS readiness is ready."
+- assertVisible:
+    id: "e2e-action-gps-offline-run-button"
+    enabled: false

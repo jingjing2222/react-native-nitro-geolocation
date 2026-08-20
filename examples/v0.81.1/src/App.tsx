@@ -18,6 +18,7 @@ import CompatScreen from "./screens/CompatScreen";
 import CurrentPositionScreen from "./screens/CurrentPositionScreen";
 import DefaultScreen from "./screens/DefaultScreen";
 import GeocodingScreen from "./screens/GeocodingScreen";
+import GpsOfflineRecipeScreen from "./screens/GpsOfflineRecipeScreen";
 import HeadingScreen from "./screens/HeadingScreen";
 import IOSAccuracyAuthorizationScreen from "./screens/IOSAccuracyAuthorizationScreen";
 import IOSLocationTuningScreen from "./screens/IOSLocationTuningScreen";
@@ -55,6 +56,7 @@ const linking = {
       AccuracyPresets: "accuracy-presets",
       LastKnownPosition: "last-known-position",
       Geocoding: "geocoding",
+      GpsOfflineRecipe: "gps-offline-recipe",
       LocationAvailability: "location-availability",
       Heading: "heading",
       AndroidRequestOptions: "android-request-options",
@@ -166,6 +168,11 @@ export default function App() {
           <Tab.Screen
             name="Geocoding"
             component={GeocodingScreen}
+            options={hiddenTabOptions}
+          />
+          <Tab.Screen
+            name="GpsOfflineRecipe"
+            component={GpsOfflineRecipeScreen}
             options={hiddenTabOptions}
           />
           <Tab.Screen

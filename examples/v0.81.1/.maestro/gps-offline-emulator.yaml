@@ -1,0 +1,7 @@
+appId: nitrogeolocation.example
+---
+# The wrapper script disables emulator Wi-Fi and mobile data before this flow.
+# setLocation still makes this a provider-routing proof, not satellite proof.
+
+- assertTrue: ${GPS_OFFLINE_NETWORK_DISABLED == '1'}
+- runFlow: gps-only-recipe.yaml

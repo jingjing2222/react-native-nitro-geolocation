@@ -17,6 +17,7 @@
     "typecheck": "tsc --noEmit",
     "typecheck:unused": "tsc --noEmit --noUnusedLocals --noUnusedParameters",
     "test:e2e:android": "bash ./scripts/test-maestro-retry-flows.sh && bash ./scripts/test-e2e-android.sh",
+    "test:e2e:gps-offline:android": "bash ./scripts/test-gps-offline-android.sh",
     "test:e2e:ios": "bash ./scripts/test-e2e-ios.sh",
     "test:e2e:background-long-run:android": "bash ./scripts/test-background-long-run-android.sh",
     "test:e2e:background-long-run:ios": "bash ./scripts/test-background-long-run-ios.sh",

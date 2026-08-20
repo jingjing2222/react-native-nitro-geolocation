@@ -1,0 +1,33 @@
+appId: nitrogeolocation.example
+---
+# First half of the stale-readiness edge. The Android runner disables location
+# services after this flow while leaving the prepared screen in place.
+
+- launchApp:
+    clearState: true
+    permissions:
+      android.permission.ACCESS_COARSE_LOCATION: allow
+      android.permission.ACCESS_FINE_LOCATION: allow
+
+- stopApp
+
+- openLink:
+    link: nitrogeolocation://app/gps-offline-recipe
+- waitForAnimationToEnd
+
+- extendedWaitUntil:
+    visible: "Android GPS-preferred routing with GPS-only result acceptance"
+    timeout: 10000
+
+- tapOn:
+    id: "e2e-action-gps-offline-check-readiness-button"
+
+- extendedWaitUntil:
+    visible:
+      id: "gps-offline-readiness-message"
+      text: ".*GPS recipe: ready.*"
+    timeout: 10000
+
+- assertVisible:
+    id: "e2e-action-gps-offline-run-button"
+    enabled: true

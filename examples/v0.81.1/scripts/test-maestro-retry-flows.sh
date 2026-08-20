@@ -27,6 +27,10 @@ cat >"$TEST_ROOT/bin/adb" <<'ADB'
 #!/usr/bin/env bash
 set -euo pipefail
 printf '%s\n' "$*" >>"$FAKE_ADB_LOG"
+
+if [[ "$*" == "shell cmd location is-location-enabled" ]]; then
+  printf 'true\n'
+fi
 ADB
 
 cat >"$TEST_ROOT/bin/sleep" <<'SLEEP'

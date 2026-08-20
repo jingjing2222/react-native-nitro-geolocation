@@ -1,0 +1,22 @@
+appId: nitrogeolocation.example
+---
+# Second half of the stale-readiness edge. The Android runner has disabled
+# location services since the prepare flow completed.
+
+- assertVisible: "Android GPS-preferred routing with GPS-only result acceptance"
+
+- tapOn:
+    id: "e2e-action-gps-offline-run-button"
+
+- extendedWaitUntil:
+    visible:
+      id: "gps-offline-request-status"
+      text: "GPS-only request: failed"
+    timeout: 10000
+
+- assertVisible:
+    id: "gps-offline-request-blocked"
+    text: "GPS-only request is blocked until GPS readiness is ready."
+- assertVisible:
+    id: "e2e-action-gps-offline-run-button"
+    enabled: false
