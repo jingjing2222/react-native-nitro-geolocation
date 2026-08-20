@@ -33,7 +33,7 @@
     "@react-navigation/native": "^7.1.26",
     "react": "19.1.0",
     "react-native": "0.81.1",
-    "react-native-nitro-geolocation": "workspace: *",
+    "react-native-nitro-geolocation": "workspace:2.0.0-rc.0",
     "react-native-nitro-modules": "^0.35.10",
     "react-native-safe-area-context": "^5.5.2",
     "react-native-screens": "4.19.0",
