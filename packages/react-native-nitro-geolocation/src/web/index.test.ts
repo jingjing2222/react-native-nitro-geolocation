@@ -74,7 +74,7 @@ describe("web Modern API", () => {
   });
 
   it("wraps navigator.geolocation.getCurrentPosition and normalizes nullable coords", async () => {
-    const timestamp = Date.now();
+    const timestamp = Date.now() - 10_000;
     const getCurrentPositionMock = vi.fn((success) => {
       success({ ...createPosition(), timestamp });
     });
@@ -104,7 +104,8 @@ describe("web Modern API", () => {
       metadata: {
         age: expect.any(Number),
         quality: "medium",
-        source: "currentPosition"
+        source: "currentPosition",
+        staleReason: "maximumAgeExceeded"
       },
       provider: "unknown"
     });

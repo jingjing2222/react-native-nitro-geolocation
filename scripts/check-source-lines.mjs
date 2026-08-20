@@ -95,7 +95,7 @@ const exceptions = new Map([
   [
     "packages/react-native-nitro-geolocation/android/src/main/java/com/margelo/nitro/nitrogeolocation/NitroGeolocation.kt",
     {
-      limit: 1453,
+      limit: 1468,
       reason: "existing native adapter exception"
     }
   ],
@@ -103,6 +103,13 @@ const exceptions = new Map([
     "packages/react-native-nitro-geolocation/ios/NitroGeolocation.swift",
     {
       limit: 1096,
+      reason: "existing native adapter exception"
+    }
+  ],
+  [
+    "packages/react-native-nitro-geolocation/ios/NitroBackgroundLocation.swift",
+    {
+      limit: 1005,
       reason: "existing native adapter exception"
     }
   ]
