@@ -4,11 +4,13 @@ import type {
   LocationSettingsOptions,
   PermissionStatus
 } from "../NitroGeolocation.nitro";
-import { buildPermissionDetails } from "../api/permissionDetails";
 import {
   type CurrentPositionOptions,
   getAbortReason
 } from "../api/currentPositionOptions";
+import { decoratePositionWithMetadata } from "../api/locationMetadata";
+import { buildLocationReadiness } from "../api/locationReadiness";
+import { buildPermissionDetails } from "../api/permissionDetails";
 import {
   readLastKnownPosition,
   rememberPosition,
@@ -23,6 +25,8 @@ import type {
   Heading,
   LocationAvailability,
   LocationProviderStatus,
+  LocationReadiness,
+  LocationSettingsResult,
   PermissionDetails,
   ReverseGeocodedAddress
 } from "../publicTypes";
@@ -37,7 +41,18 @@ import {
   rejectUnsupported,
   toPositionOptions
 } from "./browser";
+import {
+  clearWebPermissionDetailsEvidence,
+  readRecentWebPermissionDetailsEvidence,
+  rememberWebPermissionDetailsEvidence
+} from "./permissionDetailsEvidence";
+import {
+  applyRecentWebPermissionEvidence,
+  clearWebPermissionEvidence,
+  rememberWebPermissionGrant
+} from "./permissionEvidence";
 export {
+  getActiveWatches,
   stopObserving,
   unwatch,
   watchHeading,
@@ -57,6 +72,7 @@ export async function checkPermission(): Promise<PermissionStatus> {
   const browserNavigator = getNavigator();
   if (!browserNavigator?.geolocation) {
     clearWebPermissionEvidence();
+    clearWebPermissionDetailsEvidence();
     return "denied";
   }
 
@@ -69,6 +85,7 @@ export async function checkPermission(): Promise<PermissionStatus> {
       : "undetermined";
     if (permission === "denied") {
       clearWebPermissionEvidence();
+      rememberWebPermissionDetailsEvidence("denied");
     }
     return permission;
   } catch {
@@ -227,14 +244,41 @@ export function getCurrentPosition(
 
   const geolocation = getGeolocation();
   if (!geolocation) {
+    clearWebPermissionEvidence();
+    clearWebPermissionDetailsEvidence();
     return rejectUnsupported();
   }
+
+  const requestedAt = Date.now();
+  const observePosition = (
+    position: Parameters<typeof normalizePosition>[0]
+  ): GeolocationResponse => {
+    rememberWebPermissionGrant();
+    rememberWebPermissionDetailsEvidence("granted");
+    return rememberPosition(
+      decoratePositionWithMetadata(normalizePosition(position), {
+        source: "currentPosition",
+        maximumAge: options?.maximumAge ?? 0,
+        requestedAt
+      })
+    );
+  };
+  const observeError = (
+    error: Parameters<typeof mapBrowserError>[0]
+  ): LocationError => {
+    const mappedError = mapBrowserError(error);
+    if (mappedError.code === LocationErrorCode.PERMISSION_DENIED) {
+      clearWebPermissionEvidence();
+      rememberWebPermissionDetailsEvidence("denied");
+    }
+    return mappedError;
+  };
 
   if (!signal) {
     return new Promise((resolve, reject) => {
       geolocation.getCurrentPosition(
-        (position) => resolve(rememberPosition(normalizePosition(position))),
-        (error) => reject(mapBrowserError(error)),
+        (position) => resolve(observePosition(position)),
+        (error) => reject(observeError(error)),
         toPositionOptions(options)
       );
     });
@@ -266,9 +310,8 @@ export function getCurrentPosition(
 
     signal.addEventListener("abort", handleAbort, { once: true });
     requestWatch.id = geolocation.watchPosition(
-      (position) =>
-        finish(() => resolve(rememberPosition(normalizePosition(position)))),
-      (error) => finish(() => reject(mapBrowserError(error))),
+      (position) => finish(() => resolve(observePosition(position))),
+      (error) => finish(() => reject(observeError(error))),
       toPositionOptions(options)
     );
     if (shouldClearWatch) {

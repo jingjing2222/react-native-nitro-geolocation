@@ -1,26 +1,34 @@
 import {
   type LocationSettingsResult,
   checkPermission,
+  getActiveWatches,
   getCurrentPosition,
   getLastKnownPosition,
   getLastKnownPositionAsync,
+  getLocationReadiness,
+  getPermissionDetails,
   requestLocationSettings,
   requestPermission,
   stopObserving,
   unwatch,
-  watchPosition
+  watchPosition,
+  watchProviderStatus
 } from "react-native-nitro-geolocation";
 import { setScenario } from "./dom";
 
 export function assertModernApiAvailability() {
   const apiShape = {
     checkPermission: typeof checkPermission,
+    getPermissionDetails: typeof getPermissionDetails,
+    getLocationReadiness: typeof getLocationReadiness,
     requestPermission: typeof requestPermission,
     requestLocationSettings: typeof requestLocationSettings,
     getCurrentPosition: typeof getCurrentPosition,
     getLastKnownPosition: typeof getLastKnownPosition,
     getLastKnownPositionAsync: typeof getLastKnownPositionAsync,
     watchPosition: typeof watchPosition,
+    watchProviderStatus: typeof watchProviderStatus,
+    getActiveWatches: typeof getActiveWatches,
     unwatch: typeof unwatch,
     stopObserving: typeof stopObserving
   };

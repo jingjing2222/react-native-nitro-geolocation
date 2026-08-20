@@ -52,7 +52,8 @@
     "@rozenite/metro": "^1.1.0",
     "@types/react": "^19.1.0",
     "react-native-builder-bob": "^0.40.13",
-    "react-native-monorepo-config": "^0.1.9"
+    "react-native-monorepo-config": "^0.1.9",
+    "typescript": "5.9.3"
   },
   "engines": {
     "node": ">=20"

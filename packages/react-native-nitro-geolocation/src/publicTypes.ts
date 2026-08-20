@@ -72,6 +72,35 @@ export type LocationSettingsOutcome = SchemaLocationSettingsOutcome;
 export type LocationSettingsResult = SchemaLocationSettingsResult;
 export type LocationAvailability = SchemaLocationAvailability;
 
+export type LocationReadinessRemediation =
+  | "requestPermission"
+  | "requestPermissionOrReviewSettings"
+  | "reviewPermissionSettings"
+  | "enableLocationServices"
+  | "enableLocationProvider"
+  | "installOrUpdatePlayServices"
+  | "enableGoogleLocationAccuracy"
+  | "useSupportedEnvironment"
+  | "acquirePosition"
+  | "retryLocation";
+
+export type LocationCacheReadiness =
+  | { available: false }
+  | { available: true; timestamp: number; ageMs: number };
+
+/**
+ * Read-only location diagnosis assembled from permission, service, provider,
+ * availability, and module-cache state.
+ */
+export interface LocationReadiness {
+  ready: boolean;
+  permission: PermissionStatus;
+  providerStatus: LocationProviderStatus;
+  availability: LocationAvailability;
+  cache: LocationCacheReadiness;
+  remediations: LocationReadinessRemediation[];
+}
+
 export type PermissionScope = "none" | "foreground" | "background";
 export type PermissionSettingsGuidance =
   | "none"

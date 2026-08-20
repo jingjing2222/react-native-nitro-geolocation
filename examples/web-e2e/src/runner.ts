@@ -6,7 +6,9 @@ import {
   getCurrentPosition,
   getLastKnownPosition,
   getLastKnownPositionAsync,
+  getLocationReadiness,
   getPermissionDetails,
+  requestLocationSettings,
   requestPermission,
   stopObserving,
   unwatch,
@@ -38,6 +40,8 @@ import {
   isNearExpected
 } from "./locationAssertions";
 import { postNativeStatus } from "./nativeBridge";
+import { expectPostRequestPermissionDetails } from "./permissionDetailsAssertions";
+import { expectReadyWithCache } from "./readinessAssertions";
 import { runStep } from "./scenarioRunner";
 import { scenarios } from "./scenarios";
 function wait(ms: number) {
@@ -211,22 +215,7 @@ async function getCurrentPositionUntilExpected({
 
 export async function runSuccessSuite() {
   setScenario("api-availability", "running");
-  const apiShape = {
-    checkPermission: typeof checkPermission,
-    getPermissionDetails: typeof getPermissionDetails,
-    requestPermission: typeof requestPermission,
-    getCurrentPosition: typeof getCurrentPosition,
-    getLastKnownPosition: typeof getLastKnownPosition,
-    getLastKnownPositionAsync: typeof getLastKnownPositionAsync,
-    watchPosition: typeof watchPosition,
-    unwatch: typeof unwatch,
-    stopObserving: typeof stopObserving
-  };
-  const apiReady = Object.values(apiShape).every((type) => type === "function");
-  setScenario("api-availability", apiReady ? "pass" : "fail", apiShape);
-  if (!apiReady) {
-    throw new Error("Modern API browser export is incomplete.");
-  }
+  assertModernApiAvailability();
 
   runCompatApiAvailabilityCheck();
 
@@ -273,6 +262,12 @@ export async function runSuccessSuite() {
         throw new Error(`Expected granted permission, got ${status}.`);
       }
     }
+  );
+
+  await runStep(
+    "permission-details-after-request",
+    () => getPermissionDetails(),
+    expectPostRequestPermissionDetails
   );
 
   await runStep(
@@ -517,9 +512,11 @@ export async function runSuccessSuite() {
         "request-location-settings",
         "check-permission",
         "request-permission",
+        "permission-details-after-request",
         "get-current-position-pre-aborted",
         "get-current-position-cancelled",
         "get-current-position",
+        "location-readiness",
         "last-known-cold-cache",
         "last-known-async-cold-cache",
         "last-known-module-cache",

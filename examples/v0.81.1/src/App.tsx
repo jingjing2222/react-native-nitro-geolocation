@@ -34,6 +34,7 @@ import Issue122Screen from "./screens/Issue122Screen";
 import Issue132Screen from "./screens/Issue132Screen";
 import LastKnownPositionScreen from "./screens/LastKnownPositionScreen";
 import LocationAvailabilityScreen from "./screens/LocationAvailabilityScreen";
+import LocationQualityMetadataScreen from "./screens/LocationQualityMetadataScreen";
 import LocationReadinessScreen from "./screens/LocationReadinessScreen";
 import LocationSimulationScreen from "./screens/LocationSimulationScreen";
 import { LongRunBackgroundE2EScreen } from "./screens/LongRunBackgroundE2EScreen";
@@ -42,6 +43,7 @@ import PermissionCheckScreen from "./screens/PermissionCheckScreen";
 import PermissionDetailsScreen from "./screens/PermissionDetailsScreen";
 import ProviderSettingsScreen from "./screens/ProviderSettingsScreen";
 import ProviderStatusWatcherScreen from "./screens/ProviderStatusWatcherScreen";
+import WatchObservabilityScreen from "./screens/WatchObservabilityScreen";
 import WatchPositionScreen from "./screens/WatchPositionScreen";
 import WebE2EScreen from "./screens/WebE2EScreen";
 

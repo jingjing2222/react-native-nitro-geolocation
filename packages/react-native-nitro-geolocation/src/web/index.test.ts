@@ -6,6 +6,7 @@ import {
   getLastKnownPosition,
   getLastKnownPositionAsync,
   getLocationAvailability,
+  getLocationReadiness,
   getPermissionDetails,
   requestPermission,
   stopObserving,
@@ -14,6 +15,7 @@ import {
   watchProviderStatus
 } from ".";
 import { clearLastKnownPositionCache } from "../api/positionCache";
+import { LocationErrorCode } from "../utils/errors";
 import { clearWebPermissionDetailsEvidence } from "./permissionDetailsEvidence";
 
 type TestNavigator = {
@@ -469,7 +471,9 @@ describe("web Modern API", () => {
       }
     });
 
-    await expect(getCurrentPosition()).rejects.toMatchObject({ code: 1 });
+    await expect(getCurrentPosition()).rejects.toMatchObject({
+      code: LocationErrorCode.PERMISSION_DENIED
+    });
 
     await expect(getPermissionDetails()).resolves.toEqual({
       status: "denied",
@@ -737,7 +741,9 @@ describe("web Modern API", () => {
     });
 
     await getCurrentPosition();
-    await expect(getCurrentPosition()).rejects.toMatchObject({ code: 1 });
+    await expect(getCurrentPosition()).rejects.toMatchObject({
+      code: LocationErrorCode.PERMISSION_DENIED
+    });
 
     await expect(getLocationReadiness()).resolves.toMatchObject({
       ready: false,
