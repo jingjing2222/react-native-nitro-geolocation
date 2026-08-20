@@ -1,0 +1,65 @@
+appId: nitrogeolocation.example
+---
+# Copyable consumer edge contract: denied permission never starts a request and
+# leaves the user with an explicit permission action.
+
+- launchApp:
+    clearState: true
+    permissions:
+      all: deny
+
+- runFlow:
+    when:
+      platform: Android
+      visible: ".*isn't responding|.*응답하지 않.*"
+    commands:
+      - tapOn:
+          text: "Wait|대기"
+- extendedWaitUntil:
+    visible: "Geolocation API"
+    timeout: 10000
+
+- stopApp
+
+- openLink:
+    link: nitrogeolocation://app/consumer-location-contract
+- runFlow:
+    when:
+      platform: Android
+      visible: ".*isn't responding|.*응답하지 않.*"
+    commands:
+      - tapOn:
+          text: "Wait|대기"
+- runFlow:
+    when:
+      platform: iOS
+      visible: "Cancel|취소"
+    commands:
+      - tapOn:
+          text: "Open|열기"
+- runFlow:
+    when:
+      platform: iOS
+    commands:
+      - openLink:
+          link: nitrogeolocation://app/consumer-location-contract
+- waitForAnimationToEnd
+
+- extendedWaitUntil:
+    visible: "Use your location"
+    timeout: 10000
+
+- tapOn:
+    id: "consumer-location-run"
+
+- extendedWaitUntil:
+    visible: "Status: permission-required"
+    timeout: 10000
+
+- assertVisible:
+    id: "consumer-location-status"
+- assertVisible: "Permission: denied"
+- assertVisible:
+    id: "consumer-location-request-permission"
+- assertNotVisible:
+    id: "consumer-location-position"

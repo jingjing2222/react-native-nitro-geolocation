@@ -17,6 +17,7 @@ import BackgroundE2EScreen from "./screens/BackgroundE2EScreen";
 import CancellableCurrentPositionScreen from "./screens/CancellableCurrentPositionScreen";
 import CompatMetadataScreen from "./screens/CompatMetadataScreen";
 import CompatScreen from "./screens/CompatScreen";
+import ConsumerLocationContractScreen from "./screens/ConsumerLocationContractScreen";
 import CurrentPositionScreen from "./screens/CurrentPositionScreen";
 import DefaultScreen from "./screens/DefaultScreen";
 import GeocodingScreen from "./screens/GeocodingScreen";
@@ -55,6 +56,7 @@ const linking = {
       Default: "",
       Compat: "compat",
       CompatMetadata: "compat-metadata",
+      ConsumerLocationContract: "consumer-location-contract",
       PermissionCheck: "permission-check",
       PermissionDetails: "permission-details",
       CurrentPosition: "current-position",
@@ -134,6 +136,11 @@ export default function App() {
           <Tab.Screen
             name="Issue67"
             component={Issue67Screen}
+            options={hiddenTabOptions}
+          />
+          <Tab.Screen
+            name="ConsumerLocationContract"
+            component={ConsumerLocationContractScreen}
             options={hiddenTabOptions}
           />
           <Tab.Screen

@@ -38,6 +38,8 @@ appId: nitrogeolocation.example
       platform: iOS
     file: issue-122-ios.yaml
 - runFlow: permission-check.yaml
+- runFlow: consumer-location-contract-happy.yaml
+- runFlow: consumer-location-contract-denied.yaml
 - runFlow: permission-details.yaml
 - runFlow:
     when:
