@@ -46,6 +46,13 @@ export interface IOSBackgroundLocationStatus {
   significantChangesEnabled: boolean;
 }
 
+export type LocationLifecycleState = "paused" | "resumed";
+
+export interface LocationLifecycleEvent {
+  state: LocationLifecycleState;
+  timestamp: number;
+}
+
 export interface BackgroundLocationStatus {
   state: BackgroundLocationState;
   isRunning: boolean;

@@ -51,6 +51,18 @@ jobs:
         run: |
           biome ci --formatter-enabled=false --linter-enabled=true .
 
+  ios-location-lifecycle-contract:
+    name: iOS Location Lifecycle Contract
+    runs-on: macos-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Verify native pause and resume forwarding
+        run: |
+          scripts/test-ios-location-lifecycle.sh
+
   build:
     name: Build
     runs-on: ubuntu-latest

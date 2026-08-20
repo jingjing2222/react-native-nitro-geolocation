@@ -16,7 +16,8 @@ Pick the smallest entry point that matches your change:
 | Android foreground native bug | `packages/react-native-nitro-geolocation/android/src/main/java/com/margelo/nitro/nitrogeolocation/NitroGeolocation.kt` | Nearby Android helper for the specific feature |
 | Android background native bug | `packages/react-native-nitro-geolocation/android/src/main/java/com/margelo/nitro/nitrogeolocation/NitroBackgroundLocation.kt` | `packages/react-native-nitro-geolocation/android/src/main/java/com/margelo/nitro/nitrogeolocation/background/` |
 | iOS foreground native bug | `packages/react-native-nitro-geolocation/ios/NitroGeolocation.swift` | Nearby iOS helper for the specific feature |
-| iOS background native bug | `packages/react-native-nitro-geolocation/ios/NitroBackgroundLocation.swift` | `IOSBackgroundLocationDelegate.swift`, `IOSBackgroundPermission.swift`, `IOSBackgroundRuntime.swift`, `IOSBackgroundMotion.swift`, `IOSBackgroundSync.swift`, `IOSBackgroundSyncScheduler.swift`, `IOSBackgroundHttpSync.swift` |
+| iOS background native bug | `packages/react-native-nitro-geolocation/ios/NitroBackgroundLocation.swift` | `IOSBackgroundLocationDelegate.swift`, `IOSBackgroundMotion.swift`, `IOSBackgroundHttpSync.swift` |
+| iOS lifecycle delegate regression | `tests/ios/IOSBackgroundLocationDelegateContract.swift` | `scripts/test-ios-location-lifecycle.sh`, then `IOSBackgroundLocationDelegate.swift` |
 | E2E failure | Matching `examples/v0.81.1/.maestro/*.yaml` file | Matching `examples/v0.81.1/src/screens/*Screen.tsx` file |
 | E2E shared UI or selectors | `examples/v0.81.1/src/screens/scenario/` | `examples/v0.81.1/src/App.tsx` for route names |
 
@@ -37,7 +38,7 @@ Avoid these until needed:
 | --- | --- | --- |
 | Modern foreground API | Public wrappers for current position, watch, permission, provider, geocoding, heading, settings, and availability APIs. | `src/api/`, `src/NitroGeolocation.nitro.ts` |
 | Community compatibility API | `@react-native-community/geolocation`-style callbacks and configuration. | `src/compat/`, `src/NitroGeolocationCompat.nitro.ts` |
-| Background API | Public background exports, listener narrowing, storage methods, geofence helpers, activity recognition helpers, HTTP sync helper, and task registration. | `src/background/index.ts`, `src/background/task.ts`, `src/background/types.ts`, `src/background/NitroBackgroundLocation.nitro.ts` |
+| Background API | Public background exports, listener narrowing, iOS lifecycle subscriptions, storage methods, geofence helpers, activity recognition helpers, HTTP sync helper, and task registration. | `src/background/index.ts`, `src/background/locationLifecycle.ts`, `src/background/task.ts`, `src/background/types.ts`, `src/background/NitroBackgroundLocation.nitro.ts` |
 | Web fallback | Browser geolocation behavior and web E2E support. | `src/web/`, `src/index.web.tsx`, `src/background/index.web.ts` |
 
 ### Android Foreground
@@ -87,9 +88,7 @@ Avoid these until needed:
 | Responsibility | Main files |
 | --- | --- |
 | Nitro background module, storage, status, geofences, and Core Location start/stop | `ios/NitroBackgroundLocation.swift` |
-| Background Core Location delegate | `ios/IOSBackgroundLocationDelegate.swift` |
-| Background permission reporting | `ios/IOSBackgroundPermission.swift` |
-| Background manager lifecycle, listener registration, and errors | `ios/IOSBackgroundRuntime.swift` |
+| Background Core Location pause and app-triggered resume lifecycle delegate | `ios/IOSBackgroundLocationDelegate.swift` |
 | Activity recognition conversion | `ios/IOSBackgroundMotion.swift` |
 | HTTP sync scheduling, batch ownership, and store marking | `ios/IOSBackgroundSync.swift`, `ios/IOSBackgroundSyncScheduler.swift` |
 | HTTP transport and retry | `ios/IOSBackgroundHttpSync.swift` |
@@ -123,6 +122,7 @@ permission helpers, and location assertions live in
 | iOS location tuning | `ios-location-tuning.yaml` | `IOSLocationTuningScreen.tsx` |
 | iOS accuracy authorization | `ios-accuracy-authorization.yaml` | `IOSAccuracyAuthorizationScreen.tsx` |
 | iOS release bridge options | `ios-release-options-bridge.yaml` | `IOSReleaseOptionsBridgeScreen.tsx` |
+| iOS Core Location lifecycle listener | `location-lifecycle.yaml` | `IOSLocationLifecycleScreen.tsx` |
 | Issue 67 coarse Android location | `issue-67-android-coarse-location.yaml` | `Issue67Screen.tsx` |
 | Background API smoke | `background-e2e.yaml` | `BackgroundE2EScreen.tsx` |
 | Android long-run background | `background-long-run-android.yaml` | `LongRunBackgroundE2EScreen.tsx`, `backgroundLongRunTask.ts` |

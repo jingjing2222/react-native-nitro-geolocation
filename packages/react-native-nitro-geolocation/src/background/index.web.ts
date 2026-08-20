@@ -14,6 +14,7 @@ import type {
   GeofencingOptions,
   GetStoredBackgroundEventsOptions,
   GetStoredBackgroundLocationsOptions,
+  LocationLifecycleEvent,
   StoredBackgroundEvent,
   StoredBackgroundLocation
 } from "./types";
@@ -97,6 +98,12 @@ export function onBackgroundLocation(
 
 export function onBackgroundError(
   _listener: (error: LocationError) => void
+): BackgroundSubscription {
+  return noopSubscription();
+}
+
+export function onLocationLifecycleChange(
+  _listener: (event: LocationLifecycleEvent) => void
 ): BackgroundSubscription {
   return noopSubscription();
 }

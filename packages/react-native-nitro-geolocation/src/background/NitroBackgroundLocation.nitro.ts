@@ -15,6 +15,7 @@ import type {
   GeofencingOptions,
   GetStoredBackgroundEventsOptions,
   GetStoredBackgroundLocationsOptions,
+  LocationLifecycleEvent,
   StoredBackgroundEventEnvelope,
   StoredBackgroundLocation
 } from "./types";
@@ -42,6 +43,10 @@ export interface NitroBackgroundLocation
   removeBackgroundLocationListener(token: string): void;
   addBackgroundErrorListener(listener: (error: LocationError) => void): string;
   removeBackgroundErrorListener(token: string): void;
+  addLocationLifecycleListener(
+    listener: (event: LocationLifecycleEvent) => void
+  ): string;
+  removeLocationLifecycleListener(token: string): void;
   getStoredBackgroundLocations(
     options?: GetStoredBackgroundLocationsOptions
   ): Promise<StoredBackgroundLocation[]>;
@@ -78,6 +83,7 @@ export type {
   GeofencingOptions,
   GetStoredBackgroundEventsOptions,
   GetStoredBackgroundLocationsOptions,
+  LocationLifecycleEvent,
   StoredBackgroundEventEnvelope,
   StoredBackgroundLocation
 };

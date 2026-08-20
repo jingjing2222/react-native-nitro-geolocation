@@ -22,6 +22,7 @@ import GeocodingScreen from "./screens/GeocodingScreen";
 import GpsOfflineRecipeScreen from "./screens/GpsOfflineRecipeScreen";
 import HeadingScreen from "./screens/HeadingScreen";
 import IOSAccuracyAuthorizationScreen from "./screens/IOSAccuracyAuthorizationScreen";
+import IOSLocationLifecycleScreen from "./screens/IOSLocationLifecycleScreen";
 import IOSLocationTuningScreen from "./screens/IOSLocationTuningScreen";
 import IOSReleaseOptionsBridgeScreen from "./screens/IOSReleaseOptionsBridgeScreen";
 import Issue67Screen from "./screens/Issue67Screen";
@@ -76,6 +77,7 @@ const linking = {
       BackgroundE2E: "background-e2e",
       LongRunBackgroundE2E: "background-long-run",
       IOSLocationTuning: "ios-location-tuning",
+      IOSLocationLifecycle: "ios-location-lifecycle",
       IOSAccuracyAuthorization: "ios-accuracy-authorization",
       IOSReleaseOptionsBridge: "ios-release-options-bridge",
       Issue119: "issue-119",
@@ -258,6 +260,11 @@ export default function App() {
           <Tab.Screen
             name="IOSLocationTuning"
             component={IOSLocationTuningScreen}
+            options={hiddenTabOptions}
+          />
+          <Tab.Screen
+            name="IOSLocationLifecycle"
+            component={IOSLocationLifecycleScreen}
             options={hiddenTabOptions}
           />
           <Tab.Screen

@@ -1,6 +1,7 @@
 import { NitroModules } from "react-native-nitro-modules";
 import type { LocationError } from "../NitroGeolocation.nitro";
 import type { NitroBackgroundLocation } from "./NitroBackgroundLocation.nitro";
+import { createLocationLifecycleSubscription } from "./locationLifecycle";
 import type {
   BackgroundActivityEventEnvelope,
   BackgroundEvent,
@@ -10,6 +11,7 @@ import type {
   BackgroundLocation,
   BackgroundLocationStatus,
   BackgroundSubscription,
+  LocationLifecycleEvent,
   StoredBackgroundEvent,
   StoredBackgroundEventEnvelope
 } from "./types";
@@ -224,6 +226,20 @@ export function onBackgroundError(
   return {
     remove: () => NativeBackgroundLocation.removeBackgroundErrorListener(token)
   };
+}
+
+/**
+ * Observes Core Location pause and resume callbacks on iOS. After an automatic
+ * pause, the app must restart location updates before iOS can report resume.
+ * Android keeps the subscription valid but does not emit these iOS-only events.
+ */
+export function onLocationLifecycleChange(
+  listener: (event: LocationLifecycleEvent) => void
+): BackgroundSubscription {
+  return createLocationLifecycleSubscription(
+    NativeBackgroundLocation,
+    listener
+  );
 }
 
 export function onGeofence(
