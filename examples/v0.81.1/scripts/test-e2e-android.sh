@@ -9,6 +9,7 @@ ADB_BIN="${ADB:-adb}"
 MAESTRO_BIN="${MAESTRO:-maestro}"
 NODE_BIN="${NODE:-node}"
 DISABLED_LAUNCHER_PACKAGE=""
+LOCATION_WAS_ENABLED=""
 
 adb_cmd() {
   if [[ -n "${ANDROID_SERIAL:-}" ]]; then
@@ -36,7 +37,9 @@ disable_emulator_launcher() {
       awk -F/ 'NF > 1 { package = $1 } END { print package }'
   )"
 
-  if [[ -z "$launcher_package" || "$launcher_package" == "android" ]]; then
+  if [[ -z "$launcher_package" ||
+    "$launcher_package" == "android" ||
+    "$launcher_package" == "com.android.settings" ]]; then
     return
   fi
 
@@ -55,7 +58,9 @@ restore_emulator_launcher() {
 
 restore_location() {
   restore_emulator_launcher
-  set_location_enabled true || true
+  if [[ -n "$LOCATION_WAS_ENABLED" ]]; then
+    set_location_enabled "$LOCATION_WAS_ENABLED"
+  fi
   adb_cmd reverse --remove tcp:8081 >/dev/null 2>&1 || true
 }
 
@@ -74,8 +79,6 @@ connected_device_count() {
   "$ADB_BIN" devices | awk 'NR > 1 && $2 == "device" { count++ } END { print count + 0 }'
 }
 
-trap restore_location_on_exit EXIT
-
 RUN_ANDROID_PROVIDER_SELECTION_VALUE="${RUN_ANDROID_PROVIDER_SELECTION:-0}"
 PROVIDER_SELECTION_PHYSICAL_DEVICE_VALUE="0"
 
@@ -90,6 +93,16 @@ fi
 if [[ "$RUN_ANDROID_PROVIDER_SELECTION_VALUE" == "1" ]]; then
   PROVIDER_SELECTION_PHYSICAL_DEVICE_VALUE="1"
 fi
+
+LOCATION_WAS_ENABLED="$(
+  adb_cmd shell cmd location is-location-enabled | tr -d '\r'
+)"
+if [[ "$LOCATION_WAS_ENABLED" != "true" && "$LOCATION_WAS_ENABLED" != "false" ]]; then
+  echo "Unable to capture the initial Android location-services state." >&2
+  exit 1
+fi
+
+trap restore_location_on_exit EXIT
 
 if ! android_flow_output="$(
   "$NODE_BIN" "$SCRIPT_DIR/maestro-suite-flows.mjs" "$FLOW_DIR/all-tests.yaml" android
@@ -137,8 +150,15 @@ status=0
 
 set_location_enabled true
 run_maestro_flows "android location-enabled" "${ANDROID_FLOWS[@]}" || status=1
+run_maestro_flows \
+  "android GPS stale-readiness setup" \
+  gps-only-recipe-stale-readiness-prepare.yaml || status=1
 
 set_location_enabled false
+run_maestro_flows \
+  "android GPS stale-readiness verification" \
+  gps-only-recipe-stale-readiness-verify.yaml || status=1
 run_maestro_flows "android location-disabled" provider-settings-not-ready.yaml || status=1
+run_maestro_flows "android GPS not-ready" gps-only-recipe-not-ready.yaml || status=1
 
 exit "$status"
