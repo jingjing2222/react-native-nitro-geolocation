@@ -23,6 +23,8 @@ export interface BackgroundPermissionResult {
   accuracyAuthorization?: AccuracyAuthorization;
   canRequestBackgroundInline?: boolean;
   needsSettingsRedirect?: boolean;
+  /** Whether another foreground system prompt is known to be possible. */
+  canAskAgain?: boolean;
 }
 
 export type BackgroundLocationState =

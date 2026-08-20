@@ -1,5 +1,6 @@
 export { setConfiguration } from "./setConfiguration";
 export { checkPermission } from "./checkPermission";
+export { getPermissionDetails } from "./getPermissionDetails";
 export { requestPermission } from "./requestPermission";
 export { hasServicesEnabled } from "./hasServicesEnabled";
 export { getProviderStatus } from "./getProviderStatus";

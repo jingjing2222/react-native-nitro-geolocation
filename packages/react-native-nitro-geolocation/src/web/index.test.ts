@@ -6,14 +6,14 @@ import {
   getLastKnownPosition,
   getLastKnownPositionAsync,
   getLocationAvailability,
-  getLocationReadiness,
+  getPermissionDetails,
   requestPermission,
   stopObserving,
   unwatch,
   watchPosition
 } from ".";
 import { clearLastKnownPositionCache } from "../api/positionCache";
-import { clearWebPermissionEvidence } from "./permissionEvidence";
+import { clearWebPermissionDetailsEvidence } from "./permissionDetailsEvidence";
 
 type TestNavigator = {
   geolocation?: {
@@ -51,7 +51,7 @@ function createPosition(latitude = 37.5665, longitude = 126.978) {
 afterEach(() => {
   stopObserving();
   clearLastKnownPositionCache();
-  clearWebPermissionEvidence();
+  clearWebPermissionDetailsEvidence();
   vi.restoreAllMocks();
   Reflect.deleteProperty(globalThis, "navigator");
 });
@@ -257,6 +257,204 @@ describe("web Modern API", () => {
     });
 
     await expect(checkPermission()).resolves.toBe("undetermined");
+  });
+
+  it("reports a browser prompt as askable foreground permission", async () => {
+    setNavigator({
+      geolocation: {
+        getCurrentPosition: vi.fn(),
+        watchPosition: vi.fn(),
+        clearWatch: vi.fn()
+      },
+      permissions: {
+        query: vi.fn(async () => ({ state: "prompt" }))
+      }
+    });
+
+    await expect(getPermissionDetails()).resolves.toEqual({
+      status: "undetermined",
+      scope: "none",
+      accuracy: "unknown",
+      canAskAgain: true,
+      settingsGuidance: "requestPermission"
+    });
+  });
+
+  it("reports granted browser permission without claiming precise accuracy", async () => {
+    setNavigator({
+      geolocation: {
+        getCurrentPosition: vi.fn(),
+        watchPosition: vi.fn(),
+        clearWatch: vi.fn()
+      },
+      permissions: {
+        query: vi.fn(async () => ({ state: "granted" }))
+      }
+    });
+
+    await expect(getPermissionDetails()).resolves.toEqual({
+      status: "granted",
+      scope: "foreground",
+      accuracy: "unknown",
+      canAskAgain: false,
+      settingsGuidance: "none"
+    });
+  });
+
+  it("reports denied browser permission with settings guidance", async () => {
+    setNavigator({
+      geolocation: {
+        getCurrentPosition: vi.fn(),
+        watchPosition: vi.fn(),
+        clearWatch: vi.fn()
+      },
+      permissions: {
+        query: vi.fn(async () => ({ state: "denied" }))
+      }
+    });
+
+    await expect(getPermissionDetails()).resolves.toMatchObject({
+      status: "denied",
+      scope: "none",
+      canAskAgain: false,
+      settingsGuidance: "reviewSettings"
+    });
+  });
+
+  it("keeps prompt capability unknown when Permissions API is unavailable", async () => {
+    setNavigator({
+      geolocation: {
+        getCurrentPosition: vi.fn(),
+        watchPosition: vi.fn(),
+        clearWatch: vi.fn()
+      }
+    });
+
+    await expect(getPermissionDetails()).resolves.toMatchObject({
+      status: "undetermined",
+      scope: "none",
+      canAskAgain: null,
+      settingsGuidance: "requestPermission"
+    });
+  });
+
+  it("reports a missing Web Geolocation API as unsupported", async () => {
+    setNavigator({});
+
+    await expect(getPermissionDetails()).resolves.toEqual({
+      status: "denied",
+      scope: "none",
+      accuracy: "unknown",
+      canAskAgain: false,
+      settingsGuidance: "useSupportedEnvironment"
+    });
+  });
+
+  it("uses a recent successful acquisition as permission evidence", async () => {
+    setNavigator({
+      geolocation: {
+        getCurrentPosition: vi.fn((success) => success(createPosition())),
+        watchPosition: vi.fn(),
+        clearWatch: vi.fn()
+      }
+    });
+
+    await getCurrentPosition();
+
+    await expect(getPermissionDetails()).resolves.toEqual({
+      status: "granted",
+      scope: "foreground",
+      accuracy: "unknown",
+      canAskAgain: false,
+      settingsGuidance: "none"
+    });
+  });
+
+  it("uses a recent permission error as denial evidence", async () => {
+    setNavigator({
+      geolocation: {
+        getCurrentPosition: vi.fn((_success, error) =>
+          error({ code: 1, message: "denied" })
+        ),
+        watchPosition: vi.fn(),
+        clearWatch: vi.fn()
+      }
+    });
+
+    await expect(getCurrentPosition()).rejects.toMatchObject({ code: 1 });
+
+    await expect(getPermissionDetails()).resolves.toEqual({
+      status: "denied",
+      scope: "none",
+      accuracy: "unknown",
+      canAskAgain: null,
+      settingsGuidance: "requestPermissionOrReviewSettings"
+    });
+  });
+
+  it("expires Web permission evidence after 30 seconds", async () => {
+    const now = vi.spyOn(Date, "now").mockReturnValue(1_000);
+    setNavigator({
+      geolocation: {
+        getCurrentPosition: vi.fn((success) => success(createPosition())),
+        watchPosition: vi.fn(),
+        clearWatch: vi.fn()
+      }
+    });
+
+    await getCurrentPosition();
+    now.mockReturnValue(31_001);
+
+    await expect(getPermissionDetails()).resolves.toMatchObject({
+      status: "undetermined",
+      scope: "none",
+      canAskAgain: null
+    });
+  });
+
+  it("discards Web permission evidence after a system clock rollback", async () => {
+    const now = vi.spyOn(Date, "now").mockReturnValue(1_000);
+    setNavigator({
+      geolocation: {
+        getCurrentPosition: vi.fn((success) => success(createPosition())),
+        watchPosition: vi.fn(),
+        clearWatch: vi.fn()
+      }
+    });
+
+    await getCurrentPosition();
+    now.mockReturnValue(999);
+    await expect(getPermissionDetails()).resolves.toMatchObject({
+      status: "undetermined"
+    });
+
+    now.mockReturnValue(1_001);
+    await expect(getPermissionDetails()).resolves.toMatchObject({
+      status: "undetermined"
+    });
+  });
+
+  it("does not resurrect evidence after the Permissions API overrides it", async () => {
+    const query = vi.fn().mockResolvedValue({ state: "denied" });
+    setNavigator({
+      geolocation: {
+        getCurrentPosition: vi.fn((success) => success(createPosition())),
+        watchPosition: vi.fn(),
+        clearWatch: vi.fn()
+      },
+      permissions: { query }
+    });
+
+    await getCurrentPosition();
+    await expect(getPermissionDetails()).resolves.toMatchObject({
+      status: "denied"
+    });
+
+    query.mockResolvedValue({ state: "prompt" });
+    await expect(getPermissionDetails()).resolves.toMatchObject({
+      status: "undetermined",
+      canAskAgain: true
+    });
   });
 
   it("marks location unavailable when browser permission is denied", async () => {

@@ -38,6 +38,7 @@ appId: nitrogeolocation.example
       platform: iOS
     file: issue-122-ios.yaml
 - runFlow: permission-check.yaml
+- runFlow: permission-details.yaml
 - runFlow:
     when:
       platform: Android

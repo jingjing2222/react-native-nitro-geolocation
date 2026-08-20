@@ -32,7 +32,10 @@ data class BackgroundPermissionResult(
   val canRequestBackgroundInline: Boolean?,
   @DoNotStrip
   @Keep
-  val needsSettingsRedirect: Boolean?
+  val needsSettingsRedirect: Boolean?,
+  @DoNotStrip
+  @Keep
+  val canAskAgain: Boolean?
 ) {
   /* primary constructor */
 
@@ -44,6 +47,7 @@ data class BackgroundPermissionResult(
       && Objects.deepEquals(this.accuracyAuthorization, other.accuracyAuthorization)
       && Objects.deepEquals(this.canRequestBackgroundInline, other.canRequestBackgroundInline)
       && Objects.deepEquals(this.needsSettingsRedirect, other.needsSettingsRedirect)
+      && Objects.deepEquals(this.canAskAgain, other.canAskAgain)
   }
 
   override fun hashCode(): Int {
@@ -52,7 +56,8 @@ data class BackgroundPermissionResult(
       background,
       accuracyAuthorization,
       canRequestBackgroundInline,
-      needsSettingsRedirect
+      needsSettingsRedirect,
+      canAskAgain
     ).contentDeepHashCode()
   }
 
@@ -64,8 +69,8 @@ data class BackgroundPermissionResult(
     @Keep
     @Suppress("unused")
     @JvmStatic
-    private fun fromCpp(foreground: PermissionStatus, background: BackgroundPermissionStatus, accuracyAuthorization: AccuracyAuthorization?, canRequestBackgroundInline: Boolean?, needsSettingsRedirect: Boolean?): BackgroundPermissionResult {
-      return BackgroundPermissionResult(foreground, background, accuracyAuthorization, canRequestBackgroundInline, needsSettingsRedirect)
+    private fun fromCpp(foreground: PermissionStatus, background: BackgroundPermissionStatus, accuracyAuthorization: AccuracyAuthorization?, canRequestBackgroundInline: Boolean?, needsSettingsRedirect: Boolean?, canAskAgain: Boolean?): BackgroundPermissionResult {
+      return BackgroundPermissionResult(foreground, background, accuracyAuthorization, canRequestBackgroundInline, needsSettingsRedirect, canAskAgain)
     }
   }
 }

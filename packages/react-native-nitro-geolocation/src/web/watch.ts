@@ -20,9 +20,9 @@ import {
   toPositionOptions
 } from "./browser";
 import {
-  clearWebPermissionEvidence,
-  rememberWebPermissionGrant
-} from "./permissionEvidence";
+  clearWebPermissionDetailsEvidence,
+  rememberWebPermissionDetailsEvidence
+} from "./permissionDetailsEvidence";
 
 const activeWatches = new Map<string, number>();
 let nextWatchId = 1;
@@ -46,6 +46,7 @@ export function watchPosition(
   const token = `web-${nextWatchId++}`;
 
   if (!geolocation) {
+    clearWebPermissionDetailsEvidence();
     error?.(createUnsupportedError());
     return token;
   }
@@ -54,7 +55,7 @@ export function watchPosition(
   const requestedAt = Date.now();
   const watchId = geolocation.watchPosition(
     (position) => {
-      rememberWebPermissionGrant();
+      rememberWebPermissionDetailsEvidence("granted");
       const normalizedPosition = normalizePosition(position);
       const filter = options?.distanceFilter ?? 0;
       if (
@@ -69,7 +70,7 @@ export function watchPosition(
     (browserError) => {
       const mappedError = mapBrowserError(browserError);
       if (mappedError.code === LocationErrorCode.PERMISSION_DENIED) {
-        clearWebPermissionEvidence();
+        rememberWebPermissionDetailsEvidence("denied");
       }
       error?.(mappedError);
     },

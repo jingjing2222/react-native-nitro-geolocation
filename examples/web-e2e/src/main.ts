@@ -4,7 +4,7 @@ import {
   runDeniedCheck,
   runTimeoutCheck,
   runUnavailableCheck
-} from "./errorRunner";
+} from "./edgeCaseRunner";
 import { runSuccessSuite } from "./runner";
 import { scenarios } from "./scenarios";
 import "./styles.css";

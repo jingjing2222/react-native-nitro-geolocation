@@ -1,6 +1,7 @@
 package com.margelo.nitro.nitrogeolocation.background
 
 import android.Manifest
+import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
@@ -9,6 +10,7 @@ import android.os.Build
 import android.os.Handler
 import android.os.Looper
 import android.provider.Settings
+import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import com.facebook.react.bridge.ReactApplicationContext
 import com.facebook.react.modules.core.PermissionAwareActivity
@@ -21,15 +23,16 @@ internal class AndroidBackgroundPermissions(
     private val appContext: Context,
     private val configProvider: () -> BackgroundLocationOptions?
 ) {
-    fun checkBackgroundPermission(): BackgroundPermissionResult {
+    fun checkBackgroundPermission(activity: Activity? = null): BackgroundPermissionResult {
         val foreground = foregroundPermission()
         val background = backgroundPermission()
         return BackgroundPermissionResult(
-            foreground,
-            background,
-            accuracyAuthorization(),
-            Build.VERSION.SDK_INT < Build.VERSION_CODES.R,
-            background != BackgroundPermissionStatus.GRANTED
+            foreground = foreground,
+            background = background,
+            accuracyAuthorization = accuracyAuthorization(),
+            canRequestBackgroundInline = Build.VERSION.SDK_INT < Build.VERSION_CODES.R,
+            needsSettingsRedirect = background != BackgroundPermissionStatus.GRANTED,
+            canAskAgain = foregroundCanAskAgain(activity, foreground)
         )
     }
 
@@ -58,7 +61,7 @@ internal class AndroidBackgroundPermissions(
             backgroundPermission() != BackgroundPermissionStatus.GRANTED) {
             openAppLocationSettings()
         }
-        return checkBackgroundPermission()
+        return checkBackgroundPermission(activity)
     }
 
     fun openAppLocationSettings() {
@@ -124,6 +127,24 @@ internal class AndroidBackgroundPermissions(
             coarse -> AccuracyAuthorization.REDUCED
             else -> AccuracyAuthorization.UNKNOWN
         }
+    }
+
+    private fun foregroundCanAskAgain(
+        activity: Activity?,
+        foreground: PermissionStatus
+    ): Boolean? {
+        if (foreground == PermissionStatus.GRANTED) return false
+        if (activity == null) return null
+
+        val showsRationale =
+            ActivityCompat.shouldShowRequestPermissionRationale(
+                activity,
+                Manifest.permission.ACCESS_FINE_LOCATION
+            ) || ActivityCompat.shouldShowRequestPermissionRationale(
+                activity,
+                Manifest.permission.ACCESS_COARSE_LOCATION
+            )
+        return if (showsRationale) true else null
     }
 
     private fun requestPermissionsAndWait(

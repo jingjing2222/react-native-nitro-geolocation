@@ -6,7 +6,7 @@ import {
   getCurrentPosition,
   getLastKnownPosition,
   getLastKnownPositionAsync,
-  getLocationReadiness,
+  getPermissionDetails,
   requestPermission,
   stopObserving,
   unwatch,
@@ -34,8 +34,8 @@ import {
   isNearExpected
 } from "./locationAssertions";
 import { postNativeStatus } from "./nativeBridge";
-import { expectReadyWithCache } from "./readinessAssertions";
-import { scenarios, successScenarioIds } from "./scenarios";
+import { expectPostRequestPermissionDetails } from "./permissionDetailsAssertions";
+import { scenarios } from "./scenarios";
 
 function wait(ms: number) {
   return new Promise((resolve) => setTimeout(resolve, ms));
@@ -227,11 +227,11 @@ export async function runSuccessSuite() {
   setScenario("api-availability", "running");
   const apiShape = {
     checkPermission: typeof checkPermission,
+    getPermissionDetails: typeof getPermissionDetails,
     requestPermission: typeof requestPermission,
     getCurrentPosition: typeof getCurrentPosition,
     getLastKnownPosition: typeof getLastKnownPosition,
     getLastKnownPositionAsync: typeof getLastKnownPositionAsync,
-    getLocationReadiness: typeof getLocationReadiness,
     watchPosition: typeof watchPosition,
     unwatch: typeof unwatch,
     stopObserving: typeof stopObserving
@@ -287,6 +287,12 @@ export async function runSuccessSuite() {
         throw new Error(`Expected granted permission, got ${status}.`);
       }
     }
+  );
+
+  await runStep(
+    "permission-details-after-request",
+    () => getPermissionDetails(),
+    expectPostRequestPermissionDetails
   );
 
   const position = await runStep(
@@ -518,7 +524,26 @@ export async function runSuccessSuite() {
 
   const failedScenarios = scenarios.filter(
     (scenario) =>
-      successScenarioIds.has(scenario.id) && scenario.status !== "pass"
+      [
+        "api-availability",
+        "compat-api-availability",
+        "request-location-settings",
+        "check-permission",
+        "request-permission",
+        "permission-details-after-request",
+        "get-current-position",
+        "last-known-cold-cache",
+        "last-known-async-cold-cache",
+        "last-known-module-cache",
+        "last-known-async-cache",
+        "last-known-stale-cache",
+        "watch-position",
+        "unwatch",
+        "stop-observing",
+        "compat-get-current-position",
+        "compat-watch-position",
+        "compat-stop-observing"
+      ].includes(scenario.id) && scenario.status !== "pass"
   );
   if (failedScenarios.length > 0) {
     throw new Error(

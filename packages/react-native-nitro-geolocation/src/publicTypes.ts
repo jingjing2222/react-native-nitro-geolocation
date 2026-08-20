@@ -71,34 +71,25 @@ export type LocationSettingsOutcome = SchemaLocationSettingsOutcome;
 export type LocationSettingsResult = SchemaLocationSettingsResult;
 export type LocationAvailability = SchemaLocationAvailability;
 
-export type LocationReadinessRemediation =
+export type PermissionScope = "none" | "foreground" | "background";
+export type PermissionSettingsGuidance =
+  | "none"
   | "requestPermission"
   | "requestPermissionOrReviewSettings"
-  | "reviewPermissionSettings"
-  | "enableLocationServices"
-  | "enableLocationProvider"
-  | "installOrUpdatePlayServices"
-  | "enableGoogleLocationAccuracy"
-  | "useSupportedEnvironment"
-  | "acquirePosition"
-  | "retryLocation";
+  | "reviewSettings"
+  | "managedRestriction"
+  | "useSupportedEnvironment";
 
-export type LocationCacheReadiness =
-  | { available: false }
-  | { available: true; timestamp: number; ageMs: number };
-
-/**
- * Read-only location diagnosis assembled from permission, service, provider,
- * availability, and module-cache state.
- */
-export interface LocationReadiness {
-  ready: boolean;
-  permission: PermissionStatus;
-  providerStatus: LocationProviderStatus;
-  availability: LocationAvailability;
-  cache: LocationCacheReadiness;
-  remediations: LocationReadinessRemediation[];
+/** Detailed, read-only location permission state. */
+export interface PermissionDetails {
+  status: PermissionStatus;
+  scope: PermissionScope;
+  accuracy: SchemaAccuracyAuthorization;
+  /** Whether another foreground system prompt is known to be possible. */
+  canAskAgain: boolean | null;
+  settingsGuidance: PermissionSettingsGuidance;
 }
+
 export type GeocodingCoordinates = SchemaGeocodingCoordinates;
 export type GeocodedLocation = SchemaGeocodedLocation;
 export type ReverseGeocodedAddress = SchemaReverseGeocodedAddress;

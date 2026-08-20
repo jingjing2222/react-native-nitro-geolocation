@@ -4,7 +4,7 @@ import type {
   LocationSettingsOptions,
   PermissionStatus
 } from "../NitroGeolocation.nitro";
-import { buildLocationReadiness } from "../api/locationReadiness";
+import { buildPermissionDetails } from "../api/permissionDetails";
 import {
   readLastKnownPosition,
   rememberPosition,
@@ -19,7 +19,7 @@ import type {
   Heading,
   LocationAvailability,
   LocationProviderStatus,
-  LocationReadiness,
+  PermissionDetails,
   ReverseGeocodedAddress
 } from "../publicTypes";
 import { LocationErrorCode } from "../utils/errors";
@@ -34,10 +34,10 @@ import {
   toPositionOptions
 } from "./browser";
 import {
-  applyRecentWebPermissionEvidence,
-  clearWebPermissionEvidence,
-  rememberWebPermissionGrant
-} from "./permissionEvidence";
+  clearWebPermissionDetailsEvidence,
+  readRecentWebPermissionDetailsEvidence,
+  rememberWebPermissionDetailsEvidence
+} from "./permissionDetailsEvidence";
 export { stopObserving, unwatch, watchHeading, watchPosition } from "./watch";
 export {
   useWatchPosition,
@@ -68,6 +68,57 @@ export async function checkPermission(): Promise<PermissionStatus> {
     return permission;
   } catch {
     return "undetermined";
+  }
+}
+
+export async function getPermissionDetails(): Promise<PermissionDetails> {
+  const browserNavigator = getNavigator();
+  if (!browserNavigator?.geolocation) {
+    clearWebPermissionDetailsEvidence();
+    return buildPermissionDetails({
+      platform: "web",
+      foreground: "denied",
+      background: "unsupported",
+      accuracy: "unknown",
+      environmentSupported: false,
+      canAskAgain: false
+    });
+  }
+
+  try {
+    const permission = await browserNavigator.permissions?.query({
+      name: "geolocation"
+    });
+    if (permission) {
+      clearWebPermissionDetailsEvidence();
+      const status = mapPermissionState(permission.state);
+      return buildPermissionDetails({
+        platform: "web",
+        foreground: status,
+        background: "unsupported",
+        accuracy: "unknown",
+        canAskAgain: status === "undetermined"
+      });
+    }
+
+    const observed = readRecentWebPermissionDetailsEvidence();
+    const status = observed ?? "undetermined";
+    return buildPermissionDetails({
+      platform: "web",
+      foreground: status,
+      background: "unsupported",
+      accuracy: "unknown",
+      canAskAgain: observed === "granted" ? false : null
+    });
+  } catch {
+    const observed = readRecentWebPermissionDetailsEvidence();
+    return buildPermissionDetails({
+      platform: "web",
+      foreground: observed ?? "undetermined",
+      background: "unsupported",
+      accuracy: "unknown",
+      canAskAgain: observed === "granted" ? false : null
+    });
   }
 }
 
@@ -173,13 +224,13 @@ export function getCurrentPosition(
   return new Promise((resolve, reject) => {
     geolocation.getCurrentPosition(
       (position) => {
-        rememberWebPermissionGrant();
+        rememberWebPermissionDetailsEvidence("granted");
         resolve(rememberPosition(normalizePosition(position)));
       },
       (error) => {
         const mappedError = mapBrowserError(error);
         if (mappedError.code === LocationErrorCode.PERMISSION_DENIED) {
-          clearWebPermissionEvidence();
+          rememberWebPermissionDetailsEvidence("denied");
         }
         reject(mappedError);
       },
