@@ -10,7 +10,7 @@ import NitroModules
 /// See ``HybridNitroBackgroundLocationSpec``
 public protocol HybridNitroBackgroundLocationSpec_protocol: HybridObject {
   // Properties
-
+  
 
   // Methods
   func checkBackgroundPermission() throws -> Promise<BackgroundPermissionResult>

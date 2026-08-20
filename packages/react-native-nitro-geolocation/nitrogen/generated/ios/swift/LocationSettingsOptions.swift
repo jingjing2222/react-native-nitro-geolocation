@@ -62,7 +62,7 @@ public extension LocationSettingsOptions {
   var accuracy: LocationAccuracyOptions? {
     return self.__accuracy.value
   }
-
+  
   @inline(__always)
   var interval: Double? {
     return { () -> Double? in
@@ -74,7 +74,7 @@ public extension LocationSettingsOptions {
       }
     }()
   }
-
+  
   @inline(__always)
   var fastestInterval: Double? {
     return { () -> Double? in
@@ -86,7 +86,7 @@ public extension LocationSettingsOptions {
       }
     }()
   }
-
+  
   @inline(__always)
   var distanceFilter: Double? {
     return { () -> Double? in
@@ -98,7 +98,7 @@ public extension LocationSettingsOptions {
       }
     }()
   }
-
+  
   @inline(__always)
   var alwaysShow: Bool? {
     return { () -> Bool? in
@@ -110,7 +110,7 @@ public extension LocationSettingsOptions {
       }
     }()
   }
-
+  
   @inline(__always)
   var needBle: Bool? {
     return { () -> Bool? in

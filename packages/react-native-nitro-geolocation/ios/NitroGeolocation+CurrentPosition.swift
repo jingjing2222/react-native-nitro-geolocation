@@ -56,7 +56,7 @@ extension NitroGeolocation {
             options: ParsedOptions.parse(from: options)
         )
 
-        runLocationOperationOnMain {
+        runLocationOperationOnMainSync {
             self.watchSubscriptions[token] = subscription
             self.initializeLocationManagerIfNeeded()
             self.updateLocationManagerConfiguration()
@@ -80,6 +80,14 @@ extension NitroGeolocation {
             operation()
         } else {
             DispatchQueue.main.async(execute: operation)
+        }
+    }
+
+    internal func runLocationOperationOnMainSync(_ operation: () -> Void) {
+        if Thread.isMainThread {
+            operation()
+        } else {
+            DispatchQueue.main.sync(execute: operation)
         }
     }
 }

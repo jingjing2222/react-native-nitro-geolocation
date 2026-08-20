@@ -123,7 +123,7 @@ public extension LocationRequestOptions {
       }
     }()
   }
-
+  
   @inline(__always)
   var maximumAge: Double? {
     return { () -> Double? in
@@ -135,12 +135,12 @@ public extension LocationRequestOptions {
       }
     }()
   }
-
+  
   @inline(__always)
   var accuracy: LocationAccuracyOptions? {
     return self.__accuracy.value
   }
-
+  
   @inline(__always)
   var interval: Double? {
     return { () -> Double? in
@@ -152,7 +152,7 @@ public extension LocationRequestOptions {
       }
     }()
   }
-
+  
   @inline(__always)
   var fastestInterval: Double? {
     return { () -> Double? in
@@ -164,7 +164,7 @@ public extension LocationRequestOptions {
       }
     }()
   }
-
+  
   @inline(__always)
   var distanceFilter: Double? {
     return { () -> Double? in
@@ -176,12 +176,12 @@ public extension LocationRequestOptions {
       }
     }()
   }
-
+  
   @inline(__always)
   var granularity: AndroidGranularity? {
     return self.__granularity.value
   }
-
+  
   @inline(__always)
   var waitForAccurateLocation: Bool? {
     return { () -> Bool? in
@@ -193,7 +193,7 @@ public extension LocationRequestOptions {
       }
     }()
   }
-
+  
   @inline(__always)
   var maxUpdateAge: Double? {
     return { () -> Double? in
@@ -205,7 +205,7 @@ public extension LocationRequestOptions {
       }
     }()
   }
-
+  
   @inline(__always)
   var maxUpdateDelay: Double? {
     return { () -> Double? in
@@ -217,7 +217,7 @@ public extension LocationRequestOptions {
       }
     }()
   }
-
+  
   @inline(__always)
   var maxUpdates: Double? {
     return { () -> Double? in
@@ -229,7 +229,7 @@ public extension LocationRequestOptions {
       }
     }()
   }
-
+  
   @inline(__always)
   var useSignificantChanges: Bool? {
     return { () -> Bool? in
@@ -241,12 +241,12 @@ public extension LocationRequestOptions {
       }
     }()
   }
-
+  
   @inline(__always)
   var activityType: IOSActivityType? {
     return self.__activityType.value
   }
-
+  
   @inline(__always)
   var pausesLocationUpdatesAutomatically: Bool? {
     return { () -> Bool? in
@@ -258,7 +258,7 @@ public extension LocationRequestOptions {
       }
     }()
   }
-
+  
   @inline(__always)
   var showsBackgroundLocationIndicator: Bool? {
     return { () -> Bool? in

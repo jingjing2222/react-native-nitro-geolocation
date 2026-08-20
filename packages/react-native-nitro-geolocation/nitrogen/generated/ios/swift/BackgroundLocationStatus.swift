@@ -125,7 +125,7 @@ public extension BackgroundLocationStatus {
       }
     }()
   }
-
+  
   @inline(__always)
   var lastEventAt: Double? {
     return { () -> Double? in
@@ -137,7 +137,7 @@ public extension BackgroundLocationStatus {
       }
     }()
   }
-
+  
   @inline(__always)
   var geofenceCount: Double {
     return self.__geofenceCount

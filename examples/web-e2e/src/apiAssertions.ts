@@ -4,6 +4,8 @@ import {
   getCurrentPosition,
   getLastKnownPosition,
   getLastKnownPositionAsync,
+  getLocationReadiness,
+  getPermissionDetails,
   requestLocationSettings,
   requestPermission,
   stopObserving,
@@ -15,6 +17,8 @@ import { setScenario } from "./dom";
 export function assertModernApiAvailability() {
   const apiShape = {
     checkPermission: typeof checkPermission,
+    getPermissionDetails: typeof getPermissionDetails,
+    getLocationReadiness: typeof getLocationReadiness,
     requestPermission: typeof requestPermission,
     requestLocationSettings: typeof requestLocationSettings,
     getCurrentPosition: typeof getCurrentPosition,

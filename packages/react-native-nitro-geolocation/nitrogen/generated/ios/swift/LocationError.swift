@@ -26,7 +26,7 @@ public extension LocationError {
   var code: LocationErrorCode {
     return self.__code
   }
-
+  
   @inline(__always)
   var message: String {
     return String(self.__message)

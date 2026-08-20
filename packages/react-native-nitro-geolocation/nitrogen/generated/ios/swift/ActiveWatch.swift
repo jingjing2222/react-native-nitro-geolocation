@@ -26,7 +26,7 @@ public extension ActiveWatch {
   var token: String {
     return String(self.__token)
   }
-
+  
   @inline(__always)
   var kind: ActiveWatchKind {
     return self.__kind

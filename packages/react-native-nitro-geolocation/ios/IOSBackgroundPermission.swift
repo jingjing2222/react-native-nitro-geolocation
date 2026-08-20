@@ -78,7 +78,8 @@ extension NitroBackgroundLocation {
                 background: background,
                 accuracyAuthorization: accuracy,
                 canRequestBackgroundInline: true,
-                needsSettingsRedirect: background != .granted
+                needsSettingsRedirect: background != .granted,
+                canAskAgain: foreground == .undetermined
             )
         }
     }

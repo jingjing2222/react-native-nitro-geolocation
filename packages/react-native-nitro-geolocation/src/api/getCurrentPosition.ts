@@ -7,6 +7,7 @@ import {
   getAbortReason,
   getNativeCurrentPositionOptions
 } from "./currentPositionOptions";
+import { decoratePositionWithMetadata } from "./locationMetadata";
 import { rememberPosition } from "./positionCache";
 
 let nextCurrentPositionRequestId = 1;
@@ -33,7 +34,7 @@ function raceDevtoolsRequestWithSignal(
 
     signal.addEventListener("abort", handleAbort, { once: true });
     request.then(
-      (position) => finish(() => resolve(rememberPosition(position))),
+      (position) => finish(() => resolve(position)),
       (error) => finish(() => reject(error))
     );
   });
@@ -73,13 +74,24 @@ export function getCurrentPosition(
     return Promise.reject(getAbortReason(signal));
   }
 
+  const requestedAt = Date.now();
+  const rememberCurrentPosition = (position: GeolocationResponse) =>
+    rememberPosition(
+      decoratePositionWithMetadata(position, {
+        source: "currentPosition",
+        maximumAge: options?.maximumAge ?? 0,
+        requestedAt
+      })
+    );
+
   if (isDevtoolsEnabled()) {
     const devtoolsResult = getDevtoolsCurrentPosition();
     if (devtoolsResult) {
+      const decoratedResult = devtoolsResult.then(rememberCurrentPosition);
       if (signal) {
-        return raceDevtoolsRequestWithSignal(devtoolsResult, signal);
+        return raceDevtoolsRequestWithSignal(decoratedResult, signal);
       }
-      return devtoolsResult.then(rememberPosition);
+      return decoratedResult;
     }
   }
 
@@ -87,7 +99,7 @@ export function getCurrentPosition(
   if (!signal) {
     return new Promise((resolve, reject) => {
       NitroGeolocationHybridObject.getCurrentPosition(
-        (position) => resolve(rememberPosition(position)),
+        (position) => resolve(rememberCurrentPosition(position)),
         nativeOptions,
         reject
       );
@@ -113,7 +125,7 @@ export function getCurrentPosition(
     signal.addEventListener("abort", handleAbort, { once: true });
     NitroGeolocationHybridObject.getCurrentPositionCancellable(
       requestId,
-      (position) => finish(() => resolve(rememberPosition(position))),
+      (position) => finish(() => resolve(rememberCurrentPosition(position))),
       nativeOptions,
       (error) => finish(() => reject(error))
     );

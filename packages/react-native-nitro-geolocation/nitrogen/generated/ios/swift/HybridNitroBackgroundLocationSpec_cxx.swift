@@ -84,7 +84,7 @@ open class HybridNitroBackgroundLocationSpec_cxx {
     }
   }
 
-
+  
 
   /**
    * Get the memory size of the Swift class (plus size of any other allocations)
@@ -121,7 +121,7 @@ open class HybridNitroBackgroundLocationSpec_cxx {
   }
 
   // Properties
-
+  
 
   // Methods
   @inline(__always)
@@ -142,7 +142,7 @@ open class HybridNitroBackgroundLocationSpec_cxx {
       return bridge.create_Result_std__shared_ptr_Promise_BackgroundPermissionResult___(__exceptionPtr)
     }
   }
-
+  
   @inline(__always)
   public final func requestBackgroundPermission() -> bridge.Result_std__shared_ptr_Promise_BackgroundPermissionResult___ {
     do {
@@ -161,7 +161,7 @@ open class HybridNitroBackgroundLocationSpec_cxx {
       return bridge.create_Result_std__shared_ptr_Promise_BackgroundPermissionResult___(__exceptionPtr)
     }
   }
-
+  
   @inline(__always)
   public final func openAppLocationSettings() -> bridge.Result_std__shared_ptr_Promise_void___ {
     do {
@@ -180,7 +180,7 @@ open class HybridNitroBackgroundLocationSpec_cxx {
       return bridge.create_Result_std__shared_ptr_Promise_void___(__exceptionPtr)
     }
   }
-
+  
   @inline(__always)
   public final func configureBackgroundLocation(options: BackgroundLocationOptions) -> bridge.Result_std__shared_ptr_Promise_void___ {
     do {
@@ -199,7 +199,7 @@ open class HybridNitroBackgroundLocationSpec_cxx {
       return bridge.create_Result_std__shared_ptr_Promise_void___(__exceptionPtr)
     }
   }
-
+  
   @inline(__always)
   public final func getBackgroundConfiguration() -> bridge.Result_std__shared_ptr_Promise_std__optional_BackgroundLocationOptions____ {
     do {
@@ -224,7 +224,7 @@ open class HybridNitroBackgroundLocationSpec_cxx {
       return bridge.create_Result_std__shared_ptr_Promise_std__optional_BackgroundLocationOptions____(__exceptionPtr)
     }
   }
-
+  
   @inline(__always)
   public final func startBackgroundLocation(options: bridge.std__optional_BackgroundLocationOptions_) -> bridge.Result_std__shared_ptr_Promise_void___ {
     do {
@@ -243,7 +243,7 @@ open class HybridNitroBackgroundLocationSpec_cxx {
       return bridge.create_Result_std__shared_ptr_Promise_void___(__exceptionPtr)
     }
   }
-
+  
   @inline(__always)
   public final func stopBackgroundLocation() -> bridge.Result_std__shared_ptr_Promise_void___ {
     do {
@@ -262,7 +262,7 @@ open class HybridNitroBackgroundLocationSpec_cxx {
       return bridge.create_Result_std__shared_ptr_Promise_void___(__exceptionPtr)
     }
   }
-
+  
   @inline(__always)
   public final func resetBackgroundLocation() -> bridge.Result_std__shared_ptr_Promise_void___ {
     do {
@@ -281,7 +281,7 @@ open class HybridNitroBackgroundLocationSpec_cxx {
       return bridge.create_Result_std__shared_ptr_Promise_void___(__exceptionPtr)
     }
   }
-
+  
   @inline(__always)
   public final func getBackgroundLocationStatus() -> bridge.Result_std__shared_ptr_Promise_BackgroundLocationStatus___ {
     do {
@@ -300,7 +300,7 @@ open class HybridNitroBackgroundLocationSpec_cxx {
       return bridge.create_Result_std__shared_ptr_Promise_BackgroundLocationStatus___(__exceptionPtr)
     }
   }
-
+  
   @inline(__always)
   public final func addBackgroundEventListener(listener: bridge.Func_void_BackgroundEventEnvelope) -> bridge.Result_std__string_ {
     do {
@@ -317,7 +317,7 @@ open class HybridNitroBackgroundLocationSpec_cxx {
       return bridge.create_Result_std__string_(__exceptionPtr)
     }
   }
-
+  
   @inline(__always)
   public final func removeBackgroundEventListener(token: std.string) -> bridge.Result_void_ {
     do {
@@ -328,7 +328,7 @@ open class HybridNitroBackgroundLocationSpec_cxx {
       return bridge.create_Result_void_(__exceptionPtr)
     }
   }
-
+  
   @inline(__always)
   public final func addBackgroundLocationListener(listener: bridge.Func_void_BackgroundLocation) -> bridge.Result_std__string_ {
     do {
@@ -345,7 +345,7 @@ open class HybridNitroBackgroundLocationSpec_cxx {
       return bridge.create_Result_std__string_(__exceptionPtr)
     }
   }
-
+  
   @inline(__always)
   public final func removeBackgroundLocationListener(token: std.string) -> bridge.Result_void_ {
     do {
@@ -356,7 +356,7 @@ open class HybridNitroBackgroundLocationSpec_cxx {
       return bridge.create_Result_void_(__exceptionPtr)
     }
   }
-
+  
   @inline(__always)
   public final func addBackgroundErrorListener(listener: bridge.Func_void_LocationError) -> bridge.Result_std__string_ {
     do {
@@ -373,7 +373,7 @@ open class HybridNitroBackgroundLocationSpec_cxx {
       return bridge.create_Result_std__string_(__exceptionPtr)
     }
   }
-
+  
   @inline(__always)
   public final func removeBackgroundErrorListener(token: std.string) -> bridge.Result_void_ {
     do {
@@ -384,7 +384,7 @@ open class HybridNitroBackgroundLocationSpec_cxx {
       return bridge.create_Result_void_(__exceptionPtr)
     }
   }
-
+  
   @inline(__always)
   public final func addLocationLifecycleListener(listener: bridge.Func_void_LocationLifecycleEvent) -> bridge.Result_std__string_ {
     do {
@@ -401,7 +401,7 @@ open class HybridNitroBackgroundLocationSpec_cxx {
       return bridge.create_Result_std__string_(__exceptionPtr)
     }
   }
-
+  
   @inline(__always)
   public final func removeLocationLifecycleListener(token: std.string) -> bridge.Result_void_ {
     do {
@@ -412,7 +412,7 @@ open class HybridNitroBackgroundLocationSpec_cxx {
       return bridge.create_Result_void_(__exceptionPtr)
     }
   }
-
+  
   @inline(__always)
   public final func getStoredBackgroundLocations(options: bridge.std__optional_GetStoredBackgroundLocationsOptions_) -> bridge.Result_std__shared_ptr_Promise_std__vector_StoredBackgroundLocation____ {
     do {
@@ -437,7 +437,7 @@ open class HybridNitroBackgroundLocationSpec_cxx {
       return bridge.create_Result_std__shared_ptr_Promise_std__vector_StoredBackgroundLocation____(__exceptionPtr)
     }
   }
-
+  
   @inline(__always)
   public final func clearStoredBackgroundLocations(ids: bridge.std__optional_std__vector_std__string__) -> bridge.Result_std__shared_ptr_Promise_void___ {
     do {
@@ -463,7 +463,7 @@ open class HybridNitroBackgroundLocationSpec_cxx {
       return bridge.create_Result_std__shared_ptr_Promise_void___(__exceptionPtr)
     }
   }
-
+  
   @inline(__always)
   public final func markStoredBackgroundLocationsDelivered(ids: bridge.std__vector_std__string_) -> bridge.Result_std__shared_ptr_Promise_void___ {
     do {
@@ -482,7 +482,7 @@ open class HybridNitroBackgroundLocationSpec_cxx {
       return bridge.create_Result_std__shared_ptr_Promise_void___(__exceptionPtr)
     }
   }
-
+  
   @inline(__always)
   public final func getStoredBackgroundEvents(options: bridge.std__optional_GetStoredBackgroundEventsOptions_) -> bridge.Result_std__shared_ptr_Promise_std__vector_StoredBackgroundEventEnvelope____ {
     do {
@@ -507,7 +507,7 @@ open class HybridNitroBackgroundLocationSpec_cxx {
       return bridge.create_Result_std__shared_ptr_Promise_std__vector_StoredBackgroundEventEnvelope____(__exceptionPtr)
     }
   }
-
+  
   @inline(__always)
   public final func clearStoredBackgroundEvents(ids: bridge.std__optional_std__vector_std__string__) -> bridge.Result_std__shared_ptr_Promise_void___ {
     do {
@@ -533,7 +533,7 @@ open class HybridNitroBackgroundLocationSpec_cxx {
       return bridge.create_Result_std__shared_ptr_Promise_void___(__exceptionPtr)
     }
   }
-
+  
   @inline(__always)
   public final func markStoredBackgroundEventsDelivered(ids: bridge.std__vector_std__string_) -> bridge.Result_std__shared_ptr_Promise_void___ {
     do {
@@ -552,7 +552,7 @@ open class HybridNitroBackgroundLocationSpec_cxx {
       return bridge.create_Result_std__shared_ptr_Promise_void___(__exceptionPtr)
     }
   }
-
+  
   @inline(__always)
   public final func addGeofences(regions: bridge.std__vector_GeofenceRegion_, options: bridge.std__optional_GeofencingOptions_) -> bridge.Result_std__shared_ptr_Promise_void___ {
     do {
@@ -571,7 +571,7 @@ open class HybridNitroBackgroundLocationSpec_cxx {
       return bridge.create_Result_std__shared_ptr_Promise_void___(__exceptionPtr)
     }
   }
-
+  
   @inline(__always)
   public final func removeGeofences(identifiers: bridge.std__optional_std__vector_std__string__) -> bridge.Result_std__shared_ptr_Promise_void___ {
     do {
@@ -597,7 +597,7 @@ open class HybridNitroBackgroundLocationSpec_cxx {
       return bridge.create_Result_std__shared_ptr_Promise_void___(__exceptionPtr)
     }
   }
-
+  
   @inline(__always)
   public final func getRegisteredGeofences() -> bridge.Result_std__shared_ptr_Promise_std__vector_GeofenceRegion____ {
     do {
@@ -622,7 +622,7 @@ open class HybridNitroBackgroundLocationSpec_cxx {
       return bridge.create_Result_std__shared_ptr_Promise_std__vector_GeofenceRegion____(__exceptionPtr)
     }
   }
-
+  
   @inline(__always)
   public final func startActivityRecognition(options: bridge.std__optional_ActivityRecognitionOptions_) -> bridge.Result_std__shared_ptr_Promise_void___ {
     do {
@@ -641,7 +641,7 @@ open class HybridNitroBackgroundLocationSpec_cxx {
       return bridge.create_Result_std__shared_ptr_Promise_void___(__exceptionPtr)
     }
   }
-
+  
   @inline(__always)
   public final func stopActivityRecognition() -> bridge.Result_std__shared_ptr_Promise_void___ {
     do {
@@ -660,7 +660,7 @@ open class HybridNitroBackgroundLocationSpec_cxx {
       return bridge.create_Result_std__shared_ptr_Promise_void___(__exceptionPtr)
     }
   }
-
+  
   @inline(__always)
   public final func syncStoredLocations() -> bridge.Result_std__shared_ptr_Promise_BackgroundHttpSyncResult___ {
     do {

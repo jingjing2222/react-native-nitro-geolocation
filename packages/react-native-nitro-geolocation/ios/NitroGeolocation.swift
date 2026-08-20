@@ -26,6 +26,7 @@ class NitroGeolocation: HybridNitroGeolocationSpec {
     internal var pendingPositionRequests: [String: PositionRequest] = [:]
 
     // Watch subscriptions (token -> callback)
+    @ActiveWatchRegistry(kind: .position)
     internal var watchSubscriptions: [String: WatchSubscription] = [:]
 
     // Heading requests/subscriptions
@@ -433,7 +434,7 @@ class NitroGeolocation: HybridNitroGeolocationSpec {
             lastDeliveredHeading: nil
         )
 
-        runLocationOperationOnMain {
+        runLocationOperationOnMainSync {
             guard self.validateHeadingAvailability(
                 locationServicesEnabled: locationServicesEnabled,
                 error: error
@@ -448,9 +449,14 @@ class NitroGeolocation: HybridNitroGeolocationSpec {
     }
 
     func unwatch(token: String) {
-        watchSubscriptions.removeValue(forKey: token)
-        headingSubscriptions.removeValue(forKey: token)
-        providerStatusWatcher.unwatch(token: token)
+        runLocationOperationOnMainSync {
+            self.watchSubscriptions.removeValue(forKey: token)
+            self.providerStatusWatcher.unwatch(token: token)
+            if self.watchSubscriptions.isEmpty && self.pendingPositionRequests.isEmpty {
+                self.stopMonitoring()
+            } else {
+                self.updateLocationManagerConfiguration()
+            }
 
             self.headingSubscriptions.removeValue(forKey: token)
             if self.headingSubscriptions.isEmpty && self.pendingHeadingRequests.isEmpty {
@@ -467,9 +473,14 @@ class NitroGeolocation: HybridNitroGeolocationSpec {
     }
 
     func stopObserving() {
-        watchSubscriptions.removeAll()
-        headingSubscriptions.removeAll()
-        providerStatusWatcher.stopObserving()
+        runLocationOperationOnMainSync {
+            self.watchSubscriptions.removeAll()
+            self.providerStatusWatcher.stopObserving()
+            if self.pendingPositionRequests.isEmpty {
+                self.stopMonitoring()
+            } else {
+                self.updateLocationManagerConfiguration()
+            }
 
             self.headingSubscriptions.removeAll()
             if self.pendingHeadingRequests.isEmpty {
@@ -1015,6 +1026,10 @@ class NitroGeolocation: HybridNitroGeolocationSpec {
         return DispatchQueue.main.sync {
             getCurrentAccuracyAuthorization()
         }
+    }
+
+    private func locationToPosition(_ location: CLLocation) -> GeolocationResponse {
+        return location.toGeolocationResponse()
     }
 
     private func validateGeocodingCoordinates(_ coords: GeocodingCoordinates) -> LocationError? {

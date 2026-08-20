@@ -26,7 +26,7 @@ public extension LocationLifecycleEvent {
   var state: LocationLifecycleState {
     return self.__state
   }
-
+  
   @inline(__always)
   var timestamp: Double {
     return self.__timestamp

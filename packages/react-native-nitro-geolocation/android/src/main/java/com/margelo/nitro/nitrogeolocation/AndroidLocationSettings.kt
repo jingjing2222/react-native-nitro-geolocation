@@ -30,8 +30,7 @@ private const val GOOGLE_LOCATION_ACCURACY_TIMEOUT_MS = 2_000L
 internal class AndroidLocationSettings(
     private val reactContext: ReactApplicationContext,
     private val locationManager: AndroidLocationManager,
-    private val createLocationError: (LocationErrorCode, String) -> LocationError,
-    private val createPlayServicesUnavailableError: () -> LocationError
+    private val createLocationError: (LocationErrorCode, String) -> LocationError
 ) {
     private data class ParsedSettingsOptions(
         val androidAccuracy: AndroidAccuracyResolution,

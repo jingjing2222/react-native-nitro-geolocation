@@ -95,7 +95,7 @@ namespace margelo::nitro::nitrogeolocation {
 
     public:
       // Properties
-
+      
 
     public:
       // Methods

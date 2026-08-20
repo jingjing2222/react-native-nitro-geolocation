@@ -50,17 +50,17 @@ public extension BackgroundPermissionResult {
   var foreground: PermissionStatus {
     return self.__foreground
   }
-
+  
   @inline(__always)
   var background: BackgroundPermissionStatus {
     return self.__background
   }
-
+  
   @inline(__always)
   var accuracyAuthorization: AccuracyAuthorization? {
     return self.__accuracyAuthorization.value
   }
-
+  
   @inline(__always)
   var canRequestBackgroundInline: Bool? {
     return { () -> Bool? in
@@ -72,7 +72,7 @@ public extension BackgroundPermissionResult {
       }
     }()
   }
-
+  
   @inline(__always)
   var needsSettingsRedirect: Bool? {
     return { () -> Bool? in
@@ -84,7 +84,7 @@ public extension BackgroundPermissionResult {
       }
     }()
   }
-
+  
   @inline(__always)
   var canAskAgain: Bool? {
     return { () -> Bool? in
