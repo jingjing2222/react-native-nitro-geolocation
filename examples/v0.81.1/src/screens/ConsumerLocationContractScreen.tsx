@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import {
+  Linking,
   Pressable,
   SafeAreaView,
   ScrollView,
@@ -8,12 +9,14 @@ import {
   View
 } from "react-native";
 import {
-  checkPermission,
   getCurrentPosition,
-  requestPermission
+  getPermissionDetails,
+  requestPermission,
+  setConfiguration
 } from "react-native-nitro-geolocation";
 import type {
   GeolocationResponse,
+  PermissionSettingsGuidance,
   PermissionStatus
 } from "react-native-nitro-geolocation";
 
@@ -66,7 +69,10 @@ export default function ConsumerLocationContractScreen() {
   const [status, setStatus] = useState<ContractStatus>("idle");
   const [permission, setPermission] =
     useState<PermissionStatus>("undetermined");
+  const [permissionGuidance, setPermissionGuidance] =
+    useState<PermissionSettingsGuidance>("requestPermission");
   const [position, setPosition] = useState<GeolocationResponse>();
+  const [nativeRequestCount, setNativeRequestCount] = useState(0);
   const [error, setError] = useState<string>();
 
   const useLocation = async () => {
@@ -75,13 +81,15 @@ export default function ConsumerLocationContractScreen() {
     setError(undefined);
 
     try {
-      const currentPermission = await checkPermission();
-      setPermission(currentPermission);
-      if (currentPermission !== "granted") {
+      const details = await getPermissionDetails();
+      setPermission(details.status);
+      setPermissionGuidance(details.settingsGuidance);
+      if (details.status !== "granted") {
         setStatus("permission-required");
         return;
       }
 
+      setNativeRequestCount((count) => count + 1);
       const currentPosition = await getCurrentPosition({
         accuracy: { android: "high", ios: "best" },
         maximumAge: 0,
@@ -105,14 +113,37 @@ export default function ConsumerLocationContractScreen() {
     setError(undefined);
 
     try {
+      setConfiguration({ authorizationLevel: "whenInUse" });
       const nextPermission = await requestPermission();
-      setPermission(nextPermission);
+      const details = await getPermissionDetails();
+      setPermission(details.status);
+      setPermissionGuidance(details.settingsGuidance);
       setStatus(nextPermission === "granted" ? "ready" : "permission-required");
     } catch (permissionError) {
       setError(errorMessage(permissionError));
       setStatus("failed");
     }
   };
+
+  const openPermissionSettings = async () => {
+    setStatus("running");
+    setError(undefined);
+
+    try {
+      await Linking.openSettings();
+      setStatus("permission-required");
+    } catch (settingsError) {
+      setError(errorMessage(settingsError));
+      setStatus("failed");
+    }
+  };
+
+  const canRequestPermission =
+    permissionGuidance === "requestPermission" ||
+    permissionGuidance === "requestPermissionOrReviewSettings";
+  const canReviewSettings =
+    permissionGuidance === "reviewSettings" ||
+    permissionGuidance === "requestPermissionOrReviewSettings";
 
   return (
     <SafeAreaView style={styles.safeArea} testID="consumer-location-screen">
@@ -127,6 +158,9 @@ export default function ConsumerLocationContractScreen() {
           <Text testID="consumer-location-status">Status: {status}</Text>
           <Text testID="consumer-location-permission">
             Permission: {permission}
+          </Text>
+          <Text testID="consumer-location-native-requests">
+            Native requests: {nativeRequestCount}
           </Text>
           {position ? (
             <Text testID="consumer-location-position">
@@ -147,12 +181,31 @@ export default function ConsumerLocationContractScreen() {
           testID="consumer-location-run"
           title={status === "running" ? "Locating…" : "Use my location"}
         />
-        {status === "permission-required" ? (
+        {status === "permission-required" && canRequestPermission ? (
           <Button
             onPress={askForPermission}
             testID="consumer-location-request-permission"
             title="Request location permission"
           />
+        ) : null}
+        {status === "permission-required" && canReviewSettings ? (
+          <Button
+            onPress={openPermissionSettings}
+            testID="consumer-location-open-settings"
+            title="Open app settings"
+          />
+        ) : null}
+        {status === "permission-required" &&
+        permissionGuidance === "managedRestriction" ? (
+          <Text testID="consumer-location-guidance">
+            Location permission is managed on this device.
+          </Text>
+        ) : null}
+        {status === "permission-required" &&
+        permissionGuidance === "useSupportedEnvironment" ? (
+          <Text testID="consumer-location-guidance">
+            Location is unavailable in this environment.
+          </Text>
         ) : null}
       </ScrollView>
     </SafeAreaView>

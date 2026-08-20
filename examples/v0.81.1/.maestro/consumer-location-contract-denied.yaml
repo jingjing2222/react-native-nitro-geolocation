@@ -15,10 +15,6 @@ appId: nitrogeolocation.example
     commands:
       - tapOn:
           text: "Wait|대기"
-- extendedWaitUntil:
-    visible: "Geolocation API"
-    timeout: 10000
-
 - stopApp
 
 - openLink:
@@ -59,7 +55,14 @@ appId: nitrogeolocation.example
 - assertVisible:
     id: "consumer-location-status"
 - assertVisible: "Permission: denied"
-- assertVisible:
-    id: "consumer-location-request-permission"
+- assertVisible: "Native requests: 0"
 - assertNotVisible:
     id: "consumer-location-position"
+- assertVisible:
+    id: "consumer-location-open-settings"
+
+- tapOn:
+    id: "consumer-location-open-settings"
+- extendedWaitUntil:
+    notVisible: "Use your location"
+    timeout: 10000
