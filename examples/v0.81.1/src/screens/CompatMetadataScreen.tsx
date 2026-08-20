@@ -36,16 +36,48 @@ function PositionShape({
     <KeyValueBlock
       testID={testID}
       rows={[
-        { label: "Response keys", value: Object.keys(position).join(",") },
-        { label: "Latitude", value: position.coords.latitude.toFixed(6) },
-        { label: "Longitude", value: position.coords.longitude.toFixed(6) },
-        { label: "Has mocked", value: String(hasMocked) },
-        { label: "Has provider", value: String(hasProvider) },
+        {
+          label: "Response keys",
+          value: Object.keys(position).join(","),
+          testID: `${testID}-keys`
+        },
+        {
+          label: "Latitude",
+          value: position.coords.latitude.toFixed(6),
+          testID: `${testID}-latitude`
+        },
+        {
+          label: "Longitude",
+          value: position.coords.longitude.toFixed(6),
+          testID: `${testID}-longitude`
+        },
+        {
+          label: "Has mocked",
+          value: String(hasMocked),
+          testID: `${testID}-has-mocked`
+        },
+        {
+          label: "Has provider",
+          value: String(hasProvider),
+          testID: `${testID}-has-provider`
+        },
         ...(hasMocked
-          ? [{ label: "Mocked", value: String(metadata.mocked) }]
+          ? [
+              {
+                label: "Mocked",
+                value: String(metadata.mocked),
+                testID: `${testID}-mocked`
+              }
+            ]
           : []),
         ...(hasProvider
-          ? [{ label: "Provider", value: metadata.provider ?? "unknown" }]
+          ? [
+              {
+                label: "Provider",
+                value: metadata.provider ?? "unknown",
+                testID: `${testID}-provider`
+              }
+            ]
           : [])
       ]}
     />
@@ -63,11 +95,17 @@ export default function CompatMetadataScreen() {
   const [defaultWatch, setDefaultWatch] = useState<GeolocationResponse | null>(
     null
   );
+  const [explicitFalseWatch, setExplicitFalseWatch] =
+    useState<GeolocationResponse | null>(null);
   const [metadataWatch, setMetadataWatch] =
     useState<GeolocationResponseWithMetadata | null>(null);
   const [defaultWatchId, setDefaultWatchId] = useState<number | null>(null);
+  const [explicitFalseWatchId, setExplicitFalseWatchId] = useState<
+    number | null
+  >(null);
   const [metadataWatchId, setMetadataWatchId] = useState<number | null>(null);
   const defaultWatchRef = useRef<number | null>(null);
+  const explicitFalseWatchRef = useRef<number | null>(null);
   const metadataWatchRef = useRef<number | null>(null);
 
   useEffect(() => {
@@ -80,6 +118,9 @@ export default function CompatMetadataScreen() {
     return () => {
       if (defaultWatchRef.current !== null) {
         Geolocation.clearWatch(defaultWatchRef.current);
+      }
+      if (explicitFalseWatchRef.current !== null) {
+        Geolocation.clearWatch(explicitFalseWatchRef.current);
       }
       if (metadataWatchRef.current !== null) {
         Geolocation.clearWatch(metadataWatchRef.current);
@@ -141,7 +182,6 @@ export default function CompatMetadataScreen() {
       setDefaultWatch,
       (error) => Alert.alert("Default Watch Error", error.message),
       {
-        includeExtraMetadata: false,
         enableHighAccuracy: true,
         distanceFilter: 0,
         interval: 1000
@@ -149,6 +189,22 @@ export default function CompatMetadataScreen() {
     );
     defaultWatchRef.current = watchId;
     setDefaultWatchId(watchId);
+  };
+
+  const startExplicitFalseWatch = () => {
+    setExplicitFalseWatch(null);
+    const watchId = Geolocation.watchPosition(
+      setExplicitFalseWatch,
+      (error) => Alert.alert("Explicit False Watch Error", error.message),
+      {
+        includeExtraMetadata: false,
+        enableHighAccuracy: true,
+        distanceFilter: 0,
+        interval: 1000
+      }
+    );
+    explicitFalseWatchRef.current = watchId;
+    setExplicitFalseWatchId(watchId);
   };
 
   const startMetadataWatch = () => {
@@ -180,6 +236,14 @@ export default function CompatMetadataScreen() {
       Geolocation.clearWatch(metadataWatchRef.current);
       metadataWatchRef.current = null;
       setMetadataWatchId(null);
+    }
+  };
+
+  const stopExplicitFalseWatch = () => {
+    if (explicitFalseWatchRef.current !== null) {
+      Geolocation.clearWatch(explicitFalseWatchRef.current);
+      explicitFalseWatchRef.current = null;
+      setExplicitFalseWatchId(null);
     }
   };
 
@@ -236,7 +300,7 @@ export default function CompatMetadataScreen() {
       <ScenarioSection index={3} title="Concurrent Watches" divided>
         <ButtonRow>
           <ScenarioButton
-            title="Start Explicit False Watch"
+            title="Start Default Watch"
             onPress={startDefaultWatch}
             disabled={defaultWatchId !== null}
             color="#FF9800"
@@ -255,6 +319,28 @@ export default function CompatMetadataScreen() {
         <PositionShape
           position={defaultWatch}
           testID="compat-default-watch-result"
+        />
+        <ButtonRow>
+          <ScenarioButton
+            title="Start Explicit False Watch"
+            onPress={startExplicitFalseWatch}
+            disabled={explicitFalseWatchId !== null}
+            color="#1976D2"
+            containerStyle={sharedStyles.button}
+            testID="compat-false-watch-button"
+          />
+          <ScenarioButton
+            title="Stop Explicit False Watch"
+            onPress={stopExplicitFalseWatch}
+            disabled={explicitFalseWatchId === null}
+            color="#F44336"
+            containerStyle={sharedStyles.button}
+            testID="compat-false-watch-stop-button"
+          />
+        </ButtonRow>
+        <PositionShape
+          position={explicitFalseWatch}
+          testID="compat-false-watch-result"
         />
         <ButtonRow>
           <ScenarioButton

@@ -67,10 +67,14 @@ appId: nitrogeolocation.example
       id: "compat-default-current-result"
     timeout: 15000
 - assertVisible:
-    id: "compat-default-current-result"
-- assertVisible: "Response keys: coords,timestamp"
-- assertVisible: "Has mocked: false"
-- assertVisible: "Has provider: false"
+    id: "compat-default-current-result-keys"
+    text: "Response keys: coords,timestamp"
+- assertVisible:
+    id: "compat-default-current-result-has-mocked"
+    text: "Has mocked: false"
+- assertVisible:
+    id: "compat-default-current-result-has-provider"
+    text: "Has provider: false"
 
 # Explicit false is a public-call contract, not just the same runtime branch by
 # implication. It must also retain the exact drop-in response shape.
@@ -85,10 +89,14 @@ appId: nitrogeolocation.example
       id: "compat-false-current-result"
     timeout: 15000
 - assertVisible:
-    id: "compat-false-current-result"
-- assertVisible: "Response keys: coords,timestamp"
-- assertVisible: "Has mocked: false"
-- assertVisible: "Has provider: false"
+    id: "compat-false-current-result-keys"
+    text: "Response keys: coords,timestamp"
+- assertVisible:
+    id: "compat-false-current-result-has-mocked"
+    text: "Has mocked: false"
+- assertVisible:
+    id: "compat-false-current-result-has-provider"
+    text: "Has provider: false"
 
 # Explicit opt-in exposes the native mock/provider metadata.
 - scrollUntilVisible:
@@ -102,29 +110,35 @@ appId: nitrogeolocation.example
       id: "compat-metadata-current-result"
     timeout: 15000
 - assertVisible:
-    id: "compat-metadata-current-result"
-- assertVisible: "Response keys: coords,timestamp,mocked,provider"
+    id: "compat-metadata-current-result-keys"
+    text: "Response keys: coords,timestamp,mocked,provider"
 - scrollUntilVisible:
     element:
-      text: "Mocked: true"
+      id: "compat-metadata-current-result-mocked"
     direction: DOWN
-- assertVisible: "Mocked: true"
+- assertVisible:
+    id: "compat-metadata-current-result-mocked"
+    text: "Mocked: true"
 - runFlow:
     when:
       platform: Android
     commands:
-      - assertVisible: "Provider: (gps|network|passive)"
+      - assertVisible:
+          id: "compat-metadata-current-result-provider"
+          text: "Provider: (gps|network|passive)"
 - runFlow:
     when:
       platform: iOS
     commands:
       - scrollUntilVisible:
           element:
-            text: "Provider: unknown"
+            id: "compat-metadata-current-result-provider"
           direction: DOWN
-      - assertVisible: "Provider: unknown"
+      - assertVisible:
+          id: "compat-metadata-current-result-provider"
+          text: "Provider: unknown"
 
-# Watches use the same per-subscription shape contract.
+# An omitted metadata option keeps the drop-in shape.
 - scrollUntilVisible:
     element:
       id: "compat-default-watch-button"
@@ -136,16 +150,50 @@ appId: nitrogeolocation.example
     longitude: 126.979
 - extendedWaitUntil:
     visible:
-      id: "compat-default-watch-result"
+      id: "compat-default-watch-result-keys"
     timeout: 15000
-- assertVisible: "Response keys: coords,timestamp"
-- assertVisible: "Has mocked: false"
-- assertVisible: "Has provider: false"
+- assertVisible:
+    id: "compat-default-watch-result-keys"
+    text: "Response keys: coords,timestamp"
+- scrollUntilVisible:
+    element:
+      id: "compat-default-watch-result-latitude"
+    direction: DOWN
 - extendedWaitUntil:
-    visible: "Latitude: 37\\.567000"
+    visible:
+      id: "compat-default-watch-result-latitude"
+      text: "Latitude: 37\\.567000"
     timeout: 15000
 
-# Keep the default watch active while starting the opted-in watch. Each
+# Keep the omitted watch active while starting an explicit-false watch. These
+# are separate public-call contracts even though both retain the base shape.
+- scrollUntilVisible:
+    element:
+      id: "compat-false-watch-button"
+    direction: DOWN
+- tapOn:
+    id: "compat-false-watch-button"
+- setLocation:
+    latitude: 37.5675
+    longitude: 126.9795
+- extendedWaitUntil:
+    visible:
+      id: "compat-false-watch-result-keys"
+    timeout: 15000
+- assertVisible:
+    id: "compat-false-watch-result-keys"
+    text: "Response keys: coords,timestamp"
+- scrollUntilVisible:
+    element:
+      id: "compat-false-watch-result-latitude"
+    direction: DOWN
+- extendedWaitUntil:
+    visible:
+      id: "compat-false-watch-result-latitude"
+      text: "Latitude: 37\\.567500"
+    timeout: 15000
+
+# Keep both base-shape watches active while starting the opted-in watch. Every
 # subscription must retain its own response shape for the same native sample.
 - scrollUntilVisible:
     element:
@@ -158,39 +206,85 @@ appId: nitrogeolocation.example
     longitude: 126.98
 - scrollUntilVisible:
     element:
-      id: "compat-metadata-watch-result"
+      id: "compat-metadata-watch-result-keys"
     direction: DOWN
 - extendedWaitUntil:
-    visible: "Latitude: 37\\.568000"
+    visible:
+      id: "compat-metadata-watch-result-latitude"
+      text: "Latitude: 37\\.568000"
     timeout: 15000
-- assertVisible: "Response keys: coords,timestamp,mocked,provider"
-- assertVisible: "Mocked: true"
+- assertVisible:
+    id: "compat-metadata-watch-result-keys"
+    text: "Response keys: coords,timestamp,mocked,provider"
+- scrollUntilVisible:
+    element:
+      id: "compat-metadata-watch-result-mocked"
+    direction: DOWN
+- assertVisible:
+    id: "compat-metadata-watch-result-mocked"
+    text: "Mocked: true"
 - runFlow:
     when:
       platform: Android
     commands:
-      - assertVisible: "Provider: (gps|network|passive|fused|unknown)"
+      - scrollUntilVisible:
+          element:
+            id: "compat-metadata-watch-result-provider"
+          direction: DOWN
+      - assertVisible:
+          id: "compat-metadata-watch-result-provider"
+          text: "Provider: (gps|network|passive)"
 - runFlow:
     when:
       platform: iOS
     commands:
-      - assertVisible: "Provider: unknown"
+      - scrollUntilVisible:
+          element:
+            id: "compat-metadata-watch-result-provider"
+          direction: DOWN
+      - assertVisible:
+          id: "compat-metadata-watch-result-provider"
+          text: "Provider: unknown"
 - scrollUntilVisible:
     element:
-      id: "compat-default-watch-result"
+      id: "compat-default-watch-result-keys"
     direction: UP
 - assertVisible:
-    id: "compat-default-watch-result"
-- assertVisible: "Response keys: coords,timestamp"
-- assertVisible: "Has mocked: false"
-- assertVisible: "Has provider: false"
-- assertVisible: "Latitude: 37\\.568000"
+    id: "compat-default-watch-result-keys"
+    text: "Response keys: coords,timestamp"
+- scrollUntilVisible:
+    element:
+      id: "compat-default-watch-result-latitude"
+    direction: DOWN
+- assertVisible:
+    id: "compat-default-watch-result-latitude"
+    text: "Latitude: 37\\.568000"
+- scrollUntilVisible:
+    element:
+      id: "compat-false-watch-result-keys"
+    direction: DOWN
+- assertVisible:
+    id: "compat-false-watch-result-keys"
+    text: "Response keys: coords,timestamp"
+- scrollUntilVisible:
+    element:
+      id: "compat-false-watch-result-latitude"
+    direction: DOWN
+- assertVisible:
+    id: "compat-false-watch-result-latitude"
+    text: "Latitude: 37\\.568000"
 - scrollUntilVisible:
     element:
       id: "compat-default-watch-stop-button"
-    direction: DOWN
+    direction: UP
 - tapOn:
     id: "compat-default-watch-stop-button"
+- scrollUntilVisible:
+    element:
+      id: "compat-false-watch-stop-button"
+    direction: DOWN
+- tapOn:
+    id: "compat-false-watch-stop-button"
 - scrollUntilVisible:
     element:
       id: "compat-metadata-watch-stop-button"
