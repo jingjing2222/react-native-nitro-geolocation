@@ -32,7 +32,7 @@ Install both JavaScript packages normally, then keep the CocoaPods integration
 for iOS:
 
 ```bash
-yarn add react-native-nitro-modules react-native-nitro-geolocation
+yarn add react-native-nitro-modules react-native-nitro-geolocation@rc
 cd ios
 bundle exec pod install
 ```

@@ -47,6 +47,18 @@ for (const file of canonicalFiles) {
       `The excluded canonical source has drifted from docs/v2: ${file}`
     );
   }
+
+  if (file.endsWith(".md")) {
+    for (const line of versioned.toString("utf8").split("\n")) {
+      const tokens = line.trim().split(/\s+/);
+      if (
+        tokens.includes("react-native-nitro-geolocation") &&
+        !tokens.includes("react-native-nitro-geolocation@rc")
+      ) {
+        throw new Error(`The v2 install command is not pinned to @rc: ${file}`);
+      }
+    }
+  }
 }
 
 console.log(

@@ -22,7 +22,7 @@ Managed Expo apps that cannot rebuild native code should use `expo-location`.
 Install the native dependencies:
 
 ```bash
-npx expo install react-native-nitro-modules react-native-nitro-geolocation
+npx expo install react-native-nitro-modules react-native-nitro-geolocation@rc
 ```
 
 Then generate or update the native projects:
