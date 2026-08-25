@@ -36,6 +36,8 @@ namespace margelo::nitro::nitrogeolocation { struct GeofenceEvent; }
 namespace margelo::nitro::nitrogeolocation { struct DetectedActivity; }
 // Forward declaration of `LocationProviderStatus` to properly resolve imports.
 namespace margelo::nitro::nitrogeolocation { struct LocationProviderStatus; }
+// Forward declaration of `LocationLifecycleEvent` to properly resolve imports.
+namespace margelo::nitro::nitrogeolocation { struct LocationLifecycleEvent; }
 // Forward declaration of `BackgroundHttpSyncResult` to properly resolve imports.
 namespace margelo::nitro::nitrogeolocation { struct BackgroundHttpSyncResult; }
 // Forward declaration of `LocationError` to properly resolve imports.
@@ -48,6 +50,7 @@ namespace margelo::nitro::nitrogeolocation { enum class BackgroundEventType; }
 #include "GeofenceEvent.hpp"
 #include "DetectedActivity.hpp"
 #include "LocationProviderStatus.hpp"
+#include "LocationLifecycleEvent.hpp"
 #include "BackgroundHttpSyncResult.hpp"
 #include "LocationError.hpp"
 #include <string>
@@ -64,6 +67,7 @@ namespace margelo::nitro::nitrogeolocation {
     std::optional<GeofenceEvent> geofence     SWIFT_PRIVATE;
     std::optional<DetectedActivity> activity     SWIFT_PRIVATE;
     std::optional<LocationProviderStatus> providerStatus     SWIFT_PRIVATE;
+    std::optional<LocationLifecycleEvent> lifecycle     SWIFT_PRIVATE;
     std::optional<BackgroundHttpSyncResult> result     SWIFT_PRIVATE;
     std::optional<LocationError> error     SWIFT_PRIVATE;
     std::string id     SWIFT_PRIVATE;
@@ -73,7 +77,7 @@ namespace margelo::nitro::nitrogeolocation {
 
   public:
     BackgroundEventEnvelope() = default;
-    explicit BackgroundEventEnvelope(std::optional<BackgroundLocation> location, std::optional<GeofenceEvent> geofence, std::optional<DetectedActivity> activity, std::optional<LocationProviderStatus> providerStatus, std::optional<BackgroundHttpSyncResult> result, std::optional<LocationError> error, std::string id, BackgroundEventType type, double timestamp, bool deliveredToJS): location(location), geofence(geofence), activity(activity), providerStatus(providerStatus), result(result), error(error), id(id), type(type), timestamp(timestamp), deliveredToJS(deliveredToJS) {}
+    explicit BackgroundEventEnvelope(std::optional<BackgroundLocation> location, std::optional<GeofenceEvent> geofence, std::optional<DetectedActivity> activity, std::optional<LocationProviderStatus> providerStatus, std::optional<LocationLifecycleEvent> lifecycle, std::optional<BackgroundHttpSyncResult> result, std::optional<LocationError> error, std::string id, BackgroundEventType type, double timestamp, bool deliveredToJS): location(location), geofence(geofence), activity(activity), providerStatus(providerStatus), lifecycle(lifecycle), result(result), error(error), id(id), type(type), timestamp(timestamp), deliveredToJS(deliveredToJS) {}
 
   public:
     friend bool operator==(const BackgroundEventEnvelope& lhs, const BackgroundEventEnvelope& rhs) = default;
@@ -93,6 +97,7 @@ namespace margelo::nitro {
         JSIConverter<std::optional<margelo::nitro::nitrogeolocation::GeofenceEvent>>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "geofence"))),
         JSIConverter<std::optional<margelo::nitro::nitrogeolocation::DetectedActivity>>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "activity"))),
         JSIConverter<std::optional<margelo::nitro::nitrogeolocation::LocationProviderStatus>>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "providerStatus"))),
+        JSIConverter<std::optional<margelo::nitro::nitrogeolocation::LocationLifecycleEvent>>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "lifecycle"))),
         JSIConverter<std::optional<margelo::nitro::nitrogeolocation::BackgroundHttpSyncResult>>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "result"))),
         JSIConverter<std::optional<margelo::nitro::nitrogeolocation::LocationError>>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "error"))),
         JSIConverter<std::string>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "id"))),
@@ -107,6 +112,7 @@ namespace margelo::nitro {
       obj.setProperty(runtime, PropNameIDCache::get(runtime, "geofence"), JSIConverter<std::optional<margelo::nitro::nitrogeolocation::GeofenceEvent>>::toJSI(runtime, arg.geofence));
       obj.setProperty(runtime, PropNameIDCache::get(runtime, "activity"), JSIConverter<std::optional<margelo::nitro::nitrogeolocation::DetectedActivity>>::toJSI(runtime, arg.activity));
       obj.setProperty(runtime, PropNameIDCache::get(runtime, "providerStatus"), JSIConverter<std::optional<margelo::nitro::nitrogeolocation::LocationProviderStatus>>::toJSI(runtime, arg.providerStatus));
+      obj.setProperty(runtime, PropNameIDCache::get(runtime, "lifecycle"), JSIConverter<std::optional<margelo::nitro::nitrogeolocation::LocationLifecycleEvent>>::toJSI(runtime, arg.lifecycle));
       obj.setProperty(runtime, PropNameIDCache::get(runtime, "result"), JSIConverter<std::optional<margelo::nitro::nitrogeolocation::BackgroundHttpSyncResult>>::toJSI(runtime, arg.result));
       obj.setProperty(runtime, PropNameIDCache::get(runtime, "error"), JSIConverter<std::optional<margelo::nitro::nitrogeolocation::LocationError>>::toJSI(runtime, arg.error));
       obj.setProperty(runtime, PropNameIDCache::get(runtime, "id"), JSIConverter<std::string>::toJSI(runtime, arg.id));
@@ -127,6 +133,7 @@ namespace margelo::nitro {
       if (!JSIConverter<std::optional<margelo::nitro::nitrogeolocation::GeofenceEvent>>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "geofence")))) return false;
       if (!JSIConverter<std::optional<margelo::nitro::nitrogeolocation::DetectedActivity>>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "activity")))) return false;
       if (!JSIConverter<std::optional<margelo::nitro::nitrogeolocation::LocationProviderStatus>>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "providerStatus")))) return false;
+      if (!JSIConverter<std::optional<margelo::nitro::nitrogeolocation::LocationLifecycleEvent>>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "lifecycle")))) return false;
       if (!JSIConverter<std::optional<margelo::nitro::nitrogeolocation::BackgroundHttpSyncResult>>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "result")))) return false;
       if (!JSIConverter<std::optional<margelo::nitro::nitrogeolocation::LocationError>>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "error")))) return false;
       if (!JSIConverter<std::string>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "id")))) return false;

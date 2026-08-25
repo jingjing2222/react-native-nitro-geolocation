@@ -22,6 +22,7 @@ imports stay explicit and tree-shakable.
 - [Permissions](/background/permissions) - request foreground/background access and handle settings round-trips.
 - [Start And Stop](/background/start-stop) - start continuous tracking and subscribe to native updates.
 - [iOS Location Lifecycle](/background/location-lifecycle) - observe Core Location automatic pause and app-triggered resume callbacks without synthetic events.
+- [2.0 Unified Background Events](/guide/v2-unified-background-events) - migrate provider and iOS lifecycle observation to the single background event stream.
 - [Troubleshooting](/background/troubleshooting) - use `diagnoseBackgroundLocation()` to interpret the native background status when delivery is silent.
 - [Storage Recovery](/background/storage) - drain events recorded while JavaScript was not running.
 - [Reliability Contract](/background/reliability-contract) - understand foreground, background, termination, reboot, iOS suspension, status timestamps, and the E2E matrix.

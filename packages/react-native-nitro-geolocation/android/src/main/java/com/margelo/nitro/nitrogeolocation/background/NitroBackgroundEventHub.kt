@@ -22,6 +22,14 @@ class NitroBackgroundEventHub {
         synchronized(listenerLock) { eventListeners.remove(token) }
     }
 
+    fun emitToEventListener(token: String, event: BackgroundEventEnvelope): Boolean {
+        return synchronized(listenerLock) {
+            val listener = eventListeners[token] ?: return@synchronized false
+            dispatch { listener(event) }
+            true
+        }
+    }
+
     fun addLocationListener(listener: (BackgroundLocation) -> Unit): String {
         val token = UUID.randomUUID().toString()
         synchronized(listenerLock) { locationListeners[token] = listener }

@@ -32,6 +32,9 @@ data class BackgroundEventEnvelope(
   val providerStatus: LocationProviderStatus?,
   @DoNotStrip
   @Keep
+  val lifecycle: LocationLifecycleEvent?,
+  @DoNotStrip
+  @Keep
   val result: BackgroundHttpSyncResult?,
   @DoNotStrip
   @Keep
@@ -58,6 +61,7 @@ data class BackgroundEventEnvelope(
       && Objects.deepEquals(this.geofence, other.geofence)
       && Objects.deepEquals(this.activity, other.activity)
       && Objects.deepEquals(this.providerStatus, other.providerStatus)
+      && Objects.deepEquals(this.lifecycle, other.lifecycle)
       && Objects.deepEquals(this.result, other.result)
       && Objects.deepEquals(this.error, other.error)
       && Objects.deepEquals(this.id, other.id)
@@ -72,6 +76,7 @@ data class BackgroundEventEnvelope(
       geofence,
       activity,
       providerStatus,
+      lifecycle,
       result,
       error,
       id,
@@ -89,8 +94,8 @@ data class BackgroundEventEnvelope(
     @Keep
     @Suppress("unused")
     @JvmStatic
-    private fun fromCpp(location: BackgroundLocation?, geofence: GeofenceEvent?, activity: DetectedActivity?, providerStatus: LocationProviderStatus?, result: BackgroundHttpSyncResult?, error: LocationError?, id: String, type: BackgroundEventType, timestamp: Double, deliveredToJS: Boolean): BackgroundEventEnvelope {
-      return BackgroundEventEnvelope(location, geofence, activity, providerStatus, result, error, id, type, timestamp, deliveredToJS)
+    private fun fromCpp(location: BackgroundLocation?, geofence: GeofenceEvent?, activity: DetectedActivity?, providerStatus: LocationProviderStatus?, lifecycle: LocationLifecycleEvent?, result: BackgroundHttpSyncResult?, error: LocationError?, id: String, type: BackgroundEventType, timestamp: Double, deliveredToJS: Boolean): BackgroundEventEnvelope {
+      return BackgroundEventEnvelope(location, geofence, activity, providerStatus, lifecycle, result, error, id, type, timestamp, deliveredToJS)
     }
   }
 }

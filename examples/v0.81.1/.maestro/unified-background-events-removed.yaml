@@ -1,0 +1,16 @@
+appId: nitrogeolocation.example
+---
+# The runner re-enables location after subscription removal. An explicit
+# snapshot sees the new state, but no third unified event may be delivered.
+
+- assertVisible: "Listener: stopped"
+- assertVisible: "Events: 2"
+- assertVisible: "Provider events: 2"
+- assertVisible: "Services: disabled"
+- tapOn:
+    id: "e2e-action-unified-background-events-refresh-button"
+- extendedWaitUntil:
+    visible: "Manual snapshot: enabled"
+    timeout: 10000
+- assertVisible: "Events: 2"
+- assertVisible: "Provider events: 2"

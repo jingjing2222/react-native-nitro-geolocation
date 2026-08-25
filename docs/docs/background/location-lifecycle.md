@@ -30,7 +30,8 @@ await startBackgroundLocation({
 lifecycleSubscription.remove();
 ```
 
-This listener reports the native
+In 2.x, this convenience listener filters lifecycle events from the same native
+subscription used by `onBackgroundEvent`. It reports the native
 `locationManagerDidPauseLocationUpdates` and
 `locationManagerDidResumeLocationUpdates` delegate callbacks. iOS decides
 whether to pause based on the configured activity and device movement. After an
@@ -39,9 +40,11 @@ moves: your app must call `startBackgroundLocation()` before iOS can report the
 `resumed` callback. Starting or stopping tracking does not synthesize a
 lifecycle event.
 
-The listener is observational: it does not restart tracking, change the
-background state, persist an event, or add an event to `onBackgroundEvent`.
-Choose an app-specific restart policy after a pause if your use case needs one.
+The listener is observational: it does not restart tracking or change the
+background state. The event also arrives through `onBackgroundEvent` with
+`type: 'lifecycle'` and is retained by `getStoredBackgroundEvents()` when
+background persistence is enabled. Choose an app-specific restart policy after
+a pause if your use case needs one.
 
 Android and web return a removable subscription but do not emit these iOS Core
 Location events. Keep platform-independent cleanup code, but do not wait for a
@@ -62,7 +65,8 @@ or short automated test. For an end-to-end check:
    safe and idempotent.
 
 The automated E2E scenario covers the deterministic boundary instead: it uses
-the public API through the real native bridge, verifies that registration emits
-no fabricated event, and removes the subscription twice. A separate native
-delegate contract test invokes the real Core Location delegate methods and
-verifies that `paused` and `resumed` reach the listener owner in order.
+the public unified subscription through the real native bridge and verifies
+provider delivery and removal. A separate native delegate contract invokes the
+real Core Location delegate methods and verifies that `paused` and `resumed`
+retain the active location-session generation and reach the unified event path
+in order.

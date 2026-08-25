@@ -18,6 +18,7 @@ fi
 
 xcrun swiftc \
   -parse-as-library \
+  "$repo_root/packages/react-native-nitro-geolocation/ios/IOSLifecycleEventPipeline.swift" \
   "$repo_root/packages/react-native-nitro-geolocation/ios/IOSBackgroundLocationDelegate.swift" \
   "$repo_root/tests/ios/IOSBackgroundLocationDelegateContract.swift" \
   -o "$test_dir/ios-location-lifecycle-contract"

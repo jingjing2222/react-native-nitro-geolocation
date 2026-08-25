@@ -27,6 +27,8 @@ public extension BackgroundEventType {
         self = .activity
       case "providerChange":
         self = .providerchange
+      case "lifecycle":
+        self = .lifecycle
       case "httpSync":
         self = .httpsync
       default:
@@ -49,6 +51,8 @@ public extension BackgroundEventType {
         return "activity"
       case .providerchange:
         return "providerChange"
+      case .lifecycle:
+        return "lifecycle"
       case .httpsync:
         return "httpSync"
     }

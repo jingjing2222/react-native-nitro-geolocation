@@ -88,6 +88,7 @@ internal class AndroidLocationSettings(
     private val locationSettingsRequestGate =
         LocationSettingsRequestGate<PendingLocationSettingsRequest>()
     private val mainHandler = Handler(Looper.getMainLooper())
+    private val disposed = AtomicBoolean(false)
 
     private val activityEventListener = object : BaseActivityEventListener() {
         override fun onActivityResult(
@@ -112,6 +113,12 @@ internal class AndroidLocationSettings(
 
     init {
         reactContext.addActivityEventListener(activityEventListener)
+    }
+
+    fun dispose() {
+        if (disposed.compareAndSet(false, true)) {
+            reactContext.removeActivityEventListener(activityEventListener)
+        }
     }
 
     fun hasServicesEnabled(): Boolean {

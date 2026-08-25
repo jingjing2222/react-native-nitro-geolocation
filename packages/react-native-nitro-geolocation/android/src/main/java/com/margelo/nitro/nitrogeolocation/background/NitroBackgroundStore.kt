@@ -18,6 +18,9 @@ import com.margelo.nitro.nitrogeolocation.GeolocationCoordinates
 import com.margelo.nitro.nitrogeolocation.GetStoredBackgroundEventsOptions
 import com.margelo.nitro.nitrogeolocation.GetStoredBackgroundLocationsOptions
 import com.margelo.nitro.nitrogeolocation.LocationProviderUsed
+import com.margelo.nitro.nitrogeolocation.LocationProviderStatus
+import com.margelo.nitro.nitrogeolocation.LocationLifecycleEvent
+import com.margelo.nitro.nitrogeolocation.LocationLifecycleState
 import com.margelo.nitro.nitrogeolocation.NullableDouble
 import com.margelo.nitro.nitrogeolocation.StoredBackgroundEventEnvelope
 import com.margelo.nitro.nitrogeolocation.StoredBackgroundLocation
@@ -162,6 +165,8 @@ class NitroBackgroundStore(context: Context) :
                     event.location?.let(::locationPayload)
                         ?: event.geofence?.let(::geofencePayload)
                         ?: event.activity?.let(::activityPayload)
+                        ?: event.providerStatus?.let(::providerStatusPayload)
+                        ?: event.lifecycle?.let(::lifecyclePayload)
                         ?: event.result?.let(::httpSyncPayload)
                 )
                 put("timestamp", event.timestamp)
@@ -254,6 +259,16 @@ class NitroBackgroundStore(context: Context) :
                 } else {
                     null
                 }
+                val providerStatus = if (type == BackgroundEventType.PROVIDERCHANGE) {
+                    payload?.let(::payloadToProviderStatus)
+                } else {
+                    null
+                }
+                val lifecycle = if (type == BackgroundEventType.LIFECYCLE) {
+                    payload?.let(::payloadToLifecycle)
+                } else {
+                    null
+                }
                 val location = if (type == BackgroundEventType.LOCATION) {
                     payload?.let(::payloadToLocation)
                         ?: locationId?.let(::getLocationById)?.toBackgroundLocation()
@@ -261,16 +276,17 @@ class NitroBackgroundStore(context: Context) :
                     locationId?.let(::getLocationById)?.toBackgroundLocation()
                 }
                 val event = BackgroundEventEnvelope(
-                    location,
-                    geofence,
-                    activity,
-                    null,
-                    result,
-                    null,
-                    id,
-                    type,
-                    it.getDouble(it.getColumnIndexOrThrow("timestamp")),
-                    it.getInt(it.getColumnIndexOrThrow("delivered_to_js")) == 1
+                    location = location,
+                    geofence = geofence,
+                    activity = activity,
+                    providerStatus = providerStatus,
+                    lifecycle = lifecycle,
+                    result = result,
+                    error = null,
+                    id = id,
+                    type = type,
+                    timestamp = it.getDouble(it.getColumnIndexOrThrow("timestamp")),
+                    deliveredToJS = it.getInt(it.getColumnIndexOrThrow("delivered_to_js")) == 1
                 )
                 rows += StoredBackgroundEventEnvelope(
                     event,
@@ -599,6 +615,43 @@ class NitroBackgroundStore(context: Context) :
             .toString()
     }
 
+    private fun providerStatusPayload(status: LocationProviderStatus): String {
+        return status.toJson().toString()
+    }
+
+    private fun payloadToProviderStatus(payload: String): LocationProviderStatus? {
+        return runCatching {
+            val json = JSONObject(payload)
+            LocationProviderStatus(
+                locationServicesEnabled = json.getBoolean("locationServicesEnabled"),
+                backgroundModeEnabled = json.getBoolean("backgroundModeEnabled"),
+                gpsAvailable = json.optBooleanOrNull("gpsAvailable"),
+                networkAvailable = json.optBooleanOrNull("networkAvailable"),
+                passiveAvailable = json.optBooleanOrNull("passiveAvailable"),
+                googlePlayServicesAvailable = json.optBooleanOrNull("googlePlayServicesAvailable"),
+                googleLocationAccuracyEnabled = json.optBooleanOrNull("googleLocationAccuracyEnabled")
+            )
+        }.getOrNull()
+    }
+
+    private fun lifecyclePayload(event: LocationLifecycleEvent): String {
+        return event.toJson().toString()
+    }
+
+    private fun payloadToLifecycle(payload: String): LocationLifecycleEvent? {
+        return runCatching {
+            val json = JSONObject(payload)
+            LocationLifecycleEvent(
+                state = when (json.getString("state")) {
+                    "paused" -> LocationLifecycleState.PAUSED
+                    "resumed" -> LocationLifecycleState.RESUMED
+                    else -> error("Unknown lifecycle state")
+                },
+                timestamp = json.getDouble("timestamp")
+            )
+        }.getOrNull()
+    }
+
     private fun payloadToActivity(payload: String): DetectedActivity? {
         return runCatching {
             val json = JSONObject(payload)
@@ -640,6 +693,10 @@ class NitroBackgroundStore(context: Context) :
 
     private fun JSONObject.optDoubleOrNull(key: String): Double? {
         return if (has(key) && !isNull(key)) optDouble(key) else null
+    }
+
+    private fun JSONObject.optBooleanOrNull(key: String): Boolean? {
+        return if (has(key) && !isNull(key)) getBoolean(key) else null
     }
 
     private fun metadataToJson(metadata: Map<String, Variant_NullType_Boolean_String_Double>?): String? {

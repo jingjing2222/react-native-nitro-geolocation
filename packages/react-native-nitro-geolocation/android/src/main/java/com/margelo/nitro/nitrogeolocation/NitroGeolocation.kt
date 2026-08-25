@@ -40,13 +40,14 @@ class NitroGeolocation(
     private val locationManager: AndroidLocationManager by lazy {
         reactContext.getSystemService(Context.LOCATION_SERVICE) as AndroidLocationManager
     }
-    private val locationSettings: AndroidLocationSettings by lazy {
+    private val locationSettingsDelegate = lazy {
         AndroidLocationSettings(
             reactContext = reactContext,
             locationManager = locationManager,
             createLocationError = ::createLocationError
         )
     }
+    private val locationSettings by locationSettingsDelegate
     private val providerStatusWatcherDelegate = lazy { AndroidProviderStatusWatcher(reactContext, locationSettings) }
     private val providerStatusWatcher by providerStatusWatcherDelegate
     private val fusedLocationClient by lazy {
@@ -583,6 +584,9 @@ class NitroGeolocation(
     }
     override fun dispose() {
         runCatching { providerStatusWatcherDelegate.takeIf { it.isInitialized() }?.value?.dispose() }
+        runCatching {
+            locationSettingsDelegate.takeIf { it.isInitialized() }?.value?.dispose()
+        }
         super.dispose()
     }
 

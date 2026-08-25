@@ -3,13 +3,43 @@ import Foundation
 
 extension NitroBackgroundLocation {
     func addBackgroundEventListener(listener: @escaping (BackgroundEventEnvelope) -> Void) throws -> String {
-        let token = UUID().uuidString
-        withListenerLock { eventListeners[token] = listener }
-        return token
+        let eventToken = UUID().uuidString
+        withListenerLock { eventListeners[eventToken] = listener }
+        let providerToken = unifiedProviderStatusWatcher.watch { [weak self] status in
+            self?.dispatchProviderStatus(status, to: eventToken)
+        }
+        withListenerLock { providerListenerTokens[eventToken] = providerToken }
+        return eventToken
     }
 
     func removeBackgroundEventListener(token: String) throws {
-        _ = withListenerLock { eventListeners.removeValue(forKey: token) }
+        let providerToken = withListenerLock { () -> String? in
+            eventListeners.removeValue(forKey: token)
+            return providerListenerTokens.removeValue(forKey: token)
+        }
+        if let providerToken {
+            unifiedProviderStatusWatcher.unwatch(token: providerToken)
+        }
+    }
+
+    private func dispatchProviderStatus(
+        _ status: LocationProviderStatus,
+        to eventToken: String
+    ) {
+        let event = BackgroundEventEnvelope(
+            location: nil,
+            geofence: nil,
+            activity: nil,
+            providerStatus: status,
+            lifecycle: nil,
+            result: nil,
+            error: nil,
+            id: UUID().uuidString,
+            type: .providerchange,
+            timestamp: Date().timeIntervalSince1970 * 1000,
+            deliveredToJS: false
+        )
+        withListenerLock { eventListeners[eventToken]?(event) }
     }
 
     func addBackgroundLocationListener(listener: @escaping (BackgroundLocation) -> Void) throws -> String {

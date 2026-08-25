@@ -1,11 +1,15 @@
 package com.margelo.nitro.nitrogeolocation
 
+import android.content.Context
+import android.location.LocationManager
 import com.facebook.proguard.annotations.DoNotStrip
 import com.facebook.react.bridge.ReactApplicationContext
 import com.margelo.nitro.NitroModules
 import com.margelo.nitro.core.Promise
 import com.margelo.nitro.nitrogeolocation.background.NitroBackgroundLocationController
-import java.util.UUID
+import com.margelo.nitro.nitrogeolocation.background.createProviderChangeBackgroundEvent
+import com.margelo.nitro.nitrogeolocation.background.disposeIfInitialized
+import com.margelo.nitro.nitrogeolocation.background.registerUnifiedEventListener
 import java.util.concurrent.ConcurrentHashMap
 
 @DoNotStrip
@@ -13,7 +17,20 @@ class NitroBackgroundLocation(
     private val reactContext: ReactApplicationContext = NitroModules.applicationContext!!
 ) : HybridNitroBackgroundLocationSpec() {
 
-    private val lifecycleListeners = ConcurrentHashMap<String, (LocationLifecycleEvent) -> Unit>()
+    private val providerListenerTokens = ConcurrentHashMap<String, String>()
+
+    private val locationSettingsDelegate = lazy {
+        val locationManager = reactContext.getSystemService(Context.LOCATION_SERVICE) as LocationManager
+        AndroidLocationSettings(
+            reactContext = reactContext,
+            locationManager = locationManager,
+            createLocationError = ::createLocationError
+        )
+    }
+    private val providerStatusWatcherDelegate = lazy {
+        AndroidProviderStatusWatcher(reactContext, locationSettingsDelegate.value)
+    }
+    private val providerStatusWatcher by providerStatusWatcherDelegate
 
     private val controller by lazy {
         NitroBackgroundLocationController.getInstance(reactContext)
@@ -56,11 +73,25 @@ class NitroBackgroundLocation(
     }
 
     override fun addBackgroundEventListener(listener: (event: BackgroundEventEnvelope) -> Unit): String {
-        return controller.eventHub.addEventListener(listener)
+        val (eventToken, providerToken) = registerUnifiedEventListener(
+            addEventListener = { controller.eventHub.addEventListener(listener) },
+            removeEventListener = controller.eventHub::removeEventListener,
+            addProviderListener = { token ->
+                providerStatusWatcher.watch { status ->
+                    controller.eventHub.emitToEventListener(
+                        token,
+                        createProviderChangeBackgroundEvent(status)
+                    )
+                }
+            }
+        )
+        providerListenerTokens[eventToken] = providerToken
+        return eventToken
     }
 
     override fun removeBackgroundEventListener(token: String) {
         controller.eventHub.removeEventListener(token)
+        providerListenerTokens.remove(token)?.let(providerStatusWatcher::unwatch)
     }
 
     override fun addBackgroundLocationListener(listener: (location: BackgroundLocation) -> Unit): String {
@@ -77,16 +108,6 @@ class NitroBackgroundLocation(
 
     override fun removeBackgroundErrorListener(token: String) {
         controller.eventHub.removeErrorListener(token)
-    }
-
-    override fun addLocationLifecycleListener(listener: (event: LocationLifecycleEvent) -> Unit): String {
-        val token = UUID.randomUUID().toString()
-        lifecycleListeners[token] = listener
-        return token
-    }
-
-    override fun removeLocationLifecycleListener(token: String) {
-        lifecycleListeners.remove(token)
     }
 
     override fun getStoredBackgroundLocations(
@@ -142,5 +163,21 @@ class NitroBackgroundLocation(
 
     override fun syncStoredLocations(): Promise<BackgroundHttpSyncResult> {
         return Promise.async { controller.syncStoredLocations() }
+    }
+
+    override fun dispose() {
+        val eventTokens = providerListenerTokens.keys.toList()
+        if (eventTokens.isNotEmpty()) {
+            val eventHub = controller.eventHub
+            eventTokens.forEach(eventHub::removeEventListener)
+        }
+        providerListenerTokens.clear()
+        runCatching {
+            providerStatusWatcherDelegate.disposeIfInitialized(AndroidProviderStatusWatcher::dispose)
+        }
+        runCatching {
+            locationSettingsDelegate.disposeIfInitialized(AndroidLocationSettings::dispose)
+        }
+        super.dispose()
     }
 }

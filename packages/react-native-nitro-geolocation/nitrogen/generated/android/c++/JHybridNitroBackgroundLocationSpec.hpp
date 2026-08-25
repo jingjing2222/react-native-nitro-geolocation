@@ -69,8 +69,6 @@ namespace margelo::nitro::nitrogeolocation {
     void removeBackgroundLocationListener(const std::string& token) override;
     std::string addBackgroundErrorListener(const std::function<void(const LocationError& /* error */)>& listener) override;
     void removeBackgroundErrorListener(const std::string& token) override;
-    std::string addLocationLifecycleListener(const std::function<void(const LocationLifecycleEvent& /* event */)>& listener) override;
-    void removeLocationLifecycleListener(const std::string& token) override;
     std::shared_ptr<Promise<std::vector<StoredBackgroundLocation>>> getStoredBackgroundLocations(const std::optional<GetStoredBackgroundLocationsOptions>& options) override;
     std::shared_ptr<Promise<void>> clearStoredBackgroundLocations(const std::optional<std::vector<std::string>>& ids) override;
     std::shared_ptr<Promise<void>> markStoredBackgroundLocationsDelivered(const std::vector<std::string>& ids) override;

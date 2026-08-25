@@ -86,14 +86,14 @@ namespace margelo::nitro::nitrogeolocation { struct GeolocationCoordinates; }
 namespace margelo::nitro::nitrogeolocation { struct GeofenceEvent; }
 // Forward declaration of `GeofenceRegion` to properly resolve imports.
 namespace margelo::nitro::nitrogeolocation { struct GeofenceRegion; }
-// Forward declaration of `BackgroundHttpSyncResult` to properly resolve imports.
-namespace margelo::nitro::nitrogeolocation { struct BackgroundHttpSyncResult; }
-// Forward declaration of `BackgroundEventType` to properly resolve imports.
-namespace margelo::nitro::nitrogeolocation { enum class BackgroundEventType; }
 // Forward declaration of `LocationLifecycleEvent` to properly resolve imports.
 namespace margelo::nitro::nitrogeolocation { struct LocationLifecycleEvent; }
 // Forward declaration of `LocationLifecycleState` to properly resolve imports.
 namespace margelo::nitro::nitrogeolocation { enum class LocationLifecycleState; }
+// Forward declaration of `BackgroundHttpSyncResult` to properly resolve imports.
+namespace margelo::nitro::nitrogeolocation { struct BackgroundHttpSyncResult; }
+// Forward declaration of `BackgroundEventType` to properly resolve imports.
+namespace margelo::nitro::nitrogeolocation { enum class BackgroundEventType; }
 // Forward declaration of `StoredBackgroundLocation` to properly resolve imports.
 namespace margelo::nitro::nitrogeolocation { struct StoredBackgroundLocation; }
 // Forward declaration of `GetStoredBackgroundLocationsOptions` to properly resolve imports.
@@ -148,10 +148,10 @@ namespace margelo::nitro::nitrogeolocation { struct GetStoredBackgroundEventsOpt
 #include "GeolocationCoordinates.hpp"
 #include "GeofenceEvent.hpp"
 #include "GeofenceRegion.hpp"
-#include "BackgroundHttpSyncResult.hpp"
-#include "BackgroundEventType.hpp"
 #include "LocationLifecycleEvent.hpp"
 #include "LocationLifecycleState.hpp"
+#include "BackgroundHttpSyncResult.hpp"
+#include "BackgroundEventType.hpp"
 #include "StoredBackgroundLocation.hpp"
 #include "GetStoredBackgroundLocationsOptions.hpp"
 #include "StoredBackgroundEventEnvelope.hpp"
@@ -317,20 +317,6 @@ namespace margelo::nitro::nitrogeolocation {
     }
     inline void removeBackgroundErrorListener(const std::string& token) override {
       auto __result = _swiftPart.removeBackgroundErrorListener(token);
-      if (__result.hasError()) [[unlikely]] {
-        std::rethrow_exception(__result.error());
-      }
-    }
-    inline std::string addLocationLifecycleListener(const std::function<void(const LocationLifecycleEvent& /* event */)>& listener) override {
-      auto __result = _swiftPart.addLocationLifecycleListener(listener);
-      if (__result.hasError()) [[unlikely]] {
-        std::rethrow_exception(__result.error());
-      }
-      auto __value = std::move(__result.value());
-      return __value;
-    }
-    inline void removeLocationLifecycleListener(const std::string& token) override {
-      auto __result = _swiftPart.removeLocationLifecycleListener(token);
       if (__result.hasError()) [[unlikely]] {
         std::rethrow_exception(__result.error());
       }

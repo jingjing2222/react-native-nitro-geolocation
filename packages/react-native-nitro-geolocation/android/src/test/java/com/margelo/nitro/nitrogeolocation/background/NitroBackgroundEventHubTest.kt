@@ -2,6 +2,7 @@ package com.margelo.nitro.nitrogeolocation.background
 
 import com.margelo.nitro.nitrogeolocation.BackgroundEventEnvelope
 import com.margelo.nitro.nitrogeolocation.BackgroundEventType
+import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Test
@@ -10,6 +11,23 @@ import java.util.concurrent.TimeUnit
 import kotlin.concurrent.thread
 
 class NitroBackgroundEventHubTest {
+    @Test
+    fun emitToEventListenerOnlyDeliversToTheSelectedSubscriber() {
+        val hub = NitroBackgroundEventHub()
+        val firstEvents = mutableListOf<String>()
+        val secondEvents = mutableListOf<String>()
+        val firstToken = hub.addEventListener { firstEvents += it.id }
+        hub.addEventListener { secondEvents += it.id }
+
+        assertTrue(hub.emitToEventListener(firstToken, event()))
+        assertEquals(listOf("event-id"), firstEvents)
+        assertTrue(secondEvents.isEmpty())
+
+        hub.removeEventListener(firstToken)
+        assertFalse(hub.emitToEventListener(firstToken, event()))
+        assertEquals(listOf("event-id"), firstEvents)
+    }
+
     @Test
     fun removeWaitsForAnActiveListenerAndPreventsFutureDelivery() {
         val hub = NitroBackgroundEventHub()
@@ -40,6 +58,7 @@ class NitroBackgroundEventHubTest {
     }
 
     private fun event() = BackgroundEventEnvelope(
+        null,
         null,
         null,
         null,

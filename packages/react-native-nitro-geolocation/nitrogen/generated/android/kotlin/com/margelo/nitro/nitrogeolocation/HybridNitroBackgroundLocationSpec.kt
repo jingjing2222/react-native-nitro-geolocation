@@ -104,19 +104,6 @@ abstract class HybridNitroBackgroundLocationSpec: HybridObject() {
   @Keep
   abstract fun removeBackgroundErrorListener(token: String): Unit
 
-  abstract fun addLocationLifecycleListener(listener: (event: LocationLifecycleEvent) -> Unit): String
-
-  @DoNotStrip
-  @Keep
-  private fun addLocationLifecycleListener_cxx(listener: Func_void_LocationLifecycleEvent): String {
-    val __result = addLocationLifecycleListener(listener)
-    return __result
-  }
-
-  @DoNotStrip
-  @Keep
-  abstract fun removeLocationLifecycleListener(token: String): Unit
-
   @DoNotStrip
   @Keep
   abstract fun getStoredBackgroundLocations(options: GetStoredBackgroundLocationsOptions?): Promise<Array<StoredBackgroundLocation>>

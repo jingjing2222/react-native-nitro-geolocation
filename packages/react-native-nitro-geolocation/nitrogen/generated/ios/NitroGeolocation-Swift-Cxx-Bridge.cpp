@@ -151,7 +151,6 @@ namespace margelo::nitro::nitrogeolocation::bridge::swift {
       swiftClosure.call(position);
     };
   }
-
   // pragma MARK: std::function<void(const CompatGeolocationResponseWithMetadataInternal& /* position */)>
   Func_void_CompatGeolocationResponseWithMetadataInternal create_Func_void_CompatGeolocationResponseWithMetadataInternal(void* NON_NULL swiftClosureWrapper) noexcept {
     auto swiftClosure = NitroGeolocation::Func_void_CompatGeolocationResponseWithMetadataInternal::fromUnsafe(swiftClosureWrapper);
@@ -213,14 +212,6 @@ namespace margelo::nitro::nitrogeolocation::bridge::swift {
     auto swiftClosure = NitroGeolocation::Func_void_BackgroundLocation::fromUnsafe(swiftClosureWrapper);
     return [swiftClosure = std::move(swiftClosure)](const BackgroundLocation& location) mutable -> void {
       swiftClosure.call(location);
-    };
-  }
-
-  // pragma MARK: std::function<void(const LocationLifecycleEvent& /* event */)>
-  Func_void_LocationLifecycleEvent create_Func_void_LocationLifecycleEvent(void* NON_NULL swiftClosureWrapper) noexcept {
-    auto swiftClosure = NitroGeolocation::Func_void_LocationLifecycleEvent::fromUnsafe(swiftClosureWrapper);
-    return [swiftClosure = std::move(swiftClosure)](const LocationLifecycleEvent& event) mutable -> void {
-      swiftClosure.call(event);
     };
   }
 

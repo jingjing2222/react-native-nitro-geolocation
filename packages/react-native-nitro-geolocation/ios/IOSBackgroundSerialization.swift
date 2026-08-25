@@ -52,11 +52,16 @@ internal func makeStoredEvent(
     let location = persistedLocation ?? referencedLocation
     let geofence = (dictionary["geofence"] as? [String: Any]).flatMap(makeGeofenceEvent)
     let activity = (dictionary["activity"] as? [String: Any]).flatMap(makeActivity)
+    let providerStatus = (dictionary["providerStatus"] as? [String: Any])
+        .flatMap(makeProviderStatus)
+    let lifecycle = (dictionary["lifecycle"] as? [String: Any])
+        .flatMap(makeLifecycleEvent)
     let event = BackgroundEventEnvelope(
         location: location,
         geofence: geofence,
         activity: activity,
-        providerStatus: nil,
+        providerStatus: providerStatus,
+        lifecycle: lifecycle,
         result: (dictionary["result"] as? [String: Any]).flatMap(makeHttpSyncResult),
         error: nil,
         id: id,
@@ -110,6 +115,24 @@ internal func makeActivity(_ dictionary: [String: Any]) -> DetectedActivity? {
         return nil
     }
     return DetectedActivity(type: type, confidence: confidence, timestamp: timestamp)
+}
+
+internal func makeProviderStatus(_ dictionary: [String: Any]) -> LocationProviderStatus? {
+    guard
+        let locationServicesEnabled = dictionary["locationServicesEnabled"] as? Bool,
+        let backgroundModeEnabled = dictionary["backgroundModeEnabled"] as? Bool
+    else {
+        return nil
+    }
+    return LocationProviderStatus(
+        locationServicesEnabled: locationServicesEnabled,
+        backgroundModeEnabled: backgroundModeEnabled,
+        gpsAvailable: dictionary["gpsAvailable"] as? Bool,
+        networkAvailable: dictionary["networkAvailable"] as? Bool,
+        passiveAvailable: dictionary["passiveAvailable"] as? Bool,
+        googlePlayServicesAvailable: dictionary["googlePlayServicesAvailable"] as? Bool,
+        googleLocationAccuracyEnabled: dictionary["googleLocationAccuracyEnabled"] as? Bool
+    )
 }
 
 internal func makeCoordinates(_ dictionary: [String: Any]) -> GeolocationCoordinates? {
@@ -243,6 +266,12 @@ internal func storedEventDictionary(_ event: StoredBackgroundEventEnvelope) -> [
     if let activity = event.event.activity {
         dictionary["activity"] = activityDictionary(activity)
     }
+    if let providerStatus = event.event.providerStatus {
+        dictionary["providerStatus"] = providerStatusDictionary(providerStatus)
+    }
+    if let lifecycle = event.event.lifecycle {
+        dictionary["lifecycle"] = lifecycleDictionary(lifecycle)
+    }
     if let result = event.event.result {
         dictionary["result"] = httpSyncResultDictionary(result)
     }
@@ -313,6 +342,19 @@ internal func activityDictionary(_ activity: DetectedActivity) -> [String: Any] 
         "confidence": activity.confidence,
         "timestamp": activity.timestamp
     ]
+}
+
+internal func providerStatusDictionary(_ status: LocationProviderStatus) -> [String: Any] {
+    var dictionary: [String: Any] = [
+        "locationServicesEnabled": status.locationServicesEnabled,
+        "backgroundModeEnabled": status.backgroundModeEnabled
+    ]
+    dictionary["gpsAvailable"] = status.gpsAvailable
+    dictionary["networkAvailable"] = status.networkAvailable
+    dictionary["passiveAvailable"] = status.passiveAvailable
+    dictionary["googlePlayServicesAvailable"] = status.googlePlayServicesAvailable
+    dictionary["googleLocationAccuracyEnabled"] = status.googleLocationAccuracyEnabled
+    return dictionary
 }
 
 internal func makeHttpSyncResult(_ dictionary: [String: Any]) -> BackgroundHttpSyncResult? {

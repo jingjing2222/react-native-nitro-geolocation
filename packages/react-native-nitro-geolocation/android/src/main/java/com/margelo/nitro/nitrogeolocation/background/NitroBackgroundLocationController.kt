@@ -478,6 +478,7 @@ class NitroBackgroundLocationController private constructor(
             null,
             null,
             null,
+            null,
             UUID.randomUUID().toString(),
             BackgroundEventType.LOCATION,
             System.currentTimeMillis().toDouble(),
@@ -520,6 +521,7 @@ class NitroBackgroundLocationController private constructor(
             val event = BackgroundEventEnvelope(
                 null,
                 GeofenceEvent(region, transition, null, now),
+                null,
                 null,
                 null,
                 null,
@@ -604,6 +606,7 @@ class NitroBackgroundLocationController private constructor(
             null,
             null,
             null,
+            null,
             UUID.randomUUID().toString(),
             BackgroundEventType.ACTIVITY,
             detected.timestamp,
@@ -671,6 +674,7 @@ class NitroBackgroundLocationController private constructor(
             serviceGeneration,
             onResult = { result ->
                 val event = BackgroundEventEnvelope(
+                    null,
                     null,
                     null,
                     null,

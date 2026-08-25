@@ -61,10 +61,18 @@ final class NitroBackgroundLocationDelegate: NSObject, CLLocationManagerDelegate
     }
 
     func locationManagerDidPauseLocationUpdates(_ manager: CLLocationManager) {
-        owner?.handleLocationLifecycleChange(.paused)
+        owner?.handleLocationLifecycleChange(
+            .paused,
+            runGeneration: runGeneration,
+            locationSessionGeneration: locationSessionGeneration
+        )
     }
 
     func locationManagerDidResumeLocationUpdates(_ manager: CLLocationManager) {
-        owner?.handleLocationLifecycleChange(.resumed)
+        owner?.handleLocationLifecycleChange(
+            .resumed,
+            runGeneration: runGeneration,
+            locationSessionGeneration: locationSessionGeneration
+        )
     }
 }
