@@ -33,11 +33,6 @@ jobs:
           mise trust --yes
           mise install node
 
-      - name: Configure npm registry
-        run: |
-          echo "registry=https://registry.npmjs.org/" > ~/.npmrc
-          echo "//registry.npmjs.org/:_authToken=\${NODE_AUTH_TOKEN}" >> ~/.npmrc
-
       - name: Enable Corepack
         run: |
           corepack enable
@@ -51,3 +46,6 @@ jobs:
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           publish-script: yarn changeset publish
+        env:
+          YARN_NPM_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+          YARN_NPM_PUBLISH_REGISTRY: https://registry.npmjs.org
