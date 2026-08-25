@@ -45,7 +45,4 @@ jobs:
         uses: changesets/action@v2
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
-          publish-script: yarn changeset publish
-        env:
-          YARN_NPM_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-          YARN_NPM_PUBLISH_REGISTRY: https://registry.npmjs.org
+          publish-script: yarn release:publish
