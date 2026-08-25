@@ -1,0 +1,296 @@
+appId: nitrogeolocation.example
+---
+# Compat metadata is per-call opt-in. The default callback keeps the exact
+# community response shape, while explicit opt-in exposes integrity metadata.
+
+- launchApp:
+    clearState: true
+    permissions:
+      android.permission.ACCESS_COARSE_LOCATION: allow
+      android.permission.ACCESS_FINE_LOCATION: allow
+
+- runFlow:
+    when:
+      platform: Android
+      visible: ".*isn't responding|.*응답하지 않.*"
+    commands:
+      - tapOn:
+          text: "Wait|대기"
+- extendedWaitUntil:
+    visible: "Geolocation API"
+    timeout: 10000
+- stopApp
+
+- openLink:
+    link: nitrogeolocation://app/compat-metadata
+- runFlow:
+    when:
+      platform: Android
+      visible: ".*isn't responding|.*응답하지 않.*"
+    commands:
+      - tapOn:
+          text: "Wait|대기"
+- runFlow:
+    when:
+      platform: iOS
+      visible: "Cancel|취소"
+    commands:
+      - tapOn:
+          text: "Open|열기"
+- runFlow:
+    when:
+      platform: iOS
+    commands:
+      - openLink:
+          link: nitrogeolocation://app/compat-metadata
+- waitForAnimationToEnd
+
+- extendedWaitUntil:
+    visible: "Compat Metadata Opt-in"
+    timeout: 10000
+
+- tapOn:
+    id: "compat-metadata-request-permission-button"
+- tapOn:
+    text: "Allow While Using App|앱을 사용하는 동안 허용|OK"
+    optional: true
+- extendedWaitUntil:
+    visible: "Granted ✅"
+    timeout: 10000
+
+- setLocation:
+    latitude: 37.5665
+    longitude: 126.978
+
+# Default current-position calls retain the exact drop-in response shape.
+- tapOn:
+    id: "compat-default-current-button"
+- extendedWaitUntil:
+    visible:
+      id: "compat-default-current-result"
+    timeout: 15000
+- assertVisible:
+    id: "compat-default-current-result-keys"
+    text: "Response keys: coords,timestamp"
+- assertVisible:
+    id: "compat-default-current-result-has-mocked"
+    text: "Has mocked: false"
+- assertVisible:
+    id: "compat-default-current-result-has-provider"
+    text: "Has provider: false"
+
+# Explicit false is a public-call contract, not just the same runtime branch by
+# implication. It must also retain the exact drop-in response shape.
+- scrollUntilVisible:
+    element:
+      id: "compat-false-current-button"
+    direction: DOWN
+- tapOn:
+    id: "compat-false-current-button"
+- extendedWaitUntil:
+    visible:
+      id: "compat-false-current-result"
+    timeout: 15000
+- assertVisible:
+    id: "compat-false-current-result-keys"
+    text: "Response keys: coords,timestamp"
+- assertVisible:
+    id: "compat-false-current-result-has-mocked"
+    text: "Has mocked: false"
+- assertVisible:
+    id: "compat-false-current-result-has-provider"
+    text: "Has provider: false"
+
+# Explicit opt-in exposes the native mock/provider metadata.
+- scrollUntilVisible:
+    element:
+      id: "compat-metadata-current-button"
+    direction: DOWN
+- tapOn:
+    id: "compat-metadata-current-button"
+- extendedWaitUntil:
+    visible:
+      id: "compat-metadata-current-result"
+    timeout: 15000
+- assertVisible:
+    id: "compat-metadata-current-result-keys"
+    text: "Response keys: coords,timestamp,mocked,provider"
+- scrollUntilVisible:
+    element:
+      id: "compat-metadata-current-result-mocked"
+    direction: DOWN
+- assertVisible:
+    id: "compat-metadata-current-result-mocked"
+    text: "Mocked: true"
+- runFlow:
+    when:
+      platform: Android
+    commands:
+      - assertVisible:
+          id: "compat-metadata-current-result-provider"
+          text: "Provider: (gps|network|passive)"
+- runFlow:
+    when:
+      platform: iOS
+    commands:
+      - scrollUntilVisible:
+          element:
+            id: "compat-metadata-current-result-provider"
+          direction: DOWN
+      - assertVisible:
+          id: "compat-metadata-current-result-provider"
+          text: "Provider: unknown"
+
+# An omitted metadata option keeps the drop-in shape.
+- scrollUntilVisible:
+    element:
+      id: "compat-default-watch-button"
+    direction: DOWN
+- tapOn:
+    id: "compat-default-watch-button"
+- setLocation:
+    latitude: 37.567
+    longitude: 126.979
+- extendedWaitUntil:
+    visible:
+      id: "compat-default-watch-result-keys"
+    timeout: 15000
+- assertVisible:
+    id: "compat-default-watch-result-keys"
+    text: "Response keys: coords,timestamp"
+- scrollUntilVisible:
+    element:
+      id: "compat-default-watch-result-latitude"
+    direction: DOWN
+- extendedWaitUntil:
+    visible:
+      id: "compat-default-watch-result-latitude"
+      text: "Latitude: 37\\.567000"
+    timeout: 15000
+
+# Keep the omitted watch active while starting an explicit-false watch. These
+# are separate public-call contracts even though both retain the base shape.
+- scrollUntilVisible:
+    element:
+      id: "compat-false-watch-button"
+    direction: DOWN
+- tapOn:
+    id: "compat-false-watch-button"
+- setLocation:
+    latitude: 37.5675
+    longitude: 126.9795
+- extendedWaitUntil:
+    visible:
+      id: "compat-false-watch-result-keys"
+    timeout: 15000
+- assertVisible:
+    id: "compat-false-watch-result-keys"
+    text: "Response keys: coords,timestamp"
+- scrollUntilVisible:
+    element:
+      id: "compat-false-watch-result-latitude"
+    direction: DOWN
+- extendedWaitUntil:
+    visible:
+      id: "compat-false-watch-result-latitude"
+      text: "Latitude: 37\\.567500"
+    timeout: 15000
+
+# Keep both base-shape watches active while starting the opted-in watch. Every
+# subscription must retain its own response shape for the same native sample.
+- scrollUntilVisible:
+    element:
+      id: "compat-metadata-watch-button"
+    direction: DOWN
+- tapOn:
+    id: "compat-metadata-watch-button"
+- setLocation:
+    latitude: 37.568
+    longitude: 126.98
+- scrollUntilVisible:
+    element:
+      id: "compat-metadata-watch-result-keys"
+    direction: DOWN
+- extendedWaitUntil:
+    visible:
+      id: "compat-metadata-watch-result-latitude"
+      text: "Latitude: 37\\.568000"
+    timeout: 15000
+- assertVisible:
+    id: "compat-metadata-watch-result-keys"
+    text: "Response keys: coords,timestamp,mocked,provider"
+- scrollUntilVisible:
+    element:
+      id: "compat-metadata-watch-result-mocked"
+    direction: DOWN
+- assertVisible:
+    id: "compat-metadata-watch-result-mocked"
+    text: "Mocked: true"
+- runFlow:
+    when:
+      platform: Android
+    commands:
+      - scrollUntilVisible:
+          element:
+            id: "compat-metadata-watch-result-provider"
+          direction: DOWN
+      - assertVisible:
+          id: "compat-metadata-watch-result-provider"
+          text: "Provider: (gps|network|passive)"
+- runFlow:
+    when:
+      platform: iOS
+    commands:
+      - scrollUntilVisible:
+          element:
+            id: "compat-metadata-watch-result-provider"
+          direction: DOWN
+      - assertVisible:
+          id: "compat-metadata-watch-result-provider"
+          text: "Provider: unknown"
+- scrollUntilVisible:
+    element:
+      id: "compat-default-watch-result-keys"
+    direction: UP
+- assertVisible:
+    id: "compat-default-watch-result-keys"
+    text: "Response keys: coords,timestamp"
+- scrollUntilVisible:
+    element:
+      id: "compat-default-watch-result-latitude"
+    direction: DOWN
+- assertVisible:
+    id: "compat-default-watch-result-latitude"
+    text: "Latitude: 37\\.568000"
+- scrollUntilVisible:
+    element:
+      id: "compat-false-watch-result-keys"
+    direction: DOWN
+- assertVisible:
+    id: "compat-false-watch-result-keys"
+    text: "Response keys: coords,timestamp"
+- scrollUntilVisible:
+    element:
+      id: "compat-false-watch-result-latitude"
+    direction: DOWN
+- assertVisible:
+    id: "compat-false-watch-result-latitude"
+    text: "Latitude: 37\\.568000"
+- scrollUntilVisible:
+    element:
+      id: "compat-default-watch-stop-button"
+    direction: UP
+- tapOn:
+    id: "compat-default-watch-stop-button"
+- scrollUntilVisible:
+    element:
+      id: "compat-false-watch-stop-button"
+    direction: DOWN
+- tapOn:
+    id: "compat-false-watch-stop-button"
+- scrollUntilVisible:
+    element:
+      id: "compat-metadata-watch-stop-button"
+    direction: DOWN
+- tapOn:
+    id: "compat-metadata-watch-stop-button"

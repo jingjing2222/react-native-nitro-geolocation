@@ -2,8 +2,15 @@ import { NitroGeolocationHybridCompatObject } from "../NitroGeolocationModule";
 import type {
   CompatGeolocationError,
   CompatGeolocationOptions,
-  CompatGeolocationResponse
+  CompatGeolocationOptionsWithMetadata,
+  CompatGeolocationResponse,
+  CompatGeolocationResponseWithMetadata
 } from "../publicTypes";
+import {
+  toCompatResponse,
+  toCompatResponseWithMetadata,
+  toNativeCompatOptions
+} from "./metadata";
 
 /**
  * Invokes the success callback whenever the location changes.
@@ -15,13 +22,37 @@ import type {
  * @returns watchId - A number that identifies this watch session
  */
 export function watchPosition(
+  success: (position: CompatGeolocationResponseWithMetadata) => void,
+  error: ((error: CompatGeolocationError) => void) | undefined,
+  options: CompatGeolocationOptionsWithMetadata
+): number;
+export function watchPosition(
   success: (position: CompatGeolocationResponse) => void,
   error?: (error: CompatGeolocationError) => void,
   options?: CompatGeolocationOptions
+): number;
+export function watchPosition(
+  success: (position: CompatGeolocationResponseWithMetadata) => void,
+  error?: (error: CompatGeolocationError) => void,
+  options?: CompatGeolocationOptions
 ): number {
+  const nativeOptions = toNativeCompatOptions(options);
+
+  if (
+    options?.includeExtraMetadata === true &&
+    typeof NitroGeolocationHybridCompatObject.watchPositionWithMetadata ===
+      "function"
+  ) {
+    return NitroGeolocationHybridCompatObject.watchPositionWithMetadata(
+      (position) => success(toCompatResponseWithMetadata(position)),
+      nativeOptions,
+      error
+    );
+  }
+
   return NitroGeolocationHybridCompatObject.watchPosition(
-    success,
-    options ?? {},
+    (position) => success(toCompatResponse(position)),
+    nativeOptions,
     error
   );
 }

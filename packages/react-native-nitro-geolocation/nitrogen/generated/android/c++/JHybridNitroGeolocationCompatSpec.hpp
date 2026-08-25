@@ -57,7 +57,9 @@ namespace margelo::nitro::nitrogeolocation {
     void setRNConfiguration(const CompatGeolocationConfigurationInternal& config) override;
     void requestAuthorization(const std::optional<std::function<void()>>& success, const std::optional<std::function<void(const CompatGeolocationError& /* error */)>>& error) override;
     void getCurrentPosition(const std::function<void(const CompatGeolocationResponse& /* position */)>& success, const CompatGeolocationOptions& options, const std::optional<std::function<void(const CompatGeolocationError& /* error */)>>& error) override;
+    void getCurrentPositionWithMetadata(const std::function<void(const CompatGeolocationResponseWithMetadataInternal& /* position */)>& success, const CompatGeolocationOptions& options, const std::optional<std::function<void(const CompatGeolocationError& /* error */)>>& error) override;
     double watchPosition(const std::function<void(const CompatGeolocationResponse& /* position */)>& success, const CompatGeolocationOptions& options, const std::optional<std::function<void(const CompatGeolocationError& /* error */)>>& error) override;
+    double watchPositionWithMetadata(const std::function<void(const CompatGeolocationResponseWithMetadataInternal& /* position */)>& success, const CompatGeolocationOptions& options, const std::optional<std::function<void(const CompatGeolocationError& /* error */)>>& error) override;
     void clearWatch(double watchId) override;
     void stopObserving() override;
 

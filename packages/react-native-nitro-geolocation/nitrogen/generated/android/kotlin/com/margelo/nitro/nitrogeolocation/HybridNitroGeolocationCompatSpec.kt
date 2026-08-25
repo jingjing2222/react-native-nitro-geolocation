@@ -25,44 +25,62 @@ import com.margelo.nitro.core.HybridObject
 )
 abstract class HybridNitroGeolocationCompatSpec: HybridObject() {
   // Properties
-  
+
 
   // Methods
   @DoNotStrip
   @Keep
   abstract fun setRNConfiguration(config: CompatGeolocationConfigurationInternal): Unit
-  
+
   abstract fun requestAuthorization(success: (() -> Unit)?, error: ((error: CompatGeolocationError) -> Unit)?): Unit
-  
+
   @DoNotStrip
   @Keep
   private fun requestAuthorization_cxx(success: Func_void?, error: Func_void_CompatGeolocationError?): Unit {
     val __result = requestAuthorization(success?.let { it }, error?.let { it })
     return __result
   }
-  
+
   abstract fun getCurrentPosition(success: (position: CompatGeolocationResponse) -> Unit, options: CompatGeolocationOptions, error: ((error: CompatGeolocationError) -> Unit)?): Unit
-  
+
   @DoNotStrip
   @Keep
   private fun getCurrentPosition_cxx(success: Func_void_CompatGeolocationResponse, options: CompatGeolocationOptions, error: Func_void_CompatGeolocationError?): Unit {
     val __result = getCurrentPosition(success, options, error?.let { it })
     return __result
   }
-  
+
+  abstract fun getCurrentPositionWithMetadata(success: (position: CompatGeolocationResponseWithMetadataInternal) -> Unit, options: CompatGeolocationOptions, error: ((error: CompatGeolocationError) -> Unit)?): Unit
+
+  @DoNotStrip
+  @Keep
+  private fun getCurrentPositionWithMetadata_cxx(success: Func_void_CompatGeolocationResponseWithMetadataInternal, options: CompatGeolocationOptions, error: Func_void_CompatGeolocationError?): Unit {
+    val __result = getCurrentPositionWithMetadata(success, options, error?.let { it })
+    return __result
+  }
+
   abstract fun watchPosition(success: (position: CompatGeolocationResponse) -> Unit, options: CompatGeolocationOptions, error: ((error: CompatGeolocationError) -> Unit)?): Double
-  
+
   @DoNotStrip
   @Keep
   private fun watchPosition_cxx(success: Func_void_CompatGeolocationResponse, options: CompatGeolocationOptions, error: Func_void_CompatGeolocationError?): Double {
     val __result = watchPosition(success, options, error?.let { it })
     return __result
   }
-  
+
+  abstract fun watchPositionWithMetadata(success: (position: CompatGeolocationResponseWithMetadataInternal) -> Unit, options: CompatGeolocationOptions, error: ((error: CompatGeolocationError) -> Unit)?): Double
+
+  @DoNotStrip
+  @Keep
+  private fun watchPositionWithMetadata_cxx(success: Func_void_CompatGeolocationResponseWithMetadataInternal, options: CompatGeolocationOptions, error: Func_void_CompatGeolocationError?): Double {
+    val __result = watchPositionWithMetadata(success, options, error?.let { it })
+    return __result
+  }
+
   @DoNotStrip
   @Keep
   abstract fun clearWatch(watchId: Double): Unit
-  
+
   @DoNotStrip
   @Keep
   abstract fun stopObserving(): Unit

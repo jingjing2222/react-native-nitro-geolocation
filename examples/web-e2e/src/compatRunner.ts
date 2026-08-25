@@ -1,5 +1,8 @@
 import Geolocation from "react-native-nitro-geolocation/compat";
-import type { GeolocationResponse } from "react-native-nitro-geolocation/compat";
+import type {
+  GeolocationResponse,
+  GeolocationResponseWithMetadata
+} from "react-native-nitro-geolocation/compat";
 import { setScenario } from "./dom";
 import {
   type ExpectedLocation,
@@ -43,6 +46,39 @@ function getCurrentPositionAsync(options: {
       options
     );
   });
+}
+
+function getCurrentPositionWithMetadataAsync(options: {
+  maximumAge: number;
+  timeout: number;
+}) {
+  return new Promise<GeolocationResponseWithMetadata>((resolve, reject) => {
+    Geolocation.getCurrentPosition(resolve, reject, {
+      ...options,
+      includeExtraMetadata: true
+    });
+  });
+}
+
+function assertDefaultResponseShape(position: GeolocationResponse) {
+  const keys = Object.keys(position);
+  if (keys.length !== 2 || keys[0] !== "coords" || keys[1] !== "timestamp") {
+    throw new Error(`Compat default response shape changed: ${keys.join(",")}`);
+  }
+}
+
+function assertWebMetadata(position: GeolocationResponseWithMetadata) {
+  assertPosition(position);
+  const keys = Object.keys(position);
+  if (keys.join(",") !== "coords,timestamp,provider") {
+    throw new Error(`Unexpected web metadata shape: ${keys.join(",")}`);
+  }
+  if (position.provider !== "unknown") {
+    throw new Error(`Expected web provider unknown, got ${position.provider}.`);
+  }
+  if (Object.hasOwn(position, "mocked")) {
+    throw new Error("Web compat metadata must omit unsupported mocked state.");
+  }
 }
 
 async function compatGetCurrentPositionUntilSuccess(timeoutMs: number) {
@@ -110,12 +146,14 @@ async function compatWatchUntilFirstEvent({
   timeoutMs,
   clearOnFirst,
   acceptPosition,
-  onStarted
+  onStarted,
+  includeExtraMetadata = false
 }: {
   timeoutMs: number;
   clearOnFirst: boolean;
   acceptPosition: (position: GeolocationResponse) => boolean;
   onStarted?: (watchId: number) => void;
+  includeExtraMetadata?: boolean;
 }) {
   const events: GeolocationResponse[] = [];
   const errors: unknown[] = [];
@@ -143,34 +181,41 @@ async function compatWatchUntilFirstEvent({
         )
       );
     }, timeoutMs);
-    watchId = Geolocation.watchPosition(
-      (position) => {
-        if (stopped) {
-          return;
-        }
-        events.push(position);
-        if (!acceptPosition(position)) {
-          return;
-        }
-        if (resolved) {
-          return;
-        }
-        resolved = true;
-        window.clearTimeout(timeout);
-        if (clearOnFirst) {
-          stopped = true;
-          Geolocation.clearWatch(watchId);
-        }
-        resolve({ watchId, events, errors, position });
-      },
-      (error) => {
-        if (stopped || resolved) {
-          return;
-        }
-        errors.push(error);
-      },
-      { maximumAge: 0, timeout: 15000 }
-    );
+    const onPosition = (position: GeolocationResponse) => {
+      if (stopped) {
+        return;
+      }
+      events.push(position);
+      if (!acceptPosition(position)) {
+        return;
+      }
+      if (resolved) {
+        return;
+      }
+      resolved = true;
+      window.clearTimeout(timeout);
+      if (clearOnFirst) {
+        stopped = true;
+        Geolocation.clearWatch(watchId);
+      }
+      resolve({ watchId, events, errors, position });
+    };
+    const onError = (error: unknown) => {
+      if (stopped || resolved) {
+        return;
+      }
+      errors.push(error);
+    };
+    watchId = includeExtraMetadata
+      ? Geolocation.watchPosition(onPosition, onError, {
+          includeExtraMetadata: true,
+          maximumAge: 0,
+          timeout: 15000
+        })
+      : Geolocation.watchPosition(onPosition, onError, {
+          maximumAge: 0,
+          timeout: 15000
+        });
     onStarted?.(watchId);
   });
 }
@@ -214,7 +259,20 @@ export async function runCompatScenarios() {
         timeoutMs: 30000
       });
     },
-    (result) => assertPosition(result.position)
+    (result) => {
+      assertPosition(result.position);
+      assertDefaultResponseShape(result.position);
+    }
+  );
+
+  await runStep(
+    "compat-metadata-get-current-position",
+    () =>
+      getCurrentPositionWithMetadataAsync({
+        maximumAge: 10000,
+        timeout: 15000
+      }),
+    assertWebMetadata
   );
 
   await runStep(
@@ -367,6 +425,31 @@ export async function runCompatScenarios() {
       }
     }
   );
+
+  await runStep(
+    "compat-metadata-watch-position",
+    () =>
+      compatWatchUntilFirstEvent({
+        clearOnFirst: true,
+        timeoutMs: 30000,
+        includeExtraMetadata: true,
+        acceptPosition: (position) =>
+          isNearExpected(position, expectedLocations.compatMetadataWatch),
+        onStarted: () => {
+          setScenario(
+            "compat-metadata-watch-position",
+            "running",
+            {
+              phase: "move-for-compat-metadata-watch-position",
+              expected: expectedLocations.compatMetadataWatch
+            },
+            "Move device location now; the opted-in compat watch should expose web metadata."
+          );
+        }
+      }),
+    (result) =>
+      assertWebMetadata(result.position as GeolocationResponseWithMetadata)
+  );
 }
 
 export async function runCompatSuite() {
@@ -378,8 +461,10 @@ export async function runCompatSuite() {
       [
         "compat-api-availability",
         "compat-get-current-position",
+        "compat-metadata-get-current-position",
         "compat-watch-position",
-        "compat-stop-observing"
+        "compat-stop-observing",
+        "compat-metadata-watch-position"
       ].includes(scenario.id) && scenario.status !== "pass"
   );
   if (failedScenarios.length > 0) {

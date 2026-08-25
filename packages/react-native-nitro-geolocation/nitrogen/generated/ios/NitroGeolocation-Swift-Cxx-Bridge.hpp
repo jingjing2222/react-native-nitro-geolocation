@@ -62,6 +62,8 @@ namespace margelo::nitro::nitrogeolocation { enum class BackgroundTrackingMode; 
 namespace margelo::nitro::nitrogeolocation { struct BatterySnapshot; }
 // Forward declaration of `CompatGeolocationError` to properly resolve imports.
 namespace margelo::nitro::nitrogeolocation { struct CompatGeolocationError; }
+// Forward declaration of `CompatGeolocationResponseWithMetadataInternal` to properly resolve imports.
+namespace margelo::nitro::nitrogeolocation { struct CompatGeolocationResponseWithMetadataInternal; }
 // Forward declaration of `CompatGeolocationResponse` to properly resolve imports.
 namespace margelo::nitro::nitrogeolocation { struct CompatGeolocationResponse; }
 // Forward declaration of `DetectedActivityType` to properly resolve imports.
@@ -174,6 +176,7 @@ namespace NitroGeolocation { class HybridNitroGeolocationSpec_cxx; }
 #include "BatterySnapshot.hpp"
 #include "CompatGeolocationError.hpp"
 #include "CompatGeolocationResponse.hpp"
+#include "CompatGeolocationResponseWithMetadataInternal.hpp"
 #include "DetectedActivity.hpp"
 #include "DetectedActivityType.hpp"
 #include "GeocodedLocation.hpp"
@@ -1018,6 +1021,28 @@ namespace margelo::nitro::nitrogeolocation::bridge::swift {
   Func_void_CompatGeolocationResponse create_Func_void_CompatGeolocationResponse(void* NON_NULL swiftClosureWrapper) noexcept;
   inline Func_void_CompatGeolocationResponse_Wrapper wrap_Func_void_CompatGeolocationResponse(Func_void_CompatGeolocationResponse value) noexcept {
     return Func_void_CompatGeolocationResponse_Wrapper(std::move(value));
+  }
+
+  // pragma MARK: std::function<void(const CompatGeolocationResponseWithMetadataInternal& /* position */)>
+  /**
+   * Specialized version of `std::function<void(const CompatGeolocationResponseWithMetadataInternal&)>`.
+   */
+  using Func_void_CompatGeolocationResponseWithMetadataInternal = std::function<void(const CompatGeolocationResponseWithMetadataInternal& /* position */)>;
+  /**
+   * Wrapper class for a `std::function<void(const CompatGeolocationResponseWithMetadataInternal& / * position * /)>`, this can be used from Swift.
+   */
+  class Func_void_CompatGeolocationResponseWithMetadataInternal_Wrapper final {
+  public:
+    explicit Func_void_CompatGeolocationResponseWithMetadataInternal_Wrapper(std::function<void(const CompatGeolocationResponseWithMetadataInternal& /* position */)>&& func): _function(std::make_unique<std::function<void(const CompatGeolocationResponseWithMetadataInternal& /* position */)>>(std::move(func))) {}
+    inline void call(CompatGeolocationResponseWithMetadataInternal position) const noexcept {
+      _function->operator()(position);
+    }
+  private:
+    std::unique_ptr<std::function<void(const CompatGeolocationResponseWithMetadataInternal& /* position */)>> _function;
+  } SWIFT_NONCOPYABLE;
+  Func_void_CompatGeolocationResponseWithMetadataInternal create_Func_void_CompatGeolocationResponseWithMetadataInternal(void* NON_NULL swiftClosureWrapper) noexcept;
+  inline Func_void_CompatGeolocationResponseWithMetadataInternal_Wrapper wrap_Func_void_CompatGeolocationResponseWithMetadataInternal(Func_void_CompatGeolocationResponseWithMetadataInternal value) noexcept {
+    return Func_void_CompatGeolocationResponseWithMetadataInternal_Wrapper(std::move(value));
   }
 
   // pragma MARK: std::shared_ptr<HybridNitroGeolocationCompatSpec>

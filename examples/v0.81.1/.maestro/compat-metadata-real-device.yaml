@@ -1,0 +1,148 @@
+appId: nitrogeolocation.example
+---
+# Physical-device-only proof for the non-mocked compat metadata path.
+# Intentionally excluded from all-tests.yaml: do not run on a simulator.
+
+- runFlow:
+    when:
+      platform: Android
+    commands:
+      - assertTrue: ${COMPAT_METADATA_ANDROID_PHYSICAL_DEVICE == '1'}
+- runFlow:
+    when:
+      platform: iOS
+    commands:
+      - assertTrue: ${COMPAT_METADATA_IOS_PHYSICAL_DEVICE == '1'}
+
+- launchApp:
+    clearState: true
+
+- extendedWaitUntil:
+    visible: "Geolocation API"
+    timeout: 10000
+
+- stopApp
+
+- openLink:
+    link: nitrogeolocation://app/compat-metadata
+- runFlow:
+    when:
+      platform: iOS
+      visible: "Cancel|취소"
+    commands:
+      - tapOn:
+          text: "Open|열기"
+- runFlow:
+    when:
+      platform: iOS
+    commands:
+      - openLink:
+          link: nitrogeolocation://app/compat-metadata
+- waitForAnimationToEnd
+
+- extendedWaitUntil:
+    visible: "Compat Metadata Opt-in"
+    timeout: 10000
+
+- tapOn:
+    id: "compat-metadata-request-permission-button"
+- runFlow:
+    when:
+      platform: Android
+    commands:
+      - tapOn:
+          text: ".*(While using the app|앱 사용 중에만 허용).*"
+          optional: true
+- runFlow:
+    when:
+      platform: iOS
+    commands:
+      - tapOn:
+          text: "Allow While Using App|앱을 사용하는 동안 허용|OK"
+          optional: true
+- extendedWaitUntil:
+    visible: "Granted ✅"
+    timeout: 10000
+
+- tapOn:
+    id: "compat-metadata-current-button"
+- extendedWaitUntil:
+    visible:
+      id: "compat-metadata-current-result"
+    timeout: 30000
+- runFlow:
+    when:
+      platform: Android
+    commands:
+      - assertVisible:
+          id: "compat-metadata-current-result-keys"
+          text: "Response keys: coords,timestamp,mocked,provider"
+      - scrollUntilVisible:
+          element:
+            id: "compat-metadata-current-result-mocked"
+          direction: DOWN
+      - assertVisible:
+          id: "compat-metadata-current-result-mocked"
+          text: "Mocked: false"
+      - scrollUntilVisible:
+          element:
+            id: "compat-metadata-current-result-provider"
+          direction: DOWN
+      - assertVisible:
+          id: "compat-metadata-current-result-provider"
+          text: "Provider: (gps|network|passive|fused)"
+- runFlow:
+    when:
+      platform: iOS
+    commands:
+      - scrollUntilVisible:
+          element:
+            id: "compat-metadata-current-result-has-mocked"
+          direction: DOWN
+      - assertVisible:
+          id: "compat-metadata-current-result-has-mocked"
+          text: "Has mocked: (true|false)"
+- runFlow:
+    when:
+      platform: iOS
+      visible: "Has mocked: false"
+    commands:
+      # CLLocation.sourceInformation is only available on iOS 15+ and may be
+      # nil. Absence is the supported integrity-unknown result.
+      - scrollUntilVisible:
+          element:
+            id: "compat-metadata-current-result-keys"
+          direction: UP
+      - assertVisible:
+          id: "compat-metadata-current-result-keys"
+          text: "Response keys: coords,timestamp,provider"
+- runFlow:
+    when:
+      platform: iOS
+      visible: "Has mocked: true"
+    commands:
+      - scrollUntilVisible:
+          element:
+            id: "compat-metadata-current-result-mocked"
+          direction: DOWN
+      - assertVisible:
+          id: "compat-metadata-current-result-mocked"
+          text: "Mocked: false"
+      - scrollUntilVisible:
+          element:
+            id: "compat-metadata-current-result-keys"
+          direction: UP
+      - assertVisible:
+          id: "compat-metadata-current-result-keys"
+          text: "Response keys: coords,timestamp,mocked,provider"
+- runFlow:
+    when:
+      platform: iOS
+    commands:
+      - scrollUntilVisible:
+          element:
+            id: "compat-metadata-current-result-provider"
+          direction: DOWN
+      - assertVisible:
+          id: "compat-metadata-current-result-provider"
+          text: "Provider: unknown"

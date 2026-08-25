@@ -11,14 +11,14 @@ class LocationManager: NSObject, CLLocationManagerDelegate {
 
     private struct LocationRequest {
         let id: UUID = UUID()
-        let success: (CompatGeolocationResponse) -> Void
+        let success: (CLLocation) -> Void
         let error: ((CompatGeolocationError) -> Void)?
         let options: ParsedOptions
         var timer: DispatchSourceTimer?
     }
 
     private struct WatchSubscription {
-        let success: (CompatGeolocationResponse) -> Void
+        let success: (CLLocation) -> Void
         let error: ((CompatGeolocationError) -> Void)?
         let options: ParsedOptions
     }
@@ -205,6 +205,32 @@ class LocationManager: NSObject, CLLocationManagerDelegate {
         error: ((CompatGeolocationError) -> Void)?,
         options: CompatGeolocationOptions?
     ) {
+        getCurrentLocation(
+            success: { location in success(LocationManager.locationToPosition(location)) },
+            error: error,
+            options: options
+        )
+    }
+
+    func getCurrentPositionWithMetadata(
+        success: @escaping (CompatGeolocationResponseWithMetadataInternal) -> Void,
+        error: ((CompatGeolocationError) -> Void)?,
+        options: CompatGeolocationOptions?
+    ) {
+        getCurrentLocation(
+            success: { location in
+                success(LocationManager.locationToPositionWithMetadata(location))
+            },
+            error: error,
+            options: options
+        )
+    }
+
+    private func getCurrentLocation(
+        success: @escaping (CLLocation) -> Void,
+        error: ((CompatGeolocationError) -> Void)?,
+        options: CompatGeolocationOptions?
+    ) {
         let parsedOptions = ParsedOptions.parse(from: options)
 
         // Check authorization
@@ -253,6 +279,32 @@ class LocationManager: NSObject, CLLocationManagerDelegate {
 
     func watchPosition(
         success: @escaping (CompatGeolocationResponse) -> Void,
+        error: ((CompatGeolocationError) -> Void)?,
+        options: CompatGeolocationOptions?
+    ) -> Double {
+        return watchLocation(
+            success: { location in success(LocationManager.locationToPosition(location)) },
+            error: error,
+            options: options
+        )
+    }
+
+    func watchPositionWithMetadata(
+        success: @escaping (CompatGeolocationResponseWithMetadataInternal) -> Void,
+        error: ((CompatGeolocationError) -> Void)?,
+        options: CompatGeolocationOptions?
+    ) -> Double {
+        return watchLocation(
+            success: { location in
+                success(LocationManager.locationToPositionWithMetadata(location))
+            },
+            error: error,
+            options: options
+        )
+    }
+
+    private func watchLocation(
+        success: @escaping (CLLocation) -> Void,
         error: ((CompatGeolocationError) -> Void)?,
         options: CompatGeolocationOptions?
     ) -> Double {
@@ -320,18 +372,17 @@ class LocationManager: NSObject, CLLocationManagerDelegate {
         guard let location = locations.last else { return }
 
         lastLocation = location
-        let position = locationToPosition(location)
 
         // 1. Fire all pending getCurrentPosition requests
         for request in pendingRequests {
             request.timer?.cancel()
-            request.success(position)
+            request.success(location)
         }
         pendingRequests.removeAll()
 
         // 2. Fire all active watchPosition subscriptions
         for (_, watch) in activeWatches {
-            watch.success(position)
+            watch.success(location)
         }
 
         // 3. Stop monitoring if no more watches or pending requests
@@ -637,7 +688,7 @@ class LocationManager: NSObject, CLLocationManagerDelegate {
         queuedAuthorizationCallbacks.removeAll()
     }
 
-    func locationToPosition(_ location: CLLocation) -> CompatGeolocationResponse {
+    static func locationToPosition(_ location: CLLocation) -> CompatGeolocationResponse {
         let coordsObj = GeolocationCoordinates(
             latitude: location.coordinate.latitude,
             longitude: location.coordinate.longitude,
@@ -654,6 +705,18 @@ class LocationManager: NSObject, CLLocationManagerDelegate {
         )
 
         return position
+    }
+
+    static func locationToPositionWithMetadata(_ location: CLLocation)
+        -> CompatGeolocationResponseWithMetadataInternal
+    {
+        let position = LocationManager.locationToPosition(location)
+        return CompatGeolocationResponseWithMetadataInternal(
+            coords: position.coords,
+            timestamp: position.timestamp,
+            mocked: location.nitroGeolocationMocked,
+            provider: location.nitroGeolocationProvider
+        )
     }
 
     private func createError(code: Int, message: String) -> CompatGeolocationError {

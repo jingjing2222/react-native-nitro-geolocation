@@ -44,12 +44,32 @@ class NitroGeolocationCompat: HybridNitroGeolocationCompatSpec {
 
         if let cached = locationManager.lastLocation,
            locationManager.isCachedLocationValid(cached, options: parsedOptions) {
-            success(locationManager.locationToPosition(cached))
+            success(LocationManager.locationToPosition(cached))
             return
         }
 
         // Slow path: need GPS
         locationManager.getCurrentPosition(success: success, error: error, options: options)
+    }
+
+    public func getCurrentPositionWithMetadata(
+        success: @escaping (CompatGeolocationResponseWithMetadataInternal) -> Void,
+        options: CompatGeolocationOptions,
+        error: ((CompatGeolocationError) -> Void)?
+    ) throws {
+        let parsedOptions = LocationManager.ParsedOptions.parse(from: options)
+
+        if let cached = locationManager.lastLocation,
+           locationManager.isCachedLocationValid(cached, options: parsedOptions) {
+            success(LocationManager.locationToPositionWithMetadata(cached))
+            return
+        }
+
+        locationManager.getCurrentPositionWithMetadata(
+            success: success,
+            error: error,
+            options: options
+        )
     }
 
     public func watchPosition(
@@ -58,6 +78,18 @@ class NitroGeolocationCompat: HybridNitroGeolocationCompatSpec {
         error: ((CompatGeolocationError) -> Void)?
     ) throws -> Double {
         return locationManager.watchPosition(success: success, error: error, options: options)
+    }
+
+    public func watchPositionWithMetadata(
+        success: @escaping (CompatGeolocationResponseWithMetadataInternal) -> Void,
+        options: CompatGeolocationOptions,
+        error: ((CompatGeolocationError) -> Void)?
+    ) throws -> Double {
+        return locationManager.watchPositionWithMetadata(
+            success: success,
+            error: error,
+            options: options
+        )
     }
 
     public func clearWatch(watchId: Double) throws {

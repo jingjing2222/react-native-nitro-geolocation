@@ -20,6 +20,32 @@ class GetCurrentPosition(private val reactContext: ReactApplicationContext) {
             error: ((error: CompatGeolocationError) -> Unit)?,
             options: CompatGeolocationOptions?
     ) {
+        executeLocation(
+                success = { location -> success(location.toCompatGeolocationResponse()) },
+                error = error,
+                options = options
+        )
+    }
+
+    fun executeWithMetadata(
+            success: (position: CompatGeolocationResponseWithMetadataInternal) -> Unit,
+            error: ((error: CompatGeolocationError) -> Unit)?,
+            options: CompatGeolocationOptions?
+    ) {
+        executeLocation(
+                success = { location ->
+                    success(location.toCompatGeolocationResponseWithMetadata())
+                },
+                error = error,
+                options = options
+        )
+    }
+
+    private fun executeLocation(
+            success: (location: Location) -> Unit,
+            error: ((error: CompatGeolocationError) -> Unit)?,
+            options: CompatGeolocationOptions?
+    ) {
         val locationManager =
                 reactContext.getSystemService(Context.LOCATION_SERVICE) as? LocationManager
         if (locationManager == null) {
@@ -42,13 +68,13 @@ class GetCurrentPosition(private val reactContext: ReactApplicationContext) {
 
             // Check if cached location is fresh enough
             if (lastKnownLocation != null && isCachedLocationValid(lastKnownLocation, opts)) {
-                success(locationToPosition(lastKnownLocation))
+                success(lastKnownLocation)
                 return
             }
 
             // If maximumAge is Infinity and we have a last known location, use it
             if (lastKnownLocation != null && opts.maximumAge == Double.POSITIVE_INFINITY) {
-                success(locationToPosition(lastKnownLocation))
+                success(lastKnownLocation)
                 return
             }
 
@@ -115,7 +141,7 @@ class GetCurrentPosition(private val reactContext: ReactApplicationContext) {
             locationManager: LocationManager,
             provider: String,
             options: ParsedOptions,
-            success: (CompatGeolocationResponse) -> Unit,
+            success: (Location) -> Unit,
             error: ((CompatGeolocationError) -> Unit)?,
             fallbackLocation: Location?
     ) {
@@ -147,7 +173,7 @@ class GetCurrentPosition(private val reactContext: ReactApplicationContext) {
             locationManager: LocationManager,
             provider: String,
             options: ParsedOptions,
-            success: (CompatGeolocationResponse) -> Unit,
+            success: (Location) -> Unit,
             error: ((CompatGeolocationError) -> Unit)?,
             fallbackLocation: Location?
     ) {
@@ -170,7 +196,7 @@ class GetCurrentPosition(private val reactContext: ReactApplicationContext) {
                 val bestLocation = selectBestLocation(location, fallbackLocation)
 
                 if (bestLocation != null) {
-                    success(locationToPosition(bestLocation))
+                    success(bestLocation)
                 } else {
                     Log.e(TAG, "No location available")
                     error?.invoke(createError(POSITION_UNAVAILABLE, "Unable to get location"))
@@ -196,7 +222,7 @@ class GetCurrentPosition(private val reactContext: ReactApplicationContext) {
             locationManager: LocationManager,
             provider: String,
             options: ParsedOptions,
-            success: (CompatGeolocationResponse) -> Unit,
+            success: (Location) -> Unit,
             error: ((CompatGeolocationError) -> Unit)?,
             fallbackLocation: Location?
     ) {
@@ -223,7 +249,7 @@ class GetCurrentPosition(private val reactContext: ReactApplicationContext) {
                                     isResolved = true
                                     handler.removeCallbacks(timeoutRunnable)
                                     locationManager.removeUpdates(this)
-                                    success(locationToPosition(location))
+                                    success(location)
                                 }
                                 oldLocation = location
                             }
@@ -290,24 +316,6 @@ class GetCurrentPosition(private val reactContext: ReactApplicationContext) {
             return provider2 == null
         }
         return provider1 == provider2
-    }
-
-    // ===== Data Conversion =====
-
-    private fun locationToPosition(location: Location): CompatGeolocationResponse {
-        return CompatGeolocationResponse(
-                coords =
-                        GeolocationCoordinates(
-                                latitude = location.latitude,
-                                longitude = location.longitude,
-                                altitude = location.altitudeValue(),
-                                accuracy = location.accuracy.toDouble(),
-                                altitudeAccuracy = location.altitudeAccuracyValue(),
-                                heading = location.headingValue(),
-                                speed = location.speedValue()
-                        ),
-                timestamp = location.time.toDouble()
-        )
     }
 
     private fun createError(code: Int, message: String): CompatGeolocationError {

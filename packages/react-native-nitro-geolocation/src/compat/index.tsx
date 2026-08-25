@@ -27,8 +27,11 @@ const Geolocation = {
 export type {
   CompatGeolocationConfiguration as GeolocationConfiguration,
   CompatGeolocationResponse as GeolocationResponse,
+  CompatGeolocationResponseWithMetadata as GeolocationResponseWithMetadata,
   CompatGeolocationError as GeolocationError,
-  CompatGeolocationOptions as GeolocationOptions
+  CompatGeolocationOptions as GeolocationOptions,
+  CompatGeolocationOptionsWithMetadata as GeolocationOptionsWithMetadata,
+  LocationProviderUsed
 } from "../publicTypes";
 
 export default Geolocation;
