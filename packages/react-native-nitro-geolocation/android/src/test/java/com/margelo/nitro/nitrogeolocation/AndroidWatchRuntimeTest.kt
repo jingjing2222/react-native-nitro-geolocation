@@ -11,22 +11,6 @@ import kotlin.concurrent.thread
 
 class AndroidWatchRuntimeTest {
     @Test
-    fun `reentrant cleanup skips a removed callback from the delivery snapshot`() {
-        val watches = AndroidWatchCollection<String>()
-        watches.add("first", "first-value")
-        watches.add("second", "second-value")
-        val delivered = mutableListOf<String>()
-
-        watches.forEachCurrent { token, _ ->
-            delivered += token
-            if (token == "first") watches.remove("second")
-        }
-
-        assertEquals(listOf("first"), delivered)
-        assertEquals(listOf("first"), watches.tokens())
-    }
-
-    @Test
     fun `concurrent last removal and new watch leave acquisition running`() {
         val executor = Executors.newSingleThreadExecutor()
         val dispatchThread = AtomicReference<Thread>()

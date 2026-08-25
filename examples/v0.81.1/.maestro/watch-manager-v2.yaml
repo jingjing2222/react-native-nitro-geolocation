@@ -56,6 +56,13 @@ appId: nitrogeolocation.example
 - assertVisible:
     text: "Near move: passed"
 
+# Android's slow watch uses a 25 s interval. Wait until that subscription's
+# threshold has elapsed before injecting the candidate it must receive.
+- runFlow:
+    when:
+      platform: Android
+    commands:
+      - runScript: scripts/wait-15s.js
 - setLocation:
     latitude: 37.5765
     longitude: 126.9780

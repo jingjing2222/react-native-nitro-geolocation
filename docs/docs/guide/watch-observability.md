@@ -85,10 +85,10 @@ measured from its last delivered position; suppressed native updates do not move
 the baseline or count toward `maxUpdates`. `fastestInterval` still contributes
 to the shared native request, while `interval` is the per-watch minimum callback
 period. Position watch registration, removal, native restart decisions, and
-callback delivery are serialized on Android's main looper. A callback may safely
-remove itself or another watch; a watch removed before its turn in the current
-native update is skipped. Heading watches use the Android sensor manager
-separately and apply each subscription's `headingFilter` independently.
+callback delivery are serialized on Android's main looper. `unwatch()` prevents
+delivery from subsequent native updates, but a callback already handed to the
+asynchronous JS bridge may still finish. Heading watches use the Android sensor
+manager separately and apply each subscription's `headingFilter` independently.
 
 ### iOS
 

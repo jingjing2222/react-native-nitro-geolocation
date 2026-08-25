@@ -818,4 +818,3 @@ class NitroGeolocation(
         private const val PERMISSION_REQUEST_CODE = 8947
     }
 }
-
