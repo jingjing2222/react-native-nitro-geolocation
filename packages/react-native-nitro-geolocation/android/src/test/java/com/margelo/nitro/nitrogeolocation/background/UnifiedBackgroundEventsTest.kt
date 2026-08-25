@@ -3,6 +3,7 @@ package com.margelo.nitro.nitrogeolocation.background
 import androidx.test.core.app.ApplicationProvider
 import android.content.BroadcastReceiver
 import android.content.IntentFilter
+import android.os.Looper
 import com.facebook.react.bridge.LifecycleEventListener
 import com.margelo.nitro.nitrogeolocation.AndroidProviderObservationContext
 import com.margelo.nitro.nitrogeolocation.AndroidProviderStatusWatcher
@@ -25,6 +26,7 @@ import org.junit.Assert.assertTrue
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
+import org.robolectric.Shadows.shadowOf
 import org.robolectric.annotation.Config
 
 @RunWith(RobolectricTestRunner::class)
@@ -272,6 +274,53 @@ class UnifiedBackgroundEventsTest {
         assertTrue(secondToken.get()?.isNotBlank() == true)
         assertEquals(2, registrationCalls.get())
         assertEquals(1, watcher.activeWatchCount)
+        watcher.stopObserving()
+    }
+
+    @Test
+    fun `failed second refresh retries the first watch initial snapshot`() {
+        val initialStatus = LocationProviderStatus(
+            locationServicesEnabled = true,
+            backgroundModeEnabled = false,
+            gpsAvailable = true,
+            networkAvailable = false,
+            passiveAvailable = true,
+            googlePlayServicesAvailable = true,
+            googleLocationAccuracyEnabled = true
+        )
+        val loadCalls = AtomicInteger(0)
+        val firstCompletion = AtomicReference<((LocationProviderStatus) -> Unit)?>()
+        val received = mutableListOf<LocationProviderStatus>()
+        val observationContext = object : AndroidProviderObservationContext {
+            override fun registerProviderReceiver(
+                receiver: BroadcastReceiver,
+                filter: IntentFilter
+            ) = Unit
+
+            override fun unregisterProviderReceiver(receiver: BroadcastReceiver) = Unit
+            override fun addLifecycleListener(listener: LifecycleEventListener) = Unit
+            override fun removeLifecycleListener(listener: LifecycleEventListener) = Unit
+        }
+        val watcher = AndroidProviderStatusWatcher(
+            observationContext = observationContext,
+            loadProviderStatus = { completion ->
+                when (loadCalls.incrementAndGet()) {
+                    1 -> firstCompletion.set(completion)
+                    2 -> throw IllegalStateException("status load unavailable")
+                    else -> completion(initialStatus)
+                }
+            }
+        )
+        watcher.watch(received::add)
+
+        assertThrows(IllegalStateException::class.java) {
+            watcher.watch {}
+        }
+        firstCompletion.get()?.invoke(initialStatus)
+        shadowOf(Looper.getMainLooper()).idle()
+
+        assertEquals(2, loadCalls.get())
+        assertEquals(listOf(initialStatus), received)
         watcher.stopObserving()
     }
 }

@@ -135,25 +135,30 @@ internal class AndroidProviderStatusWatcher internal constructor(
 
     private fun refresh() {
         val generation = refreshGeneration.incrementAndGet()
-        loadProviderStatus providerStatus@{ status ->
-            if (generation != refreshGeneration.get()) return@providerStatus
+        try {
+            loadProviderStatus providerStatus@{ status ->
+                if (generation != refreshGeneration.get()) return@providerStatus
 
-            val tokens = synchronized(this) {
-                callbacks.keys.filter { token ->
-                    if (lastStatuses[token] == status) {
-                        false
-                    } else {
-                        lastStatuses[token] = status
-                        true
+                val tokens = synchronized(this) {
+                    callbacks.keys.filter { token ->
+                        if (lastStatuses[token] == status) {
+                            false
+                        } else {
+                            lastStatuses[token] = status
+                            true
+                        }
+                    }
+                }
+                tokens.forEach { token ->
+                    mainHandler.post {
+                        val callback = synchronized(this) { callbacks[token] }
+                        callback?.invoke(status)
                     }
                 }
             }
-            tokens.forEach { token ->
-                mainHandler.post {
-                    val callback = synchronized(this) { callbacks[token] }
-                    callback?.invoke(status)
-                }
-            }
+        } catch (error: Throwable) {
+            refreshGeneration.compareAndSet(generation, generation - 1)
+            throw error
         }
     }
 
