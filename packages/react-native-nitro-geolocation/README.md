@@ -157,6 +157,17 @@ for iOS and read the
 [Swift Package Manager guide](https://react-native-nitro-geolocation.pages.dev/guide/swift-package-manager)
 before migrating an RN 0.87 app.
 
+After configuring the native projects, inspect the installation without
+changing any files:
+
+```bash
+yarn nitro-geolocation doctor
+```
+
+Use `nitro-geolocation doctor --project apps/mobile --json` for monorepos or
+CI. Missing generated native folders are warnings; rerun it after native
+generation to verify permissions and usage descriptions.
+
 Released npm builds try to use the matching GitHub Release prebuilts first:
 Android downloads the release AAR and reuses its native `.so` files, while iOS
 downloads the release XCFramework. If the prebuilt asset is unavailable, the

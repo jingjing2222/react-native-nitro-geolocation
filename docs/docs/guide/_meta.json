@@ -1,6 +1,7 @@
 [
   "index",
   "quick-start",
+  "install-doctor",
   "swift-package-manager",
   "migration-assistance",
   "v2-error-migration",
