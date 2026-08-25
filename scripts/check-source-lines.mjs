@@ -91,23 +91,6 @@ const budgets = [
   }
 ];
 
-const exceptions = new Map([
-  [
-    "packages/react-native-nitro-geolocation/android/src/main/java/com/margelo/nitro/nitrogeolocation/NitroGeolocation.kt",
-    {
-      limit: 1453,
-      reason: "existing native adapter exception"
-    }
-  ],
-  [
-    "packages/react-native-nitro-geolocation/ios/NitroGeolocation.swift",
-    {
-      limit: 1096,
-      reason: "existing native adapter exception"
-    }
-  ]
-]);
-
 const gitFiles = spawnSync("git", ["ls-files"], {
   cwd: root,
   encoding: "utf8"
@@ -140,9 +123,8 @@ for (const file of trackedFiles) {
 if (failures.length > 0) {
   console.error("Source line-count guard failed:");
   for (const { file, lines, budget } of failures) {
-    const suffix = budget.reason ? ` (${budget.reason})` : "";
     console.error(
-      `- ${file}: ${lines} lines > ${budget.limit} ${budget.name} budget${suffix}`
+      `- ${file}: ${lines} lines > ${budget.limit} ${budget.name} budget`
     );
   }
   process.exit(1);
@@ -162,15 +144,6 @@ function isExcluded(file) {
 }
 
 function budgetFor(file) {
-  const exception = exceptions.get(file);
-  if (exception) {
-    return {
-      name: "exception",
-      limit: exception.limit,
-      reason: exception.reason
-    };
-  }
-
   return budgets.find((budget) => budget.matches(file));
 }
 

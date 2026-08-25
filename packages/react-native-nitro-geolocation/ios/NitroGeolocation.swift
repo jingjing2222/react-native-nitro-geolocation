@@ -33,7 +33,7 @@ class NitroGeolocation: HybridNitroGeolocationSpec {
     private var pendingHeadingRequests: [UUID: HeadingRequest] = [:]
     @ActiveWatchRegistry(kind: .heading)
     private var headingSubscriptions: [String: HeadingSubscription] = [:]
-    private var activeGeocoders: [UUID: CLGeocoder] = [:]
+    private let geocoder = IOSGeocoder()
 
     // MARK: - Configuration
 
@@ -48,7 +48,7 @@ class NitroGeolocation: HybridNitroGeolocationSpec {
     func checkPermission() throws -> Promise<PermissionStatus> {
         return Promise.async {
             let status = CLLocationManager.authorizationStatus()
-            return self.mapCLAuthorizationStatus(status)
+            return mapCLAuthorizationStatus(status)
         }
     }
 
@@ -61,7 +61,7 @@ class NitroGeolocation: HybridNitroGeolocationSpec {
 
             let currentStatus = CLLocationManager.authorizationStatus()
             if currentStatus != .notDetermined {
-                success(self.mapCLAuthorizationStatus(currentStatus))
+                success(mapCLAuthorizationStatus(currentStatus))
                 return
             }
 
@@ -131,7 +131,7 @@ class NitroGeolocation: HybridNitroGeolocationSpec {
 
     func getAccuracyAuthorization() throws -> Promise<AccuracyAuthorization> {
         return Promise.async {
-            return self.getCurrentAccuracyAuthorizationOnMain()
+            return currentAccuracyAuthorizationOnMain(from: self.locationManager)
         }
     }
 
@@ -173,7 +173,7 @@ class NitroGeolocation: HybridNitroGeolocationSpec {
                         return
                     }
 
-                    success(self.getCurrentAccuracyAuthorization())
+                    success(currentAccuracyAuthorization(from: self.locationManager))
                 }
             }
         }
@@ -285,46 +285,7 @@ class NitroGeolocation: HybridNitroGeolocationSpec {
         success: @escaping ([GeocodedLocation]) -> Void,
         error: ((LocationError) -> Void)?
     ) throws -> Void {
-        let query = address.trimmingCharacters(in: .whitespacesAndNewlines)
-        guard !query.isEmpty else {
-            error?(createLocationError(
-                code: INTERNAL_ERROR,
-                message: "address must not be empty."
-            ))
-            return
-        }
-
-        DispatchQueue.main.async {
-            let id = UUID()
-            let geocoder = CLGeocoder()
-            self.activeGeocoders[id] = geocoder
-
-            geocoder.geocodeAddressString(query) { [weak self] placemarks, geocodeError in
-                guard let self else { return }
-
-                DispatchQueue.main.async {
-                    self.activeGeocoders.removeValue(forKey: id)
-
-                    if let geocodeError {
-                        if self.isNoGeocoderResult(geocodeError) {
-                            success([])
-                            return
-                        }
-
-                        error?(self.createGeocoderError(
-                            geocodeError,
-                            messagePrefix: "Unable to geocode address"
-                        ))
-                        return
-                    }
-
-                    let locations = (placemarks ?? []).compactMap {
-                        $0.toGeocodedLocation()
-                    }
-                    success(locations)
-                }
-            }
-        }
+        geocoder.geocode(address: address, success: success, error: error)
     }
 
     func reverseGeocode(
@@ -332,47 +293,7 @@ class NitroGeolocation: HybridNitroGeolocationSpec {
         success: @escaping ([ReverseGeocodedAddress]) -> Void,
         error: ((LocationError) -> Void)?
     ) throws -> Void {
-        if let validationError = validateGeocodingCoordinates(coords) {
-            error?(validationError)
-            return
-        }
-
-        DispatchQueue.main.async {
-            let id = UUID()
-            let geocoder = CLGeocoder()
-            self.activeGeocoders[id] = geocoder
-
-            let location = CLLocation(
-                latitude: coords.latitude,
-                longitude: coords.longitude
-            )
-
-            geocoder.reverseGeocodeLocation(location) { [weak self] placemarks, geocodeError in
-                guard let self else { return }
-
-                DispatchQueue.main.async {
-                    self.activeGeocoders.removeValue(forKey: id)
-
-                    if let geocodeError {
-                        if self.isNoGeocoderResult(geocodeError) {
-                            success([])
-                            return
-                        }
-
-                        error?(self.createGeocoderError(
-                            geocodeError,
-                            messagePrefix: "Unable to reverse geocode coordinates"
-                        ))
-                        return
-                    }
-
-                    let addresses = (placemarks ?? []).map {
-                        $0.toReverseGeocodedAddress()
-                    }
-                    success(addresses)
-                }
-            }
-        }
+        geocoder.reverseGeocode(coords: coords, success: success, error: error)
     }
 
     // MARK: - Heading
@@ -943,19 +864,6 @@ class NitroGeolocation: HybridNitroGeolocationSpec {
         return determineAuthorizationLevelFromInfoPlist()
     }
 
-    private func determineAuthorizationLevelFromInfoPlist() -> AuthorizationLevel {
-        let hasAlwaysKey = Bundle.main.object(forInfoDictionaryKey: "NSLocationAlwaysAndWhenInUseUsageDescription") != nil
-        let hasWhenInUseKey = Bundle.main.object(forInfoDictionaryKey: "NSLocationWhenInUseUsageDescription") != nil
-
-        if hasAlwaysKey && hasWhenInUseKey {
-            return .always
-        } else if hasWhenInUseKey {
-            return .wheninuse
-        }
-
-        return .wheninuse  // Default
-    }
-
     private func requestSystemPermission(for type: AuthorizationLevel) {
         switch type {
         case .always:
@@ -979,110 +887,9 @@ class NitroGeolocation: HybridNitroGeolocationSpec {
         locationManager?.allowsBackgroundLocationUpdates = true
     }
 
-    private func getCurrentAuthorizationStatus(from manager: CLLocationManager) -> CLAuthorizationStatus {
-        if #available(iOS 14.0, *) {
-            return manager.authorizationStatus
-        } else {
-            return CLLocationManager.authorizationStatus()
-        }
-    }
-
-    private func mapCLAuthorizationStatus(_ status: CLAuthorizationStatus) -> PermissionStatus {
-        switch status {
-        case .authorizedAlways, .authorizedWhenInUse:
-            return .granted
-        case .denied:
-            return .denied
-        case .restricted:
-            return .restricted
-        case .notDetermined:
-            return .undetermined
-        @unknown default:
-            return .undetermined
-        }
-    }
-
-    private func getCurrentAccuracyAuthorization() -> AccuracyAuthorization {
-        guard #available(iOS 14.0, *) else {
-            return .unknown
-        }
-
-        let manager = locationManager ?? CLLocationManager()
-        switch manager.accuracyAuthorization {
-        case .fullAccuracy:
-            return .full
-        case .reducedAccuracy:
-            return .reduced
-        @unknown default:
-            return .unknown
-        }
-    }
-
-    private func getCurrentAccuracyAuthorizationOnMain() -> AccuracyAuthorization {
-        if Thread.isMainThread {
-            return getCurrentAccuracyAuthorization()
-        }
-
-        return DispatchQueue.main.sync {
-            getCurrentAccuracyAuthorization()
-        }
-    }
-
     private func locationToPosition(_ location: CLLocation) -> GeolocationResponse {
         return location.toGeolocationResponse()
     }
 
-    private func validateGeocodingCoordinates(_ coords: GeocodingCoordinates) -> LocationError? {
-        if !coords.latitude.isFinite || coords.latitude < -90 || coords.latitude > 90 {
-            return createLocationError(
-                code: INTERNAL_ERROR,
-                message: "latitude must be a finite number between -90 and 90."
-            )
-        }
-
-        if !coords.longitude.isFinite || coords.longitude < -180 || coords.longitude > 180 {
-            return createLocationError(
-                code: INTERNAL_ERROR,
-                message: "longitude must be a finite number between -180 and 180."
-            )
-        }
-
-        return nil
-    }
-
-    private func isNoGeocoderResult(_ error: Error) -> Bool {
-        guard let clError = error as? CLError else {
-            return false
-        }
-
-        return clError.code == .geocodeFoundNoResult
-    }
-
-    private func createGeocoderError(_ error: Error, messagePrefix: String) -> LocationError {
-        if let clError = error as? CLError {
-            switch clError.code {
-            case .denied:
-                return createLocationError(
-                    code: PERMISSION_DENIED,
-                    message: "\(messagePrefix): geocoder access denied."
-                )
-            case .network:
-                return createLocationError(
-                    code: POSITION_UNAVAILABLE,
-                    message: "\(messagePrefix): network unavailable."
-                )
-            default:
-                return createLocationError(
-                    code: POSITION_UNAVAILABLE,
-                    message: "\(messagePrefix): \(error.localizedDescription)"
-                )
-            }
-        }
-
-        return createLocationError(
-            code: POSITION_UNAVAILABLE,
-            message: "\(messagePrefix): \(error.localizedDescription)"
-        )
-    }
 
 }
