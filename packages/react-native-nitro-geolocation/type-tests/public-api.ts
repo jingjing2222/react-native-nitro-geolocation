@@ -4,7 +4,10 @@ import type {
   LocationErrorCode as LocationErrorCodeType,
   UseWatchPositionResult
 } from "../src";
-import type { BackgroundLocationDiagnosis } from "../src/background";
+import type {
+  AndroidBackgroundProvider,
+  BackgroundLocationDiagnosis
+} from "../src/background";
 
 type Equal<Left, Right> = (<Value>() => Value extends Left ? 1 : 2) extends <
   Value
@@ -32,6 +35,9 @@ type _HookResultIsNamed = Expect<
 >;
 type _BackgroundDiagnosisIsNamed = Expect<
   Equal<BackgroundLocationDiagnosis["healthy"], boolean>
+>;
+type _BackgroundProviderIsPublic = Expect<
+  Equal<AndroidBackgroundProvider, "auto" | "playServices" | "android">
 >;
 
 const timeoutCode: LocationErrorCodeType = LocationErrorCode.TIMEOUT;

@@ -19,9 +19,9 @@ import type {
   LocationLifecycleEvent,
   StoredBackgroundEvent,
   StoredBackgroundLocation
-} from "./types";
+} from "./publicTypes";
 
-export * from "./types";
+export * from "./publicTypes";
 
 export const BACKGROUND_LOCATION_TASK_NAME = "NitroBackgroundLocationTask";
 

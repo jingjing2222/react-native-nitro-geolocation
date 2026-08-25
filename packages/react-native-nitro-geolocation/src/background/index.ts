@@ -2,6 +2,10 @@ import { NitroModules } from "react-native-nitro-modules";
 import type { LocationError } from "../NitroGeolocation.nitro";
 import type { NitroBackgroundLocation } from "./NitroBackgroundLocation.nitro";
 import { createLocationLifecycleSubscription } from "./locationLifecycle";
+import {
+  fromNativeBackgroundLocationOptions,
+  toNativeBackgroundLocationOptions
+} from "./options";
 import type {
   ActivityRecognitionOptions,
   BackgroundEvent,
@@ -23,7 +27,7 @@ import type {
   StoredBackgroundEvent,
   StoredBackgroundEventEnvelope,
   StoredBackgroundLocation
-} from "./types";
+} from "./publicTypes";
 
 const NativeBackgroundLocation =
   NitroModules.createHybridObject<NitroBackgroundLocation>(
@@ -59,7 +63,7 @@ function narrowBackgroundEvent(
   }
 }
 
-export * from "./types";
+export * from "./publicTypes";
 export { BACKGROUND_LOCATION_TASK_NAME, registerBackgroundTask } from "./task";
 
 export function checkBackgroundPermission(): Promise<BackgroundPermissionResult> {
@@ -77,19 +81,24 @@ export function openAppLocationSettings(): Promise<void> {
 export function configureBackgroundLocation(
   options: BackgroundLocationOptions
 ): Promise<void> {
-  return NativeBackgroundLocation.configureBackgroundLocation(options);
+  return NativeBackgroundLocation.configureBackgroundLocation(
+    toNativeBackgroundLocationOptions(options)
+  );
 }
 
-export function getBackgroundConfiguration(): Promise<
+export async function getBackgroundConfiguration(): Promise<
   BackgroundLocationOptions | undefined
 > {
-  return NativeBackgroundLocation.getBackgroundConfiguration();
+  const options = await NativeBackgroundLocation.getBackgroundConfiguration();
+  return fromNativeBackgroundLocationOptions(options);
 }
 
 export function startBackgroundLocation(
   options?: BackgroundLocationOptions
 ): Promise<void> {
-  return NativeBackgroundLocation.startBackgroundLocation(options);
+  return NativeBackgroundLocation.startBackgroundLocation(
+    options ? toNativeBackgroundLocationOptions(options) : undefined
+  );
 }
 
 export function stopBackgroundLocation(): Promise<void> {

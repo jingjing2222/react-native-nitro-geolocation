@@ -37,7 +37,7 @@ const options: BackgroundLocationOptions = {
   stopOnTerminate: true,
   startOnBoot: false,
   android: {
-    locationProvider: "android_platform",
+    locationProvider: "android",
     requestNotificationPermission: false,
     foregroundService: {
       notificationTitle: "Issue 132 foreground listener",
