@@ -7,6 +7,9 @@ appId: nitrogeolocation.example
     clearState: true
     permissions:
       all: allow
+- extendedWaitUntil:
+    visible: "Geolocation API"
+    timeout: 10000
 - stopApp
 
 - openLink:

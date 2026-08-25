@@ -15,6 +15,11 @@ import {
   syncStoredLocations
 } from "react-native-nitro-geolocation/background";
 import {
+  MISSING_NOTIFICATION_ERROR,
+  assertBackgroundE2EConfiguration,
+  backgroundE2EOptions
+} from "./backgroundE2EOptions";
+import {
   ButtonRow,
   ResultList,
   ScenarioButton,
@@ -36,39 +41,6 @@ const initialResults = createScenarioResults([
   "storage",
   "sync"
 ] as const);
-
-const validOptions = {
-  trackingMode:
-    Platform.OS === "android"
-      ? ("activityAware" as const)
-      : ("continuous" as const),
-  interval: 10_000,
-  fastestInterval: 5_000,
-  distanceFilter: 25,
-  persist: true,
-  maxStoredLocations: 10_000,
-  maxStoredEvents: 10_000,
-  stopOnTerminate: false,
-  startOnBoot: true,
-  android: {
-    foregroundService: {
-      notificationTitle: "Background tracking active",
-      notificationText: "Recording location updates for E2E validation",
-      notificationChannelId: "nitro-background-location-e2e",
-      notificationChannelName: "Nitro Background Location E2E"
-    }
-  },
-  ios: {
-    pausesLocationUpdatesAutomatically: false,
-    showsBackgroundLocationIndicator: true
-  },
-  activityRecognition: {
-    enabled: Platform.OS === "android",
-    interval: 10_000,
-    stopOnStill: true,
-    minimumConfidence: 70
-  }
-};
 
 const shortError = (error: any) =>
   String(error?.message ?? error)
@@ -121,6 +93,11 @@ export default function BackgroundE2EScreen() {
     try {
       const before = await checkBackgroundPermission();
       const after = await requestBackgroundPermission();
+      if (after.foreground !== "granted" || after.background !== "granted") {
+        throw new Error(
+          `Expected granted background access, received foreground=${after.foreground}, background=${after.background}.`
+        );
+      }
       setResult(
         "permission",
         createScenarioResult(
@@ -152,8 +129,7 @@ export default function BackgroundE2EScreen() {
 
     try {
       await startBackgroundLocation({
-        persist: true,
-        android: {} as any
+        persist: true
       });
       setResult(
         "missingNotification",
@@ -163,9 +139,13 @@ export default function BackgroundE2EScreen() {
         )
       );
     } catch (error: any) {
+      const message = shortError(error);
       setResult(
         "missingNotification",
-        createScenarioResult("passed", shortError(error))
+        createScenarioResult(
+          message.includes(MISSING_NOTIFICATION_ERROR) ? "passed" : "failed",
+          message
+        )
       );
     }
   };
@@ -176,11 +156,15 @@ export default function BackgroundE2EScreen() {
       createScenarioResult("running", "Configuring background subsystem")
     );
     try {
-      await configureBackgroundLocation(validOptions);
+      await configureBackgroundLocation(backgroundE2EOptions);
+      await assertBackgroundE2EConfiguration();
       await refreshStatus();
       setResult(
         "configure",
-        createScenarioResult("passed", "Configuration persisted")
+        createScenarioResult(
+          "passed",
+          "Native configuration round-trip preserved common and platform options"
+        )
       );
     } catch (error: any) {
       setResult(
@@ -196,21 +180,21 @@ export default function BackgroundE2EScreen() {
       createScenarioResult("running", "Starting then stopping tracking")
     );
     try {
-      await configureBackgroundLocation(validOptions);
-      await startBackgroundLocation(validOptions);
+      await configureBackgroundLocation(backgroundE2EOptions);
+      await startBackgroundLocation(backgroundE2EOptions);
       const first = await getBackgroundLocationStatus();
       if (!first.isRunning || first.state !== "running") {
         throw new Error(`Initial tracking did not start: state=${first.state}`);
       }
       const replacementOptions = {
-        ...validOptions,
+        ...backgroundE2EOptions,
         trackingMode: "continuous",
         activityRecognition: {
-          ...validOptions.activityRecognition,
+          ...backgroundE2EOptions.activityRecognition,
           enabled: false
         },
         ios: {
-          ...validOptions.ios,
+          ...backgroundE2EOptions.ios,
           useSignificantChanges: false
         }
       } as const;

@@ -1,6 +1,7 @@
 import React from "react";
 import { Platform } from "react-native";
 import {
+  getBackgroundLocationStatus,
   startBackgroundLocation,
   stopBackgroundLocation
 } from "react-native-nitro-geolocation/background";
@@ -52,6 +53,12 @@ export default function Issue120Screen() {
     try {
       await stopBackgroundLocation().catch(() => undefined);
       await startBackgroundLocation(options);
+      const running = await getBackgroundLocationStatus();
+      if (!running.isRunning || running.state !== "running") {
+        throw new Error(
+          `Tracking did not start: state=${running.state}, running=${String(running.isRunning)}`
+        );
+      }
       await stopBackgroundLocation();
       setResult(
         "stopWithoutMotion",

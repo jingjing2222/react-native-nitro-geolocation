@@ -54,15 +54,27 @@ appId: nitrogeolocation.example
     id: "background-e2e-status"
 
 - tapOn:
+    id: "e2e-action-background-e2e-permission-button"
+- extendedWaitUntil:
+    visible: "Permission: passed"
+    timeout: 15000
+- assertVisible:
+    text: ".*foreground=granted, background=granted.*"
+
+- tapOn:
     id: "e2e-action-background-e2e-invalid-config-button"
 - extendedWaitUntil:
     visible: "Missing notification: passed"
     timeout: 10000
+- assertVisible:
+    text: ".*requires android.foregroundService notification options.*|Android-only validation skipped on iOS"
 - tapOn:
     id: "e2e-action-background-e2e-configure-button"
 - extendedWaitUntil:
     visible: "Configure: passed"
     timeout: 10000
+- assertVisible:
+    text: ".*Native configuration round-trip preserved common and platform options.*"
 - tapOn:
     id: "e2e-action-background-e2e-start-stop-button"
 - extendedWaitUntil:

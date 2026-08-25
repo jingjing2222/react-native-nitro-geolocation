@@ -73,9 +73,12 @@ yarn test:e2e:android
 
 `test:e2e:ios` runs `.maestro/all-tests.yaml` with the iOS platform flag.
 `test:e2e:android` runs the same master flow with the Android platform flag,
-then runs `provider-settings-not-ready.yaml` after disabling Android location
-services, verifies the GPS recipe's not-ready edge case, and restores the
-device state afterward. Set
+then runs the device-state-dependent provider watcher, unified background
+event, disabled-service, and stale-readiness contracts before restoring the
+device state. The repository E2E workflow additionally runs the isolated
+Android GPS-offline suite and the #132 no-Headless-JS regression suite; these
+are kept outside `all-tests.yaml` because they respectively disable network
+access and install an alternate release bundle. Set
 `RUN_ANDROID_PROVIDER_SELECTION=1` on a physical Android device to include the
 live provider-selection proof. The wrapper rejects emulators for this proof and
 requires `ANDROID_SERIAL` when multiple Android devices are connected.

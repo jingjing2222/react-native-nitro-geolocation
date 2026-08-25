@@ -61,6 +61,12 @@ export default function Issue122Screen() {
       await clearStoredBackgroundLocations().catch(() => undefined);
       startedAtRef.current = Date.now();
       await startBackgroundLocation(options);
+      const running = await getBackgroundLocationStatus();
+      if (!running.isRunning || running.state !== "running") {
+        throw new Error(
+          `Tracking did not start: state=${running.state}, running=${String(running.isRunning)}`
+        );
+      }
       setResult(
         "persistFalse",
         createScenarioResult("running", "persist=false tracking started")

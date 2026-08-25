@@ -1,6 +1,7 @@
 import React from "react";
 import { Platform } from "react-native";
 import {
+  getBackgroundLocationStatus,
   startBackgroundLocation,
   stopBackgroundLocation
 } from "react-native-nitro-geolocation/background";
@@ -63,6 +64,16 @@ export default function Issue121Screen() {
       await stopBackgroundLocation().catch(() => undefined);
       await startBackgroundLocation(options);
       await sleep(1500);
+      const running = await getBackgroundLocationStatus();
+      if (
+        !running.isRunning ||
+        running.state !== "running" ||
+        running.android?.isForegroundServiceRunning !== true
+      ) {
+        throw new Error(
+          `Foreground service did not start: state=${running.state}, running=${String(running.isRunning)}, foregroundService=${String(running.android?.isForegroundServiceRunning)}`
+        );
+      }
       await stopBackgroundLocation();
       setResult(
         "foregroundService",
