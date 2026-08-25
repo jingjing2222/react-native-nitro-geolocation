@@ -7,6 +7,18 @@ const root = process.cwd();
 const packageDir = path.join(root, "packages/react-native-nitro-geolocation");
 const packageJsonPath = path.join(packageDir, "package.json");
 const packageJson = JSON.parse(await readFile(packageJsonPath, "utf8"));
+const privacyManifest = await readFile(
+  path.join(packageDir, "ios/PrivacyInfo.xcprivacy"),
+  "utf8"
+);
+const podspec = await readFile(
+  path.join(packageDir, "NitroGeolocation.podspec"),
+  "utf8"
+);
+const prebuiltIOSScript = await readFile(
+  path.join(root, "scripts/build-prebuilt-ios.sh"),
+  "utf8"
+);
 
 const globChars = /[*?[\]{}]/;
 const missingEntries = (packageJson.files ?? []).filter((entry) => {
@@ -30,6 +42,10 @@ const packedFiles = metadata.files.map((file) => file.path);
 const packedTests = packedFiles.filter((file) =>
   /(^|\/)([^/]+\.)?(test|spec)\.[cm]?[jt]sx?$/.test(file)
 );
+const requiredPrivacyFiles = ["ios/PrivacyInfo.xcprivacy"];
+const missingPrivacyFiles = requiredPrivacyFiles.filter(
+  (file) => !packedFiles.includes(file)
+);
 
 const failures = [];
 if (missingEntries.length > 0) {
@@ -39,6 +55,28 @@ if (missingEntries.length > 0) {
 }
 if (packedTests.length > 0) {
   failures.push(`Test files included in npm pack: ${packedTests.join(", ")}`);
+}
+if (missingPrivacyFiles.length > 0) {
+  failures.push(
+    `Privacy manifest missing from npm pack: ${missingPrivacyFiles.join(", ")}`
+  );
+}
+if (
+  !privacyManifest.includes("NSPrivacyAccessedAPICategoryUserDefaults") ||
+  !privacyManifest.includes("CA92.1")
+) {
+  failures.push("iOS privacy manifest must declare UserDefaults reason CA92.1");
+}
+if (
+  !podspec.includes('"NitroGeolocationPrivacy"') ||
+  !podspec.includes('"ios/PrivacyInfo.xcprivacy"')
+) {
+  failures.push("CocoaPods must package the SDK privacy manifest");
+}
+if (!prebuiltIOSScript.includes('"$framework/PrivacyInfo.xcprivacy"')) {
+  failures.push(
+    "Prebuilt iOS frameworks must package the SDK privacy manifest"
+  );
 }
 
 if (failures.length > 0) {

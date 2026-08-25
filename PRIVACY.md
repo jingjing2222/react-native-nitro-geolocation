@@ -15,17 +15,26 @@ before shipping.
 - Foreground location, heading, provider, and lifecycle results stay between
   the platform location service and the app unless the app sends them onward.
 - Background location is opt-in. A started background session stores records on
-  the device by default unless the app sets `persist: false`. The app controls
-  storage caps and can clear retained records.
+  the device by default unless the app sets `persist: false`. Configuration and
+  geofences remain persisted independently until the app removes them or calls
+  `resetBackgroundLocation()`. App-private storage can participate in OS backup
+  unless the integrating app excludes it.
 - Native HTTP sync runs only when the app supplies `sync.url`. It sends the
   configured location payload to that app-selected URL, never to a project
   endpoint.
 - Geocoding uses the operating system geocoder. Its implementation may contact
   Apple, Google, or another platform service under the device's platform terms.
+- Android debug builds log exact background coordinates to logcat by default;
+  release builds disable verbose logs by default. Treat collected debug logs as
+  precise-location data.
 - Native prebuilt binaries may be downloaded from this project's GitHub
   Releases during the native build. This build-time request contains no app
   user's location data and can be disabled with
   `NITRO_GEOLOCATION_USE_PREBUILT=0`.
+
+The iOS SDK ships its own privacy manifest declaring its app-private
+`UserDefaults` access. Consumer apps still need to audit the final Xcode privacy
+report and maintain declarations for their own code and other dependencies.
 
 ## Reporting
 

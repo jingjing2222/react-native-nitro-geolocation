@@ -1,5 +1,7 @@
 ---
+"react-native-nitro-geolocation": patch
 ---
 
-Document runtime data flows, privacy responsibilities, dependency disclosure,
-SBOM generation, license review, and vulnerability-scanner guidance.
+Ship the iOS SDK privacy manifest and document runtime data flows, retention,
+permission ownership, dependency disclosure, SBOM generation, and license and
+vulnerability review.
