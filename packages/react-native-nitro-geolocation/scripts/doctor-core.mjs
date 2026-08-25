@@ -154,6 +154,13 @@ function parsePbxObjects(contents) {
   const lines = contents.split(/\r?\n/);
   const objects = new Map();
   for (let index = 0; index < lines.length; index += 1) {
+    const inline = lines[index].match(
+      /^\s*([A-F0-9]{24})(?: \/\*.*\*\/)? = \{(.*)\};\s*$/
+    );
+    if (inline) {
+      objects.set(inline[1], inline[2]);
+      continue;
+    }
     const start = lines[index].match(
       /^(\s+)([A-F0-9]{24})(?: \/\*.*\*\/)? = \{\s*$/
     );
@@ -171,24 +178,18 @@ function parsePbxObjects(contents) {
 
 function buildSetting(block, name) {
   const escapedName = name.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-  const match = block.match(
-    new RegExp(`^\\s*${escapedName}\\s*=\\s*(.*);\\s*$`, "m")
-  );
-  if (!match) return undefined;
-  const value = match[1].trim();
+  const matches = [
+    ...block.matchAll(new RegExp(`\\b${escapedName}\\s*=\\s*([^;{}]*);`, "g"))
+  ];
+  const value = matches.at(-1)?.[1].trim();
+  if (value === undefined) return undefined;
   if (value.startsWith('"') && value.endsWith('"')) return value.slice(1, -1);
   return value;
 }
 
-function resolvedBuildSetting(
-  block,
-  name,
-  builtIns = {},
-  resolving = new Set()
-) {
-  if (builtIns[name] !== undefined) return builtIns[name];
+function resolvedBuildSetting(settings, name, resolving = new Set()) {
   if (resolving.has(name)) return undefined;
-  const raw = buildSetting(block, name);
+  const raw = settings.get(name);
   if (raw === undefined) return undefined;
   resolving.add(name);
   let unresolved = false;
@@ -196,16 +197,7 @@ function resolvedBuildSetting(
     /\$\(([^)]+)\)|\$\{([^}]+)\}/g,
     (_, first, second) => {
       const variable = String(first ?? second).split(":", 1)[0];
-      if (variable === "inherited") {
-        unresolved = true;
-        return "";
-      }
-      const replacement = resolvedBuildSetting(
-        block,
-        variable,
-        builtIns,
-        resolving
-      );
+      const replacement = resolvedBuildSetting(settings, variable, resolving);
       if (replacement === undefined) {
         unresolved = true;
         return "";
@@ -227,36 +219,91 @@ function configurationList(objects, listId) {
   });
 }
 
-function readXcconfig(file, visited = new Set()) {
-  if (visited.has(file)) return "";
-  visited.add(file);
+function readXcconfig(file, visiting = new Set()) {
+  if (visiting.has(file)) return [];
+  visiting.add(file);
   const contents = readText(file);
-  if (!contents) return "";
+  if (!contents) {
+    visiting.delete(file);
+    return [];
+  }
   const settings = [];
   for (const rawLine of contents.split(/\r?\n/)) {
     const line = rawLine.replace(/\/\/.*$/, "").trim();
     const include = line.match(/^#include\??\s+["<](.*)[">]$/);
     if (include) {
       settings.push(
-        readXcconfig(path.resolve(path.dirname(file), include[1]), visited)
+        ...readXcconfig(path.resolve(path.dirname(file), include[1]), visiting)
       );
       continue;
     }
-    const setting = line.match(/^([A-Za-z0-9_.]+)\s*(?:\?=|=)\s*(.*?)\s*$/);
-    if (setting) settings.push(`${setting[1]} = ${setting[2]};`);
+    const setting = line.match(/^([A-Za-z0-9_.]+)\s*(\?=|=)\s*(.*?)\s*$/);
+    if (setting) {
+      settings.push({
+        name: setting[1],
+        operator: setting[2],
+        value: setting[3]
+      });
+    }
   }
-  return settings.join("\n");
+  visiting.delete(file);
+  return settings;
+}
+
+function pbxAssignments(block) {
+  return [...block.matchAll(/\b([A-Za-z0-9_.]+)\s*=\s*([^;{}]*);/g)].map(
+    (match) => ({ name: match[1], operator: "=", value: match[2].trim() })
+  );
+}
+
+function applyAssignments(settings, assignments) {
+  for (const assignment of assignments) {
+    if (assignment.operator === "?=" && settings.has(assignment.name)) continue;
+    const inherited = settings.get(assignment.name) ?? "";
+    let value = assignment.value.trim();
+    if (value.startsWith('"') && value.endsWith('"')) {
+      value = value.slice(1, -1);
+    }
+    value = value.replace(/\$\(inherited\)|\$\{inherited\}/g, inherited);
+    settings.set(assignment.name, value);
+  }
+}
+
+function effectiveBuildSettings(layers, builtIns) {
+  const settings = new Map(Object.entries(builtIns));
+  for (const assignments of layers) applyAssignments(settings, assignments);
+  return settings;
+}
+
+function objectRelativePath(objects, identifier, visiting = new Set()) {
+  if (visiting.has(identifier)) return undefined;
+  visiting.add(identifier);
+  const block = objects.get(identifier);
+  if (!block) return undefined;
+  const isGroup = block.includes("isa = PBXGroup;");
+  const ownPath =
+    buildSetting(block, "path") ?? (isGroup ? "" : buildSetting(block, "name"));
+  if (ownPath === undefined) return undefined;
+  const sourceTree = buildSetting(block, "sourceTree");
+  if (sourceTree === "SOURCE_ROOT" || path.isAbsolute(ownPath)) return ownPath;
+  const parent = [...objects.entries()].find(
+    ([, candidate]) =>
+      candidate.includes("isa = PBXGroup;") &&
+      new RegExp(`(?:\\(|,)\\s*${identifier}(?:\\s|,|\\))`).test(candidate)
+  )?.[0];
+  if (!parent) return ownPath;
+  const parentPath = objectRelativePath(objects, parent, visiting) ?? "";
+  return parentPath ? path.join(parentPath, ownPath) : ownPath;
 }
 
 function xcconfigSettings(pbxproj, objects, configuration) {
   const reference = configuration.match(
     /baseConfigurationReference = ([A-F0-9]{24})/
   )?.[1];
-  const fileReference = reference ? objects.get(reference) : undefined;
-  const configuredPath = fileReference
-    ? buildSetting(fileReference, "path")
+  const configuredPath = reference
+    ? objectRelativePath(objects, reference)
     : undefined;
-  if (!configuredPath) return "";
+  if (!configuredPath) return [];
   return readXcconfig(
     path.resolve(path.dirname(path.dirname(pbxproj)), configuredPath)
   );
@@ -289,22 +336,27 @@ function applicationBuildConfigurations(pbxproj) {
       const projectConfiguration = projectConfigurations.find(
         (candidate) => candidate.name === configuration.name
       );
+      const builtIns = {
+        SRCROOT: projectDirectory,
+        PROJECT_DIR: projectDirectory,
+        TARGET_NAME: targetName,
+        PRODUCT_NAME: targetName,
+        EXECUTABLE_NAME: targetName
+      };
       configurations.push({
-        settings: [
-          configuration.block,
-          xcconfigSettings(pbxproj, objects, configuration.block),
-          projectConfiguration?.block ?? "",
-          projectConfiguration
-            ? xcconfigSettings(pbxproj, objects, projectConfiguration.block)
-            : ""
-        ].join("\n"),
-        builtIns: {
-          SRCROOT: projectDirectory,
-          PROJECT_DIR: projectDirectory,
-          TARGET_NAME: targetName,
-          PRODUCT_NAME: targetName,
-          EXECUTABLE_NAME: targetName
-        }
+        settings: effectiveBuildSettings(
+          [
+            projectConfiguration
+              ? xcconfigSettings(pbxproj, objects, projectConfiguration.block)
+              : [],
+            projectConfiguration
+              ? pbxAssignments(projectConfiguration.block)
+              : [],
+            xcconfigSettings(pbxproj, objects, configuration.block),
+            pbxAssignments(configuration.block)
+          ],
+          builtIns
+        )
       });
     }
   }
@@ -338,13 +390,11 @@ function inspectApplicationPlists(ios) {
       const generatesInfoPlist =
         resolvedBuildSetting(
           configuration.settings,
-          "GENERATE_INFOPLIST_FILE",
-          configuration.builtIns
+          "GENERATE_INFOPLIST_FILE"
         )?.toUpperCase() === "YES";
       const generatedDescription = resolvedBuildSetting(
         configuration.settings,
-        "INFOPLIST_KEY_NSLocationWhenInUseUsageDescription",
-        configuration.builtIns
+        "INFOPLIST_KEY_NSLocationWhenInUseUsageDescription"
       );
       if (generatesInfoPlist && generatedDescription?.trim()) {
         results.push(true);
@@ -352,8 +402,7 @@ function inspectApplicationPlists(ios) {
       }
       const setting = resolvedBuildSetting(
         configuration.settings,
-        "INFOPLIST_FILE",
-        configuration.builtIns
+        "INFOPLIST_FILE"
       );
       const infoPlist = setting
         ? resolveInfoPlist(pbxproj, setting)

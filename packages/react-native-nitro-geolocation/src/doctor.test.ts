@@ -416,6 +416,152 @@ describe("nitro-geolocation doctor", () => {
     );
   });
 
+  it("resolves one-line group-relative xcconfig file references", () => {
+    const project = createProject({ iosPermission: false });
+    projects.push(project);
+    const configDirectory = path.join(
+      project,
+      "ios/Pods/Target Support Files/Consumer"
+    );
+    mkdirSync(configDirectory, { recursive: true });
+    writeFileSync(
+      path.join(configDirectory, "Location.xcconfig"),
+      "GENERATE_INFOPLIST_FILE = YES\nINFOPLIST_KEY_NSLocationWhenInUseUsageDescription = Allow location.\n"
+    );
+    writeFileSync(
+      path.join(project, "ios/Consumer.xcodeproj/project.pbxproj"),
+      `// !$*UTF8*$!
+{
+  objects = {
+		AAAAAAAAAAAAAAAAAAAAAAAA /* Consumer */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = BBBBBBBBBBBBBBBBBBBBBBBB;
+			name = Consumer;
+			productType = "com.apple.product-type.application";
+		};
+		BBBBBBBBBBBBBBBBBBBBBBBB = {isa = XCConfigurationList; buildConfigurations = (CCCCCCCCCCCCCCCCCCCCCCCC,); };
+		CCCCCCCCCCCCCCCCCCCCCCCC = {isa = XCBuildConfiguration; baseConfigurationReference = FFFFFFFFFFFFFFFFFFFFFFFF; buildSettings = {}; name = Release; };
+		DDDDDDDDDDDDDDDDDDDDDDDD /* Pods */ = {isa = PBXGroup; children = (FFFFFFFFFFFFFFFFFFFFFFFF,); path = Pods; sourceTree = "<group>"; };
+		FFFFFFFFFFFFFFFFFFFFFFFF /* Location.xcconfig */ = {isa = PBXFileReference; path = "Target Support Files/Consumer/Location.xcconfig"; sourceTree = "<group>"; };
+  };
+}
+`
+    );
+
+    const output = execFileSync(
+      process.execPath,
+      [cliPath, "doctor", "--project", project, "--json"],
+      { encoding: "utf8" }
+    );
+    const report = JSON.parse(output);
+
+    expect(report.ok).toBe(true);
+    expect(report.checks).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          code: "ios-when-in-use-description",
+          status: "pass"
+        })
+      ])
+    );
+  });
+
+  it("honors xcconfig includes, conditional assignments, and inherited values", () => {
+    const project = createProject({ iosPermission: false });
+    projects.push(project);
+    mkdirSync(path.join(project, "ios/Config"), { recursive: true });
+    writeFileSync(
+      path.join(project, "ios/Config/Base.xcconfig"),
+      "GENERATE_INFOPLIST_FILE = YES\nINFOPLIST_KEY_NSLocationWhenInUseUsageDescription = Allow inherited location.\n"
+    );
+    writeFileSync(
+      path.join(project, "ios/Config/Target.xcconfig"),
+      '#include "Base.xcconfig"\nGENERATE_INFOPLIST_FILE ?= NO\nINFOPLIST_KEY_NSLocationWhenInUseUsageDescription ?= Wrong fallback.\n'
+    );
+    writeFileSync(
+      path.join(project, "ios/Consumer.xcodeproj/project.pbxproj"),
+      `// !$*UTF8*$!
+{
+  objects = {
+		AAAAAAAAAAAAAAAAAAAAAAAA = {isa = PBXNativeTarget; buildConfigurationList = BBBBBBBBBBBBBBBBBBBBBBBB; name = Consumer; productType = "com.apple.product-type.application"; };
+		BBBBBBBBBBBBBBBBBBBBBBBB = {isa = XCConfigurationList; buildConfigurations = (CCCCCCCCCCCCCCCCCCCCCCCC,); };
+		CCCCCCCCCCCCCCCCCCCCCCCC = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = FFFFFFFFFFFFFFFFFFFFFFFF;
+			buildSettings = {
+				GENERATE_INFOPLIST_FILE = $(inherited);
+				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = $(inherited);
+			};
+			name = Release;
+		};
+		FFFFFFFFFFFFFFFFFFFFFFFF = {isa = PBXFileReference; path = Config/Target.xcconfig; sourceTree = SOURCE_ROOT; };
+  };
+}
+`
+    );
+
+    const output = execFileSync(
+      process.execPath,
+      [cliPath, "doctor", "--project", project, "--json"],
+      { encoding: "utf8" }
+    );
+    const report = JSON.parse(output);
+
+    expect(report.ok).toBe(true);
+    expect(report.checks).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          code: "ios-when-in-use-description",
+          status: "pass"
+        })
+      ])
+    );
+  });
+
+  it("rejects a later empty xcconfig override", () => {
+    const project = createProject({ iosPermission: false });
+    projects.push(project);
+    mkdirSync(path.join(project, "ios/Config"), { recursive: true });
+    writeFileSync(
+      path.join(project, "ios/Config/Base.xcconfig"),
+      "GENERATE_INFOPLIST_FILE = YES\nINFOPLIST_KEY_NSLocationWhenInUseUsageDescription = Allow location.\n"
+    );
+    writeFileSync(
+      path.join(project, "ios/Config/Target.xcconfig"),
+      '#include "Base.xcconfig"\nINFOPLIST_KEY_NSLocationWhenInUseUsageDescription =\n'
+    );
+    writeFileSync(
+      path.join(project, "ios/Consumer.xcodeproj/project.pbxproj"),
+      `// !$*UTF8*$!
+{
+  objects = {
+		AAAAAAAAAAAAAAAAAAAAAAAA = {isa = PBXNativeTarget; buildConfigurationList = BBBBBBBBBBBBBBBBBBBBBBBB; name = Consumer; productType = "com.apple.product-type.application"; };
+		BBBBBBBBBBBBBBBBBBBBBBBB = {isa = XCConfigurationList; buildConfigurations = (CCCCCCCCCCCCCCCCCCCCCCCC,); };
+		CCCCCCCCCCCCCCCCCCCCCCCC = {isa = XCBuildConfiguration; baseConfigurationReference = FFFFFFFFFFFFFFFFFFFFFFFF; buildSettings = {}; name = Release; };
+		FFFFFFFFFFFFFFFFFFFFFFFF = {isa = PBXFileReference; path = Config/Target.xcconfig; sourceTree = SOURCE_ROOT; };
+  };
+}
+`
+    );
+
+    const result = spawnSync(
+      process.execPath,
+      [cliPath, "doctor", "--project", project, "--json"],
+      { encoding: "utf8" }
+    );
+    const report = JSON.parse(result.stdout);
+
+    expect(result.status).toBe(1);
+    expect(report.checks).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          code: "ios-when-in-use-description",
+          status: "error"
+        })
+      ])
+    );
+  });
+
   it("resolves an installed React Native version for catalog dependencies", () => {
     const project = createProject({
       reactNative: "catalog:",
