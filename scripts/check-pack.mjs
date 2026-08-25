@@ -55,7 +55,14 @@ const packedTests = packedFiles.filter((file) =>
   /(^|\/)([^/]+\.)?(test|spec)\.[cm]?[jt]sx?$/.test(file)
 );
 const requiredPrivacyFiles = ["ios/PrivacyInfo.xcprivacy"];
+const requiredPrebuiltFiles = [
+  "android/prebuilt_checksum.gradle",
+  "scripts/prebuilt_ios.rb"
+];
 const missingPrivacyFiles = requiredPrivacyFiles.filter(
+  (file) => !packedFiles.includes(file)
+);
+const missingPrebuiltFiles = requiredPrebuiltFiles.filter(
   (file) => !packedFiles.includes(file)
 );
 
@@ -71,6 +78,11 @@ if (packedTests.length > 0) {
 if (missingPrivacyFiles.length > 0) {
   failures.push(
     `Privacy manifest missing from npm pack: ${missingPrivacyFiles.join(", ")}`
+  );
+}
+if (missingPrebuiltFiles.length > 0) {
+  failures.push(
+    `Prebuilt installers missing from npm pack: ${missingPrebuiltFiles.join(", ")}`
   );
 }
 if (

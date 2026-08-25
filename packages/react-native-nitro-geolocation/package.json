@@ -70,6 +70,7 @@
     "scripts/*.rb",
     "scripts/*.mjs",
     "android/build.gradle",
+    "android/prebuilt_checksum.gradle",
     "android/gradle.properties",
     "android/CMakeLists.txt",
     "android/src/**/*",
