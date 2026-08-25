@@ -14760,7 +14760,7 @@ __metadata:
     react-native: "npm:0.81.1"
     react-native-builder-bob: "npm:^0.40.13"
     react-native-monorepo-config: "npm:^0.1.9"
-    react-native-nitro-geolocation: "workspace: *"
+    react-native-nitro-geolocation: "workspace:*"
     react-native-nitro-modules: "npm:^0.35.10"
     react-native-safe-area-context: "npm:^5.5.2"
     react-native-screens: "npm:4.19.0"
@@ -14789,7 +14789,7 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"react-native-nitro-geolocation@workspace: *, react-native-nitro-geolocation@workspace:*, react-native-nitro-geolocation@workspace:packages/react-native-nitro-geolocation":
+"react-native-nitro-geolocation@workspace:*, react-native-nitro-geolocation@workspace:packages/react-native-nitro-geolocation":
   version: 0.0.0-use.local
   resolution: "react-native-nitro-geolocation@workspace:packages/react-native-nitro-geolocation"
   dependencies:
