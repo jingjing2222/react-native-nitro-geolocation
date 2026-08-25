@@ -16,6 +16,9 @@ appId: nitrogeolocation.example
     commands:
       - tapOn:
           text: "Wait|대기"
+- extendedWaitUntil:
+    visible: "Geolocation API"
+    timeout: 10000
 - stopApp
 
 - openLink:
