@@ -1,11 +1,12 @@
 import React from "react";
 import {
-  LocationErrorCode,
+  LocationErrorCodes,
   geocode,
   reverseGeocode
 } from "react-native-nitro-geolocation";
 import type {
   GeocodedLocation,
+  LocationErrorCode,
   ReverseGeocodedAddress
 } from "react-native-nitro-geolocation";
 import {
@@ -164,7 +165,7 @@ export default function GeocodingScreen() {
         status: "passed",
         message: await expectLocationError(
           () => geocode("   "),
-          LocationErrorCode.INTERNAL_ERROR
+          LocationErrorCodes.INTERNAL_ERROR
         )
       });
     } catch (error) {
@@ -179,7 +180,7 @@ export default function GeocodingScreen() {
         status: "passed",
         message: await expectLocationError(
           () => reverseGeocode(INVALID_COORDS),
-          LocationErrorCode.INTERNAL_ERROR
+          LocationErrorCodes.INTERNAL_ERROR
         )
       });
     } catch (error) {

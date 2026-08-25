@@ -30,7 +30,7 @@ import type {
   PermissionDetails,
   ReverseGeocodedAddress
 } from "../publicTypes";
-import { LocationErrorCode } from "../utils/errors";
+import { LocationErrorCodes } from "../utils/errors";
 import {
   createUnsupportedError,
   getGeolocation,
@@ -154,7 +154,9 @@ export async function requestPermission(): Promise<PermissionStatus> {
     await getCurrentPosition({ maximumAge: 0, timeout: 10000 });
     return "granted";
   } catch (error) {
-    if ((error as LocationError).code === LocationErrorCode.PERMISSION_DENIED) {
+    if (
+      (error as LocationError).code === LocationErrorCodes.PERMISSION_DENIED
+    ) {
       return "denied";
     }
     return checkPermission();
@@ -280,7 +282,7 @@ export function getCurrentPosition(
     error: Parameters<typeof mapBrowserError>[0]
   ): LocationError => {
     const mappedError = mapBrowserError(error);
-    if (mappedError.code === LocationErrorCode.PERMISSION_DENIED) {
+    if (mappedError.code === LocationErrorCodes.PERMISSION_DENIED) {
       rememberWebPermissionDenial();
       rememberWebPermissionDetailsEvidence("denied");
     }

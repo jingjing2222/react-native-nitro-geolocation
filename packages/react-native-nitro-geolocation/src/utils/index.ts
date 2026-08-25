@@ -5,13 +5,14 @@
 
 export { isCachedLocationValid } from "./cache";
 export {
-  LocationErrorCode,
+  LocationErrorCodes,
   createLocationError,
   getLocationErrorCodeName,
   isLocationErrorCode,
   mapCLErrorCode,
   mapAndroidException
 } from "./errors";
+export type { LocationError, LocationErrorCode } from "./errors";
 export {
   isBetterLocation,
   type LocationQuality

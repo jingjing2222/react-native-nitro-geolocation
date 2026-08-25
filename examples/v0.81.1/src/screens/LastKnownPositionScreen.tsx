@@ -1,6 +1,6 @@
 import React from "react";
 import {
-  LocationErrorCode,
+  LocationErrorCodes,
   getCurrentPosition,
   getLastKnownPosition,
   getLastKnownPositionAsync
@@ -209,7 +209,7 @@ export default function LastKnownPositionScreen() {
       try {
         const locationError = assertLocationErrorCode(
           error,
-          LocationErrorCode.PERMISSION_DENIED
+          LocationErrorCodes.PERMISSION_DENIED
         );
         setResult("denied", {
           status: "passed",

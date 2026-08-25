@@ -1,7 +1,7 @@
 import React from "react";
 import { Platform } from "react-native";
 import {
-  LocationErrorCode,
+  LocationErrorCodes,
   getCurrentPosition,
   getLocationAvailability,
   setConfiguration
@@ -103,7 +103,7 @@ export default function LocationAvailabilityScreen() {
         );
         throw new Error("Denied getCurrentPosition unexpectedly resolved.");
       } catch (error) {
-        assertLocationErrorCode(error, LocationErrorCode.PERMISSION_DENIED);
+        assertLocationErrorCode(error, LocationErrorCodes.PERMISSION_DENIED);
       }
 
       setResult("denied", {

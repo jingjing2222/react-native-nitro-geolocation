@@ -1,7 +1,7 @@
 import React from "react";
 import { Platform } from "react-native";
 import {
-  LocationErrorCode,
+  LocationErrorCodes,
   getAccuracyAuthorization,
   requestTemporaryFullAccuracy
 } from "react-native-nitro-geolocation";
@@ -123,7 +123,7 @@ export default function IOSAccuracyAuthorizationScreen() {
       try {
         const locationError = assertLocationErrorCode(
           error,
-          LocationErrorCode.INTERNAL_ERROR
+          LocationErrorCodes.INTERNAL_ERROR
         );
         setResult("invalid", {
           status: "passed",

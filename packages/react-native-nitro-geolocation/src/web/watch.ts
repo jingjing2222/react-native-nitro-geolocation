@@ -11,7 +11,7 @@ import type {
   HeadingOptions,
   LocationProviderStatus
 } from "../publicTypes";
-import { LocationErrorCode } from "../utils/errors";
+import { LocationErrorCodes } from "../utils/errors";
 import {
   createUnsupportedError,
   distanceMeters,
@@ -160,7 +160,7 @@ export function watchPosition(
     },
     (browserError) => {
       const mappedError = mapBrowserError(browserError);
-      if (mappedError.code === LocationErrorCode.PERMISSION_DENIED) {
+      if (mappedError.code === LocationErrorCodes.PERMISSION_DENIED) {
         rememberWebPermissionDenial();
         rememberWebPermissionDetailsEvidence("denied");
       }

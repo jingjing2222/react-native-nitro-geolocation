@@ -12,7 +12,7 @@ import {
   getCurrentPosition,
   getLastKnownPosition,
   hasServicesEnabled,
-  LocationErrorCode,
+  LocationErrorCodes,
   requestPermission,
   requestLocationSettings,
   setConfiguration,

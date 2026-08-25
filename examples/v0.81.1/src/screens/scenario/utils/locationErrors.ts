@@ -1,8 +1,9 @@
 import {
-  LocationErrorCode,
+  LocationErrorCodes,
   getLocationErrorCodeName,
   isLocationErrorCode
 } from "react-native-nitro-geolocation";
+import type { LocationErrorCode } from "react-native-nitro-geolocation";
 import type { CapturedLocationError } from "../types";
 
 /**
@@ -19,7 +20,7 @@ import type { CapturedLocationError } from "../types";
  *
  * @param {unknown} error - Unknown value caught from a native geolocation call.
  * If it has a known string `code` property, that code is used; otherwise the helper
- * falls back to `LocationErrorCode.INTERNAL_ERROR`.
+ * falls back to `LocationErrorCodes.INTERNAL_ERROR`.
  * @returns {CapturedLocationError} Normalized location error with string
  * `code`, human-readable `name` from `getLocationErrorCodeName`, and a string
  * `message` suitable for rendering in scenario UI.
@@ -28,7 +29,7 @@ export const captureLocationError = (error: unknown): CapturedLocationError => {
   const maybeError = error as { code?: unknown; message?: unknown };
   const code = isLocationErrorCode(maybeError.code)
     ? maybeError.code
-    : LocationErrorCode.INTERNAL_ERROR;
+    : LocationErrorCodes.INTERNAL_ERROR;
   const message =
     typeof maybeError.message === "string" ? maybeError.message : String(error);
 
@@ -71,7 +72,7 @@ export const getDisplayErrorMessage = (error: unknown) => {
  * ```ts
  * const locationError = assertLocationErrorCode(
  *   error,
- *   LocationErrorCode.PERMISSION_DENIED
+ *   LocationErrorCodes.PERMISSION_DENIED
  * );
  *
  * setResult(
@@ -83,7 +84,7 @@ export const getDisplayErrorMessage = (error: unknown) => {
  * @param {unknown} error - Unknown value caught from a native geolocation call.
  * The value is normalized before comparing codes.
  * @param {LocationErrorCode} expectedCode - Native `LocationErrorCode` expected
- * by the contract, such as `LocationErrorCode.PERMISSION_DENIED`.
+ * by the contract, such as `LocationErrorCodes.PERMISSION_DENIED`.
  * @returns {CapturedLocationError} Normalized location error when its code
  * matches `expectedCode`; screens can reuse it in pass messages.
  * @throws {Error} Throws when the normalized code differs from `expectedCode`.

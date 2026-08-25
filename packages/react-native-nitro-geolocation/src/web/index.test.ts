@@ -16,7 +16,7 @@ import {
   watchProviderStatus
 } from ".";
 import { clearLastKnownPositionCache } from "../api/positionCache";
-import { LocationErrorCode } from "../utils/errors";
+import { LocationErrorCodes } from "../utils/errors";
 import { clearWebPermissionDetailsEvidence } from "./permissionDetailsEvidence";
 import { clearWebPermissionEvidence } from "./permissionEvidence";
 
@@ -217,7 +217,7 @@ describe("web Modern API", () => {
     });
 
     await expect(getCurrentPosition()).rejects.toEqual({
-      code: LocationErrorCode.PERMISSION_DENIED,
+      code: LocationErrorCodes.PERMISSION_DENIED,
       message: "denied"
     });
   });
@@ -508,7 +508,7 @@ describe("web Modern API", () => {
     });
 
     await expect(getCurrentPosition()).rejects.toMatchObject({
-      code: LocationErrorCode.PERMISSION_DENIED
+      code: LocationErrorCodes.PERMISSION_DENIED
     });
 
     await expect(getPermissionDetails()).resolves.toEqual({
@@ -779,7 +779,7 @@ describe("web Modern API", () => {
 
     await getCurrentPosition();
     await expect(getCurrentPosition()).rejects.toMatchObject({
-      code: LocationErrorCode.PERMISSION_DENIED
+      code: LocationErrorCodes.PERMISSION_DENIED
     });
 
     await expect(getLocationReadiness()).resolves.toMatchObject({

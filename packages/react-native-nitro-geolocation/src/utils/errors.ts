@@ -1,7 +1,10 @@
-import type {
-  LocationError as NativeLocationError,
-  LocationErrorCode as NativeLocationErrorCode
-} from "../NitroGeolocation.nitro";
+export type LocationErrorCode =
+  | "internalError"
+  | "permissionDenied"
+  | "positionUnavailable"
+  | "timeout"
+  | "playServicesUnavailable"
+  | "settingsNotSatisfied";
 
 /**
  * Readable Modern API error codes.
@@ -10,7 +13,7 @@ import type {
  * discriminants so logs and serialized errors remain meaningful without a
  * numeric lookup table.
  */
-export const LocationErrorCode = {
+export const LocationErrorCodes = {
   /** Unexpected module/native failure */
   INTERNAL_ERROR: "internalError",
   /** User denied the request for Geolocation */
@@ -23,40 +26,40 @@ export const LocationErrorCode = {
   PLAY_SERVICE_NOT_AVAILABLE: "playServicesUnavailable",
   /** Device/provider settings do not satisfy the request */
   SETTINGS_NOT_SATISFIED: "settingsNotSatisfied"
-} as const satisfies Record<string, NativeLocationErrorCode>;
-
-export type LocationErrorCode =
-  (typeof LocationErrorCode)[keyof typeof LocationErrorCode];
+} as const satisfies Record<string, LocationErrorCode>;
 
 /**
  * Geolocation error object.
  */
-export type LocationError = NativeLocationError;
+export interface LocationError {
+  code: LocationErrorCode;
+  message: string;
+}
 
 const locationErrorCodes = new Set<LocationErrorCode>(
-  Object.values(LocationErrorCode)
+  Object.values(LocationErrorCodes)
 );
 
 const locationErrorCodeNames: Record<LocationErrorCode, string> = {
-  [LocationErrorCode.INTERNAL_ERROR]: "INTERNAL_ERROR",
-  [LocationErrorCode.PERMISSION_DENIED]: "PERMISSION_DENIED",
-  [LocationErrorCode.POSITION_UNAVAILABLE]: "POSITION_UNAVAILABLE",
-  [LocationErrorCode.TIMEOUT]: "TIMEOUT",
-  [LocationErrorCode.PLAY_SERVICE_NOT_AVAILABLE]: "PLAY_SERVICE_NOT_AVAILABLE",
-  [LocationErrorCode.SETTINGS_NOT_SATISFIED]: "SETTINGS_NOT_SATISFIED"
+  [LocationErrorCodes.INTERNAL_ERROR]: "INTERNAL_ERROR",
+  [LocationErrorCodes.PERMISSION_DENIED]: "PERMISSION_DENIED",
+  [LocationErrorCodes.POSITION_UNAVAILABLE]: "POSITION_UNAVAILABLE",
+  [LocationErrorCodes.TIMEOUT]: "TIMEOUT",
+  [LocationErrorCodes.PLAY_SERVICE_NOT_AVAILABLE]: "PLAY_SERVICE_NOT_AVAILABLE",
+  [LocationErrorCodes.SETTINGS_NOT_SATISFIED]: "SETTINGS_NOT_SATISFIED"
 };
 
 /**
  * Creates a standardized LocationError object.
  *
- * @param code - The error code from LocationErrorCode enum
+ * @param code - A Modern API location error code
  * @param message - A human-readable error message
  * @returns A LocationError object
  *
  * @example
  * ```ts
  * const error = createLocationError(
- *   LocationErrorCode.PERMISSION_DENIED,
+ *   LocationErrorCodes.PERMISSION_DENIED,
  *   'User denied location permission'
  * );
  * ```
@@ -95,11 +98,11 @@ export function getLocationErrorCodeName(code: unknown): string {
 export function mapCLErrorCode(clErrorCode: number): LocationErrorCode {
   switch (clErrorCode) {
     case 0: // kCLErrorLocationUnknown
-      return LocationErrorCode.POSITION_UNAVAILABLE;
+      return LocationErrorCodes.POSITION_UNAVAILABLE;
     case 1: // kCLErrorDenied
-      return LocationErrorCode.PERMISSION_DENIED;
+      return LocationErrorCodes.PERMISSION_DENIED;
     default:
-      return LocationErrorCode.POSITION_UNAVAILABLE;
+      return LocationErrorCodes.POSITION_UNAVAILABLE;
   }
 }
 
@@ -111,19 +114,19 @@ export function mapCLErrorCode(clErrorCode: number): LocationErrorCode {
  */
 export function mapAndroidException(exceptionType: string): LocationErrorCode {
   if (exceptionType === "SecurityException") {
-    return LocationErrorCode.PERMISSION_DENIED;
+    return LocationErrorCodes.PERMISSION_DENIED;
   }
   if (
     exceptionType === "GooglePlayServicesNotAvailableException" ||
     exceptionType === "GooglePlayServicesRepairableException"
   ) {
-    return LocationErrorCode.PLAY_SERVICE_NOT_AVAILABLE;
+    return LocationErrorCodes.PLAY_SERVICE_NOT_AVAILABLE;
   }
   if (
     exceptionType === "ResolvableApiException" ||
     exceptionType === "LocationSettingsException"
   ) {
-    return LocationErrorCode.SETTINGS_NOT_SATISFIED;
+    return LocationErrorCodes.SETTINGS_NOT_SATISFIED;
   }
-  return LocationErrorCode.POSITION_UNAVAILABLE;
+  return LocationErrorCodes.POSITION_UNAVAILABLE;
 }

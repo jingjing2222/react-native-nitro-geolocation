@@ -109,7 +109,7 @@ The final migration is not just "no type errors." Prefer this target state:
   code. Do not hide prompts or global cleanup in utility functions unless that
   is already the app's architecture.
 - Use typed Modern errors where handling is specific. Match on
-  `LocationErrorCode` for permission denied, timeout, settings-not-satisfied,
+  `LocationErrorCodes` for permission denied, timeout, settings-not-satisfied,
   or provider/setup failures instead of parsing error messages.
 
 ## Selection Criteria

@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Platform } from "react-native";
 import {
-  LocationErrorCode,
+  LocationErrorCodes,
   getCurrentPosition,
   getLocationErrorCodeName,
   getProviderStatus,
@@ -87,8 +87,8 @@ export default function ProviderSettingsScreen() {
       if (permission !== "granted") {
         setSettingsStatus("permission required");
         setError({
-          code: LocationErrorCode.PERMISSION_DENIED,
-          name: getLocationErrorCodeName(LocationErrorCode.PERMISSION_DENIED),
+          code: LocationErrorCodes.PERMISSION_DENIED,
+          name: getLocationErrorCodeName(LocationErrorCodes.PERMISSION_DENIED),
           message: "Location permission is required before check-in."
         });
         return;

@@ -1,5 +1,5 @@
 import {
-  LocationErrorCode,
+  LocationErrorCodes,
   getCurrentPosition,
   getLocationReadiness,
   getPermissionDetails
@@ -23,7 +23,7 @@ export async function runDeniedCheck() {
     );
   } catch (error) {
     const code = getErrorCode(error);
-    if (code !== LocationErrorCode.PERMISSION_DENIED) {
+    if (code !== LocationErrorCodes.PERMISSION_DENIED) {
       setScenario(
         "permission-denied",
         "fail",
@@ -90,18 +90,18 @@ export async function runUnavailableCheck() {
   } catch (error) {
     const code = getErrorCode(error);
     const status =
-      code === LocationErrorCode.POSITION_UNAVAILABLE
+      code === LocationErrorCodes.POSITION_UNAVAILABLE
         ? "pass"
-        : code === LocationErrorCode.TIMEOUT
+        : code === LocationErrorCodes.TIMEOUT
           ? "manual"
           : "fail";
     setScenario(
       "position-unavailable",
       status,
       error,
-      code === LocationErrorCode.POSITION_UNAVAILABLE
+      code === LocationErrorCodes.POSITION_UNAVAILABLE
         ? "Browser returned POSITION_UNAVAILABLE."
-        : code === LocationErrorCode.TIMEOUT
+        : code === LocationErrorCodes.TIMEOUT
           ? "Browser returned TIMEOUT while provider/location services were disabled. Platform does not expose provider-disabled state."
           : `Expected POSITION_UNAVAILABLE or platform TIMEOUT, got ${String(code)}.`
     );
@@ -126,9 +126,9 @@ export async function runTimeoutCheck() {
     const code = getErrorCode(error);
     setScenario(
       "timeout",
-      code === LocationErrorCode.TIMEOUT ? "pass" : "manual",
+      code === LocationErrorCodes.TIMEOUT ? "pass" : "manual",
       error,
-      code === LocationErrorCode.TIMEOUT
+      code === LocationErrorCodes.TIMEOUT
         ? "Browser returned TIMEOUT."
         : `Got ${String(code)}. Timeout is browser/provider timing dependent.`
     );

@@ -1,13 +1,24 @@
-import { LocationErrorCode } from "../src";
+import { LocationErrorCodes } from "../src";
 import type {
+  GeolocationConfiguration,
   LocationError,
   LocationErrorCode as LocationErrorCodeType,
   UseWatchPositionResult
 } from "../src";
 import type {
+  GeolocationConfiguration as NativeGeolocationConfiguration,
+  LocationError as NativeLocationError,
+  LocationProvider as NativeLocationProvider
+} from "../src/NitroGeolocation.nitro";
+import type {
+  CompatGeolocationConfigurationInternal,
+  LocationProviderInternal
+} from "../src/NitroGeolocationCompat.nitro";
+import type {
   AndroidBackgroundProvider,
   BackgroundLocationDiagnosis
 } from "../src/background";
+import type { CompatGeolocationConfiguration } from "../src/publicTypes";
 
 type Equal<Left, Right> = (<Value>() => Value extends Left ? 1 : 2) extends <
   Value
@@ -15,9 +26,13 @@ type Equal<Left, Right> = (<Value>() => Value extends Left ? 1 : 2) extends <
   ? true
   : false;
 type Expect<Value extends true> = Value;
+type Simplify<Value> = { [Key in keyof Value]: Value[Key] };
 
 type _LocationErrorUsesPublicCode = Expect<
   Equal<LocationError["code"], LocationErrorCodeType>
+>;
+type _LocationErrorMatchesNativeContract = Expect<
+  Equal<LocationError, NativeLocationError>
 >;
 type _LocationErrorCodeIsExact = Expect<
   Equal<
@@ -39,8 +54,34 @@ type _BackgroundDiagnosisIsNamed = Expect<
 type _BackgroundProviderIsPublic = Expect<
   Equal<AndroidBackgroundProvider, "auto" | "playServices" | "android">
 >;
+type _RootConfigurationMatchesNativeContract = Expect<
+  Equal<
+    Simplify<
+      Omit<GeolocationConfiguration, "locationProvider"> & {
+        locationProvider?: NativeLocationProvider;
+      }
+    >,
+    NativeGeolocationConfiguration
+  >
+>;
+type _CompatConfigurationMatchesNativeContract = Expect<
+  Equal<
+    Simplify<
+      Omit<CompatGeolocationConfiguration, "locationProvider"> & {
+        locationProvider?: LocationProviderInternal;
+      }
+    >,
+    CompatGeolocationConfigurationInternal
+  >
+>;
 
-const timeoutCode: LocationErrorCodeType = LocationErrorCode.TIMEOUT;
+const timeoutCode: LocationErrorCodeType = LocationErrorCodes.TIMEOUT;
+type _LocationErrorCodesMatchType = Expect<
+  Equal<
+    (typeof LocationErrorCodes)[keyof typeof LocationErrorCodes],
+    LocationErrorCodeType
+  >
+>;
 void timeoutCode;
 
 declare const nativeRoot: typeof import("../src/index");
