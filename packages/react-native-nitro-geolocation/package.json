@@ -6,6 +6,9 @@
   "source": "src/index",
   "browser": "src/index.web.tsx",
   "react-native": "src/index.tsx",
+  "bin": {
+    "nitro-geolocation": "scripts/doctor.mjs"
+  },
   "exports": {
     ".": {
       "types": "./src/index.tsx",
@@ -63,6 +66,7 @@
     "src",
     "nitrogen",
     "scripts/*.rb",
+    "scripts/*.mjs",
     "android/build.gradle",
     "android/gradle.properties",
     "android/CMakeLists.txt",

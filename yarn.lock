@@ -12785,6 +12785,8 @@ __metadata:
     react: ">=18.0.0"
     react-native: ">=0.75.0"
     react-native-nitro-modules: "*"
+  bin:
+    nitro-geolocation: scripts/doctor.mjs
   languageName: unknown
   linkType: soft
 

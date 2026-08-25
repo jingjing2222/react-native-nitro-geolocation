@@ -42,6 +42,16 @@ This package requires native Nitro bindings. Expo Go is not supported. For Expo
 apps, use prebuild, a development build, or another custom native build flow;
 see the [Expo development build guide](/guide/expo-development-build).
 
+After configuring the native projects, run the read-only install doctor:
+
+```bash
+yarn nitro-geolocation doctor
+```
+
+It reports dependency, architecture, and permission setup errors without
+editing the app. See the [Install Doctor guide](/guide/install-doctor) for CI,
+monorepo, and JSON output options.
+
 
 ## 2. iOS Setup
 
