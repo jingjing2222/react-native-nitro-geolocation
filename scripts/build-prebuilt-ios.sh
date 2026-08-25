@@ -52,6 +52,10 @@ xcodebuild -create-xcframework \
   -framework "$BUILD_DIR/ios-simulator.xcarchive/Products/Library/Frameworks/NitroGeolocation.framework" \
   -output "$BUILD_DIR/NitroGeolocation.xcframework"
 
+while IFS= read -r framework; do
+  cp "$PACKAGE_DIR/ios/PrivacyInfo.xcprivacy" "$framework/PrivacyInfo.xcprivacy"
+done < <(find "$BUILD_DIR/NitroGeolocation.xcframework" -type d -name '*.framework')
+
 rm -f "$OUT_DIR/$ASSET_NAME" "$OUT_DIR/$ASSET_NAME.sha256"
 (
   cd "$BUILD_DIR"

@@ -25,6 +25,7 @@ apply plugin: "kotlin-android"
 apply from: '../nitrogen/generated/android/nitrogeolocation+autolinking.gradle'
 
 apply plugin: "com.facebook.react"
+apply from: "prebuilt_checksum.gradle"
 
 def getExtOrIntegerDefault(name) {
   return rootProject.ext.has(name) ? rootProject.ext.get(name) : (project.properties["NitroGeolocation_" + name]).toInteger()
@@ -106,8 +107,13 @@ def prebuiltUrlBase = getNitroGeolocationStringProperty(
   "https://github.com/jingjing2222/react-native-nitro-geolocation/releases/download/${encodedPrebuiltTag}"
 )
 def prebuiltUrl = "${prebuiltUrlBase}/${prebuiltAssetName}"
-def prebuiltCacheDir = new File(gradle.gradleUserHomeDir, "caches/react-native-nitro-geolocation/${packageVersion}")
+def prebuiltChecksumUrl = "${prebuiltUrl}.sha256"
+def prebuiltCacheDir = new File(getNitroGeolocationStringProperty(
+  "prebuiltCacheDir",
+  new File(gradle.gradleUserHomeDir, "caches/react-native-nitro-geolocation/${packageVersion}").path
+))
 def prebuiltAarFile = new File(prebuiltCacheDir, prebuiltAssetName)
+def prebuiltChecksumFile = new File(prebuiltCacheDir, "${prebuiltAssetName}.sha256")
 def prebuiltJniDir = file("${buildDir}/generated/prebuilt-jni")
 
 def bundledReactNativeVersion = packageJson.devDependencies["react-native"]
@@ -117,27 +123,6 @@ def consumerNitroModulesVersion = readNodeModuleVersion("react-native-nitro-modu
 def isAndroidPrebuiltAbiCompatible = {
   return parseMajorMinor(consumerReactNativeVersion) == parseMajorMinor(bundledReactNativeVersion) &&
     parseMajorMinor(consumerNitroModulesVersion) == parseMajorMinor(bundledNitroModulesVersion)
-}
-
-def downloadNitroGeolocationPrebuiltIfAvailable = {
-  try {
-    if (!prebuiltAarFile.exists()) {
-      prebuiltCacheDir.mkdirs()
-      logger.lifecycle("[NitroGeolocation] Downloading Android prebuilt AAR: ${prebuiltUrl}")
-      new URL(prebuiltUrl).withInputStream { input ->
-        prebuiltAarFile.withOutputStream { output -> output << input }
-      }
-    }
-
-    logger.lifecycle("[NitroGeolocation] Using Android prebuilt native libraries from ${prebuiltAarFile}")
-    return true
-  } catch (Throwable error) {
-    if (prebuiltAarFile.exists()) {
-      prebuiltAarFile.delete()
-    }
-    logger.warn("[NitroGeolocation] Android prebuilt unavailable (${error.message}). Falling back to source build.")
-    return false
-  }
 }
 
 def extractNitroGeolocationPrebuilt = {
@@ -172,11 +157,21 @@ if (shouldAttemptPrebuilt && !isAndroidPrebuiltAbiCompatible()) {
       "assets target React Native ${bundledReactNativeVersion} and NitroModules ${bundledNitroModulesVersion}."
   )
 }
-def usePrebuilt = shouldAttemptPrebuilt && isAndroidPrebuiltAbiCompatible() && downloadNitroGeolocationPrebuiltIfAvailable()
+def prebuiltResolution = shouldAttemptPrebuilt && isAndroidPrebuiltAbiCompatible() ?
+  resolveNitroGeolocationPrebuilt(
+    assetName: prebuiltAssetName,
+    assetUrl: prebuiltUrl,
+    checksumUrl: prebuiltChecksumUrl,
+    cacheDir: prebuiltCacheDir
+  ) : null
+def usePrebuilt = prebuiltResolution != null
 
 def preparePrebuiltTaskProvider = null
 if (usePrebuilt) {
   preparePrebuiltTaskProvider = tasks.register("prepareNitroGeolocationPrebuilt") {
+    inputs.file(prebuiltAarFile)
+    inputs.file(prebuiltChecksumFile)
+    inputs.property("verifiedChecksum", prebuiltResolution.checksum)
     outputs.dir(prebuiltJniDir)
 
     doLast {

@@ -18,6 +18,9 @@ Pod::Spec.new do |s|
 
   s.dependency 'React-jsi'
   s.dependency 'React-callinvoker'
+  s.resource_bundles = {
+    "NitroGeolocationPrivacy" => ["ios/PrivacyInfo.xcprivacy"]
+  }
 
   if prebuilt_available
     s.vendored_frameworks = "prebuilds/ios/NitroGeolocation.xcframework"

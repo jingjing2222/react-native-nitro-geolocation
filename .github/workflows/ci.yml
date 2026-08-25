@@ -63,6 +63,9 @@ jobs:
         run: |
           scripts/test-ios-location-lifecycle.sh
 
+      - name: Verify iOS prebuilt checksums
+        run: ruby tests/ruby/prebuilt_ios_checksum_test.rb
+
   build:
     name: Build
     runs-on: ubuntu-latest
@@ -195,6 +198,9 @@ jobs:
             --no-daemon \
             --console=plain \
             :react-native-nitro-geolocation:testDebugUnitTest
+
+      - name: Verify Android prebuilt checksums
+        run: scripts/test-android-prebuilt-checksum.sh
 
   guardrails:
     name: Dead Code / Package Guardrails
