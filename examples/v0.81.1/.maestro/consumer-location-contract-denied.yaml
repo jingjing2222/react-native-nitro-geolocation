@@ -33,6 +33,9 @@ env:
     commands:
       - tapOn:
           text: "Wait|대기"
+- extendedWaitUntil:
+    visible: "Geolocation API"
+    timeout: 30000
 - stopApp
 
 - openLink:
