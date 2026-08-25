@@ -19,6 +19,7 @@
     "format:check": "biome ci --formatter-enabled=true --linter-enabled=false .",
     "lint": "biome ci --formatter-enabled=false --linter-enabled=true .",
     "lint:fix": "biome check --write .",
+    "release:publish": "node scripts/publish-release.mjs",
     "test:unit": "yarn workspace react-native-nitro-geolocation test",
     "test:ios-location-lifecycle": "bash scripts/test-ios-location-lifecycle.sh",
     "test:e2e:web": "yarn workspace react-native-nitro-geolocation-web-e2e build",
