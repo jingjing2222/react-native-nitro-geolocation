@@ -59,6 +59,10 @@ class PrebuiltIOSChecksumTest < Minitest::Test
 
     refute NitroGeolocationPrebuiltIOS.ensure_framework(package_directory, package)
     refute_path_exists cache_path
+    refute_path_exists cached_checksum_path
+
+    write_release_checksum
+    assert NitroGeolocationPrebuiltIOS.ensure_framework(package_directory, package)
   end
 
   private
@@ -72,6 +76,7 @@ class PrebuiltIOSChecksumTest < Minitest::Test
   def checksum_path = "#{asset_path}.sha256"
   def cache_path = File.join(ENV.fetch("HOME"), "Library", "Caches",
     "react-native-nitro-geolocation", version, asset_name)
+  def cached_checksum_path = "#{cache_path}.sha256"
   def privacy_manifest_path = File.join(package_directory, "prebuilds", "ios",
     "NitroGeolocation.xcframework", "ios-arm64", "NitroGeolocation.framework",
     "PrivacyInfo.xcprivacy")
@@ -86,6 +91,10 @@ class PrebuiltIOSChecksumTest < Minitest::Test
     system("/usr/bin/ditto", "-c", "-k", "--keepParent",
       File.join(@temporary_directory, "archive", "NitroGeolocation.xcframework"),
       asset_path, exception: true)
+    write_release_checksum
+  end
+
+  def write_release_checksum
     digest = Digest::SHA256.file(asset_path).hexdigest
     File.write(checksum_path, "#{digest}  #{asset_name}\n")
   end

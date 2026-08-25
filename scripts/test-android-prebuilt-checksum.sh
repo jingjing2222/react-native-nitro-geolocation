@@ -79,6 +79,15 @@ printf '%064d  %s\n' 0 "$ASSET_NAME" > "$RELEASE_DIR/$ASSET_NAME.sha256"
 run_configuration_only "$MISMATCH_CACHE" 2>&1 | tee "$TEST_ROOT/mismatch.log"
 grep -q "SHA-256 mismatch" "$TEST_ROOT/mismatch.log"
 test ! -e "$MISMATCH_CACHE/$ASSET_NAME"
+test ! -e "$MISMATCH_CACHE/$ASSET_NAME.sha256"
+
+(
+  cd "$RELEASE_DIR"
+  shasum -a 256 "$ASSET_NAME" > "$ASSET_NAME.sha256"
+)
+CACHE_DIR="$MISMATCH_CACHE"
+run_prebuilt_task --rerun-tasks
+test "$(<"$OUTPUT_SO")" = "native-v2"
 
 MALFORMED_CACHE="$TEST_ROOT/malformed-cache"
 printf 'not-a-checksum\n' > "$RELEASE_DIR/$ASSET_NAME.sha256"

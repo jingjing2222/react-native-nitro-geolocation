@@ -115,6 +115,7 @@ module NitroGeolocationPrebuiltIOS
     end
     unless Digest::SHA256.file(zip_path).hexdigest == checksum
       FileUtils.rm_f(zip_path)
+      FileUtils.rm_f(cached_checksum_path)
       raise "SHA-256 mismatch for #{asset_name}"
     end
 

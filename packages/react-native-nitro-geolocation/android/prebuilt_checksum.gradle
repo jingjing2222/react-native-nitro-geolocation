@@ -70,6 +70,7 @@ ext.resolveNitroGeolocationPrebuilt = { Map options ->
     }
     if (sha256File(assetFile) != expectedChecksum) {
       assetFile.delete()
+      checksumFile.delete()
       throw new GradleException("SHA-256 mismatch for ${options.assetName}")
     }
 
