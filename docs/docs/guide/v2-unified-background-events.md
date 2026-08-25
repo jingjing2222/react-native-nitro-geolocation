@@ -27,11 +27,12 @@ const subscription = onBackgroundEvent((event) => {
 subscription.remove();
 ```
 
-Each subscription receives its own initial `providerChange` snapshot. Later
-provider changes are delivered once per active subscriber. Removing a
-subscription removes its provider watcher as well, so a direct
-`getProviderStatus()` call can return a newer value without changing removed
-event counters.
+On Android and iOS, each subscription receives its own initial
+`providerChange` snapshot. Later provider changes are delivered once per active
+subscriber. Removing a subscription removes its provider watcher as well, so a
+direct `getProviderStatus()` call can return a newer value without changing
+removed event counters. Web background listeners remain no-op subscriptions and
+do not emit an initial provider snapshot.
 
 Provider snapshots are live-only and are not stored. iOS `lifecycle` events are
 stored when the background configuration has persistence enabled, matching
