@@ -3,8 +3,23 @@ appId: nitrogeolocation.example
 # Physical-device-only proof for the non-mocked compat metadata path.
 # Intentionally excluded from all-tests.yaml: do not run on a simulator.
 
+- runFlow:
+    when:
+      platform: Android
+    commands:
+      - assertTrue: ${COMPAT_METADATA_ANDROID_PHYSICAL_DEVICE == '1'}
+- runFlow:
+    when:
+      platform: iOS
+    commands:
+      - assertTrue: ${COMPAT_METADATA_IOS_PHYSICAL_DEVICE == '1'}
+
 - launchApp:
     clearState: true
+
+- extendedWaitUntil:
+    visible: "Geolocation API"
+    timeout: 10000
 
 - stopApp
 
