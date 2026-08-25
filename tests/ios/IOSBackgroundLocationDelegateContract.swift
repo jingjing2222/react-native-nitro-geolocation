@@ -12,7 +12,13 @@ enum GeofenceTransition {
 }
 
 final class NitroBackgroundLocation {
-    private(set) var lifecycleStates: [LocationLifecycleState] = []
+    struct UnifiedLifecycleEvent: Equatable {
+        let state: LocationLifecycleState
+        let runGeneration: UInt64
+        let locationSessionGeneration: UInt64
+    }
+
+    private(set) var lifecycleEvents: [UnifiedLifecycleEvent] = []
 
     func handleLocations(
         _ locations: [CLLocation],
@@ -43,8 +49,18 @@ final class NitroBackgroundLocation {
         status: CLAuthorizationStatus
     ) {}
 
-    func handleLocationLifecycleChange(_ state: LocationLifecycleState) {
-        lifecycleStates.append(state)
+    func handleLocationLifecycleChange(
+        _ state: LocationLifecycleState,
+        runGeneration: UInt64,
+        locationSessionGeneration: UInt64
+    ) {
+        lifecycleEvents.append(
+            UnifiedLifecycleEvent(
+                state: state,
+                runGeneration: runGeneration,
+                locationSessionGeneration: locationSessionGeneration
+            )
+        )
     }
 }
 
@@ -63,8 +79,11 @@ enum IOSBackgroundLocationDelegateContract {
         delegate.locationManagerDidResumeLocationUpdates(manager)
 
         precondition(
-            owner.lifecycleStates == [.paused, .resumed],
-            "Expected native pause and resume callbacks to reach the owner in order"
+            owner.lifecycleEvents == [
+                .init(state: .paused, runGeneration: 1, locationSessionGeneration: 1),
+                .init(state: .resumed, runGeneration: 1, locationSessionGeneration: 1)
+            ],
+            "Expected pause and resume callbacks to retain their active-session generations"
         )
         print("iOS location lifecycle delegate contract passed")
     }

@@ -1,0 +1,16 @@
+appId: nitrogeolocation.example
+---
+# The runner disables the real Android provider while the same subscription is
+# active. Exactly one new provider event must arrive through onBackgroundEvent.
+
+- extendedWaitUntil:
+    visible: "Services: disabled"
+    timeout: 10000
+- extendedWaitUntil:
+    visible: "Provider events: 2"
+    timeout: 10000
+- assertVisible: "Events: 2"
+- assertVisible: "Lifecycle events: 0"
+- tapOn:
+    id: "e2e-action-unified-background-events-stop-button"
+- assertVisible: "Listener: stopped"

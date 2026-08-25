@@ -85,14 +85,14 @@ namespace margelo::nitro::nitrogeolocation { struct BackgroundLocation; }
 namespace margelo::nitro::nitrogeolocation { struct GeofenceEvent; }
 // Forward declaration of `GeofenceRegion` to properly resolve imports.
 namespace margelo::nitro::nitrogeolocation { struct GeofenceRegion; }
-// Forward declaration of `BackgroundHttpSyncResult` to properly resolve imports.
-namespace margelo::nitro::nitrogeolocation { struct BackgroundHttpSyncResult; }
-// Forward declaration of `BackgroundEventType` to properly resolve imports.
-namespace margelo::nitro::nitrogeolocation { enum class BackgroundEventType; }
 // Forward declaration of `LocationLifecycleEvent` to properly resolve imports.
 namespace margelo::nitro::nitrogeolocation { struct LocationLifecycleEvent; }
 // Forward declaration of `LocationLifecycleState` to properly resolve imports.
 namespace margelo::nitro::nitrogeolocation { enum class LocationLifecycleState; }
+// Forward declaration of `BackgroundHttpSyncResult` to properly resolve imports.
+namespace margelo::nitro::nitrogeolocation { struct BackgroundHttpSyncResult; }
+// Forward declaration of `BackgroundEventType` to properly resolve imports.
+namespace margelo::nitro::nitrogeolocation { enum class BackgroundEventType; }
 // Forward declaration of `GetStoredBackgroundLocationsOptions` to properly resolve imports.
 namespace margelo::nitro::nitrogeolocation { struct GetStoredBackgroundLocationsOptions; }
 // Forward declaration of `GetStoredBackgroundEventsOptions` to properly resolve imports.
@@ -188,6 +188,10 @@ namespace margelo::nitro::nitrogeolocation { struct GetStoredBackgroundEventsOpt
 #include "JGeofenceEvent.hpp"
 #include "GeofenceRegion.hpp"
 #include "JGeofenceRegion.hpp"
+#include "LocationLifecycleEvent.hpp"
+#include "JLocationLifecycleEvent.hpp"
+#include "LocationLifecycleState.hpp"
+#include "JLocationLifecycleState.hpp"
 #include "BackgroundHttpSyncResult.hpp"
 #include "JBackgroundHttpSyncResult.hpp"
 #include "BackgroundEventType.hpp"
@@ -197,11 +201,6 @@ namespace margelo::nitro::nitrogeolocation { struct GetStoredBackgroundEventsOpt
 #include <NitroModules/JNICallable.hpp>
 #include "JFunc_void_BackgroundLocation.hpp"
 #include "JFunc_void_LocationError.hpp"
-#include "LocationLifecycleEvent.hpp"
-#include "JFunc_void_LocationLifecycleEvent.hpp"
-#include "JLocationLifecycleEvent.hpp"
-#include "LocationLifecycleState.hpp"
-#include "JLocationLifecycleState.hpp"
 #include "GetStoredBackgroundLocationsOptions.hpp"
 #include "JGetStoredBackgroundLocationsOptions.hpp"
 #include "GetStoredBackgroundEventsOptions.hpp"
@@ -237,7 +236,7 @@ namespace margelo::nitro::nitrogeolocation {
   }
 
   // Properties
-
+  
 
   // Methods
   std::shared_ptr<Promise<BackgroundPermissionResult>> JHybridNitroBackgroundLocationSpec::checkBackgroundPermission() {
@@ -404,15 +403,6 @@ namespace margelo::nitro::nitrogeolocation {
   }
   void JHybridNitroBackgroundLocationSpec::removeBackgroundErrorListener(const std::string& token) {
     static const auto method = _javaPart->javaClassStatic()->getMethod<void(jni::alias_ref<jni::JString> /* token */)>("removeBackgroundErrorListener");
-    method(_javaPart, jni::make_jstring(token));
-  }
-  std::string JHybridNitroBackgroundLocationSpec::addLocationLifecycleListener(const std::function<void(const LocationLifecycleEvent& /* event */)>& listener) {
-    static const auto method = _javaPart->javaClassStatic()->getMethod<jni::local_ref<jni::JString>(jni::alias_ref<JFunc_void_LocationLifecycleEvent::javaobject> /* listener */)>("addLocationLifecycleListener_cxx");
-    auto __result = method(_javaPart, JFunc_void_LocationLifecycleEvent_cxx::fromCpp(listener));
-    return __result->toStdString();
-  }
-  void JHybridNitroBackgroundLocationSpec::removeLocationLifecycleListener(const std::string& token) {
-    static const auto method = _javaPart->javaClassStatic()->getMethod<void(jni::alias_ref<jni::JString> /* token */)>("removeLocationLifecycleListener");
     method(_javaPart, jni::make_jstring(token));
   }
   std::shared_ptr<Promise<std::vector<StoredBackgroundLocation>>> JHybridNitroBackgroundLocationSpec::getStoredBackgroundLocations(const std::optional<GetStoredBackgroundLocationsOptions>& options) {

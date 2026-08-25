@@ -21,7 +21,8 @@ enum class BackgroundEventType(@DoNotStrip @Keep val value: Int) {
   LOCATION(2),
   ACTIVITY(3),
   PROVIDERCHANGE(4),
-  HTTPSYNC(5);
+  LIFECYCLE(5),
+  HTTPSYNC(6);
 
   companion object
 }

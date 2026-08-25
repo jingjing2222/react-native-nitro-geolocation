@@ -29,8 +29,27 @@ internal fun BackgroundEventEnvelope.toJson(): JSONObject {
             location?.let { put("location", it.toJson()) }
             geofence?.let { put("geofence", it.toJson()) }
             activity?.let { put("activity", it.toJson()) }
+            providerStatus?.let { put("providerStatus", it.toJson()) }
+            lifecycle?.let { put("lifecycle", it.toJson()) }
             result?.let { put("result", it.toJson()) }
         }
+}
+
+internal fun LocationProviderStatus.toJson(): JSONObject {
+    return JSONObject()
+        .put("locationServicesEnabled", locationServicesEnabled)
+        .put("backgroundModeEnabled", backgroundModeEnabled)
+        .put("gpsAvailable", gpsAvailable)
+        .put("networkAvailable", networkAvailable)
+        .put("passiveAvailable", passiveAvailable)
+        .put("googlePlayServicesAvailable", googlePlayServicesAvailable)
+        .put("googleLocationAccuracyEnabled", googleLocationAccuracyEnabled)
+}
+
+internal fun LocationLifecycleEvent.toJson(): JSONObject {
+    return JSONObject()
+        .put("state", state.jsValue())
+        .put("timestamp", timestamp)
 }
 
 internal fun BackgroundHttpSyncResult.toJson(): JSONObject {
@@ -183,8 +202,16 @@ internal fun BackgroundEventType.jsValue(): String {
         BackgroundEventType.GEOFENCE -> "geofence"
         BackgroundEventType.ACTIVITY -> "activity"
         BackgroundEventType.PROVIDERCHANGE -> "providerChange"
+        BackgroundEventType.LIFECYCLE -> "lifecycle"
         BackgroundEventType.HTTPSYNC -> "httpSync"
         BackgroundEventType.ERROR -> "error"
+    }
+}
+
+internal fun LocationLifecycleState.jsValue(): String {
+    return when (this) {
+        LocationLifecycleState.PAUSED -> "paused"
+        LocationLifecycleState.RESUMED -> "resumed"
     }
 }
 

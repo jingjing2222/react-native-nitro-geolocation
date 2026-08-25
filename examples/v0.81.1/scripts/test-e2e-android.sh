@@ -231,6 +231,18 @@ run_maestro_flows \
   "android provider watcher stopped" \
   provider-status-watcher-android-stopped.yaml || status=1
 
+run_maestro_flows \
+  "android unified background events started" \
+  unified-background-events-start.yaml || status=1
+set_location_enabled false
+run_maestro_flows \
+  "android unified background events changed" \
+  unified-background-events-disabled.yaml || status=1
+set_location_enabled true
+run_maestro_flows \
+  "android unified background events removed" \
+  unified-background-events-removed.yaml || status=1
+
 set_location_enabled false
 run_maestro_flows \
   "android location-disabled" \

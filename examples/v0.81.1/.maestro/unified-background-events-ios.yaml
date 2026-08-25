@@ -1,0 +1,40 @@
+appId: nitrogeolocation.example
+---
+# iOS exposes the same unified subscription and delivers its initial provider
+# snapshot. Real Core Location pause/resume routing is covered by the native
+# delegate contract because the simulator cannot deterministically induce it.
+
+- launchApp:
+    clearState: true
+    permissions:
+      all: allow
+- stopApp
+- openLink:
+    link: nitrogeolocation://app/unified-background-events
+- runFlow:
+    when:
+      platform: iOS
+      visible: "Cancel|취소"
+    commands:
+      - tapOn:
+          text: "Open|열기"
+- runFlow:
+    when:
+      platform: iOS
+    commands:
+      - openLink:
+          link: nitrogeolocation://app/unified-background-events
+- extendedWaitUntil:
+    visible: "Unified Background Events"
+    timeout: 10000
+- tapOn:
+    id: "e2e-action-unified-background-events-start-button"
+- extendedWaitUntil:
+    visible: "Provider events: 1"
+    timeout: 10000
+- assertVisible: "Events: 1"
+- assertVisible: "Lifecycle events: 0"
+- assertVisible: "Services: enabled"
+- tapOn:
+    id: "e2e-action-unified-background-events-stop-button"
+- assertVisible: "Listener: stopped"

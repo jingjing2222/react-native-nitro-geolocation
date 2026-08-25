@@ -1,0 +1,21 @@
+appId: nitrogeolocation.example
+---
+# Start one public background event subscription while location is enabled.
+# The provider snapshot must arrive through that unified stream.
+
+- openLink:
+    link: nitrogeolocation://app/unified-background-events
+- extendedWaitUntil:
+    visible: "Unified Background Events"
+    timeout: 10000
+- assertVisible: "Listener: stopped"
+- assertVisible: "Events: 0"
+- tapOn:
+    id: "e2e-action-unified-background-events-start-button"
+- extendedWaitUntil:
+    visible: "Provider events: 1"
+    timeout: 10000
+- assertVisible: "Events: 1"
+- assertVisible: "Lifecycle events: 0"
+- assertVisible: "Services: enabled"
+- assertVisible: "Listener: listening"

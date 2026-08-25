@@ -42,6 +42,7 @@ extension NitroBackgroundLocation {
                 geofence: nil,
                 activity: nil,
                 providerStatus: nil,
+                lifecycle: nil,
                 result: result,
                 error: nil,
                 id: UUID().uuidString,

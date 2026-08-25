@@ -10,7 +10,7 @@ import NitroModules
 /// See ``HybridNitroBackgroundLocationSpec``
 public protocol HybridNitroBackgroundLocationSpec_protocol: HybridObject {
   // Properties
-
+  
 
   // Methods
   func checkBackgroundPermission() throws -> Promise<BackgroundPermissionResult>
@@ -28,8 +28,6 @@ public protocol HybridNitroBackgroundLocationSpec_protocol: HybridObject {
   func removeBackgroundLocationListener(token: String) throws -> Void
   func addBackgroundErrorListener(listener: @escaping (_ error: LocationError) -> Void) throws -> String
   func removeBackgroundErrorListener(token: String) throws -> Void
-  func addLocationLifecycleListener(listener: @escaping (_ event: LocationLifecycleEvent) -> Void) throws -> String
-  func removeLocationLifecycleListener(token: String) throws -> Void
   func getStoredBackgroundLocations(options: GetStoredBackgroundLocationsOptions?) throws -> Promise<[StoredBackgroundLocation]>
   func clearStoredBackgroundLocations(ids: [String]?) throws -> Promise<Void>
   func markStoredBackgroundLocationsDelivered(ids: [String]) throws -> Promise<Void>

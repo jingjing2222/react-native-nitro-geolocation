@@ -37,6 +37,12 @@ function narrowBackgroundEvent(
         type: "providerChange",
         providerStatus: event.providerStatus!
       };
+    case "lifecycle":
+      return {
+        ...event,
+        type: "lifecycle",
+        lifecycle: event.lifecycle!
+      };
     case "httpSync":
       return { ...event, type: "httpSync", result: event.result! };
     case "error":
@@ -229,9 +235,10 @@ export function onBackgroundError(
 }
 
 /**
- * Observes Core Location pause and resume callbacks on iOS. After an automatic
- * pause, the app must restart location updates before iOS can report resume.
- * Android keeps the subscription valid but does not emit these iOS-only events.
+ * Convenience filter for lifecycle events from the unified background stream.
+ * After an automatic pause, the app must restart location updates before iOS
+ * can report resume. Android keeps the subscription valid but emits no
+ * Core Location lifecycle events.
  */
 export function onLocationLifecycleChange(
   listener: (event: LocationLifecycleEvent) => void

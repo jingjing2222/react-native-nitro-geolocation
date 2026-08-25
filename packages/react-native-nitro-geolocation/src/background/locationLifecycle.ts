@@ -1,20 +1,24 @@
-import type { BackgroundSubscription, LocationLifecycleEvent } from "./types";
+import type {
+  BackgroundEventEnvelope,
+  BackgroundSubscription,
+  LocationLifecycleEvent
+} from "./types";
 
-export interface LocationLifecycleNative {
-  addLocationLifecycleListener(
-    listener: (event: LocationLifecycleEvent) => void
+export interface UnifiedBackgroundEventNative {
+  addBackgroundEventListener(
+    listener: (event: BackgroundEventEnvelope) => void
   ): string;
-  removeLocationLifecycleListener(token: string): void;
+  removeBackgroundEventListener(token: string): void;
 }
 
 export function createLocationLifecycleSubscription(
-  native: LocationLifecycleNative,
+  native: UnifiedBackgroundEventNative,
   listener: (event: LocationLifecycleEvent) => void
 ): BackgroundSubscription {
   let removed = false;
-  const token = native.addLocationLifecycleListener((event) => {
-    if (!removed) {
-      listener(event);
+  const token = native.addBackgroundEventListener((event) => {
+    if (!removed && event.type === "lifecycle" && event.lifecycle) {
+      listener(event.lifecycle);
     }
   });
 
@@ -24,7 +28,7 @@ export function createLocationLifecycleSubscription(
         return;
       }
       removed = true;
-      native.removeLocationLifecycleListener(token);
+      native.removeBackgroundEventListener(token);
     }
   };
 }

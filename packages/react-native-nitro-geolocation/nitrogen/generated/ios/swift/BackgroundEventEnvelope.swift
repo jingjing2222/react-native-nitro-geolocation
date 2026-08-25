@@ -18,7 +18,7 @@ public extension BackgroundEventEnvelope {
   /**
    * Create a new instance of `BackgroundEventEnvelope`.
    */
-  init(location: BackgroundLocation?, geofence: GeofenceEvent?, activity: DetectedActivity?, providerStatus: LocationProviderStatus?, result: BackgroundHttpSyncResult?, error: LocationError?, id: String, type: BackgroundEventType, timestamp: Double, deliveredToJS: Bool) {
+  init(location: BackgroundLocation?, geofence: GeofenceEvent?, activity: DetectedActivity?, providerStatus: LocationProviderStatus?, lifecycle: LocationLifecycleEvent?, result: BackgroundHttpSyncResult?, error: LocationError?, id: String, type: BackgroundEventType, timestamp: Double, deliveredToJS: Bool) {
     self.init({ () -> bridge.std__optional_BackgroundLocation_ in
       if let __unwrappedValue = location {
         return bridge.create_std__optional_BackgroundLocation_(__unwrappedValue)
@@ -40,6 +40,12 @@ public extension BackgroundEventEnvelope {
     }(), { () -> bridge.std__optional_LocationProviderStatus_ in
       if let __unwrappedValue = providerStatus {
         return bridge.create_std__optional_LocationProviderStatus_(__unwrappedValue)
+      } else {
+        return .init()
+      }
+    }(), { () -> bridge.std__optional_LocationLifecycleEvent_ in
+      if let __unwrappedValue = lifecycle {
+        return bridge.create_std__optional_LocationLifecycleEvent_(__unwrappedValue)
       } else {
         return .init()
       }
@@ -76,6 +82,11 @@ public extension BackgroundEventEnvelope {
   @inline(__always)
   var providerStatus: LocationProviderStatus? {
     return self.__providerStatus.value
+  }
+  
+  @inline(__always)
+  var lifecycle: LocationLifecycleEvent? {
+    return self.__lifecycle.value
   }
   
   @inline(__always)

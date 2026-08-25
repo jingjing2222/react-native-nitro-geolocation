@@ -20,4 +20,7 @@ await markStoredBackgroundLocationsDelivered(
 );
 ```
 
-Use `getStoredBackgroundEvents()` for mixed event recovery.
+Use `getStoredBackgroundEvents()` for mixed event recovery. In 2.x this includes
+iOS `lifecycle` events when persistence is enabled. `providerChange` events are
+live snapshots for active JavaScript subscriptions and are not written to the
+background store.

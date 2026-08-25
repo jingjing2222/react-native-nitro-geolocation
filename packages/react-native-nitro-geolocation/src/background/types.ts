@@ -185,6 +185,7 @@ export type BackgroundEventType =
   | "geofence"
   | "activity"
   | "providerChange"
+  | "lifecycle"
   | "httpSync"
   | "error";
 
@@ -215,6 +216,11 @@ export interface BackgroundProviderChangeEvent extends BackgroundEventBase {
   providerStatus: LocationProviderStatus;
 }
 
+export interface BackgroundLifecycleEvent extends BackgroundEventBase {
+  type: "lifecycle";
+  lifecycle: LocationLifecycleEvent;
+}
+
 export interface BackgroundHttpSyncEvent extends BackgroundEventBase {
   type: "httpSync";
   result: BackgroundHttpSyncResult;
@@ -230,6 +236,7 @@ export interface BackgroundEventEnvelope extends BackgroundEventBase {
   geofence?: GeofenceEvent;
   activity?: DetectedActivity;
   providerStatus?: LocationProviderStatus;
+  lifecycle?: LocationLifecycleEvent;
   result?: BackgroundHttpSyncResult;
   error?: LocationError;
 }
@@ -239,6 +246,7 @@ export type BackgroundEvent =
   | BackgroundGeofenceEventEnvelope
   | BackgroundActivityEventEnvelope
   | BackgroundProviderChangeEvent
+  | BackgroundLifecycleEvent
   | BackgroundHttpSyncEvent
   | BackgroundErrorEvent;
 

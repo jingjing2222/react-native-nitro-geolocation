@@ -44,6 +44,10 @@
 #include "JGeofenceTransition.hpp"
 #include "LocationProviderStatus.hpp"
 #include "JLocationProviderStatus.hpp"
+#include "LocationLifecycleEvent.hpp"
+#include "JLocationLifecycleEvent.hpp"
+#include "LocationLifecycleState.hpp"
+#include "JLocationLifecycleState.hpp"
 #include "BackgroundHttpSyncResult.hpp"
 #include "JBackgroundHttpSyncResult.hpp"
 #include <vector>

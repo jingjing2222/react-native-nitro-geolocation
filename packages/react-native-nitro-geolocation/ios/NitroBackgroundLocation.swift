@@ -16,8 +16,8 @@ class NitroBackgroundLocation: HybridNitroBackgroundLocationSpec {
     var eventListeners: [String: (BackgroundEventEnvelope) -> Void] = [:]
     var locationListeners: [String: (BackgroundLocation) -> Void] = [:]
     var errorListeners: [String: (LocationError) -> Void] = [:]
-    private var lifecycleListeners: [String: (LocationLifecycleEvent) -> Void] = [:]
-    private let lifecycleListenerLock = NSLock()
+    var providerListenerTokens: [String: String] = [:]
+    lazy var unifiedProviderStatusWatcher = IOSProviderStatusWatcher()
     var storedLocations: [StoredBackgroundLocation] = []
     private var storedEvents: [StoredBackgroundEventEnvelope] = []
     private var geofences: [GeofenceRegion] = []
@@ -231,32 +231,52 @@ class NitroBackgroundLocation: HybridNitroBackgroundLocationSpec {
         }
     }
 
-    func addLocationLifecycleListener(
-        listener: @escaping (LocationLifecycleEvent) -> Void
-    ) throws -> String {
-        let token = UUID().uuidString
-        lifecycleListenerLock.lock()
-        lifecycleListeners[token] = listener
-        lifecycleListenerLock.unlock()
-        return token
-    }
-
-    func removeLocationLifecycleListener(token: String) throws {
-        lifecycleListenerLock.lock()
-        lifecycleListeners.removeValue(forKey: token)
-        lifecycleListenerLock.unlock()
-    }
-
-    func handleLocationLifecycleChange(_ state: LocationLifecycleState) {
-        lifecycleListenerLock.lock()
-        let listeners = Array(lifecycleListeners.values)
-        lifecycleListenerLock.unlock()
-
-        let event = LocationLifecycleEvent(
+    func handleLocationLifecycleChange(
+        _ state: LocationLifecycleState,
+        runGeneration: UInt64,
+        locationSessionGeneration: UInt64
+    ) {
+        let lifecycle = LocationLifecycleEvent(
             state: state,
             timestamp: Date().timeIntervalSince1970 * 1000
         )
-        listeners.forEach { $0(event) }
+        let event = BackgroundEventEnvelope(
+            location: nil,
+            geofence: nil,
+            activity: nil,
+            providerStatus: nil,
+            lifecycle: lifecycle,
+            result: nil,
+            error: nil,
+            id: UUID().uuidString,
+            type: .lifecycle,
+            timestamp: lifecycle.timestamp,
+            deliveredToJS: false
+        )
+        let storedForRun: Bool = withStoreLock {
+            guard isCurrentLocationSession(
+                runGeneration,
+                locationSessionGeneration
+            ) else { return false }
+            appendStoredEvent(
+                StoredBackgroundEventEnvelope(
+                    event: event,
+                    createdAt: Date().timeIntervalSince1970 * 1000,
+                    id: event.id,
+                    type: event.type,
+                    timestamp: event.timestamp,
+                    deliveredToJS: false
+                )
+            )
+            persistStore()
+            return true
+        }
+        guard storedForRun else { return }
+        dispatchInProcess(
+            event: event,
+            runGeneration: runGeneration,
+            locationSessionGeneration: locationSessionGeneration
+        )
     }
 
     func getStoredBackgroundLocations(
@@ -526,6 +546,7 @@ class NitroBackgroundLocation: HybridNitroBackgroundLocationSpec {
                 geofence: nil,
                 activity: nil,
                 providerStatus: nil,
+                lifecycle: nil,
                 result: nil,
                 error: nil,
                 id: UUID().uuidString,
@@ -588,6 +609,7 @@ class NitroBackgroundLocation: HybridNitroBackgroundLocationSpec {
             ),
             activity: nil,
             providerStatus: nil,
+            lifecycle: nil,
             result: nil,
             error: nil,
             id: UUID().uuidString,

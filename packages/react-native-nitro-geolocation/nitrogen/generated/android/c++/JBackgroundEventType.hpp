@@ -57,6 +57,9 @@ namespace margelo::nitro::nitrogeolocation {
         case BackgroundEventType::PROVIDERCHANGE:
           static const auto fieldPROVIDERCHANGE = clazz->getStaticField<JBackgroundEventType>("PROVIDERCHANGE");
           return clazz->getStaticFieldValue(fieldPROVIDERCHANGE);
+        case BackgroundEventType::LIFECYCLE:
+          static const auto fieldLIFECYCLE = clazz->getStaticField<JBackgroundEventType>("LIFECYCLE");
+          return clazz->getStaticFieldValue(fieldLIFECYCLE);
         case BackgroundEventType::HTTPSYNC:
           static const auto fieldHTTPSYNC = clazz->getStaticField<JBackgroundEventType>("HTTPSYNC");
           return clazz->getStaticFieldValue(fieldHTTPSYNC);

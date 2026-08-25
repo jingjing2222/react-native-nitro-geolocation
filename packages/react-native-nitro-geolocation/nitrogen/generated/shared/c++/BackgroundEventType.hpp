@@ -34,7 +34,8 @@ namespace margelo::nitro::nitrogeolocation {
     LOCATION      SWIFT_NAME(location) = 2,
     ACTIVITY      SWIFT_NAME(activity) = 3,
     PROVIDERCHANGE      SWIFT_NAME(providerchange) = 4,
-    HTTPSYNC      SWIFT_NAME(httpsync) = 5,
+    LIFECYCLE      SWIFT_NAME(lifecycle) = 5,
+    HTTPSYNC      SWIFT_NAME(httpsync) = 6,
   } CLOSED_ENUM;
 
 } // namespace margelo::nitro::nitrogeolocation
@@ -52,6 +53,7 @@ namespace margelo::nitro {
         case hashString("location"): return margelo::nitro::nitrogeolocation::BackgroundEventType::LOCATION;
         case hashString("activity"): return margelo::nitro::nitrogeolocation::BackgroundEventType::ACTIVITY;
         case hashString("providerChange"): return margelo::nitro::nitrogeolocation::BackgroundEventType::PROVIDERCHANGE;
+        case hashString("lifecycle"): return margelo::nitro::nitrogeolocation::BackgroundEventType::LIFECYCLE;
         case hashString("httpSync"): return margelo::nitro::nitrogeolocation::BackgroundEventType::HTTPSYNC;
         default: [[unlikely]]
           throw std::invalid_argument("Cannot convert \"" + unionValue + "\" to enum BackgroundEventType - invalid value!");
@@ -64,6 +66,7 @@ namespace margelo::nitro {
         case margelo::nitro::nitrogeolocation::BackgroundEventType::LOCATION: return JSIConverter<std::string>::toJSI(runtime, "location");
         case margelo::nitro::nitrogeolocation::BackgroundEventType::ACTIVITY: return JSIConverter<std::string>::toJSI(runtime, "activity");
         case margelo::nitro::nitrogeolocation::BackgroundEventType::PROVIDERCHANGE: return JSIConverter<std::string>::toJSI(runtime, "providerChange");
+        case margelo::nitro::nitrogeolocation::BackgroundEventType::LIFECYCLE: return JSIConverter<std::string>::toJSI(runtime, "lifecycle");
         case margelo::nitro::nitrogeolocation::BackgroundEventType::HTTPSYNC: return JSIConverter<std::string>::toJSI(runtime, "httpSync");
         default: [[unlikely]]
           throw std::invalid_argument("Cannot convert BackgroundEventType to JS - invalid value: "
@@ -81,6 +84,7 @@ namespace margelo::nitro {
         case hashString("location"):
         case hashString("activity"):
         case hashString("providerChange"):
+        case hashString("lifecycle"):
         case hashString("httpSync"):
           return true;
         default:

@@ -1,11 +1,13 @@
 package com.margelo.nitro.nitrogeolocation
 
+import android.content.Context
+import android.location.LocationManager
 import com.facebook.proguard.annotations.DoNotStrip
 import com.facebook.react.bridge.ReactApplicationContext
 import com.margelo.nitro.NitroModules
 import com.margelo.nitro.core.Promise
 import com.margelo.nitro.nitrogeolocation.background.NitroBackgroundLocationController
-import java.util.UUID
+import com.margelo.nitro.nitrogeolocation.background.createProviderChangeBackgroundEvent
 import java.util.concurrent.ConcurrentHashMap
 
 @DoNotStrip
@@ -13,7 +15,17 @@ class NitroBackgroundLocation(
     private val reactContext: ReactApplicationContext = NitroModules.applicationContext!!
 ) : HybridNitroBackgroundLocationSpec() {
 
-    private val lifecycleListeners = ConcurrentHashMap<String, (LocationLifecycleEvent) -> Unit>()
+    private val providerListenerTokens = ConcurrentHashMap<String, String>()
+
+    private val providerStatusWatcher by lazy {
+        val locationManager = reactContext.getSystemService(Context.LOCATION_SERVICE) as LocationManager
+        val locationSettings = AndroidLocationSettings(
+            reactContext = reactContext,
+            locationManager = locationManager,
+            createLocationError = ::createLocationError
+        )
+        AndroidProviderStatusWatcher(reactContext, locationSettings)
+    }
 
     private val controller by lazy {
         NitroBackgroundLocationController.getInstance(reactContext)
@@ -56,11 +68,20 @@ class NitroBackgroundLocation(
     }
 
     override fun addBackgroundEventListener(listener: (event: BackgroundEventEnvelope) -> Unit): String {
-        return controller.eventHub.addEventListener(listener)
+        val eventToken = controller.eventHub.addEventListener(listener)
+        val providerToken = providerStatusWatcher.watch { status ->
+            controller.eventHub.emitToEventListener(
+                eventToken,
+                createProviderChangeBackgroundEvent(status)
+            )
+        }
+        providerListenerTokens[eventToken] = providerToken
+        return eventToken
     }
 
     override fun removeBackgroundEventListener(token: String) {
         controller.eventHub.removeEventListener(token)
+        providerListenerTokens.remove(token)?.let(providerStatusWatcher::unwatch)
     }
 
     override fun addBackgroundLocationListener(listener: (location: BackgroundLocation) -> Unit): String {
@@ -77,16 +98,6 @@ class NitroBackgroundLocation(
 
     override fun removeBackgroundErrorListener(token: String) {
         controller.eventHub.removeErrorListener(token)
-    }
-
-    override fun addLocationLifecycleListener(listener: (event: LocationLifecycleEvent) -> Unit): String {
-        val token = UUID.randomUUID().toString()
-        lifecycleListeners[token] = listener
-        return token
-    }
-
-    override fun removeLocationLifecycleListener(token: String) {
-        lifecycleListeners.remove(token)
     }
 
     override fun getStoredBackgroundLocations(
@@ -142,5 +153,12 @@ class NitroBackgroundLocation(
 
     override fun syncStoredLocations(): Promise<BackgroundHttpSyncResult> {
         return Promise.async { controller.syncStoredLocations() }
+    }
+
+    override fun dispose() {
+        providerListenerTokens.keys.forEach(controller.eventHub::removeEventListener)
+        providerListenerTokens.clear()
+        runCatching { providerStatusWatcher.dispose() }
+        super.dispose()
     }
 }

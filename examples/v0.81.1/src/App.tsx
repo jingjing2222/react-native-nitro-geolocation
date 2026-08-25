@@ -45,6 +45,7 @@ import PermissionCheckScreen from "./screens/PermissionCheckScreen";
 import PermissionDetailsScreen from "./screens/PermissionDetailsScreen";
 import ProviderSettingsScreen from "./screens/ProviderSettingsScreen";
 import ProviderStatusWatcherScreen from "./screens/ProviderStatusWatcherScreen";
+import UnifiedBackgroundEventsScreen from "./screens/UnifiedBackgroundEventsScreen";
 import WatchManagerV2Screen from "./screens/WatchManagerV2Screen";
 import WatchObservabilityScreen from "./screens/WatchObservabilityScreen";
 import WatchPositionScreen from "./screens/WatchPositionScreen";
@@ -76,6 +77,7 @@ const linking = {
       MockedMetadata: "mocked-metadata",
       ProviderSettings: "provider-settings",
       ProviderStatusWatcher: "provider-status-watcher",
+      UnifiedBackgroundEvents: "unified-background-events",
       ApiErrors: "api-errors",
       AccuracyPresets: "accuracy-presets",
       LastKnownPosition: "last-known-position",
@@ -205,6 +207,11 @@ export default function App() {
           <Tab.Screen
             name="ProviderStatusWatcher"
             component={ProviderStatusWatcherScreen}
+            options={hiddenTabOptions}
+          />
+          <Tab.Screen
+            name="UnifiedBackgroundEvents"
+            component={UnifiedBackgroundEventsScreen}
             options={hiddenTabOptions}
           />
           <Tab.Screen

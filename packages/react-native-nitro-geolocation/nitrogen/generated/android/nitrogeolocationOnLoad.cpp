@@ -33,7 +33,6 @@
 #include "JHybridNitroBackgroundLocationSpec.hpp"
 #include "JFunc_void_BackgroundEventEnvelope.hpp"
 #include "JFunc_void_BackgroundLocation.hpp"
-#include "JFunc_void_LocationLifecycleEvent.hpp"
 #include <NitroModules/DefaultConstructableObject.hpp>
 
 namespace margelo::nitro::nitrogeolocation {
@@ -92,7 +91,6 @@ void registerAllNatives() {
   margelo::nitro::nitrogeolocation::JHybridNitroBackgroundLocationSpec::CxxPart::registerNatives();
   margelo::nitro::nitrogeolocation::JFunc_void_BackgroundEventEnvelope_cxx::registerNatives();
   margelo::nitro::nitrogeolocation::JFunc_void_BackgroundLocation_cxx::registerNatives();
-  margelo::nitro::nitrogeolocation::JFunc_void_LocationLifecycleEvent_cxx::registerNatives();
 
   // Register Nitro Hybrid Objects
   HybridObjectRegistry::registerHybridObjectConstructor(

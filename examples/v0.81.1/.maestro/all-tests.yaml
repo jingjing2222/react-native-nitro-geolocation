@@ -97,6 +97,10 @@ appId: nitrogeolocation.example
 - runFlow: location-lifecycle.yaml
 - runFlow:
     when:
+      platform: iOS
+    file: unified-background-events-ios.yaml
+- runFlow:
+    when:
       platform: Android
     file: issue-67-android-coarse-location.yaml
 - runFlow:
