@@ -1,5 +1,61 @@
 # react-native-nitro-geolocation
 
+## 2.0.0-rc.0
+
+### Major Changes
+
+- 8bbd6de: Replace Modern API numeric location error codes with readable string discriminants while preserving numeric W3C codes under `/compat`.
+- cbb4d17: Remove the deprecated `ModernGeolocationConfiguration` alias. Use
+  `GeolocationConfiguration` for the root modern API instead.
+- 65e100e: Make Watch Manager v2 delivery semantics the default: native acquisition stays
+  shared, while each Modern API watch independently enforces its own callback
+  thresholds and cleanup lifecycle.
+- 189a661: Split last-known position reads into synchronous module-cache and asynchronous
+  platform-cache APIs. `getLastKnownPosition()` now returns the module cache
+  immediately, while `getLastKnownPositionAsync(options)` queries cache-only native
+  sources or filters observed Web and DevTools caches without starting a fresh
+  location request.
+- 3a54d84: Remove `enableHighAccuracy` from the Modern API. Modern requests and Android
+  settings now use explicit platform `accuracy` presets, while the `/compat`
+  entry point retains `enableHighAccuracy` for drop-in compatibility.
+- c03b5ac: Route provider status and iOS location lifecycle changes through the unified
+  background event stream, retain lifecycle events when persistence is enabled,
+  and keep `onLocationLifecycleChange()` as a convenience filter.
+- 7587f42: Return a deterministic result from `requestLocationSettings()` with a
+  `satisfied`, `cancelled`, `unavailable`, or `activityMissing` outcome and the
+  latest provider status. Expected Android resolution outcomes no longer reject.
+
+### Minor Changes
+
+- 03ea183: Add a copyable consumer E2E contract page and Maestro happy-path and
+  permission-denied flows, with guidance for release-build CI verification.
+- 374e40c: Add the read-only `nitro-geolocation doctor` command for checking React Native,
+  Nitro, Android permission, iOS usage-description, and New Architecture setup.
+- 7b6f4dc: Add `requestLocationSettingsDetailed()` as the explicit detailed-result API for
+  Android settings resolution while preserving the v2 deterministic method.
+- 4c24ecb: Add a read-only `getPermissionDetails()` API for normalized permission scope, accuracy, prompt capability, and settings guidance across native and Web.
+- 0b2ee95: Add request-scoped `AbortSignal` cancellation to the Modern API `getCurrentPosition()` call on Android, iOS, and web.
+- a56f54f: Add per-call opt-in mock and provider metadata to the Compat API without changing its default response shape.
+- 292d12b: Add optional Modern response metadata for delivery source, age, horizontal
+  accuracy quality, and stale reasons without changing location acceptance
+  policy.
+- 791353b: Add native background reliability timestamps, run- and config-generation-aware serialized HTTP sync with bounded burst coalescing and automatic batch draining, long-run assertions, and a foreground/background/termination/reboot verification contract.
+- fe9521a: Add active Modern API watch snapshots and document native merge and cleanup semantics.
+- 91c342e: Add a read-only `getLocationReadiness()` diagnosis API with permission, provider, services, availability, cache, Play Services state, and remediation codes.
+- 8463f74: Add a cancellable provider status watcher that emits an initial snapshot and distinct readiness changes.
+- 441fb48: Add an iOS Core Location pause and app-triggered resume lifecycle listener.
+- 0e73c37: Add an opt-in Expo config plugin for foreground permissions and explicitly
+  enabled background location configuration.
+
+### Patch Changes
+
+- f721c84: Ship the iOS SDK privacy manifest and document runtime data flows, retention,
+  permission ownership, dependency disclosure, SBOM generation, and license and
+  vulnerability review.
+- de8fc5c: Restore the combined 2.0 roadmap contracts after independent feature
+  integration, including web readiness and metadata behavior, native background
+  and location settings, and regenerated Nitro bindings.
+
 ## 1.4.3
 
 ### Patch Changes
