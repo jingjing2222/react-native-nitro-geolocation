@@ -66,6 +66,9 @@ jobs:
       - name: Verify iOS prebuilt checksums
         run: ruby tests/ruby/prebuilt_ios_checksum_test.rb
 
+      - name: Verify iOS watch delivery policy
+        run: scripts/test-ios-watch-delivery.sh
+
   build:
     name: Build
     runs-on: ubuntu-latest

@@ -53,7 +53,8 @@ extension NitroGeolocation {
         let subscription = WatchSubscription(
             success: success,
             error: error,
-            options: ParsedOptions.parse(from: options)
+            options: ParsedOptions.parse(from: options),
+            deliveryState: nil
         )
 
         runLocationOperationOnMainSync {

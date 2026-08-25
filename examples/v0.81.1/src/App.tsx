@@ -45,6 +45,7 @@ import PermissionCheckScreen from "./screens/PermissionCheckScreen";
 import PermissionDetailsScreen from "./screens/PermissionDetailsScreen";
 import ProviderSettingsScreen from "./screens/ProviderSettingsScreen";
 import ProviderStatusWatcherScreen from "./screens/ProviderStatusWatcherScreen";
+import WatchManagerV2Screen from "./screens/WatchManagerV2Screen";
 import WatchObservabilityScreen from "./screens/WatchObservabilityScreen";
 import WatchPositionScreen from "./screens/WatchPositionScreen";
 import WebE2EScreen from "./screens/WebE2EScreen";
@@ -70,6 +71,7 @@ const linking = {
       CancellableCurrentPosition: "cancellable-current-position",
       WatchPosition: "watch-position",
       WatchObservability: "watch-observability",
+      WatchManagerV2: "watch-manager-v2",
       LocationSimulation: "location-simulation",
       MockedMetadata: "mocked-metadata",
       ProviderSettings: "provider-settings",
@@ -178,6 +180,11 @@ export default function App() {
           <Tab.Screen
             name="WatchObservability"
             component={WatchObservabilityScreen}
+            options={hiddenTabOptions}
+          />
+          <Tab.Screen
+            name="WatchManagerV2"
+            component={WatchManagerV2Screen}
             options={hiddenTabOptions}
           />
           <Tab.Screen

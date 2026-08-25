@@ -65,7 +65,8 @@ internal data class WatchSubscription(
     val success: (GeolocationResponse) -> Unit,
     val error: ((LocationError) -> Unit)?,
     val options: ParsedOptions,
-    var deliveredUpdates: Int = 0
+    var deliveredUpdates: Int = 0,
+    var deliveryState: AndroidWatchDeliveryState? = null
 )
 
 internal sealed interface PositionResult {

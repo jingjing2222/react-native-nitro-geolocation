@@ -103,6 +103,7 @@ struct WatchSubscription {
     let success: (GeolocationResponse) -> Void
     let error: ((LocationError) -> Void)?
     let options: ParsedOptions
+    var deliveryState: IOSWatchDeliveryState?
 }
 
 struct PositionRequest {

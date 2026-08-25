@@ -4,12 +4,11 @@ import android.location.Location
 import android.location.LocationListener
 import android.location.LocationManager
 import android.os.Looper
+import android.os.SystemClock
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationCallback
 import com.google.android.gms.location.LocationResult
 import java.util.UUID
-import java.util.concurrent.ConcurrentHashMap
-import java.util.concurrent.atomic.AtomicLong
 
 internal class AndroidPositionWatchManager(
     private val locationManager: LocationManager,
@@ -19,12 +18,13 @@ internal class AndroidPositionWatchManager(
     private val configuredProvider: () -> LocationProvider?,
     private val getValidProvider: (ParsedOptions) -> String?,
     private val getNoProviderMessage: (ParsedOptions) -> String,
-    private val locationToPosition: (Location, LocationProviderUsed?) -> GeolocationResponse
+    private val locationToPosition: (Location, LocationProviderUsed?) -> GeolocationResponse,
+    private val dispatcher: AndroidWatchSerialDispatcher = createAndroidMainWatchDispatcher()
 ) {
-    private val subscriptions = ConcurrentHashMap<String, WatchSubscription>()
+    private val subscriptions = AndroidWatchCollection<WatchSubscription>()
     private var platformListener: LocationListener? = null
     private var fusedCallback: LocationCallback? = null
-    private val generation = AtomicLong(0L)
+    private var generation = 0L
 
     fun watch(
         success: (GeolocationResponse) -> Unit,
@@ -32,29 +32,34 @@ internal class AndroidPositionWatchManager(
         options: ParsedOptions
     ): String {
         val token = UUID.randomUUID().toString()
-        subscriptions[token] = WatchSubscription(token, success, error, options)
-        if (subscriptions.size == 1) start() else restart()
+        dispatcher.sync {
+            applyTransition(subscriptions.add(
+                token,
+                WatchSubscription(token, success, error, options)
+            ))
+        }
         return token
     }
 
-    fun unwatch(token: String): Boolean {
-        if (subscriptions.remove(token) == null) return false
-        if (subscriptions.isEmpty()) stop() else restart()
-        return true
+    fun unwatch(token: String): Boolean = dispatcher.sync {
+        val transition = subscriptions.remove(token)
+        applyTransition(transition)
+        transition != AndroidWatchTransition.NONE
     }
 
-    fun activeWatches(): Array<ActiveWatch> = subscriptions.keys
-        .map { ActiveWatch(token = it, kind = ActiveWatchKind.POSITION) }
-        .sortedBy { it.token }
-        .toTypedArray()
+    fun activeWatches(): Array<ActiveWatch> = dispatcher.sync {
+        subscriptions.tokens()
+            .map { ActiveWatch(token = it, kind = ActiveWatchKind.POSITION) }
+            .sortedBy { it.token }
+            .toTypedArray()
+    }
 
     fun stopObserving() {
-        subscriptions.clear()
-        stop()
+        dispatcher.sync { applyTransition(subscriptions.clear()) }
     }
 
     private fun start() {
-        val activeGeneration = generation.get()
+        val activeGeneration = generation
         if (providerRoute() == AndroidProviderRoute.FUSED) {
             startFused(activeGeneration)
         } else {
@@ -63,7 +68,7 @@ internal class AndroidPositionWatchManager(
     }
 
     private fun isActive(activeGeneration: Long): Boolean =
-        subscriptions.isNotEmpty() && generation.get() == activeGeneration
+        !subscriptions.isEmpty() && generation == activeGeneration
 
     private fun startPlatform(activeGeneration: Long) {
         if (!isActive(activeGeneration)) return
@@ -76,16 +81,20 @@ internal class AndroidPositionWatchManager(
 
         val listener = object : LocationListener {
             override fun onLocationChanged(location: Location) {
-                if (!isActive(activeGeneration)) return
-                deliver(locationToPosition(location, null))
+                dispatcher.sync {
+                    if (!isActive(activeGeneration)) return@sync
+                    deliver(locationToPosition(location, null))
+                }
             }
 
             override fun onProviderDisabled(provider: String) {
-                if (!isActive(activeGeneration)) return
-                notifyError(LocationError(
-                    code = SETTINGS_NOT_SATISFIED,
-                    message = "Provider disabled: $provider"
-                ))
+                dispatcher.sync {
+                    if (!isActive(activeGeneration)) return@sync
+                    notifyError(LocationError(
+                        code = SETTINGS_NOT_SATISFIED,
+                        message = "Provider disabled: $provider"
+                    ))
+                }
             }
 
             override fun onProviderEnabled(provider: String) = Unit
@@ -121,9 +130,11 @@ internal class AndroidPositionWatchManager(
         val options = mergeOptions()
         val callback = object : LocationCallback() {
             override fun onLocationResult(result: LocationResult) {
-                if (!isActive(activeGeneration)) return
                 val location = result.lastLocation ?: return
-                deliver(locationToPosition(location, LocationProviderUsed.FUSED))
+                dispatcher.sync {
+                    if (!isActive(activeGeneration)) return@sync
+                    deliver(locationToPosition(location, LocationProviderUsed.FUSED))
+                }
             }
         }
 
@@ -131,23 +142,27 @@ internal class AndroidPositionWatchManager(
         fusedCallback = callback
 
         fun handleFailure(error: LocationError? = null) {
-            if (!isActive(activeGeneration)) return
-            removeFusedCallback()
-            runAndroidWatchPositionFallbackAfterFusedFailure(
-                locationProvider = configuredProvider(),
-                runPlatformFallback = { startPlatform(activeGeneration) },
-                failWithoutFallback = {
-                    if (error != null) notifyError(error) else notifyProviderUnavailable()
-                }
-            )
+            dispatcher.sync {
+                if (!isActive(activeGeneration)) return@sync
+                removeFusedCallback()
+                runAndroidWatchPositionFallbackAfterFusedFailure(
+                    locationProvider = configuredProvider(),
+                    runPlatformFallback = { startPlatform(activeGeneration) },
+                    failWithoutFallback = {
+                        if (error != null) notifyError(error) else notifyProviderUnavailable()
+                    }
+                )
+            }
         }
 
         fusedLocationProvider.requestWatchUpdates(
             options = options,
             callback = callback,
             onInactiveStart = {
-                if (!isActive(activeGeneration)) {
-                    runCatching { fusedLocationClient.removeLocationUpdates(callback) }
+                dispatcher.sync {
+                    if (!isActive(activeGeneration)) {
+                        runCatching { fusedLocationClient.removeLocationUpdates(callback) }
+                    }
                 }
             },
             onFailure = { error -> handleFailure(error) }
@@ -164,7 +179,7 @@ internal class AndroidPositionWatchManager(
         var maxUpdateAge: Double? = null
         var maxUpdateDelay = Double.MAX_VALUE
 
-        for (subscription in subscriptions.values) {
+        for (subscription in subscriptions.values()) {
             androidAccuracy = mostDemandingAndroidAccuracy(
                 androidAccuracy,
                 subscription.options.androidAccuracy
@@ -196,23 +211,35 @@ internal class AndroidPositionWatchManager(
     }
 
     private fun deliver(position: GeolocationResponse) {
-        val finishedTokens = mutableListOf<String>()
-        for ((token, subscription) in subscriptions) {
-            subscription.success(position)
+        var removedFinishedWatch = false
+        val elapsedRealtimeMillis = SystemClock.elapsedRealtime()
+        subscriptions.forEachCurrent { token, subscription ->
+            val decision = evaluateAndroidWatchDelivery(
+                previous = subscription.deliveryState,
+                latitude = position.coords.latitude,
+                longitude = position.coords.longitude,
+                elapsedRealtimeMillis = elapsedRealtimeMillis,
+                minimumIntervalMillis = subscription.options.interval,
+                distanceFilterMeters = subscription.options.distanceFilter
+            )
+            if (!decision.shouldDeliver) return@forEachCurrent
+
+            subscription.deliveryState = decision.nextState
             subscription.deliveredUpdates += 1
+            subscription.success(position)
             val maxUpdates = subscription.options.maxUpdates
             if (maxUpdates != null && subscription.deliveredUpdates >= maxUpdates) {
-                finishedTokens.add(token)
+                removedFinishedWatch = subscriptions.removeCurrent(token, subscription) ||
+                    removedFinishedWatch
             }
         }
-        finishedTokens.forEach(subscriptions::remove)
-        if (finishedTokens.isNotEmpty()) {
-            if (subscriptions.isEmpty()) stop() else restart()
+        if (removedFinishedWatch) {
+            applyTransition(subscriptions.transitionAfterRemoval())
         }
     }
 
     private fun notifyProviderUnavailable() {
-        for (subscription in subscriptions.values) {
+        subscriptions.forEachCurrent { _, subscription ->
             subscription.error?.invoke(LocationError(
                 code = SETTINGS_NOT_SATISFIED,
                 message = getNoProviderMessage(subscription.options)
@@ -221,7 +248,7 @@ internal class AndroidPositionWatchManager(
     }
 
     private fun notifyError(error: LocationError) {
-        subscriptions.values.forEach { it.error?.invoke(error) }
+        subscriptions.forEachCurrent { _, subscription -> subscription.error?.invoke(error) }
     }
 
     private fun mergeGranularity(
@@ -238,7 +265,7 @@ internal class AndroidPositionWatchManager(
     }
 
     private fun stop() {
-        generation.incrementAndGet()
+        generation += 1
         removePlatformListener()
         removeFusedCallback()
     }
@@ -260,5 +287,14 @@ internal class AndroidPositionWatchManager(
     private fun restart() {
         stop()
         start()
+    }
+
+    private fun applyTransition(transition: AndroidWatchTransition) {
+        when (transition) {
+            AndroidWatchTransition.NONE -> Unit
+            AndroidWatchTransition.START -> start()
+            AndroidWatchTransition.RESTART -> restart()
+            AndroidWatchTransition.STOP -> stop()
+        }
     }
 }

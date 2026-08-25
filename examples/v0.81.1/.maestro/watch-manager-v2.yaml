@@ -1,0 +1,87 @@
+appId: nitrogeolocation.example
+---
+# Proves that two natural Modern API consumers keep independent delivery
+# thresholds and that removing one subscription leaves the other alive.
+
+- launchApp:
+    clearState: true
+    permissions:
+      all: allow
+
+- extendedWaitUntil:
+    visible: "Geolocation API"
+    timeout: 10000
+
+- setLocation:
+    latitude: 37.5665
+    longitude: 126.9780
+
+- stopApp
+- openLink:
+    link: nitrogeolocation://app/watch-manager-v2
+- runFlow:
+    when:
+      platform: iOS
+      visible: "Cancel|취소"
+    commands:
+      - tapOn:
+          text: "Open|열기"
+- runFlow:
+    when:
+      platform: iOS
+    commands:
+      - openLink:
+          link: nitrogeolocation://app/watch-manager-v2
+- waitForAnimationToEnd
+
+- extendedWaitUntil:
+    visible: "Independent delivery thresholds and exact cleanup"
+    timeout: 10000
+- tapOn:
+    id: "e2e-action-watch-manager-v2-start-button"
+- extendedWaitUntil:
+    visible: "Initial delivery: passed"
+    timeout: 15000
+- tapOn:
+    id: "e2e-action-watch-manager-v2-baseline-button"
+- assertVisible:
+    text: "Baseline: passed"
+
+- setLocation:
+    latitude: 37.5668
+    longitude: 126.9780
+- runScript: scripts/wait-15s.js
+- tapOn:
+    id: "e2e-action-watch-manager-v2-near-button"
+- assertVisible:
+    text: "Near move: passed"
+
+# Android's slow watch uses a 25 s interval. Wait until that subscription's
+# threshold has elapsed before injecting the candidate it must receive.
+- runFlow:
+    when:
+      platform: Android
+    commands:
+      - runScript: scripts/wait-15s.js
+- setLocation:
+    latitude: 37.5765
+    longitude: 126.9780
+- runScript: scripts/wait-15s.js
+- tapOn:
+    id: "e2e-action-watch-manager-v2-far-button"
+- assertVisible:
+    text: "Far move: passed"
+
+- tapOn:
+    id: "e2e-action-watch-manager-v2-cleanup-button"
+- extendedWaitUntil:
+    visible: "Selective cleanup: passed"
+    timeout: 5000
+- setLocation:
+    latitude: 37.5865
+    longitude: 126.9780
+- runScript: scripts/wait-15s.js
+- tapOn:
+    id: "e2e-action-watch-manager-v2-remaining-button"
+- assertVisible:
+    text: "Remaining watch: passed"
