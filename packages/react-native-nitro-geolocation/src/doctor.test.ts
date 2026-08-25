@@ -13,6 +13,7 @@ function createProject({
   iosPermission = true,
   iosTestPermission = false,
   generatedIosPermission,
+  generateInfoPlist = true,
   newArchitecture = true,
   newArchitectureKey = "newArchEnabled"
 }: {
@@ -23,6 +24,7 @@ function createProject({
   iosPermission?: boolean;
   iosTestPermission?: boolean;
   generatedIosPermission?: string;
+  generateInfoPlist?: boolean;
   newArchitecture?: boolean | "absent";
   newArchitectureKey?: "newArchEnabled" | "react.newArchEnabled";
 } = {}) {
@@ -77,6 +79,7 @@ function createProject({
 		AAAAAAAAAAAAAAAAAAAAAAAA /* Consumer */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = BBBBBBBBBBBBBBBBBBBBBBBB;
+			name = Consumer;
 			productType = "com.apple.product-type.application";
 		};
 		BBBBBBBBBBBBBBBBBBBBBBBB /* Build configuration list for PBXNativeTarget "Consumer" */ = {
@@ -90,8 +93,8 @@ function createProject({
 			buildSettings = {
 ${
   generatedIosPermission
-    ? `\t\t\t\tGENERATE_INFOPLIST_FILE = YES;\n\t\t\t\tINFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "${generatedIosPermission}";`
-    : "\t\t\t\tINFOPLIST_FILE = Consumer/Info.plist;"
+    ? `\t\t\t\tGENERATE_INFOPLIST_FILE = ${generateInfoPlist ? "YES" : "NO"};\n\t\t\t\tINFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "${generatedIosPermission}";`
+    : "\t\t\t\tINFOPLIST_FILE = $(TARGET_NAME)/Info.plist;"
 }
 			};
 			name = Release;
@@ -206,6 +209,7 @@ describe("nitro-geolocation doctor", () => {
       reactNative: "0.75.5",
       newArchitecture: "absent",
       androidManifest: `<manifest xmlns:android="http://schemas.android.com/apk/res/android" xmlns:tools="http://schemas.android.com/tools">
+        <!-- <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" /> -->
         <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" android:maxSdkVersion="30" />
         <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" tools:node="remove" />
       </manifest>`,
@@ -315,6 +319,103 @@ describe("nitro-geolocation doctor", () => {
     );
   });
 
+  it("does not accept a generated key when Info.plist generation is disabled", () => {
+    const project = createProject({
+      iosPermission: false,
+      generatedIosPermission: "Allow location while using the app.",
+      generateInfoPlist: false
+    });
+    projects.push(project);
+
+    const result = spawnSync(
+      process.execPath,
+      [cliPath, "doctor", "--project", project, "--json"],
+      { encoding: "utf8" }
+    );
+    const report = JSON.parse(result.stdout);
+
+    expect(result.status).toBe(1);
+    expect(report.checks).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          code: "ios-when-in-use-description",
+          status: "error"
+        })
+      ])
+    );
+  });
+
+  it("resolves project-level and target xcconfig build settings", () => {
+    const project = createProject({ iosPermission: false });
+    projects.push(project);
+    mkdirSync(path.join(project, "ios/Config"), { recursive: true });
+    writeFileSync(
+      path.join(project, "ios/Config/Location.xcconfig"),
+      "INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = Allow $(PRODUCT_NAME) to use location.\n"
+    );
+    writeFileSync(
+      path.join(project, "ios/Consumer.xcodeproj/project.pbxproj"),
+      `// !$*UTF8*$!
+{
+  objects = {
+		AAAAAAAAAAAAAAAAAAAAAAAA /* Consumer */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = BBBBBBBBBBBBBBBBBBBBBBBB;
+			name = Consumer;
+			productType = "com.apple.product-type.application";
+		};
+		BBBBBBBBBBBBBBBBBBBBBBBB = {
+			isa = XCConfigurationList;
+			buildConfigurations = (CCCCCCCCCCCCCCCCCCCCCCCC,);
+		};
+		CCCCCCCCCCCCCCCCCCCCCCCC = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = FFFFFFFFFFFFFFFFFFFFFFFF;
+			buildSettings = {};
+			name = Release;
+		};
+		DDDDDDDDDDDDDDDDDDDDDDDD = {
+			isa = PBXProject;
+			buildConfigurationList = EEEEEEEEEEEEEEEEEEEEEEEE;
+		};
+		EEEEEEEEEEEEEEEEEEEEEEEE = {
+			isa = XCConfigurationList;
+			buildConfigurations = (111111111111111111111111,);
+		};
+		FFFFFFFFFFFFFFFFFFFFFFFF = {
+			isa = PBXFileReference;
+			path = Config/Location.xcconfig;
+		};
+		111111111111111111111111 = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				GENERATE_INFOPLIST_FILE = YES;
+			};
+			name = Release;
+		};
+  };
+}
+`
+    );
+
+    const output = execFileSync(
+      process.execPath,
+      [cliPath, "doctor", "--project", project, "--json"],
+      { encoding: "utf8" }
+    );
+    const report = JSON.parse(output);
+
+    expect(report.ok).toBe(true);
+    expect(report.checks).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          code: "ios-when-in-use-description",
+          status: "pass"
+        })
+      ])
+    );
+  });
+
   it("resolves an installed React Native version for catalog dependencies", () => {
     const project = createProject({
       reactNative: "catalog:",
@@ -368,6 +469,81 @@ describe("nitro-geolocation doctor", () => {
         expect.objectContaining({
           code: "android-new-architecture",
           status: "error"
+        })
+      ])
+    );
+  });
+
+  it("uses Gradle's OR semantics for legacy and scoped New Architecture keys", () => {
+    const project = createProject();
+    projects.push(project);
+    writeFileSync(
+      path.join(project, "android/gradle.properties"),
+      "newArchEnabled=false\nreact.newArchEnabled=true\n"
+    );
+
+    const output = execFileSync(
+      process.execPath,
+      [cliPath, "doctor", "--project", project, "--json"],
+      { encoding: "utf8" }
+    );
+    const report = JSON.parse(output);
+
+    expect(report.ok).toBe(true);
+    expect(report.checks).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          code: "android-new-architecture",
+          status: "pass"
+        })
+      ])
+    );
+  });
+
+  it("recognizes the Gradle project-property environment override", () => {
+    const project = createProject({ newArchitecture: "absent" });
+    projects.push(project);
+
+    const output = execFileSync(
+      process.execPath,
+      [cliPath, "doctor", "--project", project, "--json"],
+      {
+        encoding: "utf8",
+        env: {
+          ...process.env,
+          ORG_GRADLE_PROJECT_newArchEnabled: "true"
+        }
+      }
+    );
+    const report = JSON.parse(output);
+
+    expect(report.ok).toBe(true);
+  });
+
+  it("prefers the installed React Native version over an ambiguous range", () => {
+    const project = createProject({ reactNative: ">=0.74 <0.88" });
+    projects.push(project);
+    mkdirSync(path.join(project, "node_modules/react-native"), {
+      recursive: true
+    });
+    writeFileSync(
+      path.join(project, "node_modules/react-native/package.json"),
+      JSON.stringify({ name: "react-native", version: "0.87.0" })
+    );
+
+    const output = execFileSync(
+      process.execPath,
+      [cliPath, "doctor", "--project", project, "--json"],
+      { encoding: "utf8" }
+    );
+    const report = JSON.parse(output);
+
+    expect(report.ok).toBe(true);
+    expect(report.checks).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          code: "react-native-version",
+          status: "pass"
         })
       ])
     );

@@ -101,14 +101,22 @@ function inspectAndroid(project, checks, reactNativeVersion) {
   }
 
   const properties = readText(path.join(android, "gradle.properties")) ?? "";
-  const architectureValues = [
-    ...properties.matchAll(
-      /^\s*(?:react\.)?newArchEnabled\s*=\s*(true|false)\s*$/gim
-    )
-  ].map((match) => match[1].toLowerCase());
+  function effectiveBooleanProperty(name) {
+    const values = [
+      ...properties.matchAll(
+        new RegExp(
+          `^\\s*${name.replace(".", "\\.")}\\s*=\\s*(true|false)\\s*$`,
+          "gim"
+        )
+      )
+    ];
+    const environment = process.env[`ORG_GRADLE_PROJECT_${name}`];
+    const value = environment ?? values.at(-1)?.[1];
+    return value?.toLowerCase() === "true";
+  }
   const architectureEnabled =
-    architectureValues.length > 0 &&
-    architectureValues.every((value) => value === "true");
+    effectiveBooleanProperty("newArchEnabled") ||
+    effectiveBooleanProperty("react.newArchEnabled");
   checks.push(
     architectureEnabled
       ? check(
@@ -120,7 +128,7 @@ function inspectAndroid(project, checks, reactNativeVersion) {
           "android-new-architecture",
           "error",
           `Android does not explicitly enable React Native's New Architecture${reactNativeVersion ? ` for React Native ${reactNativeVersion.major}.${reactNativeVersion.minor}` : ""}.`,
-          "Set newArchEnabled=true or react.newArchEnabled=true in android/gradle.properties, remove conflicting false values, and rebuild the app."
+          "Set newArchEnabled=true or react.newArchEnabled=true in android/gradle.properties (or the matching ORG_GRADLE_PROJECT_ environment variable) and rebuild the app."
         )
   );
 
@@ -172,7 +180,13 @@ function buildSetting(block, name) {
   return value;
 }
 
-function resolvedBuildSetting(block, name, resolving = new Set()) {
+function resolvedBuildSetting(
+  block,
+  name,
+  builtIns = {},
+  resolving = new Set()
+) {
+  if (builtIns[name] !== undefined) return builtIns[name];
   if (resolving.has(name)) return undefined;
   const raw = buildSetting(block, name);
   if (raw === undefined) return undefined;
@@ -182,16 +196,16 @@ function resolvedBuildSetting(block, name, resolving = new Set()) {
     /\$\(([^)]+)\)|\$\{([^}]+)\}/g,
     (_, first, second) => {
       const variable = String(first ?? second).split(":", 1)[0];
-      if (
-        ["PRODUCT_NAME", "TARGET_NAME", "EXECUTABLE_NAME"].includes(variable)
-      ) {
-        return variable;
-      }
       if (variable === "inherited") {
         unresolved = true;
         return "";
       }
-      const replacement = resolvedBuildSetting(block, variable, resolving);
+      const replacement = resolvedBuildSetting(
+        block,
+        variable,
+        builtIns,
+        resolving
+      );
       if (replacement === undefined) {
         unresolved = true;
         return "";
@@ -203,11 +217,63 @@ function resolvedBuildSetting(block, name, resolving = new Set()) {
   return unresolved ? undefined : value;
 }
 
+function configurationList(objects, listId) {
+  const list = listId ? objects.get(listId) : undefined;
+  const ids = list?.match(/[A-F0-9]{24}/g) ?? [];
+  return ids.flatMap((identifier) => {
+    const block = objects.get(identifier);
+    if (!block?.includes("isa = XCBuildConfiguration;")) return [];
+    return [{ block, name: buildSetting(block, "name") }];
+  });
+}
+
+function readXcconfig(file, visited = new Set()) {
+  if (visited.has(file)) return "";
+  visited.add(file);
+  const contents = readText(file);
+  if (!contents) return "";
+  const settings = [];
+  for (const rawLine of contents.split(/\r?\n/)) {
+    const line = rawLine.replace(/\/\/.*$/, "").trim();
+    const include = line.match(/^#include\??\s+["<](.*)[">]$/);
+    if (include) {
+      settings.push(
+        readXcconfig(path.resolve(path.dirname(file), include[1]), visited)
+      );
+      continue;
+    }
+    const setting = line.match(/^([A-Za-z0-9_.]+)\s*(?:\?=|=)\s*(.*?)\s*$/);
+    if (setting) settings.push(`${setting[1]} = ${setting[2]};`);
+  }
+  return settings.join("\n");
+}
+
+function xcconfigSettings(pbxproj, objects, configuration) {
+  const reference = configuration.match(
+    /baseConfigurationReference = ([A-F0-9]{24})/
+  )?.[1];
+  const fileReference = reference ? objects.get(reference) : undefined;
+  const configuredPath = fileReference
+    ? buildSetting(fileReference, "path")
+    : undefined;
+  if (!configuredPath) return "";
+  return readXcconfig(
+    path.resolve(path.dirname(path.dirname(pbxproj)), configuredPath)
+  );
+}
+
 function applicationBuildConfigurations(pbxproj) {
   const contents = readText(pbxproj);
   if (!contents) return [];
   const objects = parsePbxObjects(contents);
   const configurations = [];
+  const project = [...objects.values()].find((block) =>
+    block.includes("isa = PBXProject;")
+  );
+  const projectListId = project?.match(
+    /buildConfigurationList = ([A-F0-9]{24})/
+  )?.[1];
+  const projectConfigurations = configurationList(objects, projectListId);
 
   for (const target of objects.values()) {
     if (
@@ -217,13 +283,29 @@ function applicationBuildConfigurations(pbxproj) {
       continue;
     }
     const listId = target.match(/buildConfigurationList = ([A-F0-9]{24})/)?.[1];
-    const list = listId ? objects.get(listId) : undefined;
-    const ids = list?.match(/[A-F0-9]{24}/g) ?? [];
-    for (const identifier of ids) {
-      const configuration = objects.get(identifier);
-      if (configuration?.includes("isa = XCBuildConfiguration;")) {
-        configurations.push(configuration);
-      }
+    const targetName = buildSetting(target, "name") ?? "App";
+    const projectDirectory = path.dirname(path.dirname(pbxproj));
+    for (const configuration of configurationList(objects, listId)) {
+      const projectConfiguration = projectConfigurations.find(
+        (candidate) => candidate.name === configuration.name
+      );
+      configurations.push({
+        settings: [
+          configuration.block,
+          xcconfigSettings(pbxproj, objects, configuration.block),
+          projectConfiguration?.block ?? "",
+          projectConfiguration
+            ? xcconfigSettings(pbxproj, objects, projectConfiguration.block)
+            : ""
+        ].join("\n"),
+        builtIns: {
+          SRCROOT: projectDirectory,
+          PROJECT_DIR: projectDirectory,
+          TARGET_NAME: targetName,
+          PRODUCT_NAME: targetName,
+          EXECUTABLE_NAME: targetName
+        }
+      });
     }
   }
   return configurations;
@@ -255,18 +337,24 @@ function inspectApplicationPlists(ios) {
     for (const configuration of applicationBuildConfigurations(pbxproj)) {
       const generatesInfoPlist =
         resolvedBuildSetting(
-          configuration,
-          "GENERATE_INFOPLIST_FILE"
+          configuration.settings,
+          "GENERATE_INFOPLIST_FILE",
+          configuration.builtIns
         )?.toUpperCase() === "YES";
       const generatedDescription = resolvedBuildSetting(
-        configuration,
-        "INFOPLIST_KEY_NSLocationWhenInUseUsageDescription"
+        configuration.settings,
+        "INFOPLIST_KEY_NSLocationWhenInUseUsageDescription",
+        configuration.builtIns
       );
       if (generatesInfoPlist && generatedDescription?.trim()) {
         results.push(true);
         continue;
       }
-      const setting = buildSetting(configuration, "INFOPLIST_FILE");
+      const setting = resolvedBuildSetting(
+        configuration.settings,
+        "INFOPLIST_FILE",
+        configuration.builtIns
+      );
       const infoPlist = setting
         ? resolveInfoPlist(pbxproj, setting)
         : undefined;
@@ -392,8 +480,6 @@ export function inspectProject(projectPath) {
 }
 
 function resolveReactNativeVersion(project, declaredVersion) {
-  if (parseReactNativeVersion(declaredVersion)) return declaredVersion;
-
   let directory = project;
   for (let depth = 0; depth < 6; depth += 1) {
     const installedPackage = readText(
