@@ -278,7 +278,7 @@ class UnifiedBackgroundEventsTest {
     }
 
     @Test
-    fun `failed second refresh retries the first watch initial snapshot`() {
+    fun `failed refresh cannot discard a snapshot completed during startup`() {
         val initialStatus = LocationProviderStatus(
             locationServicesEnabled = true,
             backgroundModeEnabled = false,
@@ -289,7 +289,11 @@ class UnifiedBackgroundEventsTest {
             googleLocationAccuracyEnabled = true
         )
         val loadCalls = AtomicInteger(0)
+        val secondLoadStarted = CountDownLatch(1)
+        val releaseSecondLoad = CountDownLatch(1)
+        val firstCompletionStarted = CountDownLatch(1)
         val firstCompletion = AtomicReference<((LocationProviderStatus) -> Unit)?>()
+        val secondFailure = AtomicReference<Throwable?>()
         val received = mutableListOf<LocationProviderStatus>()
         val observationContext = object : AndroidProviderObservationContext {
             override fun registerProviderReceiver(
@@ -306,21 +310,109 @@ class UnifiedBackgroundEventsTest {
             loadProviderStatus = { completion ->
                 when (loadCalls.incrementAndGet()) {
                     1 -> firstCompletion.set(completion)
-                    2 -> throw IllegalStateException("status load unavailable")
+                    2 -> {
+                        secondLoadStarted.countDown()
+                        assertTrue(releaseSecondLoad.await(2, TimeUnit.SECONDS))
+                        throw IllegalStateException("status load unavailable")
+                    }
                     else -> completion(initialStatus)
                 }
             }
         )
         watcher.watch(received::add)
 
-        assertThrows(IllegalStateException::class.java) {
-            watcher.watch {}
+        val secondThread = thread {
+            secondFailure.set(runCatching { watcher.watch {} }.exceptionOrNull())
         }
+        assertTrue(secondLoadStarted.await(2, TimeUnit.SECONDS))
+        val completionThread = thread {
+            firstCompletionStarted.countDown()
+            firstCompletion.get()?.invoke(initialStatus)
+        }
+        assertTrue(firstCompletionStarted.await(2, TimeUnit.SECONDS))
+        releaseSecondLoad.countDown()
+        secondThread.join(2_000)
+        completionThread.join(2_000)
+        shadowOf(Looper.getMainLooper()).idle()
+
+        assertFalse(secondThread.isAlive)
+        assertFalse(completionThread.isAlive)
+        assertTrue(secondFailure.get() is IllegalStateException)
+        assertEquals(2, loadCalls.get())
+        assertEquals(listOf(initialStatus), received)
+        watcher.stopObserving()
+    }
+
+    @Test
+    fun `concurrent failed refreshes cannot leave a phantom generation`() {
+        val initialStatus = LocationProviderStatus(
+            locationServicesEnabled = true,
+            backgroundModeEnabled = false,
+            gpsAvailable = true,
+            networkAvailable = true,
+            passiveAvailable = true,
+            googlePlayServicesAvailable = true,
+            googleLocationAccuracyEnabled = true
+        )
+        val loadCalls = AtomicInteger(0)
+        val secondLoadStarted = CountDownLatch(1)
+        val thirdWatchStarted = CountDownLatch(1)
+        val thirdLoadStarted = CountDownLatch(1)
+        val releaseSecondLoad = CountDownLatch(1)
+        val releaseThirdLoad = CountDownLatch(1)
+        val firstCompletion = AtomicReference<((LocationProviderStatus) -> Unit)?>()
+        val observationContext = object : AndroidProviderObservationContext {
+            override fun registerProviderReceiver(
+                receiver: BroadcastReceiver,
+                filter: IntentFilter
+            ) = Unit
+
+            override fun unregisterProviderReceiver(receiver: BroadcastReceiver) = Unit
+            override fun addLifecycleListener(listener: LifecycleEventListener) = Unit
+            override fun removeLifecycleListener(listener: LifecycleEventListener) = Unit
+        }
+        val watcher = AndroidProviderStatusWatcher(
+            observationContext = observationContext,
+            loadProviderStatus = { completion ->
+                when (loadCalls.incrementAndGet()) {
+                    1 -> firstCompletion.set(completion)
+                    2 -> {
+                        secondLoadStarted.countDown()
+                        assertTrue(releaseSecondLoad.await(2, TimeUnit.SECONDS))
+                        throw IllegalStateException("second load unavailable")
+                    }
+                    3 -> {
+                        thirdLoadStarted.countDown()
+                        assertTrue(releaseThirdLoad.await(2, TimeUnit.SECONDS))
+                        throw IllegalStateException("third load unavailable")
+                    }
+                }
+            }
+        )
+        val received = mutableListOf<LocationProviderStatus>()
+        watcher.watch(received::add)
+        val secondThread = thread { runCatching { watcher.watch {} } }
+
+        assertTrue(secondLoadStarted.await(2, TimeUnit.SECONDS))
+        val thirdThread = thread {
+            thirdWatchStarted.countDown()
+            runCatching { watcher.watch {} }
+        }
+        assertTrue(thirdWatchStarted.await(2, TimeUnit.SECONDS))
+        val thirdEnteredBeforeSecondSettled =
+            thirdLoadStarted.await(200, TimeUnit.MILLISECONDS)
+        releaseSecondLoad.countDown()
+        assertTrue(thirdLoadStarted.await(2, TimeUnit.SECONDS))
+        releaseThirdLoad.countDown()
+        secondThread.join(2_000)
+        thirdThread.join(2_000)
         firstCompletion.get()?.invoke(initialStatus)
         shadowOf(Looper.getMainLooper()).idle()
 
-        assertEquals(2, loadCalls.get())
+        assertFalse(thirdEnteredBeforeSecondSettled)
+        assertEquals(3, loadCalls.get())
         assertEquals(listOf(initialStatus), received)
+        assertEquals(1, watcher.activeWatchCount)
         watcher.stopObserving()
     }
 }

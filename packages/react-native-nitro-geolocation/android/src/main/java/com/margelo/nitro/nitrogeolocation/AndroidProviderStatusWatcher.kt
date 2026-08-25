@@ -11,7 +11,6 @@ import androidx.core.content.ContextCompat
 import com.facebook.react.bridge.LifecycleEventListener
 import com.facebook.react.bridge.ReactApplicationContext
 import java.util.UUID
-import java.util.concurrent.atomic.AtomicLong
 
 internal interface AndroidProviderObservationContext {
     fun registerProviderReceiver(receiver: BroadcastReceiver, filter: IntentFilter)
@@ -60,7 +59,8 @@ internal class AndroidProviderStatusWatcher internal constructor(
     private val callbacks = mutableMapOf<String, (LocationProviderStatus) -> Unit>()
     private val lastStatuses = mutableMapOf<String, LocationProviderStatus>()
     private val mainHandler = Handler(Looper.getMainLooper())
-    private val refreshGeneration = AtomicLong(0L)
+    private var nextRefreshGeneration = 0L
+    private var activeRefreshGeneration = 0L
     private var receiverRegistered = false
     private var lifecycleRegistered = false
     private val broadcastRefresh = Runnable { refresh() }
@@ -81,7 +81,7 @@ internal class AndroidProviderStatusWatcher internal constructor(
             } catch (error: Throwable) {
                 callbacks.remove(token)
                 lastStatuses.remove(token)
-                refreshGeneration.incrementAndGet()
+                invalidateRefreshes()
                 runCatching { stopObservingSources() }
                 throw error
             }
@@ -103,7 +103,7 @@ internal class AndroidProviderStatusWatcher internal constructor(
             callbacks.remove(token)
             lastStatuses.remove(token)
             if (callbacks.isEmpty()) {
-                refreshGeneration.incrementAndGet()
+                invalidateRefreshes()
                 stopObservingSources()
             }
         }
@@ -113,7 +113,7 @@ internal class AndroidProviderStatusWatcher internal constructor(
         synchronized(this) {
             callbacks.clear()
             lastStatuses.clear()
-            refreshGeneration.incrementAndGet()
+            invalidateRefreshes()
             stopObservingSources()
         }
     }
@@ -134,32 +134,57 @@ internal class AndroidProviderStatusWatcher internal constructor(
     }
 
     private fun refresh() {
-        val generation = refreshGeneration.incrementAndGet()
-        try {
-            loadProviderStatus providerStatus@{ status ->
-                if (generation != refreshGeneration.get()) return@providerStatus
-
-                val tokens = synchronized(this) {
-                    callbacks.keys.filter { token ->
-                        if (lastStatuses[token] == status) {
-                            false
+        var generation = 0L
+        var bufferedStatus: LocationProviderStatus? = null
+        synchronized(this) {
+            generation = ++nextRefreshGeneration
+            var startSettled = false
+            var accepted = false
+            try {
+                loadProviderStatus { status ->
+                    val deliverNow = synchronized(this) {
+                        if (startSettled) {
+                            accepted
                         } else {
-                            lastStatuses[token] = status
-                            true
+                            bufferedStatus = status
+                            false
                         }
                     }
+                    if (deliverNow) deliverProviderStatus(generation, status)
                 }
-                tokens.forEach { token ->
-                    mainHandler.post {
-                        val callback = synchronized(this) { callbacks[token] }
-                        callback?.invoke(status)
-                    }
+                activeRefreshGeneration = generation
+                accepted = true
+                startSettled = true
+            } catch (error: Throwable) {
+                startSettled = true
+                throw error
+            }
+        }
+        bufferedStatus?.let { status -> deliverProviderStatus(generation, status) }
+    }
+
+    private fun deliverProviderStatus(generation: Long, status: LocationProviderStatus) {
+        val tokens = synchronized(this) {
+            if (generation != activeRefreshGeneration) return
+            callbacks.keys.filter { token ->
+                if (lastStatuses[token] == status) {
+                    false
+                } else {
+                    lastStatuses[token] = status
+                    true
                 }
             }
-        } catch (error: Throwable) {
-            refreshGeneration.compareAndSet(generation, generation - 1)
-            throw error
         }
+        tokens.forEach { token ->
+            mainHandler.post {
+                val callback = synchronized(this) { callbacks[token] }
+                callback?.invoke(status)
+            }
+        }
+    }
+
+    private fun invalidateRefreshes() {
+        activeRefreshGeneration = ++nextRefreshGeneration
     }
 
     private fun startObserving() {
