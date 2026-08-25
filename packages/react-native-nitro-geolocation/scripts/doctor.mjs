@@ -24,7 +24,9 @@ function parseArguments(arguments_) {
     else if (argument === "--help" || argument === "-h") result.help = true;
     else if (argument === "--project") {
       const project = args.shift();
-      if (!project) throw new Error("--project requires a path");
+      if (!project || project.startsWith("-")) {
+        throw new Error("--project requires a path");
+      }
       result.project = project;
     } else {
       throw new Error(`Unknown option: ${argument}`);

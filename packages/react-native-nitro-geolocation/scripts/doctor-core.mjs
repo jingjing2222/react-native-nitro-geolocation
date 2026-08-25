@@ -29,10 +29,9 @@ function declaredDependency(packageJson, name) {
 }
 
 function reactNativeVersionStatus(version) {
-  const match = version?.match(/(?:^|[^\d])(\d+)\.(\d+)(?:\.\d+)?/);
-  if (!match) return "unknown";
-  const major = Number(match[1]);
-  const minor = Number(match[2]);
+  const parsed = parseReactNativeVersion(version);
+  if (!parsed) return "unknown";
+  const { major, minor } = parsed;
   if (
     major > MINIMUM_REACT_NATIVE.major ||
     (major === MINIMUM_REACT_NATIVE.major &&
@@ -43,11 +42,16 @@ function reactNativeVersionStatus(version) {
   return "unsupported";
 }
 
-function findInfoPlists(directory, depth = 0) {
-  if (depth > 4 || !existsSync(directory)) return [];
+function parseReactNativeVersion(version) {
+  const match = version?.match(/(?:^|[^\d])(\d+)\.(\d+)(?:\.\d+)?/);
+  if (!match) return undefined;
+  return { major: Number(match[1]), minor: Number(match[2]) };
+}
+
+function findFiles(directory, fileName, depth = 0, maxDepth = 6) {
+  if (depth > maxDepth || !existsSync(directory)) return [];
 
   const results = [];
-
   for (const entry of readdirSync(directory)) {
     if (["build", "Pods", ".git"].includes(entry)) continue;
     const candidate = path.join(directory, entry);
@@ -57,15 +61,41 @@ function findInfoPlists(directory, depth = 0) {
     } catch {
       continue;
     }
-    if (metadata.isFile() && entry === "Info.plist") results.push(candidate);
+    if (metadata.isFile() && entry === fileName) results.push(candidate);
     if (metadata.isDirectory()) {
-      results.push(...findInfoPlists(candidate, depth + 1));
+      results.push(...findFiles(candidate, fileName, depth + 1, maxDepth));
     }
   }
   return results;
 }
 
-function inspectAndroid(project, checks) {
+function activeAndroidPermission(manifest, name) {
+  const withoutComments = manifest.replace(/<!--[\s\S]*?-->/g, "");
+  const tags =
+    withoutComments.match(/<uses-permission(?:-sdk-\d+)?\b[^>]*>/gi) ?? [];
+  return tags.some((tag) => {
+    const declaresName = new RegExp(
+      `\\bandroid:name\\s*=\\s*["']${name.replaceAll(".", "\\.")}["']`,
+      "i"
+    ).test(tag);
+    const removesNode = /\btools:node\s*=\s*["'](?:remove|removeAll)["']/i.test(
+      tag
+    );
+    return declaresName && !removesNode;
+  });
+}
+
+function mergedAndroidManifests(android) {
+  const intermediates = path.join(android, "app/build/intermediates");
+  if (!existsSync(intermediates)) return [];
+  return readdirSync(intermediates)
+    .filter((entry) => /merged_manifest|packaged_manifest/.test(entry))
+    .flatMap((entry) =>
+      findFiles(path.join(intermediates, entry), "AndroidManifest.xml", 0, 8)
+    );
+}
+
+function inspectAndroid(project, checks, reactNativeVersion) {
   const android = path.join(project, "android");
   if (!existsSync(android)) {
     checks.push(
@@ -80,32 +110,58 @@ function inspectAndroid(project, checks) {
   }
 
   const properties = readText(path.join(android, "gradle.properties")) ?? "";
-  const newArchitectureDisabled = /^\s*newArchEnabled\s*=\s*false\s*$/im.test(
-    properties
-  );
+  const architectureValues = [
+    ...properties.matchAll(/^\s*newArchEnabled\s*=\s*(true|false)\s*$/gim)
+  ];
+  const configuredArchitecture = architectureValues.at(-1)?.[1].toLowerCase();
+  const defaultArchitectureEnabled =
+    reactNativeVersion &&
+    (reactNativeVersion.major > 0 || reactNativeVersion.minor >= 76);
   checks.push(
-    newArchitectureDisabled
+    configuredArchitecture === "false"
       ? check(
           "android-new-architecture",
           "error",
           "Android explicitly disables React Native's New Architecture.",
           "Set newArchEnabled=true in android/gradle.properties and rebuild the app."
         )
-      : check(
-          "android-new-architecture",
-          "pass",
-          "Android does not disable React Native's New Architecture."
-        )
+      : configuredArchitecture === "true"
+        ? check(
+            "android-new-architecture",
+            "pass",
+            "Android enables React Native's New Architecture."
+          )
+        : defaultArchitectureEnabled
+          ? check(
+              "android-new-architecture",
+              "pass",
+              "React Native 0.76+ enables the New Architecture by default and Android does not override it."
+            )
+          : check(
+              "android-new-architecture",
+              "error",
+              "Android does not explicitly enable React Native's New Architecture for this React Native version.",
+              "Set newArchEnabled=true in android/gradle.properties and rebuild the app."
+            )
   );
 
-  const manifest =
-    readText(path.join(android, "app/src/main/AndroidManifest.xml")) ?? "";
+  const sourceManifest = path.join(android, "app/src/main/AndroidManifest.xml");
+  const mergedManifests = mergedAndroidManifests(android);
+  const manifestFiles =
+    mergedManifests.length > 0 ? mergedManifests : [sourceManifest];
   for (const permission of ["COARSE", "FINE"]) {
     const name = `android.permission.ACCESS_${permission}_LOCATION`;
     const code = `android-permission-${permission.toLowerCase()}`;
+    const missingFrom = manifestFiles.filter(
+      (file) => !activeAndroidPermission(readText(file) ?? "", name)
+    );
     checks.push(
-      manifest.includes(name)
-        ? check(code, "pass", `${name} is declared.`)
+      missingFrom.length === 0
+        ? check(
+            code,
+            "pass",
+            `${name} is active in the app manifest${manifestFiles.length > 1 ? "s" : ""}.`
+          )
         : check(
             code,
             "error",
@@ -114,6 +170,106 @@ function inspectAndroid(project, checks) {
           )
     );
   }
+}
+
+function parsePbxObjects(contents) {
+  const lines = contents.split(/\r?\n/);
+  const objects = new Map();
+  for (let index = 0; index < lines.length; index += 1) {
+    const start = lines[index].match(
+      /^(\s+)([A-F0-9]{24})(?: \/\*.*\*\/)? = \{\s*$/
+    );
+    if (!start) continue;
+    const [, indentation, identifier] = start;
+    const body = [];
+    for (index += 1; index < lines.length; index += 1) {
+      if (lines[index] === `${indentation}};`) break;
+      body.push(lines[index]);
+    }
+    objects.set(identifier, body.join("\n"));
+  }
+  return objects;
+}
+
+function buildSetting(block, name) {
+  const escapedName = name.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  const match = block.match(
+    new RegExp(`^\\s*${escapedName}\\s*=\\s*(.*);\\s*$`, "m")
+  );
+  if (!match) return undefined;
+  const value = match[1].trim();
+  if (value.startsWith('"') && value.endsWith('"')) return value.slice(1, -1);
+  return value;
+}
+
+function applicationBuildConfigurations(pbxproj) {
+  const contents = readText(pbxproj);
+  if (!contents) return [];
+  const objects = parsePbxObjects(contents);
+  const configurations = [];
+
+  for (const target of objects.values()) {
+    if (
+      !target.includes("isa = PBXNativeTarget;") ||
+      !target.includes('productType = "com.apple.product-type.application";')
+    ) {
+      continue;
+    }
+    const listId = target.match(/buildConfigurationList = ([A-F0-9]{24})/)?.[1];
+    const list = listId ? objects.get(listId) : undefined;
+    const ids = list?.match(/[A-F0-9]{24}/g) ?? [];
+    for (const identifier of ids) {
+      const configuration = objects.get(identifier);
+      if (configuration?.includes("isa = XCBuildConfiguration;")) {
+        configurations.push(configuration);
+      }
+    }
+  }
+  return configurations;
+}
+
+function resolveInfoPlist(pbxproj, setting) {
+  let relative = setting
+    .replace(/^\$\((?:SRCROOT|PROJECT_DIR)\)\/?/, "")
+    .replace(/^\$\{(?:SRCROOT|PROJECT_DIR)\}\/?/, "");
+  if (relative.includes("$(") || relative.includes("${")) return undefined;
+  if (path.isAbsolute(relative)) return relative;
+  relative = relative.replace(/^\.\//, "");
+  return path.resolve(path.dirname(path.dirname(pbxproj)), relative);
+}
+
+function nonEmptyUsageDescription(contents) {
+  if (!contents) return false;
+  const withoutComments = contents.replace(/<!--[\s\S]*?-->/g, "");
+  const match = withoutComments.match(
+    /<key>\s*NSLocationWhenInUseUsageDescription\s*<\/key>\s*<string>([\s\S]*?)<\/string>/i
+  );
+  return Boolean(match?.[1].trim());
+}
+
+function inspectApplicationPlists(ios) {
+  const pbxprojects = findFiles(ios, "project.pbxproj", 0, 3);
+  const results = [];
+  for (const pbxproj of pbxprojects) {
+    for (const configuration of applicationBuildConfigurations(pbxproj)) {
+      const generatedDescription = buildSetting(
+        configuration,
+        "INFOPLIST_KEY_NSLocationWhenInUseUsageDescription"
+      );
+      if (generatedDescription?.trim()) {
+        results.push(true);
+        continue;
+      }
+      const setting = buildSetting(configuration, "INFOPLIST_FILE");
+      const infoPlist = setting
+        ? resolveInfoPlist(pbxproj, setting)
+        : undefined;
+      results.push(
+        nonEmptyUsageDescription(infoPlist ? readText(infoPlist) : undefined)
+      );
+    }
+  }
+  return results;
 }
 
 function inspectIos(project, checks) {
@@ -130,10 +286,10 @@ function inspectIos(project, checks) {
     return;
   }
 
-  const infoPlists = findInfoPlists(ios);
-  const hasDescription = infoPlists.some((infoPlist) =>
-    readText(infoPlist)?.includes("NSLocationWhenInUseUsageDescription")
-  );
+  const applicationResults = inspectApplicationPlists(ios);
+  const hasResolvedApplication = applicationResults.length > 0;
+  const hasDescription =
+    hasResolvedApplication && applicationResults.every((result) => result);
   checks.push(
     hasDescription
       ? check(
@@ -144,8 +300,10 @@ function inspectIos(project, checks) {
       : check(
           "ios-when-in-use-description",
           "error",
-          "NSLocationWhenInUseUsageDescription is missing from the app Info.plist.",
-          "Add a user-facing NSLocationWhenInUseUsageDescription string to the app target's Info.plist."
+          hasResolvedApplication
+            ? "A non-empty NSLocationWhenInUseUsageDescription is missing from an app target build configuration."
+            : "Could not resolve an application target Info.plist or generated usage-description setting.",
+          "Set a user-facing NSLocationWhenInUseUsageDescription for every app target build configuration."
         )
   );
 }
@@ -221,7 +379,7 @@ export function inspectProject(projectPath) {
         )
   );
 
-  inspectAndroid(project, checks);
+  inspectAndroid(project, checks, parseReactNativeVersion(reactNative));
   inspectIos(project, checks);
   return createReport(project, checks);
 }
