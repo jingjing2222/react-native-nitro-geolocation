@@ -101,6 +101,17 @@ When adding a flow:
 
 ## Test Files
 
+### Consumer location contract kit
+- `consumer-location-contract-happy.yaml` copies into a consumer app and proves
+  that granted permission reaches a real native position rendered by the UI
+- `consumer-location-contract-denied.yaml` proves the same product action does
+  not call the public position API when permission is denied and leaves a
+  working remediation action
+- The standalone `ConsumerLocationContractScreen.tsx` uses only React Native
+  and the public package API; see the
+  [consumer E2E contract kit](../../../docs/docs/guide/consumer-e2e-contract-kit.md)
+  for the copy and CI workflow
+
 ### `permission-check.yaml`
 - Tests location permission check/request functionality
 - Verifies permission state changes

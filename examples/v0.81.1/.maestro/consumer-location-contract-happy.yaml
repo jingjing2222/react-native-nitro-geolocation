@@ -1,0 +1,86 @@
+appId: nitrogeolocation.example
+---
+# Copyable consumer contract: a granted user can request and render a real fix.
+
+- runFlow:
+    when:
+      platform: Android
+    commands:
+      - launchApp:
+          clearState: true
+          permissions:
+            all: unset
+            location: allow
+- runFlow:
+    when:
+      platform: iOS
+    commands:
+      - launchApp:
+          clearState: true
+          permissions:
+            all: unset
+            location: inuse
+
+- runFlow:
+    when:
+      platform: Android
+      visible: ".*isn't responding|.*응답하지 않.*"
+    commands:
+      - tapOn:
+          text: "Wait|대기"
+- extendedWaitUntil:
+    visible: "Geolocation API"
+    timeout: 30000
+- stopApp
+
+- openLink:
+    link: nitrogeolocation://app/consumer-location-contract
+- runFlow:
+    when:
+      platform: Android
+      visible: ".*isn't responding|.*응답하지 않.*"
+    commands:
+      - tapOn:
+          text: "Wait|대기"
+- runFlow:
+    when:
+      platform: iOS
+      visible: "Cancel|취소"
+    commands:
+      - tapOn:
+          text: "Open|열기"
+- runFlow:
+    when:
+      platform: iOS
+    commands:
+      - openLink:
+          link: nitrogeolocation://app/consumer-location-contract
+- waitForAnimationToEnd
+
+- extendedWaitUntil:
+    visible:
+      id: "consumer-location-screen"
+    timeout: 10000
+
+- setLocation:
+    latitude: 37.5665
+    longitude: 126.978
+
+- tapOn:
+    id: "consumer-location-run"
+
+- setLocation:
+    latitude: 37.5665
+    longitude: 126.978
+
+- extendedWaitUntil:
+    visible:
+      id: "consumer-location-status-passed"
+    timeout: 60000
+
+- assertVisible:
+    id: "consumer-location-permission-granted"
+- assertVisible:
+    id: "consumer-location-api-attempts-1"
+- assertVisible:
+    id: "consumer-location-position-37566500-126978000"

@@ -1,0 +1,106 @@
+appId: nitrogeolocation.example
+env:
+  CONSUMER_APP_DISPLAY_NAME_PATTERN: NitroGeolocationExample
+  ANDROID_APP_SETTINGS_TITLE_PATTERN: App info|앱 정보
+  IOS_SETTINGS_TITLE_PATTERN: Settings|설정
+---
+# Copyable consumer edge contract: denied permission never starts a request and
+# leaves the user with an explicit permission action.
+
+- runFlow:
+    when:
+      platform: Android
+    commands:
+      - launchApp:
+          clearState: true
+          permissions:
+            all: unset
+            location: deny
+- runFlow:
+    when:
+      platform: iOS
+    commands:
+      - launchApp:
+          clearState: true
+          permissions:
+            all: unset
+            location: never
+
+- runFlow:
+    when:
+      platform: Android
+      visible: ".*isn't responding|.*응답하지 않.*"
+    commands:
+      - tapOn:
+          text: "Wait|대기"
+- extendedWaitUntil:
+    visible: "Geolocation API"
+    timeout: 30000
+- stopApp
+
+- openLink:
+    link: nitrogeolocation://app/consumer-location-contract
+- runFlow:
+    when:
+      platform: Android
+      visible: ".*isn't responding|.*응답하지 않.*"
+    commands:
+      - tapOn:
+          text: "Wait|대기"
+- runFlow:
+    when:
+      platform: iOS
+      visible: "Cancel|취소"
+    commands:
+      - tapOn:
+          text: "Open|열기"
+- runFlow:
+    when:
+      platform: iOS
+    commands:
+      - openLink:
+          link: nitrogeolocation://app/consumer-location-contract
+- waitForAnimationToEnd
+
+- extendedWaitUntil:
+    visible:
+      id: "consumer-location-screen"
+    timeout: 10000
+
+- tapOn:
+    id: "consumer-location-run"
+
+- extendedWaitUntil:
+    visible:
+      id: "consumer-location-status-permission-required"
+    timeout: 10000
+
+- assertVisible:
+    id: "consumer-location-permission-denied"
+- assertVisible:
+    id: "consumer-location-api-attempts-0"
+- assertNotVisible:
+    id: ".*consumer-location-position-.*"
+- assertVisible:
+    id: "consumer-location-open-settings"
+
+- tapOn:
+    id: "consumer-location-open-settings"
+- runFlow:
+    when:
+      platform: Android
+    commands:
+      - extendedWaitUntil:
+          visible: "${ANDROID_APP_SETTINGS_TITLE_PATTERN}"
+          timeout: 10000
+      - assertVisible: "${CONSUMER_APP_DISPLAY_NAME_PATTERN}"
+- runFlow:
+    when:
+      platform: iOS
+    commands:
+      - extendedWaitUntil:
+          visible: "${IOS_SETTINGS_TITLE_PATTERN}"
+          timeout: 10000
+      - assertVisible:
+          id: "breadcrumb"
+          text: ".*${CONSUMER_APP_DISPLAY_NAME_PATTERN}.*"
