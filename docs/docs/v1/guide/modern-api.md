@@ -58,6 +58,12 @@ export type GeolocationConfiguration = {
   /** `auto` and `playServices` prefer fused, then platform fallback. */
   locationProvider?: 'playServices' | 'android' | 'auto';
 };
+
+/**
+ * @deprecated Use `GeolocationConfiguration` instead.
+ * This alias is kept only for backward compatibility.
+ */
+export type ModernGeolocationConfiguration = GeolocationConfiguration;
 ```
 
 **When to call**:
@@ -99,72 +105,6 @@ async function checkLocationPermission() {
 - `'denied'` - User denied permission
 - `'restricted'` - Permission restricted (iOS parental controls)
 - `'undetermined'` - Permission not yet requested
-
-### getPermissionDetails()
-
-Read the current foreground status, granted scope, accuracy authorization, and
-the next appropriate permission action without showing a prompt, opening
-settings, or acquiring a location.
-
-```tsx
-import { getPermissionDetails } from 'react-native-nitro-geolocation';
-
-async function prepareLocationPermission() {
-  const details = await getPermissionDetails();
-
-  if (details.settingsGuidance === 'requestPermission') {
-    // Show your in-app rationale before calling requestPermission().
-  } else if (details.settingsGuidance === 'reviewSettings') {
-    // Explain why the user may want to review the app's system settings.
-  }
-
-  return details;
-}
-```
-
-**Returns**: `Promise<PermissionDetails>`
-
-```typescript
-interface PermissionDetails {
-  status: PermissionStatus;
-  scope: 'none' | 'foreground' | 'background';
-  accuracy: 'full' | 'reduced' | 'unknown';
-  canAskAgain: boolean | null;
-  settingsGuidance:
-    | 'none'
-    | 'requestPermission'
-    | 'requestPermissionOrReviewSettings'
-    | 'reviewSettings'
-    | 'managedRestriction'
-    | 'useSupportedEnvironment';
-}
-```
-
-- `scope` is `background` only when both foreground and background access are
-  granted. Browser access is always `foreground`.
-- `accuracy` reports iOS precise/reduced and Android fine/approximate access.
-  Browsers do not expose this distinction and return `unknown`.
-- `canAskAgain` describes whether another **foreground** system permission
-  prompt is known to be possible. It does not describe a later background
-  permission upgrade. `null` means the platform cannot determine the answer
-  without attempting a request.
-- Android exposes the same denied state before the first request and after
-  permanent denial through this read-only API. In that ambiguous state,
-  `canAskAgain` is `null` and `settingsGuidance` is
-  `requestPermissionOrReviewSettings`. After a normal denial, Android's
-  permission-rationale signal makes the state known requestable, so
-  `canAskAgain` is `true` and guidance is `requestPermission`.
-- iOS returns `requestPermission` for `undetermined`, `reviewSettings` for
-  `denied`, and `managedRestriction` for `restricted`.
-- Web uses the Permissions API when available. Without it, a successful
-  position/watch callback or permission-denied error is used as bounded
-  evidence for at most 30 seconds. A denial proves the current state but not
-  whether the browser will prompt again, so `canAskAgain` remains `null` and
-  guidance is `requestPermissionOrReviewSettings`. An authoritative
-  Permissions API `denied` state instead returns `false` and `reviewSettings`.
-  Without observed evidence, foreground prompt capability is also unknown. Without
-  `navigator.geolocation`, guidance is
-  `useSupportedEnvironment`.
 
 
 ### requestPermission()
@@ -224,34 +164,19 @@ function PermissionButton() {
 
 ### Android Provider and Settings
 
-The provider/settings snapshot helpers introduced before 2.0 remain available.
-`watchProviderStatus()` and the deterministic settings result are available in
-2.0.
+Available since `v1.2`.
 
 Use these helpers before user-facing precise-location flows where the app needs
 to know whether Android device settings can satisfy the request.
 
 ```tsx
-import { useEffect } from 'react';
 import {
   getCurrentPosition,
   getLocationAvailability,
-  getLocationReadiness,
   getProviderStatus,
   hasServicesEnabled,
-  requestLocationSettings,
-  requestLocationSettingsDetailed,
-  unwatch,
-  watchProviderStatus
+  requestLocationSettings
 } from 'react-native-nitro-geolocation';
-
-async function inspectLocation() {
-  const readiness = await getLocationReadiness();
-  // Show app-owned actions for every remediation, including acquirePosition
-  // when the device is ready but the module cache is still cold.
-  // The diagnosis itself never prompts or opens settings.
-  return readiness.remediations;
-}
 
 async function prepareAccurateLocation() {
   const availability = await getLocationAvailability();
@@ -259,30 +184,17 @@ async function prepareAccurateLocation() {
   const providerStatus = await getProviderStatus();
 
   if (!availability.available || !servicesEnabled || providerStatus.googleLocationAccuracyEnabled === false) {
-    const settings = await requestLocationSettingsDetailed({
+    await requestLocationSettings({
       accuracy: { android: 'high' },
       interval: 5000,
       fastestInterval: 1000
     });
-    if (settings.outcome !== 'satisfied') return settings;
   }
 
   return getCurrentPosition({
     accuracy: { android: 'high', ios: 'best' },
     timeout: 15000
   });
-}
-
-function ProviderStatusObserver() {
-  useEffect(() => {
-    const providerToken = watchProviderStatus((status) => {
-      console.log('Location services:', status.locationServicesEnabled);
-    });
-
-    return () => unwatch(providerToken);
-  }, []);
-
-  return null;
 }
 ```
 
@@ -295,51 +207,18 @@ function ProviderStatusObserver() {
   `networkAvailable`, `passiveAvailable`, Android Google Play Services
   availability, and Google Location Accuracy when Google Play Services exposes
   it.
-- `watchProviderStatus(callback): string` - Delivers an asynchronous initial
-  provider snapshot and then only distinct readiness changes. Pass its token to
-  `unwatch()` for cleanup. Available in 2.0.
 - `getLocationAvailability(): Promise<{ available: boolean; reason?: string }>` -
   Available since `v1.2`. Android reads Fused Location availability when
   `locationProvider: 'auto'` or `locationProvider: 'playServices'` is
   configured, then falls back to platform provider/service checks. iOS maps Core
   Location service and authorization state.
-- `getLocationReadiness(): Promise<LocationReadiness>` - Combines current
-  permission, services, provider, availability, Play Services, Google Location
-  Accuracy, and observed module-cache state into one read-only diagnosis. It
-  returns stable remediation codes such as `requestPermission`,
-  `requestPermissionOrReviewSettings`, `enableLocationServices`,
-  `useSupportedEnvironment`, and `acquirePosition`; it never requests
-  permission, opens settings, starts location acquisition, or changes
-  configuration. On Web, `useSupportedEnvironment` means reopening the app in
-  a secure context and a browser or WebView that exposes the Geolocation API.
-  When the Permissions API cannot report state, Web treats a successful
-  position observation as best-effort granted evidence for at most 30 seconds;
-  a denial, missing Geolocation API, clock rollback, or expiry clears that
-  inference.
-  Android uses `requestPermissionOrReviewSettings` because its existing
-  permission status cannot distinguish a first request from permanent denial;
-  request permission first, then offer app settings if it remains denied.
-  Google Play Services remediations are returned only when
-  `locationProvider: 'playServices'` is explicitly configured; the default
-  `auto` and `android` routes can continue through Android platform providers.
-- `requestLocationSettingsDetailed(options?): Promise<LocationSettingsResult>` -
+- `requestLocationSettings(options?): Promise<LocationProviderStatus>` -
   Checks the requested Android location settings and shows Android's native
-  resolution dialog when available. Expected outcomes resolve as `satisfied`,
-  `cancelled`, `unavailable`, or `activityMissing`, together with the latest
-  provider status. Request failures such as a concurrent request still reject.
-- `requestLocationSettings(options?): Promise<LocationSettingsResult>` - The
-  v2 method returns the same deterministic result. The detailed name is
-  provided to make result handling explicit in code shared across release lines.
+  resolution dialog when available. It resolves with the updated provider
+  status after the settings satisfy the request.
 
-Both settings methods are Android-focused. On iOS they resolve with the current
-Core Location service status and do not show a settings dialog.
-
-`watchProviderStatus()` only observes readiness: it does not request permission,
-open settings, or start position updates. Android reacts to system provider and
-location-mode broadcasts. iOS rechecks after authorization changes and when the
-app becomes active, which covers returning from Settings. Browser builds recheck
-when the page becomes visible or active. Provider-specific optional fields stay
-`undefined` on platforms that cannot report them.
+`requestLocationSettings()` is Android-focused. On iOS it resolves with the
+current Core Location service status and does not show a settings dialog.
 
 ### Android Reliability Notes
 
@@ -350,9 +229,8 @@ when the page becomes visible or active. Provider-specific optional fields stay
   path.
 - Approximate/coarse location flows are supported through permissions and
   Android `granularity`.
-- Use `getLastKnownPosition()` for a synchronous read of the module cache. Use
-  `getLastKnownPositionAsync()` to query native/provider caches without starting
-  a fresh request.
+- Use `getLastKnownPosition()` when you want an explicit cached read without
+  starting a fresh native request.
 - Modern API errors include `PLAY_SERVICE_NOT_AVAILABLE`,
   `SETTINGS_NOT_SATISFIED`, and `TIMEOUT`.
 
@@ -368,23 +246,17 @@ Supported on web:
 - `checkPermission()` maps `navigator.permissions.query({ name:
   'geolocation' })` to `granted`, `denied`, or `undetermined` when the
   Permissions API is available.
-- `getPermissionDetails()` enriches that read-only state with foreground scope
-  and settings guidance. Browser accuracy authorization remains `unknown`.
 - `requestPermission()` performs a one-shot browser geolocation request because
   browsers do not expose a standalone geolocation permission request API.
-- `getCurrentPosition()` uses `navigator.geolocation.getCurrentPosition()` for
-  ordinary requests. When `signal` is provided, it uses a one-shot browser
-  watch so aborting can call `clearWatch()` immediately.
+- `getCurrentPosition()` wraps `navigator.geolocation.getCurrentPosition()`.
 - `watchPosition()` wraps `navigator.geolocation.watchPosition()` and returns a
   string token.
-- `watchProviderStatus()` reports whether browser geolocation is available and
-  rechecks on page visibility/focus lifecycle events.
-- `unwatch()` and `stopObserving()` clear position and provider-status watches.
+- `unwatch()` and `stopObserving()` clear browser watch IDs.
 
 Web option behavior:
 
-- `accuracy` maps to the browser's high-accuracy boolean. `timeout` and
-  `maximumAge` are forwarded to the browser.
+- `enableHighAccuracy`, `timeout`, and `maximumAge` are forwarded to the
+  browser.
 - `distanceFilter` is applied in JavaScript for watch updates after the first
   emitted position.
 - `authorizationLevel`, `enableBackgroundLocationUpdates`, `locationProvider`,
@@ -449,17 +321,14 @@ function LocationButton() {
 }
 ```
 
-**Parameters**: `options?: CurrentPositionOptions`
+**Parameters**: `options?: LocationRequestOptions`
 
 **Options**:
 
 - `timeout?: number` - Request timeout in ms (default: 600000 / 10 min)
 - `maximumAge?: number` - Max age of cached location in ms (default: 0)
-- `signal?: AbortSignal` - Cancels only this request. A signal that is already
-  aborted prevents native or browser location work from starting. The promise
-  rejects with the exact `signal.reason`; runtimes without a reason receive an
-  `AbortError` fallback.
-- `accuracy?: { android?: 'high' | 'balanced' | 'low' | 'passive'; ios?: 'bestForNavigation' | 'best' | 'nearestTenMeters' | 'hundredMeters' | 'kilometer' | 'threeKilometers' | 'reduced' }` - Platform-specific accuracy preset. Modern 2.0 callers use this option; `enableHighAccuracy` remains only on `/compat`.
+- `enableHighAccuracy?: boolean` - Deprecated since `v1.2`. Kept for v1 compatibility only; prefer `accuracy`. It is expected to be removed from the Modern API in v2.
+- `accuracy?: { android?: 'high' | 'balanced' | 'low' | 'passive'; ios?: 'bestForNavigation' | 'best' | 'nearestTenMeters' | 'hundredMeters' | 'kilometer' | 'threeKilometers' | 'reduced' }` - Platform-specific accuracy preset, available since `v1.2`. When a preset is provided for the current platform, it takes precedence over `enableHighAccuracy`.
 - `granularity?: 'permission' | 'coarse' | 'fine'` - Android-only request granularity, available since `v1.2`. `permission` follows the granted permission level, `coarse` avoids fine GPS-only requests, and `fine` requires fine location permission.
 - `waitForAccurateLocation?: boolean` - Android-only Fused request tuning, available since `v1.2`.
 - `maxUpdateAge?: number` - Android-only maximum age for an initial update in ms, available since `v1.2`.
@@ -482,28 +351,6 @@ await getCurrentPosition({
   timeout: 15000
 });
 ```
-
-Use an `AbortController` when the screen or operation that owns a one-shot
-request can end before location arrives:
-
-```tsx
-const controller = new AbortController();
-
-const request = getCurrentPosition({
-  accuracy: { android: 'high', ios: 'best' },
-  maximumAge: 0,
-  timeout: 30000,
-  signal: controller.signal
-});
-
-controller.abort(new Error('Screen closed'));
-await request;
-```
-
-Cancellation is isolated by request ID: aborting one concurrent request does
-not cancel another request or an active watch. Omitting `signal` keeps the
-existing one-shot native/browser path. The callback-based `/compat` API is
-unchanged.
 
 Android maps the presets to native accuracy/priority intent. With `auto` or
 `playServices`, requests prefer Google Play Services fused location and use the
@@ -542,24 +389,6 @@ export type LocationProviderUsed =
   | 'passive'
   | 'unknown';
 
-type LocationResponseSource =
-  | 'currentPosition'
-  | 'watchPosition'
-  | 'platformCache'
-  | 'moduleCache';
-
-type LocationQualityBand = 'high' | 'medium' | 'low' | 'unknown';
-
-interface LocationMetadata {
-  source: LocationResponseSource;
-  age?: number;
-  quality: LocationQualityBand;
-  staleReason?:
-    | 'maximumAgeExceeded'
-    | 'futureTimestamp'
-    | 'invalidTimestamp';
-}
-
 interface GeolocationResponse {
   coords: {
     latitude: number;
@@ -573,62 +402,10 @@ interface GeolocationResponse {
   timestamp: number;
   mocked?: boolean;
   provider?: LocationProviderUsed;
-  metadata?: LocationMetadata;
 }
 ```
 
-### Mock and provider metadata
-
-`mocked` and `provider` are optional Modern API metadata fields added in v1.2.
-They describe the source of that particular position sample:
-
-- `mocked` reports whether the sample source identified it as simulated or
-  supplied by a test provider. Native Android responses use `Location.isMock`
-  (or `isFromMockProvider` on older Android versions). Native iOS responses use
-  `CLLocation.sourceInformation` when it is available on iOS 15 and later;
-  otherwise the field can be absent.
-- `provider` identifies the Android provider route as `fused`, `gps`,
-  `network`, or `passive`. iOS and web return `unknown` because those platforms
-  do not expose an equivalent provider name through this API.
-- Web positions omit `mocked` because the browser Geolocation API does not
-  expose trustworthy simulation metadata.
-- The optional development-tools integration returns `mocked: true` for its
-  injected JavaScript samples. That value identifies the tooling source; it is
-  not native platform attestation.
-
-Treat `mocked` as per-sample diagnostic evidence, not as an anti-fraud or
-device-integrity guarantee. A missing value means the platform did not expose
-the signal; it does not mean `false`. Likewise, `provider` describes the route
-used for the sample and does not establish whether the coordinates should be
-trusted.
-
-The synchronous module cache returned by `getLastKnownPosition()` preserves
-the metadata attached to the last position observed by this JavaScript module.
-Disabling a mock-location app or simulator fixture cannot rewrite that cached
-response, so it may still contain `mocked: true`. By contrast,
-`getLastKnownPositionAsync()` converts a native cached sample when it is read
-on Android or iOS; platform metadata is derived again and Android `provider`
-can reflect the current query route. On web it filters the JavaScript module
-cache, while the optional development-tools integration filters its configured
-mock cache. Do not require an asynchronous native-cache response to be
-identical to an earlier JavaScript response. Request or observe a newer sample
-when application policy requires fresher evidence, and apply `maximumAge` when
-reading the platform cache.
-
-The `/compat` entry point keeps the
-`@react-native-community/geolocation` response shape and does not include these
-fields. Compat callers can opt into equivalent metadata by setting
-`includeExtraMetadata: true` on compat `getCurrentPosition()` / `watchPosition()` calls.
-
-#### Testing the signal naturally
-
-- Test `mocked: true` with an emulator or simulator location fixture such as
-  Maestro `setLocation`.
-- Test `mocked: false` only on a physical device receiving a real provider
-  location, without coordinate injection. Do not manufacture the false branch
-  by changing or hiding returned metadata.
-- Assert absence separately on platforms that cannot provide the signal; do
-  not convert an unavailable value to `false`.
+`mocked` and `provider` are optional metadata fields added to the Modern API response in v1.2. The `/compat` API keeps the `@react-native-community/geolocation` response shape and does not include these fields.
 
 **Error Handling**:
 
@@ -654,12 +431,10 @@ const token = watchPosition(
 unwatch(token);
 ```
 
-Starting in 2.0, Modern API errors use readable string discriminants. Keep
-comparisons against the `LocationErrorCode` members shown below instead of
-copying their values. The expanded modern-only native setup/provider members
-(`INTERNAL_ERROR`, `PLAY_SERVICE_NOT_AVAILABLE`, and
-`SETTINGS_NOT_SATISFIED`) were originally added in v1.2; 2.0 keeps those member
-names while replacing every Modern numeric value with a string.
+Modern API errors use the following codes. The expanded modern-only native
+setup/provider codes (`INTERNAL_ERROR`, `PLAY_SERVICE_NOT_AVAILABLE`, and
+`SETTINGS_NOT_SATISFIED`) were added in v1.2; codes 1-3 remain aligned with the
+legacy browser-style contract.
 
 The code is committed by the native layer before a `LocationError` is sent to
 JS. Both `watchPosition` error callbacks and public Promise rejections from
@@ -667,45 +442,39 @@ JS. Both `watchPosition` error callbacks and public Promise rejections from
 shape; JS only relays that object and does not parse or reclassify native
 messages.
 
-| Value | Name                         | Meaning                                      |
-| ----- | ---------------------------- | -------------------------------------------- |
-| `internalError` | `INTERNAL_ERROR` | Unexpected module/native failure |
-| `permissionDenied` | `PERMISSION_DENIED` | Location permission was denied |
-| `positionUnavailable` | `POSITION_UNAVAILABLE` | A position fix is unavailable |
-| `timeout` | `TIMEOUT` | The request timed out |
-| `playServicesUnavailable` | `PLAY_SERVICE_NOT_AVAILABLE` | Android Google Play Services is unavailable |
-| `settingsNotSatisfied` | `SETTINGS_NOT_SATISFIED` | Device/provider settings do not satisfy the request |
+| Code | Name                         | Meaning                                      |
+| ---- | ---------------------------- | -------------------------------------------- |
+| -1   | `INTERNAL_ERROR`             | Unexpected module/native failure             |
+| 1    | `PERMISSION_DENIED`          | Location permission was denied               |
+| 2    | `POSITION_UNAVAILABLE`       | A position fix is unavailable                |
+| 3    | `TIMEOUT`                    | The request timed out                        |
+| 4    | `PLAY_SERVICE_NOT_AVAILABLE` | Android Google Play Services is unavailable  |
+| 5    | `SETTINGS_NOT_SATISFIED`     | Device/provider settings do not satisfy the request |
 
-The `/compat` API keeps the legacy numeric browser-style contract with only
-`PERMISSION_DENIED` (`1`), `POSITION_UNAVAILABLE` (`2`), and `TIMEOUT` (`3`).
-See [2.0 Error Migration](./v2-error-migration.md) for the 1.x-to-2.x mapping.
+The `/compat` API keeps the legacy browser-style error contract with only `PERMISSION_DENIED`, `POSITION_UNAVAILABLE`, and `TIMEOUT`.
 
-### getLastKnownPosition() and getLastKnownPositionAsync()
+### getLastKnownPosition()
 
-`getLastKnownPosition()` synchronously reads the latest position observed by
-this JavaScript module. It takes no options, never calls native code, and returns
-`undefined` while that module-local cache is cold.
+Available since `v1.2`.
+
+Read the best cached native location explicitly without starting a fresh
+location request. This is useful for fast app startup, stale-while-refresh UI,
+and cache-only flows where a fresh GPS/network request would be too expensive.
 
 ```tsx
-import {
-  getLastKnownPosition,
-  getLastKnownPositionAsync
-} from 'react-native-nitro-geolocation';
+import { getLastKnownPosition } from 'react-native-nitro-geolocation';
 
-const observed = getLastKnownPosition();
-
-const cached = await getLastKnownPositionAsync({
+const cached = await getLastKnownPosition({
   maximumAge: 60_000,
   accuracy: { android: 'balanced', ios: 'hundredMeters' }
 });
 ```
 
-`getLastKnownPositionAsync(options?)` queries native/provider cache-only sources
-with the same filtering options as `getCurrentPosition()`, but never falls
-through to a fresh request. It resolves `undefined` when no cached location
-satisfies the options, including a native `POSITION_UNAVAILABLE` result. Other
-failures, such as permission denial, reject with the Modern `LocationError`
-contract.
+`getLastKnownPosition(options?)` uses the same provider and cache-filtering
+options as `getCurrentPosition()`, but it never falls through to a fresh native
+request. If no cached location satisfies `maximumAge` or permission is denied,
+it rejects with the native `LocationError` contract, usually
+`POSITION_UNAVAILABLE` or `PERMISSION_DENIED`.
 
 ### Geocoding APIs
 
@@ -877,7 +646,8 @@ function LiveTracker() {
 **Options**:
 
 - `enabled?: boolean` - Start/stop watching (default: `false`)
-- `accuracy?: { android?: 'high' | 'balanced' | 'low' | 'passive'; ios?: 'bestForNavigation' | 'best' | 'nearestTenMeters' | 'hundredMeters' | 'kilometer' | 'threeKilometers' | 'reduced' }` - Platform-specific accuracy preset. Modern 2.0 callers use this option; `enableHighAccuracy` remains only on `/compat`.
+- `enableHighAccuracy?: boolean` - Deprecated since `v1.2`. Kept for v1 compatibility only; prefer `accuracy`. It is expected to be removed from the Modern API in v2.
+- `accuracy?: { android?: 'high' | 'balanced' | 'low' | 'passive'; ios?: 'bestForNavigation' | 'best' | 'nearestTenMeters' | 'hundredMeters' | 'kilometer' | 'threeKilometers' | 'reduced' }` - Platform-specific accuracy preset, available since `v1.2`.
 - `granularity?: 'permission' | 'coarse' | 'fine'` - Android-only request granularity, available since `v1.2`
 - `waitForAccurateLocation?: boolean` - Android-only high-accuracy initial update tuning, available since `v1.2`
 - `maxUpdateAge?: number` - Android-only maximum age for an initial update, available since `v1.2`
@@ -972,21 +742,6 @@ import { unwatch } from 'react-native-nitro-geolocation';
 unwatch(token);
 ```
 
-### getActiveWatches()
-
-Read the active Modern API position and heading subscriptions without starting
-or changing location services:
-
-```tsx
-import { getActiveWatches } from 'react-native-nitro-geolocation';
-
-const active = getActiveWatches();
-// [{ token: '...', kind: 'position' }]
-```
-
-See [Watch observability](/guide/watch-observability) for the native merge,
-restart, automatic `maxUpdates` removal, and cleanup contracts.
-
 ### stopObserving()
 
 Stop ALL watch subscriptions immediately.
@@ -1070,21 +825,17 @@ All Modern API exports are fully typed:
 ```typescript
 import type {
   PermissionStatus,
-  CurrentPositionOptions,
   LocationRequestOptions,
   LocationErrorCode,
   LocationError,
   GeolocationResponse,
   GeolocationCoordinates,
   LocationProviderUsed,
-  LocationReadiness,
-  LocationReadinessRemediation,
   GeolocationConfiguration
 } from 'react-native-nitro-geolocation';
 ```
 
-The deprecated `ModernGeolocationConfiguration` alias was removed in 2.0. Use
-`GeolocationConfiguration` for the root Modern API.
+`ModernGeolocationConfiguration` is still exported as a deprecated compatibility alias.
 
 ### Type Inference
 

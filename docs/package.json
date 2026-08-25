@@ -8,6 +8,7 @@
   },
   "scripts": {
     "build": "rspress build",
+    "check:versions": "node scripts/check-version-sources.mjs && node scripts/check-version-routes.mjs",
     "dev": "rspress dev",
     "preview": "rspress preview",
     "typecheck": "tsc --noEmit"

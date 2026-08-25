@@ -8,24 +8,18 @@ Before installing the module, make sure your app uses React Native 0.75+ with
 the New Architecture and Nitro Modules enabled.
 
 ```bash
-# Install Nitro core and the 2.0 release candidate
-yarn add react-native-nitro-modules react-native-nitro-geolocation@rc
+# Install Nitro core and Geolocation module
+yarn add react-native-nitro-modules react-native-nitro-geolocation
 
 # or using npm
-npm install react-native-nitro-modules react-native-nitro-geolocation@rc
+npm install react-native-nitro-modules react-native-nitro-geolocation
 ```
 
 After installation, rebuild your native app to ensure the new module is linked.
 
 ```bash
-cd ios && bundle exec pod install
+cd ios && pod install
 ```
-
-Use `pod install` directly when your app does not check in a `Gemfile`.
-React Native 0.87's Swift Package Manager workflow is not yet compatible with
-the required Nitro Modules native target. Keep CocoaPods for iOS and see the
-[Swift Package Manager compatibility guide](/guide/swift-package-manager)
-before migrating an RN 0.87 app.
 
 Released npm builds try to use the matching GitHub Release prebuilts first:
 Android downloads the release AAR and reuses its native `.so` files, while iOS
@@ -41,16 +35,6 @@ NITRO_GEOLOCATION_USE_PREBUILT=0
 This package requires native Nitro bindings. Expo Go is not supported. For Expo
 apps, use prebuild, a development build, or another custom native build flow;
 see the [Expo development build guide](/guide/expo-development-build).
-
-After configuring the native projects, run the read-only install doctor:
-
-```bash
-yarn nitro-geolocation doctor
-```
-
-It reports dependency, architecture, and permission setup errors without
-editing the app. See the [Install Doctor guide](/guide/install-doctor) for CI,
-monorepo, and JSON output options.
 
 
 ## 2. iOS Setup
@@ -127,7 +111,7 @@ from the [Modern API reference](/guide/modern-api).
 
 ```tsx
 import {
-  getLastKnownPositionAsync,
+  getLastKnownPosition,
   requestLocationSettings
 } from 'react-native-nitro-geolocation';
 
@@ -135,7 +119,7 @@ await requestLocationSettings({
   accuracy: { android: 'high' }
 });
 
-const cached = await getLastKnownPositionAsync({
+const cached = await getLastKnownPosition({
   maximumAge: 60_000,
   accuracy: { android: 'balanced', ios: 'hundredMeters' }
 });
@@ -145,7 +129,6 @@ const cached = await getLastKnownPositionAsync({
 ## Next Steps
 
 - [Modern API Reference](/guide/modern-api) — Complete documentation
-- [Swift Package Manager](/guide/swift-package-manager) — RN 0.87 compatibility and migration gate
 - [Compat API Reference](/guide/compat-api) — Compatibility methods
 - [Background Location](/background/overview) — Native background tracking, geofencing, and storage recovery
 - [Migration Guides](/guide/migration-assistance) — Move from community/service geolocation packages
