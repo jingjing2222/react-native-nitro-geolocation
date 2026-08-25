@@ -443,10 +443,7 @@ class NitroGeolocation: HybridNitroGeolocationSpec {
             request.success(position)
         }
 
-        let subscriptions = Array(watchSubscriptions.values)
-        for subscription in subscriptions {
-            subscription.success(position)
-        }
+        deliverPositionToWatches(location: location, position: position)
 
         if watchSubscriptions.isEmpty && pendingPositionRequests.isEmpty {
             stopMonitoring()

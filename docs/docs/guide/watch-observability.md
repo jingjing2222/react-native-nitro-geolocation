@@ -57,11 +57,13 @@ unsupported web heading requests are not reported as active.
   shared `CLLocationManager`; it restarts only when the selected Core Location
   mode changes.
 
-## Current native merge policy
+## Watch Manager v2 default
 
 Multiple position watches share native resources. Options are merged to serve
-the most demanding active consumers; this is observable behavior, not a new
-Watch Manager policy.
+the most demanding active acquisition, while callback delivery is evaluated
+against each subscription's own thresholds. A one-shot request or a second
+watch may make native acquisition more demanding, but cannot lower an existing
+watch's delivery threshold or move its last-delivered baseline.
 
 ### Android
 
@@ -76,9 +78,14 @@ native request uses:
   when any watch explicitly requires fine, otherwise permission granularity.
 
 `maxUpdates` remains per subscription. Reaching the limit removes only that
-watch, then stops or restarts the shared request as needed. Heading watches use
-the Android sensor manager separately and apply each subscription's
-`headingFilter` independently.
+watch, then stops or restarts the shared request as needed. For callback
+delivery, the first native position establishes each watch's baseline. Later
+positions must satisfy that watch's own `interval` and `distanceFilter`, both
+measured from its last delivered position; suppressed native updates do not move
+the baseline or count toward `maxUpdates`. `fastestInterval` still contributes
+to the shared native request, while `interval` is the per-watch minimum callback
+period. Heading watches use the Android sensor manager separately and apply each
+subscription's `headingFilter` independently.
 
 ### iOS
 
@@ -92,12 +99,25 @@ Position watches and pending one-shot position requests share one
   for it.
 
 Changing significant-change mode stops and restarts Core Location. Other
-position option changes reconfigure the existing manager. Heading watches share
-the same manager's heading sensor separately and use the smallest active heading
-filter.
+position option changes reconfigure the existing manager. Each position watch
+receives its first native position, then applies its own `distanceFilter` from
+the last position delivered to that watch. A nearby update accepted for a more
+demanding watch or one-shot request no longer leaks into a less frequent watch.
+Core Location does not expose the Android `interval` option. Heading watches
+share the same manager's heading sensor separately and apply each subscription's
+`headingFilter` independently.
 
 ### Web
 
 Each position watch maps to its own `navigator.geolocation.watchPosition()`
 call. Browser watches are not merged. The package applies each watch's
 `distanceFilter` in JavaScript.
+
+## Migration note
+
+The v1.x native managers delivered every shared native position to every watch,
+so adding a more demanding watch or one-shot request could increase callbacks
+for existing consumers. In v2, code that intentionally relied on that leakage
+must lower the affected watch's own `interval` or `distanceFilter`. Continue to
+call `unwatch(token)` for component-local cleanup and reserve `stopObserving()`
+for session-wide cleanup.

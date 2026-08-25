@@ -70,6 +70,7 @@ appId: nitrogeolocation.example
 - runFlow: cancellable-current-position.yaml
 - runFlow: watch-position.yaml
 - runFlow: watch-observability.yaml
+- runFlow: watch-manager-v2.yaml
 - runFlow: location-simulation.yaml
 - runFlow: accuracy-presets.yaml
 - runFlow: last-known-position.yaml
