@@ -1,5 +1,5 @@
-import type { PermissionStatus } from "../NitroGeolocation.nitro";
 import { NitroGeolocationHybridObject } from "../NitroGeolocationModule";
+import type { PermissionStatus } from "../publicTypes";
 
 /**
  * Request location permission from the user.

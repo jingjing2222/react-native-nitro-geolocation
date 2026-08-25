@@ -1,7 +1,8 @@
-import type { LocationRequestOptions } from "../NitroGeolocation.nitro";
+import type { LocationRequestOptions } from "../publicTypes";
 
 /** Options for a one-shot location request. */
-export interface CurrentPositionOptions extends LocationRequestOptions {
+export interface CurrentPositionOptions
+  extends Omit<LocationRequestOptions, "maxUpdates"> {
   /**
    * Cancels only this request. A pre-aborted signal does not start native or
    * browser location work. Cancellation rejects with `signal.reason`, or an

@@ -1,4 +1,3 @@
-import type { PermissionStatus } from "./NitroGeolocation.nitro";
 import type {
   AccuracyAuthorization as SchemaAccuracyAuthorization,
   ActiveWatch as SchemaActiveWatch,
@@ -8,7 +7,6 @@ import type {
   CompatGeolocationError as SchemaCompatGeolocationError,
   CompatGeolocationOptions as SchemaCompatGeolocationOptions,
   CompatGeolocationResponse as SchemaCompatGeolocationResponse,
-  CompatGeolocationResponseWithMetadataInternal as SchemaCompatGeolocationResponseWithMetadataInternal,
   GeocodedLocation as SchemaGeocodedLocation,
   GeocodingCoordinates as SchemaGeocodingCoordinates,
   GeolocationResponse as SchemaGeolocationResponse,
@@ -17,11 +15,13 @@ import type {
   IOSAccuracyPreset as SchemaIOSAccuracyPreset,
   IOSActivityType as SchemaIOSActivityType,
   LocationAccuracyOptions as SchemaLocationAccuracyOptions,
-  LocationAvailability as SchemaLocationAvailability,
   LocationProviderStatus as SchemaLocationProviderStatus,
   LocationProviderUsed as SchemaLocationProviderUsed,
+  LocationRequestOptions as SchemaLocationRequestOptions,
+  LocationSettingsOptions as SchemaLocationSettingsOptions,
   LocationSettingsOutcome as SchemaLocationSettingsOutcome,
   LocationSettingsResult as SchemaLocationSettingsResult,
+  PermissionStatus as SchemaPermissionStatus,
   ReverseGeocodedAddress as SchemaReverseGeocodedAddress
 } from "./types";
 
@@ -59,7 +59,23 @@ export type GeolocationResponse = SchemaGeolocationResponse & {
 export type LocationProviderStatus = SchemaLocationProviderStatus;
 export type LocationSettingsOutcome = SchemaLocationSettingsOutcome;
 export type LocationSettingsResult = SchemaLocationSettingsResult;
-export type LocationAvailability = SchemaLocationAvailability;
+export type LocationAvailabilityReason =
+  | "unsupported"
+  | "permissionUndetermined"
+  | "permissionDenied"
+  | "permissionRestricted"
+  | "locationServicesDisabled"
+  | "providerUnavailable"
+  | "temporarilyUnavailable"
+  | "authorizationUnknown"
+  | "unknown";
+export interface LocationAvailability {
+  available: boolean;
+  reason?: LocationAvailabilityReason;
+}
+export type PermissionStatus = SchemaPermissionStatus;
+export type LocationRequestOptions = SchemaLocationRequestOptions;
+export type LocationSettingsOptions = SchemaLocationSettingsOptions;
 
 export type LocationReadinessRemediation =
   | "requestPermission"
@@ -123,6 +139,20 @@ export type HeadingOptions = SchemaHeadingOptions;
 export type ActiveWatch = SchemaActiveWatch;
 export type ActiveWatchKind = SchemaActiveWatchKind;
 
+/** Cache filters accepted by `getLastKnownPositionAsync()`. */
+export interface LastKnownPositionOptions {
+  /** Maximum age of a cached location in milliseconds. Defaults to unbounded. */
+  maximumAge?: number;
+  /** Accuracy used for Android provider and cache-quality selection. */
+  accuracy?: LocationAccuracyOptions;
+  /** Android cache/provider granularity. */
+  granularity?: AndroidGranularity;
+  /** Require an Android cached fix to satisfy the requested accuracy. */
+  waitForAccurateLocation?: boolean;
+  /** Additional Android upper bound for cached update age. */
+  maxUpdateAge?: number;
+}
+
 export type CompatGeolocationResponse = SchemaCompatGeolocationResponse;
 
 /**
@@ -130,13 +160,10 @@ export type CompatGeolocationResponse = SchemaCompatGeolocationResponse;
  * Metadata remains optional because platform/runtime support can vary.
  */
 export type CompatGeolocationResponseWithMetadata =
-  SchemaCompatGeolocationResponse &
-    Partial<
-      Pick<
-        SchemaCompatGeolocationResponseWithMetadataInternal,
-        "mocked" | "provider"
-      >
-    >;
+  SchemaCompatGeolocationResponse & {
+    mocked?: boolean;
+    provider?: LocationProviderUsed;
+  };
 
 export type GeolocationCoordinates = GeolocationResponse["coords"];
 export type LocationProviderUsed = SchemaLocationProviderUsed;

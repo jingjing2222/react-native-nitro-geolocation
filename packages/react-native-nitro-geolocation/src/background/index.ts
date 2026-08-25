@@ -1,5 +1,5 @@
 import { NitroModules } from "react-native-nitro-modules";
-import type { LocationError } from "../NitroGeolocation.nitro";
+import type { LocationError } from "../utils/errors";
 import type { NitroBackgroundLocation } from "./NitroBackgroundLocation.nitro";
 import { createLocationLifecycleSubscription } from "./locationLifecycle";
 import {
@@ -7,9 +7,7 @@ import {
   toNativeBackgroundLocationOptions
 } from "./options";
 import type {
-  ActivityRecognitionOptions,
   BackgroundEvent,
-  BackgroundEventEnvelope,
   BackgroundHttpSyncResult,
   BackgroundLocation,
   BackgroundLocationDiagnosis,
@@ -24,10 +22,14 @@ import type {
   GetStoredBackgroundEventsOptions,
   GetStoredBackgroundLocationsOptions,
   LocationLifecycleEvent,
+  StartActivityRecognitionOptions,
   StoredBackgroundEvent,
-  StoredBackgroundEventEnvelope,
   StoredBackgroundLocation
 } from "./publicTypes";
+import type {
+  BackgroundEventEnvelope,
+  StoredBackgroundEventEnvelope
+} from "./types";
 
 const NativeBackgroundLocation =
   NitroModules.createHybridObject<NitroBackgroundLocation>(
@@ -166,7 +168,7 @@ export function getRegisteredGeofences(): Promise<GeofenceRegion[]> {
 }
 
 export function startActivityRecognition(
-  options?: ActivityRecognitionOptions
+  options?: StartActivityRecognitionOptions
 ): Promise<void> {
   return NativeBackgroundLocation.startActivityRecognition(options);
 }

@@ -1,6 +1,6 @@
-import type { LocationError } from "../NitroGeolocation.nitro";
 import type { GeolocationResponse } from "../publicTypes";
 import type { ActiveWatch } from "../publicTypes";
+import type { LocationError } from "../utils/errors";
 import { LocationErrorCodes } from "../utils/errors";
 import { getDevtoolsState } from "./index";
 

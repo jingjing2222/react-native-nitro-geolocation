@@ -692,7 +692,7 @@ class NitroGeolocation(
 
     private fun getPlatformLocationAvailability(): LocationAvailability {
         val providers = getValidProviders(resolveAndroidAccuracy(null, enableHighAccuracy = false))
-        val reason = if (providers.isEmpty()) "noLocationProvider" else null
+        val reason = if (providers.isEmpty()) "providerUnavailable" else null
         return createLocationAvailability(providers.isNotEmpty(), reason)
     }
 

@@ -1,8 +1,10 @@
-import type { LocationRequestOptions } from "../NitroGeolocation.nitro";
 import { NitroGeolocationHybridObject } from "../NitroGeolocationModule";
 import { isDevtoolsEnabled } from "../devtools";
 import { getDevtoolsLastKnownPosition } from "../devtools/getLastKnownPosition";
-import type { GeolocationResponse } from "../publicTypes";
+import type {
+  GeolocationResponse,
+  LastKnownPositionOptions
+} from "../publicTypes";
 import { LocationErrorCodes } from "../utils/errors";
 import { decoratePositionWithMetadata } from "./locationMetadata";
 import { readLastKnownPosition, rememberPosition } from "./positionCache";
@@ -32,7 +34,7 @@ export function getLastKnownPosition(): GeolocationResponse | undefined {
  * @throws LocationError if permission is denied or the cache query fails
  */
 export function getLastKnownPositionAsync(
-  options?: LocationRequestOptions
+  options?: LastKnownPositionOptions
 ): Promise<GeolocationResponse | undefined> {
   const requestedAt = Date.now();
   const rememberPlatformCache = (position: GeolocationResponse) =>
