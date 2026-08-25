@@ -81,18 +81,9 @@ function activeAndroidPermission(manifest, name) {
     const removesNode = /\btools:node\s*=\s*["'](?:remove|removeAll)["']/i.test(
       tag
     );
-    return declaresName && !removesNode;
+    const limitsSdk = /\bandroid:maxSdkVersion\s*=/i.test(tag);
+    return declaresName && !removesNode && !limitsSdk;
   });
-}
-
-function mergedAndroidManifests(android) {
-  const intermediates = path.join(android, "app/build/intermediates");
-  if (!existsSync(intermediates)) return [];
-  return readdirSync(intermediates)
-    .filter((entry) => /merged_manifest|packaged_manifest/.test(entry))
-    .flatMap((entry) =>
-      findFiles(path.join(intermediates, entry), "AndroidManifest.xml", 0, 8)
-    );
 }
 
 function inspectAndroid(project, checks, reactNativeVersion) {
@@ -111,57 +102,36 @@ function inspectAndroid(project, checks, reactNativeVersion) {
 
   const properties = readText(path.join(android, "gradle.properties")) ?? "";
   const architectureValues = [
-    ...properties.matchAll(/^\s*newArchEnabled\s*=\s*(true|false)\s*$/gim)
-  ];
-  const configuredArchitecture = architectureValues.at(-1)?.[1].toLowerCase();
-  const defaultArchitectureEnabled =
-    reactNativeVersion &&
-    (reactNativeVersion.major > 0 || reactNativeVersion.minor >= 76);
+    ...properties.matchAll(
+      /^\s*(?:react\.)?newArchEnabled\s*=\s*(true|false)\s*$/gim
+    )
+  ].map((match) => match[1].toLowerCase());
+  const architectureEnabled =
+    architectureValues.length > 0 &&
+    architectureValues.every((value) => value === "true");
   checks.push(
-    configuredArchitecture === "false"
+    architectureEnabled
       ? check(
           "android-new-architecture",
-          "error",
-          "Android explicitly disables React Native's New Architecture.",
-          "Set newArchEnabled=true in android/gradle.properties and rebuild the app."
+          "pass",
+          "Android enables React Native's New Architecture."
         )
-      : configuredArchitecture === "true"
-        ? check(
-            "android-new-architecture",
-            "pass",
-            "Android enables React Native's New Architecture."
-          )
-        : defaultArchitectureEnabled
-          ? check(
-              "android-new-architecture",
-              "pass",
-              "React Native 0.76+ enables the New Architecture by default and Android does not override it."
-            )
-          : check(
-              "android-new-architecture",
-              "error",
-              "Android does not explicitly enable React Native's New Architecture for this React Native version.",
-              "Set newArchEnabled=true in android/gradle.properties and rebuild the app."
-            )
+      : check(
+          "android-new-architecture",
+          "error",
+          `Android does not explicitly enable React Native's New Architecture${reactNativeVersion ? ` for React Native ${reactNativeVersion.major}.${reactNativeVersion.minor}` : ""}.`,
+          "Set newArchEnabled=true or react.newArchEnabled=true in android/gradle.properties, remove conflicting false values, and rebuild the app."
+        )
   );
 
   const sourceManifest = path.join(android, "app/src/main/AndroidManifest.xml");
-  const mergedManifests = mergedAndroidManifests(android);
-  const manifestFiles =
-    mergedManifests.length > 0 ? mergedManifests : [sourceManifest];
+  const manifest = readText(sourceManifest) ?? "";
   for (const permission of ["COARSE", "FINE"]) {
     const name = `android.permission.ACCESS_${permission}_LOCATION`;
     const code = `android-permission-${permission.toLowerCase()}`;
-    const missingFrom = manifestFiles.filter(
-      (file) => !activeAndroidPermission(readText(file) ?? "", name)
-    );
     checks.push(
-      missingFrom.length === 0
-        ? check(
-            code,
-            "pass",
-            `${name} is active in the app manifest${manifestFiles.length > 1 ? "s" : ""}.`
-          )
+      activeAndroidPermission(manifest, name)
+        ? check(code, "pass", `${name} is active in the main app manifest.`)
         : check(
             code,
             "error",
@@ -200,6 +170,37 @@ function buildSetting(block, name) {
   const value = match[1].trim();
   if (value.startsWith('"') && value.endsWith('"')) return value.slice(1, -1);
   return value;
+}
+
+function resolvedBuildSetting(block, name, resolving = new Set()) {
+  if (resolving.has(name)) return undefined;
+  const raw = buildSetting(block, name);
+  if (raw === undefined) return undefined;
+  resolving.add(name);
+  let unresolved = false;
+  const value = raw.replace(
+    /\$\(([^)]+)\)|\$\{([^}]+)\}/g,
+    (_, first, second) => {
+      const variable = String(first ?? second).split(":", 1)[0];
+      if (
+        ["PRODUCT_NAME", "TARGET_NAME", "EXECUTABLE_NAME"].includes(variable)
+      ) {
+        return variable;
+      }
+      if (variable === "inherited") {
+        unresolved = true;
+        return "";
+      }
+      const replacement = resolvedBuildSetting(block, variable, resolving);
+      if (replacement === undefined) {
+        unresolved = true;
+        return "";
+      }
+      return replacement;
+    }
+  );
+  resolving.delete(name);
+  return unresolved ? undefined : value;
 }
 
 function applicationBuildConfigurations(pbxproj) {
@@ -252,11 +253,16 @@ function inspectApplicationPlists(ios) {
   const results = [];
   for (const pbxproj of pbxprojects) {
     for (const configuration of applicationBuildConfigurations(pbxproj)) {
-      const generatedDescription = buildSetting(
+      const generatesInfoPlist =
+        resolvedBuildSetting(
+          configuration,
+          "GENERATE_INFOPLIST_FILE"
+        )?.toUpperCase() === "YES";
+      const generatedDescription = resolvedBuildSetting(
         configuration,
         "INFOPLIST_KEY_NSLocationWhenInUseUsageDescription"
       );
-      if (generatedDescription?.trim()) {
+      if (generatesInfoPlist && generatedDescription?.trim()) {
         results.push(true);
         continue;
       }
@@ -331,7 +337,8 @@ export function inspectProject(projectPath) {
     return createReport(project, checks);
   }
 
-  const reactNative = declaredDependency(packageJson, "react-native");
+  const declaredReactNative = declaredDependency(packageJson, "react-native");
+  const reactNative = resolveReactNativeVersion(project, declaredReactNative);
   const versionStatus = reactNativeVersionStatus(reactNative);
   if (versionStatus === "supported") {
     checks.push(
@@ -355,8 +362,8 @@ export function inspectProject(projectPath) {
       check(
         "react-native-version",
         "warning",
-        reactNative
-          ? `Could not determine the React Native version from ${reactNative}.`
+        declaredReactNative
+          ? `Could not determine the React Native version from ${declaredReactNative}.`
           : "react-native is not declared in package.json.",
         "Declare a concrete React Native 0.75+ version and rerun the doctor."
       )
@@ -382,6 +389,29 @@ export function inspectProject(projectPath) {
   inspectAndroid(project, checks, parseReactNativeVersion(reactNative));
   inspectIos(project, checks);
   return createReport(project, checks);
+}
+
+function resolveReactNativeVersion(project, declaredVersion) {
+  if (parseReactNativeVersion(declaredVersion)) return declaredVersion;
+
+  let directory = project;
+  for (let depth = 0; depth < 6; depth += 1) {
+    const installedPackage = readText(
+      path.join(directory, "node_modules/react-native/package.json")
+    );
+    if (installedPackage) {
+      try {
+        const version = JSON.parse(installedPackage).version;
+        if (typeof version === "string") return version;
+      } catch {
+        return declaredVersion;
+      }
+    }
+    const parent = path.dirname(directory);
+    if (parent === directory) break;
+    directory = parent;
+  }
+  return declaredVersion;
 }
 
 function createReport(project, checks) {

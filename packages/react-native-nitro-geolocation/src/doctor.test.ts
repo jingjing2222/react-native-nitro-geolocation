@@ -13,7 +13,8 @@ function createProject({
   iosPermission = true,
   iosTestPermission = false,
   generatedIosPermission,
-  newArchitecture = true
+  newArchitecture = true,
+  newArchitectureKey = "newArchEnabled"
 }: {
   reactNative?: string;
   nitro?: boolean;
@@ -23,6 +24,7 @@ function createProject({
   iosTestPermission?: boolean;
   generatedIosPermission?: string;
   newArchitecture?: boolean | "absent";
+  newArchitectureKey?: "newArchEnabled" | "react.newArchEnabled";
 } = {}) {
   const project = mkdtempSync(path.join(tmpdir(), "nitro-geolocation-doctor-"));
   const dependencies: Record<string, string> = {
@@ -42,7 +44,7 @@ function createProject({
     path.join(project, "android/gradle.properties"),
     newArchitecture === "absent"
       ? "android.useAndroidX=true\n"
-      : `newArchEnabled=${String(newArchitecture)}\n`
+      : `${newArchitectureKey}=${String(newArchitecture)}\n`
   );
   writeFileSync(
     path.join(project, "android/app/src/main/AndroidManifest.xml"),
@@ -204,13 +206,22 @@ describe("nitro-geolocation doctor", () => {
       reactNative: "0.75.5",
       newArchitecture: "absent",
       androidManifest: `<manifest xmlns:android="http://schemas.android.com/apk/res/android" xmlns:tools="http://schemas.android.com/tools">
-        <!-- <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" /> -->
+        <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" android:maxSdkVersion="30" />
         <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" tools:node="remove" />
       </manifest>`,
       iosPermission: false,
       iosTestPermission: true
     });
     projects.push(project);
+    const staleMergedManifest = path.join(
+      project,
+      "android/app/build/intermediates/merged_manifests/debug/processDebugManifest"
+    );
+    mkdirSync(staleMergedManifest, { recursive: true });
+    writeFileSync(
+      path.join(staleMergedManifest, "AndroidManifest.xml"),
+      '<manifest xmlns:android="http://schemas.android.com/apk/res/android"><uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" /><uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" /></manifest>'
+    );
 
     const result = spawnSync(
       process.execPath,
@@ -274,6 +285,89 @@ describe("nitro-geolocation doctor", () => {
         expect.objectContaining({
           code: "ios-when-in-use-description",
           status: "pass"
+        })
+      ])
+    );
+  });
+
+  it("does not accept an unresolved generated usage-description variable", () => {
+    const project = createProject({
+      iosPermission: false,
+      generatedIosPermission: "$(LOCATION_USAGE_DESCRIPTION)"
+    });
+    projects.push(project);
+
+    const result = spawnSync(
+      process.execPath,
+      [cliPath, "doctor", "--project", project, "--json"],
+      { encoding: "utf8" }
+    );
+    const report = JSON.parse(result.stdout);
+
+    expect(result.status).toBe(1);
+    expect(report.checks).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          code: "ios-when-in-use-description",
+          status: "error"
+        })
+      ])
+    );
+  });
+
+  it("resolves an installed React Native version for catalog dependencies", () => {
+    const project = createProject({
+      reactNative: "catalog:",
+      newArchitectureKey: "react.newArchEnabled"
+    });
+    projects.push(project);
+    mkdirSync(path.join(project, "node_modules/react-native"), {
+      recursive: true
+    });
+    writeFileSync(
+      path.join(project, "node_modules/react-native/package.json"),
+      JSON.stringify({ name: "react-native", version: "0.87.0" })
+    );
+
+    const output = execFileSync(
+      process.execPath,
+      [cliPath, "doctor", "--project", project, "--json"],
+      { encoding: "utf8" }
+    );
+    const report = JSON.parse(output);
+
+    expect(report.ok).toBe(true);
+    expect(report.checks).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          code: "react-native-version",
+          status: "pass"
+        }),
+        expect.objectContaining({
+          code: "android-new-architecture",
+          status: "pass"
+        })
+      ])
+    );
+  });
+
+  it("does not infer New Architecture from a modern React Native version", () => {
+    const project = createProject({ newArchitecture: "absent" });
+    projects.push(project);
+
+    const result = spawnSync(
+      process.execPath,
+      [cliPath, "doctor", "--project", project, "--json"],
+      { encoding: "utf8" }
+    );
+    const report = JSON.parse(result.stdout);
+
+    expect(result.status).toBe(1);
+    expect(report.checks).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          code: "android-new-architecture",
+          status: "error"
         })
       ])
     );
