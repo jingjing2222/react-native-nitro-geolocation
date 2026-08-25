@@ -3,15 +3,15 @@ pageType: home
 
 hero:
   name: React Native Nitro Geolocation
-  text: Nitro-powered native geolocation
-  tagline: Replace community geolocation with /compat, then move to a typed Modern API.
+  text: 2.x release candidate documentation
+  tagline: Preview the breaking 2.x contracts, migration paths, and unified background APIs before the stable release.
   actions:
     - theme: brand
-      text: Introduction
-      link: /guide/
+      text: Read the 2.x guide
+      link: /v2/guide/index.html
     - theme: alt
-      text: Quick Start
-      link: /guide/quick-start/
+      text: Review migrations
+      link: /v2/guide/v2-error-migration.html
   image:
     src: /logo.png
     alt: Nitro Geolocation Logo

@@ -58,12 +58,6 @@ export type GeolocationConfiguration = {
   /** `auto` and `playServices` prefer fused, then platform fallback. */
   locationProvider?: 'playServices' | 'android' | 'auto';
 };
-
-/**
- * @deprecated Use `GeolocationConfiguration` instead.
- * This alias is kept only for backward compatibility.
- */
-export type ModernGeolocationConfiguration = GeolocationConfiguration;
 ```
 
 **When to call**:
@@ -230,8 +224,9 @@ function PermissionButton() {
 
 ### Android Provider and Settings
 
-The provider/settings snapshot helpers are available since `v1.2`.
-`watchProviderStatus()` is available since `v1.5`.
+The provider/settings snapshot helpers introduced before 2.0 remain available.
+`watchProviderStatus()` and the deterministic settings result are available in
+2.0.
 
 Use these helpers before user-facing precise-location flows where the app needs
 to know whether Android device settings can satisfy the request.
@@ -302,7 +297,7 @@ function ProviderStatusObserver() {
   it.
 - `watchProviderStatus(callback): string` - Delivers an asynchronous initial
   provider snapshot and then only distinct readiness changes. Pass its token to
-  `unwatch()` for cleanup. Available since `v1.5`.
+  `unwatch()` for cleanup. Available in 2.0.
 - `getLocationAvailability(): Promise<{ available: boolean; reason?: string }>` -
   Available since `v1.2`. Android reads Fused Location availability when
   `locationProvider: 'auto'` or `locationProvider: 'playServices'` is
@@ -334,7 +329,7 @@ function ProviderStatusObserver() {
   provider status. Request failures such as a concurrent request still reject.
 - `requestLocationSettings(options?): Promise<LocationSettingsResult>` - The
   v2 method returns the same deterministic result. The detailed name is
-  provided for code shared with v1.5 and to make result handling explicit.
+  provided to make result handling explicit in code shared across release lines.
 
 Both settings methods are Android-focused. On iOS they resolve with the current
 Core Location service status and do not show a settings dialog.
@@ -355,8 +350,9 @@ when the page becomes visible or active. Provider-specific optional fields stay
   path.
 - Approximate/coarse location flows are supported through permissions and
   Android `granularity`.
-- Use `getLastKnownPosition()` when you want an explicit cached read without
-  starting a fresh native request.
+- Use `getLastKnownPosition()` for a synchronous read of the module cache. Use
+  `getLastKnownPositionAsync()` to query native/provider caches without starting
+  a fresh request.
 - Modern API errors include `PLAY_SERVICE_NOT_AVAILABLE`,
   `SETTINGS_NOT_SATISFIED`, and `TIMEOUT`.
 
@@ -387,8 +383,8 @@ Supported on web:
 
 Web option behavior:
 
-- `enableHighAccuracy`, `timeout`, and `maximumAge` are forwarded to the
-  browser.
+- `accuracy` maps to the browser's high-accuracy boolean. `timeout` and
+  `maximumAge` are forwarded to the browser.
 - `distanceFilter` is applied in JavaScript for watch updates after the first
   emitted position.
 - `authorizationLevel`, `enableBackgroundLocationUpdates`, `locationProvider`,
@@ -463,8 +459,7 @@ function LocationButton() {
   aborted prevents native or browser location work from starting. The promise
   rejects with the exact `signal.reason`; runtimes without a reason receive an
   `AbortError` fallback.
-- `enableHighAccuracy?: boolean` - Deprecated since `v1.2`. Kept for v1 compatibility only; prefer `accuracy`. It is expected to be removed from the Modern API in v2.
-- `accuracy?: { android?: 'high' | 'balanced' | 'low' | 'passive'; ios?: 'bestForNavigation' | 'best' | 'nearestTenMeters' | 'hundredMeters' | 'kilometer' | 'threeKilometers' | 'reduced' }` - Platform-specific accuracy preset, available since `v1.2`. When a preset is provided for the current platform, it takes precedence over `enableHighAccuracy`.
+- `accuracy?: { android?: 'high' | 'balanced' | 'low' | 'passive'; ios?: 'bestForNavigation' | 'best' | 'nearestTenMeters' | 'hundredMeters' | 'kilometer' | 'threeKilometers' | 'reduced' }` - Platform-specific accuracy preset. Modern 2.0 callers use this option; `enableHighAccuracy` remains only on `/compat`.
 - `granularity?: 'permission' | 'coarse' | 'fine'` - Android-only request granularity, available since `v1.2`. `permission` follows the granted permission level, `coarse` avoids fine GPS-only requests, and `fine` requires fine location permission.
 - `waitForAccurateLocation?: boolean` - Android-only Fused request tuning, available since `v1.2`.
 - `maxUpdateAge?: number` - Android-only maximum age for an initial update in ms, available since `v1.2`.
@@ -685,28 +680,32 @@ The `/compat` API keeps the legacy numeric browser-style contract with only
 `PERMISSION_DENIED` (`1`), `POSITION_UNAVAILABLE` (`2`), and `TIMEOUT` (`3`).
 See [2.0 Error Migration](./v2-error-migration.md) for the 1.x-to-2.x mapping.
 
-### getLastKnownPosition()
+### getLastKnownPosition() and getLastKnownPositionAsync()
 
-Available since `v1.2`.
-
-Read the best cached native location explicitly without starting a fresh
-location request. This is useful for fast app startup, stale-while-refresh UI,
-and cache-only flows where a fresh GPS/network request would be too expensive.
+`getLastKnownPosition()` synchronously reads the latest position observed by
+this JavaScript module. It takes no options, never calls native code, and returns
+`undefined` while that module-local cache is cold.
 
 ```tsx
-import { getLastKnownPosition } from 'react-native-nitro-geolocation';
+import {
+  getLastKnownPosition,
+  getLastKnownPositionAsync
+} from 'react-native-nitro-geolocation';
 
-const cached = await getLastKnownPosition({
+const observed = getLastKnownPosition();
+
+const cached = await getLastKnownPositionAsync({
   maximumAge: 60_000,
   accuracy: { android: 'balanced', ios: 'hundredMeters' }
 });
 ```
 
-`getLastKnownPosition(options?)` uses the same provider and cache-filtering
-options as `getCurrentPosition()`, but it never falls through to a fresh native
-request. If no cached location satisfies `maximumAge` or permission is denied,
-it rejects with the native `LocationError` contract, usually
-`POSITION_UNAVAILABLE` or `PERMISSION_DENIED`.
+`getLastKnownPositionAsync(options?)` queries native/provider cache-only sources
+with the same filtering options as `getCurrentPosition()`, but never falls
+through to a fresh request. It resolves `undefined` when no cached location
+satisfies the options, including a native `POSITION_UNAVAILABLE` result. Other
+failures, such as permission denial, reject with the Modern `LocationError`
+contract.
 
 ### Geocoding APIs
 
@@ -878,8 +877,7 @@ function LiveTracker() {
 **Options**:
 
 - `enabled?: boolean` - Start/stop watching (default: `false`)
-- `enableHighAccuracy?: boolean` - Deprecated since `v1.2`. Kept for v1 compatibility only; prefer `accuracy`. It is expected to be removed from the Modern API in v2.
-- `accuracy?: { android?: 'high' | 'balanced' | 'low' | 'passive'; ios?: 'bestForNavigation' | 'best' | 'nearestTenMeters' | 'hundredMeters' | 'kilometer' | 'threeKilometers' | 'reduced' }` - Platform-specific accuracy preset, available since `v1.2`.
+- `accuracy?: { android?: 'high' | 'balanced' | 'low' | 'passive'; ios?: 'bestForNavigation' | 'best' | 'nearestTenMeters' | 'hundredMeters' | 'kilometer' | 'threeKilometers' | 'reduced' }` - Platform-specific accuracy preset. Modern 2.0 callers use this option; `enableHighAccuracy` remains only on `/compat`.
 - `granularity?: 'permission' | 'coarse' | 'fine'` - Android-only request granularity, available since `v1.2`
 - `waitForAccurateLocation?: boolean` - Android-only high-accuracy initial update tuning, available since `v1.2`
 - `maxUpdateAge?: number` - Android-only maximum age for an initial update, available since `v1.2`
@@ -1085,7 +1083,8 @@ import type {
 } from 'react-native-nitro-geolocation';
 ```
 
-`ModernGeolocationConfiguration` is still exported as a deprecated compatibility alias.
+The deprecated `ModernGeolocationConfiguration` alias was removed in 2.0. Use
+`GeolocationConfiguration` for the root Modern API.
 
 ### Type Inference
 

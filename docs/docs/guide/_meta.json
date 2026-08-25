@@ -5,6 +5,7 @@
   "swift-package-manager",
   "migration-assistance",
   "v2-error-migration",
+  "v2-unified-background-events",
   "community-migration",
   "service-migration",
   "gps-offline-recipe",

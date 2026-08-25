@@ -8,10 +8,10 @@ hero:
   actions:
     - theme: brand
       text: Read the 2.x guide
-      link: /guide/
+      link: /v2/guide/index.html
     - theme: alt
       text: Review migrations
-      link: /guide/v2-error-migration/
+      link: /v2/guide/v2-error-migration.html
   image:
     src: /logo.png
     alt: Nitro Geolocation Logo

@@ -74,7 +74,8 @@ compatibility fallback.
 | Legacy or compat usage | Modern API target |
 | --- | --- |
 | `getCurrentPosition(success, error, options)` | `await getCurrentPosition(options)` |
-| cache-first startup location reads | `await getLastKnownPosition(options)` |
+| latest position already observed by this JS module | `getLastKnownPosition()` |
+| cache-first native/provider reads | `await getLastKnownPositionAsync(options)` |
 | `requestAuthorization(success, error)` | `await requestPermission()` |
 | `setRNConfiguration(config)` | `setConfiguration(config)` |
 | `watchPosition` in function components | `useWatchPosition({ enabled, ...options })` |

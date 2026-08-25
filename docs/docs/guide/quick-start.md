@@ -8,11 +8,11 @@ Before installing the module, make sure your app uses React Native 0.75+ with
 the New Architecture and Nitro Modules enabled.
 
 ```bash
-# Install Nitro core and Geolocation module
-yarn add react-native-nitro-modules react-native-nitro-geolocation
+# Install Nitro core and the 2.0 release candidate
+yarn add react-native-nitro-modules react-native-nitro-geolocation@rc
 
 # or using npm
-npm install react-native-nitro-modules react-native-nitro-geolocation
+npm install react-native-nitro-modules react-native-nitro-geolocation@rc
 ```
 
 After installation, rebuild your native app to ensure the new module is linked.
@@ -127,7 +127,7 @@ from the [Modern API reference](/guide/modern-api).
 
 ```tsx
 import {
-  getLastKnownPosition,
+  getLastKnownPositionAsync,
   requestLocationSettings
 } from 'react-native-nitro-geolocation';
 
@@ -135,7 +135,7 @@ await requestLocationSettings({
   accuracy: { android: 'high' }
 });
 
-const cached = await getLastKnownPosition({
+const cached = await getLastKnownPositionAsync({
   maximumAge: 60_000,
   accuracy: { android: 'balanced', ios: 'hundredMeters' }
 });

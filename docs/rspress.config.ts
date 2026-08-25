@@ -1,5 +1,37 @@
 import * as path from "node:path";
-import { defineConfig } from "@rspress/core";
+import { type RspressPlugin, defineConfig } from "@rspress/core";
+
+const v2OnlyRoutes = [
+  "background/location-lifecycle",
+  "background/reliability-contract",
+  "guide/consumer-e2e-contract-kit",
+  "guide/gps-offline-recipe",
+  "guide/install-doctor",
+  "guide/privacy-compliance",
+  "guide/swift-package-manager",
+  "guide/v2-error-migration",
+  "guide/v2-unified-background-events",
+  "guide/watch-observability"
+];
+
+const versionFallbacks: RspressPlugin = {
+  name: "version-fallbacks",
+  addPages() {
+    return v2OnlyRoutes.map((route) => ({
+      routePath: `/${route}`,
+      content: `---
+title: Available in 2.x
+---
+
+# Available in 2.x
+
+This page documents a 2.x feature and is not part of the 1.x API snapshot.
+
+[Open the 2.x page](/v2/${route}.html) or [return to the 1.x guide](/guide/index.html).
+`
+    }));
+  }
+};
 
 export default defineConfig({
   root: path.join(__dirname, "docs"),
@@ -15,6 +47,7 @@ export default defineConfig({
   route: {
     exclude: ["./index.md", "./guide/**", "./background/**"]
   },
+  plugins: [versionFallbacks],
   head: [
     [
       "meta",
