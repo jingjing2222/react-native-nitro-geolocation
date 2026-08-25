@@ -174,6 +174,12 @@ alone does not mutate native files. See the
 [Expo development build guide](https://react-native-nitro-geolocation.pages.dev/guide/expo-development-build)
 for foreground and explicit background options.
 
+Before release, review the project's
+[privacy statement](https://github.com/jingjing2222/react-native-nitro-geolocation/blob/main/PRIVACY.md)
+and [privacy and compliance guide](https://react-native-nitro-geolocation.pages.dev/guide/privacy-compliance)
+for runtime data flows, permission disclosures, dependency inventory, SBOM, and
+scanner guidance.
+
 Released npm builds try to use the matching GitHub Release prebuilts first:
 Android downloads the release AAR and reuses its native `.so` files, while iOS
 downloads the release XCFramework. If the prebuilt asset is unavailable, the
