@@ -397,6 +397,14 @@ jobs:
           scripts/ci/update-e2e-comment.sh "${{ inputs.android_comment_id }}" "Android" "running" "Running native Maestro flows"
           yarn test:e2e:android
 
+      - name: Run Android GPS-offline E2E
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REQUESTED_BY: ${{ inputs.requested_by }}
+        run: |
+          scripts/ci/update-e2e-comment.sh "${{ inputs.android_comment_id }}" "Android" "running" "Running GPS-offline flow"
+          yarn workspace react-native-nitro-geolocation-example test:e2e:gps-offline:android
+
       - name: Run Android web E2E
         env:
           GH_TOKEN: ${{ github.token }}
@@ -404,6 +412,14 @@ jobs:
         run: |
           scripts/ci/update-e2e-comment.sh "${{ inputs.android_comment_id }}" "Android" "running" "Running web fallback flows"
           yarn test:e2e:web:android
+
+      - name: Run Android no-Headless-JS regression E2E
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REQUESTED_BY: ${{ inputs.requested_by }}
+        run: |
+          scripts/ci/update-e2e-comment.sh "${{ inputs.android_comment_id }}" "Android" "running" "Running no-Headless-JS regression flow"
+          yarn workspace react-native-nitro-geolocation-example test:e2e:issue-132:android
 
       - name: Stop Android emulator
         if: always()

@@ -4,13 +4,10 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 EXAMPLE_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
 ANDROID_DIR="$EXAMPLE_DIR/android"
+FLOW_DIR="$EXAMPLE_DIR/.maestro"
 
 ADB_BIN="${ADB:-adb}"
-AGENT_DEVICE_BIN="${AGENT_DEVICE:-agent-device}"
-AGENT_DEVICE_ARGS=(--platform android)
-if [[ -n "${ANDROID_SERIAL:-}" ]]; then
-  AGENT_DEVICE_ARGS+=(--serial "$ANDROID_SERIAL")
-fi
+MAESTRO_BIN="${MAESTRO:-maestro}"
 
 adb_device() {
   if [[ -n "${ANDROID_SERIAL:-}" ]]; then
@@ -20,18 +17,12 @@ adb_device() {
   fi
 }
 
-agent_device() {
-  "$AGENT_DEVICE_BIN" "$@" "${AGENT_DEVICE_ARGS[@]}"
-}
-
 EXPECT_WARNING="${EXPECT_WARNING:-0}"
 LOG_FILE="${LOG_FILE:-$ANDROID_DIR/build/reports/issue-132-logcat.txt}"
 WARNING_PATTERN="No task registered for key NitroBackgroundLocationTask"
 APK_PATH="$ANDROID_DIR/app/build/outputs/apk/release/app-release.apk"
-SESSION_NAME="${AGENT_DEVICE_SESSION:-issue132}"
 
 cleanup() {
-  "$AGENT_DEVICE_BIN" --session "$SESSION_NAME" close >/dev/null 2>&1 || true
   adb_device shell am force-stop nitrogeolocation.example >/dev/null 2>&1 || true
   adb_device shell cmd location set-location-enabled true >/dev/null 2>&1 || true
 }
@@ -58,28 +49,19 @@ if [[ "$(adb_device shell getprop ro.kernel.qemu | tr -d '\r')" != "1" ]]; then
   exit 1
 fi
 
-agent_device --session "$SESSION_NAME" --session-lock strip open nitrogeolocation://app/issue-132 >/dev/null
-agent_device --session "$SESSION_NAME" press 'id="issue-132-start-button"' >/dev/null
-adb_device emu geo fix 126.978 37.5665 >/dev/null
-sleep 15
-adb_device emu geo fix 126.979 37.567 >/dev/null
-
-ui_passed=0
-for _ in $(seq 1 30); do
-  if agent_device --session "$SESSION_NAME" snapshot 2>/dev/null | grep -Fq "Foreground listener: passed"; then
-    ui_passed=1
-    break
-  fi
-  sleep 1
-done
-
-agent_device --session "$SESSION_NAME" press 'id="issue-132-cleanup-button"' >/dev/null 2>&1 || true
-
-if [[ "$ui_passed" != "1" ]]; then
-  echo "Issue 132 E2E failed: foreground listener did not receive a location update." >&2
-  agent_device --session "$SESSION_NAME" snapshot >&2 || true
-  exit 1
+retry_args=(
+  --platform android
+  --flow-dir "$FLOW_DIR"
+  --maestro "$MAESTRO_BIN"
+  --suite-name "android issue 132 no-headless regression"
+)
+if [[ -n "${ANDROID_SERIAL:-}" ]]; then
+  retry_args+=(--maestro-arg --udid --maestro-arg "$ANDROID_SERIAL")
 fi
+
+"$SCRIPT_DIR/maestro-retry-flows.sh" \
+  "${retry_args[@]}" \
+  -- issue-132-android.yaml
 
 adb_device logcat -d -v time > "$LOG_FILE"
 

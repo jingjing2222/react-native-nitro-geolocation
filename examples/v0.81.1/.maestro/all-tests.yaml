@@ -12,27 +12,11 @@ appId: nitrogeolocation.example
 - runFlow:
     when:
       platform: Android
-    file: issue-120-android.yaml
-- runFlow:
-    when:
-      platform: Android
     file: issue-121-android.yaml
-- runFlow:
-    when:
-      platform: Android
-    file: issue-122-android.yaml
-- runFlow:
-    when:
-      platform: iOS
-    file: issue-119-ios.yaml
 - runFlow:
     when:
       platform: iOS
     file: issue-120-ios.yaml
-- runFlow:
-    when:
-      platform: iOS
-    file: issue-121-ios.yaml
 - runFlow:
     when:
       platform: iOS
@@ -41,6 +25,7 @@ appId: nitrogeolocation.example
 - runFlow: consumer-location-contract-happy.yaml
 - runFlow: consumer-location-contract-denied.yaml
 - runFlow: permission-details.yaml
+- runFlow: location-readiness.yaml
 - runFlow:
     when:
       platform: Android
