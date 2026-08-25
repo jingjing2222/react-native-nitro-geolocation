@@ -68,52 +68,52 @@ public extension BackgroundEventEnvelope {
   var location: BackgroundLocation? {
     return self.__location.value
   }
-  
+
   @inline(__always)
   var geofence: GeofenceEvent? {
     return self.__geofence.value
   }
-  
+
   @inline(__always)
   var activity: DetectedActivity? {
     return self.__activity.value
   }
-  
+
   @inline(__always)
   var providerStatus: LocationProviderStatus? {
     return self.__providerStatus.value
   }
-  
+
   @inline(__always)
   var lifecycle: LocationLifecycleEvent? {
     return self.__lifecycle.value
   }
-  
+
   @inline(__always)
   var result: BackgroundHttpSyncResult? {
     return self.__result.value
   }
-  
+
   @inline(__always)
   var error: LocationError? {
     return self.__error.value
   }
-  
+
   @inline(__always)
   var id: String {
     return String(self.__id)
   }
-  
+
   @inline(__always)
   var type: BackgroundEventType {
     return self.__type
   }
-  
+
   @inline(__always)
   var timestamp: Double {
     return self.__timestamp
   }
-  
+
   @inline(__always)
   var deliveredToJS: Bool {
     return self.__deliveredToJS

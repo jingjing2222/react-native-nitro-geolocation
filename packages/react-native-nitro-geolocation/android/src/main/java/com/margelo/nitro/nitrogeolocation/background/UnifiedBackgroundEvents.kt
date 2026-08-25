@@ -22,3 +22,25 @@ internal fun createProviderChangeBackgroundEvent(
     timestamp = timestamp,
     deliveredToJS = false
 )
+
+internal fun registerUnifiedEventListener(
+    addEventListener: () -> String,
+    removeEventListener: (String) -> Unit,
+    addProviderListener: (String) -> String
+): Pair<String, String> {
+    val eventToken = addEventListener()
+    return try {
+        eventToken to addProviderListener(eventToken)
+    } catch (error: Throwable) {
+        removeEventListener(eventToken)
+        throw error
+    }
+}
+
+internal fun <T> Lazy<T>.disposeIfInitialized(dispose: (T) -> Unit): Boolean {
+    return synchronized(this) {
+        if (!isInitialized()) return@synchronized false
+        dispose(value)
+        true
+    }
+}

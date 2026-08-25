@@ -135,17 +135,6 @@ internal func makeProviderStatus(_ dictionary: [String: Any]) -> LocationProvide
     )
 }
 
-internal func makeLifecycleEvent(_ dictionary: [String: Any]) -> LocationLifecycleEvent? {
-    guard
-        let stateValue = dictionary["state"] as? String,
-        let state = LocationLifecycleState(fromString: stateValue),
-        let timestamp = dictionary["timestamp"] as? Double
-    else {
-        return nil
-    }
-    return LocationLifecycleEvent(state: state, timestamp: timestamp)
-}
-
 internal func makeCoordinates(_ dictionary: [String: Any]) -> GeolocationCoordinates? {
     guard
         let latitude = dictionary["latitude"] as? Double,
@@ -366,13 +355,6 @@ internal func providerStatusDictionary(_ status: LocationProviderStatus) -> [Str
     dictionary["googlePlayServicesAvailable"] = status.googlePlayServicesAvailable
     dictionary["googleLocationAccuracyEnabled"] = status.googleLocationAccuracyEnabled
     return dictionary
-}
-
-internal func lifecycleDictionary(_ event: LocationLifecycleEvent) -> [String: Any] {
-    return [
-        "state": event.state.stringValue,
-        "timestamp": event.timestamp
-    ]
 }
 
 internal func makeHttpSyncResult(_ dictionary: [String: Any]) -> BackgroundHttpSyncResult? {

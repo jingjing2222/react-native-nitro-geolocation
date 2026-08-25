@@ -236,44 +236,31 @@ class NitroBackgroundLocation: HybridNitroBackgroundLocationSpec {
         runGeneration: UInt64,
         locationSessionGeneration: UInt64
     ) {
-        let lifecycle = LocationLifecycleEvent(
-            state: state,
-            timestamp: Date().timeIntervalSince1970 * 1000
-        )
-        let event = BackgroundEventEnvelope(
-            location: nil,
-            geofence: nil,
-            activity: nil,
-            providerStatus: nil,
-            lifecycle: lifecycle,
-            result: nil,
-            error: nil,
-            id: UUID().uuidString,
-            type: .lifecycle,
-            timestamp: lifecycle.timestamp,
-            deliveredToJS: false
-        )
-        let storedForRun: Bool = withStoreLock {
-            guard isCurrentLocationSession(
-                runGeneration,
-                locationSessionGeneration
-            ) else { return false }
-            appendStoredEvent(
-                StoredBackgroundEventEnvelope(
-                    event: event,
-                    createdAt: Date().timeIntervalSince1970 * 1000,
-                    id: event.id,
-                    type: event.type,
-                    timestamp: event.timestamp,
-                    deliveredToJS: false
-                )
+        let timestamp = Date().timeIntervalSince1970 * 1000
+        let plan: IOSLifecycleEventDeliveryPlan? = withStoreLock {
+            guard shouldAcceptIOSLifecycleEvent(
+                runGeneration: runGeneration,
+                locationSessionGeneration: locationSessionGeneration,
+                currentRunGeneration: storeGeneration,
+                currentLocationSessionGeneration: self.locationSessionGeneration,
+                locationSessionActive: locationSessionActive
+            ) else { return nil }
+            let plan = makeIOSLifecycleEventDeliveryPlan(
+                state: state,
+                timestamp: timestamp,
+                id: UUID().uuidString,
+                createdAt: timestamp,
+                shouldPersist: shouldPersist()
             )
-            persistStore()
-            return true
+            if let storedEvent = plan.storedEvent {
+                appendStoredEvent(storedEvent)
+                persistStore()
+            }
+            return plan
         }
-        guard storedForRun else { return }
+        guard let plan else { return }
         dispatchInProcess(
-            event: event,
+            event: plan.event,
             runGeneration: runGeneration,
             locationSessionGeneration: locationSessionGeneration
         )

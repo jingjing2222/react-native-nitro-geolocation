@@ -13,10 +13,50 @@ import com.facebook.react.bridge.ReactApplicationContext
 import java.util.UUID
 import java.util.concurrent.atomic.AtomicLong
 
-internal class AndroidProviderStatusWatcher(
-    private val reactContext: ReactApplicationContext,
-    private val locationSettings: AndroidLocationSettings
+internal interface AndroidProviderObservationContext {
+    fun registerProviderReceiver(receiver: BroadcastReceiver, filter: IntentFilter)
+    fun unregisterProviderReceiver(receiver: BroadcastReceiver)
+    fun addLifecycleListener(listener: LifecycleEventListener)
+    fun removeLifecycleListener(listener: LifecycleEventListener)
+}
+
+private class ReactProviderObservationContext(
+    private val reactContext: ReactApplicationContext
+) : AndroidProviderObservationContext {
+    override fun registerProviderReceiver(receiver: BroadcastReceiver, filter: IntentFilter) {
+        ContextCompat.registerReceiver(
+            reactContext,
+            receiver,
+            filter,
+            ContextCompat.RECEIVER_NOT_EXPORTED
+        )
+    }
+
+    override fun unregisterProviderReceiver(receiver: BroadcastReceiver) {
+        reactContext.unregisterReceiver(receiver)
+    }
+
+    override fun addLifecycleListener(listener: LifecycleEventListener) {
+        reactContext.addLifecycleEventListener(listener)
+    }
+
+    override fun removeLifecycleListener(listener: LifecycleEventListener) {
+        reactContext.removeLifecycleEventListener(listener)
+    }
+}
+
+internal class AndroidProviderStatusWatcher internal constructor(
+    private val observationContext: AndroidProviderObservationContext,
+    private val loadProviderStatus: ((LocationProviderStatus) -> Unit) -> Unit
 ) : LifecycleEventListener {
+    constructor(
+        reactContext: ReactApplicationContext,
+        locationSettings: AndroidLocationSettings
+    ) : this(
+        observationContext = ReactProviderObservationContext(reactContext),
+        loadProviderStatus = { success -> locationSettings.getProviderStatus(success = success) }
+    )
+
     private val callbacks = mutableMapOf<String, (LocationProviderStatus) -> Unit>()
     private val lastStatuses = mutableMapOf<String, LocationProviderStatus>()
     private val mainHandler = Handler(Looper.getMainLooper())
@@ -34,13 +74,29 @@ internal class AndroidProviderStatusWatcher(
 
     fun watch(success: (LocationProviderStatus) -> Unit): String {
         val token = UUID.randomUUID().toString()
-        synchronized(this) {
+        val shouldStart = synchronized(this) {
             callbacks[token] = success
-            if (!receiverRegistered) startObserving()
+            !receiverRegistered && callbacks.size == 1
         }
-        refresh()
+        try {
+            if (shouldStart) startObserving()
+            refresh()
+        } catch (error: Throwable) {
+            synchronized(this) {
+                callbacks.remove(token)
+                lastStatuses.remove(token)
+                if (callbacks.isEmpty()) {
+                    refreshGeneration.incrementAndGet()
+                    runCatching { stopObservingSources() }
+                }
+            }
+            throw error
+        }
         return token
     }
+
+    internal val activeWatchCount: Int
+        get() = synchronized(this) { callbacks.size }
 
     fun unwatch(token: String) {
         synchronized(this) {
@@ -79,8 +135,8 @@ internal class AndroidProviderStatusWatcher(
 
     private fun refresh() {
         val generation = refreshGeneration.incrementAndGet()
-        locationSettings.getProviderStatus { status ->
-            if (generation != refreshGeneration.get()) return@getProviderStatus
+        loadProviderStatus providerStatus@{ status ->
+            if (generation != refreshGeneration.get()) return@providerStatus
 
             val tokens = synchronized(this) {
                 callbacks.keys.filter { token ->
@@ -106,25 +162,20 @@ internal class AndroidProviderStatusWatcher(
             addAction(LocationManager.PROVIDERS_CHANGED_ACTION)
             addAction(LocationManager.MODE_CHANGED_ACTION)
         }
-        ContextCompat.registerReceiver(
-            reactContext,
-            receiver,
-            filter,
-            ContextCompat.RECEIVER_NOT_EXPORTED
-        )
+        observationContext.registerProviderReceiver(receiver, filter)
         receiverRegistered = true
-        reactContext.addLifecycleEventListener(this)
+        observationContext.addLifecycleListener(this)
         lifecycleRegistered = true
     }
 
     private fun stopObservingSources() {
         mainHandler.removeCallbacks(broadcastRefresh)
         if (lifecycleRegistered) {
-            reactContext.removeLifecycleEventListener(this)
+            observationContext.removeLifecycleListener(this)
             lifecycleRegistered = false
         }
         if (receiverRegistered) {
-            reactContext.unregisterReceiver(receiver)
+            observationContext.unregisterProviderReceiver(receiver)
             receiverRegistered = false
         }
     }

@@ -1,6 +1,11 @@
 package com.margelo.nitro.nitrogeolocation.background
 
 import androidx.test.core.app.ApplicationProvider
+import android.content.BroadcastReceiver
+import android.content.IntentFilter
+import com.facebook.react.bridge.LifecycleEventListener
+import com.margelo.nitro.nitrogeolocation.AndroidProviderObservationContext
+import com.margelo.nitro.nitrogeolocation.AndroidProviderStatusWatcher
 import com.margelo.nitro.nitrogeolocation.BackgroundEventEnvelope
 import com.margelo.nitro.nitrogeolocation.BackgroundEventType
 import com.margelo.nitro.nitrogeolocation.GetStoredBackgroundEventsOptions
@@ -8,7 +13,10 @@ import com.margelo.nitro.nitrogeolocation.LocationLifecycleEvent
 import com.margelo.nitro.nitrogeolocation.LocationLifecycleState
 import com.margelo.nitro.nitrogeolocation.LocationProviderStatus
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNull
+import org.junit.Assert.assertThrows
+import org.junit.Assert.assertTrue
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
@@ -84,5 +92,68 @@ class UnifiedBackgroundEventsTest {
         assertNull(events.single().event.providerStatus)
         store.clearEvents(null)
         store.close()
+    }
+
+    @Test
+    fun `failed provider registration rolls back its event listener`() {
+        val registered = mutableSetOf<String>()
+
+        assertThrows(IllegalStateException::class.java) {
+            registerUnifiedEventListener(
+                addEventListener = {
+                    registered += "event-1"
+                    "event-1"
+                },
+                removeEventListener = registered::remove,
+                addProviderListener = { throw IllegalStateException("receiver unavailable") }
+            )
+        }
+
+        assertTrue(registered.isEmpty())
+    }
+
+    @Test
+    fun `disposing an untouched lazy resource does not initialize it`() {
+        var created = 0
+        var disposed = 0
+        val resource = lazy {
+            created += 1
+            Any()
+        }
+
+        assertFalse(resource.disposeIfInitialized { disposed += 1 })
+        assertEquals(0, created)
+        assertEquals(0, disposed)
+
+        resource.value
+        assertTrue(resource.disposeIfInitialized { disposed += 1 })
+        assertEquals(1, created)
+        assertEquals(1, disposed)
+    }
+
+    @Test
+    fun `provider watcher rolls back callback when native source registration fails`() {
+        val observationContext = object : AndroidProviderObservationContext {
+            override fun registerProviderReceiver(
+                receiver: BroadcastReceiver,
+                filter: IntentFilter
+            ) {
+                throw IllegalStateException("receiver unavailable")
+            }
+
+            override fun unregisterProviderReceiver(receiver: BroadcastReceiver) = Unit
+            override fun addLifecycleListener(listener: LifecycleEventListener) = Unit
+            override fun removeLifecycleListener(listener: LifecycleEventListener) = Unit
+        }
+        val watcher = AndroidProviderStatusWatcher(
+            observationContext = observationContext,
+            loadProviderStatus = {}
+        )
+
+        assertThrows(IllegalStateException::class.java) {
+            watcher.watch {}
+        }
+
+        assertEquals(0, watcher.activeWatchCount)
     }
 }
