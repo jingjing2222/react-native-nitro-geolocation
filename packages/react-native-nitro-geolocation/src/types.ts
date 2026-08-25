@@ -140,7 +140,8 @@ export type LocationSettingsOutcome =
   | "activityMissing";
 
 /**
- * Deterministic result from `requestLocationSettings()`.
+ * Deterministic result from `requestLocationSettings()` or
+ * `requestLocationSettingsDetailed()`.
  *
  * Expected platform outcomes resolve through this object. Errors are reserved
  * for failures of the request itself, such as a concurrent request.

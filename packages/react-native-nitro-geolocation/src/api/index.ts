@@ -8,6 +8,7 @@ export { watchProviderStatus } from "./watchProviderStatus";
 export { getLocationAvailability } from "./getLocationAvailability";
 export { getLocationReadiness } from "./getLocationReadiness";
 export { requestLocationSettings } from "./requestLocationSettings";
+export { requestLocationSettingsDetailed } from "./requestLocationSettingsDetailed";
 export { getAccuracyAuthorization } from "./getAccuracyAuthorization";
 export { requestTemporaryFullAccuracy } from "./requestTemporaryFullAccuracy";
 export { getCurrentPosition } from "./getCurrentPosition";
