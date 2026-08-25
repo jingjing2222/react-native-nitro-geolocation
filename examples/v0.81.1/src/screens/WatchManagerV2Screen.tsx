@@ -190,6 +190,7 @@ export default function WatchManagerV2Screen() {
           active.some(({ token }) => token === slowToken))) &&
       !active.some(({ token }) => token === eagerToken);
     await waitForBridgeDrain();
+    if (!mountedRef.current) return;
     cleanupRef.current = { ...countsRef.current };
     setResult("cleanup", {
       status: passed ? "passed" : "failed",
