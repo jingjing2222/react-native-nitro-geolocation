@@ -1,5 +1,3 @@
-import java.security.MessageDigest
-
 buildscript {
   ext.getExtOrDefault = {name ->
     return rootProject.ext.has(name) ? rootProject.ext.get(name) : project.properties['NitroGeolocation_' + name]
@@ -27,6 +25,7 @@ apply plugin: "kotlin-android"
 apply from: '../nitrogen/generated/android/nitrogeolocation+autolinking.gradle'
 
 apply plugin: "com.facebook.react"
+apply from: "prebuilt_checksum.gradle"
 
 def getExtOrIntegerDefault(name) {
   return rootProject.ext.has(name) ? rootProject.ext.get(name) : (project.properties["NitroGeolocation_" + name]).toInteger()
@@ -109,8 +108,12 @@ def prebuiltUrlBase = getNitroGeolocationStringProperty(
 )
 def prebuiltUrl = "${prebuiltUrlBase}/${prebuiltAssetName}"
 def prebuiltChecksumUrl = "${prebuiltUrl}.sha256"
-def prebuiltCacheDir = new File(gradle.gradleUserHomeDir, "caches/react-native-nitro-geolocation/${packageVersion}")
+def prebuiltCacheDir = new File(getNitroGeolocationStringProperty(
+  "prebuiltCacheDir",
+  new File(gradle.gradleUserHomeDir, "caches/react-native-nitro-geolocation/${packageVersion}").path
+))
 def prebuiltAarFile = new File(prebuiltCacheDir, prebuiltAssetName)
+def prebuiltChecksumFile = new File(prebuiltCacheDir, "${prebuiltAssetName}.sha256")
 def prebuiltJniDir = file("${buildDir}/generated/prebuilt-jni")
 
 def bundledReactNativeVersion = packageJson.devDependencies["react-native"]
@@ -120,51 +123,6 @@ def consumerNitroModulesVersion = readNodeModuleVersion("react-native-nitro-modu
 def isAndroidPrebuiltAbiCompatible = {
   return parseMajorMinor(consumerReactNativeVersion) == parseMajorMinor(bundledReactNativeVersion) &&
     parseMajorMinor(consumerNitroModulesVersion) == parseMajorMinor(bundledNitroModulesVersion)
-}
-
-def sha256File = { target ->
-  def digest = MessageDigest.getInstance("SHA-256")
-  target.eachByte(8192) { buffer, count -> digest.update(buffer, 0, count) }
-  return digest.digest().encodeHex().toString()
-}
-
-def expectedPrebuiltChecksum = {
-  def parts = new URL(prebuiltChecksumUrl).text.trim().split(/\s+/, 2)
-  if (parts.length == 0 || !(parts[0] ==~ /(?i)[0-9a-f]{64}/)) {
-    throw new GradleException("Invalid SHA-256 file for ${prebuiltAssetName}")
-  }
-  if (parts.length > 1 && new File(parts[1].replaceFirst(/^\*/, "")).name != prebuiltAssetName) {
-    throw new GradleException("SHA-256 file referenced a different Android asset")
-  }
-  return parts[0].toLowerCase()
-}
-
-def downloadNitroGeolocationPrebuiltIfAvailable = {
-  try {
-    def expectedChecksum = expectedPrebuiltChecksum()
-    if (prebuiltAarFile.exists() && sha256File(prebuiltAarFile) != expectedChecksum) {
-      prebuiltAarFile.delete()
-    }
-    if (!prebuiltAarFile.exists()) {
-      prebuiltCacheDir.mkdirs()
-      logger.lifecycle("[NitroGeolocation] Downloading Android prebuilt AAR: ${prebuiltUrl}")
-      new URL(prebuiltUrl).withInputStream { input ->
-        prebuiltAarFile.withOutputStream { output -> output << input }
-      }
-    }
-    if (sha256File(prebuiltAarFile) != expectedChecksum) {
-      throw new GradleException("SHA-256 mismatch for ${prebuiltAssetName}")
-    }
-
-    logger.lifecycle("[NitroGeolocation] Using Android prebuilt native libraries from ${prebuiltAarFile}")
-    return true
-  } catch (Throwable error) {
-    if (prebuiltAarFile.exists()) {
-      prebuiltAarFile.delete()
-    }
-    logger.warn("[NitroGeolocation] Android prebuilt unavailable (${error.message}). Falling back to source build.")
-    return false
-  }
 }
 
 def extractNitroGeolocationPrebuilt = {
@@ -199,11 +157,21 @@ if (shouldAttemptPrebuilt && !isAndroidPrebuiltAbiCompatible()) {
       "assets target React Native ${bundledReactNativeVersion} and NitroModules ${bundledNitroModulesVersion}."
   )
 }
-def usePrebuilt = shouldAttemptPrebuilt && isAndroidPrebuiltAbiCompatible() && downloadNitroGeolocationPrebuiltIfAvailable()
+def prebuiltResolution = shouldAttemptPrebuilt && isAndroidPrebuiltAbiCompatible() ?
+  resolveNitroGeolocationPrebuilt(
+    assetName: prebuiltAssetName,
+    assetUrl: prebuiltUrl,
+    checksumUrl: prebuiltChecksumUrl,
+    cacheDir: prebuiltCacheDir
+  ) : null
+def usePrebuilt = prebuiltResolution != null
 
 def preparePrebuiltTaskProvider = null
 if (usePrebuilt) {
   preparePrebuiltTaskProvider = tasks.register("prepareNitroGeolocationPrebuilt") {
+    inputs.file(prebuiltAarFile)
+    inputs.file(prebuiltChecksumFile)
+    inputs.property("verifiedChecksum", prebuiltResolution.checksum)
     outputs.dir(prebuiltJniDir)
 
     doLast {

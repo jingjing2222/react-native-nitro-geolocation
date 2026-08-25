@@ -45,6 +45,15 @@ class PrebuiltIOSChecksumTest < Minitest::Test
       Digest::SHA256.file(cache_path).hexdigest
   end
 
+  def test_reuses_verified_cache_without_release_network
+    assert NitroGeolocationPrebuiltIOS.ensure_framework(package_directory, package)
+    FileUtils.rm_rf(release_directory)
+    FileUtils.rm_rf(File.join(package_directory, "prebuilds"))
+
+    assert NitroGeolocationPrebuiltIOS.ensure_framework(package_directory, package)
+    assert_path_exists privacy_manifest_path
+  end
+
   def test_rejects_a_mismatched_release_checksum
     File.write(checksum_path, "#{'0' * 64}  #{asset_name}\n")
 

@@ -199,6 +199,9 @@ jobs:
             --console=plain \
             :react-native-nitro-geolocation:testDebugUnitTest
 
+      - name: Verify Android prebuilt checksums
+        run: scripts/test-android-prebuilt-checksum.sh
+
   guardrails:
     name: Dead Code / Package Guardrails
     runs-on: ubuntu-latest

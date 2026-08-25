@@ -1,0 +1,82 @@
+import java.nio.file.Files
+import java.nio.file.StandardCopyOption
+import java.security.MessageDigest
+
+def sha256File = { File target ->
+  def digest = MessageDigest.getInstance("SHA-256")
+  target.eachByte(8192) { buffer, count -> digest.update(buffer, 0, count) }
+  digest.digest().encodeHex().toString()
+}
+
+def parseChecksum = { String contents, String assetName ->
+  def parts = contents.trim().split(/\s+/, 2)
+  if (parts.length == 0 || !(parts[0] ==~ /(?i)[0-9a-f]{64}/)) {
+    throw new GradleException("Invalid SHA-256 file for ${assetName}")
+  }
+  if (parts.length > 1 && new File(parts[1].replaceFirst(/^\*/, "")).name != assetName) {
+    throw new GradleException("SHA-256 file referenced a different Android asset")
+  }
+  parts[0].toLowerCase()
+}
+
+def downloadFile = { String url, File destination ->
+  destination.parentFile.mkdirs()
+  def temporary = new File(destination.parentFile, ".${destination.name}.${UUID.randomUUID()}.tmp")
+  try {
+    new URL(url).withInputStream { input ->
+      temporary.withOutputStream { output -> output << input }
+    }
+    Files.move(temporary.toPath(), destination.toPath(), StandardCopyOption.REPLACE_EXISTING)
+  } finally {
+    temporary.delete()
+  }
+}
+
+ext.resolveNitroGeolocationPrebuilt = { Map options ->
+  File cacheDir = options.cacheDir
+  File assetFile = new File(cacheDir, options.assetName)
+  File checksumFile = new File(cacheDir, "${options.assetName}.sha256")
+
+  try {
+    String expectedChecksum = null
+    if (checksumFile.exists()) {
+      try {
+        expectedChecksum = parseChecksum(checksumFile.text, options.assetName)
+      } catch (Throwable ignored) {
+        checksumFile.delete()
+      }
+    }
+
+    if (expectedChecksum != null && assetFile.exists()) {
+      if (sha256File(assetFile) == expectedChecksum) {
+        logger.lifecycle("[NitroGeolocation] Using verified Android prebuilt cache: ${assetFile}")
+        return [assetFile: assetFile, checksumFile: checksumFile, checksum: expectedChecksum]
+      }
+      assetFile.delete()
+    }
+
+    if (expectedChecksum == null) {
+      logger.lifecycle("[NitroGeolocation] Fetching Android prebuilt checksum: ${options.checksumUrl}")
+      downloadFile(options.checksumUrl, checksumFile)
+      expectedChecksum = parseChecksum(checksumFile.text, options.assetName)
+    }
+
+    if (assetFile.exists() && sha256File(assetFile) != expectedChecksum) {
+      assetFile.delete()
+    }
+    if (!assetFile.exists()) {
+      logger.lifecycle("[NitroGeolocation] Downloading Android prebuilt AAR: ${options.assetUrl}")
+      downloadFile(options.assetUrl, assetFile)
+    }
+    if (sha256File(assetFile) != expectedChecksum) {
+      assetFile.delete()
+      throw new GradleException("SHA-256 mismatch for ${options.assetName}")
+    }
+
+    logger.lifecycle("[NitroGeolocation] Using Android prebuilt native libraries from ${assetFile}")
+    [assetFile: assetFile, checksumFile: checksumFile, checksum: expectedChecksum]
+  } catch (Throwable error) {
+    logger.warn("[NitroGeolocation] Android prebuilt unavailable (${error.message}). Falling back to source build.")
+    null
+  }
+}

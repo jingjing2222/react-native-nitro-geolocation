@@ -27,6 +27,10 @@ const androidBuild = await readFile(
   path.join(packageDir, "android/build.gradle"),
   "utf8"
 );
+const androidChecksumInstaller = await readFile(
+  path.join(packageDir, "android/prebuilt_checksum.gradle"),
+  "utf8"
+);
 
 const globChars = /[*?[\]{}]/;
 const missingEntries = (packageJson.files ?? []).filter((entry) => {
@@ -101,8 +105,9 @@ if (
   failures.push("iOS prebuilt installation must verify the published SHA-256");
 }
 if (
-  !androidBuild.includes('MessageDigest.getInstance("SHA-256")') ||
-  !androidBuild.includes("prebuiltChecksumUrl")
+  !androidChecksumInstaller.includes('MessageDigest.getInstance("SHA-256")') ||
+  !androidBuild.includes("prebuiltChecksumUrl") ||
+  !androidBuild.includes("inputs.file(prebuiltAarFile)")
 ) {
   failures.push(
     "Android prebuilt installation must verify the published SHA-256"

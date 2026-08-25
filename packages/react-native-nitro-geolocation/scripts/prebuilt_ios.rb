@@ -85,17 +85,36 @@ module NitroGeolocationPrebuiltIOS
     marker_path = File.join(destination_dir, ".version")
     cache_dir = File.expand_path("~/Library/Caches/react-native-nitro-geolocation/#{version}")
     zip_path = File.join(cache_dir, asset_name)
+    cached_checksum_path = File.join(cache_dir, checksum_name)
 
     FileUtils.mkdir_p(cache_dir)
-    checksum = expected_checksum(read_url(checksum_url), asset_name)
-    if File.exist?(zip_path) && Digest::SHA256.file(zip_path).hexdigest != checksum
+    checksum = nil
+    if File.exist?(cached_checksum_path)
+      begin
+        checksum = expected_checksum(File.read(cached_checksum_path), asset_name)
+      rescue StandardError
+        FileUtils.rm_f(cached_checksum_path)
+      end
+    end
+
+    if checksum && File.exist?(zip_path) && Digest::SHA256.file(zip_path).hexdigest == checksum
+      Pod::UI.puts "[NitroGeolocation] Using verified iOS prebuilt cache: #{zip_path}"
+    else
       FileUtils.rm_f(zip_path)
+    end
+
+    unless checksum
+      Pod::UI.puts "[NitroGeolocation] Fetching iOS prebuilt checksum: #{checksum_url}"
+      checksum_contents = read_url(checksum_url)
+      checksum = expected_checksum(checksum_contents, asset_name)
+      File.write(cached_checksum_path, checksum_contents)
     end
     unless File.exist?(zip_path)
       Pod::UI.puts "[NitroGeolocation] Downloading iOS prebuilt XCFramework: #{url}"
       download(url, zip_path)
     end
     unless Digest::SHA256.file(zip_path).hexdigest == checksum
+      FileUtils.rm_f(zip_path)
       raise "SHA-256 mismatch for #{asset_name}"
     end
 
@@ -118,7 +137,6 @@ module NitroGeolocationPrebuiltIOS
     Pod::UI.puts "[NitroGeolocation] Using iOS prebuilt XCFramework from #{framework_path}"
     true
   rescue StandardError => error
-    FileUtils.rm_f(zip_path) if defined?(zip_path) && zip_path
     Pod::UI.warn "[NitroGeolocation] iOS prebuilt unavailable (#{error.message}). Falling back to source build."
     false
   end

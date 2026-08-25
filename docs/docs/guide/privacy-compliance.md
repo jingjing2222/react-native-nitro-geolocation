@@ -124,10 +124,13 @@ URL/checksum/provenance, and applicable license notices. Final AAB/APK/XCArchive
 scanning is a useful cross-check, but generally cannot reconstruct original
 Maven/CocoaPods coordinates, transitive graph, versions, or license obligations.
 
-The default prebuilt installers fetch each release asset's `.sha256` sidecar,
-reject malformed or mismatched sidecars, and verify cached and newly downloaded
-artifacts before extraction. The sidecar and artifact share the same GitHub
-Release/TLS trust boundary; this detects corruption and cache tampering but is
+On first use, the default prebuilt installers fetch each release asset's
+`.sha256` sidecar, reject malformed or mismatched sidecars, and persist it next
+to the verified artifact. Later installs verify that local pair without network
+access; an integrity mismatch removes only the invalid artifact and downloads a
+fresh copy. The sidecar and artifact share the same GitHub Release/TLS trust
+boundary, and the cached sidecar shares the artifact cache's filesystem trust
+boundary. This detects ordinary corruption and one-sided cache tampering but is
 not an independent signature. Pin or independently attest release digests when
 your supply-chain policy requires stronger publisher authentication.
 
