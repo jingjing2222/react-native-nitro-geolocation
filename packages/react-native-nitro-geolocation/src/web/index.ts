@@ -60,10 +60,11 @@ export {
   watchPosition,
   watchProviderStatus
 } from "./watch";
-export {
-  useWatchPosition,
-  type UseWatchPositionOptions
-} from "./useWatchPosition";
+export { useWatchPosition } from "./useWatchPosition";
+export type {
+  UseWatchPositionOptions,
+  UseWatchPositionResult
+} from "../hooks/types";
 
 export function setConfiguration(_config: GeolocationConfiguration): void {
   // Browser geolocation has no global configuration API.
