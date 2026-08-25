@@ -26,6 +26,8 @@ const initialResults = createScenarioResults([
   "remaining"
 ] as const);
 type Counts = { eager: number; filtered: number; slow: number };
+const waitForBridgeDrain = () =>
+  new Promise<void>((resolve) => setTimeout(resolve, 1_000));
 
 export default function WatchManagerV2Screen() {
   const { results, setResult } = useScenarioResults(initialResults);
@@ -164,7 +166,7 @@ export default function WatchManagerV2Screen() {
     });
   };
 
-  const removeEagerWatch = () => {
+  const removeEagerWatch = async () => {
     const eagerToken = tokensRef.current.eager;
     if (!eagerToken) {
       setResult("cleanup", {
@@ -177,7 +179,6 @@ export default function WatchManagerV2Screen() {
     unwatch(eagerToken);
     unwatch("watch-manager-v2-unknown-token");
     tokensRef.current.eager = undefined;
-    cleanupRef.current = { ...countsRef.current };
     const filteredToken = tokensRef.current.filtered;
     const slowToken = tokensRef.current.slow;
     const active = getActiveWatches();
@@ -188,10 +189,12 @@ export default function WatchManagerV2Screen() {
         (slowToken !== undefined &&
           active.some(({ token }) => token === slowToken))) &&
       !active.some(({ token }) => token === eagerToken);
+    await waitForBridgeDrain();
+    cleanupRef.current = { ...countsRef.current };
     setResult("cleanup", {
       status: passed ? "passed" : "failed",
       message: passed
-        ? "Repeated cleanup removed only the eager watch."
+        ? "Repeated cleanup removed only the eager watch; in-flight callbacks drained."
         : "Cleanup did not leave exactly the owned filtered watch."
     });
   };

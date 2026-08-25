@@ -74,8 +74,9 @@ appId: nitrogeolocation.example
 
 - tapOn:
     id: "e2e-action-watch-manager-v2-cleanup-button"
-- assertVisible:
-    text: "Selective cleanup: passed"
+- extendedWaitUntil:
+    visible: "Selective cleanup: passed"
+    timeout: 5000
 - setLocation:
     latitude: 37.5865
     longitude: 126.9780
