@@ -12,6 +12,7 @@ import type {
 import {
   getLocationReadiness,
   requestLocationSettings,
+  requestLocationSettingsDetailed,
   selectProvider
 } from "react-native-nitro-geolocation";
 import type { GeolocationOptions as CompatGeolocationOptions } from "react-native-nitro-geolocation/compat";
@@ -30,6 +31,8 @@ const modernSettings: LocationSettingsOptions = {
 
 const settingsResultPromise: Promise<LocationSettingsResult> =
   requestLocationSettings();
+const detailedSettingsResultPromise: Promise<LocationSettingsResult> =
+  requestLocationSettingsDetailed();
 const settingsOutcome: LocationSettingsOutcome = "activityMissing";
 
 const compatRequest: CompatGeolocationOptions = {
@@ -58,6 +61,7 @@ void [
   modernRequest,
   modernSettings,
   settingsResultPromise,
+  detailedSettingsResultPromise,
   settingsOutcome,
   compatRequest,
   mergedRequest,

@@ -60,6 +60,7 @@ export {
   getLocationAvailability,
   getLocationReadiness,
   requestLocationSettings,
+  requestLocationSettingsDetailed,
   getAccuracyAuthorization,
   requestTemporaryFullAccuracy,
   getCurrentPosition,

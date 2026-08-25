@@ -8,6 +8,7 @@ import {
   getLocationAvailability,
   getLocationReadiness,
   getPermissionDetails,
+  requestLocationSettingsDetailed,
   requestPermission,
   stopObserving,
   unwatch,
@@ -63,6 +64,18 @@ afterEach(() => {
 });
 
 describe("web Modern API", () => {
+  it("returns an unavailable detailed settings result without browser geolocation", async () => {
+    setNavigator(undefined);
+
+    await expect(requestLocationSettingsDetailed()).resolves.toEqual({
+      outcome: "unavailable",
+      providerStatus: {
+        backgroundModeEnabled: false,
+        locationServicesEnabled: false
+      }
+    });
+  });
+
   it("returns undefined from a cold sync module cache without querying the browser", () => {
     const getCurrentPositionMock = vi.fn();
     setNavigator({

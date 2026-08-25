@@ -227,6 +227,13 @@ export function requestLocationSettings(
   }));
 }
 
+/** Detailed alias for the deterministic settings result used by native. */
+export function requestLocationSettingsDetailed(
+  options?: LocationSettingsOptions
+): Promise<LocationSettingsResult> {
+  return requestLocationSettings(options);
+}
+
 export function getAccuracyAuthorization(): Promise<AccuracyAuthorization> {
   return checkPermission().then((status) =>
     status === "granted" ? "full" : "unknown"

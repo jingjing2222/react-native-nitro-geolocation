@@ -245,6 +245,7 @@ import {
   getProviderStatus,
   hasServicesEnabled,
   requestLocationSettings,
+  requestLocationSettingsDetailed,
   unwatch,
   watchProviderStatus
 } from 'react-native-nitro-geolocation';
@@ -263,11 +264,12 @@ async function prepareAccurateLocation() {
   const providerStatus = await getProviderStatus();
 
   if (!availability.available || !servicesEnabled || providerStatus.googleLocationAccuracyEnabled === false) {
-    await requestLocationSettings({
+    const settings = await requestLocationSettingsDetailed({
       accuracy: { android: 'high' },
       interval: 5000,
       fastestInterval: 1000
     });
+    if (settings.outcome !== 'satisfied') return settings;
   }
 
   return getCurrentPosition({
@@ -325,13 +327,17 @@ function ProviderStatusObserver() {
   Google Play Services remediations are returned only when
   `locationProvider: 'playServices'` is explicitly configured; the default
   `auto` and `android` routes can continue through Android platform providers.
-- `requestLocationSettings(options?): Promise<LocationProviderStatus>` -
+- `requestLocationSettingsDetailed(options?): Promise<LocationSettingsResult>` -
   Checks the requested Android location settings and shows Android's native
-  resolution dialog when available. It resolves with the updated provider
-  status after the settings satisfy the request.
+  resolution dialog when available. Expected outcomes resolve as `satisfied`,
+  `cancelled`, `unavailable`, or `activityMissing`, together with the latest
+  provider status. Request failures such as a concurrent request still reject.
+- `requestLocationSettings(options?): Promise<LocationSettingsResult>` - The
+  v2 method returns the same deterministic result. The detailed name is
+  provided for code shared with v1.5 and to make result handling explicit.
 
-`requestLocationSettings()` is Android-focused. On iOS it resolves with the
-current Core Location service status and does not show a settings dialog.
+Both settings methods are Android-focused. On iOS they resolve with the current
+Core Location service status and do not show a settings dialog.
 
 `watchProviderStatus()` only observes readiness: it does not request permission,
 open settings, or start position updates. Android reacts to system provider and

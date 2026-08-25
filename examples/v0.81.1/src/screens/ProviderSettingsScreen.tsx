@@ -6,7 +6,7 @@ import {
   getLocationErrorCodeName,
   getProviderStatus,
   hasServicesEnabled,
-  requestLocationSettings
+  requestLocationSettingsDetailed
 } from "react-native-nitro-geolocation";
 import type {
   GeolocationResponse,
@@ -94,7 +94,7 @@ export default function ProviderSettingsScreen() {
         return;
       }
 
-      const result = await requestLocationSettings({
+      const result = await requestLocationSettingsDetailed({
         accuracy: { android: "high" },
         interval: 5000,
         fastestInterval: 1000,
