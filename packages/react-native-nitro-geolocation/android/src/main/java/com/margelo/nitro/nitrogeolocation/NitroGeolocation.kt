@@ -4,12 +4,8 @@ import android.Manifest
 import android.content.Context
 import android.content.pm.PackageManager
 import android.location.Location
-import android.location.LocationListener
 import android.location.LocationManager as AndroidLocationManager
 import android.os.Build
-import android.os.CancellationSignal
-import android.os.Handler
-import android.os.Looper
 import android.os.SystemClock
 import androidx.core.content.ContextCompat
 import com.facebook.proguard.annotations.DoNotStrip
@@ -18,14 +14,11 @@ import com.facebook.react.modules.core.PermissionAwareActivity
 import com.facebook.react.modules.core.PermissionListener
 import com.google.android.gms.common.ConnectionResult
 import com.google.android.gms.common.GoogleApiAvailability
-import com.google.android.gms.location.LocationCallback
-import com.google.android.gms.location.LocationResult
 import com.google.android.gms.location.LocationServices
 import com.margelo.nitro.NitroModules
 import com.margelo.nitro.core.Promise
 import java.util.UUID
 import java.util.concurrent.ConcurrentHashMap
-import java.util.concurrent.atomic.AtomicLong
 
 /**
  * Geolocation implementation for Android.
@@ -67,6 +60,30 @@ class NitroGeolocation(
             locationToPosition = ::locationToPosition
         )
     }
+    private val currentPositionManager by lazy {
+        AndroidCurrentPositionManager(
+            locationManager = locationManager,
+            isCachedLocationValid = ::isCachedLocationValid,
+            effectiveMaximumAge = ::effectiveMaximumAge,
+            createNoProviderError = ::createNoLocationProviderError,
+            createTimeoutError = ::createPositionTimeoutError,
+            locationToPosition = { location -> locationToPosition(location) }
+        )
+    }
+    private val positionWatchManager by lazy {
+        AndroidPositionWatchManager(
+            locationManager = locationManager,
+            fusedLocationClient = fusedLocationClient,
+            fusedLocationProvider = fusedLocationProvider,
+            providerRoute = {
+                currentProviderRoute(isGooglePlayServicesAvailable())
+            },
+            configuredProvider = { configuration?.locationProvider },
+            getValidProvider = ::getValidProvider,
+            getNoProviderMessage = ::getNoLocationProviderMessage,
+            locationToPosition = ::locationToPosition
+        )
+    }
     private val headingManager: AndroidHeadingManager by lazy {
         AndroidHeadingManager(
             context = reactContext,
@@ -86,17 +103,8 @@ class NitroGeolocation(
     private val pendingPermissionResolvers = mutableListOf<(PermissionStatus) -> Unit>()
 
     // getCurrentPosition requests
-    private val pendingPositionRequests = ConcurrentHashMap<String, PositionRequest>()
     private val cancellablePositionRequests =
         ConcurrentHashMap<String, CurrentPositionCancellationState>()
-
-    // Watch subscriptions (token -> callback)
-    private val watchSubscriptions = ConcurrentHashMap<String, WatchSubscription>()
-
-    // Location listener for watch subscriptions
-    private var watchLocationListener: LocationListener? = null
-    private var fusedWatchLocationCallback: LocationCallback? = null
-    private val watchLocationGeneration = AtomicLong(0L)
 
     // MARK: - Configuration
 
@@ -388,7 +396,7 @@ class NitroGeolocation(
         }
 
         // Request fresh location
-        requestFreshLocation(
+        currentPositionManager.requestFreshLocation(
             providers,
             parsedOptions,
             deadlineElapsedRealtime,
@@ -519,23 +527,7 @@ class NitroGeolocation(
             return token
         }
 
-        val subscription = WatchSubscription(
-            token = token,
-            success = success,
-            error = error,
-            options = parsedOptions
-        )
-
-        watchSubscriptions[token] = subscription
-
-        // Start watching if first subscriber
-        if (watchSubscriptions.size == 1) {
-            startWatchingLocation()
-        } else {
-            restartWatchingLocation()
-        }
-
-        return token
+        return positionWatchManager.watch(success, error, parsedOptions)
     }
 
     override fun getHeading(
@@ -571,26 +563,13 @@ class NitroGeolocation(
     }
 
     override fun unwatch(token: String) {
-        val didRemoveLocationSubscription = watchSubscriptions.remove(token) != null
+        positionWatchManager.unwatch(token)
         headingManager.unwatch(token)
         providerStatusWatcherDelegate.takeIf { it.isInitialized() }?.value?.unwatch(token)
-
-        if (!didRemoveLocationSubscription) {
-            return
-        }
-
-        // Stop watching if no more subscribers
-        if (watchSubscriptions.isEmpty()) {
-            stopWatchingLocation()
-        } else {
-            restartWatchingLocation()
-        }
     }
 
     override fun getActiveWatches(): Array<ActiveWatch> {
-        val watches = watchSubscriptions.keys.map {
-            ActiveWatch(token = it, kind = ActiveWatchKind.POSITION)
-        }
+        val watches = positionWatchManager.activeWatches()
         val headings = headingManager.getActiveWatchTokens().map {
             ActiveWatch(token = it, kind = ActiveWatchKind.HEADING)
         }
@@ -598,10 +577,9 @@ class NitroGeolocation(
     }
 
     override fun stopObserving() {
-        watchSubscriptions.clear()
+        positionWatchManager.stopObserving()
         headingManager.stopObserving()
         providerStatusWatcherDelegate.takeIf { it.isInitialized() }?.value?.stopObserving()
-        stopWatchingLocation()
     }
     override fun dispose() {
         runCatching { providerStatusWatcherDelegate.takeIf { it.isInitialized() }?.value?.dispose() }
@@ -823,540 +801,6 @@ class NitroGeolocation(
         }
 
         return bestLocation
-    }
-
-    // MARK: - Helper Functions - Request Fresh Location
-
-    private fun requestFreshLocation(
-        providers: List<String>,
-        options: ParsedOptions,
-        deadlineElapsedRealtime: Long = createRequestDeadlineElapsedRealtime(options.timeout),
-        resolver: (PositionResult) -> Unit,
-        requestId: String? = null,
-        onCancellationReady: ((() -> Unit) -> Unit)? = null
-    ) {
-        val id = requestId ?: UUID.randomUUID().toString()
-        val handler = Handler(Looper.getMainLooper())
-
-        val request = PositionRequest(
-            id = id,
-            resolver = resolver,
-            options = options,
-            handler = handler,
-            providers = providers,
-            deadlineElapsedRealtime = deadlineElapsedRealtime
-        )
-
-        pendingPositionRequests[id] = request
-        onCancellationReady?.invoke { cancelPlatformCurrentPositionRequest(id) }
-        requestFreshLocationForCurrentProvider(id)
-    }
-
-    private fun cancelPlatformCurrentPositionRequest(requestId: String) {
-        val request = pendingPositionRequests.remove(requestId) ?: return
-        request.handler.removeCallbacksAndMessages(null)
-        request.cancellationAction?.invoke()
-        request.cancellationAction = null
-    }
-
-    private fun requestFreshLocationForCurrentProvider(requestId: String) {
-        val request = pendingPositionRequests[requestId] ?: return
-        val provider = request.providers.getOrNull(request.providerIndex)
-        val remainingTimeoutMillis = request.remainingTimeoutMillis()
-
-        if (provider == null) {
-            pendingPositionRequests.remove(requestId)?.resolver(
-                PositionResult.Failure(createNoLocationProviderError(request.options))
-            )
-            return
-        }
-
-        if (remainingTimeoutMillis <= 0L) {
-            pendingPositionRequests.remove(requestId)?.resolver(
-                PositionResult.Failure(createPositionTimeoutError(request.options))
-            )
-            return
-        }
-
-        // Android's getCurrentLocation may resolve a recent historical fix. An effective
-        // maximum age of 0 means callers explicitly asked us to wait for a fresh update.
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R && effectiveMaximumAge(request.options) > 0.0) {
-            requestCurrentLocationModern(provider, requestId, request.handler, remainingTimeoutMillis)
-        } else {
-            requestCurrentLocationLegacy(provider, requestId, request.handler, remainingTimeoutMillis)
-        }
-    }
-
-    @androidx.annotation.RequiresApi(Build.VERSION_CODES.R)
-    private fun requestCurrentLocationModern(
-        provider: String,
-        requestId: String,
-        handler: Handler,
-        timeoutMillis: Long
-    ) {
-        val cancellationSignal = CancellationSignal()
-
-        // Timeout handler
-        val timeoutRunnable = Runnable {
-            handlePositionTimeout(requestId)
-        }
-
-        try {
-            locationManager.getCurrentLocation(
-                provider,
-                cancellationSignal,
-                { runnable -> handler.post(runnable) }
-            ) { location ->
-                handler.removeCallbacks(timeoutRunnable)
-
-                val request = pendingPositionRequests[requestId]
-                if (request != null) {
-                    if (location != null && isCachedLocationValid(location, request.options)) {
-                        pendingPositionRequests.remove(requestId)
-                        val position = locationToPosition(location)
-                        request.resolver(PositionResult.Success(position))
-                    } else if (location != null) {
-                        retryCurrentLocationLegacyAfterStaleModern(
-                            provider,
-                            requestId,
-                            handler,
-                            request
-                        )
-                    } else {
-                        handleProviderFailure(requestId, createLocationError(
-                            POSITION_UNAVAILABLE,
-                            "Unable to get fresh location"
-                        ))
-                    }
-                }
-            }
-
-            handler.postDelayed(timeoutRunnable, timeoutMillis)
-
-            val cleanup = {
-                handler.removeCallbacksAndMessages(null)
-                cancellationSignal.cancel()
-            }
-            val request = pendingPositionRequests[requestId]
-            if (request != null) {
-                request.cancellationAction = cleanup
-                if (pendingPositionRequests[requestId] !== request) cleanup()
-            } else {
-                cleanup()
-            }
-
-        } catch (e: SecurityException) {
-            handler.removeCallbacks(timeoutRunnable)
-            handleProviderFailure(requestId, createLocationError(
-                PERMISSION_DENIED,
-                "Security exception: ${e.message}"
-            ))
-        }
-    }
-
-    private fun retryCurrentLocationLegacyAfterStaleModern(
-        provider: String,
-        requestId: String,
-        handler: Handler,
-        request: PositionRequest
-    ) {
-        request.cancellationAction?.invoke()
-        request.cancellationAction = null
-
-        val remainingTimeoutMillis = request.remainingTimeoutMillis()
-        if (remainingTimeoutMillis <= 0L) {
-            handlePositionTimeout(requestId)
-            return
-        }
-
-        requestCurrentLocationLegacy(provider, requestId, handler, remainingTimeoutMillis)
-    }
-
-    private fun requestCurrentLocationLegacy(
-        provider: String,
-        requestId: String,
-        handler: Handler,
-        timeoutMillis: Long
-    ) {
-        var isResolved = false
-        var oldLocation: Location? = null
-
-        val listener = object : LocationListener {
-            override fun onLocationChanged(location: Location) {
-                synchronized(this) {
-                    if (!isResolved) {
-                        val bestLocation = selectBestLocation(location, oldLocation)
-                        if (bestLocation == location) {
-                            isResolved = true
-                            handler.removeCallbacksAndMessages(null)
-
-                            try {
-                                locationManager.removeUpdates(this)
-                            } catch (e: Exception) {
-                                // Ignore
-                            }
-
-                            val request = pendingPositionRequests.remove(requestId)
-                            if (request != null) {
-                                val position = locationToPosition(location)
-                                request.resolver(PositionResult.Success(position))
-                            }
-                        }
-                        oldLocation = location
-                    }
-                }
-            }
-
-            override fun onProviderDisabled(provider: String) {}
-            override fun onProviderEnabled(provider: String) {}
-            @Deprecated("Deprecated in Java")
-            override fun onStatusChanged(provider: String?, status: Int, extras: android.os.Bundle?) {}
-        }
-
-        // Timeout handler
-        val timeoutRunnable = Runnable {
-            synchronized(listener) {
-                if (!isResolved) {
-                    isResolved = true
-                    try {
-                        locationManager.removeUpdates(listener)
-                    } catch (e: Exception) {
-                        // Ignore
-                    }
-                    handlePositionTimeout(requestId)
-                }
-            }
-        }
-
-        try {
-            locationManager.requestLocationUpdates(
-                provider,
-                100, // min time (ms)
-                1f,  // min distance (m)
-                listener,
-                Looper.getMainLooper()
-            )
-
-            handler.postDelayed(timeoutRunnable, timeoutMillis)
-
-            val cleanup = {
-                synchronized(listener) {
-                    isResolved = true
-                    handler.removeCallbacksAndMessages(null)
-                    try {
-                        locationManager.removeUpdates(listener)
-                    } catch (_: Exception) {
-                        // Ignore cleanup races.
-                    }
-                }
-            }
-            val request = pendingPositionRequests[requestId]
-            if (request != null) {
-                request.cancellationAction = cleanup
-                if (pendingPositionRequests[requestId] !== request) cleanup()
-            } else {
-                cleanup()
-            }
-
-        } catch (e: SecurityException) {
-            handleProviderFailure(requestId, createLocationError(
-                PERMISSION_DENIED,
-                "Security exception: ${e.message}"
-            ))
-        }
-    }
-
-    private fun handleProviderFailure(requestId: String, error: LocationError) {
-        val request = pendingPositionRequests[requestId] ?: return
-
-        request.cancellationAction?.invoke()
-        request.cancellationAction = null
-        request.providerIndex += 1
-
-        if (request.providerIndex < request.providers.size) {
-            if (request.remainingTimeoutMillis() <= 0L) {
-                pendingPositionRequests.remove(requestId)?.resolver(
-                    PositionResult.Failure(createPositionTimeoutError(request.options))
-                )
-                return
-            }
-
-            requestFreshLocationForCurrentProvider(requestId)
-            return
-        }
-
-        pendingPositionRequests.remove(requestId)?.resolver(PositionResult.Failure(error))
-    }
-
-    private fun handlePositionTimeout(requestId: String) {
-        val request = pendingPositionRequests.remove(requestId) ?: return
-        request.handler.removeCallbacksAndMessages(null)
-        request.cancellationAction?.invoke()
-        request.cancellationAction = null
-        request.resolver(PositionResult.Failure(createPositionTimeoutError(request.options)))
-    }
-
-    // MARK: - Helper Functions - Watch Position
-
-    private fun startWatchingLocation() {
-        val generation = watchLocationGeneration.get()
-
-        if (currentProviderRoute(isGooglePlayServicesAvailable()) == AndroidProviderRoute.FUSED) {
-            startWatchingFusedLocation(generation)
-            return
-        }
-
-        startWatchingPlatformLocation(generation)
-    }
-
-    private fun isActiveWatchGeneration(generation: Long): Boolean {
-        return watchSubscriptions.isNotEmpty() && watchLocationGeneration.get() == generation
-    }
-
-    private fun startWatchingPlatformLocation(generation: Long) {
-        if (!isActiveWatchGeneration(generation)) return
-
-        val mergedOptions = mergeWatchOptions()
-        val provider = getValidProvider(mergedOptions)
-        if (provider == null) {
-            notifyWatchProviderUnavailable()
-            return
-        }
-
-        val listener = object : LocationListener {
-            override fun onLocationChanged(location: Location) {
-                if (!isActiveWatchGeneration(generation)) return
-
-                val position = locationToPosition(location)
-                deliverWatchPosition(position)
-            }
-
-            override fun onProviderDisabled(provider: String) {
-                if (!isActiveWatchGeneration(generation)) return
-
-                val error = LocationError(
-                    code = SETTINGS_NOT_SATISFIED,
-                    message = "Provider disabled: $provider"
-                )
-
-                for ((_, subscription) in watchSubscriptions) {
-                    subscription.error?.invoke(error)
-                }
-            }
-
-            override fun onProviderEnabled(provider: String) {}
-            @Deprecated("Deprecated in Java")
-            override fun onStatusChanged(provider: String?, status: Int, extras: android.os.Bundle?) {}
-        }
-
-        removePlatformWatchLocationListener()
-        watchLocationListener = listener
-
-        try {
-            locationManager.requestLocationUpdates(
-                provider,
-                mergedOptions.interval.toLong(),
-                mergedOptions.distanceFilter.toFloat(),
-                listener,
-                Looper.getMainLooper()
-            )
-        } catch (e: SecurityException) {
-            val error = LocationError(
-                code = PERMISSION_DENIED,
-                message = "Permission denied: ${e.message}"
-            )
-
-            for ((_, subscription) in watchSubscriptions) {
-                subscription.error?.invoke(error)
-            }
-        }
-    }
-
-    private fun startWatchingFusedLocation(generation: Long) {
-        if (!isActiveWatchGeneration(generation)) return
-
-        val mergedOptions = mergeWatchOptions()
-        val callback = object : LocationCallback() {
-            override fun onLocationResult(result: LocationResult) {
-                if (!isActiveWatchGeneration(generation)) return
-
-                val location = result.lastLocation ?: return
-                deliverWatchPosition(locationToPosition(location, LocationProviderUsed.FUSED))
-            }
-        }
-
-        removeFusedWatchLocationCallback()
-        fusedWatchLocationCallback = callback
-
-        fun handleFusedRequestFailure(fusedError: LocationError? = null) {
-            if (!isActiveWatchGeneration(generation)) return
-
-            removeFusedWatchLocationCallback()
-            runAndroidWatchPositionFallbackAfterFusedFailure(
-                locationProvider = configuration?.locationProvider,
-                runPlatformFallback = { startWatchingPlatformLocation(generation) },
-                failWithoutFallback = {
-                    if (fusedError != null) {
-                        notifyWatchError(fusedError)
-                    } else {
-                        notifyWatchProviderUnavailable()
-                    }
-                }
-            )
-        }
-
-        fusedLocationProvider.requestWatchUpdates(
-            options = mergedOptions,
-            callback = callback,
-            onInactiveStart = {
-                if (!isActiveWatchGeneration(generation)) {
-                    try {
-                        fusedLocationClient.removeLocationUpdates(callback)
-                    } catch (e: Exception) {
-                        // Ignore
-                    }
-                }
-            },
-            onFailure = { fusedError -> handleFusedRequestFailure(fusedError) }
-        )
-    }
-
-    private fun mergeWatchOptions(): ParsedOptions {
-        var androidAccuracy: AndroidAccuracyResolution? = null
-        var smallestInterval = Double.MAX_VALUE
-        var smallestFastestInterval = Double.MAX_VALUE
-        var smallestDistanceFilter = Double.MAX_VALUE
-        var granularity = AndroidGranularity.PERMISSION
-        var waitForAccurateLocation = false
-        var maxUpdateAge: Double? = null
-        var smallestMaxUpdateDelay = Double.MAX_VALUE
-
-        for ((_, subscription) in watchSubscriptions) {
-            androidAccuracy = mostDemandingAndroidAccuracy(
-                androidAccuracy,
-                subscription.options.androidAccuracy
-            )
-            smallestInterval = minOf(smallestInterval, subscription.options.interval)
-            smallestFastestInterval = minOf(
-                smallestFastestInterval,
-                subscription.options.fastestInterval
-            )
-            smallestDistanceFilter = minOf(
-                smallestDistanceFilter,
-                subscription.options.distanceFilter
-            )
-            granularity = mergeWatchGranularity(granularity, subscription.options.granularity)
-            waitForAccurateLocation = waitForAccurateLocation ||
-                subscription.options.waitForAccurateLocation
-            maxUpdateAge = mergeNullableMinimum(maxUpdateAge, subscription.options.maxUpdateAge)
-            smallestMaxUpdateDelay = minOf(
-                smallestMaxUpdateDelay,
-                subscription.options.maxUpdateDelay
-            )
-        }
-
-        return ParsedOptions(
-            timeout = Double.POSITIVE_INFINITY,
-            maximumAge = 0.0,
-            androidAccuracy = androidAccuracy ?: resolveAndroidAccuracy(null, enableHighAccuracy = false),
-            interval = smallestInterval,
-            fastestInterval = smallestFastestInterval,
-            distanceFilter = smallestDistanceFilter,
-            granularity = granularity,
-            waitForAccurateLocation = waitForAccurateLocation,
-            maxUpdateAge = maxUpdateAge,
-            maxUpdateDelay = if (smallestMaxUpdateDelay == Double.MAX_VALUE) 0.0 else smallestMaxUpdateDelay,
-            maxUpdates = null
-        )
-    }
-
-    private fun deliverWatchPosition(position: GeolocationResponse) {
-        val tokensToRemove = mutableListOf<String>()
-
-        for ((token, subscription) in watchSubscriptions) {
-            subscription.success(position)
-            subscription.deliveredUpdates += 1
-
-            val maxUpdates = subscription.options.maxUpdates
-            if (maxUpdates != null && subscription.deliveredUpdates >= maxUpdates) {
-                tokensToRemove.add(token)
-            }
-        }
-
-        for (token in tokensToRemove) {
-            watchSubscriptions.remove(token)
-        }
-
-        if (tokensToRemove.isNotEmpty()) {
-            if (watchSubscriptions.isEmpty()) {
-                stopWatchingLocation()
-            } else {
-                restartWatchingLocation()
-            }
-        }
-    }
-
-    private fun notifyWatchProviderUnavailable() {
-        for ((_, subscription) in watchSubscriptions) {
-            subscription.error?.invoke(LocationError(
-                code = SETTINGS_NOT_SATISFIED,
-                message = getNoLocationProviderMessage(subscription.options)
-            ))
-        }
-    }
-
-    private fun notifyWatchError(error: LocationError) {
-        for ((_, subscription) in watchSubscriptions) {
-            subscription.error?.invoke(error)
-        }
-    }
-
-    private fun mergeWatchGranularity(
-        current: AndroidGranularity,
-        next: AndroidGranularity
-    ): AndroidGranularity {
-        return when {
-            current == AndroidGranularity.COARSE || next == AndroidGranularity.COARSE -> {
-                AndroidGranularity.COARSE
-            }
-            current == AndroidGranularity.FINE || next == AndroidGranularity.FINE -> {
-                AndroidGranularity.FINE
-            }
-            else -> AndroidGranularity.PERMISSION
-        }
-    }
-
-    private fun stopWatchingLocation() {
-        watchLocationGeneration.incrementAndGet()
-        removePlatformWatchLocationListener()
-        removeFusedWatchLocationCallback()
-    }
-
-    private fun removePlatformWatchLocationListener() {
-        watchLocationListener?.let { listener ->
-            try {
-                locationManager.removeUpdates(listener)
-            } catch (e: Exception) {
-                // Ignore
-            }
-        }
-        watchLocationListener = null
-    }
-
-    private fun removeFusedWatchLocationCallback() {
-        fusedWatchLocationCallback?.let { callback ->
-            try {
-                fusedLocationClient.removeLocationUpdates(callback)
-            } catch (e: Exception) {
-                // Ignore
-            }
-        }
-        fusedWatchLocationCallback = null
-    }
-
-    private fun restartWatchingLocation() {
-        stopWatchingLocation()
-        startWatchingLocation()
     }
 
     // MARK: - Helper Functions - Conversion

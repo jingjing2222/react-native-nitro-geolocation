@@ -1,6 +1,62 @@
 import CoreLocation
 import Foundation
 
+func getCurrentAuthorizationStatus(from manager: CLLocationManager) -> CLAuthorizationStatus {
+    if #available(iOS 14.0, *) {
+        return manager.authorizationStatus
+    }
+    return CLLocationManager.authorizationStatus()
+}
+
+func mapCLAuthorizationStatus(_ status: CLAuthorizationStatus) -> PermissionStatus {
+    switch status {
+    case .authorizedAlways, .authorizedWhenInUse:
+        return .granted
+    case .denied:
+        return .denied
+    case .restricted:
+        return .restricted
+    case .notDetermined:
+        return .undetermined
+    @unknown default:
+        return .undetermined
+    }
+}
+
+func currentAccuracyAuthorization(from locationManager: CLLocationManager?) -> AccuracyAuthorization {
+    guard #available(iOS 14.0, *) else { return .unknown }
+    let manager = locationManager ?? CLLocationManager()
+    switch manager.accuracyAuthorization {
+    case .fullAccuracy:
+        return .full
+    case .reducedAccuracy:
+        return .reduced
+    @unknown default:
+        return .unknown
+    }
+}
+
+func currentAccuracyAuthorizationOnMain(
+    from locationManager: CLLocationManager?
+) -> AccuracyAuthorization {
+    if Thread.isMainThread {
+        return currentAccuracyAuthorization(from: locationManager)
+    }
+    return DispatchQueue.main.sync {
+        currentAccuracyAuthorization(from: locationManager)
+    }
+}
+
+func determineAuthorizationLevelFromInfoPlist() -> AuthorizationLevel {
+    let hasAlwaysKey = Bundle.main.object(
+        forInfoDictionaryKey: "NSLocationAlwaysAndWhenInUseUsageDescription"
+    ) != nil
+    let hasWhenInUseKey = Bundle.main.object(
+        forInfoDictionaryKey: "NSLocationWhenInUseUsageDescription"
+    ) != nil
+    return hasAlwaysKey && hasWhenInUseKey ? .always : .wheninuse
+}
+
 func headingToResponse(_ clHeading: CLHeading) -> Heading {
     let trueHeading = clHeading.trueHeading >= 0
         ? clHeading.trueHeading
