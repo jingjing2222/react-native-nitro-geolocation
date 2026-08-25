@@ -120,4 +120,21 @@ describe("opt-in Expo config plugin", () => {
       "locationAlwaysAndWhenInUsePermission must be a non-empty string"
     );
   });
+
+  it("rejects a string background flag instead of enabling sensitive permissions", () => {
+    expect(() =>
+      plugin.applyAndroidManifest({}, {
+        enableBackgroundLocation: "false"
+      } as unknown as {
+        enableBackgroundLocation?: boolean;
+      })
+    ).toThrow("enableBackgroundLocation must be a boolean");
+    expect(() =>
+      plugin.applyInfoPlist({}, {
+        enableBackgroundLocation: "true"
+      } as unknown as {
+        enableBackgroundLocation?: boolean;
+      })
+    ).toThrow("enableBackgroundLocation must be a boolean");
+  });
 });

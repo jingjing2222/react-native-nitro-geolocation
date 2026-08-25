@@ -26,6 +26,12 @@ function validatePermissionOption(name, value) {
   }
 }
 
+function validateBackgroundOption(value) {
+  if (value !== undefined && typeof value !== "boolean") {
+    throw new Error("enableBackgroundLocation must be a boolean");
+  }
+}
+
 function ensureAndroidPermission(manifest, name) {
   const permissions = Array.isArray(manifest["uses-permission"])
     ? manifest["uses-permission"]
@@ -51,7 +57,8 @@ function ensureAndroidPermission(manifest, name) {
 }
 
 function applyAndroidManifest(manifest, options = {}) {
-  const permissions = options.enableBackgroundLocation
+  validateBackgroundOption(options.enableBackgroundLocation);
+  const permissions = options.enableBackgroundLocation === true
     ? [...FOREGROUND_PERMISSIONS, ...BACKGROUND_PERMISSIONS]
     : FOREGROUND_PERMISSIONS;
   for (const permission of permissions) {
@@ -61,6 +68,7 @@ function applyAndroidManifest(manifest, options = {}) {
 }
 
 function applyInfoPlist(infoPlist, options = {}) {
+  validateBackgroundOption(options.enableBackgroundLocation);
   validatePermissionOption(
     "locationWhenInUsePermission",
     options.locationWhenInUsePermission
@@ -77,7 +85,7 @@ function applyInfoPlist(infoPlist, options = {}) {
       ? infoPlist.NSLocationWhenInUseUsageDescription
       : DEFAULT_WHEN_IN_USE_PERMISSION);
 
-  if (options.enableBackgroundLocation) {
+  if (options.enableBackgroundLocation === true) {
     infoPlist.NSLocationAlwaysAndWhenInUseUsageDescription =
       options.locationAlwaysAndWhenInUsePermission ||
       (typeof infoPlist.NSLocationAlwaysAndWhenInUseUsageDescription ===

@@ -88,6 +88,14 @@ declarations. Your app must still request runtime permissions from a user
 action and explain why background access is needed. Run `npx expo prebuild`
 and rebuild the native app after changing plugin options.
 
+When changing `enableBackgroundLocation` from `true` to `false`, regenerate the
+native projects with `npx expo prebuild --clean` before rebuilding. The plugin
+does not remove existing background declarations from an already-generated
+project because it cannot distinguish its previous output from app-owned native
+configuration. If a clean prebuild is not possible, remove the Android
+background/service/notification declarations, the iOS Always usage description,
+and the iOS `location` background mode manually when they are no longer needed.
+
 ## Manual native permissions
 
 If you do not enable the config plugin, add the same native permission
