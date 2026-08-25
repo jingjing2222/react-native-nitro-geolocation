@@ -11,8 +11,7 @@ export * from "./background/index.web";
 export type {
   PermissionStatus,
   LocationRequestOptions,
-  LocationSettingsOptions,
-  LocationError
+  LocationSettingsOptions
 } from "./NitroGeolocation.nitro";
 
 export type { CurrentPositionOptions } from "./api/currentPositionOptions";

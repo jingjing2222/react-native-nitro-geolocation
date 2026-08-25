@@ -1,6 +1,6 @@
 import {
   type GeolocationResponse,
-  LocationErrorCode,
+  LocationErrorCodes,
   type PermissionStatus,
   checkPermission,
   getCurrentPosition,
@@ -161,8 +161,8 @@ async function getCurrentPositionUntilSuccess(timeoutMs: number) {
       transientErrors.push(error);
       const code = getErrorCode(error);
       if (
-        (code !== LocationErrorCode.POSITION_UNAVAILABLE &&
-          code !== LocationErrorCode.TIMEOUT) ||
+        (code !== LocationErrorCodes.POSITION_UNAVAILABLE &&
+          code !== LocationErrorCodes.TIMEOUT) ||
         Date.now() - startedAt >= timeoutMs
       ) {
         throw error;
@@ -203,8 +203,8 @@ async function getCurrentPositionUntilExpected({
       transientErrors.push(error);
       const code = getErrorCode(error);
       if (
-        (code !== LocationErrorCode.POSITION_UNAVAILABLE &&
-          code !== LocationErrorCode.TIMEOUT) ||
+        (code !== LocationErrorCodes.POSITION_UNAVAILABLE &&
+          code !== LocationErrorCodes.TIMEOUT) ||
         Date.now() - startedAt >= timeoutMs
       ) {
         throw error;

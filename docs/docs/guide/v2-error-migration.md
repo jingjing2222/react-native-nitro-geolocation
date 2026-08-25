@@ -10,12 +10,12 @@ API with readable string discriminants. This is a Modern API change only. The
 
 ## Update comparisons
 
-Keep comparisons against `LocationErrorCode` instead of copying either the old
+Keep comparisons against `LocationErrorCodes` instead of copying either the old
 number or the new string into application code:
 
 ```diff
  import {
-   LocationErrorCode,
+   LocationErrorCodes,
    getCurrentPosition
  } from 'react-native-nitro-geolocation';
 
@@ -25,7 +25,7 @@ number or the new string into application code:
 -  if ((error as { code?: number }).code === 1) {
 +  if (
 +    (error as { code?: string }).code ===
-+    LocationErrorCode.PERMISSION_DENIED
++    LocationErrorCodes.PERMISSION_DENIED
 +  ) {
      showPermissionHelp();
    }
@@ -34,7 +34,7 @@ number or the new string into application code:
 
 The constants now carry their meaning in logs and serialized data:
 
-| 1.x number | 2.x `LocationErrorCode` | 2.x wire value |
+| 1.x number | 2.x `LocationErrorCodes` member | 2.x wire value |
 | ---: | --- | --- |
 | `-1` | `INTERNAL_ERROR` | `internalError` |
 | `1` | `PERMISSION_DENIED` | `permissionDenied` |
@@ -51,7 +51,7 @@ needs a trusted location code:
 ```tsx
 import {
   isLocationErrorCode,
-  LocationErrorCode
+  LocationErrorCodes
 } from 'react-native-nitro-geolocation';
 
 function describeLocationFailure(error: unknown): string {
@@ -61,7 +61,7 @@ function describeLocationFailure(error: unknown): string {
     return 'Unexpected location failure';
   }
 
-  if (candidate.code === LocationErrorCode.TIMEOUT) {
+  if (candidate.code === LocationErrorCodes.TIMEOUT) {
     return 'Location took too long. Try again.';
   }
 

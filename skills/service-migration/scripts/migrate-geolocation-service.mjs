@@ -780,7 +780,7 @@ function buildWatchPositionCall(t, args, transformedOptions) {
 
 function enumMember(t, name) {
   return t.memberExpression(
-    t.identifier("LocationErrorCode"),
+    t.identifier("LocationErrorCodes"),
     t.identifier(name)
   );
 }
@@ -843,7 +843,7 @@ function rewriteInlineErrorCodeComparisons(t, callbackPath, requiredImports) {
       const codeName = numericErrorCodeName(t, literalSide);
       if (!codeName) return;
 
-      requiredImports.add("LocationErrorCode");
+      requiredImports.add("LocationErrorCodes");
       if (leftObject) {
         path.node.right = enumMember(t, codeName);
       } else {
@@ -1140,7 +1140,7 @@ function transformSourceFile(
       if (path.parentPath.isCallExpression({ callee: path.node })) return;
       if (!ERROR_CONSTANT_NAMES.has(info.propertyName)) return;
 
-      requiredImports.add("LocationErrorCode");
+      requiredImports.add("LocationErrorCodes");
       path.replaceWith(enumMember(t, info.propertyName));
     }
   });

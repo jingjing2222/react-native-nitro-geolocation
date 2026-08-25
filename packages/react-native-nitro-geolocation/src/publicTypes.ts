@@ -1,8 +1,4 @@
-import type {
-  NitroGeolocation,
-  PermissionStatus
-} from "./NitroGeolocation.nitro";
-import type { CompatGeolocationConfigurationInternal } from "./NitroGeolocationCompat.nitro";
+import type { PermissionStatus } from "./NitroGeolocation.nitro";
 import type {
   AccuracyAuthorization as SchemaAccuracyAuthorization,
   ActiveWatch as SchemaActiveWatch,
@@ -28,13 +24,6 @@ import type {
   LocationSettingsResult as SchemaLocationSettingsResult,
   ReverseGeocodedAddress as SchemaReverseGeocodedAddress
 } from "./types";
-
-type NativeGeolocationConfiguration = Parameters<
-  NitroGeolocation["setConfiguration"]
->[0];
-type NativeLocationProvider = NonNullable<
-  NativeGeolocationConfiguration["locationProvider"]
->;
 
 /** API path that delivered a Modern location response. */
 export type LocationResponseSource =
@@ -167,17 +156,10 @@ export type CompatGeolocationOptionsWithMetadata = Omit<
   includeExtraMetadata: true;
 };
 
-export type AuthorizationLevel = NonNullable<
-  NativeGeolocationConfiguration["authorizationLevel"]
->;
-export type LocationProvider =
-  | Exclude<NativeLocationProvider, "android_platform">
-  | "android";
+export type AuthorizationLevel = "always" | "whenInUse" | "auto";
+export type LocationProvider = "playServices" | "android" | "auto";
 
-export type GeolocationConfiguration = Omit<
-  NativeGeolocationConfiguration,
-  "autoRequestPermission" | "locationProvider"
-> & {
+export interface GeolocationConfiguration {
   /**
    * @deprecated This option is accepted for backward compatibility only.
    * `setConfiguration()` does not request permission. Call
@@ -188,6 +170,16 @@ export type GeolocationConfiguration = Omit<
   autoRequestPermission?: boolean;
 
   /**
+   * iOS authorization level.
+   *
+   * `auto` selects a level from the usage-description keys in Info.plist.
+   */
+  authorizationLevel?: AuthorizationLevel;
+
+  /** Enable iOS background location updates. */
+  enableBackgroundLocationUpdates?: boolean;
+
+  /**
    * Android location provider.
    *
    * `auto` and `playServices` prefer Google Play Services fused location when
@@ -195,12 +187,18 @@ export type GeolocationConfiguration = Omit<
    * force Android's platform `LocationManager` path.
    */
   locationProvider?: LocationProvider;
-};
+}
 
-export type CompatGeolocationConfiguration = Omit<
-  CompatGeolocationConfigurationInternal,
-  "locationProvider"
-> & {
+export interface CompatGeolocationConfiguration {
+  /** Preserve the community API's manual permission-request behavior. */
+  skipPermissionRequests: boolean;
+
+  /** iOS authorization level. */
+  authorizationLevel?: AuthorizationLevel;
+
+  /** Enable iOS background location updates. */
+  enableBackgroundLocationUpdates?: boolean;
+
   /**
    * Android location provider compatibility option.
    *
@@ -208,4 +206,4 @@ export type CompatGeolocationConfiguration = Omit<
    * API root import when you need Android fused/provider selection.
    */
   locationProvider?: LocationProvider;
-};
+}

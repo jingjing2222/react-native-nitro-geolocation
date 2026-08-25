@@ -3,7 +3,7 @@ import { NitroGeolocationHybridObject } from "../NitroGeolocationModule";
 import { isDevtoolsEnabled } from "../devtools";
 import { getDevtoolsLastKnownPosition } from "../devtools/getLastKnownPosition";
 import type { GeolocationResponse } from "../publicTypes";
-import { LocationErrorCode } from "../utils/errors";
+import { LocationErrorCodes } from "../utils/errors";
 import { decoratePositionWithMetadata } from "./locationMetadata";
 import { readLastKnownPosition, rememberPosition } from "./positionCache";
 
@@ -60,7 +60,7 @@ export function getLastKnownPositionAsync(
       typeof error === "object" &&
       error !== null &&
       "code" in error &&
-      error.code === LocationErrorCode.POSITION_UNAVAILABLE
+      error.code === LocationErrorCodes.POSITION_UNAVAILABLE
     ) {
       return undefined;
     }

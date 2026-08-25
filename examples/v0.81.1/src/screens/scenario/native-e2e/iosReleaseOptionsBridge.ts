@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { Platform } from "react-native";
 import {
-  LocationErrorCode,
+  LocationErrorCodes,
   getCurrentPosition,
   getLastKnownPositionAsync,
   unwatch,
@@ -348,7 +348,7 @@ export const useIOSReleaseOptionsBridgeScenario = () => {
       setResult(
         "headingFilter",
         createScenarioResult(
-          locationError.code === LocationErrorCode.INTERNAL_ERROR &&
+          locationError.code === LocationErrorCodes.INTERNAL_ERROR &&
             locationError.message.includes("headingFilter")
             ? "passed"
             : "failed",

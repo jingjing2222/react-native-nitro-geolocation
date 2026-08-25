@@ -634,7 +634,7 @@ fields. Compat callers can opt into equivalent metadata by setting
 
 ```tsx
 import {
-  LocationErrorCode,
+  LocationErrorCodes,
   watchPosition,
   unwatch,
 } from 'react-native-nitro-geolocation';
@@ -644,7 +644,7 @@ const token = watchPosition(
     console.log(position.coords.latitude, position.coords.longitude);
   },
   (error) => {
-    if (error.code === LocationErrorCode.SETTINGS_NOT_SATISFIED) {
+    if (error.code === LocationErrorCodes.SETTINGS_NOT_SATISFIED) {
       // Device/provider settings do not satisfy the request.
     }
     // error.message: Human-readable error
@@ -655,7 +655,7 @@ unwatch(token);
 ```
 
 Starting in 2.0, Modern API errors use readable string discriminants. Keep
-comparisons against the `LocationErrorCode` members shown below instead of
+comparisons against the `LocationErrorCodes` members shown below instead of
 copying their values. The expanded modern-only native setup/provider members
 (`INTERNAL_ERROR`, `PLAY_SERVICE_NOT_AVAILABLE`, and
 `SETTINGS_NOT_SATISFIED`) were originally added in v1.2; 2.0 keeps those member

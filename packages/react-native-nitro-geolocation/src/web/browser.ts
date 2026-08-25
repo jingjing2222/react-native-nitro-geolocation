@@ -3,7 +3,7 @@ import type {
   LocationRequestOptions
 } from "../NitroGeolocation.nitro";
 import type { GeolocationResponse } from "../publicTypes";
-import { LocationErrorCode, createLocationError } from "../utils/errors";
+import { LocationErrorCodes, createLocationError } from "../utils/errors";
 
 type BrowserPermissionState = "granted" | "denied" | "prompt";
 
@@ -117,7 +117,7 @@ export function mapPermissionState(
 
 export function createUnsupportedError(): LocationError {
   return createLocationError(
-    LocationErrorCode.POSITION_UNAVAILABLE,
+    LocationErrorCodes.POSITION_UNAVAILABLE,
     "Browser geolocation is unavailable. Use a secure context and a browser that supports navigator.geolocation."
   );
 }
@@ -126,17 +126,17 @@ export function mapBrowserError(error: BrowserPositionError): LocationError {
   switch (error.code) {
     case 1:
       return createLocationError(
-        LocationErrorCode.PERMISSION_DENIED,
+        LocationErrorCodes.PERMISSION_DENIED,
         error.message || "User denied geolocation permission."
       );
     case 3:
       return createLocationError(
-        LocationErrorCode.TIMEOUT,
+        LocationErrorCodes.TIMEOUT,
         error.message || "Geolocation request timed out."
       );
     default:
       return createLocationError(
-        LocationErrorCode.POSITION_UNAVAILABLE,
+        LocationErrorCodes.POSITION_UNAVAILABLE,
         error.message || "Position is unavailable."
       );
   }

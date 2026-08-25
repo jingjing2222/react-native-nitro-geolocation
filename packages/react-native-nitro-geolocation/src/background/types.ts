@@ -352,6 +352,16 @@ export interface BackgroundSubscription {
   remove(): void;
 }
 
+/** Result returned by `diagnoseBackgroundLocation()`. */
+export interface BackgroundLocationDiagnosis {
+  /** True when no blocking issues were found. */
+  healthy: boolean;
+  /** The raw status the diagnosis was derived from. */
+  status: BackgroundLocationStatus;
+  /** Human-readable, actionable reasons. Empty when healthy. */
+  issues: string[];
+}
+
 export type BackgroundTaskHandler = (
   event: BackgroundEvent
 ) => void | Promise<void>;

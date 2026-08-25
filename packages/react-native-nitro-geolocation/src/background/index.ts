@@ -2,19 +2,32 @@ import { NitroModules } from "react-native-nitro-modules";
 import type { LocationError } from "../NitroGeolocation.nitro";
 import type { NitroBackgroundLocation } from "./NitroBackgroundLocation.nitro";
 import { createLocationLifecycleSubscription } from "./locationLifecycle";
+import {
+  fromNativeBackgroundLocationOptions,
+  toNativeBackgroundLocationOptions
+} from "./options";
 import type {
-  BackgroundActivityEventEnvelope,
+  ActivityRecognitionOptions,
   BackgroundEvent,
   BackgroundEventEnvelope,
-  BackgroundGeofenceEventEnvelope,
-  BackgroundHttpSyncEvent,
+  BackgroundHttpSyncResult,
   BackgroundLocation,
+  BackgroundLocationDiagnosis,
+  BackgroundLocationOptions,
   BackgroundLocationStatus,
+  BackgroundPermissionResult,
   BackgroundSubscription,
+  DetectedActivity,
+  GeofenceEvent,
+  GeofenceRegion,
+  GeofencingOptions,
+  GetStoredBackgroundEventsOptions,
+  GetStoredBackgroundLocationsOptions,
   LocationLifecycleEvent,
   StoredBackgroundEvent,
-  StoredBackgroundEventEnvelope
-} from "./types";
+  StoredBackgroundEventEnvelope,
+  StoredBackgroundLocation
+} from "./publicTypes";
 
 const NativeBackgroundLocation =
   NitroModules.createHybridObject<NitroBackgroundLocation>(
@@ -50,53 +63,74 @@ function narrowBackgroundEvent(
   }
 }
 
-export * from "./types";
+export * from "./publicTypes";
 export { BACKGROUND_LOCATION_TASK_NAME, registerBackgroundTask } from "./task";
 
-export const checkBackgroundPermission =
-  NativeBackgroundLocation.checkBackgroundPermission.bind(
-    NativeBackgroundLocation
+export function checkBackgroundPermission(): Promise<BackgroundPermissionResult> {
+  return NativeBackgroundLocation.checkBackgroundPermission();
+}
+
+export function requestBackgroundPermission(): Promise<BackgroundPermissionResult> {
+  return NativeBackgroundLocation.requestBackgroundPermission();
+}
+
+export function openAppLocationSettings(): Promise<void> {
+  return NativeBackgroundLocation.openAppLocationSettings();
+}
+
+export function configureBackgroundLocation(
+  options: BackgroundLocationOptions
+): Promise<void> {
+  return NativeBackgroundLocation.configureBackgroundLocation(
+    toNativeBackgroundLocationOptions(options)
   );
-export const requestBackgroundPermission =
-  NativeBackgroundLocation.requestBackgroundPermission.bind(
-    NativeBackgroundLocation
+}
+
+export async function getBackgroundConfiguration(): Promise<
+  BackgroundLocationOptions | undefined
+> {
+  const options = await NativeBackgroundLocation.getBackgroundConfiguration();
+  return fromNativeBackgroundLocationOptions(options);
+}
+
+export function startBackgroundLocation(
+  options?: BackgroundLocationOptions
+): Promise<void> {
+  return NativeBackgroundLocation.startBackgroundLocation(
+    options ? toNativeBackgroundLocationOptions(options) : undefined
   );
-export const openAppLocationSettings =
-  NativeBackgroundLocation.openAppLocationSettings.bind(
-    NativeBackgroundLocation
-  );
-export const configureBackgroundLocation =
-  NativeBackgroundLocation.configureBackgroundLocation.bind(
-    NativeBackgroundLocation
-  );
-export const getBackgroundConfiguration =
-  NativeBackgroundLocation.getBackgroundConfiguration.bind(
-    NativeBackgroundLocation
-  );
-export const startBackgroundLocation: NitroBackgroundLocation["startBackgroundLocation"] =
-  (options) => NativeBackgroundLocation.startBackgroundLocation(options);
-export const stopBackgroundLocation =
-  NativeBackgroundLocation.stopBackgroundLocation.bind(
-    NativeBackgroundLocation
-  );
-export const resetBackgroundLocation =
-  NativeBackgroundLocation.resetBackgroundLocation.bind(
-    NativeBackgroundLocation
-  );
-export const getBackgroundLocationStatus =
-  NativeBackgroundLocation.getBackgroundLocationStatus.bind(
-    NativeBackgroundLocation
-  );
-export const getStoredBackgroundLocations: NitroBackgroundLocation["getStoredBackgroundLocations"] =
-  (options) => NativeBackgroundLocation.getStoredBackgroundLocations(options);
-export const clearStoredBackgroundLocations: NitroBackgroundLocation["clearStoredBackgroundLocations"] =
-  (ids) => NativeBackgroundLocation.clearStoredBackgroundLocations(ids);
-export const markStoredBackgroundLocationsDelivered =
-  NativeBackgroundLocation.markStoredBackgroundLocationsDelivered.bind(
-    NativeBackgroundLocation
-  );
+}
+
+export function stopBackgroundLocation(): Promise<void> {
+  return NativeBackgroundLocation.stopBackgroundLocation();
+}
+
+export function resetBackgroundLocation(): Promise<void> {
+  return NativeBackgroundLocation.resetBackgroundLocation();
+}
+
+export function getBackgroundLocationStatus(): Promise<BackgroundLocationStatus> {
+  return NativeBackgroundLocation.getBackgroundLocationStatus();
+}
+
+export function getStoredBackgroundLocations(
+  options?: GetStoredBackgroundLocationsOptions
+): Promise<StoredBackgroundLocation[]> {
+  return NativeBackgroundLocation.getStoredBackgroundLocations(options);
+}
+
+export function clearStoredBackgroundLocations(ids?: string[]): Promise<void> {
+  return NativeBackgroundLocation.clearStoredBackgroundLocations(ids);
+}
+
+export function markStoredBackgroundLocationsDelivered(
+  ids: string[]
+): Promise<void> {
+  return NativeBackgroundLocation.markStoredBackgroundLocationsDelivered(ids);
+}
+
 export async function getStoredBackgroundEvents(
-  options?: Parameters<NitroBackgroundLocation["getStoredBackgroundEvents"]>[0]
+  options?: GetStoredBackgroundEventsOptions
 ): Promise<StoredBackgroundEvent[]> {
   const events =
     await NativeBackgroundLocation.getStoredBackgroundEvents(options);
@@ -105,38 +139,44 @@ export async function getStoredBackgroundEvents(
     event: narrowBackgroundEvent(event.event)
   }));
 }
-export const clearStoredBackgroundEvents: NitroBackgroundLocation["clearStoredBackgroundEvents"] =
-  (ids) => NativeBackgroundLocation.clearStoredBackgroundEvents(ids);
-export const markStoredBackgroundEventsDelivered =
-  NativeBackgroundLocation.markStoredBackgroundEventsDelivered.bind(
-    NativeBackgroundLocation
-  );
-export const addGeofences = NativeBackgroundLocation.addGeofences.bind(
-  NativeBackgroundLocation
-);
-export const removeGeofences: NitroBackgroundLocation["removeGeofences"] = (
-  identifiers
-) => NativeBackgroundLocation.removeGeofences(identifiers);
-export const getRegisteredGeofences =
-  NativeBackgroundLocation.getRegisteredGeofences.bind(
-    NativeBackgroundLocation
-  );
-export const startActivityRecognition: NitroBackgroundLocation["startActivityRecognition"] =
-  (options) => NativeBackgroundLocation.startActivityRecognition(options);
-export const stopActivityRecognition =
-  NativeBackgroundLocation.stopActivityRecognition.bind(
-    NativeBackgroundLocation
-  );
-export const syncStoredLocations =
-  NativeBackgroundLocation.syncStoredLocations.bind(NativeBackgroundLocation);
 
-export interface BackgroundLocationDiagnosis {
-  /** True when no blocking issues were found. */
-  healthy: boolean;
-  /** The raw status the diagnosis was derived from. */
-  status: BackgroundLocationStatus;
-  /** Human-readable, actionable reasons delivery may not be working. Empty when healthy. */
-  issues: string[];
+export function clearStoredBackgroundEvents(ids?: string[]): Promise<void> {
+  return NativeBackgroundLocation.clearStoredBackgroundEvents(ids);
+}
+
+export function markStoredBackgroundEventsDelivered(
+  ids: string[]
+): Promise<void> {
+  return NativeBackgroundLocation.markStoredBackgroundEventsDelivered(ids);
+}
+
+export function addGeofences(
+  regions: GeofenceRegion[],
+  options?: GeofencingOptions
+): Promise<void> {
+  return NativeBackgroundLocation.addGeofences(regions, options);
+}
+
+export function removeGeofences(identifiers?: string[]): Promise<void> {
+  return NativeBackgroundLocation.removeGeofences(identifiers);
+}
+
+export function getRegisteredGeofences(): Promise<GeofenceRegion[]> {
+  return NativeBackgroundLocation.getRegisteredGeofences();
+}
+
+export function startActivityRecognition(
+  options?: ActivityRecognitionOptions
+): Promise<void> {
+  return NativeBackgroundLocation.startActivityRecognition(options);
+}
+
+export function stopActivityRecognition(): Promise<void> {
+  return NativeBackgroundLocation.stopActivityRecognition();
+}
+
+export function syncStoredLocations(): Promise<BackgroundHttpSyncResult> {
+  return NativeBackgroundLocation.syncStoredLocations();
 }
 
 /**
@@ -250,7 +290,7 @@ export function onLocationLifecycleChange(
 }
 
 export function onGeofence(
-  listener: (event: BackgroundGeofenceEventEnvelope["geofence"]) => void
+  listener: (event: GeofenceEvent) => void
 ): BackgroundSubscription {
   return onBackgroundEvent((event) => {
     if (event.type === "geofence") {
@@ -260,7 +300,7 @@ export function onGeofence(
 }
 
 export function onActivityChange(
-  listener: (activity: BackgroundActivityEventEnvelope["activity"]) => void
+  listener: (activity: DetectedActivity) => void
 ): BackgroundSubscription {
   return onBackgroundEvent((event) => {
     if (event.type === "activity") {
@@ -270,7 +310,7 @@ export function onActivityChange(
 }
 
 export function onHttpSync(
-  listener: (result: BackgroundHttpSyncEvent["result"]) => void
+  listener: (result: BackgroundHttpSyncResult) => void
 ): BackgroundSubscription {
   return onBackgroundEvent((event) => {
     if (event.type === "httpSync") {

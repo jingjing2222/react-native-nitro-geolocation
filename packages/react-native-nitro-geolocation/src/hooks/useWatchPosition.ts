@@ -1,22 +1,8 @@
 import { useEffect, useRef, useState } from "react";
-import type {
-  LocationError,
-  LocationRequestOptions
-} from "../NitroGeolocation.nitro";
+import type { LocationError } from "../NitroGeolocation.nitro";
 import { unwatch, watchPosition } from "../api";
 import type { GeolocationResponse } from "../publicTypes";
-
-/**
- * Options for useWatchPosition hook.
- */
-export interface UseWatchPositionOptions extends LocationRequestOptions {
-  /**
-   * Whether to actively watch for location updates.
-   * When false, watching is paused and cleanup is performed.
-   * @default false
-   */
-  enabled?: boolean;
-}
+import type { UseWatchPositionOptions, UseWatchPositionResult } from "./types";
 
 /**
  * Hook for continuous location tracking.
@@ -50,7 +36,9 @@ export interface UseWatchPositionOptions extends LocationRequestOptions {
  * }
  * ```
  */
-export function useWatchPosition(options?: UseWatchPositionOptions) {
+export function useWatchPosition(
+  options?: UseWatchPositionOptions
+): UseWatchPositionResult {
   const [position, setPosition] = useState<GeolocationResponse | null>(null);
   const [isWatching, setIsWatching] = useState(false);
   const [error, setError] = useState<LocationError | null>(null);

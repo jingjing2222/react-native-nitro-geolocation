@@ -1,6 +1,6 @@
 import React from "react";
 import {
-  LocationErrorCode,
+  LocationErrorCodes,
   getActiveWatches,
   getHeading,
   unwatch,
@@ -228,7 +228,7 @@ export default function HeadingScreen() {
               unwatch(token);
             }
             try {
-              assertLocationErrorCode(error, LocationErrorCode.INTERNAL_ERROR);
+              assertLocationErrorCode(error, LocationErrorCodes.INTERNAL_ERROR);
               resolve();
             } catch (assertionError) {
               reject(assertionError);
@@ -277,7 +277,7 @@ export default function HeadingScreen() {
       try {
         const locationError = assertLocationErrorCode(
           error,
-          LocationErrorCode.PERMISSION_DENIED
+          LocationErrorCodes.PERMISSION_DENIED
         );
         setResult(
           "denied",

@@ -1,7 +1,7 @@
 import type { LocationError } from "../NitroGeolocation.nitro";
 import type { GeolocationResponse } from "../publicTypes";
 import type { ActiveWatch } from "../publicTypes";
-import { LocationErrorCode } from "../utils/errors";
+import { LocationErrorCodes } from "../utils/errors";
 import { getDevtoolsState } from "./index";
 
 function nextDevtoolsWatchToken(): string {
@@ -21,7 +21,7 @@ export function devtoolsWatchPosition(
     // Call error callback immediately if provided
     if (error) {
       error({
-        code: LocationErrorCode.POSITION_UNAVAILABLE,
+        code: LocationErrorCodes.POSITION_UNAVAILABLE,
         message:
           "Geolocation devtools not connected. Press 'j' in Metro to open devtools and enable the geolocation plugin."
       });

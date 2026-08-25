@@ -1,7 +1,7 @@
 import React from "react";
 import { Platform } from "react-native";
 import {
-  LocationErrorCode,
+  LocationErrorCodes,
   getCurrentPosition,
   unwatch,
   watchPosition
@@ -172,7 +172,7 @@ export default function IOSLocationTuningScreen() {
       try {
         const locationError = assertLocationErrorCode(
           error,
-          LocationErrorCode.PERMISSION_DENIED
+          LocationErrorCodes.PERMISSION_DENIED
         );
         setResult("denied", {
           status: "passed",

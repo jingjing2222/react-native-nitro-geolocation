@@ -4,10 +4,12 @@ import type {
   BackgroundEvent,
   BackgroundHttpSyncResult,
   BackgroundLocation,
+  BackgroundLocationDiagnosis,
   BackgroundLocationOptions,
   BackgroundLocationStatus,
   BackgroundPermissionResult,
   BackgroundSubscription,
+  BackgroundTaskHandler,
   DetectedActivity,
   GeofenceEvent,
   GeofenceRegion,
@@ -17,9 +19,9 @@ import type {
   LocationLifecycleEvent,
   StoredBackgroundEvent,
   StoredBackgroundLocation
-} from "./types";
+} from "./publicTypes";
 
-export * from "./types";
+export * from "./publicTypes";
 
 export const BACKGROUND_LOCATION_TASK_NAME = "NitroBackgroundLocationTask";
 
@@ -28,7 +30,7 @@ const unsupported = (): Error =>
 
 const rejectUnsupported = <T>(): Promise<T> => Promise.reject(unsupported());
 
-export function registerBackgroundTask(): void {
+export function registerBackgroundTask(_handler: BackgroundTaskHandler): void {
   throw unsupported();
 }
 
@@ -81,6 +83,10 @@ export const startActivityRecognition = (
 export const stopActivityRecognition = (): Promise<void> => rejectUnsupported();
 export const syncStoredLocations = (): Promise<BackgroundHttpSyncResult> =>
   rejectUnsupported();
+
+export function diagnoseBackgroundLocation(): Promise<BackgroundLocationDiagnosis> {
+  return rejectUnsupported();
+}
 
 const noopSubscription = (): BackgroundSubscription => ({ remove() {} });
 

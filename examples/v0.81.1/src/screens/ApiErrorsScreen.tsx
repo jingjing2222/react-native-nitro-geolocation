@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { Text, View } from "react-native";
 import {
-  LocationErrorCode,
+  LocationErrorCodes,
   getCurrentPosition,
   getLocationErrorCodeName
 } from "react-native-nitro-geolocation";
@@ -31,35 +31,35 @@ const TIMEOUT_CONTRACT_OPTIONS = {
 
 const ERROR_CODE_CONTRACT = [
   {
-    code: LocationErrorCode.INTERNAL_ERROR,
-    name: getLocationErrorCodeName(LocationErrorCode.INTERNAL_ERROR),
+    code: LocationErrorCodes.INTERNAL_ERROR,
+    name: getLocationErrorCodeName(LocationErrorCodes.INTERNAL_ERROR),
     meaning: "Modern-only internal/native failure"
   },
   {
-    code: LocationErrorCode.PERMISSION_DENIED,
-    name: getLocationErrorCodeName(LocationErrorCode.PERMISSION_DENIED),
+    code: LocationErrorCodes.PERMISSION_DENIED,
+    name: getLocationErrorCodeName(LocationErrorCodes.PERMISSION_DENIED),
     meaning: "Permission was denied"
   },
   {
-    code: LocationErrorCode.POSITION_UNAVAILABLE,
-    name: getLocationErrorCodeName(LocationErrorCode.POSITION_UNAVAILABLE),
+    code: LocationErrorCodes.POSITION_UNAVAILABLE,
+    name: getLocationErrorCodeName(LocationErrorCodes.POSITION_UNAVAILABLE),
     meaning: "Position fix is unavailable"
   },
   {
-    code: LocationErrorCode.TIMEOUT,
-    name: getLocationErrorCodeName(LocationErrorCode.TIMEOUT),
+    code: LocationErrorCodes.TIMEOUT,
+    name: getLocationErrorCodeName(LocationErrorCodes.TIMEOUT),
     meaning: "Request timed out"
   },
   {
-    code: LocationErrorCode.PLAY_SERVICE_NOT_AVAILABLE,
+    code: LocationErrorCodes.PLAY_SERVICE_NOT_AVAILABLE,
     name: getLocationErrorCodeName(
-      LocationErrorCode.PLAY_SERVICE_NOT_AVAILABLE
+      LocationErrorCodes.PLAY_SERVICE_NOT_AVAILABLE
     ),
     meaning: "Modern-only Google Play Services failure"
   },
   {
-    code: LocationErrorCode.SETTINGS_NOT_SATISFIED,
-    name: getLocationErrorCodeName(LocationErrorCode.SETTINGS_NOT_SATISFIED),
+    code: LocationErrorCodes.SETTINGS_NOT_SATISFIED,
+    name: getLocationErrorCodeName(LocationErrorCodes.SETTINGS_NOT_SATISFIED),
     meaning: "Modern-only provider/settings failure"
   }
 ] as const;

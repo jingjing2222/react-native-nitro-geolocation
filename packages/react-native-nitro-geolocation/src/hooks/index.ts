@@ -4,4 +4,7 @@
  */
 
 export { useWatchPosition } from "./useWatchPosition";
-export type { UseWatchPositionOptions } from "./useWatchPosition";
+export type {
+  UseWatchPositionOptions,
+  UseWatchPositionResult
+} from "./types";

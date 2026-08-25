@@ -102,7 +102,7 @@ app.
 - Do not introduce React hooks unless the file is a function component or
   custom hook and the call is at hook-safe top level.
 - Use low-level `watchPosition` plus `unwatch` as the first safe Modern target.
-- Replace numeric error-code checks with `LocationErrorCode` where possible.
+- Replace numeric error-code checks with `LocationErrorCodes` where possible.
 - Do not remove `PermissionsAndroid` code unless it is clearly only for
   location permission and replaced by `requestPermission()`.
 
@@ -123,7 +123,7 @@ app.
 | `forceRequestLocation` | no direct option | Report and preserve intent manually. |
 | `position.mocked` | `GeolocationResponse.mocked` | Available in Modern API. |
 | `position.provider` | `GeolocationResponse.provider` | Available in Modern API. |
-| error codes `-1`, `1`, `2`, `3`, `4`, `5` | `LocationErrorCode` | Prefer enum comparisons. |
+| error codes `-1`, `1`, `2`, `3`, `4`, `5` | `LocationErrorCodes` | Prefer named constant comparisons. |
 
 ## Transform Patterns
 
@@ -138,7 +138,7 @@ import {
   requestPermission,
   setConfiguration,
   requestLocationSettings,
-  LocationErrorCode,
+  LocationErrorCodes,
 } from "react-native-nitro-geolocation";
 ```
 

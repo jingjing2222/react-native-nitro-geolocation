@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
-  LocationErrorCode,
+  LocationErrorCodes,
   createLocationError,
   getLocationErrorCodeName,
   isLocationErrorCode,
@@ -8,62 +8,64 @@ import {
   mapCLErrorCode
 } from "./errors";
 
-describe("LocationErrorCode", () => {
+describe("LocationErrorCodes", () => {
   it("uses readable, platform-independent Modern API codes", () => {
-    expect(LocationErrorCode.INTERNAL_ERROR).toBe("internalError");
-    expect(LocationErrorCode.PERMISSION_DENIED).toBe("permissionDenied");
-    expect(LocationErrorCode.POSITION_UNAVAILABLE).toBe("positionUnavailable");
-    expect(LocationErrorCode.TIMEOUT).toBe("timeout");
-    expect(LocationErrorCode.PLAY_SERVICE_NOT_AVAILABLE).toBe(
+    expect(LocationErrorCodes.INTERNAL_ERROR).toBe("internalError");
+    expect(LocationErrorCodes.PERMISSION_DENIED).toBe("permissionDenied");
+    expect(LocationErrorCodes.POSITION_UNAVAILABLE).toBe("positionUnavailable");
+    expect(LocationErrorCodes.TIMEOUT).toBe("timeout");
+    expect(LocationErrorCodes.PLAY_SERVICE_NOT_AVAILABLE).toBe(
       "playServicesUnavailable"
     );
-    expect(LocationErrorCode.SETTINGS_NOT_SATISFIED).toBe(
+    expect(LocationErrorCodes.SETTINGS_NOT_SATISFIED).toBe(
       "settingsNotSatisfied"
     );
   });
 
   it("creates the same plain LocationError shape native sends to JS", () => {
     const error = createLocationError(
-      LocationErrorCode.SETTINGS_NOT_SATISFIED,
+      LocationErrorCodes.SETTINGS_NOT_SATISFIED,
       "Location settings are disabled"
     );
 
     expect(error).toEqual({
-      code: LocationErrorCode.SETTINGS_NOT_SATISFIED,
+      code: LocationErrorCodes.SETTINGS_NOT_SATISFIED,
       message: "Location settings are disabled"
     });
   });
 
   it("maps platform-specific error sources", () => {
-    expect(mapCLErrorCode(0)).toBe(LocationErrorCode.POSITION_UNAVAILABLE);
-    expect(mapCLErrorCode(1)).toBe(LocationErrorCode.PERMISSION_DENIED);
+    expect(mapCLErrorCode(0)).toBe(LocationErrorCodes.POSITION_UNAVAILABLE);
+    expect(mapCLErrorCode(1)).toBe(LocationErrorCodes.PERMISSION_DENIED);
     expect(mapAndroidException("SecurityException")).toBe(
-      LocationErrorCode.PERMISSION_DENIED
+      LocationErrorCodes.PERMISSION_DENIED
     );
     expect(mapAndroidException("ResolvableApiException")).toBe(
-      LocationErrorCode.SETTINGS_NOT_SATISFIED
+      LocationErrorCodes.SETTINGS_NOT_SATISFIED
     );
     expect(mapAndroidException("GooglePlayServicesNotAvailableException")).toBe(
-      LocationErrorCode.PLAY_SERVICE_NOT_AVAILABLE
+      LocationErrorCodes.PLAY_SERVICE_NOT_AVAILABLE
     );
   });
 
   it("returns stable names for known codes and rejects legacy numbers", () => {
-    expect(getLocationErrorCodeName(LocationErrorCode.INTERNAL_ERROR)).toBe(
+    expect(getLocationErrorCodeName(LocationErrorCodes.INTERNAL_ERROR)).toBe(
       "INTERNAL_ERROR"
     );
-    expect(getLocationErrorCodeName(LocationErrorCode.PERMISSION_DENIED)).toBe(
+    expect(getLocationErrorCodeName(LocationErrorCodes.PERMISSION_DENIED)).toBe(
       "PERMISSION_DENIED"
     );
     expect(
-      getLocationErrorCodeName(LocationErrorCode.POSITION_UNAVAILABLE)
+      getLocationErrorCodeName(LocationErrorCodes.POSITION_UNAVAILABLE)
     ).toBe("POSITION_UNAVAILABLE");
-    expect(getLocationErrorCodeName(LocationErrorCode.TIMEOUT)).toBe("TIMEOUT");
+    expect(getLocationErrorCodeName(LocationErrorCodes.TIMEOUT)).toBe(
+      "TIMEOUT"
+    );
     expect(
-      getLocationErrorCodeName(LocationErrorCode.PLAY_SERVICE_NOT_AVAILABLE)
+      getLocationErrorCodeName(LocationErrorCodes.PLAY_SERVICE_NOT_AVAILABLE)
     ).toBe("PLAY_SERVICE_NOT_AVAILABLE");
     expect(
-      getLocationErrorCodeName(LocationErrorCode.SETTINGS_NOT_SATISFIED)
+      getLocationErrorCodeName(LocationErrorCodes.SETTINGS_NOT_SATISFIED)
     ).toBe("SETTINGS_NOT_SATISFIED");
     expect(getLocationErrorCodeName(1)).toBe("UNKNOWN_LOCATION_ERROR");
   });

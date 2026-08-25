@@ -1,5 +1,5 @@
 import {
-  LocationErrorCode,
+  LocationErrorCodes,
   getCurrentPosition,
   getLastKnownPositionAsync,
   unwatch,
@@ -227,7 +227,7 @@ export const useAndroidRequestOptionsScenario = () => {
                 try {
                   const locationError = assertLocationErrorCode(
                     error,
-                    LocationErrorCode.INTERNAL_ERROR
+                    LocationErrorCodes.INTERNAL_ERROR
                   );
                   assertErrorMessageIncludes(
                     error,
@@ -286,7 +286,7 @@ export const useAndroidRequestOptionsScenario = () => {
       try {
         const locationError = assertLocationErrorCode(
           error,
-          LocationErrorCode.PERMISSION_DENIED
+          LocationErrorCodes.PERMISSION_DENIED
         );
         assertErrorMessageIncludes(
           error,

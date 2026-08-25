@@ -37,6 +37,7 @@ async function startIfAllowed(permission) {
       distanceFilter: 25,
       persist: true,
       android: {
+        locationProvider: 'auto',
         foregroundService: {
           notificationTitle: 'Location tracking active',
           notificationText: 'Your location is being recorded',
@@ -55,6 +56,11 @@ export async function stopTracking() {
   subscription = undefined;
 }
 ```
+
+`android.locationProvider` uses the same public values as the root API:
+`'auto'`, `'playServices'`, or `'android'`. Use `'android'` to force the
+platform `LocationManager`; the Nitro-only `'android_platform'` spelling is not
+part of the public API.
 
 Use [Activity Recognition](/background/activity-recognition) before switching to
 `trackingMode: 'activityAware'`. Use [Android Setup](/background/setup-android)

@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { Platform } from "react-native";
 import {
-  LocationErrorCode,
+  LocationErrorCodes,
   getCurrentPosition
 } from "react-native-nitro-geolocation";
 import type {
@@ -59,7 +59,7 @@ const isRetryableLocationError = (error: unknown) => {
     return true;
   }
 
-  return captureLocationError(error).code === LocationErrorCode.TIMEOUT;
+  return captureLocationError(error).code === LocationErrorCodes.TIMEOUT;
 };
 
 const sleep = (durationMs: number) =>
@@ -300,7 +300,7 @@ export default function AccuracyPresetsScreen() {
 
       setResult("denied", {
         status:
-          code === LocationErrorCode.PERMISSION_DENIED ? "passed" : "failed",
+          code === LocationErrorCodes.PERMISSION_DENIED ? "passed" : "failed",
         message: getDisplayErrorMessage(error)
       });
     }
