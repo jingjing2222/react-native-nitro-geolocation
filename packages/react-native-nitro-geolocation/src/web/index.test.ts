@@ -64,6 +64,15 @@ afterEach(() => {
 });
 
 describe("web Modern API", () => {
+  it("uses a stable availability reason when browser geolocation is unsupported", async () => {
+    setNavigator(undefined);
+
+    await expect(getLocationAvailability()).resolves.toEqual({
+      available: false,
+      reason: "unsupported"
+    });
+  });
+
   it("returns an unavailable detailed settings result without browser geolocation", async () => {
     setNavigator(undefined);
 
@@ -599,7 +608,7 @@ describe("web Modern API", () => {
 
     await expect(getLocationAvailability()).resolves.toEqual({
       available: false,
-      reason: "Browser geolocation permission is denied."
+      reason: "permissionDenied"
     });
   });
 

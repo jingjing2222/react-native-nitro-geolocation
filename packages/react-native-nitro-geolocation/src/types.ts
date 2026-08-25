@@ -1,5 +1,11 @@
-// Shared Nitro schema structs. Public entry points re-export inferred aliases
-// from the Nitro/Compat specs in publicTypes.ts.
+// Shared Nitro schema structs. Public entry points expose these through the
+// package's public type facade.
+export type PermissionStatus =
+  | "granted"
+  | "denied"
+  | "restricted"
+  | "undetermined";
+
 export type LocationProviderUsed =
   | "fused"
   | "gps"
@@ -28,6 +34,63 @@ export type IOSActivityType =
 export interface LocationAccuracyOptions {
   android?: AndroidAccuracyPreset;
   ios?: IOSAccuracyPreset;
+}
+
+/** Options shared by native current-position, cache, and watch operations. */
+export interface LocationRequestOptions {
+  /** Timeout in milliseconds (default: 600000 / 10 minutes). */
+  timeout?: number;
+  /** Maximum age of cached location in milliseconds (default: 0). */
+  maximumAge?: number;
+  /** Platform-specific accuracy preset. */
+  accuracy?: LocationAccuracyOptions;
+  /** Minimum time interval between updates in milliseconds. */
+  interval?: number;
+  /** Fastest interval for Android updates. */
+  fastestInterval?: number;
+  /** Minimum distance change in meters. */
+  distanceFilter?: number;
+  /** Android location granularity. */
+  granularity?: AndroidGranularity;
+  /** Wait for a high-accuracy initial Android update. */
+  waitForAccurateLocation?: boolean;
+  /** Android maximum age for an initial update in milliseconds. */
+  maxUpdateAge?: number;
+  /** Android maximum batching delay in milliseconds. */
+  maxUpdateDelay?: number;
+  /** Android maximum number of updates before a watch stops itself. */
+  maxUpdates?: number;
+  /** Use significant location changes mode on iOS. */
+  useSignificantChanges?: boolean;
+  /** iOS activity type used to tune Core Location behavior. */
+  activityType?: IOSActivityType;
+  /** Allow iOS to pause location updates automatically. */
+  pausesLocationUpdatesAutomatically?: boolean;
+  /** Show the iOS background location indicator. */
+  showsBackgroundLocationIndicator?: boolean;
+}
+
+/** Android location-settings resolution options. */
+export interface LocationSettingsOptions {
+  accuracy?: LocationAccuracyOptions;
+  interval?: number;
+  fastestInterval?: number;
+  distanceFilter?: number;
+  alwaysShow?: boolean;
+  needBle?: boolean;
+}
+
+export type LocationErrorCode =
+  | "internalError"
+  | "permissionDenied"
+  | "positionUnavailable"
+  | "timeout"
+  | "playServicesUnavailable"
+  | "settingsNotSatisfied";
+
+export interface LocationError {
+  code: LocationErrorCode;
+  message: string;
 }
 
 export interface GeolocationCoordinates {

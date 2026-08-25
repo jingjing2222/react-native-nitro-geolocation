@@ -1,6 +1,6 @@
-import type { LocationError } from "../NitroGeolocation.nitro";
 import { NitroGeolocationHybridObject } from "../NitroGeolocationModule";
 import type { AccuracyAuthorization } from "../publicTypes";
+import type { LocationError } from "../utils/errors";
 
 /**
  * Request temporary full location accuracy on iOS.

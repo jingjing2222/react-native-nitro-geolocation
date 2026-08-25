@@ -1,10 +1,9 @@
-export type LocationErrorCode =
-  | "internalError"
-  | "permissionDenied"
-  | "positionUnavailable"
-  | "timeout"
-  | "playServicesUnavailable"
-  | "settingsNotSatisfied";
+import type {
+  LocationError as SchemaLocationError,
+  LocationErrorCode as SchemaLocationErrorCode
+} from "../types";
+
+export type LocationErrorCode = SchemaLocationErrorCode;
 
 /**
  * Readable Modern API error codes.
@@ -31,10 +30,7 @@ export const LocationErrorCodes = {
 /**
  * Geolocation error object.
  */
-export interface LocationError {
-  code: LocationErrorCode;
-  message: string;
-}
+export type LocationError = SchemaLocationError;
 
 const locationErrorCodes = new Set<LocationErrorCode>(
   Object.values(LocationErrorCodes)

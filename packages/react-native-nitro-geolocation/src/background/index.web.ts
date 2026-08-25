@@ -1,6 +1,5 @@
-import type { LocationError } from "../NitroGeolocation.nitro";
+import type { LocationError } from "../utils/errors";
 import type {
-  ActivityRecognitionOptions,
   BackgroundEvent,
   BackgroundHttpSyncResult,
   BackgroundLocation,
@@ -17,6 +16,7 @@ import type {
   GetStoredBackgroundEventsOptions,
   GetStoredBackgroundLocationsOptions,
   LocationLifecycleEvent,
+  StartActivityRecognitionOptions,
   StoredBackgroundEvent,
   StoredBackgroundLocation
 } from "./publicTypes";
@@ -78,7 +78,7 @@ export const removeGeofences = (_identifiers?: string[]): Promise<void> =>
 export const getRegisteredGeofences = (): Promise<GeofenceRegion[]> =>
   rejectUnsupported();
 export const startActivityRecognition = (
-  _options?: ActivityRecognitionOptions
+  _options?: StartActivityRecognitionOptions
 ): Promise<void> => rejectUnsupported();
 export const stopActivityRecognition = (): Promise<void> => rejectUnsupported();
 export const syncStoredLocations = (): Promise<BackgroundHttpSyncResult> =>

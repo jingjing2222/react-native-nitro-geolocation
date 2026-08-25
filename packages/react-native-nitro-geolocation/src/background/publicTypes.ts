@@ -5,13 +5,59 @@ import type {
 import type {
   ActivityRecognitionOptions,
   AndroidForegroundServiceOptions,
+  BackgroundErrorEvent,
+  BackgroundEventBase,
+  BackgroundHttpSyncEvent,
   BackgroundHttpSyncOptions,
+  BackgroundLifecycleEvent,
+  BackgroundLocationEvent,
+  BackgroundProviderChangeEvent,
   BackgroundTrackingMode,
+  DetectedActivity,
+  GeofenceEvent,
   GeofencingOptions,
   IOSBackgroundLocationOptions
 } from "./types";
 
-export * from "./types";
+export type {
+  ActivityRecognitionOptions,
+  AndroidBackgroundLocationStatus,
+  AndroidForegroundServiceOptions,
+  BackgroundErrorEvent,
+  BackgroundEventBase,
+  BackgroundEventType,
+  BackgroundHttpMethod,
+  BackgroundHttpSyncEvent,
+  BackgroundHttpSyncOptions,
+  BackgroundHttpSyncResult,
+  BackgroundLifecycleEvent,
+  BackgroundLocation,
+  BackgroundLocationDiagnosis,
+  BackgroundLocationEvent,
+  BackgroundLocationSource,
+  BackgroundLocationState,
+  BackgroundLocationStatus,
+  BackgroundPermissionResult,
+  BackgroundPermissionStatus,
+  BackgroundProviderChangeEvent,
+  BackgroundSubscription,
+  BackgroundTrackingMode,
+  BatterySnapshot,
+  DetectedActivity,
+  DetectedActivityType,
+  GeofenceEvent,
+  GeofenceRegion,
+  GeofenceTransition,
+  GeofencingOptions,
+  GetStoredBackgroundEventsOptions,
+  GetStoredBackgroundLocationsOptions,
+  IOSBackgroundActivityType,
+  IOSBackgroundLocationOptions,
+  IOSBackgroundLocationStatus,
+  LocationLifecycleEvent,
+  LocationLifecycleState,
+  StoredBackgroundLocation
+} from "./types";
 
 /** Android provider selection exposed by the public background API. */
 export type AndroidBackgroundProvider = "auto" | "playServices" | "android";
@@ -46,3 +92,39 @@ export interface BackgroundLocationOptions {
   activityRecognition?: ActivityRecognitionOptions;
   sync?: BackgroundHttpSyncOptions;
 }
+
+/** Options for an explicit `startActivityRecognition()` call. */
+export interface StartActivityRecognitionOptions {
+  interval?: number;
+  stopOnStill?: boolean;
+  minimumConfidence?: number;
+}
+
+export interface BackgroundGeofenceEvent extends BackgroundEventBase {
+  type: "geofence";
+  geofence: GeofenceEvent;
+}
+
+export interface BackgroundActivityEvent extends BackgroundEventBase {
+  type: "activity";
+  activity: DetectedActivity;
+}
+
+/** Discriminated event delivered by background listeners and tasks. */
+export type BackgroundEvent =
+  | BackgroundLocationEvent
+  | BackgroundGeofenceEvent
+  | BackgroundActivityEvent
+  | BackgroundProviderChangeEvent
+  | BackgroundLifecycleEvent
+  | BackgroundHttpSyncEvent
+  | BackgroundErrorEvent;
+
+export interface StoredBackgroundEvent extends BackgroundEventBase {
+  event: BackgroundEvent;
+  createdAt: number;
+}
+
+export type BackgroundTaskHandler = (
+  event: BackgroundEvent
+) => void | Promise<void>;

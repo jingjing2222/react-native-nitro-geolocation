@@ -2,29 +2,28 @@ import type { HybridObject } from "react-native-nitro-modules";
 import type {
   AccuracyAuthorization,
   ActiveWatch,
-  AndroidGranularity,
   GeocodedLocation,
   GeocodingCoordinates,
   GeolocationResponse,
   Heading,
   HeadingOptions,
-  IOSActivityType,
-  LocationAccuracyOptions,
   LocationAvailability,
+  LocationError,
   LocationProviderStatus,
+  LocationRequestOptions,
+  LocationSettingsOptions,
   LocationSettingsResult,
+  PermissionStatus,
   ReverseGeocodedAddress
 } from "./types";
 
-/**
- * Permission status for location services.
- * Matches native permission states across iOS and Android.
- */
-export type PermissionStatus =
-  | "granted" // User has granted location permission
-  | "denied" // User has denied permission
-  | "restricted" // Permission is restricted (iOS parental controls)
-  | "undetermined"; // Permission not yet requested
+export type {
+  LocationError,
+  LocationErrorCode,
+  LocationRequestOptions,
+  LocationSettingsOptions,
+  PermissionStatus
+} from "./types";
 
 /**
  * iOS authorization level.
@@ -72,151 +71,6 @@ export interface GeolocationConfiguration {
    * - 'auto': Prefer Google Play Services (fused location), then platform fallback
    */
   locationProvider?: LocationProvider;
-}
-
-/**
- * Options for location requests.
- */
-export interface LocationRequestOptions {
-  /** Timeout in milliseconds (default: 600000 / 10 minutes) */
-  timeout?: number;
-
-  /** Maximum age of cached location in milliseconds (default: 0) */
-  maximumAge?: number;
-
-  /**
-   * Platform-specific accuracy preset.
-   */
-  accuracy?: LocationAccuracyOptions;
-
-  /** Minimum time interval between updates in milliseconds (watch only) */
-  interval?: number;
-
-  /** Fastest interval for updates in milliseconds (Android watch only) */
-  fastestInterval?: number;
-
-  /** Minimum distance change in meters for updates (watch only) */
-  distanceFilter?: number;
-
-  /**
-   * Android-only location granularity.
-   *
-   * Available since v1.2.
-   *
-   * `permission` follows the granted permission level, `coarse` prevents fine
-   * GPS-only requests from being used, and `fine` requires fine location
-   * permission.
-   */
-  granularity?: AndroidGranularity;
-
-  /**
-   * Android-only option for high-accuracy initial updates.
-   *
-   * Available since v1.2.
-   */
-  waitForAccurateLocation?: boolean;
-
-  /**
-   * Android-only maximum age for an initial update in milliseconds.
-   *
-   * Available since v1.2.
-   */
-  maxUpdateAge?: number;
-
-  /**
-   * Android-only maximum batching delay in milliseconds.
-   *
-   * Available since v1.2.
-   */
-  maxUpdateDelay?: number;
-
-  /**
-   * Android-only maximum number of updates before a watch stops itself.
-   *
-   * Available since v1.2.
-   */
-  maxUpdates?: number;
-
-  /** Use significant location changes mode (iOS watch only) */
-  useSignificantChanges?: boolean;
-
-  /**
-   * iOS-only activity type used to tune Core Location behavior.
-   *
-   * Available since v1.2.
-   */
-  activityType?: IOSActivityType;
-
-  /**
-   * iOS-only setting for automatic pausing of location updates.
-   *
-   * Available since v1.2.
-   */
-  pausesLocationUpdatesAutomatically?: boolean;
-
-  /**
-   * iOS-only setting for the background location indicator.
-   *
-   * Requires background location capability and is ignored by Android.
-   *
-   * Available since v1.2.
-   */
-  showsBackgroundLocationIndicator?: boolean;
-}
-
-/**
- * Android-only location settings request options.
- *
- * Used by `requestLocationSettings()` on Android to build the native
- * `LocationSettingsRequest`. On iOS these options are ignored because iOS does
- * not provide an equivalent system settings resolution dialog.
- */
-export interface LocationSettingsOptions {
-  /**
-   * Platform-specific accuracy preset for settings checks.
-   *
-   * Android uses `accuracy.android` to map to the native location request
-   * priority. iOS ignores this option because iOS has no equivalent settings
-   * resolution dialog.
-   */
-  accuracy?: LocationAccuracyOptions;
-
-  /** Desired update interval in milliseconds. */
-  interval?: number;
-
-  /** Fastest acceptable update interval in milliseconds. */
-  fastestInterval?: number;
-
-  /** Minimum distance change in meters. */
-  distanceFilter?: number;
-
-  /** Ask Android to always show the resolution dialog when possible. */
-  alwaysShow?: boolean;
-
-  /** Require BLE availability for the location settings request. */
-  needBle?: boolean;
-}
-
-/**
- * Stable Modern API error codes.
- *
- * These string values are intentionally separate from the numeric W3C codes
- * exposed by `/compat`.
- */
-export type LocationErrorCode =
-  | "internalError"
-  | "permissionDenied"
-  | "positionUnavailable"
-  | "timeout"
-  | "playServicesUnavailable"
-  | "settingsNotSatisfied";
-
-/**
- * Location error structure.
- */
-export interface LocationError {
-  code: LocationErrorCode;
-  message: string;
 }
 
 /**

@@ -1,5 +1,5 @@
-import type { LocationSettingsOptions } from "../NitroGeolocation.nitro";
 import { NitroGeolocationHybridObject } from "../NitroGeolocationModule";
+import type { LocationSettingsOptions } from "../publicTypes";
 import type { LocationSettingsResult } from "../publicTypes";
 
 /**

@@ -1,9 +1,12 @@
 import type {
-  LocationError,
+  GeolocationResponse,
   LocationRequestOptions
-} from "../NitroGeolocation.nitro";
-import type { GeolocationResponse } from "../publicTypes";
-import { LocationErrorCodes, createLocationError } from "../utils/errors";
+} from "../publicTypes";
+import {
+  type LocationError,
+  LocationErrorCodes,
+  createLocationError
+} from "../utils/errors";
 
 type BrowserPermissionState = "granted" | "denied" | "prompt";
 
