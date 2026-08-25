@@ -19,6 +19,14 @@ const prebuiltIOSScript = await readFile(
   path.join(root, "scripts/build-prebuilt-ios.sh"),
   "utf8"
 );
+const prebuiltIOSInstaller = await readFile(
+  path.join(packageDir, "scripts/prebuilt_ios.rb"),
+  "utf8"
+);
+const androidBuild = await readFile(
+  path.join(packageDir, "android/build.gradle"),
+  "utf8"
+);
 
 const globChars = /[*?[\]{}]/;
 const missingEntries = (packageJson.files ?? []).filter((entry) => {
@@ -68,6 +76,14 @@ if (
   failures.push("iOS privacy manifest must declare UserDefaults reason CA92.1");
 }
 if (
+  !privacyManifest.includes("NSPrivacyCollectedDataTypePreciseLocation") ||
+  !privacyManifest.includes("NSPrivacyCollectedDataTypePurposeAppFunctionality")
+) {
+  failures.push(
+    "iOS privacy manifest must disclose opt-in precise-location sync"
+  );
+}
+if (
   !podspec.includes('"NitroGeolocationPrivacy"') ||
   !podspec.includes('"ios/PrivacyInfo.xcprivacy"')
 ) {
@@ -76,6 +92,20 @@ if (
 if (!prebuiltIOSScript.includes('"$framework/PrivacyInfo.xcprivacy"')) {
   failures.push(
     "Prebuilt iOS frameworks must package the SDK privacy manifest"
+  );
+}
+if (
+  !prebuiltIOSInstaller.includes("Digest::SHA256.file") ||
+  !prebuiltIOSInstaller.includes('"#{asset_name}.sha256"')
+) {
+  failures.push("iOS prebuilt installation must verify the published SHA-256");
+}
+if (
+  !androidBuild.includes('MessageDigest.getInstance("SHA-256")') ||
+  !androidBuild.includes("prebuiltChecksumUrl")
+) {
+  failures.push(
+    "Android prebuilt installation must verify the published SHA-256"
   );
 }
 

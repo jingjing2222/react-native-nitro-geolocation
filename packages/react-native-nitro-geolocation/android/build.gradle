@@ -1,3 +1,5 @@
+import java.security.MessageDigest
+
 buildscript {
   ext.getExtOrDefault = {name ->
     return rootProject.ext.has(name) ? rootProject.ext.get(name) : project.properties['NitroGeolocation_' + name]
@@ -106,6 +108,7 @@ def prebuiltUrlBase = getNitroGeolocationStringProperty(
   "https://github.com/jingjing2222/react-native-nitro-geolocation/releases/download/${encodedPrebuiltTag}"
 )
 def prebuiltUrl = "${prebuiltUrlBase}/${prebuiltAssetName}"
+def prebuiltChecksumUrl = "${prebuiltUrl}.sha256"
 def prebuiltCacheDir = new File(gradle.gradleUserHomeDir, "caches/react-native-nitro-geolocation/${packageVersion}")
 def prebuiltAarFile = new File(prebuiltCacheDir, prebuiltAssetName)
 def prebuiltJniDir = file("${buildDir}/generated/prebuilt-jni")
@@ -119,14 +122,38 @@ def isAndroidPrebuiltAbiCompatible = {
     parseMajorMinor(consumerNitroModulesVersion) == parseMajorMinor(bundledNitroModulesVersion)
 }
 
+def sha256File = { target ->
+  def digest = MessageDigest.getInstance("SHA-256")
+  target.eachByte(8192) { buffer, count -> digest.update(buffer, 0, count) }
+  return digest.digest().encodeHex().toString()
+}
+
+def expectedPrebuiltChecksum = {
+  def parts = new URL(prebuiltChecksumUrl).text.trim().split(/\s+/, 2)
+  if (parts.length == 0 || !(parts[0] ==~ /(?i)[0-9a-f]{64}/)) {
+    throw new GradleException("Invalid SHA-256 file for ${prebuiltAssetName}")
+  }
+  if (parts.length > 1 && new File(parts[1].replaceFirst(/^\*/, "")).name != prebuiltAssetName) {
+    throw new GradleException("SHA-256 file referenced a different Android asset")
+  }
+  return parts[0].toLowerCase()
+}
+
 def downloadNitroGeolocationPrebuiltIfAvailable = {
   try {
+    def expectedChecksum = expectedPrebuiltChecksum()
+    if (prebuiltAarFile.exists() && sha256File(prebuiltAarFile) != expectedChecksum) {
+      prebuiltAarFile.delete()
+    }
     if (!prebuiltAarFile.exists()) {
       prebuiltCacheDir.mkdirs()
       logger.lifecycle("[NitroGeolocation] Downloading Android prebuilt AAR: ${prebuiltUrl}")
       new URL(prebuiltUrl).withInputStream { input ->
         prebuiltAarFile.withOutputStream { output -> output << input }
       }
+    }
+    if (sha256File(prebuiltAarFile) != expectedChecksum) {
+      throw new GradleException("SHA-256 mismatch for ${prebuiltAssetName}")
     }
 
     logger.lifecycle("[NitroGeolocation] Using Android prebuilt native libraries from ${prebuiltAarFile}")

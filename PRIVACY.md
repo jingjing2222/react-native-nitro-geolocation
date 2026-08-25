@@ -33,8 +33,10 @@ before shipping.
   `NITRO_GEOLOCATION_USE_PREBUILT=0`.
 
 The iOS SDK ships its own privacy manifest declaring its app-private
-`UserDefaults` access. Consumer apps still need to audit the final Xcode privacy
-report and maintain declarations for their own code and other dependencies.
+`UserDefaults` access and the opt-in sync feature's linked precise-location
+collection for app functionality, with tracking disabled. Consumer apps still
+need to audit the final Xcode privacy report and maintain declarations for their
+own code and other dependencies.
 
 ## Reporting
 

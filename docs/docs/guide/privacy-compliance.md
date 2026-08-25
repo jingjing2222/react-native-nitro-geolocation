@@ -76,11 +76,16 @@ The iOS implementation uses `UserDefaults.standard` for app-private background
 state. The SDK therefore ships `PrivacyInfo.xcprivacy` with
 `NSPrivacyAccessedAPICategoryUserDefaults` reason `CA92.1`; CocoaPods packages it
 as the SDK's privacy resource, and release XCFrameworks include it in each
-framework slice. This is the SDK's required-reason declaration, not a substitute
-for the app's own manifest. Verify the manifest in the installed Pods resource
-bundle or XCFramework and in Xcode's final privacy report. Apple does not allow
-a third-party SDK to rely on the host manifest for its own required-reason API
-use; see [Apple's required-reason guidance](https://developer.apple.com/documentation/bundleresources/describing-use-of-required-reason-api).
+framework slice. Because the opt-in sync API can transmit exact coordinates to
+an app-selected server and configured headers or body values can associate that
+payload with an account, the manifest conservatively declares linked precise
+location for app functionality, with tracking disabled. This is the SDK's
+declaration, not a substitute for the app's own manifest or App Privacy answers.
+Verify the manifest in the installed Pods resource bundle or XCFramework and in
+Xcode's final privacy report. Apple does not allow a third-party SDK to rely on
+the host manifest for its own required-reason API use; see [Apple's
+required-reason guidance](https://developer.apple.com/documentation/bundleresources/describing-use-of-required-reason-api)
+and [collected-data guidance](https://developer.apple.com/documentation/bundleresources/describing-data-use-in-privacy-manifests).
 
 Before release, reconcile the implementation with:
 
@@ -118,6 +123,13 @@ metadata, `Podfile.lock` (and `Package.resolved` when using SPM), prebuilt relea
 URL/checksum/provenance, and applicable license notices. Final AAB/APK/XCArchive
 scanning is a useful cross-check, but generally cannot reconstruct original
 Maven/CocoaPods coordinates, transitive graph, versions, or license obligations.
+
+The default prebuilt installers fetch each release asset's `.sha256` sidecar,
+reject malformed or mismatched sidecars, and verify cached and newly downloaded
+artifacts before extraction. The sidecar and artifact share the same GitHub
+Release/TLS trust boundary; this detects corruption and cache tampering but is
+not an independent signature. Pin or independently attest release digests when
+your supply-chain policy requires stronger publisher authentication.
 
 ## Reproducible audit checklist
 
