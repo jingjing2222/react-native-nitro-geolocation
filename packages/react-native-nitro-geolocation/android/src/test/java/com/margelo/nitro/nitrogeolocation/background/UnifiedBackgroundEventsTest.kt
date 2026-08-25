@@ -12,6 +12,11 @@ import com.margelo.nitro.nitrogeolocation.GetStoredBackgroundEventsOptions
 import com.margelo.nitro.nitrogeolocation.LocationLifecycleEvent
 import com.margelo.nitro.nitrogeolocation.LocationLifecycleState
 import com.margelo.nitro.nitrogeolocation.LocationProviderStatus
+import java.util.concurrent.CountDownLatch
+import java.util.concurrent.TimeUnit
+import java.util.concurrent.atomic.AtomicInteger
+import java.util.concurrent.atomic.AtomicReference
+import kotlin.concurrent.thread
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNull
@@ -155,5 +160,118 @@ class UnifiedBackgroundEventsTest {
         }
 
         assertEquals(0, watcher.activeWatchCount)
+    }
+
+    @Test
+    fun `provider watcher serializes stop with native source startup`() {
+        val registrationStarted = CountDownLatch(1)
+        val releaseRegistration = CountDownLatch(1)
+        val stopStarted = CountDownLatch(1)
+        val stopReturned = CountDownLatch(1)
+        val unregisterCalls = AtomicInteger(0)
+        val removeLifecycleCalls = AtomicInteger(0)
+        val observationContext = object : AndroidProviderObservationContext {
+            override fun registerProviderReceiver(
+                receiver: BroadcastReceiver,
+                filter: IntentFilter
+            ) {
+                registrationStarted.countDown()
+                assertTrue(releaseRegistration.await(2, TimeUnit.SECONDS))
+            }
+
+            override fun unregisterProviderReceiver(receiver: BroadcastReceiver) {
+                unregisterCalls.incrementAndGet()
+            }
+
+            override fun addLifecycleListener(listener: LifecycleEventListener) = Unit
+
+            override fun removeLifecycleListener(listener: LifecycleEventListener) {
+                removeLifecycleCalls.incrementAndGet()
+            }
+        }
+        val watcher = AndroidProviderStatusWatcher(
+            observationContext = observationContext,
+            loadProviderStatus = {}
+        )
+        val watchThread = thread { watcher.watch {} }
+
+        assertTrue(registrationStarted.await(2, TimeUnit.SECONDS))
+        val stopThread = thread {
+            stopStarted.countDown()
+            watcher.stopObserving()
+            stopReturned.countDown()
+        }
+        assertTrue(stopStarted.await(2, TimeUnit.SECONDS))
+        val stoppedBeforeStartupCompleted = stopReturned.await(200, TimeUnit.MILLISECONDS)
+        releaseRegistration.countDown()
+        watchThread.join(2_000)
+        stopThread.join(2_000)
+
+        assertFalse(stoppedBeforeStartupCompleted)
+        assertFalse(watchThread.isAlive)
+        assertFalse(stopThread.isAlive)
+        assertEquals(0, watcher.activeWatchCount)
+        assertEquals(1, unregisterCalls.get())
+        assertEquals(1, removeLifecycleCalls.get())
+    }
+
+    @Test
+    fun `second provider watch retries startup after first startup fails`() {
+        val firstRegistrationStarted = CountDownLatch(1)
+        val releaseFirstRegistration = CountDownLatch(1)
+        val secondWatchStarted = CountDownLatch(1)
+        val secondWatchReturned = CountDownLatch(1)
+        val registrationCalls = AtomicInteger(0)
+        val firstFailure = AtomicReference<Throwable?>()
+        val secondFailure = AtomicReference<Throwable?>()
+        val secondToken = AtomicReference<String?>()
+        val observationContext = object : AndroidProviderObservationContext {
+            override fun registerProviderReceiver(
+                receiver: BroadcastReceiver,
+                filter: IntentFilter
+            ) {
+                if (registrationCalls.incrementAndGet() == 1) {
+                    firstRegistrationStarted.countDown()
+                    assertTrue(releaseFirstRegistration.await(2, TimeUnit.SECONDS))
+                    throw IllegalStateException("receiver unavailable")
+                }
+            }
+
+            override fun unregisterProviderReceiver(receiver: BroadcastReceiver) = Unit
+            override fun addLifecycleListener(listener: LifecycleEventListener) = Unit
+            override fun removeLifecycleListener(listener: LifecycleEventListener) = Unit
+        }
+        val watcher = AndroidProviderStatusWatcher(
+            observationContext = observationContext,
+            loadProviderStatus = {}
+        )
+        val firstThread = thread {
+            firstFailure.set(runCatching { watcher.watch {} }.exceptionOrNull())
+        }
+
+        assertTrue(firstRegistrationStarted.await(2, TimeUnit.SECONDS))
+        val secondThread = thread {
+            secondWatchStarted.countDown()
+            val result = runCatching { watcher.watch {} }
+            secondToken.set(result.getOrNull())
+            secondFailure.set(result.exceptionOrNull())
+            secondWatchReturned.countDown()
+        }
+        assertTrue(secondWatchStarted.await(2, TimeUnit.SECONDS))
+        val secondReturnedBeforeFirstCompleted =
+            secondWatchReturned.await(200, TimeUnit.MILLISECONDS)
+        releaseFirstRegistration.countDown()
+        firstThread.join(2_000)
+        secondThread.join(2_000)
+
+        assertFalse(firstThread.isAlive)
+        assertFalse(secondThread.isAlive)
+        assertFalse(secondReturnedBeforeFirstCompleted)
+        assertTrue(firstFailure.get() is IllegalStateException)
+        assertNull(secondFailure.get())
+        assertTrue(secondToken.get()?.isNotBlank() == true)
+        assertEquals(2, registrationCalls.get())
+        assertEquals(1, watcher.activeWatchCount)
+        watcher.stopObserving()
     }
 }

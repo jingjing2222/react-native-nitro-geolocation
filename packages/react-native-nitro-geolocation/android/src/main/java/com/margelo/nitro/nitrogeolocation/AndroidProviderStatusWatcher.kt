@@ -74,22 +74,22 @@ internal class AndroidProviderStatusWatcher internal constructor(
 
     fun watch(success: (LocationProviderStatus) -> Unit): String {
         val token = UUID.randomUUID().toString()
-        val shouldStart = synchronized(this) {
+        synchronized(this) {
             callbacks[token] = success
-            !receiverRegistered && callbacks.size == 1
-        }
-        try {
-            if (shouldStart) startObserving()
-            refresh()
-        } catch (error: Throwable) {
-            synchronized(this) {
+            try {
+                if (!receiverRegistered) startObserving()
+            } catch (error: Throwable) {
                 callbacks.remove(token)
                 lastStatuses.remove(token)
-                if (callbacks.isEmpty()) {
-                    refreshGeneration.incrementAndGet()
-                    runCatching { stopObservingSources() }
-                }
+                refreshGeneration.incrementAndGet()
+                runCatching { stopObservingSources() }
+                throw error
             }
+        }
+        try {
+            refresh()
+        } catch (error: Throwable) {
+            unwatch(token)
             throw error
         }
         return token

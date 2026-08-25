@@ -166,7 +166,11 @@ class NitroBackgroundLocation(
     }
 
     override fun dispose() {
-        providerListenerTokens.keys.forEach(controller.eventHub::removeEventListener)
+        val eventTokens = providerListenerTokens.keys.toList()
+        if (eventTokens.isNotEmpty()) {
+            val eventHub = controller.eventHub
+            eventTokens.forEach(eventHub::removeEventListener)
+        }
         providerListenerTokens.clear()
         runCatching {
             providerStatusWatcherDelegate.disposeIfInitialized(AndroidProviderStatusWatcher::dispose)
