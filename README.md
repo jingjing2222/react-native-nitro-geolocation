@@ -168,6 +168,12 @@ Use `nitro-geolocation doctor --project apps/mobile --json` for monorepos or
 CI. Missing generated native folders are warnings; rerun it after native
 generation to verify permissions and usage descriptions.
 
+Expo development builds can opt into native permission generation by listing
+`react-native-nitro-geolocation` in the app config `plugins` array. Installation
+alone does not mutate native files. See the
+[Expo development build guide](https://react-native-nitro-geolocation.pages.dev/guide/expo-development-build)
+for foreground and explicit background options.
+
 Released npm builds try to use the matching GitHub Release prebuilts first:
 Android downloads the release AAR and reuses its native `.so` files, while iOS
 downloads the release XCFramework. If the prebuilt asset is unavailable, the

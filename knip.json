@@ -55,12 +55,16 @@
       "entry": [
         "src/index.tsx",
         "src/index.web.tsx",
+        "app.plugin.js",
+        "plugin/index.js",
         "src/compat/index.tsx",
         "src/background/index.ts",
         "src/background/index.web.ts"
       ],
       "project": [
         "src/**/*.{ts,tsx}",
+        "app.plugin.js",
+        "plugin/**/*.js",
         "!src/**/*.test.ts",
         "!src/**/*.test.tsx",
         "!src/**/*.spec.ts",
