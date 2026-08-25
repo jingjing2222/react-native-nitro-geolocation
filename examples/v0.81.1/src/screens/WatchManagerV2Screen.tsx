@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
-import { Text } from "react-native";
+import { Platform, Text } from "react-native";
 import {
   getActiveWatches,
   requestPermission,
@@ -25,12 +25,16 @@ const initialResults = createScenarioResults([
   "cleanup",
   "remaining"
 ] as const);
-type Counts = { eager: number; filtered: number };
+type Counts = { eager: number; filtered: number; slow: number };
 
 export default function WatchManagerV2Screen() {
   const { results, setResult } = useScenarioResults(initialResults);
-  const tokensRef = useRef<{ eager?: string; filtered?: string }>({});
-  const countsRef = useRef<Counts>({ eager: 0, filtered: 0 });
+  const tokensRef = useRef<{
+    eager?: string;
+    filtered?: string;
+    slow?: string;
+  }>({});
+  const countsRef = useRef<Counts>({ eager: 0, filtered: 0, slow: 0 });
   const baselineRef = useRef<Counts | undefined>(undefined);
   const nearRef = useRef<Counts | undefined>(undefined);
   const cleanupRef = useRef<Counts | undefined>(undefined);
@@ -52,10 +56,14 @@ export default function WatchManagerV2Screen() {
     const next = { ...countsRef.current, [kind]: countsRef.current[kind] + 1 };
     countsRef.current = next;
     setCounts(next);
-    if (next.eager > 0 && next.filtered > 0) {
+    const allReady =
+      next.eager > 0 &&
+      next.filtered > 0 &&
+      (Platform.OS !== "android" || next.slow > 0);
+    if (allReady) {
       setResult("start", {
         status: "passed",
-        message: "Both independent watches received their initial position."
+        message: "Every independent watch received its initial position."
       });
     }
   };
@@ -93,6 +101,13 @@ export default function WatchManagerV2Screen() {
         onError,
         { distanceFilter: 500, interval: 100, fastestInterval: 100 }
       );
+      if (Platform.OS === "android") {
+        tokensRef.current.slow = watchPosition(
+          () => recordUpdate("slow"),
+          onError,
+          { distanceFilter: 0, interval: 25_000, fastestInterval: 100 }
+        );
+      }
     } catch (error) {
       setResult("start", {
         status: "failed",
@@ -103,7 +118,10 @@ export default function WatchManagerV2Screen() {
 
   const captureBaseline = () => {
     const current = countsRef.current;
-    const ready = current.eager > 0 && current.filtered > 0;
+    const ready =
+      current.eager > 0 &&
+      current.filtered > 0 &&
+      (Platform.OS !== "android" || current.slow > 0);
     if (ready) baselineRef.current = { ...current };
     setResult("baseline", {
       status: ready ? "passed" : "failed",
@@ -119,12 +137,13 @@ export default function WatchManagerV2Screen() {
     const passed =
       baseline !== undefined &&
       current.eager > baseline.eager &&
-      current.filtered === baseline.filtered;
+      current.filtered === baseline.filtered &&
+      (Platform.OS !== "android" || current.slow === baseline.slow);
     if (passed) nearRef.current = { ...current };
     setResult("near", {
       status: passed ? "passed" : "failed",
       message: passed
-        ? "The eager watch advanced while the 500 m watch stayed filtered."
+        ? "Only the eager watch advanced before distance and interval thresholds."
         : "Expected only the eager watch to advance after the near move."
     });
   };
@@ -135,12 +154,13 @@ export default function WatchManagerV2Screen() {
     const passed =
       near !== undefined &&
       current.eager > near.eager &&
-      current.filtered > near.filtered;
+      current.filtered > near.filtered &&
+      (Platform.OS !== "android" || current.slow > near.slow);
     setResult("far", {
       status: passed ? "passed" : "failed",
       message: passed
-        ? "Both watches advanced after crossing the 500 m threshold."
-        : "Expected both watches to advance after the far move."
+        ? "Distance and Android interval thresholds advanced their own watches."
+        : "Expected every eligible watch to advance after the far move."
     });
   };
 
@@ -159,10 +179,14 @@ export default function WatchManagerV2Screen() {
     tokensRef.current.eager = undefined;
     cleanupRef.current = { ...countsRef.current };
     const filteredToken = tokensRef.current.filtered;
+    const slowToken = tokensRef.current.slow;
     const active = getActiveWatches();
     const passed =
       filteredToken !== undefined &&
       active.some(({ token }) => token === filteredToken) &&
+      (Platform.OS !== "android" ||
+        (slowToken !== undefined &&
+          active.some(({ token }) => token === slowToken))) &&
       !active.some(({ token }) => token === eagerToken);
     setResult("cleanup", {
       status: passed ? "passed" : "failed",
@@ -182,6 +206,9 @@ export default function WatchManagerV2Screen() {
     const filteredToken = tokensRef.current.filtered;
     if (filteredToken) unwatch(filteredToken);
     tokensRef.current.filtered = undefined;
+    const slowToken = tokensRef.current.slow;
+    if (slowToken) unwatch(slowToken);
+    tokensRef.current.slow = undefined;
     const fullyCleaned = getActiveWatches().length === 0;
     setResult("remaining", {
       status: passed && fullyCleaned ? "passed" : "failed",
@@ -216,6 +243,11 @@ export default function WatchManagerV2Screen() {
         <Text testID={`${PREFIX}-filtered-count`}>
           Filtered updates: {counts.filtered}
         </Text>
+        {Platform.OS === "android" ? (
+          <Text testID={`${PREFIX}-slow-count`}>
+            Slow updates: {counts.slow}
+          </Text>
+        ) : null}
         <ScenarioButton
           title="Capture Baseline"
           onPress={captureBaseline}
