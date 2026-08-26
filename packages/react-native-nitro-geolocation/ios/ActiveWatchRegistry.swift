@@ -31,6 +31,10 @@ final class ActiveWatchRegistry<Value> {
         }
     }
 
+    func entriesSnapshot() -> [String: Value] {
+        return withLock { subscriptions }
+    }
+
     func updateIfPresent(token: String, value: Value) -> Bool {
         return withLock {
             guard subscriptions[token] != nil else { return false }

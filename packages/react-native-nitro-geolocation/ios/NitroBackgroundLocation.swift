@@ -171,7 +171,6 @@ class NitroBackgroundLocation: HybridNitroBackgroundLocationSpec {
                     self.persistStore()
                 }
                 self.runOnMainSync {
-                    self.manager?.disallowDeferredLocationUpdates()
                     self.manager?.stopUpdatingLocation()
                     self.manager?.stopMonitoringSignificantLocationChanges()
                     self.manager?.monitoredRegions.forEach { self.manager?.stopMonitoring(for: $0) }
@@ -201,8 +200,12 @@ class NitroBackgroundLocation: HybridNitroBackgroundLocationSpec {
                             self.options?.ios?.useSignificantChanges == true,
                         locationCount: Double(self.storedLocations.count),
                         eventCount: Double(self.storedEvents.count),
-                        lastLocationAt: self.storedLocations.map(\.recordedAt).max(),
-                        lastEventAt: self.storedEvents.map(\.timestamp).max(),
+                        lastLocationAt: self.storedLocations.max {
+                            $0.recordedAt < $1.recordedAt
+                        }?.recordedAt,
+                        lastEventAt: self.storedEvents.max {
+                            $0.timestamp < $1.timestamp
+                        }?.timestamp,
                         geofenceCount: Double(self.geofences.count)
                     )
                 }
@@ -254,7 +257,7 @@ class NitroBackgroundLocation: HybridNitroBackgroundLocationSpec {
             )
             if let storedEvent = plan.storedEvent {
                 appendStoredEvent(storedEvent)
-                persistStore()
+                persistEvents()
             }
             return plan
         }
@@ -270,22 +273,22 @@ class NitroBackgroundLocation: HybridNitroBackgroundLocationSpec {
         options: GetStoredBackgroundLocationsOptions?
     ) throws -> Promise<[StoredBackgroundLocation]> {
         return Promise.async {
-            var rows = self.withStoreLock { self.storedLocations }
-            if options?.includeDelivered != true {
-                rows = rows.filter { !$0.deliveredToJS }
+            return self.withStoreLock {
+                let includeDelivered = options?.includeDelivered == true
+                let includeSynced = options?.includeSynced == true
+                let since = options?.since
+                let limit = self.safePrefixCount(
+                    options?.limit,
+                    defaultValue: 100,
+                    upperBound: self.storedLocations.count
+                )
+                return Array(self.storedLocations.lazy.filter { location in
+                    if !includeDelivered && location.deliveredToJS { return false }
+                    if !includeSynced && location.synced { return false }
+                    if let since, location.createdAt < since { return false }
+                    return true
+                }.prefix(limit))
             }
-            if options?.includeSynced != true {
-                rows = rows.filter { !$0.synced }
-            }
-            if let since = options?.since {
-                rows = rows.filter { $0.createdAt >= since }
-            }
-            let limit = self.safePrefixCount(
-                options?.limit,
-                defaultValue: 100,
-                upperBound: rows.count
-            )
-            return Array(rows.prefix(limit))
         }
     }
 
@@ -294,11 +297,12 @@ class NitroBackgroundLocation: HybridNitroBackgroundLocationSpec {
             self.withStoreLock {
                 guard let ids else {
                     self.storedLocations.removeAll()
-                    self.persistStore()
+                    self.persistLocations()
                     return
                 }
-                self.storedLocations.removeAll { ids.contains($0.id) }
-                self.persistStore()
+                let idSet = Set(ids)
+                self.storedLocations.removeAll { idSet.contains($0.id) }
+                self.persistLocations()
             }
         }
     }
@@ -306,26 +310,27 @@ class NitroBackgroundLocation: HybridNitroBackgroundLocationSpec {
     func markStoredBackgroundLocationsDelivered(ids: [String]) throws -> Promise<Void> {
         return Promise.async {
             self.withStoreLock {
-                self.storedLocations = self.storedLocations.map { location in
-                    ids.contains(location.id)
-                        ? StoredBackgroundLocation(
-                            id: location.id,
-                            deliveredToJS: true,
-                            synced: location.synced,
-                            createdAt: location.createdAt,
-                            source: location.source,
-                            isFromBackground: location.isFromBackground,
-                            provider: location.provider,
-                            mocked: location.mocked,
-                            recordedAt: location.recordedAt,
-                            activity: location.activity,
-                            battery: location.battery,
-                            coords: location.coords,
-                            timestamp: location.timestamp
-                        )
-                        : location
+                let idSet = Set(ids)
+                for index in self.storedLocations.indices
+                where idSet.contains(self.storedLocations[index].id) {
+                    let location = self.storedLocations[index]
+                    self.storedLocations[index] = StoredBackgroundLocation(
+                        id: location.id,
+                        deliveredToJS: true,
+                        synced: location.synced,
+                        createdAt: location.createdAt,
+                        source: location.source,
+                        isFromBackground: location.isFromBackground,
+                        provider: location.provider,
+                        mocked: location.mocked,
+                        recordedAt: location.recordedAt,
+                        activity: location.activity,
+                        battery: location.battery,
+                        coords: location.coords,
+                        timestamp: location.timestamp
+                    )
                 }
-                self.persistStore()
+                self.persistLocations()
             }
         }
     }
@@ -334,22 +339,22 @@ class NitroBackgroundLocation: HybridNitroBackgroundLocationSpec {
         options: GetStoredBackgroundEventsOptions?
     ) throws -> Promise<[StoredBackgroundEventEnvelope]> {
         return Promise.async {
-            var rows = self.withStoreLock { self.storedEvents }
-            if options?.includeDelivered != true {
-                rows = rows.filter { !$0.deliveredToJS }
+            return self.withStoreLock {
+                let includeDelivered = options?.includeDelivered == true
+                let since = options?.since
+                let types = options?.types
+                let limit = self.safePrefixCount(
+                    options?.limit,
+                    defaultValue: 100,
+                    upperBound: self.storedEvents.count
+                )
+                return Array(self.storedEvents.lazy.filter { event in
+                    if !includeDelivered && event.deliveredToJS { return false }
+                    if let since, event.createdAt < since { return false }
+                    if let types, !types.isEmpty, !types.contains(event.type) { return false }
+                    return true
+                }.prefix(limit))
             }
-            if let since = options?.since {
-                rows = rows.filter { $0.createdAt >= since }
-            }
-            if let types = options?.types, !types.isEmpty {
-                rows = rows.filter { types.contains($0.type) }
-            }
-            let limit = self.safePrefixCount(
-                options?.limit,
-                defaultValue: 100,
-                upperBound: rows.count
-            )
-            return Array(rows.prefix(limit))
         }
     }
 
@@ -358,11 +363,12 @@ class NitroBackgroundLocation: HybridNitroBackgroundLocationSpec {
             self.withStoreLock {
                 guard let ids else {
                     self.storedEvents.removeAll()
-                    self.persistStore()
+                    self.persistEvents()
                     return
                 }
-                self.storedEvents.removeAll { ids.contains($0.id) }
-                self.persistStore()
+                let idSet = Set(ids)
+                self.storedEvents.removeAll { idSet.contains($0.id) }
+                self.persistEvents()
             }
         }
     }
@@ -370,19 +376,20 @@ class NitroBackgroundLocation: HybridNitroBackgroundLocationSpec {
     func markStoredBackgroundEventsDelivered(ids: [String]) throws -> Promise<Void> {
         return Promise.async {
             self.withStoreLock {
-                self.storedEvents = self.storedEvents.map { event in
-                    ids.contains(event.id)
-                        ? StoredBackgroundEventEnvelope(
-                            event: event.event,
-                            createdAt: event.createdAt,
-                            id: event.id,
-                            type: event.type,
-                            timestamp: event.timestamp,
-                            deliveredToJS: true
-                        )
-                        : event
+                let idSet = Set(ids)
+                for index in self.storedEvents.indices
+                where idSet.contains(self.storedEvents[index].id) {
+                    let event = self.storedEvents[index]
+                    self.storedEvents[index] = StoredBackgroundEventEnvelope(
+                        event: event.event,
+                        createdAt: event.createdAt,
+                        id: event.id,
+                        type: event.type,
+                        timestamp: event.timestamp,
+                        deliveredToJS: true
+                    )
                 }
-                self.persistStore()
+                self.persistEvents()
             }
         }
     }
@@ -410,12 +417,13 @@ class NitroBackgroundLocation: HybridNitroBackgroundLocationSpec {
                         self.manager?.startMonitoring(for: circular)
                     }
                 }
+                let sanitizedIdentifiers = Set(sanitized.map(\.identifier))
                 self.withStoreLock {
-                    self.geofences.removeAll { existing in
-                        sanitized.contains { $0.identifier == existing.identifier }
+                    self.geofences.removeAll {
+                        sanitizedIdentifiers.contains($0.identifier)
                     }
                     self.geofences.append(contentsOf: sanitized)
-                    self.persistStore()
+                    self.persistGeofences()
                 }
             }
         }
@@ -430,18 +438,19 @@ class NitroBackgroundLocation: HybridNitroBackgroundLocationSpec {
                     }
                     self.withStoreLock {
                         self.geofences.removeAll()
-                        self.persistStore()
+                        self.persistGeofences()
                     }
                     return
                 }
+                let identifierSet = Set(identifiers)
                 self.runOnMainSync {
                     self.manager?.monitoredRegions
-                        .filter { identifiers.contains($0.identifier) }
+                        .filter { identifierSet.contains($0.identifier) }
                         .forEach { self.manager?.stopMonitoring(for: $0) }
                 }
                 self.withStoreLock {
-                    self.geofences.removeAll { identifiers.contains($0.identifier) }
-                    self.persistStore()
+                    self.geofences.removeAll { identifierSet.contains($0.identifier) }
+                    self.persistGeofences()
                 }
             }
         }
@@ -558,7 +567,7 @@ class NitroBackgroundLocation: HybridNitroBackgroundLocationSpec {
                         deliveredToJS: false
                     )
                 )
-                persistStore()
+                persistLocationsAndEvents()
                 return true
             }
             guard storedForRun else { return }
@@ -617,7 +626,7 @@ class NitroBackgroundLocation: HybridNitroBackgroundLocationSpec {
                 ),
                 allowUnconfigured: true
             )
-            persistStore()
+            persistEvents()
             return true
         }
         guard storedForRun else { return }
@@ -639,10 +648,8 @@ class NitroBackgroundLocation: HybridNitroBackgroundLocationSpec {
             manager.allowsBackgroundLocationUpdates = true
             manager.pausesLocationUpdatesAutomatically =
                 options.ios?.pausesLocationUpdatesAutomatically ?? false
-            if #available(iOS 11.0, *) {
-                manager.showsBackgroundLocationIndicator =
-                    options.ios?.showsBackgroundLocationIndicator ?? false
-            }
+            manager.showsBackgroundLocationIndicator =
+                options.ios?.showsBackgroundLocationIndicator ?? false
             manager.desiredAccuracy = kCLLocationAccuracyBest
             manager.distanceFilter = options.distanceFilter ?? kCLDistanceFilterNone
             manager.activityType = mapActivityType(options.ios?.activityType)
@@ -700,9 +707,34 @@ class NitroBackgroundLocation: HybridNitroBackgroundLocationSpec {
 
     func persistStore() {
         withStoreLock {
+            persistLocations()
+            persistEvents()
+            persistGeofences()
+        }
+    }
+
+    func persistLocations() {
+        withStoreLock {
             defaults.set(storedLocations.map(storedLocationDictionary), forKey: locationsKey)
+        }
+    }
+
+    func persistEvents() {
+        withStoreLock {
             defaults.set(storedEvents.map(storedEventDictionary), forKey: eventsKey)
+        }
+    }
+
+    private func persistGeofences() {
+        withStoreLock {
             defaults.set(geofences.map(geofenceDictionary), forKey: geofencesKey)
+        }
+    }
+
+    private func persistLocationsAndEvents() {
+        withStoreLock {
+            persistLocations()
+            persistEvents()
         }
     }
 

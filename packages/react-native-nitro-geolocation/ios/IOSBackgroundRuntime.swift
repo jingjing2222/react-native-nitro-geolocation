@@ -143,7 +143,6 @@ extension NitroBackgroundLocation {
             let stopOnStill = activityOptions?.stopOnStill ?? (options.trackingMode == .activityaware)
             if activity.type == .still && stopOnStill {
                 runOnMainSync {
-                    self.manager?.disallowDeferredLocationUpdates()
                     self.manager?.stopUpdatingLocation()
                     self.manager?.stopMonitoringSignificantLocationChanges()
                 }
@@ -182,29 +181,6 @@ extension NitroBackgroundLocation {
         self.delegate = delegate
     }
 
-    func applyDeferredUpdatesIfNeeded(
-        _ manager: CLLocationManager,
-        runGeneration: UInt64,
-        locationSessionGeneration: UInt64
-    ) {
-        guard let options = withStoreLock({ () -> BackgroundLocationOptions? in
-            guard isCurrentLocationSession(
-                runGeneration,
-                locationSessionGeneration
-            ) else { return nil }
-            return self.options
-        }),
-            let distance = options.ios?.deferredUpdatesDistance,
-            let interval = options.ios?.deferredUpdatesInterval
-        else {
-            return
-        }
-        manager.allowDeferredLocationUpdates(
-            untilTraveled: distance,
-            timeout: interval / 1000
-        )
-    }
-
     func replaceLocationSession() -> UInt64 {
         let generations = withStoreLock {
             locationSessionGeneration &+= 1
@@ -212,7 +188,6 @@ extension NitroBackgroundLocation {
             return (storeGeneration, locationSessionGeneration)
         }
         runOnMainSync {
-            self.manager?.disallowDeferredLocationUpdates()
             self.manager?.stopUpdatingLocation()
             self.manager?.stopMonitoringSignificantLocationChanges()
             let delegate = NitroBackgroundLocationDelegate(
@@ -238,7 +213,6 @@ extension NitroBackgroundLocation {
         }
         guard shouldStop else { return }
         runOnMainSync {
-            self.manager?.disallowDeferredLocationUpdates()
             self.manager?.stopUpdatingLocation()
             self.manager?.stopMonitoringSignificantLocationChanges()
         }

@@ -131,12 +131,27 @@ export function watchPosition(
     return token;
   }
 
-  let lastEmitted: GeolocationResponse | null = null;
+  let lastEmittedLatitude: number | undefined;
+  let lastEmittedLongitude: number | undefined;
   const requestedAt = Date.now();
+  const distanceFilter = options?.distanceFilter ?? 0;
   const watchId = geolocation.watchPosition(
     (position) => {
       rememberWebPermissionGrant();
       rememberWebPermissionDetailsEvidence("granted");
+      if (
+        distanceFilter > 0 &&
+        lastEmittedLatitude !== undefined &&
+        lastEmittedLongitude !== undefined &&
+        distanceMeters(
+          lastEmittedLatitude,
+          lastEmittedLongitude,
+          position.coords.latitude,
+          position.coords.longitude
+        ) < distanceFilter
+      ) {
+        return;
+      }
       const normalizedPosition = decoratePositionWithMetadata(
         normalizePosition(position),
         {
@@ -145,15 +160,9 @@ export function watchPosition(
           requestedAt
         }
       );
-      const filter = options?.distanceFilter ?? 0;
-      if (
-        filter <= 0 ||
-        !lastEmitted ||
-        distanceMeters(lastEmitted, normalizedPosition) >= filter
-      ) {
-        lastEmitted = rememberPosition(normalizedPosition);
-        success(lastEmitted);
-      }
+      lastEmittedLatitude = position.coords.latitude;
+      lastEmittedLongitude = position.coords.longitude;
+      success(rememberPosition(normalizedPosition));
     },
     (browserError) => {
       const mappedError = mapBrowserError(browserError);

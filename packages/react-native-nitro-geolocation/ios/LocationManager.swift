@@ -374,11 +374,12 @@ class LocationManager: NSObject, CLLocationManagerDelegate {
         lastLocation = location
 
         // 1. Fire all pending getCurrentPosition requests
-        for request in pendingRequests {
+        let requests = pendingRequests
+        pendingRequests.removeAll()
+        for request in requests {
             request.timer?.cancel()
             request.success(location)
         }
-        pendingRequests.removeAll()
 
         // 2. Fire all active watchPosition subscriptions
         for (_, watch) in activeWatches {
@@ -386,10 +387,12 @@ class LocationManager: NSObject, CLLocationManagerDelegate {
         }
 
         // 3. Stop monitoring if no more watches or pending requests
-        if activeWatches.isEmpty && pendingRequests.isEmpty {
-            stopMonitoring()
-        } else {
-            updateLocationManagerConfiguration()
+        if !requests.isEmpty {
+            if activeWatches.isEmpty && pendingRequests.isEmpty {
+                stopMonitoring()
+            } else {
+                updateLocationManagerConfiguration()
+            }
         }
     }
 
@@ -497,9 +500,7 @@ class LocationManager: NSObject, CLLocationManagerDelegate {
         manager.activityType = activityType ?? .other
         manager.pausesLocationUpdatesAutomatically = pausesLocationUpdatesAutomatically ?? true
 
-        if #available(iOS 11.0, *) {
-            manager.showsBackgroundLocationIndicator = showsBackgroundLocationIndicator
-        }
+        manager.showsBackgroundLocationIndicator = showsBackgroundLocationIndicator
 
         // Update significant changes mode if changed
         if shouldUseSignificantChanges != usingSignificantChanges {

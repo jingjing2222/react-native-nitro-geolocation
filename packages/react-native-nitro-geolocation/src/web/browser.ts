@@ -150,16 +150,16 @@ export function rejectUnsupported<T>(): Promise<T> {
 }
 
 export function distanceMeters(
-  first: GeolocationResponse,
-  second: GeolocationResponse
+  firstLatitude: number,
+  firstLongitude: number,
+  secondLatitude: number,
+  secondLongitude: number
 ): number {
   const earthRadiusMeters = 6371000;
-  const lat1 = (first.coords.latitude * Math.PI) / 180;
-  const lat2 = (second.coords.latitude * Math.PI) / 180;
-  const deltaLat =
-    ((second.coords.latitude - first.coords.latitude) * Math.PI) / 180;
-  const deltaLon =
-    ((second.coords.longitude - first.coords.longitude) * Math.PI) / 180;
+  const lat1 = (firstLatitude * Math.PI) / 180;
+  const lat2 = (secondLatitude * Math.PI) / 180;
+  const deltaLat = ((secondLatitude - firstLatitude) * Math.PI) / 180;
+  const deltaLon = ((secondLongitude - firstLongitude) * Math.PI) / 180;
 
   const a =
     Math.sin(deltaLat / 2) * Math.sin(deltaLat / 2) +

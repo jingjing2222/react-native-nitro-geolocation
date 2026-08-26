@@ -23,11 +23,6 @@ final class NitroBackgroundLocationDelegate: NSObject, CLLocationManagerDelegate
             runGeneration: runGeneration,
             locationSessionGeneration: locationSessionGeneration
         )
-        owner?.applyDeferredUpdatesIfNeeded(
-            manager,
-            runGeneration: runGeneration,
-            locationSessionGeneration: locationSessionGeneration
-        )
     }
 
     func locationManager(_ manager: CLLocationManager, didFailWithError error: Error) {

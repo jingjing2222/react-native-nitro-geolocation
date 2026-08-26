@@ -85,12 +85,6 @@ final class NitroBackgroundLocation {
         locationSessionGeneration: UInt64
     ) {}
 
-    func applyDeferredUpdatesIfNeeded(
-        _ manager: CLLocationManager,
-        runGeneration: UInt64,
-        locationSessionGeneration: UInt64
-    ) {}
-
     func handleError(
         _ error: Error,
         runGeneration: UInt64,

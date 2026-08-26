@@ -18,7 +18,8 @@ extension NitroBackgroundLocation {
                 let sync = options?.sync
             else { return nil }
             let threshold = positiveFiniteInt(sync.syncThreshold, defaultValue: 1)
-            guard storedLocations.filter({ !$0.synced }).count >= threshold else { return nil }
+            guard storedLocations.lazy.filter({ !$0.synced }).prefix(threshold).count >= threshold
+            else { return nil }
             return syncConfigRevision
         }
         guard let scheduledConfigRevision else { return }
@@ -66,7 +67,7 @@ extension NitroBackgroundLocation {
                         deliveredToJS: false
                     )
                 )
-                self.persistStore()
+                self.persistEvents()
                 return true
             }
             guard storedForRun else { return nil }
@@ -154,32 +155,31 @@ extension NitroBackgroundLocation {
         if !result.success && result.syncedLocationIds.isEmpty {
             return result
         }
-        let syncedIds = result.syncedLocationIds
+        let syncedIds = Set(result.syncedLocationIds)
         withStoreLock {
             guard runGeneration == storeGeneration else { return }
-            storedLocations = storedLocations.map { location in
-                syncedIds.contains(location.id)
-                    ? StoredBackgroundLocation(
-                        id: location.id,
-                        deliveredToJS: location.deliveredToJS,
-                        synced: true,
-                        createdAt: location.createdAt,
-                        source: location.source,
-                        isFromBackground: location.isFromBackground,
-                        provider: location.provider,
-                        mocked: location.mocked,
-                        recordedAt: location.recordedAt,
-                        activity: location.activity,
-                        battery: location.battery,
-                        coords: location.coords,
-                        timestamp: location.timestamp
-                    )
-                    : location
+            for index in storedLocations.indices where syncedIds.contains(storedLocations[index].id) {
+                let location = storedLocations[index]
+                storedLocations[index] = StoredBackgroundLocation(
+                    id: location.id,
+                    deliveredToJS: location.deliveredToJS,
+                    synced: true,
+                    createdAt: location.createdAt,
+                    source: location.source,
+                    isFromBackground: location.isFromBackground,
+                    provider: location.provider,
+                    mocked: location.mocked,
+                    recordedAt: location.recordedAt,
+                    activity: location.activity,
+                    battery: location.battery,
+                    coords: location.coords,
+                    timestamp: location.timestamp
+                )
             }
             if batch.sync.autoClear == true {
                 storedLocations.removeAll { syncedIds.contains($0.id) }
             }
-            persistStore()
+            persistLocations()
         }
         return result
     }

@@ -44,10 +44,7 @@ internal func mapActivityType(_ activityType: IOSBackgroundActivityType?) -> CLA
     case .othernavigation:
         return .otherNavigation
     case .airborne:
-        if #available(iOS 12.0, *) {
-            return .airborne
-        }
-        return .other
+        return .airborne
     case .other, nil:
         return .other
     @unknown default:
@@ -183,7 +180,7 @@ extension NitroBackgroundLocation {
                 ),
                 allowUnconfigured: true
             )
-            persistStore()
+            persistEvents()
             return true
         }
         guard storedForRun else { return }

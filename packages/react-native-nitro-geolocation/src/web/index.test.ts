@@ -952,6 +952,35 @@ describe("web Modern API", () => {
     expect(getActiveWatches()).toEqual([]);
   });
 
+  it("rejects distance-filtered browser updates before normalizing them", () => {
+    let observePosition:
+      | ((position: ReturnType<typeof createPosition>) => void)
+      | undefined;
+    setNavigator({
+      geolocation: {
+        getCurrentPosition: vi.fn(),
+        watchPosition: vi.fn((success) => {
+          observePosition = success;
+          return 12;
+        }),
+        clearWatch: vi.fn()
+      }
+    });
+    const success = vi.fn();
+    watchPosition(success, undefined, { distanceFilter: 100 });
+    observePosition?.(createPosition());
+
+    const filteredPosition = createPosition(37.56651, 126.97801);
+    Object.defineProperty(filteredPosition.coords, "accuracy", {
+      get: () => {
+        throw new Error("filtered positions must not be normalized");
+      }
+    });
+
+    expect(() => observePosition?.(filteredPosition)).not.toThrow();
+    expect(success).toHaveBeenCalledTimes(1);
+  });
+
   it("observes distinct provider status changes and stops by token", async () => {
     const windowListeners = new Map<string, EventListener>();
     const documentListeners = new Map<string, EventListener>();

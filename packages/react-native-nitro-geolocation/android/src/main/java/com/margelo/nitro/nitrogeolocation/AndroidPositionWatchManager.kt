@@ -83,7 +83,7 @@ internal class AndroidPositionWatchManager(
             override fun onLocationChanged(location: Location) {
                 dispatcher.sync {
                     if (!isActive(activeGeneration)) return@sync
-                    deliver(locationToPosition(location, null))
+                    deliver(location, null)
                 }
             }
 
@@ -133,7 +133,7 @@ internal class AndroidPositionWatchManager(
                 val location = result.lastLocation ?: return
                 dispatcher.sync {
                     if (!isActive(activeGeneration)) return@sync
-                    deliver(locationToPosition(location, LocationProviderUsed.FUSED))
+                    deliver(location, LocationProviderUsed.FUSED)
                 }
             }
         }
@@ -210,14 +210,15 @@ internal class AndroidPositionWatchManager(
         )
     }
 
-    private fun deliver(position: GeolocationResponse) {
+    private fun deliver(location: Location, provider: LocationProviderUsed?) {
         var removedFinishedWatch = false
+        var position: GeolocationResponse? = null
         val elapsedRealtimeMillis = SystemClock.elapsedRealtime()
         subscriptions.forEachCurrent { token, subscription ->
             val decision = evaluateAndroidWatchDelivery(
                 previous = subscription.deliveryState,
-                latitude = position.coords.latitude,
-                longitude = position.coords.longitude,
+                latitude = location.latitude,
+                longitude = location.longitude,
                 elapsedRealtimeMillis = elapsedRealtimeMillis,
                 minimumIntervalMillis = subscription.options.interval,
                 distanceFilterMeters = subscription.options.distanceFilter
@@ -226,7 +227,10 @@ internal class AndroidPositionWatchManager(
 
             subscription.deliveryState = decision.nextState
             subscription.deliveredUpdates += 1
-            subscription.success(position)
+            val deliveredPosition = position ?: locationToPosition(location, provider).also {
+                position = it
+            }
+            subscription.success(deliveredPosition)
             val maxUpdates = subscription.options.maxUpdates
             if (maxUpdates != null && subscription.deliveredUpdates >= maxUpdates) {
                 removedFinishedWatch = subscriptions.removeCurrent(token, subscription) ||

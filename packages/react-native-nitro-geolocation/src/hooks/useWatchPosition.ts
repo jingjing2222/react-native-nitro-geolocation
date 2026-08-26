@@ -62,11 +62,6 @@ export function useWatchPosition(
 
   useEffect(() => {
     if (!enabled) {
-      // Not enabled, ensure cleanup
-      if (tokenRef.current) {
-        unwatch(tokenRef.current);
-        tokenRef.current = null;
-      }
       setIsWatching(false);
       return;
     }
@@ -94,8 +89,9 @@ export function useWatchPosition(
 
     // Cleanup function
     return () => {
-      if (token) {
-        unwatch(token);
+      unwatch(token);
+      if (tokenRef.current === token) {
+        tokenRef.current = null;
       }
     };
   }, [enabled]); // Only re-subscribe when enabled changes

@@ -89,16 +89,13 @@ class NitroGeolocation(
         AndroidHeadingManager(
             context = reactContext,
             createLocationError = ::createLocationError,
-            getReferenceLocation = {
-                lastLocation ?: getBestCachedLocation(
-                    getValidProviders(resolveAndroidAccuracy(null, enableHighAccuracy = false)),
-                    ParsedOptions.parseLastKnown(null)
-                )
-            }
+            getReferenceLocation = ::getHeadingReferenceLocation
         )
     }
     private val geocoder by lazy { AndroidGeocoder(reactContext) }
     private var lastLocation: Location? = null
+    private var cachedHeadingReferenceLocation: Location? = null
+    private var didResolveHeadingReferenceLocation = false
 
     // Permission callbacks
     private val pendingPermissionResolvers = mutableListOf<(PermissionStatus) -> Unit>()
@@ -805,6 +802,18 @@ class NitroGeolocation(
         }
 
         return bestLocation
+    }
+
+    private fun getHeadingReferenceLocation(): Location? {
+        lastLocation?.let { return it }
+        if (!didResolveHeadingReferenceLocation) {
+            cachedHeadingReferenceLocation = getBestCachedLocation(
+                getValidProviders(resolveAndroidAccuracy(null, enableHighAccuracy = false)),
+                ParsedOptions.parseLastKnown(null)
+            )
+            didResolveHeadingReferenceLocation = true
+        }
+        return cachedHeadingReferenceLocation
     }
 
     // MARK: - Helper Functions - Conversion
