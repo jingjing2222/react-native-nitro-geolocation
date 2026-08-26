@@ -386,13 +386,12 @@ class LocationManager: NSObject, CLLocationManagerDelegate {
             watch.success(location)
         }
 
-        // 3. Stop monitoring if no more watches or pending requests
-        if !requests.isEmpty {
-            if activeWatches.isEmpty && pendingRequests.isEmpty {
-                stopMonitoring()
-            } else {
-                updateLocationManagerConfiguration()
-            }
+        // 3. Stop authorization-triggered monitoring once there is no active work.
+        // Only recompute the configuration when completing requests can change it.
+        if activeWatches.isEmpty && pendingRequests.isEmpty {
+            stopMonitoring()
+        } else if !requests.isEmpty {
+            updateLocationManagerConfiguration()
         }
     }
 
