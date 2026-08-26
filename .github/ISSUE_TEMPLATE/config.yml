@@ -1,8 +1,11 @@
 blank_issues_enabled: true
 contact_links:
-  - name: Documentation
+  - name: Stable 1.x documentation
     url: https://react-native-nitro-geolocation.pages.dev
-    about: Check the documentation for guides and API reference
+    about: Read the documentation for the current stable 1.x release
+  - name: 2.0 release-candidate documentation
+    url: https://react-native-nitro-geolocation.pages.dev/v2/
+    about: Read the versioned 2.0 RC setup, upgrade, and support guides
   - name: Discussions
     url: https://github.com/jingjing2222/react-native-nitro-geolocation/discussions
     about: Ask questions and discuss ideas with the community

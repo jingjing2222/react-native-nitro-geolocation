@@ -126,4 +126,4 @@ This provides:
 - **Performance**: Native-level speed via JSI
 - **Developer Experience**: React-friendly hooks with TanStack Query patterns
 - **Flexibility**: Choose Modern API (hooks) or Compat API (callbacks)
-- **Compatibility**: Drop-in compatible with the core native community API via `/compat`
+- **Compatibility**: Preserves the core callback methods and numeric errors via `/compat`, with documented boundaries

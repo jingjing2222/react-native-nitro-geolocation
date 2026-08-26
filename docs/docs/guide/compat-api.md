@@ -1,9 +1,12 @@
 ---
-title: Compat API (Compatibility)
+title: Compatibility API (/compat)
 ---
 
-> ⚠️ **This is the compat callback-based API for compatibility with @react-native-community/geolocation.**
-> For new projects, we recommend using the [Modern API](./modern-api.md) with functions and the `useWatchPosition` hook.
+> **Migration boundary:** this callback API preserves the core community method
+> shapes and numeric error contract. It does not install a
+> `navigator.geolocation` global, and documented platform defaults or ignored
+> options can differ. Review the matrix below before calling it drop-in for your
+> application. New code should prefer the [Modern API](./modern-api.md).
 
 ## Import Path
 
@@ -49,10 +52,12 @@ subpath with `node`, `node16`, `nodenext`, and `bundler` module resolution.
 
 ## Compatibility Scope
 
-This API is drop-in compatible with the core native
-`@react-native-community/geolocation` surface. It preserves the callback-based
-shape for existing iOS and Android apps while the Modern API gives new code a
-Promise/function API.
+This API is compatible with the core native
+`@react-native-community/geolocation` callback shape. It preserves the listed
+methods and numeric error contract for existing iOS and Android apps while the
+Modern API gives new code a Promise/function API. The matrix is the compatibility
+boundary; options described as ignored/no-op and the missing global polyfill are
+intentional differences.
 
 | Community API | Nitro `/compat` | Notes |
 | --- | ---: | --- |

@@ -1,4 +1,8 @@
-# Start And Stop
+---
+title: Start and stop tracking
+---
+
+# Start and stop tracking
 
 ```ts
 import {

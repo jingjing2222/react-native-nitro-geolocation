@@ -202,7 +202,7 @@ The DevTools plugin should only be enabled in development builds. Rozenite DevTo
 :::
 
 :::tip
-The plugin only intercepts Modern API calls. Compat API calls keep the drop-in replacement behavior.
+The plugin only intercepts Modern API calls. Compatibility API calls keep their callback behavior.
 :::
 
 ## Troubleshooting

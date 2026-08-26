@@ -8,7 +8,10 @@ const v2OnlyRoutes = [
   "guide/gps-offline-recipe",
   "guide/install-doctor",
   "guide/privacy-compliance",
+  "guide/release-readiness",
   "guide/swift-package-manager",
+  "guide/troubleshooting",
+  "guide/upgrade-from-v1",
   "guide/v2-error-migration",
   "guide/v2-unified-background-events",
   "guide/watch-observability"

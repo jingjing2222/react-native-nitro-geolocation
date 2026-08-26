@@ -55,7 +55,7 @@ Geolocation.getCurrentPosition(
 );
 ```
 
-### Step 2: Drop-In `/compat`
+### Step 2: Compatibility `/compat`
 
 First install the Nitro packages:
 

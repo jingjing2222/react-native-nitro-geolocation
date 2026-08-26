@@ -1,74 +1,107 @@
-# Background Location
+---
+title: Background Location overview
+description: Decide when to use native background location, understand platform limits, and follow the shortest setup path.
+---
 
-React Native Nitro Geolocation includes a dedicated Background Location API for background updates, geofencing, Android foreground-service tracking, native event persistence, Android Headless JS delivery, activity recognition events, start-on-boot, native HTTP sync, and stored event recovery.
+# Background Location overview
 
-Background tracking is separate from `watchPosition`. `watchPosition` is for active foreground sessions. Background Location uses native services, receivers, and storage so events can be recorded even when JavaScript is not currently running.
+Use the Background API when the product must record location while the app is
+not active, monitor geofences, recover events recorded while JavaScript was
+unavailable, or run native delivery behavior. For an active screen, use the
+Modern foreground `useWatchPosition` API instead; it has a simpler permission
+and lifecycle model.
 
 ```ts
 import {
   startBackgroundLocation,
+  onBackgroundLocation,
+  stopBackgroundLocation,
+} from 'react-native-nitro-geolocation/background';
+```
+
+Keep the `/background` import explicit. It separates background permissions,
+storage, and native services from foreground code and is safe for shared web
+bundles to import, but background behavior itself is **native-only**.
+
+## Understand the platform contract first
+
+| State | Android | iOS |
+| --- | --- | --- |
+| App in foreground | Native updates can be delivered to JS | Native updates can be delivered to JS |
+| App backgrounded | Foreground service with visible notification for continuous tracking | Core Location delivery under granted Always access and OS policy |
+| JavaScript unavailable | Native persistence, Headless JS, and optional native sync are available | Native persistence is available; no Android-style Headless JS |
+| App terminated or device rebooted | Feature- and OEM-dependent; optional boot restoration | No promise of continuous killed-app execution |
+| Browser | Unsupported result/stub | Unsupported result/stub |
+
+Background delivery is best effort, not an unbounded execution guarantee. Read
+the [reliability contract](./reliability-contract.md) before promising behavior
+for termination, reboot, suspension, or exact delivery timing.
+
+## Complete the happy path
+
+### 1. Configure one platform
+
+- [Android background setup](./setup-android.md) separates foreground,
+  continuous tracking, notification, activity, and boot permissions.
+- [iOS background setup](./setup-ios.md) stages When In Use → Always and adds
+  only the background/motion capabilities the feature needs.
+
+Do not copy both platforms' complete permission lists into a foreground-only
+app.
+
+### 2. Request background access
+
+[Background permissions](./permissions.md) requests foreground and background
+access in the OS-required sequence and handles settings/app-resume round trips.
+Ask only after explaining the user-facing background outcome.
+
+### 3. Start and own the subscription
+
+[Start and stop tracking](./start-stop.md) shows a complete continuous-tracking
+flow, one subscription owner, cleanup, and explicit stop behavior. A visible
+Android notification is part of the running product experience, not an
+implementation detail.
+
+### 4. Verify on a real device
+
+Confirm foreground, background, screen lock, permission changes, process loss,
+stored-event recovery, and any reboot behavior your app claims. Use the
+[long-run E2E guide](./long-run-e2e.md) and test the Android OEMs/iOS versions
+you ship.
+
+The minimum success outcome is:
+
+- permission status reports foreground and background granted;
+- tracking status reports configured and started;
+- a live location is received while the app is active and backgrounded;
+- persisted events can be drained after JavaScript restarts when persistence is
+  enabled;
+- stopping tracking removes the listener and native tracking state.
+
+## Add advanced behavior only when needed
+
+- [Storage Recovery](./storage.md) for events recorded while JavaScript was not
+  running. Consumers must process recovered IDs idempotently.
+- [Android Headless JS](./headless-js.md) for Android JavaScript delivery when
+  the app process can be started for a task.
+- [Native HTTP Sync](./http-sync.md) for native delivery. Treat endpoints,
+  credentials, retention, retries, and server deduplication as security/product
+  contracts.
+- [Geofencing](./geofencing.md) for enter/exit behavior with documented platform
+  limits.
+- [Activity Recognition](./activity-recognition.md) for standalone activity
+  events or activity-aware tracking and its extra permission.
+- [iOS Location Lifecycle](./location-lifecycle.md) for automatic pause and
+  app-triggered resume observation.
+- [2.0 Unified Background Events](../guide/v2-unified-background-events.md) when
+  upgrading stored provider or lifecycle event consumers.
+
+## Diagnose silent delivery
+
+```ts
+import {
   diagnoseBackgroundLocation,
-  addGeofences,
-  registerBackgroundTask,
 } from 'react-native-nitro-geolocation/background';
-```
-
-Prefer `react-native-nitro-geolocation/background` so foreground and background
-imports stay explicit and tree-shakable.
-
-## Type imports
-
-The `/background` entry point is self-contained. Background contracts and the
-named coordinate, accuracy, permission, provider, and error types they reference
-can all be imported from the same subpath:
-
-```ts
-import type {
-  BackgroundLocation,
-  BackgroundLocationOptions,
-  GeolocationResponse,
-  GeolocationCoordinates,
-  NullableDouble,
-  LocationAccuracyOptions,
-  AndroidAccuracyPreset,
-  AndroidGranularity,
-  IOSAccuracyPreset,
-  AccuracyAuthorization,
-  PermissionStatus,
-  LocationProviderStatus,
-  LocationProviderUsed,
-  LocationError,
-  LocationErrorCode,
-} from 'react-native-nitro-geolocation/background';
-```
-
-The background `GeolocationResponse` is the raw native background payload
-shape. The Modern root response additionally allows delivery metadata. No root
-type import is required for a background-only integration. TypeScript can
-resolve this subpath with `node`, `node16`, `nodenext`, and `bundler` module
-resolution.
-
-## Where to go next
-
-- [Android Setup](/background/setup-android) and [iOS Setup](/background/setup-ios) - add the required native permissions and capabilities.
-- [Permissions](/background/permissions) - request foreground/background access and handle settings round-trips.
-- [Start And Stop](/background/start-stop) - start continuous tracking and subscribe to native updates.
-- [iOS Location Lifecycle](/background/location-lifecycle) - observe Core Location automatic pause and app-triggered resume callbacks without synthetic events.
-- [2.0 Unified Background Events](/guide/v2-unified-background-events) - migrate provider and iOS lifecycle observation to the single background event stream.
-- [Troubleshooting](/background/troubleshooting) - use `diagnoseBackgroundLocation()` to interpret the native background status when delivery is silent.
-- [Storage Recovery](/background/storage) - drain events recorded while JavaScript was not running.
-- [Reliability Contract](/background/reliability-contract) - understand foreground, background, termination, reboot, iOS suspension, status timestamps, and the E2E matrix.
-- [Geofencing](/background/geofencing), [Activity Recognition](/background/activity-recognition), and [Native HTTP Sync](/background/http-sync) - add advanced background behavior.
-
-## Diagnose Silent Background Delivery
-
-Use `diagnoseBackgroundLocation()` when background tracking is configured but
-the app is not receiving locations. It reads `getBackgroundLocationStatus()`
-and returns actionable issues instead of forcing app code to interpret every
-status field.
-
-```ts
-import { diagnoseBackgroundLocation } from 'react-native-nitro-geolocation/background';
 
 const diagnosis = await diagnoseBackgroundLocation();
 
@@ -77,9 +110,26 @@ if (!diagnosis.healthy) {
 }
 ```
 
-The result is `{ healthy, status, issues }`. `healthy` is `true` when no issues
-were found, `status` is the raw background status, and `issues` contains
-human-readable reasons delivery may be blocked, such as a native `lastError`,
-missing foreground or background permission, disabled device location services,
-tracking configured but not started, or Android foreground-service and
-notification-permission problems.
+The diagnosis returns `{ healthy, status, issues }` and identifies recorded
+native errors, missing permissions, disabled device services, a configured but
+stopped tracker, notification/service problems, or a tracker still waiting for
+a fix. Continue to [Background troubleshooting](./troubleshooting.md).
+
+## Type imports
+
+Background code can import its contracts from the same self-contained subpath:
+
+```ts
+import type {
+  BackgroundLocation,
+  BackgroundLocationOptions,
+  BackgroundLocationStatus,
+  GeolocationResponse,
+  LocationError,
+  PermissionStatus,
+} from 'react-native-nitro-geolocation/background';
+```
+
+Before shipping persistence or native sync, complete the
+[Privacy and Compliance](../guide/privacy-compliance.md) and
+[Release readiness](../guide/release-readiness.md#ship-checklist) reviews.

@@ -1,12 +1,53 @@
 [
   {
-    "text": "Guide",
+    "text": "Get started",
     "link": "/guide/",
     "activeMatch": "/guide/"
+  },
+  {
+    "text": "Migrate",
+    "items": [
+      {
+        "text": "Upgrade from 1.x",
+        "link": "/guide/upgrade-from-v1"
+      },
+      {
+        "text": "From community geolocation",
+        "link": "/guide/community-migration"
+      },
+      {
+        "text": "From geolocation service",
+        "link": "/guide/service-migration"
+      }
+    ]
+  },
+  {
+    "text": "Foreground APIs",
+    "items": [
+      {
+        "text": "Modern API",
+        "link": "/guide/modern-api"
+      },
+      {
+        "text": "Compatibility API",
+        "link": "/guide/compat-api"
+      }
+    ]
   },
   {
     "text": "Background",
     "link": "/background/overview",
     "activeMatch": "/background/"
+  },
+  {
+    "text": "2.0 RC",
+    "link": "/guide/release-readiness",
+    "position": "right",
+    "tag": "RC"
+  },
+  {
+    "text": "1.x stable",
+    "link": "https://react-native-nitro-geolocation.pages.dev/",
+    "position": "right"
   }
 ]

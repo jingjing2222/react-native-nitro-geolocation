@@ -10,7 +10,7 @@ This app benchmarks cached location read overhead between
 **Test Environment:**
 - Device: iPhone 14 Pro
 - React Native: 0.81.4
-- Test: 1000 iterations × 5 runs of `getCurrentPosition` with cached location (measuring pure bridge/JSI latency)
+- Test: 10 warm-up calls followed by 1,000 measured `getCurrentPosition` calls with cached location for each library (measuring pure bridge/JSI latency)
 
 :::warning Benchmark scope
 This benchmark measures cached location reads and the JS-to-native call path. It
@@ -30,7 +30,7 @@ faster; it makes cached reads and the JS-to-native path cheaper.
 | **P95** | 0.025ms | 6.434ms | **257.4x faster** |
 | **P99** | 0.031ms | 7.271ms | **234.5x faster** |
 | **Std Dev** | 0.032ms | 1.545ms | 98.0% more stable |
-| **Samples** | 1000 | 1000 | - |
+| **Samples** | 1,000 measured calls | 1,000 measured calls | - |
 
 ### Why is Nitro faster for cached reads?
 

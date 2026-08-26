@@ -1,155 +1,182 @@
-# Quick Start
+---
+title: Install and get a location
+description: Install the 2.0 RC with foreground-only permissions and render the first coordinates in a React Native app.
+---
 
-This guide walks you through installing and setting up **React Native Nitro Geolocation** in your React Native project.
+# Install and get a location
 
-## 1. Installation
+This path ends with a button that renders foreground coordinates on iOS or
+Android. It deliberately requests **foreground location only**. Do not add
+background permissions unless your product must track while the app is not
+active.
 
-Before installing the module, make sure your app uses React Native 0.75+ with
-the New Architecture and Nitro Modules enabled.
+## Before you install
+
+Your native app must use React Native 0.75 or newer, New Architecture, and Nitro
+Modules. Expo apps need a development/custom native build; Expo Go is not
+supported. iOS uses CocoaPods. See [Release readiness](./release-readiness.md)
+before adopting the RC in a release branch.
+
+## 1. Install an RC
+
+Use `@rc` to evaluate the latest release candidate:
 
 ```bash
-# Install Nitro core and the 2.0 release candidate
 yarn add react-native-nitro-modules react-native-nitro-geolocation@rc
+```
 
-# or using npm
+```bash
 npm install react-native-nitro-modules react-native-nitro-geolocation@rc
 ```
 
-After installation, rebuild your native app to ensure the new module is linked.
+For reproducible testing and release approval, replace the moving tags with the
+exact versions from the [tested reference stack](./release-readiness.md#tested-reference-stack).
 
-```bash
-cd ios && bundle exec pod install
+Released npm builds prefer compatible GitHub Release prebuilts and fall back to
+a native source build. Android prebuilts require matching React Native and Nitro
+Modules major/minor versions. Set `NITRO_GEOLOCATION_USE_PREBUILT=0` when you
+need to verify the source-build path.
+
+## 2. Add minimum foreground permissions
+
+### iOS
+
+Add one product-specific explanation to `ios/<AppName>/Info.plist`:
+
+```xml
+<key>NSLocationWhenInUseUsageDescription</key>
+<string>Show your location on the nearby places map.</string>
 ```
 
-Use `pod install` directly when your app does not check in a `Gemfile`.
-React Native 0.87's Swift Package Manager workflow is not yet compatible with
-the required Nitro Modules native target. Keep CocoaPods for iOS and see the
-[Swift Package Manager compatibility guide](/guide/swift-package-manager)
-before migrating an RN 0.87 app.
+Write the value for the feature the user just chose. Do not copy a vague
+template into a store build. `NSLocationAlwaysAndWhenInUseUsageDescription` and
+the `location` background mode are not needed for this foreground path.
 
-Released npm builds try to use the matching GitHub Release prebuilts first:
-Android downloads the release AAR and reuses its native `.so` files, while iOS
-downloads the release XCFramework. If the prebuilt asset is unavailable, the
-native source build is used automatically. Android prebuilts are used only when
-the app's React Native and Nitro Modules major/minor versions match the release
-asset build. To force source builds, set:
+### Android
 
-```bash
-NITRO_GEOLOCATION_USE_PREBUILT=0
+Add these to `android/app/src/main/AndroidManifest.xml`:
+
+```xml
+<uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+<uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
 ```
 
-This package requires native Nitro bindings. Expo Go is not supported. For Expo
-apps, use prebuild, a development build, or another custom native build flow;
-see the [Expo development build guide](/guide/expo-development-build).
+Do not add `ACCESS_BACKGROUND_LOCATION`, foreground-service, notification,
+activity-recognition, boot, or wake-lock permissions for this foreground path.
 
-After configuring the native projects, run the read-only install doctor:
+## 3. Rebuild the native app
+
+Install iOS pods, then rebuild rather than relying on an existing binary:
+
+```bash
+cd ios
+bundle exec pod install
+cd ..
+yarn ios
+```
+
+Use `pod install` directly when the app has no `Gemfile`. For Android:
+
+```bash
+yarn android
+```
+
+React Native 0.87 SwiftPM-only projects are not supported yet. Keep CocoaPods
+and review the [Swift Package Manager guide](./swift-package-manager.md).
+
+## 4. Check the native setup
+
+Run the read-only doctor after adding permissions and generating native files:
 
 ```bash
 yarn nitro-geolocation doctor
 ```
 
-It reports dependency, architecture, and permission setup errors without
-editing the app. See the [Install Doctor guide](/guide/install-doctor) for CI,
-monorepo, and JSON output options.
+The setup is ready for this guide when dependency, New Architecture, and
+foreground-permission checks do not report errors. Warnings about optional
+background declarations are expected because this flow does not use them. See
+[Install Doctor](./install-doctor.md) for monorepo, CI, and JSON output.
 
+## 5. Render the first coordinates
 
-## 2. iOS Setup
-
-### Permissions
-
-Add the following keys to your **Info.plist**:
-
-```xml
-<key>NSLocationWhenInUseUsageDescription</key>
-<string>This app requires access to your location while it's in use.</string>
-<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
-<string>This app requires access to your location at all times.</string>
-```
-
-For background tracking, also enable the `location` background mode in
-`UIBackgroundModes`; see [iOS background setup](/background/setup-ios).
-
-
-## 3. Android Setup
-
-Add the following permissions to your **android/app/src/main/AndroidManifest.xml**:
-
-```xml
-<uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
-<uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
-```
-
-Optional (for background access):
-
-```xml
-<uses-permission android:name="android.permission.ACCESS_BACKGROUND_LOCATION" />
-```
-
-Full background tracking uses a foreground service on Android. Add the full
-permission set from [Android background setup](/background/setup-android) when
-using `react-native-nitro-geolocation/background`, including Android 13+
-`POST_NOTIFICATIONS` for the tracking notification.
-
-## 4. Get Your First Location
-
-Configure once at app startup. Ask for permission from a user action, then read
-one position.
+Configure once at startup. Request permission only after a user action.
 
 ```tsx
+import { useState } from 'react';
+import { Button, Text, View } from 'react-native';
 import {
   getCurrentPosition,
   requestPermission,
-  setConfiguration
+  setConfiguration,
 } from 'react-native-nitro-geolocation';
 
 setConfiguration({
   authorizationLevel: 'whenInUse',
-  locationProvider: 'auto'
+  locationProvider: 'auto',
 });
 
-async function handleUseMyLocation() {
-  const status = await requestPermission();
+export function FirstLocation() {
+  const [message, setMessage] = useState('Location has not been requested.');
+  const [loading, setLoading] = useState(false);
 
-  if (status === 'granted') {
-    const position = await getCurrentPosition({
-      accuracy: { android: 'high', ios: 'best' },
-      timeout: 15000
-    });
+  async function handleUseMyLocation() {
+    setLoading(true);
+    setMessage('Requesting permission…');
+
+    try {
+      const status = await requestPermission();
+
+      if (status !== 'granted') {
+        setMessage(`Location permission is ${status}.`);
+        return;
+      }
+
+      setMessage('Finding a location…');
+      const position = await getCurrentPosition({
+        accuracy: { android: 'high', ios: 'best' },
+        timeout: 15_000,
+      });
+
+      setMessage(
+        `${position.coords.latitude.toFixed(5)}, ` +
+          `${position.coords.longitude.toFixed(5)} ` +
+          `(±${Math.round(position.coords.accuracy)} m)`,
+      );
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : 'Location failed.');
+    } finally {
+      setLoading(false);
+    }
   }
+
+  return (
+    <View>
+      <Button
+        title={loading ? 'Finding location…' : 'Use my location'}
+        disabled={loading}
+        onPress={handleUseMyLocation}
+      />
+      <Text accessibilityLiveRegion="polite">{message}</Text>
+    </View>
+  );
 }
 ```
 
-## 5. Android Accuracy Helpers (Optional)
+## Confirm the outcome
 
-If Android needs a settings prompt or an explicit cached read, configure the
-provider in your startup `setConfiguration()` call and add the settings helpers
-from the [Modern API reference](/guide/modern-api).
+- On success, the screen shows `latitude, longitude (±accuracy m)`.
+- `denied` or `restricted` means the app must explain the feature and let the
+  user choose whether to review system settings; do not loop permission prompts.
+- A timeout means no acceptable fix arrived within 15 seconds. Try outdoors or
+  lower the accuracy requirement rather than requesting background permission.
+- On Android, a provider/settings error means device location services or the
+  requested accuracy is unavailable. Follow [Troubleshooting](./troubleshooting.md).
 
-```tsx
-import {
-  getLastKnownPositionAsync,
-  requestLocationSettings
-} from 'react-native-nitro-geolocation';
+## Continue only for your use case
 
-await requestLocationSettings({
-  accuracy: { android: 'high' }
-});
-
-const cached = await getLastKnownPositionAsync({
-  maximumAge: 60_000,
-  accuracy: { android: 'balanced', ios: 'hundredMeters' }
-});
-```
-
-
-## Next Steps
-
-- [Modern API Reference](/guide/modern-api) — Complete documentation
-- [Swift Package Manager](/guide/swift-package-manager) — RN 0.87 compatibility and migration gate
-- [Compat API Reference](/guide/compat-api) — Compatibility methods
-- [Background Location](/background/overview) — Native background tracking, geofencing, and storage recovery
-- [Migration Guides](/guide/migration-assistance) — Move from community/service geolocation packages
-- [Expo Development Builds](/guide/expo-development-build) — Use the package in Expo custom native builds
-- [DevTools Plugin Guide](/guide/devtools) — Mock locations in development
-- [Why Nitro Module?](/guide/why-nitro-module) — Architecture deep dive
-- [Benchmark Results](/guide/benchmark) — Performance comparison
+- [Modern API reference](./modern-api.md) for readiness, cached reads, watches,
+  geocoding, and heading.
+- [Community migration](./community-migration.md) if this replaces the community
+  callback package.
+- [Background Location](../background/overview.md) only when the product must
+  track while the app is not active.

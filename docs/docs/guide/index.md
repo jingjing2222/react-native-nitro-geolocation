@@ -1,251 +1,71 @@
-# Introduction
+---
+title: Choose your path
+description: Pick the shortest React Native Nitro Geolocation 2.0 path for a new app, migration, Expo build, or background integration.
+---
 
-The [`@react-native-community/geolocation`](https://github.com/michalchudziak/react-native-geolocation) package has been the standard way to access device location in React Native apps.
+# Choose your path
 
-With the React Native ecosystem moving toward **TurboModules**, **Fabric**, and **JSI-based architecture**, we saw an opportunity to bring geolocation to the new architecture while improving the developer experience.
+You are reading the **2.0 release-candidate** documentation. Use this page to
+pick one path; you do not need to read every guide before starting.
 
-This project — **React Native Nitro Geolocation** — is a native iOS/Android
-module designed for the **Nitro Module** system. It is best positioned as a
-React Native 0.75+ / New Architecture path for replacing the core native
-`@react-native-community/geolocation` API with `/compat`, then gradually moving
-to a typed Modern API.
+| I want to… | Start here | Outcome |
+| --- | --- | --- |
+| Add foreground location to a new app | [Install and get a location](./quick-start.md) | A foreground-only screen that renders coordinates |
+| Upgrade Nitro Geolocation 1.x | [Upgrade from 1.x](./upgrade-from-v1.md) | All seven 2.0 breaking changes reviewed and tested |
+| Replace `@react-native-community/geolocation` | [Community migration](./community-migration.md) | `/compat` first, then an optional Modern API refactor |
+| Replace `react-native-geolocation-service` | [Service migration](./service-migration.md) | A direct Modern API migration |
+| Use an Expo app | [Expo development builds](./expo-development-build.md) | A custom native build; Expo Go is not supported |
+| Track when the app is not active | [Background Location](../background/overview.md) | Native background tracking with platform-specific setup |
+| Evaluate the RC for release | [Release readiness](./release-readiness.md) | Tested-stack, RC-policy, and ship-checklist review |
+| Diagnose an existing integration | [Troubleshooting](./troubleshooting.md) | A readiness snapshot and a useful issue report |
 
-The current release line adds a clearer three-surface story: Modern and
-`/compat` foreground geolocation on web, plus a native Background Location API
-for tracking, geofencing, storage recovery, Headless JS, and HTTP sync.
+## Choose an API surface
 
-## When should I use this?
+The package has three intentionally separate entry points.
 
-| Use case | Recommendation |
-| --- | --- |
-| Bare React Native 0.75+ app with New Architecture/Nitro enabled | Use Nitro Geolocation |
-| Migrating from `@react-native-community/geolocation` | Start with `/compat` |
-| New Architecture / Nitro-based app | Recommended |
-| Expo development build or custom native build | Supported with native setup |
-| Expo managed app without native rebuild | Use `expo-location` |
-| React Native 0.87 app using CocoaPods | Supported |
-| React Native 0.87 SwiftPM-only app | Wait for official Nitro Modules SwiftPM support |
-| Web support required | Use the Modern API root import or `/compat` callback API |
-| Full background tracking / geofencing | Use `react-native-nitro-geolocation/background` |
+| Surface | Import | Best for | Platform boundary |
+| --- | --- | --- | --- |
+| **Modern API** | `react-native-nitro-geolocation` | New foreground code, Promise APIs, typed readiness, React watches | Native and web foreground |
+| **Compatibility API** | `react-native-nitro-geolocation/compat` | A controlled migration from the core community callback API | Native and web foreground |
+| **Background API** | `react-native-nitro-geolocation/background` | Tracking, geofencing, persistence, Headless JS, and native sync | Native only; web imports return unsupported results |
 
-Web support is available for the Modern API root import and the `/compat`
-subpath. Browser builds resolve both entries to implementations backed by
-`navigator.geolocation` and do not load Nitro native bindings. Background
-location remains native-only.
+`/compat` preserves the core callback methods and numeric error contract. It is
+a migration-friendly API-shape path, not a promise that every legacy global,
+default, or platform-specific option behaves identically. Review the
+[compatibility matrix](./compat-api.md#compatibility-scope) before shipping.
 
-React Native Nitro Geolocation provides **three public API surfaces** to fit
-your needs:
+## Check the support boundary
 
-## 1. Modern API (Recommended)
+- React Native 0.75 or newer with New Architecture and Nitro Modules is
+  required for native apps.
+- Bare React Native and Expo development/custom native builds are supported.
+  Expo Go is not supported.
+- CocoaPods is the supported iOS dependency path. React Native 0.87 SwiftPM-only
+  projects must wait for official Nitro Modules SwiftPM support.
+- The Modern and Compatibility foreground APIs support browser builds through
+  `navigator.geolocation`. Background Location is native-only.
+- Android and iOS share public contracts but retain documented OS behavior and
+  reliability limits.
 
-**Simple functional API** with direct calls and minimal abstractions.
+The peer range describes where installation is allowed; it is broader than the
+single reference combination continuously exercised by this repository. See
+[Release readiness](./release-readiness.md) for the declared and tested scopes.
 
-```tsx
-import {
-  setConfiguration,
-  requestPermission,
-  getCurrentPosition,
-  geocode,
-  reverseGeocode,
-  useWatchPosition
-} from 'react-native-nitro-geolocation';
+## RC expectations
 
-// Configure once at app startup
-setConfiguration({
-  authorizationLevel: 'whenInUse',
-  locationProvider: 'auto'
-});
+Install an exact RC when reproducing or approving behavior:
 
-// Request permission
-const status = await requestPermission();
-if (status !== 'granted') {
-  throw new Error('Location permission was not granted');
-}
-
-// Get current location
-const position = await getCurrentPosition({
-  accuracy: { android: 'high', ios: 'best' },
-  timeout: 15000
-});
-
-// Convert between addresses and coordinates
-const locations = await geocode('City Hall, Seoul, South Korea');
-const addresses = await reverseGeocode({
-  latitude: 37.5665,
-  longitude: 126.978
-});
-
-// Continuous tracking with hook
-function LocationTracker() {
-  const { position, error, isWatching } = useWatchPosition({
-    enabled: true,
-    accuracy: { android: 'high', ios: 'bestForNavigation' },
-    distanceFilter: 10
-  });
-
-  if (error) return <Text>Error: {error.message}</Text>;
-  if (!position) return <Text>Waiting...</Text>;
-
-  return (
-    <Text>
-      {position.coords.latitude}, {position.coords.longitude}
-    </Text>
-  );
-}
+```bash
+yarn add react-native-nitro-modules@0.35.10 react-native-nitro-geolocation@2.0.0-rc.0
 ```
 
-**Key Features**:
-- 🎯 Simple and direct — No complex abstractions
-- 🪝 Single hook for continuous tracking
-- 🧹 Auto-cleanup when component unmounts
-- 📘 Full TypeScript support
+Release candidates may still receive contract fixes before 2.0 stable. Do not
+silently follow the moving `@rc` tag in a production lockfile. Keep a tested
+1.x rollback branch until the [upgrade checklist](./upgrade-from-v1.md) and
+[release checklist](./release-readiness.md#ship-checklist) pass in your app.
 
-## 2. Compat API (Compatibility)
+## Next action
 
-Drop-in compatible with the core native `@react-native-community/geolocation`
-API via the `/compat` subpath.
-
-```tsx
-import Geolocation from 'react-native-nitro-geolocation/compat';
-
-Geolocation.getCurrentPosition(
-  (position) => console.log(position),
-  (error) => console.error(error),
-  { enableHighAccuracy: true }
-);
-```
-
-**Use cases**:
-- Drop-in replacement for existing apps
-- Minimal migration effort
-- Callback-based API preference
-
-## 3. Background API
-
-Native background tracking, geofencing, activity events, Android Headless JS,
-HTTP sync, and stored event recovery should use the explicit background subpath
-`react-native-nitro-geolocation/background`.
-
-Background location is native-only. Browser builds expose unsupported stubs so
-web bundles can still import shared code safely. Start with the
-[Background Location guide](/background/overview) when you need full background
-tracking, geofencing, storage recovery, or native sync.
-
-## Why Modern API?
-
-The Modern API brings simplicity and React hook patterns to geolocation:
-
-### Declarative vs Imperative
-
-**Before (Imperative)**:
-```tsx
-const [position, setPosition] = useState(null);
-const watchIdRef = useRef(null);
-
-useEffect(() => {
-  watchIdRef.current = Geolocation.watchPosition(
-    (pos) => setPosition(pos),
-    (err) => console.error(err)
-  );
-
-  return () => {
-    if (watchIdRef.current !== null) {
-      Geolocation.clearWatch(watchIdRef.current);
-    }
-  };
-}, []);
-```
-
-**After (Declarative)**:
-```tsx
-const { position } = useWatchPosition({ enabled: true });
-// Auto cleanup, no watch ID management needed!
-```
-
-### Key Benefits
-
-- **🎯 Simple and Direct**: Just functions and one hook
-- **🧹 Auto-cleanup**: No need to remember `clearWatch()` in `useEffect` cleanup
-- **🪝 Single Hook**: Only `useWatchPosition` for continuous tracking
-- **📘 Type-safe**: Full TypeScript support with inference
-- **⚡ High Performance**: JSI-powered for native speed
-
-
-## Motivation
-
-The motivation behind React Native Nitro Geolocation is twofold:
-
-### 1. Update the Architecture
-
-React Native has evolved with new architectural capabilities, and we wanted to bring these benefits to the Geolocation API.
-
-`@react-native-community/geolocation` was built on the **bridge-based architecture**, which was the standard at the time. The new JSI-based architecture offers different characteristics:
-
-- Direct communication between JS and native layers
-- Support for synchronous APIs when needed
-- Better integration with concurrent React and Fabric
-- Enhanced TypeScript support and platform consistency
-
-### 2. Improve Developer Experience
-
-We created a geolocation API that:
-
-- **Simple configuration**: Call `setConfiguration()` once
-- **Direct function calls**: No classes or complex abstractions
-- **Handles lifecycle automatically**: No manual cleanup required
-- **Provides declarative control**: `{ enabled }` prop instead of start/stop
-- **Ensures type safety**: Full TypeScript inference
-
-
-## Design Philosophy
-
-### Simple and Functional
-
-Instead of complex provider patterns or class-based APIs, we provide:
-
-| Concept | Modern API |
-|---------|------------|
-| **Configuration** | `setConfiguration()` |
-| **Permission** | `checkPermission()`, `requestPermission()` |
-| **Location** | `getCurrentPosition()`, `useWatchPosition()` |
-| **Geocoding** | `geocode()`, `reverseGeocode()` |
-| **Cleanup** | Automatic (in hook) |
-
-### Core Principles
-
-1. **Configuration at startup**: Set up once with `setConfiguration()`
-2. **Direct function calls**: Use Promise-based functions directly
-3. **Single hook for tracking**: `useWatchPosition` handles continuous updates
-4. **Automatic lifecycle**: No manual cleanup code
-5. **Type-safe by default**: Full TypeScript inference
-6. **Performance first**: JSI-powered for native speed
-
-
-## What You Get
-
-The package has three clear surfaces:
-
-- **Modern API** - typed foreground geolocation, geocoding, watching, cached reads, and Android settings helpers.
-- **Compat API** - a `/compat` path for migrating the core `@react-native-community/geolocation` surface.
-- **Background API** - native tracking, geofencing, storage recovery, Headless JS, and HTTP sync.
-
-Modern and `/compat` foreground APIs also support web through the browser
-`navigator.geolocation` API.
-
-The benchmark measures cached location reads and the JS-to-native call path. It
-does not make cold GPS acquisition itself 22x faster.
-
-Whether you're upgrading an existing app or building a new one using the latest React Native architecture, **React Native Nitro Geolocation** gives you the Modern API with a migration-friendly compat path.
-
-
-## Next Steps
-
-- [Quick Start Guide](/guide/quick-start) — Get up and running in minutes
-- [Migration Skills](/guide/migration-assistance) — Choose the right agent skill for community or service migrations
-- [Community Migration](/guide/community-migration) — Move from community imports to `/compat` and the Modern API
-- [Service Migration](/guide/service-migration) — Move from `react-native-geolocation-service` directly to the Modern API
-- [Expo Development Build Guide](/guide/expo-development-build) — Use the package in Expo custom native builds
-- [Modern API Reference](/guide/modern-api) — Explore functions and hooks
-- [Compat API Reference](/guide/compat-api) — Compatibility documentation
-- [Why Nitro Module?](/guide/why-nitro-module) — Architecture deep dive
-- [Benchmark Results](/guide/benchmark) — Performance comparison
+For a new integration, continue to [Install and get a location](./quick-start.md).
+For any existing Nitro Geolocation 1.x app, start with
+[Upgrade from 1.x](./upgrade-from-v1.md) before opening the API reference.
