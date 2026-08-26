@@ -9,6 +9,7 @@ import type {
   LocationErrorCode as LocationErrorCodeType,
   LocationRequestOptions,
   LocationSettingsOptions,
+  NullableDouble,
   PermissionStatus,
   UseWatchPositionResult
 } from "../src";
@@ -26,15 +27,38 @@ import type {
 } from "../src/NitroGeolocationCompat.nitro";
 import type {
   AndroidBackgroundProvider,
+  AccuracyAuthorization as BackgroundAccuracyAuthorization,
   BackgroundActivityEvent,
+  AndroidAccuracyPreset as BackgroundAndroidAccuracyPreset,
+  AndroidGranularity as BackgroundAndroidGranularity,
   BackgroundGeofenceEvent,
+  GeolocationCoordinates as BackgroundGeolocationCoordinates,
+  GeolocationResponse as BackgroundGeolocationResponse,
+  IOSAccuracyPreset as BackgroundIOSAccuracyPreset,
+  LocationAccuracyOptions as BackgroundLocationAccuracyOptions,
   BackgroundLocationDiagnosis,
+  LocationError as BackgroundLocationError,
+  LocationErrorCode as BackgroundLocationErrorCode,
+  LocationProviderStatus as BackgroundLocationProviderStatus,
+  LocationProviderUsed as BackgroundLocationProviderUsed,
+  NullableDouble as BackgroundNullableDouble,
+  PermissionStatus as BackgroundPermissionStatus,
   StartActivityRecognitionOptions
 } from "../src/background";
 import type {
   BackgroundActivityEventEnvelope as NativeBackgroundActivityEvent,
   BackgroundGeofenceEventEnvelope as NativeBackgroundGeofenceEvent
 } from "../src/background/types";
+import type {
+  AndroidAccuracyPreset as CompatAndroidAccuracyPreset,
+  AuthorizationLevel as CompatAuthorizationLevel,
+  GeolocationCoordinates as CompatGeolocationCoordinates,
+  IOSAccuracyPreset as CompatIOSAccuracyPreset,
+  IOSActivityType as CompatIOSActivityType,
+  LocationAccuracyOptions as CompatLocationAccuracyOptions,
+  LocationProvider as CompatLocationProvider,
+  NullableDouble as CompatNullableDouble
+} from "../src/compat";
 import type { CompatGeolocationConfiguration } from "../src/publicTypes";
 import type { LocationAvailability as NativeLocationAvailability } from "../src/types";
 
@@ -86,6 +110,7 @@ type _LocationAvailabilityReasonIsExact = Expect<
     | "unknown"
   >
 >;
+type _NullableDoubleIsExact = Expect<Equal<NullableDouble, number | null>>;
 type _LocationAvailabilityUsesPublicReason = Expect<
   Equal<LocationAvailability["reason"], LocationAvailabilityReason | undefined>
 >;
@@ -137,6 +162,64 @@ type _StartActivityOptionsAreActionSpecific = Expect<
       stopOnStill?: boolean;
       minimumConfidence?: number;
     }
+  >
+>;
+type _BackgroundEntrypointExportsRelatedRootTypes = Expect<
+  Equal<
+    [
+      BackgroundAccuracyAuthorization,
+      BackgroundAndroidAccuracyPreset,
+      BackgroundAndroidGranularity,
+      BackgroundGeolocationCoordinates,
+      BackgroundGeolocationResponse,
+      BackgroundIOSAccuracyPreset,
+      BackgroundLocationAccuracyOptions,
+      BackgroundLocationError,
+      BackgroundLocationErrorCode,
+      BackgroundLocationProviderStatus,
+      BackgroundLocationProviderUsed,
+      BackgroundNullableDouble,
+      BackgroundPermissionStatus
+    ],
+    [
+      import("../src").AccuracyAuthorization,
+      import("../src").AndroidAccuracyPreset,
+      import("../src").AndroidGranularity,
+      import("../src/types").GeolocationCoordinates,
+      import("../src/types").GeolocationResponse,
+      import("../src").IOSAccuracyPreset,
+      import("../src").LocationAccuracyOptions,
+      import("../src").LocationError,
+      import("../src").LocationErrorCode,
+      import("../src").LocationProviderStatus,
+      import("../src").LocationProviderUsed,
+      import("../src").NullableDouble,
+      import("../src").PermissionStatus
+    ]
+  >
+>;
+type _CompatEntrypointExportsRelatedRootTypes = Expect<
+  Equal<
+    [
+      CompatAndroidAccuracyPreset,
+      CompatAuthorizationLevel,
+      CompatGeolocationCoordinates,
+      CompatIOSAccuracyPreset,
+      CompatIOSActivityType,
+      CompatLocationAccuracyOptions,
+      CompatLocationProvider,
+      CompatNullableDouble
+    ],
+    [
+      import("../src").AndroidAccuracyPreset,
+      import("../src").AuthorizationLevel,
+      import("../src").GeolocationCoordinates,
+      import("../src").IOSAccuracyPreset,
+      import("../src").IOSActivityType,
+      import("../src").LocationAccuracyOptions,
+      import("../src").LocationProvider,
+      import("../src").NullableDouble
+    ]
   >
 >;
 type _RootConfigurationMatchesNativeContract = Expect<

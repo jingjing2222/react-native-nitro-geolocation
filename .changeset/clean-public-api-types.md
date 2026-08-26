@@ -14,4 +14,10 @@ bridge envelopes remain internal, and activity recognition and last-known
 position use option types limited to the fields those operations support.
 One-shot position options no longer advertise the watch-only `maxUpdates`.
 Location availability reasons are also exposed as a consistent typed union
-across native and web implementations.
+across native and web implementations. The `/background` entry point now
+re-exports every named root type referenced by its public options, status, and
+event contracts, so consumers do not need cross-entrypoint type imports. The
+root also exports the `NullableDouble` used by nullable coordinate fields. The
+`/compat` entry point exports all supporting types referenced by its
+configuration, options, and response contracts, and legacy TypeScript `node`
+module resolution can resolve both public subpaths through `typesVersions`.

@@ -1082,6 +1082,7 @@ import type {
   LocationProviderUsed,
   LocationAvailability,
   LocationAvailabilityReason,
+  NullableDouble,
   LocationReadiness,
   LocationReadinessRemediation,
   GeolocationConfiguration

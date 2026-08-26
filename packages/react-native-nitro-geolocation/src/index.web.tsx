@@ -19,6 +19,7 @@ export type {
   LocationReadinessRemediation,
   LocationSettingsOutcome,
   LocationSettingsResult,
+  NullableDouble,
   LocationAvailability,
   LocationAvailabilityReason,
   LastKnownPositionOptions,

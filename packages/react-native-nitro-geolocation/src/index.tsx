@@ -91,6 +91,7 @@ export type {
   LocationProviderStatus,
   LocationSettingsOutcome,
   LocationSettingsResult,
+  NullableDouble,
   LocationAvailability,
   LocationAvailabilityReason,
   LastKnownPositionOptions,

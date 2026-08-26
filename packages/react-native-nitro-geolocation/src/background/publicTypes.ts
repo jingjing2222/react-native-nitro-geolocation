@@ -19,6 +19,26 @@ import type {
   IOSBackgroundLocationOptions
 } from "./types";
 
+// Keep the `/background` entry point self-contained: consumers should be able
+// to import every named type referenced by its public options, status, and
+// event contracts without reaching through the package root.
+export type {
+  AccuracyAuthorization,
+  AndroidAccuracyPreset,
+  AndroidGranularity,
+  IOSAccuracyPreset,
+  LocationAccuracyOptions,
+  LocationProviderStatus,
+  LocationProviderUsed,
+  PermissionStatus
+} from "../publicTypes";
+export type {
+  GeolocationCoordinates,
+  GeolocationResponse,
+  NullableDouble
+} from "../types";
+export type { LocationError, LocationErrorCode } from "../utils/errors";
+
 export type {
   ActivityRecognitionOptions,
   AndroidBackgroundLocationStatus,

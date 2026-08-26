@@ -25,13 +25,21 @@ const Geolocation = {
 
 // Export types
 export type {
+  AndroidAccuracyPreset,
+  AuthorizationLevel,
   CompatGeolocationConfiguration as GeolocationConfiguration,
   CompatGeolocationResponse as GeolocationResponse,
   CompatGeolocationResponseWithMetadata as GeolocationResponseWithMetadata,
   CompatGeolocationError as GeolocationError,
   CompatGeolocationOptions as GeolocationOptions,
   CompatGeolocationOptionsWithMetadata as GeolocationOptionsWithMetadata,
-  LocationProviderUsed
+  GeolocationCoordinates,
+  IOSAccuracyPreset,
+  IOSActivityType,
+  LocationAccuracyOptions,
+  LocationProvider,
+  LocationProviderUsed,
+  NullableDouble
 } from "../publicTypes";
 
 export default Geolocation;

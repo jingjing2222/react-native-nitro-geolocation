@@ -29,6 +29,16 @@
       "default": "./src/background/index.ts"
     }
   },
+  "typesVersions": {
+    "*": {
+      "compat": [
+        "src/compat/index.tsx"
+      ],
+      "background": [
+        "src/background/index.ts"
+      ]
+    }
+  },
   "codegenConfig": {
     "name": "NitroGeolocationSpec",
     "type": "modules",

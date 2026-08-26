@@ -21,6 +21,7 @@ import type {
   LocationSettingsOptions as SchemaLocationSettingsOptions,
   LocationSettingsOutcome as SchemaLocationSettingsOutcome,
   LocationSettingsResult as SchemaLocationSettingsResult,
+  NullableDouble as SchemaNullableDouble,
   PermissionStatus as SchemaPermissionStatus,
   ReverseGeocodedAddress as SchemaReverseGeocodedAddress
 } from "./types";
@@ -59,6 +60,7 @@ export type GeolocationResponse = SchemaGeolocationResponse & {
 export type LocationProviderStatus = SchemaLocationProviderStatus;
 export type LocationSettingsOutcome = SchemaLocationSettingsOutcome;
 export type LocationSettingsResult = SchemaLocationSettingsResult;
+export type NullableDouble = SchemaNullableDouble;
 export type LocationAvailabilityReason =
   | "unsupported"
   | "permissionUndetermined"
