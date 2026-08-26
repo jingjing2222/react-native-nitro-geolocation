@@ -1089,6 +1089,9 @@ import type {
 } from 'react-native-nitro-geolocation';
 ```
 
+`NullableDouble` is `number | null`. It is the shared scalar used by
+`GeolocationCoordinates.altitude`, `altitudeAccuracy`, `heading`, and `speed`.
+
 The deprecated `ModernGeolocationConfiguration` alias was removed in 2.0. Use
 `GeolocationConfiguration` for the root Modern API.
 

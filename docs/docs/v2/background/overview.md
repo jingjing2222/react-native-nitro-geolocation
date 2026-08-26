@@ -16,6 +16,38 @@ import {
 Prefer `react-native-nitro-geolocation/background` so foreground and background
 imports stay explicit and tree-shakable.
 
+## Type imports
+
+The `/background` entry point is self-contained. Background contracts and the
+named coordinate, accuracy, permission, provider, and error types they reference
+can all be imported from the same subpath:
+
+```ts
+import type {
+  BackgroundLocation,
+  BackgroundLocationOptions,
+  GeolocationResponse,
+  GeolocationCoordinates,
+  NullableDouble,
+  LocationAccuracyOptions,
+  AndroidAccuracyPreset,
+  AndroidGranularity,
+  IOSAccuracyPreset,
+  AccuracyAuthorization,
+  PermissionStatus,
+  LocationProviderStatus,
+  LocationProviderUsed,
+  LocationError,
+  LocationErrorCode,
+} from 'react-native-nitro-geolocation/background';
+```
+
+The background `GeolocationResponse` is the raw native background payload
+shape. The Modern root response additionally allows delivery metadata. No root
+type import is required for a background-only integration. TypeScript can
+resolve this subpath with `node`, `node16`, `nodenext`, and `bundler` module
+resolution.
+
 ## Where to go next
 
 - [Android Setup](/background/setup-android) and [iOS Setup](/background/setup-ios) - add the required native permissions and capabilities.
