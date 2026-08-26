@@ -1,5 +1,26 @@
 # react-native-nitro-geolocation
 
+## 2.0.0-rc.1
+
+### Patch Changes
+
+- 8aaca3b: Align the native and browser public API surfaces, export a named
+  `UseWatchPositionResult`, and keep background function declarations expressed
+  in public types instead of inferred Nitro spec signatures. Background provider
+  configuration now uses the same public `"android"` spelling as the root and
+  compat APIs while retaining `"android_platform"` only inside the Nitro bridge.
+  The `LocationErrorCode` type and `LocationErrorCodes` runtime constants now
+  have distinct names so type-only and value imports are unambiguous.
+- 782c0a2: Restructure the 2.0 release-candidate documentation around installation,
+  upgrade, background setup, release readiness, and support journeys without
+  changing package runtime behavior.
+- 8a300af: Harden the v2 public type boundary by moving shared schemas out of Nitro
+  codegen declarations, keeping bridge envelopes internal, narrowing
+  operation-specific options, and exposing stable location availability reason
+  codes. The root, `/compat`, and `/background` entry points now export every
+  named supporting type referenced by their public contracts, while legacy
+  TypeScript `node` module resolution can resolve both public subpaths.
+
 ## 2.0.0-rc.0
 
 ### Major Changes
