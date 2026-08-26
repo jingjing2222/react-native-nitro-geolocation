@@ -1,6 +1,6 @@
-import type { LocationError } from "../NitroGeolocation.nitro";
 import { NitroGeolocationHybridObject } from "../NitroGeolocationModule";
 import type { Heading, HeadingOptions } from "../publicTypes";
+import type { LocationError } from "../utils/errors";
 
 /**
  * Start watching platform heading updates.

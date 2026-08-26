@@ -1,5 +1,5 @@
-import type { PermissionStatus } from "../NitroGeolocation.nitro";
 import type { BackgroundPermissionStatus } from "../background/types";
+import type { PermissionStatus } from "../publicTypes";
 import type {
   AccuracyAuthorization,
   PermissionDetails,

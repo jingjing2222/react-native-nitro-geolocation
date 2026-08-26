@@ -1,4 +1,4 @@
-import type { PermissionStatus } from "../NitroGeolocation.nitro";
+import type { PermissionStatus } from "../publicTypes";
 
 type ObservedPermissionStatus = Extract<PermissionStatus, "granted" | "denied">;
 

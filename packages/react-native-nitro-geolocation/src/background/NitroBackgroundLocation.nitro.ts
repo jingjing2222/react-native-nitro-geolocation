@@ -1,5 +1,5 @@
 import type { HybridObject } from "react-native-nitro-modules";
-import type { LocationError } from "../NitroGeolocation.nitro";
+import type { LocationError } from "../types";
 import type {
   ActivityRecognitionOptions,
   BackgroundEventEnvelope,

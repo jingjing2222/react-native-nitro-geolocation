@@ -1,7 +1,3 @@
-import type {
-  LocationError,
-  LocationRequestOptions
-} from "../NitroGeolocation.nitro";
 import { decoratePositionWithMetadata } from "../api/locationMetadata";
 import { rememberPosition } from "../api/positionCache";
 import type {
@@ -9,9 +5,10 @@ import type {
   GeolocationResponse,
   Heading,
   HeadingOptions,
-  LocationProviderStatus
+  LocationProviderStatus,
+  LocationRequestOptions
 } from "../publicTypes";
-import { LocationErrorCodes } from "../utils/errors";
+import { type LocationError, LocationErrorCodes } from "../utils/errors";
 import {
   createUnsupportedError,
   distanceMeters,

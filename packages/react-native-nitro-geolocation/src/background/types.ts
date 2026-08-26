@@ -1,15 +1,13 @@
 import type {
-  LocationError,
-  PermissionStatus
-} from "../NitroGeolocation.nitro";
-import type {
   AccuracyAuthorization,
   AndroidGranularity,
   LocationAccuracyOptions,
   LocationProviderStatus,
-  LocationProviderUsed
+  LocationProviderUsed,
+  PermissionStatus
 } from "../publicTypes";
 import type { GeolocationResponse as SchemaGeolocationResponse } from "../types";
+import type { LocationError } from "../utils/errors";
 
 export type BackgroundPermissionStatus =
   | "granted"

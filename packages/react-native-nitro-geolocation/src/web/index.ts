@@ -1,9 +1,3 @@
-import type {
-  LocationError,
-  LocationRequestOptions,
-  LocationSettingsOptions,
-  PermissionStatus
-} from "../NitroGeolocation.nitro";
 import {
   type CurrentPositionOptions,
   getAbortReason
@@ -23,16 +17,18 @@ import type {
   GeolocationConfiguration,
   GeolocationResponse,
   Heading,
+  LastKnownPositionOptions,
   LocationAvailability,
   LocationProviderStatus,
   LocationReadiness,
+  LocationSettingsOptions,
   LocationSettingsResult,
   PermissionDetails,
+  PermissionStatus,
   ReverseGeocodedAddress
 } from "../publicTypes";
-import { LocationErrorCodes } from "../utils/errors";
+import { type LocationError, LocationErrorCodes } from "../utils/errors";
 import {
-  createUnsupportedError,
   getGeolocation,
   getNavigator,
   mapBrowserError,
@@ -179,7 +175,7 @@ export async function getLocationAvailability(): Promise<LocationAvailability> {
   if (!getGeolocation()) {
     return {
       available: false,
-      reason: createUnsupportedError().message
+      reason: "unsupported"
     };
   }
 
@@ -190,7 +186,7 @@ export async function getLocationAvailability(): Promise<LocationAvailability> {
   if (permission === "denied" || permission === "restricted") {
     return {
       available: false,
-      reason: "Browser geolocation permission is denied."
+      reason: "permissionDenied"
     };
   }
 
@@ -340,7 +336,7 @@ export function getLastKnownPosition(): GeolocationResponse | undefined {
 }
 
 export function getLastKnownPositionAsync(
-  options?: LocationRequestOptions
+  options?: LastKnownPositionOptions
 ): Promise<GeolocationResponse | undefined> {
   const maximumAge = options?.maximumAge ?? Number.POSITIVE_INFINITY;
   return Promise.resolve(

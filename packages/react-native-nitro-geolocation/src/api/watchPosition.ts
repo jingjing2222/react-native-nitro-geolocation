@@ -1,11 +1,9 @@
-import type {
-  LocationError,
-  LocationRequestOptions
-} from "../NitroGeolocation.nitro";
 import { NitroGeolocationHybridObject } from "../NitroGeolocationModule";
 import { isDevtoolsEnabled } from "../devtools";
 import { devtoolsWatchPosition } from "../devtools/watchPosition";
+import type { LocationRequestOptions } from "../publicTypes";
 import type { GeolocationResponse } from "../publicTypes";
+import type { LocationError } from "../utils/errors";
 import { decoratePositionWithMetadata } from "./locationMetadata";
 import { rememberPosition } from "./positionCache";
 

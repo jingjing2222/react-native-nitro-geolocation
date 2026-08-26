@@ -8,12 +8,6 @@
 export * from "./web";
 export * from "./background/index.web";
 
-export type {
-  PermissionStatus,
-  LocationRequestOptions,
-  LocationSettingsOptions
-} from "./NitroGeolocation.nitro";
-
 export type { CurrentPositionOptions } from "./api/currentPositionOptions";
 
 export type {
@@ -25,7 +19,13 @@ export type {
   LocationReadinessRemediation,
   LocationSettingsOutcome,
   LocationSettingsResult,
+  NullableDouble,
   LocationAvailability,
+  LocationAvailabilityReason,
+  LastKnownPositionOptions,
+  PermissionStatus,
+  LocationRequestOptions,
+  LocationSettingsOptions,
   PermissionDetails,
   PermissionScope,
   PermissionSettingsGuidance,

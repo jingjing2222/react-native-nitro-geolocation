@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
-import type { LocationError } from "../NitroGeolocation.nitro";
 import { unwatch, watchPosition } from "../api";
 import type { GeolocationResponse } from "../publicTypes";
+import type { LocationError } from "../utils/errors";
 import type { UseWatchPositionOptions, UseWatchPositionResult } from "./types";
 
 /**

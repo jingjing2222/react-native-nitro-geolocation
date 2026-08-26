@@ -1,5 +1,5 @@
 import { AppRegistry } from "react-native";
-import type { BackgroundEvent, BackgroundTaskHandler } from "./types";
+import type { BackgroundEvent, BackgroundTaskHandler } from "./publicTypes";
 
 export const BACKGROUND_LOCATION_TASK_NAME = "NitroBackgroundLocationTask";
 

@@ -298,11 +298,12 @@ function ProviderStatusObserver() {
 - `watchProviderStatus(callback): string` - Delivers an asynchronous initial
   provider snapshot and then only distinct readiness changes. Pass its token to
   `unwatch()` for cleanup. Available in 2.0.
-- `getLocationAvailability(): Promise<{ available: boolean; reason?: string }>` -
+- `getLocationAvailability(): Promise<LocationAvailability>` -
   Available since `v1.2`. Android reads Fused Location availability when
   `locationProvider: 'auto'` or `locationProvider: 'playServices'` is
   configured, then falls back to platform provider/service checks. iOS maps Core
-  Location service and authorization state.
+  Location service and authorization state. When unavailable, `reason` is a
+  typed `LocationAvailabilityReason` code rather than platform-specific text.
 - `getLocationReadiness(): Promise<LocationReadiness>` - Combines current
   permission, services, provider, availability, Play Services, Google Location
   Accuracy, and observed module-cache state into one read-only diagnosis. It
@@ -464,7 +465,6 @@ function LocationButton() {
 - `waitForAccurateLocation?: boolean` - Android-only Fused request tuning, available since `v1.2`.
 - `maxUpdateAge?: number` - Android-only maximum age for an initial update in ms, available since `v1.2`.
 - `maxUpdateDelay?: number` - Android-only maximum batching delay in ms, available since `v1.2`.
-- `maxUpdates?: number` - Android-only maximum watch updates before native cleanup, available since `v1.2`.
 - `activityType?: 'other' | 'automotiveNavigation' | 'fitness' | 'otherNavigation' | 'airborne'` - iOS Core Location activity type, available since `v1.2`.
 - `pausesLocationUpdatesAutomatically?: boolean` - iOS automatic pause behavior, available since `v1.2`.
 - `showsBackgroundLocationIndicator?: boolean` - iOS background location indicator, available since `v1.2`. This only has a visible effect when the app has background location capability and permission.
@@ -700,9 +700,11 @@ const cached = await getLastKnownPositionAsync({
 });
 ```
 
-`getLastKnownPositionAsync(options?)` queries native/provider cache-only sources
-with the same filtering options as `getCurrentPosition()`, but never falls
-through to a fresh request. It resolves `undefined` when no cached location
+`getLastKnownPositionAsync(options?: LastKnownPositionOptions)` queries
+native/provider cache-only sources using `maximumAge`, `accuracy`,
+`granularity`, `waitForAccurateLocation`, and `maxUpdateAge`. Fresh/watch-only
+options are intentionally excluded, and the call never falls through to a
+fresh request. It resolves `undefined` when no cached location
 satisfies the options, including a native `POSITION_UNAVAILABLE` result. Other
 failures, such as permission denial, reject with the Modern `LocationError`
 contract.
@@ -1071,17 +1073,24 @@ All Modern API exports are fully typed:
 import type {
   PermissionStatus,
   CurrentPositionOptions,
+  LastKnownPositionOptions,
   LocationRequestOptions,
   LocationErrorCode,
   LocationError,
   GeolocationResponse,
   GeolocationCoordinates,
   LocationProviderUsed,
+  LocationAvailability,
+  LocationAvailabilityReason,
+  NullableDouble,
   LocationReadiness,
   LocationReadinessRemediation,
   GeolocationConfiguration
 } from 'react-native-nitro-geolocation';
 ```
+
+`NullableDouble` is `number | null`. It is the shared scalar used by
+`GeolocationCoordinates.altitude`, `altitudeAccuracy`, `heading`, and `speed`.
 
 The deprecated `ModernGeolocationConfiguration` alias was removed in 2.0. Use
 `GeolocationConfiguration` for the root Modern API.

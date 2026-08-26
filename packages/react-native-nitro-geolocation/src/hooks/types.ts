@@ -1,8 +1,8 @@
 import type {
-  LocationError,
+  GeolocationResponse,
   LocationRequestOptions
-} from "../NitroGeolocation.nitro";
-import type { GeolocationResponse } from "../publicTypes";
+} from "../publicTypes";
+import type { LocationError } from "../utils/errors";
 
 /** Options for the declarative position watcher. */
 export interface UseWatchPositionOptions extends LocationRequestOptions {

@@ -1,10 +1,10 @@
 import { getDevtoolsState } from ".";
-import type { LocationRequestOptions } from "../NitroGeolocation.nitro";
 import { selectCachedPosition } from "../api/positionCache";
+import type { LastKnownPositionOptions } from "../publicTypes";
 import type { GeolocationResponse } from "../publicTypes";
 
 export function getDevtoolsLastKnownPosition(
-  options?: LocationRequestOptions,
+  options?: LastKnownPositionOptions,
   currentTime = Date.now()
 ): GeolocationResponse | undefined {
   const maximumAge = Math.min(

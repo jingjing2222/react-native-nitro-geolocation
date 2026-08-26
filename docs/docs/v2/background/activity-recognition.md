@@ -7,7 +7,6 @@ import {
 } from 'react-native-nitro-geolocation/background';
 
 await startActivityRecognition({
-  enabled: true,
   interval: 10_000,
   stopOnStill: true,
   minimumConfidence: 70,
@@ -17,6 +16,11 @@ const sub = onActivityChange((activity) => {
   console.log(activity.type, activity.confidence);
 });
 ```
+
+Calling `startActivityRecognition()` enables the standalone activity stream, so
+its options do not include `enabled`. Use `activityRecognition.enabled` only
+inside `BackgroundLocationOptions` when activity recognition is controlled by
+background tracking configuration.
 
 Activity events are delivered through the same native event pipeline as location
 and geofence events. Android uses Activity Recognition APIs. iOS uses Core

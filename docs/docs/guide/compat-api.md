@@ -19,6 +19,34 @@ import {
 } from 'react-native-nitro-geolocation/compat';
 ```
 
+### Type imports
+
+The `/compat` entry point is self-contained. Import the callback API contracts
+and every named supporting type from the same subpath:
+
+```ts
+import type {
+  GeolocationConfiguration,
+  GeolocationOptions,
+  GeolocationOptionsWithMetadata,
+  GeolocationResponse,
+  GeolocationResponseWithMetadata,
+  GeolocationError,
+  GeolocationCoordinates,
+  NullableDouble,
+  AuthorizationLevel,
+  LocationProvider,
+  LocationProviderUsed,
+  LocationAccuracyOptions,
+  AndroidAccuracyPreset,
+  IOSAccuracyPreset,
+  IOSActivityType,
+} from 'react-native-nitro-geolocation/compat';
+```
+
+No type import from the Modern root is required. TypeScript can resolve this
+subpath with `node`, `node16`, `nodenext`, and `bundler` module resolution.
+
 ## Compatibility Scope
 
 This API is drop-in compatible with the core native
