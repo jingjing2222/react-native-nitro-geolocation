@@ -1,15 +1,32 @@
 ---
-title: Migration Skills
+title: Migration overview
 ---
 
-# Migration Skills
+# Migration overview
 
 Use this guide when migrating an existing app from
 `@react-native-community/geolocation`, `navigator.geolocation`,
 `react-native-geolocation-service`, or `react-native-nitro-geolocation/compat`
 toward the Modern API.
 
-## Agent Skill
+## Choose a path
+
+For `@react-native-community/geolocation`, first make the mechanical
+dependency/import change and verify the app still builds. Then refactor the
+callback-based compatibility code to Modern API calls. See
+[Community Migration](/guide/community-migration).
+
+For `react-native-geolocation-service`, migrate directly to named Modern API
+imports. Its Android fused-provider and settings-dialog options map to Modern
+APIs such as `setConfiguration({ locationProvider: 'playServices' })` and
+`requestLocationSettings()`. See [Service Migration](/guide/service-migration).
+
+The final target state should avoid runtime imports from
+`@react-native-community/geolocation`, `navigator.geolocation`, and
+`react-native-nitro-geolocation/compat` unless the app deliberately keeps a
+compatibility fallback.
+
+## Optional agent skill
 
 This repository publishes Agent Skills-compatible migration playbooks for
 coding agents.
@@ -50,24 +67,6 @@ The service migration skill skips `/compat` and targets the Modern API directly.
 It preserves service-specific behavior such as `accuracy`, fused-provider
 intent, Android settings-dialog handling, `mocked`/`provider` metadata, and
 provider-related error codes.
-
-## Choose a Path
-
-For `@react-native-community/geolocation`, first make the mechanical
-dependency/import change and verify the app still builds. Then refactor the
-callback-based compat code to Modern API calls. See
-[Community Migration](/guide/community-migration).
-
-For `react-native-geolocation-service`, migrate directly to named Modern API
-imports. That package's Android fused-provider and settings-dialog options map
-more naturally to Modern APIs such as
-`setConfiguration({ locationProvider: 'playServices' })` and
-`requestLocationSettings()`. See [Service Migration](/guide/service-migration).
-
-The final target state should avoid runtime imports from
-`@react-native-community/geolocation`, `navigator.geolocation`, and
-`react-native-nitro-geolocation/compat` unless the app deliberately keeps a
-compatibility fallback.
 
 ## Modern API Targets
 

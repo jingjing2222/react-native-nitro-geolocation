@@ -1,6 +1,18 @@
 # Native HTTP Sync
 
+:::warning Credentials and retention
+Sync URLs, headers, and body templates are stored in app-private preferences,
+not a credential vault. Use TLS and short-lived credentials, make the server
+idempotent, and define retention before enabling sync. Never embed a long-lived
+production token in application code.
+:::
+
 ```ts
+import {
+  startBackgroundLocation,
+  syncStoredLocations,
+} from 'react-native-nitro-geolocation/background';
+
 await startBackgroundLocation({
   interval: 10_000,
   distanceFilter: 25,
@@ -13,7 +25,7 @@ await startBackgroundLocation({
   sync: {
     url: 'https://api.example.com/locations',
     method: 'POST',
-    headers: { Authorization: 'Bearer token' },
+    headers: { Authorization: `Bearer ${shortLivedToken}` },
     batch: true,
     batchSize: 50,
     syncThreshold: 5,
@@ -22,6 +34,8 @@ await startBackgroundLocation({
     autoClear: false,
   },
 });
+
+const result = await syncStoredLocations();
 ```
 
 When `sync` is configured, native code attempts a flush after stored locations
@@ -40,3 +54,8 @@ so manual sync and a newer run can take precedence.
 Calling `configureBackgroundLocation()` starts a new sync-config revision. An
 older upload may finish, but its continuation must reapply the replacement
 config's `syncInterval` before starting another batch.
+
+With `autoClear: false`, successfully uploaded rows are marked synced but remain
+in local storage until the app clears them. Set retention and deletion limits
+deliberately. With `autoClear: true`, successfully synced rows are removed after
+the native store commits the sync result.

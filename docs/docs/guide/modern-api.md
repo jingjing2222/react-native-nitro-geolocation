@@ -1,10 +1,27 @@
 ---
-title: Modern API (Recommended)
+title: Modern API
 ---
 
 > Simple functional API with direct calls and minimal abstractions
 
 The Modern API provides a straightforward approach to geolocation with direct function calls and a single hook for continuous tracking.
+
+## Find an API by task
+
+| Task | Start at |
+| --- | --- |
+| Configure providers and authorization | [Configuration](#configuration) |
+| Inspect or request permission | [Permission Functions](#permission-functions) |
+| Diagnose whether location can run | [Android Provider and Settings](#android-provider-and-settings) |
+| Read a fresh or cached position | [Location Functions](#location-functions) |
+| Watch position in a component | [React Hook](#react-hook) |
+| Own a watch outside React | [Low-level Functions](#low-level-functions-advanced) |
+| Handle location errors | [Error handling](#error-handling) |
+| Import TypeScript types | [TypeScript Support](#typescript-support) |
+| Move from `/compat` | [Migration from Compat](#migration-from-compat) |
+
+For a 1.x application, complete [Upgrade from 1.x](./upgrade-from-v1.md) first;
+the API reference is not a complete breaking-change checklist.
 
 ## Design Philosophy
 
@@ -329,7 +346,7 @@ function ProviderStatusObserver() {
   `cancelled`, `unavailable`, or `activityMissing`, together with the latest
   provider status. Request failures such as a concurrent request still reject.
 - `requestLocationSettings(options?): Promise<LocationSettingsResult>` - The
-  v2 method returns the same deterministic result. The detailed name is
+  2.0 method returns the same deterministic result. The detailed name is
   provided to make result handling explicit in code shared across release lines.
 
 Both settings methods are Android-focused. On iOS they resolve with the current
@@ -630,7 +647,7 @@ fields. Compat callers can opt into equivalent metadata by setting
 - Assert absence separately on platforms that cannot provide the signal; do
   not convert an unavailable value to `false`.
 
-**Error Handling**:
+### Error handling
 
 ```tsx
 import {
@@ -852,10 +869,10 @@ function LiveTracker() {
       <Switch
         value={enabled}
         onValueChange={setEnabled}
-        label="Track location"
+        accessibilityLabel="Track location"
       />
 
-      <Text>Status: {isWatching ? 'Watching 🟢' : 'Stopped 🔴'}</Text>
+      <Text>Status: {isWatching ? 'Watching location' : 'Stopped'}</Text>
 
       {error && (
         <Text style={{ color: 'red' }}>Error: {error.message}</Text>
@@ -1123,8 +1140,8 @@ const status = await requestPermission();
 | **Watch**        | `useWatchPosition({ enabled })`          | `watchPosition()` / `clearWatch()`       |
 | **Cleanup**      | Automatic (hook)                         | Manual (`clearWatch`)                    |
 | **Watch ID**     | Hidden (internal)                        | User-managed                             |
-| **TypeScript**   | Full inference                           | Basic types                              |
-| **React Friendly** | ✅ Yes                                  | ⚠️ Requires useEffect boilerplate       |
+| **TypeScript**   | Full inference                           | Typed callback contracts                 |
+| **React components** | Declarative hook available          | Manual effect and cleanup ownership      |
 
 
 ## Migration from Compat
@@ -1173,8 +1190,7 @@ function LocationTracker() {
 
 **Benefits**:
 
-- 70% less code
 - No watch ID management
 - Automatic cleanup
 - Declarative enable/disable
-- Better TypeScript support
+- Promise-based control flow and inferred Modern API results

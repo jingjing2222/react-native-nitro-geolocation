@@ -1,23 +1,44 @@
 [
-  "index",
-  "quick-start",
+  { "type": "section-header", "label": "Get started" },
+  { "type": "file", "name": "index", "label": "Choose your path" },
+  {
+    "type": "file",
+    "name": "quick-start",
+    "label": "Install and get a location"
+  },
+  "expo-development-build",
   "install-doctor",
   "swift-package-manager",
-  "migration-assistance",
-  "v2-error-migration",
-  "v2-unified-background-events",
+  { "type": "section-header", "label": "Migrate" },
+  {
+    "type": "file",
+    "name": "upgrade-from-v1",
+    "label": "Upgrade from 1.x",
+    "tag": "2.0"
+  },
+  {
+    "type": "file",
+    "name": "migration-assistance",
+    "label": "Migration overview"
+  },
   "community-migration",
   "service-migration",
-  "gps-offline-recipe",
-  "consumer-e2e-contract-kit",
-  "expo-development-build",
-  "privacy-compliance",
-  "react-native-directory",
-  "modern-api",
+  "v2-error-migration",
+  "v2-unified-background-events",
+  { "type": "section-header", "label": "Foreground location" },
+  { "type": "file", "name": "modern-api", "label": "Modern API reference" },
+  { "type": "file", "name": "compat-api", "label": "Compatibility API" },
   "watch-observability",
-  "compat-api",
-  "agent-context-map",
+  "gps-offline-recipe",
+  { "type": "section-header", "label": "Ship and support" },
+  "release-readiness",
+  "troubleshooting",
+  "privacy-compliance",
+  { "type": "section-header", "label": "Tools and project" },
   "devtools",
+  "consumer-e2e-contract-kit",
   "why-nitro-module",
-  "benchmark"
+  "benchmark",
+  "agent-context-map",
+  "react-native-directory"
 ]
