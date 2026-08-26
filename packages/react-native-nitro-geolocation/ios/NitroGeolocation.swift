@@ -435,13 +435,12 @@ class NitroGeolocation: HybridNitroGeolocationSpec {
 
         lastLocation = location
         var position: GeolocationResponse?
-        let removedPositionRequests = !pendingPositionRequests.isEmpty
-        let positionRequests = Array(pendingPositionRequests.values)
+        let positionRequests = pendingPositionRequests
         pendingPositionRequests.removeAll()
-        if removedPositionRequests {
+        if !positionRequests.isEmpty {
             let currentPosition = location.toGeolocationResponse()
             position = currentPosition
-            for request in positionRequests {
+            for request in positionRequests.values {
                 request.timer?.cancel()
                 request.success(currentPosition)
             }
@@ -449,7 +448,7 @@ class NitroGeolocation: HybridNitroGeolocationSpec {
 
         deliverPositionToWatches(location: location, cachedPosition: position)
 
-        if removedPositionRequests {
+        if !positionRequests.isEmpty {
             updateMonitoringAfterPositionRequestRemoval()
         }
     }
@@ -480,15 +479,14 @@ class NitroGeolocation: HybridNitroGeolocationSpec {
             )
         }
 
-        let positionRequests = Array(pendingPositionRequests.values)
+        let positionRequests = pendingPositionRequests
         pendingPositionRequests.removeAll()
-        for request in positionRequests {
+        for request in positionRequests.values {
             request.timer?.cancel()
             request.error(locationError)
         }
 
-        let subscriptions = Array(watchSubscriptions.values)
-        for subscription in subscriptions {
+        for subscription in $watchSubscriptions.entriesSnapshot().values {
             subscription.error?(locationError)
         }
 
@@ -497,20 +495,25 @@ class NitroGeolocation: HybridNitroGeolocationSpec {
     }
 
     func handleHeadingUpdate(_ clHeading: CLHeading) {
-        let heading = headingToResponse(clHeading)
-
-        for (id, request) in Array(pendingHeadingRequests) {
-            request.timer?.cancel()
-            request.success(heading)
-            pendingHeadingRequests.removeValue(forKey: id)
+        var heading: Heading?
+        let headingRequests = pendingHeadingRequests
+        pendingHeadingRequests.removeAll()
+        if !headingRequests.isEmpty {
+            let currentHeading = headingToResponse(clHeading)
+            heading = currentHeading
+            for request in headingRequests.values {
+                request.timer?.cancel()
+                request.success(currentHeading)
+            }
         }
 
-        for (token, subscription) in Array(headingSubscriptions) {
+        let magneticHeading = normalizeHeading(clHeading.magneticHeading)
+        for (token, subscription) in $headingSubscriptions.entriesSnapshot() {
             let shouldDeliver: Bool
             if let lastDeliveredHeading = subscription.lastDeliveredHeading {
                 shouldDeliver = angularDistance(
                     lastDeliveredHeading,
-                    heading.magneticHeading
+                    magneticHeading
                 ) >= subscription.options.headingFilter
             } else {
                 shouldDeliver = true
@@ -518,9 +521,11 @@ class NitroGeolocation: HybridNitroGeolocationSpec {
 
             if shouldDeliver {
                 var nextSubscription = subscription
-                nextSubscription.lastDeliveredHeading = heading.magneticHeading
+                nextSubscription.lastDeliveredHeading = magneticHeading
                 if $headingSubscriptions.updateIfPresent(token: token, value: nextSubscription) {
-                    nextSubscription.success(heading)
+                    let deliveredHeading = heading ?? headingToResponse(clHeading)
+                    heading = deliveredHeading
+                    nextSubscription.success(deliveredHeading)
                 }
             }
         }
@@ -647,16 +652,14 @@ class NitroGeolocation: HybridNitroGeolocationSpec {
             return
         }
 
-        let headingRequests = Array(pendingHeadingRequests.values)
+        let headingRequests = pendingHeadingRequests
         pendingHeadingRequests.removeAll()
-        for request in headingRequests {
+        for request in headingRequests.values {
             request.timer?.cancel()
             request.error(locationError)
         }
 
-        let subscriptions = Array(headingSubscriptions.values)
-        headingSubscriptions.removeAll()
-        for subscription in subscriptions {
+        for subscription in $headingSubscriptions.drain().values {
             subscription.error?(locationError)
         }
         stopHeadingMonitoring()

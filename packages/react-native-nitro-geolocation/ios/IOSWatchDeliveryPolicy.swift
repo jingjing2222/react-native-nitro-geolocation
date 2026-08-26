@@ -42,8 +42,10 @@ private func distanceMeters(
     let longitudeDelta = (toLongitude - fromLongitude) * .pi / 180
     let fromLatitudeRadians = fromLatitude * .pi / 180
     let toLatitudeRadians = toLatitude * .pi / 180
-    let haversine = pow(sin(latitudeDelta / 2), 2) +
+    let latitudeSine = sin(latitudeDelta / 2)
+    let longitudeSine = sin(longitudeDelta / 2)
+    let haversine = latitudeSine * latitudeSine +
         cos(fromLatitudeRadians) * cos(toLatitudeRadians) *
-        pow(sin(longitudeDelta / 2), 2)
+        longitudeSine * longitudeSine
     return 2 * 6_371_000 * asin(sqrt(min(max(haversine, 0), 1)))
 }

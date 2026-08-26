@@ -2,7 +2,7 @@ import type { GeolocationResponse } from "../publicTypes";
 import { LocationErrorCodes, createLocationError } from "../utils/errors";
 import { getDevtoolsState } from "./index";
 
-export function getDevtoolsCurrentPosition(): Promise<GeolocationResponse> | null {
+export function getDevtoolsCurrentPosition(): Promise<GeolocationResponse> {
   const devtools = getDevtoolsState();
   if (devtools.position) {
     return Promise.resolve(devtools.position);

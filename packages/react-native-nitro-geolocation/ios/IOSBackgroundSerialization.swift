@@ -33,7 +33,7 @@ internal func makeStoredLocation(_ dictionary: [String: Any]) -> StoredBackgroun
 
 internal func makeStoredEvent(
     _ dictionary: [String: Any],
-    storedLocations: [StoredBackgroundLocation] = []
+    storedLocationsById: [String: StoredBackgroundLocation] = [:]
 ) -> StoredBackgroundEventEnvelope? {
     guard
         let id = dictionary["id"] as? String,
@@ -44,12 +44,16 @@ internal func makeStoredEvent(
     else {
         return nil
     }
-    let persistedLocation = (dictionary["location"] as? [String: Any])
-        .flatMap(makeBackgroundLocation)
-    let referencedLocation = (dictionary["locationId"] as? String)
-        .flatMap { locationId in storedLocations.first { $0.id == locationId } }
-        .map(backgroundLocation)
-    let location = persistedLocation ?? referencedLocation
+    let location: BackgroundLocation?
+    if let persistedLocation = (dictionary["location"] as? [String: Any])
+        .flatMap(makeBackgroundLocation) {
+        location = persistedLocation
+    } else if let locationId = dictionary["locationId"] as? String,
+        let storedLocation = storedLocationsById[locationId] {
+        location = backgroundLocation(storedLocation)
+    } else {
+        location = nil
+    }
     let geofence = (dictionary["geofence"] as? [String: Any]).flatMap(makeGeofenceEvent)
     let activity = (dictionary["activity"] as? [String: Any]).flatMap(makeActivity)
     let providerStatus = (dictionary["providerStatus"] as? [String: Any])

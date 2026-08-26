@@ -47,7 +47,7 @@ internal class AndroidWatchCollection<T> {
     fun tokens(): List<String> = entries.keys.toList()
 
     fun forEachCurrent(deliver: (String, T) -> Unit) {
-        val snapshot = entries.toList()
+        val snapshot = entries.entries.toList()
         for ((token, value) in snapshot) {
             if (entries[token] === value) deliver(token, value)
         }

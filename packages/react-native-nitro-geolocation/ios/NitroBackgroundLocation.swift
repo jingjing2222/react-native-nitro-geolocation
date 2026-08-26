@@ -37,6 +37,7 @@ class NitroBackgroundLocation: HybridNitroBackgroundLocationSpec {
     var motionRegistrationActive = false
     var backgroundMotionRequested = false
     var standaloneMotionRequested = false
+    var activityPausedLocationUpdates = false
     let syncScheduler = IOSBackgroundSyncScheduler()
     let httpSync = IOSBackgroundHttpSync()
     var permissionRequest: IOSBackgroundPermissionRequest?
@@ -127,6 +128,7 @@ class NitroBackgroundLocation: HybridNitroBackgroundLocationSpec {
                     self.state = .starting
                 }
                 _ = self.replaceLocationSession()
+                self.activityPausedLocationUpdates = false
                 self.apply(current)
                 self.backgroundMotionRequested = motionRequested
                 self.updateMotionUpdates()
@@ -143,6 +145,7 @@ class NitroBackgroundLocation: HybridNitroBackgroundLocationSpec {
             self.withLifecycleLock {
                 self.withStoreLock { self.state = .stopping }
                 self.stopLocationSession()
+                self.activityPausedLocationUpdates = false
                 self.backgroundMotionRequested = false
                 self.updateMotionUpdates()
                 self.withStoreLock {
@@ -180,6 +183,7 @@ class NitroBackgroundLocation: HybridNitroBackgroundLocationSpec {
                 }
                 self.backgroundMotionRequested = false
                 self.standaloneMotionRequested = false
+                self.activityPausedLocationUpdates = false
                 self.updateMotionUpdates()
             }
             // Do not overlap listenerLock with lifecycleLock: callbacks may re-enter lifecycle APIs.
@@ -301,8 +305,11 @@ class NitroBackgroundLocation: HybridNitroBackgroundLocationSpec {
                     return
                 }
                 let idSet = Set(ids)
+                let previousCount = self.storedLocations.count
                 self.storedLocations.removeAll { idSet.contains($0.id) }
-                self.persistLocations()
+                if self.storedLocations.count != previousCount {
+                    self.persistLocations()
+                }
             }
         }
     }
@@ -311,8 +318,10 @@ class NitroBackgroundLocation: HybridNitroBackgroundLocationSpec {
         return Promise.async {
             self.withStoreLock {
                 let idSet = Set(ids)
+                var changed = false
                 for index in self.storedLocations.indices
-                where idSet.contains(self.storedLocations[index].id) {
+                where idSet.contains(self.storedLocations[index].id) &&
+                    !self.storedLocations[index].deliveredToJS {
                     let location = self.storedLocations[index]
                     self.storedLocations[index] = StoredBackgroundLocation(
                         id: location.id,
@@ -329,8 +338,11 @@ class NitroBackgroundLocation: HybridNitroBackgroundLocationSpec {
                         coords: location.coords,
                         timestamp: location.timestamp
                     )
+                    changed = true
                 }
-                self.persistLocations()
+                if changed {
+                    self.persistLocations()
+                }
             }
         }
     }
@@ -367,8 +379,11 @@ class NitroBackgroundLocation: HybridNitroBackgroundLocationSpec {
                     return
                 }
                 let idSet = Set(ids)
+                let previousCount = self.storedEvents.count
                 self.storedEvents.removeAll { idSet.contains($0.id) }
-                self.persistEvents()
+                if self.storedEvents.count != previousCount {
+                    self.persistEvents()
+                }
             }
         }
     }
@@ -377,8 +392,10 @@ class NitroBackgroundLocation: HybridNitroBackgroundLocationSpec {
         return Promise.async {
             self.withStoreLock {
                 let idSet = Set(ids)
+                var changed = false
                 for index in self.storedEvents.indices
-                where idSet.contains(self.storedEvents[index].id) {
+                where idSet.contains(self.storedEvents[index].id) &&
+                    !self.storedEvents[index].deliveredToJS {
                     let event = self.storedEvents[index]
                     self.storedEvents[index] = StoredBackgroundEventEnvelope(
                         event: event.event,
@@ -388,8 +405,11 @@ class NitroBackgroundLocation: HybridNitroBackgroundLocationSpec {
                         timestamp: event.timestamp,
                         deliveredToJS: true
                     )
+                    changed = true
                 }
-                self.persistEvents()
+                if changed {
+                    self.persistEvents()
+                }
             }
         }
     }
@@ -498,9 +518,20 @@ class NitroBackgroundLocation: HybridNitroBackgroundLocationSpec {
         runGeneration: UInt64,
         locationSessionGeneration: UInt64
     ) {
-        guard isCurrentLocationSession(runGeneration, locationSessionGeneration) else { return }
+        guard !locations.isEmpty,
+            isCurrentLocationSession(runGeneration, locationSessionGeneration)
+        else { return }
+        var deliveries: [(
+            id: String,
+            createdAt: Double,
+            location: BackgroundLocation,
+            event: BackgroundEventEnvelope
+        )] = []
+        deliveries.reserveCapacity(locations.count)
+
         for location in locations {
             let id = UUID().uuidString
+            let createdAt = Date().timeIntervalSince1970 * 1000
             let coords = GeolocationCoordinates(
                 latitude: location.coordinate.latitude,
                 longitude: location.coordinate.longitude,
@@ -516,26 +547,11 @@ class NitroBackgroundLocation: HybridNitroBackgroundLocationSpec {
                 isFromBackground: true,
                 provider: .unknown,
                 mocked: location.sourceInformation?.isSimulatedBySoftware,
-                recordedAt: Date().timeIntervalSince1970 * 1000,
+                recordedAt: createdAt,
                 activity: nil,
                 battery: nil,
                 coords: coords,
                 timestamp: location.timestamp.timeIntervalSince1970 * 1000
-            )
-            let stored = StoredBackgroundLocation(
-                id: id,
-                deliveredToJS: false,
-                synced: false,
-                createdAt: Date().timeIntervalSince1970 * 1000,
-                source: backgroundLocation.source,
-                isFromBackground: true,
-                provider: backgroundLocation.provider,
-                mocked: backgroundLocation.mocked,
-                recordedAt: backgroundLocation.recordedAt,
-                activity: nil,
-                battery: nil,
-                coords: coords,
-                timestamp: backgroundLocation.timestamp
             )
             let event = BackgroundEventEnvelope(
                 location: backgroundLocation,
@@ -547,41 +563,75 @@ class NitroBackgroundLocation: HybridNitroBackgroundLocationSpec {
                 error: nil,
                 id: UUID().uuidString,
                 type: .location,
-                timestamp: Date().timeIntervalSince1970 * 1000,
+                timestamp: createdAt,
                 deliveredToJS: false
             )
-            let storedForRun: Bool = withStoreLock {
-                guard runGeneration == storeGeneration,
-                    self.locationSessionGeneration == locationSessionGeneration,
-                    locationSessionActive,
-                    options != nil
-                else { return false }
-                appendStoredLocation(stored)
-                appendStoredEvent(
-                    StoredBackgroundEventEnvelope(
-                        event: event,
-                        createdAt: Date().timeIntervalSince1970 * 1000,
-                        id: event.id,
-                        type: event.type,
-                        timestamp: event.timestamp,
-                        deliveredToJS: false
-                    )
-                )
-                persistLocationsAndEvents()
-                return true
-            }
-            guard storedForRun else { return }
-            dispatchInProcess(
-                event: event,
+            deliveries.append((
+                id: id,
+                createdAt: createdAt,
                 location: backgroundLocation,
-                runGeneration: runGeneration,
-                locationSessionGeneration: locationSessionGeneration
-            )
-            scheduleSyncIfNeeded(
+                event: event
+            ))
+        }
+
+        let acceptedForRun: Bool = withStoreLock {
+            guard runGeneration == storeGeneration,
+                self.locationSessionGeneration == locationSessionGeneration,
+                locationSessionActive,
+                options != nil
+            else { return false }
+
+            if shouldPersist() {
+                storedLocations.reserveCapacity(storedLocations.count + deliveries.count)
+                storedEvents.reserveCapacity(storedEvents.count + deliveries.count)
+                for delivery in deliveries {
+                    let location = delivery.location
+                    storedLocations.append(StoredBackgroundLocation(
+                        id: delivery.id,
+                        deliveredToJS: false,
+                        synced: false,
+                        createdAt: delivery.createdAt,
+                        source: location.source,
+                        isFromBackground: true,
+                        provider: location.provider,
+                        mocked: location.mocked,
+                        recordedAt: location.recordedAt,
+                        activity: nil,
+                        battery: nil,
+                        coords: location.coords,
+                        timestamp: location.timestamp
+                    ))
+                    storedEvents.append(
+                        StoredBackgroundEventEnvelope(
+                            event: delivery.event,
+                            createdAt: delivery.createdAt,
+                            id: delivery.event.id,
+                            type: delivery.event.type,
+                            timestamp: delivery.event.timestamp,
+                            deliveredToJS: false
+                        )
+                    )
+                }
+                trimStoredLocationsIfNeeded()
+                trimStoredEventsIfNeeded()
+                persistLocationsAndEvents()
+            }
+            return true
+        }
+        guard acceptedForRun else { return }
+
+        for delivery in deliveries {
+            dispatchInProcess(
+                event: delivery.event,
+                location: delivery.location,
                 runGeneration: runGeneration,
                 locationSessionGeneration: locationSessionGeneration
             )
         }
+        scheduleSyncIfNeeded(
+            runGeneration: runGeneration,
+            locationSessionGeneration: locationSessionGeneration
+        )
     }
 
     func handleRegion(
@@ -595,13 +645,14 @@ class NitroBackgroundLocation: HybridNitroBackgroundLocationSpec {
         }) else {
             return
         }
+        let timestamp = Date().timeIntervalSince1970 * 1000
         let event = BackgroundEventEnvelope(
             location: nil,
             geofence: GeofenceEvent(
                 region: geofence,
                 transition: transition,
                 location: nil,
-                timestamp: Date().timeIntervalSince1970 * 1000
+                timestamp: timestamp
             ),
             activity: nil,
             providerStatus: nil,
@@ -610,7 +661,7 @@ class NitroBackgroundLocation: HybridNitroBackgroundLocationSpec {
             error: nil,
             id: UUID().uuidString,
             type: .geofence,
-            timestamp: Date().timeIntervalSince1970 * 1000,
+            timestamp: timestamp,
             deliveredToJS: false
         )
         let storedForRun: Bool = withStoreLock {
@@ -618,7 +669,7 @@ class NitroBackgroundLocation: HybridNitroBackgroundLocationSpec {
             appendStoredEvent(
                 StoredBackgroundEventEnvelope(
                     event: event,
-                    createdAt: Date().timeIntervalSince1970 * 1000,
+                    createdAt: timestamp,
                     id: event.id,
                     type: event.type,
                     timestamp: event.timestamp,
@@ -697,10 +748,19 @@ class NitroBackgroundLocation: HybridNitroBackgroundLocationSpec {
         withStoreLock {
             storedLocations = (defaults.array(forKey: locationsKey) as? [[String: Any]] ?? [])
                 .compactMap(makeStoredLocation)
+            let eventDictionaries = defaults.array(forKey: eventsKey) as? [[String: Any]] ?? []
+            let needsLocationIndex = eventDictionaries.contains {
+                $0["location"] == nil && $0["locationId"] != nil
+            }
+            let storedLocationsById = needsLocationIndex
+                ? storedLocations.reduce(into: [String: StoredBackgroundLocation]()) { index, location in
+                    index[location.id] = location
+                }
+                : [:]
             geofences = (defaults.array(forKey: geofencesKey) as? [[String: Any]] ?? [])
                 .compactMap(makeGeofenceRegion)
-            storedEvents = (defaults.array(forKey: eventsKey) as? [[String: Any]] ?? [])
-                .compactMap { makeStoredEvent($0, storedLocations: storedLocations) }
+            storedEvents = eventDictionaries
+                .compactMap { makeStoredEvent($0, storedLocationsById: storedLocationsById) }
             options = defaults.dictionary(forKey: optionsKey).flatMap(makeBackgroundOptions)
         }
     }
@@ -753,17 +813,6 @@ class NitroBackgroundLocation: HybridNitroBackgroundLocationSpec {
         return Int(configured)
     }
 
-    private func appendStoredLocation(_ location: StoredBackgroundLocation) {
-        withStoreLock {
-            guard shouldPersist() else { return }
-            storedLocations.append(location)
-            if let max = resolveMaxStored(options?.maxStoredLocations, default: Self.defaultMaxStoredRows),
-               storedLocations.count > max {
-                storedLocations = Array(storedLocations.suffix(max))
-            }
-        }
-    }
-
     func appendStoredEvent(
         _ event: StoredBackgroundEventEnvelope,
         allowUnconfigured: Bool = false
@@ -771,10 +820,25 @@ class NitroBackgroundLocation: HybridNitroBackgroundLocationSpec {
         withStoreLock {
             guard shouldPersist(allowUnconfigured: allowUnconfigured) else { return }
             storedEvents.append(event)
-            if let max = resolveMaxStored(options?.maxStoredEvents, default: Self.defaultMaxStoredRows),
-               storedEvents.count > max {
-                storedEvents = Array(storedEvents.suffix(max))
-            }
+            trimStoredEventsIfNeeded()
+        }
+    }
+
+    private func trimStoredLocationsIfNeeded() {
+        if let max = resolveMaxStored(
+            options?.maxStoredLocations,
+            default: Self.defaultMaxStoredRows
+        ), storedLocations.count > max {
+            storedLocations = Array(storedLocations.suffix(max))
+        }
+    }
+
+    private func trimStoredEventsIfNeeded() {
+        if let max = resolveMaxStored(
+            options?.maxStoredEvents,
+            default: Self.defaultMaxStoredRows
+        ), storedEvents.count > max {
+            storedEvents = Array(storedEvents.suffix(max))
         }
     }
 

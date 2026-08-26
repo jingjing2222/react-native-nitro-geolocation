@@ -2,7 +2,7 @@ import {
   type CurrentPositionOptions,
   getAbortReason
 } from "../api/currentPositionOptions";
-import { decoratePositionWithMetadata } from "../api/locationMetadata";
+import { buildLocationMetadata } from "../api/locationMetadata";
 import { buildLocationReadiness } from "../api/locationReadiness";
 import { buildPermissionDetails } from "../api/permissionDetails";
 import {
@@ -171,18 +171,16 @@ export function getProviderStatus(): Promise<LocationProviderStatus> {
   });
 }
 
-export async function getLocationAvailability(): Promise<LocationAvailability> {
-  if (!getGeolocation()) {
+function buildWebLocationAvailability(
+  environmentSupported: boolean,
+  permission: PermissionStatus
+): LocationAvailability {
+  if (!environmentSupported) {
     return {
       available: false,
       reason: "unsupported"
     };
   }
-
-  const permission = applyRecentWebPermissionEvidence(
-    await checkPermission(),
-    Date.now()
-  );
   if (permission === "denied" || permission === "restricted") {
     return {
       available: false,
@@ -193,21 +191,39 @@ export async function getLocationAvailability(): Promise<LocationAvailability> {
   return { available: true };
 }
 
+export async function getLocationAvailability(): Promise<LocationAvailability> {
+  const environmentSupported = Boolean(getGeolocation());
+  if (!environmentSupported) {
+    return buildWebLocationAvailability(false, "denied");
+  }
+
+  const permission = applyRecentWebPermissionEvidence(
+    await checkPermission(),
+    Date.now()
+  );
+  return buildWebLocationAvailability(true, permission);
+}
+
 export async function getLocationReadiness(): Promise<LocationReadiness> {
-  const [permission, providerStatus, availability] = await Promise.all([
-    checkPermission(),
-    getProviderStatus(),
-    getLocationAvailability()
-  ]);
-  const cachedPosition = readLastKnownPosition();
+  const environmentSupported = Boolean(getGeolocation());
+  const permission = await checkPermission();
   const now = Date.now();
   const observedPermission = applyRecentWebPermissionEvidence(permission, now);
+  const providerStatus: LocationProviderStatus = {
+    locationServicesEnabled: environmentSupported,
+    backgroundModeEnabled: false
+  };
+  const availability = buildWebLocationAvailability(
+    environmentSupported,
+    observedPermission
+  );
+  const cachedPosition = readLastKnownPosition(now);
 
   return buildLocationReadiness({
     permission: observedPermission,
     deniedPermissionIsAmbiguous:
       permission === "undetermined" && observedPermission === "denied",
-    environmentSupported: Boolean(getGeolocation()),
+    environmentSupported,
     providerStatus,
     availability,
     cachedPosition,
@@ -261,26 +277,30 @@ export function getCurrentPosition(
   }
 
   const requestedAt = Date.now();
+  const maximumAge = options?.maximumAge ?? 0;
   const observePosition = (
     position: Parameters<typeof normalizePosition>[0]
   ): GeolocationResponse => {
-    rememberWebPermissionGrant();
-    rememberWebPermissionDetailsEvidence("granted");
-    return rememberPosition(
-      decoratePositionWithMetadata(normalizePosition(position), {
-        source: "currentPosition",
-        maximumAge: options?.maximumAge ?? 0,
-        requestedAt
-      })
-    );
+    const observedAt = Date.now();
+    rememberWebPermissionGrant(observedAt);
+    rememberWebPermissionDetailsEvidence("granted", observedAt);
+    const normalizedPosition = normalizePosition(position);
+    normalizedPosition.metadata = buildLocationMetadata(normalizedPosition, {
+      source: "currentPosition",
+      maximumAge,
+      requestedAt,
+      observedAt
+    });
+    return rememberPosition(normalizedPosition);
   };
   const observeError = (
     error: Parameters<typeof mapBrowserError>[0]
   ): LocationError => {
     const mappedError = mapBrowserError(error);
     if (mappedError.code === LocationErrorCodes.PERMISSION_DENIED) {
-      rememberWebPermissionDenial();
-      rememberWebPermissionDetailsEvidence("denied");
+      const observedAt = Date.now();
+      rememberWebPermissionDenial(observedAt);
+      rememberWebPermissionDetailsEvidence("denied", observedAt);
     }
     return mappedError;
   };

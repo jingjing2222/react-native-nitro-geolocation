@@ -298,14 +298,16 @@ internal class AndroidHeadingManager(
 
     private fun emitHeading(magneticHeading: Double) {
         var heading: Heading? = null
-        val pendingSnapshot = pendingRequests.values.toList()
-        pendingSnapshot.forEach { request ->
-            mainHandler.removeCallbacks(request.timeoutRunnable)
-            if (pendingRequests.remove(request.id) != null) {
-                val deliveredHeading = heading ?: createHeading(magneticHeading).also {
-                    heading = it
+        if (pendingRequests.isNotEmpty()) {
+            val pendingSnapshot = pendingRequests.values.toList()
+            pendingSnapshot.forEach { request ->
+                mainHandler.removeCallbacks(request.timeoutRunnable)
+                if (pendingRequests.remove(request.id) != null) {
+                    val deliveredHeading = heading ?: createHeading(magneticHeading).also {
+                        heading = it
+                    }
+                    request.success(deliveredHeading)
                 }
-                request.success(deliveredHeading)
             }
         }
 

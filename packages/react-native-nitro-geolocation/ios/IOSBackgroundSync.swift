@@ -38,6 +38,7 @@ extension NitroBackgroundLocation {
                 continuationConfigRevision: continuationConfigRevision
             ) else { return nil }
             let result = self.performSyncBatch(batch, runGeneration: runGeneration)
+            let timestamp = Date().timeIntervalSince1970 * 1000
             let event = BackgroundEventEnvelope(
                 location: nil,
                 geofence: nil,
@@ -48,7 +49,7 @@ extension NitroBackgroundLocation {
                 error: nil,
                 id: UUID().uuidString,
                 type: .httpsync,
-                timestamp: Date().timeIntervalSince1970 * 1000,
+                timestamp: timestamp,
                 deliveredToJS: false
             )
             let storedForRun: Bool = self.withStoreLock {
@@ -60,7 +61,7 @@ extension NitroBackgroundLocation {
                 self.appendStoredEvent(
                     StoredBackgroundEventEnvelope(
                         event: event,
-                        createdAt: Date().timeIntervalSince1970 * 1000,
+                        createdAt: timestamp,
                         id: event.id,
                         type: event.type,
                         timestamp: event.timestamp,
@@ -107,9 +108,9 @@ extension NitroBackgroundLocation {
                 locationSessionActive,
                 let sync = options?.sync
             else { return nil }
-            let allUnsynced = storedLocations.filter { !$0.synced }
+            let unsyncedLocations = storedLocations.lazy.filter { !$0.synced }
             let threshold = positiveFiniteInt(sync.syncThreshold, defaultValue: 1)
-            guard allUnsynced.count >= threshold else { return nil }
+            guard unsyncedLocations.prefix(threshold).count >= threshold else { return nil }
             let now = Date().timeIntervalSince1970 * 1000
             let interval = sync.syncInterval ?? 0
             let sameConfigContinuation = continuationConfigRevision == syncConfigRevision
@@ -119,12 +120,13 @@ extension NitroBackgroundLocation {
             let count = safePrefixCount(
                 sync.batchSize,
                 defaultValue: 50,
-                upperBound: allUnsynced.count
+                upperBound: storedLocations.count
             )
-            guard count > 0 else { return nil }
+            let locations = Array(unsyncedLocations.prefix(count))
+            guard !locations.isEmpty else { return nil }
             lastSyncAt = now
             return IOSBackgroundSyncBatch(
-                locations: Array(allUnsynced.prefix(count)),
+                locations: locations,
                 sync: sync,
                 configRevision: syncConfigRevision
             )
@@ -133,15 +135,15 @@ extension NitroBackgroundLocation {
 
     private func syncBatch(runGeneration: UInt64) -> IOSBackgroundSyncBatch? {
         guard runGeneration == storeGeneration, let sync = options?.sync else { return nil }
-        let allUnsynced = storedLocations.filter { !$0.synced }
         let count = safePrefixCount(
             sync.batchSize,
             defaultValue: 50,
-            upperBound: allUnsynced.count
+            upperBound: storedLocations.count
         )
-        guard count > 0 else { return nil }
+        let locations = Array(storedLocations.lazy.filter { !$0.synced }.prefix(count))
+        guard !locations.isEmpty else { return nil }
         return IOSBackgroundSyncBatch(
-            locations: Array(allUnsynced.prefix(count)),
+            locations: locations,
             sync: sync,
             configRevision: syncConfigRevision
         )
@@ -158,28 +160,37 @@ extension NitroBackgroundLocation {
         let syncedIds = Set(result.syncedLocationIds)
         withStoreLock {
             guard runGeneration == storeGeneration else { return }
-            for index in storedLocations.indices where syncedIds.contains(storedLocations[index].id) {
-                let location = storedLocations[index]
-                storedLocations[index] = StoredBackgroundLocation(
-                    id: location.id,
-                    deliveredToJS: location.deliveredToJS,
-                    synced: true,
-                    createdAt: location.createdAt,
-                    source: location.source,
-                    isFromBackground: location.isFromBackground,
-                    provider: location.provider,
-                    mocked: location.mocked,
-                    recordedAt: location.recordedAt,
-                    activity: location.activity,
-                    battery: location.battery,
-                    coords: location.coords,
-                    timestamp: location.timestamp
-                )
-            }
+            var changed = false
             if batch.sync.autoClear == true {
+                let previousCount = storedLocations.count
                 storedLocations.removeAll { syncedIds.contains($0.id) }
+                changed = storedLocations.count != previousCount
+            } else {
+                for index in storedLocations.indices
+                where syncedIds.contains(storedLocations[index].id) &&
+                    !storedLocations[index].synced {
+                    let location = storedLocations[index]
+                    storedLocations[index] = StoredBackgroundLocation(
+                        id: location.id,
+                        deliveredToJS: location.deliveredToJS,
+                        synced: true,
+                        createdAt: location.createdAt,
+                        source: location.source,
+                        isFromBackground: location.isFromBackground,
+                        provider: location.provider,
+                        mocked: location.mocked,
+                        recordedAt: location.recordedAt,
+                        activity: location.activity,
+                        battery: location.battery,
+                        coords: location.coords,
+                        timestamp: location.timestamp
+                    )
+                    changed = true
+                }
             }
-            persistLocations()
+            if changed {
+                persistLocations()
+            }
         }
         return result
     }

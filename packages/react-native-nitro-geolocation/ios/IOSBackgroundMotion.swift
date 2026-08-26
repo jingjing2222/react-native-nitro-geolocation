@@ -151,6 +151,7 @@ extension NitroBackgroundLocation {
             confidence: motionConfidence(activity.confidence),
             timestamp: activity.startDate.timeIntervalSince1970 * 1000
         )
+        let timestamp = Date().timeIntervalSince1970 * 1000
         let event = BackgroundEventEnvelope(
             location: nil,
             geofence: nil,
@@ -161,7 +162,7 @@ extension NitroBackgroundLocation {
             error: nil,
             id: UUID().uuidString,
             type: .activity,
-            timestamp: Date().timeIntervalSince1970 * 1000,
+            timestamp: timestamp,
             deliveredToJS: false
         )
         let storedForRun: Bool = withStoreLock {
@@ -172,7 +173,7 @@ extension NitroBackgroundLocation {
             appendStoredEvent(
                 StoredBackgroundEventEnvelope(
                     event: event,
-                    createdAt: Date().timeIntervalSince1970 * 1000,
+                    createdAt: timestamp,
                     id: event.id,
                     type: event.type,
                     timestamp: event.timestamp,

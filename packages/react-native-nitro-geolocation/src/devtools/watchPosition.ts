@@ -4,10 +4,57 @@ import type { LocationError } from "../utils/errors";
 import { LocationErrorCodes } from "../utils/errors";
 import { getDevtoolsState } from "./index";
 
-function nextDevtoolsWatchToken(): string {
-  const globals = globalThis as any;
+type DevtoolsWatchRegistration = {
+  previousPosition: GeolocationResponse;
+  success: (position: GeolocationResponse) => void;
+};
+
+type DevtoolsWatchGlobals = typeof globalThis & {
+  __devtoolsWatchInterval?: ReturnType<typeof setInterval>;
+  __devtoolsWatchers?: Map<string, DevtoolsWatchRegistration>;
+  __devtoolsWatchSequence?: number;
+};
+
+function getDevtoolsGlobals(): DevtoolsWatchGlobals {
+  return globalThis as DevtoolsWatchGlobals;
+}
+
+function nextDevtoolsWatchSequence(): number {
+  const globals = getDevtoolsGlobals();
   globals.__devtoolsWatchSequence = (globals.__devtoolsWatchSequence ?? 0) + 1;
-  return `devtools-${globals.__devtoolsWatchSequence}`;
+  return globals.__devtoolsWatchSequence;
+}
+
+function getDevtoolsWatchers(): Map<string, DevtoolsWatchRegistration> {
+  const globals = getDevtoolsGlobals();
+  if (!(globals.__devtoolsWatchers instanceof Map)) {
+    globals.__devtoolsWatchers = new Map();
+  }
+  return globals.__devtoolsWatchers;
+}
+
+function pollDevtoolsPosition(): void {
+  const position = getDevtoolsState().position;
+  if (!position) return;
+
+  for (const registration of getDevtoolsWatchers().values()) {
+    if (position === registration.previousPosition) continue;
+    registration.previousPosition = position;
+    registration.success(position);
+  }
+}
+
+function startDevtoolsPolling(): void {
+  const globals = getDevtoolsGlobals();
+  if (globals.__devtoolsWatchInterval !== undefined) return;
+  globals.__devtoolsWatchInterval = setInterval(pollDevtoolsPosition, 100);
+}
+
+function stopDevtoolsPolling(): void {
+  const globals = getDevtoolsGlobals();
+  if (globals.__devtoolsWatchInterval === undefined) return;
+  clearInterval(globals.__devtoolsWatchInterval);
+  globals.__devtoolsWatchInterval = undefined;
 }
 
 export function devtoolsWatchPosition(
@@ -27,26 +74,18 @@ export function devtoolsWatchPosition(
       });
     }
     // Return a dummy token that does nothing
-    return `devtools-error-${Date.now()}`;
+    return `devtools-error-${nextDevtoolsWatchSequence()}`;
   }
-
-  let previousPosition = devtools.position;
 
   // Send initial position immediately if available
   success(devtools.position);
 
-  const interval = setInterval(() => {
-    if (devtools.position && devtools.position !== previousPosition) {
-      previousPosition = devtools.position;
-      success(devtools.position);
-    }
-  }, 100);
-
-  // Return a cleanup token
-  const token = nextDevtoolsWatchToken();
-  (globalThis as any).__devtoolsWatchers =
-    (globalThis as any).__devtoolsWatchers || {};
-  (globalThis as any).__devtoolsWatchers[token] = interval;
+  const token = `devtools-${nextDevtoolsWatchSequence()}`;
+  getDevtoolsWatchers().set(token, {
+    previousPosition: devtools.position,
+    success
+  });
+  startDevtoolsPolling();
 
   return token;
 }
@@ -61,26 +100,24 @@ export function devtoolsUnwatch(token: string): boolean {
     return true;
   }
 
-  const watchers = (globalThis as any).__devtoolsWatchers;
-  if (watchers?.[token]) {
-    clearInterval(watchers[token]);
-    delete watchers[token];
-    return true;
-  }
+  const watchers = getDevtoolsGlobals().__devtoolsWatchers;
+  if (!(watchers instanceof Map) || !watchers.delete(token)) return false;
+  if (watchers.size === 0) stopDevtoolsPolling();
 
-  return false;
+  return true;
 }
 
 export function getDevtoolsActiveWatches(): ActiveWatch[] {
-  const watchers = (globalThis as any).__devtoolsWatchers;
-  return Object.keys(watchers ?? {}).map((token) => ({
+  const watchers = getDevtoolsGlobals().__devtoolsWatchers;
+  if (!(watchers instanceof Map)) return [];
+  return Array.from(watchers.keys(), (token) => ({
     token,
     kind: "position"
   }));
 }
 
 export function devtoolsStopObserving(): void {
-  for (const { token } of getDevtoolsActiveWatches()) {
-    devtoolsUnwatch(token);
-  }
+  const watchers = getDevtoolsGlobals().__devtoolsWatchers;
+  if (watchers instanceof Map) watchers.clear();
+  stopDevtoolsPolling();
 }

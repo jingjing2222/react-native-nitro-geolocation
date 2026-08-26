@@ -13,8 +13,8 @@ export function useWatchPosition(
   const [position, setPosition] = useState<GeolocationResponse | null>(null);
   const [isWatching, setIsWatching] = useState(false);
   const [error, setError] = useState<LocationError | null>(null);
-  const tokenRef = useRef<string | null>(null);
   const isMountedRef = useRef(true);
+  const hasErrorRef = useRef(false);
   const optionsRef = useRef(options);
   const enabled = options?.enabled ?? false;
 
@@ -31,15 +31,12 @@ export function useWatchPosition(
 
   useEffect(() => {
     if (!enabled) {
-      if (tokenRef.current) {
-        unwatch(tokenRef.current);
-        tokenRef.current = null;
-      }
       setIsWatching(false);
       return;
     }
 
     setIsWatching(true);
+    hasErrorRef.current = false;
     setError(null);
     const token = watchPosition(
       (nextPosition) => {
@@ -47,23 +44,22 @@ export function useWatchPosition(
           return;
         }
         setPosition(nextPosition);
-        setError(null);
+        if (hasErrorRef.current) {
+          hasErrorRef.current = false;
+          setError(null);
+        }
       },
       (nextError) => {
         if (!isMountedRef.current) {
           return;
         }
+        hasErrorRef.current = true;
         setError(nextError);
       },
       optionsRef.current
     );
-    tokenRef.current = token;
-
     return () => {
       unwatch(token);
-      if (tokenRef.current === token) {
-        tokenRef.current = null;
-      }
     };
   }, [enabled]);
 

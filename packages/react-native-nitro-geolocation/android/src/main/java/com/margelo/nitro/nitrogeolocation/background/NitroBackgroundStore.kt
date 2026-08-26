@@ -38,7 +38,7 @@ internal data class NitroBackgroundStoreSnapshot(
 )
 
 class NitroBackgroundStore(context: Context) :
-    SQLiteOpenHelper(context, "nitro_background_location.db", null, 3) {
+    SQLiteOpenHelper(context, "nitro_background_location.db", null, 4) {
 
     init {
         // WAL lets the broadcast-receiver writer and concurrent readers (JS Promise threads and the
@@ -99,6 +99,7 @@ class NitroBackgroundStore(context: Context) :
             )
             """.trimIndent()
         )
+        createIndexes(db)
     }
 
     override fun onUpgrade(db: SQLiteDatabase, oldVersion: Int, newVersion: Int) {
@@ -108,6 +109,32 @@ class NitroBackgroundStore(context: Context) :
         if (oldVersion < 3) {
             runCatching { db.execSQL("ALTER TABLE geofences ADD COLUMN metadata TEXT") }
         }
+        if (oldVersion < 4) {
+            createIndexes(db)
+        }
+    }
+
+    private fun createIndexes(db: SQLiteDatabase) {
+        db.execSQL(
+            "CREATE INDEX IF NOT EXISTS idx_background_locations_created_at " +
+                "ON background_locations(created_at DESC)"
+        )
+        db.execSQL(
+            "CREATE INDEX IF NOT EXISTS idx_background_locations_sync_queue " +
+                "ON background_locations(synced, created_at DESC)"
+        )
+        db.execSQL(
+            "CREATE INDEX IF NOT EXISTS idx_background_locations_pending " +
+                "ON background_locations(delivered_to_js, synced, created_at DESC)"
+        )
+        db.execSQL(
+            "CREATE INDEX IF NOT EXISTS idx_background_events_created_at " +
+                "ON background_events(created_at DESC)"
+        )
+        db.execSQL(
+            "CREATE INDEX IF NOT EXISTS idx_background_events_pending " +
+                "ON background_events(delivered_to_js, created_at DESC)"
+        )
     }
 
     fun insertLocation(location: BackgroundLocation): StoredBackgroundLocation {
@@ -175,6 +202,36 @@ class NitroBackgroundStore(context: Context) :
             },
             SQLiteDatabase.CONFLICT_REPLACE
         )
+    }
+
+    fun insertLocationEventAndPrune(
+        location: BackgroundLocation,
+        event: BackgroundEventEnvelope,
+        maxLocations: Int?,
+        maxEvents: Int?
+    ) {
+        val database = writableDatabase
+        database.beginTransaction()
+        try {
+            insertLocation(location)
+            pruneLocations(maxLocations)
+            insertEvent(event)
+            pruneEvents(maxEvents)
+            database.setTransactionSuccessful()
+        } finally {
+            database.endTransaction()
+        }
+    }
+
+    fun hasUnsyncedLocations(minimumCount: Int): Boolean {
+        if (minimumCount <= 0) return true
+        val cursor = readableDatabase.rawQuery(
+            "SELECT count(*) FROM (" +
+                "SELECT 1 FROM background_locations WHERE synced = 0 LIMIT ?" +
+                ")",
+            arrayOf(minimumCount.toString())
+        )
+        return cursor.use { it.moveToFirst() && it.getInt(0) >= minimumCount }
     }
 
     fun getLocations(options: GetStoredBackgroundLocationsOptions?): Array<StoredBackgroundLocation> {
@@ -383,12 +440,12 @@ class NitroBackgroundStore(context: Context) :
         }
     }
 
-    fun markSynced(ids: List<String>) {
+    fun markSynced(ids: Array<String>) {
         if (ids.isEmpty()) return
         val placeholders = ids.joinToString(",") { "?" }
         writableDatabase.execSQL(
             "UPDATE background_locations SET synced = 1 WHERE id IN ($placeholders)",
-            ids.toTypedArray()
+            ids
         )
     }
 
@@ -400,8 +457,10 @@ class NitroBackgroundStore(context: Context) :
         writableDatabase.execSQL(
             """
             DELETE FROM $table
-            WHERE id NOT IN (
-              SELECT id FROM $table ORDER BY created_at DESC LIMIT ?
+            WHERE id IN (
+              SELECT id FROM $table
+              ORDER BY created_at ASC
+              LIMIT max((SELECT count(*) FROM $table) - ?, 0)
             )
             """.trimIndent(),
             arrayOf(limit.toString())
@@ -667,8 +726,8 @@ class NitroBackgroundStore(context: Context) :
         return JSONObject()
             .put("success", result.success)
             .put("statusCode", result.statusCode)
-            .put("syncedLocationIds", JSONArray(result.syncedLocationIds.toList()))
-            .put("failedLocationIds", JSONArray(result.failedLocationIds.toList()))
+            .put("syncedLocationIds", result.syncedLocationIds.toJsonArray())
+            .put("failedLocationIds", result.failedLocationIds.toJsonArray())
             .put("error", result.error)
             .toString()
     }

@@ -3,27 +3,30 @@ import type { PermissionStatus } from "../publicTypes";
 type ObservedPermissionStatus = Extract<PermissionStatus, "granted" | "denied">;
 
 const permissionEvidenceMaxAgeMs = 30_000;
-let evidence:
-  | { status: ObservedPermissionStatus; observedAt: number }
-  | undefined;
+let evidenceStatus: ObservedPermissionStatus | undefined;
+let evidenceObservedAt: number | undefined;
 
 export function rememberWebPermissionGrant(now = Date.now()): void {
-  evidence = { status: "granted", observedAt: now };
+  evidenceStatus = "granted";
+  evidenceObservedAt = now;
 }
 
 export function rememberWebPermissionDenial(now = Date.now()): void {
-  evidence = { status: "denied", observedAt: now };
+  evidenceStatus = "denied";
+  evidenceObservedAt = now;
 }
 
 export function clearWebPermissionEvidence(): void {
-  evidence = undefined;
+  evidenceStatus = undefined;
+  evidenceObservedAt = undefined;
 }
 
 export function applyRecentWebPermissionEvidence(
   permission: PermissionStatus,
   now: number
 ): PermissionStatus {
-  const evidenceAgeMs = evidence ? now - evidence.observedAt : undefined;
+  const evidenceAgeMs =
+    evidenceObservedAt === undefined ? undefined : now - evidenceObservedAt;
 
   if (
     evidenceAgeMs !== undefined &&
@@ -34,7 +37,7 @@ export function applyRecentWebPermissionEvidence(
   }
 
   if (permission === "undetermined" && evidenceAgeMs !== undefined) {
-    return evidence?.status ?? permission;
+    return evidenceStatus ?? permission;
   }
 
   return permission;

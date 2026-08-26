@@ -1,4 +1,4 @@
-import { decoratePositionWithMetadata } from "../api/locationMetadata";
+import { buildLocationMetadata } from "../api/locationMetadata";
 import { rememberPosition } from "../api/positionCache";
 import type {
   ActiveWatch,
@@ -135,10 +135,12 @@ export function watchPosition(
   let lastEmittedLongitude: number | undefined;
   const requestedAt = Date.now();
   const distanceFilter = options?.distanceFilter ?? 0;
+  const maximumAge = options?.maximumAge ?? 0;
   const watchId = geolocation.watchPosition(
     (position) => {
-      rememberWebPermissionGrant();
-      rememberWebPermissionDetailsEvidence("granted");
+      const observedAt = Date.now();
+      rememberWebPermissionGrant(observedAt);
+      rememberWebPermissionDetailsEvidence("granted", observedAt);
       if (
         distanceFilter > 0 &&
         lastEmittedLatitude !== undefined &&
@@ -152,14 +154,13 @@ export function watchPosition(
       ) {
         return;
       }
-      const normalizedPosition = decoratePositionWithMetadata(
-        normalizePosition(position),
-        {
-          source: "watchPosition",
-          maximumAge: options?.maximumAge ?? 0,
-          requestedAt
-        }
-      );
+      const normalizedPosition = normalizePosition(position);
+      normalizedPosition.metadata = buildLocationMetadata(normalizedPosition, {
+        source: "watchPosition",
+        maximumAge,
+        requestedAt,
+        observedAt
+      });
       lastEmittedLatitude = position.coords.latitude;
       lastEmittedLongitude = position.coords.longitude;
       success(rememberPosition(normalizedPosition));
@@ -167,8 +168,9 @@ export function watchPosition(
     (browserError) => {
       const mappedError = mapBrowserError(browserError);
       if (mappedError.code === LocationErrorCodes.PERMISSION_DENIED) {
-        rememberWebPermissionDenial();
-        rememberWebPermissionDetailsEvidence("denied");
+        const observedAt = Date.now();
+        rememberWebPermissionDenial(observedAt);
+        rememberWebPermissionDetailsEvidence("denied", observedAt);
       }
       error?.(mappedError);
     },

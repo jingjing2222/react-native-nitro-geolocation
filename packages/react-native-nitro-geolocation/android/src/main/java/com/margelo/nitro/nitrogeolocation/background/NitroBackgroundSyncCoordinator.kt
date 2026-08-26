@@ -88,7 +88,7 @@ internal class NitroBackgroundSyncCoordinator(
                         false,
                         null,
                         emptyArray(),
-                        batch.locations.map { it.id }.toTypedArray(),
+                        Array(batch.locations.size) { index -> batch.locations[index].id },
                         error.message ?: "HTTP sync failed"
                     )
                 }
@@ -148,11 +148,16 @@ internal class NitroBackgroundSyncCoordinator(
                     if (candidates.size < threshold) {
                         null
                     } else {
+                        val batch = if (candidates.size <= batchSize) {
+                            candidates
+                        } else {
+                            candidates.copyOfRange(0, batchSize)
+                        }
                         NitroBackgroundSyncBatch(
                             callbackGeneration,
                             configRevision,
                             sync,
-                            candidates.take(batchSize).toTypedArray()
+                            batch
                         )
                     }
                 }
@@ -194,7 +199,7 @@ internal class NitroBackgroundSyncCoordinator(
         val result = httpSync.uploadLocationsWithRetry(batch.sync, batch.locations)
         synchronized(storageLock) {
             if (currentRunGeneration() == batch.runGeneration) {
-                store.markSynced(result.syncedLocationIds.toList())
+                store.markSynced(result.syncedLocationIds)
                 if (batch.sync.autoClear == true) {
                     store.clearLocations(result.syncedLocationIds)
                 }

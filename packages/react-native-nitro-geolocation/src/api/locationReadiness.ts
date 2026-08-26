@@ -74,15 +74,15 @@ export function buildLocationReadiness({
   if (!providerStatus.locationServicesEnabled) {
     remediations.push("enableLocationServices");
   } else if (permission === "granted" && !availability.available) {
-    const androidProviders = [
-      providerStatus.gpsAvailable,
-      providerStatus.networkAvailable,
-      providerStatus.passiveAvailable
-    ].filter((value): value is boolean => typeof value === "boolean");
-
+    const hasKnownAndroidProvider =
+      typeof providerStatus.gpsAvailable === "boolean" ||
+      typeof providerStatus.networkAvailable === "boolean" ||
+      typeof providerStatus.passiveAvailable === "boolean";
     if (
-      androidProviders.length > 0 &&
-      androidProviders.every((providerAvailable) => !providerAvailable)
+      hasKnownAndroidProvider &&
+      providerStatus.gpsAvailable !== true &&
+      providerStatus.networkAvailable !== true &&
+      providerStatus.passiveAvailable !== true
     ) {
       remediations.push("enableLocationProvider");
     }

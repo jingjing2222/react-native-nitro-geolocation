@@ -447,17 +447,39 @@ class NitroBackgroundLocationController private constructor(
         callbackGeneration: Long,
         registrationGeneration: Long
     ) {
-        if (!isActiveLocationRegistration(callbackGeneration, registrationGeneration)) return
-        val serviceGeneration = activeServiceGeneration() ?: return
-        NitroGeoLog.d("handleNativeLocation(): src=$source lat=${location.latitude} lng=${location.longitude}")
+        val serviceGeneration = handleNativeLocationWithoutSync(
+            location,
+            source,
+            callbackGeneration,
+            registrationGeneration
+        ) ?: return
+        scheduleSyncIfNeeded(
+            callbackGeneration,
+            registrationGeneration,
+            serviceGeneration
+        )
+    }
+
+    internal fun handleNativeLocationWithoutSync(
+        location: Location,
+        source: BackgroundLocationSource,
+        callbackGeneration: Long,
+        registrationGeneration: Long
+    ): Long? {
+        if (!isActiveLocationRegistration(callbackGeneration, registrationGeneration)) return null
+        val serviceGeneration = activeServiceGeneration() ?: return null
+        NitroGeoLog.d {
+            "handleNativeLocation(): src=$source lat=${location.latitude} lng=${location.longitude}"
+        }
         val id = UUID.randomUUID().toString()
+        val recordedAt = System.currentTimeMillis().toDouble()
         val backgroundLocation = BackgroundLocation(
             id,
             source,
             true,
             backgroundProviderFrom(location.provider),
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) location.isMock else location.isFromMockProvider,
-            System.currentTimeMillis().toDouble(),
+            recordedAt,
             null,
             null,
             GeolocationCoordinates(
@@ -481,7 +503,7 @@ class NitroBackgroundLocationController private constructor(
             null,
             UUID.randomUUID().toString(),
             BackgroundEventType.LOCATION,
-            System.currentTimeMillis().toDouble(),
+            recordedAt,
             false
         )
         val current = configForGeneration(callbackGeneration)
@@ -492,18 +514,16 @@ class NitroBackgroundLocationController private constructor(
             ) {
                 synchronized(storageLock) {
                     if (!shouldPersist(current, callbackGeneration)) return@synchronized
-                store.insertLocation(backgroundLocation)
-                store.pruneLocations(maxStoredLocations(current))
-                store.insertEvent(event)
-                store.pruneEvents(maxStoredEvents(current))
+                    store.insertLocationEventAndPrune(
+                        backgroundLocation,
+                        event,
+                        maxStoredLocations(current),
+                        maxStoredEvents(current)
+                    )
                 }
             }
-        ) return
-        scheduleSyncIfNeeded(
-            callbackGeneration,
-            registrationGeneration,
-            serviceGeneration
-        )
+        ) return null
+        return serviceGeneration
     }
 
     fun handleGeofenceEvent(geofencingEvent: GeofencingEvent, callbackGeneration: Long) {
@@ -650,7 +670,7 @@ class NitroBackgroundLocationController private constructor(
         return syncCoordinator.syncManual(callbackGeneration)
     }
 
-    private fun scheduleSyncIfNeeded(
+    internal fun scheduleSyncIfNeeded(
         callbackGeneration: Long,
         registrationGeneration: Long,
         serviceGeneration: Long
@@ -658,15 +678,7 @@ class NitroBackgroundLocationController private constructor(
         if (!isActiveLocationRegistration(callbackGeneration, registrationGeneration)) return
         val sync = configForGeneration(callbackGeneration)?.sync ?: return
         val threshold = sync.syncThreshold?.toInt()?.takeIf { it > 0 } ?: 1
-        val unsynced = store.getLocations(
-            GetStoredBackgroundLocationsOptions(
-                threshold.toDouble(),
-                null,
-                true,
-                false
-            )
-        )
-        if (unsynced.size < threshold) return
+        if (!store.hasUnsyncedLocations(threshold)) return
 
         syncCoordinator.scheduleAutomatic(
             callbackGeneration,

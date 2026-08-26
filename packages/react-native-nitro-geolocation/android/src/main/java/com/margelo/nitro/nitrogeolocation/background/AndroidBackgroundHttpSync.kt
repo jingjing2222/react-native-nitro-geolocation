@@ -13,7 +13,6 @@ internal class AndroidBackgroundHttpSync {
         sync: BackgroundHttpSyncOptions,
         locations: Array<StoredBackgroundLocation>
     ): BackgroundHttpSyncResult {
-        val ids = locations.map { it.id }
         val maxAttempts = if (sync.retry == true) {
             (sync.maxRetries?.toInt()?.takeIf { it >= 0 } ?: 3) + 1
         } else {
@@ -25,6 +24,7 @@ internal class AndroidBackgroundHttpSync {
         if (sync.batch == false) {
             return uploadSingleLocationsWithRetry(sync, locations, maxAttempts)
         }
+        val ids = Array(locations.size) { index -> locations[index].id }
 
         repeat(maxAttempts) { attempt ->
             try {
@@ -34,7 +34,7 @@ internal class AndroidBackgroundHttpSync {
                     return BackgroundHttpSyncResult(
                         true,
                         response.toDouble(),
-                        ids.toTypedArray(),
+                        ids,
                         emptyArray(),
                         null
                     )
@@ -52,7 +52,7 @@ internal class AndroidBackgroundHttpSync {
             false,
             lastStatus?.toDouble(),
             emptyArray(),
-            ids.toTypedArray(),
+            ids,
             lastError ?: "HTTP sync failed"
         )
     }

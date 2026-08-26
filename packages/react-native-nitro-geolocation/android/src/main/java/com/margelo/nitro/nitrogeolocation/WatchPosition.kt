@@ -20,24 +20,30 @@ class WatchPosition(private val reactContext: ReactApplicationContext) {
     private val watchIdGenerator = AtomicInteger(0)
     private var locationListener: LocationListener? = null
     private var watchedProvider: String? = null
-    private var currentOptions: CompatGeolocationOptions? = null
 
-    data class WatchCallback(
-            val success: (Location) -> Unit,
-            val error: ((CompatGeolocationError) -> Unit)?,
-            val options: CompatGeolocationOptions?
-    )
+    private sealed interface WatchCallback {
+        val error: ((CompatGeolocationError) -> Unit)?
+        val options: CompatGeolocationOptions?
+    }
+
+    private data class PositionWatchCallback(
+            val success: (CompatGeolocationResponse) -> Unit,
+            override val error: ((CompatGeolocationError) -> Unit)?,
+            override val options: CompatGeolocationOptions?
+    ) : WatchCallback
+
+    private data class MetadataWatchCallback(
+            val success: (CompatGeolocationResponseWithMetadataInternal) -> Unit,
+            override val error: ((CompatGeolocationError) -> Unit)?,
+            override val options: CompatGeolocationOptions?
+    ) : WatchCallback
 
     fun watch(
             success: (CompatGeolocationResponse) -> Unit,
             error: ((CompatGeolocationError) -> Unit)?,
             options: CompatGeolocationOptions?
     ): Int {
-        return watchLocation(
-                success = { location -> success(location.toCompatGeolocationResponse()) },
-                error = error,
-                options = options
-        )
+        return addWatch(PositionWatchCallback(success, error, options))
     }
 
     fun watchWithMetadata(
@@ -45,26 +51,16 @@ class WatchPosition(private val reactContext: ReactApplicationContext) {
             error: ((CompatGeolocationError) -> Unit)?,
             options: CompatGeolocationOptions?
     ): Int {
-        return watchLocation(
-                success = { location ->
-                    success(location.toCompatGeolocationResponseWithMetadata())
-                },
-                error = error,
-                options = options
-        )
+        return addWatch(MetadataWatchCallback(success, error, options))
     }
 
-    private fun watchLocation(
-            success: (Location) -> Unit,
-            error: ((CompatGeolocationError) -> Unit)?,
-            options: CompatGeolocationOptions?
-    ): Int {
+    private fun addWatch(callback: WatchCallback): Int {
         val watchId = watchIdGenerator.incrementAndGet()
-        watchCallbacks[watchId] = WatchCallback(success, error, options)
+        watchCallbacks[watchId] = callback
 
         // Start observing if this is the first watch
         if (watchCallbacks.size == 1) {
-            startObserving(options)
+            startObserving(callback.options)
         }
 
         return watchId
@@ -87,7 +83,6 @@ class WatchPosition(private val reactContext: ReactApplicationContext) {
 
         locationListener = null
         watchedProvider = null
-        currentOptions = null
         watchCallbacks.clear()
     }
 
@@ -133,8 +128,26 @@ class WatchPosition(private val reactContext: ReactApplicationContext) {
             val listener =
                     object : LocationListener {
                         override fun onLocationChanged(location: Location) {
-                            // Call all watch callbacks
-                            watchCallbacks.values.forEach { callback -> callback.success(location) }
+                            var position: CompatGeolocationResponse? = null
+                            var positionWithMetadata: CompatGeolocationResponseWithMetadataInternal? = null
+                            watchCallbacks.values.forEach { callback ->
+                                when (callback) {
+                                    is PositionWatchCallback -> {
+                                        val response = position
+                                            ?: location.toCompatGeolocationResponse().also {
+                                                position = it
+                                            }
+                                        callback.success(response)
+                                    }
+                                    is MetadataWatchCallback -> {
+                                        val response = positionWithMetadata
+                                            ?: location.toCompatGeolocationResponseWithMetadata().also {
+                                                positionWithMetadata = it
+                                            }
+                                        callback.success(response)
+                                    }
+                                }
+                            }
                         }
 
                         override fun onStatusChanged(
@@ -156,7 +169,6 @@ class WatchPosition(private val reactContext: ReactApplicationContext) {
 
             locationListener = listener
             watchedProvider = provider
-            currentOptions = options
         } catch (e: SecurityException) {
             Log.e(TAG, "SecurityException: ${e.message}")
             emitErrorToAll(
@@ -188,24 +200,20 @@ class WatchPosition(private val reactContext: ReactApplicationContext) {
             locationManager: LocationManager,
             accuracy: AndroidAccuracyResolution
     ): String? {
+        val fineGranted = hasPermission(Manifest.permission.ACCESS_FINE_LOCATION)
+        val coarseGranted = fineGranted || hasPermission(Manifest.permission.ACCESS_COARSE_LOCATION)
         return accuracy.providerOrder().firstOrNull { provider ->
-            isProviderValid(locationManager, provider)
+            isProviderValid(locationManager, provider, fineGranted, coarseGranted)
         }
     }
 
-    private fun isProviderValid(locationManager: LocationManager, provider: String): Boolean {
+    private fun isProviderValid(
+            locationManager: LocationManager,
+            provider: String,
+            fineGranted: Boolean,
+            coarseGranted: Boolean
+    ): Boolean {
         if (!locationManager.isProviderEnabled(provider)) return false
-
-        val fineGranted =
-                ContextCompat.checkSelfPermission(
-                        reactContext,
-                        Manifest.permission.ACCESS_FINE_LOCATION
-                ) == PackageManager.PERMISSION_GRANTED
-        val coarseGranted =
-                ContextCompat.checkSelfPermission(
-                        reactContext,
-                        Manifest.permission.ACCESS_COARSE_LOCATION
-                ) == PackageManager.PERMISSION_GRANTED
 
         return if (provider == LocationManager.GPS_PROVIDER) {
             fineGranted
@@ -213,6 +221,10 @@ class WatchPosition(private val reactContext: ReactApplicationContext) {
             coarseGranted || fineGranted
         }
     }
+
+    private fun hasPermission(permission: String): Boolean =
+            ContextCompat.checkSelfPermission(reactContext, permission) ==
+                    PackageManager.PERMISSION_GRANTED
 
     private fun createError(code: Int, message: String): CompatGeolocationError {
         return CompatGeolocationError(

@@ -111,24 +111,20 @@ class GetCurrentPosition(private val reactContext: ReactApplicationContext) {
             locationManager: LocationManager,
             accuracy: AndroidAccuracyResolution
     ): String? {
+        val fineGranted = hasPermission(Manifest.permission.ACCESS_FINE_LOCATION)
+        val coarseGranted = fineGranted || hasPermission(Manifest.permission.ACCESS_COARSE_LOCATION)
         return accuracy.providerOrder().firstOrNull { provider ->
-            isProviderValid(locationManager, provider)
+            isProviderValid(locationManager, provider, fineGranted, coarseGranted)
         }
     }
 
-    private fun isProviderValid(locationManager: LocationManager, provider: String): Boolean {
+    private fun isProviderValid(
+            locationManager: LocationManager,
+            provider: String,
+            fineGranted: Boolean,
+            coarseGranted: Boolean
+    ): Boolean {
         if (!locationManager.isProviderEnabled(provider)) return false
-
-        val fineGranted =
-                ContextCompat.checkSelfPermission(
-                        reactContext,
-                        Manifest.permission.ACCESS_FINE_LOCATION
-                ) == PackageManager.PERMISSION_GRANTED
-        val coarseGranted =
-                ContextCompat.checkSelfPermission(
-                        reactContext,
-                        Manifest.permission.ACCESS_COARSE_LOCATION
-                ) == PackageManager.PERMISSION_GRANTED
 
         return if (provider == LocationManager.GPS_PROVIDER) {
             fineGranted
@@ -136,6 +132,10 @@ class GetCurrentPosition(private val reactContext: ReactApplicationContext) {
             coarseGranted || fineGranted
         }
     }
+
+    private fun hasPermission(permission: String): Boolean =
+            ContextCompat.checkSelfPermission(reactContext, permission) ==
+                    PackageManager.PERMISSION_GRANTED
 
     private fun requestFreshLocation(
             locationManager: LocationManager,
