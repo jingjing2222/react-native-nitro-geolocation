@@ -17,6 +17,8 @@ jobs:
   release:
     name: Create version PR or publish packages
     runs-on: ubuntu-latest
+    outputs:
+      geolocation-version: ${{ steps.release-tag.outputs.version }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -42,7 +44,35 @@ jobs:
         run: yarn install
 
       - name: Create release PR or publish packages
+        id: changesets
         uses: changesets/action@v2
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           publish-script: yarn release:publish
+
+      - name: Resolve published Geolocation version
+        id: release-tag
+        if: steps.changesets.outputs.published == 'true'
+        env:
+          PUBLISHED_PACKAGES: ${{ steps.changesets.outputs['published-packages'] }}
+        run: |
+          version="$(
+            jq -r '
+              .[]
+              | select(.name == "react-native-nitro-geolocation")
+              | .version
+            ' <<< "$PUBLISHED_PACKAGES"
+          )"
+          if [ -n "$version" ]; then
+            echo "version=$version" >> "$GITHUB_OUTPUT"
+          fi
+
+  prebuilt-binaries:
+    name: Build and upload release prebuilts
+    needs: release
+    if: needs.release.outputs.geolocation-version != ''
+    permissions:
+      contents: write
+    uses: ./.github/workflows/prebuilt-binaries.yml
+    with:
+      tag: react-native-nitro-geolocation@${{ needs.release.outputs.geolocation-version }}

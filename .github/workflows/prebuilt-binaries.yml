@@ -4,6 +4,12 @@ on:
   push:
     tags:
       - "react-native-nitro-geolocation@*"
+  workflow_call:
+    inputs:
+      tag:
+        description: "Package tag to build, for example react-native-nitro-geolocation@1.4.2"
+        required: true
+        type: string
   workflow_dispatch:
     inputs:
       tag:
