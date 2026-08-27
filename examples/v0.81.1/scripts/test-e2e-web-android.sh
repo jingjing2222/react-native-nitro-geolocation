@@ -11,6 +11,23 @@ MAESTRO_BIN="${MAESTRO:-maestro}"
 WEB_E2E_PORT="${WEB_E2E_PORT:-4173}"
 WEB_SERVER_PID=""
 
+run_web_flow() {
+  local suite_name="$1"
+  local flow="$2"
+  local retry_args=(
+    --platform android
+    --flow-dir "$FLOW_DIR"
+    --maestro "$MAESTRO_BIN"
+    --suite-name "$suite_name"
+  )
+
+  if [[ -n "${ANDROID_SERIAL:-}" ]]; then
+    retry_args+=(--maestro-arg --udid --maestro-arg "$ANDROID_SERIAL")
+  fi
+
+  "$SCRIPT_DIR/maestro-retry-flows.sh" "${retry_args[@]}" -- "$flow"
+}
+
 cleanup() {
   "$ADB_BIN" shell cmd location set-location-enabled true >/dev/null 2>&1 || true
   "$ADB_BIN" reverse --remove tcp:8081 >/dev/null 2>&1 || true
@@ -54,7 +71,8 @@ if ! curl -fsS "http://127.0.0.1:$WEB_E2E_PORT" | grep -q "Nitro Geolocation Web
 fi
 
 "$ADB_BIN" shell cmd location set-location-enabled true >/dev/null
-"$MAESTRO_BIN" test --platform android "$FLOW_DIR/web-e2e.yaml"
+run_web_flow "android web location-enabled" web-e2e.yaml
+run_web_flow "android web permission-denied" web-e2e-denied.yaml
 
 "$ADB_BIN" shell cmd location set-location-enabled false >/dev/null
-"$MAESTRO_BIN" test --platform android "$FLOW_DIR/web-e2e-unavailable.yaml"
+run_web_flow "android web location-disabled" web-e2e-unavailable.yaml
