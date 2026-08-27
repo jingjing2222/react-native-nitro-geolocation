@@ -6,6 +6,8 @@ on:
       - main
     paths:
       - "docs/**"
+      - "packages/react-native-nitro-geolocation/package.json"
+      - "packages/react-native-nitro-geolocation/README.md"
       - ".github/workflows/docs-ci.yml"
 
 jobs:

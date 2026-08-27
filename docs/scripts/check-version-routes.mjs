@@ -6,6 +6,12 @@ const packageReadme = path.resolve(
   import.meta.dirname,
   "../../packages/react-native-nitro-geolocation/README.md"
 );
+const packageJsonPath = path.resolve(
+  import.meta.dirname,
+  "../../packages/react-native-nitro-geolocation/package.json"
+);
+const packageJson = JSON.parse(await readFile(packageJsonPath, "utf8"));
+const isReleaseCandidate = /-rc\.\d+$/.test(packageJson.version);
 const requiredRoutes = [
   "index.html",
   "guide/modern-api.html",
@@ -80,8 +86,12 @@ const v2Modern = await readFile(
   "utf8"
 );
 
-if (!v2Modern.includes(">2.0 RC<")) {
+if (isReleaseCandidate && !v2Modern.includes(">2.0 RC<")) {
   throw new Error("A deep v2 page does not expose the persistent RC marker.");
+}
+
+if (!isReleaseCandidate && v2Modern.includes(">2.0 RC<")) {
+  throw new Error("A stable 2.0 page still exposes the RC marker.");
 }
 
 if (
@@ -103,10 +113,20 @@ if (
 for (const command of readme.matchAll(
   /^(?:yarn add|npm install)[^\n]*(?:^|\s)react-native-nitro-geolocation(?:@|\s|$)[^\n]*$/gm
 )) {
-  if (!/react-native-nitro-geolocation@(?:rc|2\.0\.0-rc\.)/.test(command[0])) {
+  if (
+    isReleaseCandidate &&
+    !/react-native-nitro-geolocation@(?:rc|2\.0\.0-rc\.)/.test(command[0])
+  ) {
     throw new Error(
       `The 2.0 RC README install is not pinned to an RC: ${command[0]}`
     );
+  }
+
+  if (
+    !isReleaseCandidate &&
+    /react-native-nitro-geolocation@rc(?:\s|$)/.test(command[0])
+  ) {
+    throw new Error(`The stable README install still uses @rc: ${command[0]}`);
   }
 }
 
