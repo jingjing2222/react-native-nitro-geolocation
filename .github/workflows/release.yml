@@ -43,7 +43,10 @@ jobs:
       - name: Install dependencies
         run: yarn install
 
-      - name: Create release PR or publish packages
+      - name: Verify documentation matches the package release channel
+        run: yarn workspace docs check:versions
+
+      - name: Create release PR or publish packages to a safe candidate tag
         id: changesets
         uses: changesets/action@v2
         with:

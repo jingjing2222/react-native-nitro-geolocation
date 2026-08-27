@@ -2,6 +2,7 @@ import { execFileSync } from "node:child_process";
 import { mkdtemp, readFile, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import path from "node:path";
+import { resolvePublishTag } from "./release-policy.mjs";
 
 const dryRun = process.argv.includes("--dry-run");
 
@@ -50,13 +51,20 @@ try {
       throw new Error(`Release workspace not found: ${release.name}`);
     }
 
+    const publishTag = resolvePublishTag(release);
+    if (publishTag !== release.tag) {
+      console.log(
+        `Publishing ${release.name}@${release.version} under the protected candidate tag ${publishTag}; latest requires manual promotion after prebuilt validation.`
+      );
+    }
+
     const args = [
       "publish",
       path.resolve(workspaceLocation),
       "--access",
       release.access,
       "--tag",
-      release.tag,
+      publishTag,
       "--registry",
       "https://registry.npmjs.org",
       "--loglevel",
