@@ -102,6 +102,21 @@ jobs:
       - name: Build XCFramework
         run: scripts/build-prebuilt-ios.sh build/prebuilt
 
+      - name: Verify the example consumes the packaged XCFramework
+        working-directory: examples/v0.81.1
+        env:
+          NITRO_GEOLOCATION_USE_PREBUILT: "1"
+          NITRO_GEOLOCATION_PREBUILT_URL_BASE: file://${{ github.workspace }}/build/prebuilt
+        run: |
+          bundle exec pod install --project-directory=ios
+          xcodebuild build -quiet \
+            -workspace ios/NitroGeolocationExample.xcworkspace \
+            -scheme NitroGeolocationExample \
+            -configuration Release \
+            -destination "generic/platform=iOS Simulator" \
+            -derivedDataPath "${{ runner.temp }}/prebuilt-consumer" \
+            CODE_SIGNING_ALLOWED=NO
+
       - name: Upload iOS artifact
         uses: actions/upload-artifact@v4
         with:

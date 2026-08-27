@@ -1,0 +1,102 @@
+name: Promote validated GA to latest
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Exact stable version to promote, for example 2.0.0"
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: npm-latest-promotion
+  cancel-in-progress: false
+
+jobs:
+  promote:
+    name: Validate release assets and promote npm tag
+    runs-on: ubuntu-latest
+    environment: npm-latest
+    steps:
+      - name: Checkout the exact release tag
+        uses: actions/checkout@v4
+        with:
+          ref: refs/tags/react-native-nitro-geolocation@${{ inputs.version }}
+
+      - name: Setup mise
+        uses: jdx/mise-action@v3
+        with:
+          install: false
+
+      - name: Trust and install tools via mise
+        run: |
+          mise trust --yes
+          mise install node
+
+      - name: Enable Corepack
+        run: |
+          corepack enable
+          mise reshim node
+
+      - name: Validate exact source version
+        env:
+          VERSION: ${{ inputs.version }}
+        run: |
+          actual="$(node -p "require('./packages/react-native-nitro-geolocation/package.json').version")"
+          test "$actual" = "$VERSION"
+
+      - name: Download all release assets
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: react-native-nitro-geolocation@${{ inputs.version }}
+        run: |
+          test "$(gh release view "$TAG" --json isDraft --jq .isDraft)" = "false"
+          gh release download "$TAG" --dir "${{ runner.temp }}/release-assets"
+
+      - name: Verify required prebuilts and checksums
+        env:
+          ASSET_DIR: ${{ runner.temp }}/release-assets
+          VERSION: ${{ inputs.version }}
+        run: |
+          android="react-native-nitro-geolocation-${VERSION}-android.aar"
+          ios="react-native-nitro-geolocation-${VERSION}-ios.xcframework.zip"
+          test -s "$ASSET_DIR/$android"
+          test -s "$ASSET_DIR/$android.sha256"
+          test -s "$ASSET_DIR/$ios"
+          test -s "$ASSET_DIR/$ios.sha256"
+          cd "$ASSET_DIR"
+          test "$(wc -l < "$android.sha256" | tr -d ' ')" = "1"
+          test "$(awk '{ sub(/^\*/, "", $2); print $2 }' "$android.sha256")" = "$android"
+          test "$(wc -l < "$ios.sha256" | tr -d ' ')" = "1"
+          test "$(awk '{ sub(/^\*/, "", $2); print $2 }' "$ios.sha256")" = "$ios"
+          sha256sum --check "$android.sha256"
+          sha256sum --check "$ios.sha256"
+
+          android_entries="$(unzip -Z1 "$android")"
+          ios_entries="$(unzip -Z1 "$ios")"
+          for abi in armeabi-v7a arm64-v8a x86 x86_64; do
+            grep -Fxq "jni/$abi/libnitrogeolocation.so" <<< "$android_entries"
+          done
+          for slice in ios-arm64 ios-arm64_x86_64-simulator; do
+            grep -Fxq "NitroGeolocation.xcframework/$slice/NitroGeolocation.framework/NitroGeolocation" <<< "$ios_entries"
+            grep -Fxq "NitroGeolocation.xcframework/$slice/NitroGeolocation.framework/PrivacyInfo.xcprivacy" <<< "$ios_entries"
+          done
+          if grep -Eq '\.swift(interface|module)' <<< "$ios_entries"; then
+            echo "The iOS prebuilt unexpectedly contains a textual Swift module." >&2
+            exit 1
+          fi
+
+      - name: Configure npm authentication
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+          NPM_CONFIG_USERCONFIG: ${{ runner.temp }}/npmrc
+        run: npm config set "//registry.npmjs.org/:_authToken" "$NODE_AUTH_TOKEN"
+
+      - name: Promote validated candidate to latest
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+          NPM_CONFIG_USERCONFIG: ${{ runner.temp }}/npmrc
+        run: node scripts/promote-latest.mjs "${{ inputs.version }}"

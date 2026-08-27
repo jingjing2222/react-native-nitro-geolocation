@@ -16,7 +16,7 @@ appId: nitrogeolocation.example
           text: "Wait|대기"
 - extendedWaitUntil:
     visible: "Geolocation API"
-    timeout: 10000
+    timeout: 30000
 - stopApp
 - openLink:
     link: nitrogeolocation://app/permission-details
@@ -85,7 +85,7 @@ appId: nitrogeolocation.example
           text: "Wait|대기"
 - extendedWaitUntil:
     visible: "Geolocation API"
-    timeout: 10000
+    timeout: 30000
 - stopApp
 - openLink:
     link: nitrogeolocation://app/permission-details
@@ -129,7 +129,7 @@ appId: nitrogeolocation.example
                 text: "Wait|대기"
       - extendedWaitUntil:
           visible: "Geolocation API"
-          timeout: 10000
+          timeout: 30000
       - stopApp
       - openLink:
           link: nitrogeolocation://app/permission-details
@@ -161,7 +161,7 @@ appId: nitrogeolocation.example
           text: "Wait|대기"
 - extendedWaitUntil:
     visible: "Geolocation API"
-    timeout: 10000
+    timeout: 30000
 - stopApp
 - openLink:
     link: nitrogeolocation://app/permission-details

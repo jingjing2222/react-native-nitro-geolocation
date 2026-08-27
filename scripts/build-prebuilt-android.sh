@@ -4,12 +4,13 @@ set -euo pipefail
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 PACKAGE_DIR="$ROOT_DIR/packages/react-native-nitro-geolocation"
 EXAMPLE_ANDROID_DIR="$ROOT_DIR/examples/v0.81.1/android"
-OUT_DIR="${1:-$ROOT_DIR/build/prebuilt}"
+OUT_DIR_INPUT="${1:-$ROOT_DIR/build/prebuilt}"
 
 VERSION="$(node -p "require('$PACKAGE_DIR/package.json').version")"
 ASSET_NAME="react-native-nitro-geolocation-${VERSION}-android.aar"
 
-mkdir -p "$OUT_DIR"
+mkdir -p "$OUT_DIR_INPUT"
+OUT_DIR="$(cd "$OUT_DIR_INPUT" && pwd)"
 
 (
   cd "$EXAMPLE_ANDROID_DIR"
@@ -28,6 +29,9 @@ if [[ -z "$AAR_PATH" ]]; then
 fi
 
 cp "$AAR_PATH" "$OUT_DIR/$ASSET_NAME"
-shasum -a 256 "$OUT_DIR/$ASSET_NAME" > "$OUT_DIR/$ASSET_NAME.sha256"
+(
+  cd "$OUT_DIR"
+  shasum -a 256 "$ASSET_NAME" > "$ASSET_NAME.sha256"
+)
 
 echo "$OUT_DIR/$ASSET_NAME"
