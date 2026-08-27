@@ -89,16 +89,13 @@ class NitroGeolocation(
         AndroidHeadingManager(
             context = reactContext,
             createLocationError = ::createLocationError,
-            getReferenceLocation = {
-                lastLocation ?: getBestCachedLocation(
-                    getValidProviders(resolveAndroidAccuracy(null, enableHighAccuracy = false)),
-                    ParsedOptions.parseLastKnown(null)
-                )
-            }
+            getReferenceLocation = ::getHeadingReferenceLocation
         )
     }
     private val geocoder by lazy { AndroidGeocoder(reactContext) }
     private var lastLocation: Location? = null
+    private var cachedHeadingReferenceLocation: Location? = null
+    private var didResolveHeadingReferenceLocation = false
 
     // Permission callbacks
     private val pendingPermissionResolvers = mutableListOf<(PermissionStatus) -> Unit>()
@@ -508,12 +505,11 @@ class NitroGeolocation(
         options: LocationRequestOptions,
         error: ((LocationError) -> Unit)?
     ): String {
-        val token = UUID.randomUUID().toString()
         val parsedOptions = ParsedOptions.parse(options)
         val validationError = validateParsedOptions(parsedOptions)
         if (validationError != null) {
             error?.invoke(validationError)
-            return token
+            return UUID.randomUUID().toString()
         }
         val permissionError = if (!hasLocationPermission()) {
             createLocationError(
@@ -525,7 +521,7 @@ class NitroGeolocation(
         }
         if (permissionError != null) {
             error?.invoke(permissionError)
-            return token
+            return UUID.randomUUID().toString()
         }
 
         return positionWatchManager.watch(success, error, parsedOptions)
@@ -705,25 +701,35 @@ class NitroGeolocation(
     }
 
     private fun getValidProviders(options: ParsedOptions): List<String> {
-        return getValidProviders(options.androidAccuracy)
-            .filter { provider -> options.granularity.allowsProvider(provider) }
+        return getValidProviders(options.androidAccuracy, options.granularity)
     }
 
-    private fun getValidProviders(accuracy: AndroidAccuracyResolution): List<String> {
+    private fun getValidProviders(
+        accuracy: AndroidAccuracyResolution,
+        granularity: AndroidGranularity? = null
+    ): List<String> {
+        val fineGranted = hasFineLocationPermission()
+        val coarseGranted = fineGranted || hasCoarseLocationPermission()
         return accuracy.providerOrder()
-            .distinct()
-            .filter { provider -> isProviderValid(provider) }
+            .filter { provider ->
+                granularity.allowsProvider(provider) &&
+                    isProviderValid(provider, fineGranted, coarseGranted)
+            }
     }
 
-    private fun isProviderValid(provider: String): Boolean {
+    private fun isProviderValid(
+        provider: String,
+        fineGranted: Boolean,
+        coarseGranted: Boolean
+    ): Boolean {
         return try {
             if (!locationManager.isProviderEnabled(provider)) return false
 
             when (provider) {
-                AndroidLocationManager.GPS_PROVIDER -> hasFineLocationPermission()
-                AndroidLocationManager.NETWORK_PROVIDER -> hasCoarseLocationPermission() || hasFineLocationPermission()
-                AndroidLocationManager.PASSIVE_PROVIDER -> hasLocationPermission()
-                else -> hasLocationPermission()
+                AndroidLocationManager.GPS_PROVIDER -> fineGranted
+                AndroidLocationManager.NETWORK_PROVIDER -> coarseGranted
+                AndroidLocationManager.PASSIVE_PROVIDER -> coarseGranted
+                else -> coarseGranted
             }
         } catch (e: Exception) {
             false
@@ -805,6 +811,18 @@ class NitroGeolocation(
         }
 
         return bestLocation
+    }
+
+    private fun getHeadingReferenceLocation(): Location? {
+        lastLocation?.let { return it }
+        if (!didResolveHeadingReferenceLocation) {
+            cachedHeadingReferenceLocation = getBestCachedLocation(
+                getValidProviders(resolveAndroidAccuracy(null, enableHighAccuracy = false)),
+                ParsedOptions.parseLastKnown(null)
+            )
+            didResolveHeadingReferenceLocation = true
+        }
+        return cachedHeadingReferenceLocation
     }
 
     // MARK: - Helper Functions - Conversion

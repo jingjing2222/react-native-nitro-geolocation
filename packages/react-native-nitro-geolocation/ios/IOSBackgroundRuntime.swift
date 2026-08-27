@@ -87,9 +87,13 @@ extension NitroBackgroundLocation {
         )
         withListenerLock {
             guard withStoreLock({
-                isCurrentLocationSession(runGeneration, locationSessionGeneration)
+                runGeneration == storeGeneration &&
+                    self.locationSessionGeneration == locationSessionGeneration &&
+                    locationSessionActive
             }) else { return }
-            Array(errorListeners.keys).forEach { errorListeners[$0]?(locationError) }
+            for listener in Array(errorListeners.values) {
+                listener(locationError)
+            }
         }
     }
 
@@ -104,22 +108,24 @@ extension NitroBackgroundLocation {
             guard withStoreLock({
                 guard runGeneration == storeGeneration else { return false }
                 if let locationSessionGeneration {
-                    guard isCurrentLocationSession(
-                        runGeneration,
-                        locationSessionGeneration
-                    ) else { return false }
+                    guard self.locationSessionGeneration == locationSessionGeneration,
+                        locationSessionActive
+                    else { return false }
                 }
                 if let motionRegistrationGeneration {
-                    guard isCurrentMotionRegistration(
-                        runGeneration,
-                        motionRegistrationGeneration
-                    ) else { return false }
+                    guard self.motionRegistrationGeneration == motionRegistrationGeneration,
+                        motionRegistrationActive
+                    else { return false }
                 }
                 return true
             }) else { return }
-            Array(eventListeners.keys).forEach { eventListeners[$0]?(event) }
+            for listener in Array(eventListeners.values) {
+                listener(event)
+            }
             if let location {
-                Array(locationListeners.keys).forEach { locationListeners[$0]?(location) }
+                for listener in Array(locationListeners.values) {
+                    listener(location)
+                }
             }
         }
     }
@@ -142,14 +148,17 @@ extension NitroBackgroundLocation {
             guard activity.confidence >= (activityOptions?.minimumConfidence ?? 0) else { return }
             let stopOnStill = activityOptions?.stopOnStill ?? (options.trackingMode == .activityaware)
             if activity.type == .still && stopOnStill {
+                guard !activityPausedLocationUpdates else { return }
+                activityPausedLocationUpdates = true
                 runOnMainSync {
-                    self.manager?.disallowDeferredLocationUpdates()
                     self.manager?.stopUpdatingLocation()
                     self.manager?.stopMonitoringSignificantLocationChanges()
                 }
                 return
             }
-            if activity.type != .still && activity.type != .unknown && snapshot.1 {
+            if activity.type != .still && activity.type != .unknown && snapshot.1 &&
+                activityPausedLocationUpdates {
+                activityPausedLocationUpdates = false
                 runOnMainSync {
                     if options.trackingMode == .significantchanges ||
                         options.ios?.useSignificantChanges == true {
@@ -182,29 +191,6 @@ extension NitroBackgroundLocation {
         self.delegate = delegate
     }
 
-    func applyDeferredUpdatesIfNeeded(
-        _ manager: CLLocationManager,
-        runGeneration: UInt64,
-        locationSessionGeneration: UInt64
-    ) {
-        guard let options = withStoreLock({ () -> BackgroundLocationOptions? in
-            guard isCurrentLocationSession(
-                runGeneration,
-                locationSessionGeneration
-            ) else { return nil }
-            return self.options
-        }),
-            let distance = options.ios?.deferredUpdatesDistance,
-            let interval = options.ios?.deferredUpdatesInterval
-        else {
-            return
-        }
-        manager.allowDeferredLocationUpdates(
-            untilTraveled: distance,
-            timeout: interval / 1000
-        )
-    }
-
     func replaceLocationSession() -> UInt64 {
         let generations = withStoreLock {
             locationSessionGeneration &+= 1
@@ -212,7 +198,6 @@ extension NitroBackgroundLocation {
             return (storeGeneration, locationSessionGeneration)
         }
         runOnMainSync {
-            self.manager?.disallowDeferredLocationUpdates()
             self.manager?.stopUpdatingLocation()
             self.manager?.stopMonitoringSignificantLocationChanges()
             let delegate = NitroBackgroundLocationDelegate(
@@ -238,7 +223,6 @@ extension NitroBackgroundLocation {
         }
         guard shouldStop else { return }
         runOnMainSync {
-            self.manager?.disallowDeferredLocationUpdates()
             self.manager?.stopUpdatingLocation()
             self.manager?.stopMonitoringSignificantLocationChanges()
         }

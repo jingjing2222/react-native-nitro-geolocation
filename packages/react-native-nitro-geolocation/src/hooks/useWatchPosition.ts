@@ -43,11 +43,9 @@ export function useWatchPosition(
   const [isWatching, setIsWatching] = useState(false);
   const [error, setError] = useState<LocationError | null>(null);
 
-  // Store subscription token (hidden from user!)
-  const tokenRef = useRef<string | null>(null);
-
   // Track if component is mounted to prevent state updates after unmount
   const isMountedRef = useRef(true);
+  const hasErrorRef = useRef(false);
 
   // Store latest options in ref to avoid unnecessary re-subscriptions
   const optionsRef = useRef(options);
@@ -62,17 +60,13 @@ export function useWatchPosition(
 
   useEffect(() => {
     if (!enabled) {
-      // Not enabled, ensure cleanup
-      if (tokenRef.current) {
-        unwatch(tokenRef.current);
-        tokenRef.current = null;
-      }
       setIsWatching(false);
       return;
     }
 
     // Start watching with latest options
     setIsWatching(true);
+    hasErrorRef.current = false;
     setError(null);
 
     const token = watchPosition(
@@ -80,23 +74,23 @@ export function useWatchPosition(
         // Success callback
         if (!isMountedRef.current) return;
         setPosition(result);
-        setError(null);
+        if (hasErrorRef.current) {
+          hasErrorRef.current = false;
+          setError(null);
+        }
       },
       (err: LocationError) => {
         // Error callback
         if (!isMountedRef.current) return;
+        hasErrorRef.current = true;
         setError(err);
       },
       optionsRef.current
     );
 
-    tokenRef.current = token;
-
     // Cleanup function
     return () => {
-      if (token) {
-        unwatch(token);
-      }
+      unwatch(token);
     };
   }, [enabled]); // Only re-subscribe when enabled changes
 

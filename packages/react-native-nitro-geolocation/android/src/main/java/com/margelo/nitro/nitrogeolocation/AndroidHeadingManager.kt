@@ -50,8 +50,18 @@ internal class AndroidHeadingManager(
 
     private var isListening = false
     private var sensorAccuracy: Int? = null
-    private var gravityValues: FloatArray? = null
-    private var magneticValues: FloatArray? = null
+    private val gravityValues = FloatArray(3)
+    private val magneticValues = FloatArray(3)
+    private val rotationMatrix = FloatArray(9)
+    private val inclinationMatrix = FloatArray(9)
+    private val orientation = FloatArray(3)
+    private var hasGravityValues = false
+    private var hasMagneticValues = false
+    private var declinationLatitude = Double.NaN
+    private var declinationLongitude = Double.NaN
+    private var declinationAltitude = Double.NaN
+    private var declinationTime = Long.MIN_VALUE
+    private var cachedDeclination = 0.0
 
     private val sensorListener = object : SensorEventListener {
         override fun onSensorChanged(event: SensorEvent) {
@@ -61,17 +71,19 @@ internal class AndroidHeadingManager(
                     headingFromRotationVector(event.values)
                 }
                 Sensor.TYPE_ACCELEROMETER -> {
-                    gravityValues = event.values.clone()
+                    event.values.copyInto(gravityValues, endIndex = gravityValues.size)
+                    hasGravityValues = true
                     headingFromAccelerationAndMagnetometer()
                 }
                 Sensor.TYPE_MAGNETIC_FIELD -> {
-                    magneticValues = event.values.clone()
+                    event.values.copyInto(magneticValues, endIndex = magneticValues.size)
+                    hasMagneticValues = true
                     headingFromAccelerationAndMagnetometer()
                 }
                 else -> null
             } ?: return
 
-            emitHeading(createHeading(magneticHeading))
+            emitHeading(magneticHeading)
         }
 
         override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {
@@ -220,29 +232,28 @@ internal class AndroidHeadingManager(
             // Ignore unregister races.
         }
         isListening = false
-        gravityValues = null
-        magneticValues = null
+        hasGravityValues = false
+        hasMagneticValues = false
     }
 
     private fun headingFromRotationVector(values: FloatArray): Double? {
-        val rotationMatrix = FloatArray(9)
-        val orientation = FloatArray(3)
         SensorManager.getRotationMatrixFromVector(rotationMatrix, values)
         SensorManager.getOrientation(rotationMatrix, orientation)
         return normalizeHeading(Math.toDegrees(orientation[0].toDouble()))
     }
 
     private fun headingFromAccelerationAndMagnetometer(): Double? {
-        val gravity = gravityValues ?: return null
-        val magnetic = magneticValues ?: return null
-        val rotationMatrix = FloatArray(9)
-        val inclinationMatrix = FloatArray(9)
+        if (!hasGravityValues || !hasMagneticValues) return null
 
-        if (!SensorManager.getRotationMatrix(rotationMatrix, inclinationMatrix, gravity, magnetic)) {
+        if (!SensorManager.getRotationMatrix(
+                rotationMatrix,
+                inclinationMatrix,
+                gravityValues,
+                magneticValues
+            )) {
             return null
         }
 
-        val orientation = FloatArray(3)
         SensorManager.getOrientation(rotationMatrix, orientation)
         return normalizeHeading(Math.toDegrees(orientation[0].toDouble()))
     }
@@ -250,13 +261,7 @@ internal class AndroidHeadingManager(
     private fun createHeading(magneticHeading: Double): Heading {
         val referenceLocation = getReferenceLocation()
         val trueHeading = referenceLocation?.let { location ->
-            val field = GeomagneticField(
-                location.latitude.toFloat(),
-                location.longitude.toFloat(),
-                if (location.hasAltitude()) location.altitude.toFloat() else 0f,
-                location.time
-            )
-            normalizeHeading(magneticHeading + field.declination)
+            normalizeHeading(magneticHeading + declination(location))
         }
 
         return Heading(
@@ -269,12 +274,40 @@ internal class AndroidHeadingManager(
         )
     }
 
-    private fun emitHeading(heading: Heading) {
-        val pendingSnapshot = pendingRequests.values.toList()
-        pendingSnapshot.forEach { request ->
-            mainHandler.removeCallbacks(request.timeoutRunnable)
-            if (pendingRequests.remove(request.id) != null) {
-                request.success(heading)
+    private fun declination(location: Location): Double {
+        val altitude = if (location.hasAltitude()) location.altitude else 0.0
+        if (
+            location.latitude != declinationLatitude ||
+            location.longitude != declinationLongitude ||
+            altitude != declinationAltitude ||
+            location.time != declinationTime
+        ) {
+            cachedDeclination = GeomagneticField(
+                location.latitude.toFloat(),
+                location.longitude.toFloat(),
+                altitude.toFloat(),
+                location.time
+            ).declination.toDouble()
+            declinationLatitude = location.latitude
+            declinationLongitude = location.longitude
+            declinationAltitude = altitude
+            declinationTime = location.time
+        }
+        return cachedDeclination
+    }
+
+    private fun emitHeading(magneticHeading: Double) {
+        var heading: Heading? = null
+        if (pendingRequests.isNotEmpty()) {
+            val pendingSnapshot = pendingRequests.values.toList()
+            pendingSnapshot.forEach { request ->
+                mainHandler.removeCallbacks(request.timeoutRunnable)
+                if (pendingRequests.remove(request.id) != null) {
+                    val deliveredHeading = heading ?: createHeading(magneticHeading).also {
+                        heading = it
+                    }
+                    request.success(deliveredHeading)
+                }
             }
         }
 
@@ -282,10 +315,13 @@ internal class AndroidHeadingManager(
             val lastHeading = subscription.lastDeliveredHeading
             if (
                 lastHeading == null ||
-                angularDistance(lastHeading, heading.magneticHeading) >= subscription.headingFilter
+                angularDistance(lastHeading, magneticHeading) >= subscription.headingFilter
             ) {
-                subscription.lastDeliveredHeading = heading.magneticHeading
-                subscription.success(heading)
+                subscription.lastDeliveredHeading = magneticHeading
+                val deliveredHeading = heading ?: createHeading(magneticHeading).also {
+                    heading = it
+                }
+                subscription.success(deliveredHeading)
             }
         }
 

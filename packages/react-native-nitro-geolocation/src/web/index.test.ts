@@ -614,6 +614,7 @@ describe("web Modern API", () => {
 
   it("diagnoses a ready browser without starting location acquisition", async () => {
     const getCurrentPositionMock = vi.fn();
+    const query = vi.fn(async () => ({ state: "granted" as const }));
     setNavigator({
       geolocation: {
         getCurrentPosition: getCurrentPositionMock,
@@ -621,7 +622,7 @@ describe("web Modern API", () => {
         clearWatch: vi.fn()
       },
       permissions: {
-        query: vi.fn(async () => ({ state: "granted" }))
+        query
       }
     });
 
@@ -634,6 +635,7 @@ describe("web Modern API", () => {
       remediations: ["acquirePosition"]
     });
     expect(getCurrentPositionMock).not.toHaveBeenCalled();
+    expect(query).toHaveBeenCalledTimes(1);
   });
 
   it("uses a recent successful observation as bounded permission evidence", async () => {
@@ -950,6 +952,35 @@ describe("web Modern API", () => {
     stopObserving();
     expect(clearWatch).toHaveBeenCalledWith(11);
     expect(getActiveWatches()).toEqual([]);
+  });
+
+  it("rejects distance-filtered browser updates before normalizing them", () => {
+    let observePosition:
+      | ((position: ReturnType<typeof createPosition>) => void)
+      | undefined;
+    setNavigator({
+      geolocation: {
+        getCurrentPosition: vi.fn(),
+        watchPosition: vi.fn((success) => {
+          observePosition = success;
+          return 12;
+        }),
+        clearWatch: vi.fn()
+      }
+    });
+    const success = vi.fn();
+    watchPosition(success, undefined, { distanceFilter: 100 });
+    observePosition?.(createPosition());
+
+    const filteredPosition = createPosition(37.56651, 126.97801);
+    Object.defineProperty(filteredPosition.coords, "accuracy", {
+      get: () => {
+        throw new Error("filtered positions must not be normalized");
+      }
+    });
+
+    expect(() => observePosition?.(filteredPosition)).not.toThrow();
+    expect(success).toHaveBeenCalledTimes(1);
   });
 
   it("observes distinct provider status changes and stops by token", async () => {

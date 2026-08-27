@@ -11,7 +11,7 @@ import com.margelo.nitro.nitrogeolocation.BackgroundLocationSource
 
 class NitroLocationUpdateReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent) {
-        NitroGeoLog.d("LocationUpdateReceiver.onReceive(): action=${intent.action}")
+        NitroGeoLog.d { "LocationUpdateReceiver.onReceive(): action=${intent.action}" }
         val controller = NitroBackgroundLocationController.getInstance(context)
         val generation = intent.getLongExtra(
             EXTRA_RUN_GENERATION,
@@ -47,13 +47,17 @@ class NitroLocationUpdateReceiver : BroadcastReceiver() {
             )
             return
         }
+        var serviceGeneration: Long? = null
         for (location in result.locations) {
-            controller.handleNativeLocation(
+            controller.handleNativeLocationWithoutSync(
                 location,
                 BackgroundLocationSource.FOREGROUNDSERVICE,
                 generation,
                 registrationGeneration
-            )
+            )?.let { serviceGeneration = it }
+        }
+        serviceGeneration?.let {
+            controller.scheduleSyncIfNeeded(generation, registrationGeneration, it)
         }
     }
 }

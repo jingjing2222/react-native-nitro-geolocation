@@ -14,13 +14,18 @@ import com.margelo.nitro.nitrogeolocation.BuildConfig
  * quiet, while [w] and [e] always emit because they mark real delivery or registration failures.
  */
 internal object NitroGeoLog {
-    private const val TAG = "NitroGeolocation"
+    @PublishedApi
+    internal const val TAG = "NitroGeolocation"
 
     @Volatile
     var verbose: Boolean = BuildConfig.DEBUG
 
     fun d(message: String) {
         if (verbose) Log.d(TAG, message)
+    }
+
+    inline fun d(message: () -> String) {
+        if (verbose) Log.d(TAG, message())
     }
 
     fun w(message: String, error: Throwable? = null) {

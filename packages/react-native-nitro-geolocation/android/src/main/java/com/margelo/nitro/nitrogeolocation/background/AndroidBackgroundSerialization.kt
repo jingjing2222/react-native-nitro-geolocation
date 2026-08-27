@@ -56,8 +56,8 @@ internal fun BackgroundHttpSyncResult.toJson(): JSONObject {
     return JSONObject()
         .put("success", success)
         .put("statusCode", statusCode)
-        .put("syncedLocationIds", JSONArray(syncedLocationIds.toList()))
-        .put("failedLocationIds", JSONArray(failedLocationIds.toList()))
+        .put("syncedLocationIds", syncedLocationIds.toJsonArray())
+        .put("failedLocationIds", failedLocationIds.toJsonArray())
         .put("error", error)
 }
 
@@ -183,8 +183,16 @@ internal fun jsonToVariantMap(payload: String): Map<String, Variant_NullType_Boo
 
 internal fun BackgroundHttpSyncOptions.batchBody(locations: Array<StoredBackgroundLocation>): JSONObject {
     val body = metadataToJsonObject(bodyTemplate) ?: JSONObject()
-    body.put("locations", JSONArray(locations.map { it.toJson() }))
+    val serializedLocations = JSONArray()
+    for (location in locations) serializedLocations.put(location.toJson())
+    body.put("locations", serializedLocations)
     return body
+}
+
+internal fun Array<String>.toJsonArray(): JSONArray {
+    val json = JSONArray()
+    for (value in this) json.put(value)
+    return json
 }
 
 internal fun BackgroundHttpSyncOptions.singleBody(location: StoredBackgroundLocation): JSONObject {

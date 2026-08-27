@@ -42,6 +42,7 @@ describe("devtools watch observability", () => {
       { token: firstToken, kind: "position" },
       { token: secondToken, kind: "position" }
     ]);
+    expect(vi.getTimerCount()).toBe(1);
 
     devtoolsStopObserving();
 

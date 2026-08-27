@@ -24,6 +24,7 @@ internal class AndroidPositionWatchManager(
     private val subscriptions = AndroidWatchCollection<WatchSubscription>()
     private var platformListener: LocationListener? = null
     private var fusedCallback: LocationCallback? = null
+    private var activeRequestOptions: ParsedOptions? = null
     private var generation = 0L
 
     fun watch(
@@ -50,7 +51,6 @@ internal class AndroidPositionWatchManager(
     fun activeWatches(): Array<ActiveWatch> = dispatcher.sync {
         subscriptions.tokens()
             .map { ActiveWatch(token = it, kind = ActiveWatchKind.POSITION) }
-            .sortedBy { it.token }
             .toTypedArray()
     }
 
@@ -58,23 +58,27 @@ internal class AndroidPositionWatchManager(
         dispatcher.sync { applyTransition(subscriptions.clear()) }
     }
 
-    private fun start() {
+    private fun start(options: ParsedOptions = mergeOptions()) {
         val activeGeneration = generation
+        activeRequestOptions = options
         if (providerRoute() == AndroidProviderRoute.FUSED) {
-            startFused(activeGeneration)
+            startFused(activeGeneration, options)
         } else {
-            startPlatform(activeGeneration)
+            startPlatform(activeGeneration, options)
         }
     }
 
     private fun isActive(activeGeneration: Long): Boolean =
         !subscriptions.isEmpty() && generation == activeGeneration
 
-    private fun startPlatform(activeGeneration: Long) {
+    private fun startPlatform(
+        activeGeneration: Long,
+        options: ParsedOptions = mergeOptions()
+    ) {
         if (!isActive(activeGeneration)) return
-        val options = mergeOptions()
         val provider = getValidProvider(options)
         if (provider == null) {
+            activeRequestOptions = null
             notifyProviderUnavailable()
             return
         }
@@ -83,13 +87,14 @@ internal class AndroidPositionWatchManager(
             override fun onLocationChanged(location: Location) {
                 dispatcher.sync {
                     if (!isActive(activeGeneration)) return@sync
-                    deliver(locationToPosition(location, null))
+                    deliver(location, null)
                 }
             }
 
             override fun onProviderDisabled(provider: String) {
                 dispatcher.sync {
                     if (!isActive(activeGeneration)) return@sync
+                    activeRequestOptions = null
                     notifyError(LocationError(
                         code = SETTINGS_NOT_SATISFIED,
                         message = "Provider disabled: $provider"
@@ -118,6 +123,7 @@ internal class AndroidPositionWatchManager(
                 Looper.getMainLooper()
             )
         } catch (error: SecurityException) {
+            activeRequestOptions = null
             notifyError(LocationError(
                 code = PERMISSION_DENIED,
                 message = "Permission denied: ${error.message}"
@@ -125,15 +131,14 @@ internal class AndroidPositionWatchManager(
         }
     }
 
-    private fun startFused(activeGeneration: Long) {
+    private fun startFused(activeGeneration: Long, options: ParsedOptions) {
         if (!isActive(activeGeneration)) return
-        val options = mergeOptions()
         val callback = object : LocationCallback() {
             override fun onLocationResult(result: LocationResult) {
                 val location = result.lastLocation ?: return
                 dispatcher.sync {
                     if (!isActive(activeGeneration)) return@sync
-                    deliver(locationToPosition(location, LocationProviderUsed.FUSED))
+                    deliver(location, LocationProviderUsed.FUSED)
                 }
             }
         }
@@ -147,8 +152,9 @@ internal class AndroidPositionWatchManager(
                 removeFusedCallback()
                 runAndroidWatchPositionFallbackAfterFusedFailure(
                     locationProvider = configuredProvider(),
-                    runPlatformFallback = { startPlatform(activeGeneration) },
+                    runPlatformFallback = { startPlatform(activeGeneration, options) },
                     failWithoutFallback = {
+                        activeRequestOptions = null
                         if (error != null) notifyError(error) else notifyProviderUnavailable()
                     }
                 )
@@ -210,14 +216,15 @@ internal class AndroidPositionWatchManager(
         )
     }
 
-    private fun deliver(position: GeolocationResponse) {
+    private fun deliver(location: Location, provider: LocationProviderUsed?) {
         var removedFinishedWatch = false
+        var position: GeolocationResponse? = null
         val elapsedRealtimeMillis = SystemClock.elapsedRealtime()
         subscriptions.forEachCurrent { token, subscription ->
             val decision = evaluateAndroidWatchDelivery(
                 previous = subscription.deliveryState,
-                latitude = position.coords.latitude,
-                longitude = position.coords.longitude,
+                latitude = location.latitude,
+                longitude = location.longitude,
                 elapsedRealtimeMillis = elapsedRealtimeMillis,
                 minimumIntervalMillis = subscription.options.interval,
                 distanceFilterMeters = subscription.options.distanceFilter
@@ -226,7 +233,10 @@ internal class AndroidPositionWatchManager(
 
             subscription.deliveryState = decision.nextState
             subscription.deliveredUpdates += 1
-            subscription.success(position)
+            val deliveredPosition = position ?: locationToPosition(location, provider).also {
+                position = it
+            }
+            subscription.success(deliveredPosition)
             val maxUpdates = subscription.options.maxUpdates
             if (maxUpdates != null && subscription.deliveredUpdates >= maxUpdates) {
                 removedFinishedWatch = subscriptions.removeCurrent(token, subscription) ||
@@ -266,6 +276,7 @@ internal class AndroidPositionWatchManager(
 
     private fun stop() {
         generation += 1
+        activeRequestOptions = null
         removePlatformListener()
         removeFusedCallback()
     }
@@ -284,16 +295,19 @@ internal class AndroidPositionWatchManager(
         fusedCallback = null
     }
 
-    private fun restart() {
+    private fun restart(options: ParsedOptions) {
         stop()
-        start()
+        start(options)
     }
 
     private fun applyTransition(transition: AndroidWatchTransition) {
         when (transition) {
             AndroidWatchTransition.NONE -> Unit
             AndroidWatchTransition.START -> start()
-            AndroidWatchTransition.RESTART -> restart()
+            AndroidWatchTransition.RESTART -> {
+                val options = mergeOptions()
+                if (options != activeRequestOptions) restart(options)
+            }
             AndroidWatchTransition.STOP -> stop()
         }
     }

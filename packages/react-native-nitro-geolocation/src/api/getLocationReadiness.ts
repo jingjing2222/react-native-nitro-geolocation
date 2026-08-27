@@ -20,6 +20,7 @@ export async function getLocationReadiness(): Promise<LocationReadiness> {
     getProviderStatus(),
     getLocationAvailability()
   ]);
+  const now = Date.now();
 
   return buildLocationReadiness({
     permission,
@@ -29,7 +30,7 @@ export async function getLocationReadiness(): Promise<LocationReadiness> {
       getConfiguredLocationProvider() === "playServices",
     providerStatus,
     availability,
-    cachedPosition: readLastKnownPosition(),
-    now: Date.now()
+    cachedPosition: readLastKnownPosition(now),
+    now
   });
 }

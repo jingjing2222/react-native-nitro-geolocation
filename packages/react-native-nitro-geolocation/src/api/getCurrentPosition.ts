@@ -87,16 +87,14 @@ export function getCurrentPosition(
 
   if (isDevtoolsEnabled()) {
     const devtoolsResult = getDevtoolsCurrentPosition();
-    if (devtoolsResult) {
-      if (signal) {
-        return raceDevtoolsRequestWithSignal(
-          devtoolsResult,
-          signal,
-          rememberCurrentPosition
-        );
-      }
-      return devtoolsResult.then(rememberCurrentPosition);
+    if (signal) {
+      return raceDevtoolsRequestWithSignal(
+        devtoolsResult,
+        signal,
+        rememberCurrentPosition
+      );
     }
+    return devtoolsResult.then(rememberCurrentPosition);
   }
 
   const nativeOptions = getNativeCurrentPositionOptions(options);

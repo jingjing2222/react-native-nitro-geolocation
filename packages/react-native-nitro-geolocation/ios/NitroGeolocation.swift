@@ -434,21 +434,22 @@ class NitroGeolocation: HybridNitroGeolocationSpec {
         guard let location = locations.last else { return }
 
         lastLocation = location
-        let position = location.toGeolocationResponse()
-
-        let positionRequests = Array(pendingPositionRequests.values)
+        var position: GeolocationResponse?
+        let positionRequests = pendingPositionRequests
         pendingPositionRequests.removeAll()
-        for request in positionRequests {
-            request.timer?.cancel()
-            request.success(position)
+        if !positionRequests.isEmpty {
+            let currentPosition = location.toGeolocationResponse()
+            position = currentPosition
+            for request in positionRequests.values {
+                request.timer?.cancel()
+                request.success(currentPosition)
+            }
         }
 
-        deliverPositionToWatches(location: location, position: position)
+        deliverPositionToWatches(location: location, cachedPosition: position)
 
-        if watchSubscriptions.isEmpty && pendingPositionRequests.isEmpty {
-            stopMonitoring()
-        } else {
-            updateLocationManagerConfiguration()
+        if !positionRequests.isEmpty {
+            updateMonitoringAfterPositionRequestRemoval()
         }
     }
 
@@ -478,15 +479,14 @@ class NitroGeolocation: HybridNitroGeolocationSpec {
             )
         }
 
-        let positionRequests = Array(pendingPositionRequests.values)
+        let positionRequests = pendingPositionRequests
         pendingPositionRequests.removeAll()
-        for request in positionRequests {
+        for request in positionRequests.values {
             request.timer?.cancel()
             request.error(locationError)
         }
 
-        let subscriptions = Array(watchSubscriptions.values)
-        for subscription in subscriptions {
+        for subscription in $watchSubscriptions.entriesSnapshot().values {
             subscription.error?(locationError)
         }
 
@@ -495,20 +495,25 @@ class NitroGeolocation: HybridNitroGeolocationSpec {
     }
 
     func handleHeadingUpdate(_ clHeading: CLHeading) {
-        let heading = headingToResponse(clHeading)
-
-        for (id, request) in Array(pendingHeadingRequests) {
-            request.timer?.cancel()
-            request.success(heading)
-            pendingHeadingRequests.removeValue(forKey: id)
+        var heading: Heading?
+        let headingRequests = pendingHeadingRequests
+        pendingHeadingRequests.removeAll()
+        if !headingRequests.isEmpty {
+            let currentHeading = headingToResponse(clHeading)
+            heading = currentHeading
+            for request in headingRequests.values {
+                request.timer?.cancel()
+                request.success(currentHeading)
+            }
         }
 
-        for (token, subscription) in Array(headingSubscriptions) {
+        let magneticHeading = normalizeHeading(clHeading.magneticHeading)
+        for (token, subscription) in $headingSubscriptions.entriesSnapshot() {
             let shouldDeliver: Bool
             if let lastDeliveredHeading = subscription.lastDeliveredHeading {
                 shouldDeliver = angularDistance(
                     lastDeliveredHeading,
-                    heading.magneticHeading
+                    magneticHeading
                 ) >= subscription.options.headingFilter
             } else {
                 shouldDeliver = true
@@ -516,17 +521,17 @@ class NitroGeolocation: HybridNitroGeolocationSpec {
 
             if shouldDeliver {
                 var nextSubscription = subscription
-                nextSubscription.lastDeliveredHeading = heading.magneticHeading
+                nextSubscription.lastDeliveredHeading = magneticHeading
                 if $headingSubscriptions.updateIfPresent(token: token, value: nextSubscription) {
-                    nextSubscription.success(heading)
+                    let deliveredHeading = heading ?? headingToResponse(clHeading)
+                    heading = deliveredHeading
+                    nextSubscription.success(deliveredHeading)
                 }
             }
         }
 
         if pendingHeadingRequests.isEmpty && headingSubscriptions.isEmpty {
             stopHeadingMonitoring()
-        } else {
-            updateHeadingConfiguration()
         }
     }
 
@@ -647,25 +652,17 @@ class NitroGeolocation: HybridNitroGeolocationSpec {
             return
         }
 
-        let headingRequests = Array(pendingHeadingRequests.values)
+        let headingRequests = pendingHeadingRequests
         pendingHeadingRequests.removeAll()
-        for request in headingRequests {
+        for request in headingRequests.values {
             request.timer?.cancel()
             request.error(locationError)
         }
 
-        let subscriptions = Array(headingSubscriptions.values)
-        headingSubscriptions.removeAll()
-        for subscription in subscriptions {
+        for subscription in $headingSubscriptions.drain().values {
             subscription.error?(locationError)
         }
-
-        if pendingHeadingRequests.isEmpty && headingSubscriptions.isEmpty {
-            stopHeadingMonitoring()
-        } else {
-            updateHeadingConfiguration()
-            startHeadingMonitoring()
-        }
+        stopHeadingMonitoring()
     }
 
     internal func updateLocationManagerConfiguration() {
@@ -716,9 +713,7 @@ class NitroGeolocation: HybridNitroGeolocationSpec {
         manager.activityType = activityType ?? .other
         manager.pausesLocationUpdatesAutomatically = pausesLocationUpdatesAutomatically ?? true
 
-        if #available(iOS 11.0, *) {
-            manager.showsBackgroundLocationIndicator = showsBackgroundLocationIndicator
-        }
+        manager.showsBackgroundLocationIndicator = showsBackgroundLocationIndicator
 
         // Update significant changes mode if changed
         if shouldUseSignificantChanges != usingSignificantChanges {
@@ -819,11 +814,18 @@ class NitroGeolocation: HybridNitroGeolocationSpec {
 
     private func getBestCachedLocation(options: ParsedOptions) -> CLLocation? {
         initializeLocationManagerIfNeeded()
-
-        return [lastLocation, locationManager?.location]
-            .compactMap { $0 }
-            .filter { isCachedLocationValid($0, options: options) }
-            .max { $0.timestamp < $1.timestamp }
+        let validLastLocation = lastLocation.flatMap {
+            isCachedLocationValid($0, options: options) ? $0 : nil
+        }
+        guard let managerLocation = locationManager?.location,
+              isCachedLocationValid(managerLocation, options: options)
+        else {
+            return validLastLocation
+        }
+        guard let validLastLocation else { return managerLocation }
+        return managerLocation.timestamp > validLastLocation.timestamp
+            ? managerLocation
+            : validLastLocation
     }
 
     private func handlePositionTimeout(requestId: String) {

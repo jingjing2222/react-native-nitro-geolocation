@@ -26,44 +26,12 @@ import type {
   StoredBackgroundEvent,
   StoredBackgroundLocation
 } from "./publicTypes";
-import type {
-  BackgroundEventEnvelope,
-  StoredBackgroundEventEnvelope
-} from "./types";
+import type { BackgroundEventEnvelope } from "./types";
 
 const NativeBackgroundLocation =
   NitroModules.createHybridObject<NitroBackgroundLocation>(
     "NitroBackgroundLocation"
   );
-
-function narrowBackgroundEvent(
-  event: BackgroundEventEnvelope
-): BackgroundEvent {
-  switch (event.type) {
-    case "location":
-      return { ...event, type: "location", location: event.location! };
-    case "geofence":
-      return { ...event, type: "geofence", geofence: event.geofence! };
-    case "activity":
-      return { ...event, type: "activity", activity: event.activity! };
-    case "providerChange":
-      return {
-        ...event,
-        type: "providerChange",
-        providerStatus: event.providerStatus!
-      };
-    case "lifecycle":
-      return {
-        ...event,
-        type: "lifecycle",
-        lifecycle: event.lifecycle!
-      };
-    case "httpSync":
-      return { ...event, type: "httpSync", result: event.result! };
-    case "error":
-      return { ...event, type: "error", error: event.error! };
-  }
-}
 
 export * from "./publicTypes";
 export { BACKGROUND_LOCATION_TASK_NAME, registerBackgroundTask } from "./task";
@@ -131,15 +99,15 @@ export function markStoredBackgroundLocationsDelivered(
   return NativeBackgroundLocation.markStoredBackgroundLocationsDelivered(ids);
 }
 
-export async function getStoredBackgroundEvents(
+export function getStoredBackgroundEvents(
   options?: GetStoredBackgroundEventsOptions
 ): Promise<StoredBackgroundEvent[]> {
-  const events =
-    await NativeBackgroundLocation.getStoredBackgroundEvents(options);
-  return events.map((event: StoredBackgroundEventEnvelope) => ({
-    ...event,
-    event: narrowBackgroundEvent(event.event)
-  }));
+  // Nitro codegen exposes discriminated native unions as envelopes. The
+  // bridged payload already has the public runtime shape, so keep the native
+  // promise and its event objects intact.
+  return NativeBackgroundLocation.getStoredBackgroundEvents(
+    options
+  ) as unknown as Promise<StoredBackgroundEvent[]>;
 }
 
 export function clearStoredBackgroundEvents(ids?: string[]): Promise<void> {
@@ -248,9 +216,11 @@ export async function diagnoseBackgroundLocation(): Promise<BackgroundLocationDi
 export function onBackgroundEvent(
   listener: (event: BackgroundEvent) => void
 ): BackgroundSubscription {
-  const token = NativeBackgroundLocation.addBackgroundEventListener((event) => {
-    listener(narrowBackgroundEvent(event));
-  });
+  // See getStoredBackgroundEvents: this cast narrows only the codegen type and
+  // avoids a passthrough closure on every native event delivery.
+  const token = NativeBackgroundLocation.addBackgroundEventListener(
+    listener as (event: BackgroundEventEnvelope) => void
+  );
   return {
     remove: () => NativeBackgroundLocation.removeBackgroundEventListener(token)
   };

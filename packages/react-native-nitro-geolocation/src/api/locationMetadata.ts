@@ -58,15 +58,13 @@ function getStaleReason(
     : undefined;
 }
 
-/** Add descriptive metadata without changing whether a position is accepted. */
-export function decoratePositionWithMetadata(
+/** @internal Build descriptive metadata without changing position acceptance. */
+export function buildLocationMetadata(
   position: GeolocationResponse,
   context: LocationMetadataContext
-): GeolocationResponse {
+): LocationMetadata {
   const observedAt = context.observedAt ?? Date.now();
   const requestedAt = context.requestedAt ?? observedAt;
-  const basePosition = { ...position };
-  basePosition.metadata = undefined;
   const staleReason = getStaleReason(
     position.timestamp,
     context.maximumAge,
@@ -85,5 +83,16 @@ export function decoratePositionWithMetadata(
     metadata.staleReason = staleReason;
   }
 
-  return { ...basePosition, metadata };
+  return metadata;
+}
+
+/** Add descriptive metadata without changing whether a position is accepted. */
+export function decoratePositionWithMetadata(
+  position: GeolocationResponse,
+  context: LocationMetadataContext
+): GeolocationResponse {
+  return {
+    ...position,
+    metadata: buildLocationMetadata(position, context)
+  };
 }
