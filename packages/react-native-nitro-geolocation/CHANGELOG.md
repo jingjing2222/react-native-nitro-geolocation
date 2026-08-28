@@ -1,5 +1,11 @@
 # react-native-nitro-geolocation
 
+## 2.0.0-rc.3
+
+### Patch Changes
+
+- ee6cd92: Fix prebuilt packaging and portable checksums, and stage stable releases behind a validated, commit-matched manual `latest` promotion.
+
 ## 2.0.0-rc.2
 
 ### Patch Changes
