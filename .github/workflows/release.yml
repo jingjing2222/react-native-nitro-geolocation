@@ -44,7 +44,9 @@ jobs:
         run: yarn install
 
       - name: Verify documentation matches the package release channel
-        run: yarn workspace docs check:versions
+        run: |
+          yarn workspace docs build
+          yarn workspace docs check:versions
 
       - name: Create release PR or publish packages to a safe candidate tag
         id: changesets
