@@ -109,3 +109,26 @@ test("the shipped manifest links both binaries and forces ObjC registration", as
   assert.match(manifest, /name: "NitroGeolocationSPM"/);
   assert.match(manifest, /\.unsafeFlags\(\["-ObjC"\]\)/);
 });
+
+test("the checked-in SwiftPM consumer pins the validated RN and Nitro versions", async () => {
+  const exampleDir = path.join(root, "examples/v0.87.1");
+  const manifest = JSON.parse(
+    await readFile(path.join(exampleDir, "package.json"), "utf8")
+  );
+  const config = await readFile(
+    path.join(exampleDir, "react-native.config.js"),
+    "utf8"
+  );
+
+  assert.equal(manifest.dependencies["react-native"], "0.87.1");
+  assert.equal(manifest.dependencies["react-native-nitro-modules"], "0.37.1");
+  assert.equal(
+    manifest.dependencies["react-native-nitro-geolocation"],
+    "workspace:*"
+  );
+  assert.equal(
+    manifest.scripts["spm:setup"],
+    "react-native spm scaffold --deintegrate --yes"
+  );
+  assert.match(config, /withNitroGeolocationSwiftPM/);
+});

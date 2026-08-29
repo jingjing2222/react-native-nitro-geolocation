@@ -22,6 +22,10 @@ native Nitro runtime. The JavaScript package installed in the app must match
 that binary. The autolinking plugin stops with an actionable error when either
 React Native or Nitro is outside this matrix.
 
+The repository's
+[RN 0.87.1 consumer example](https://github.com/jingjing2222/react-native-nitro-geolocation/tree/main/examples/v0.87.1)
+is the same clean fixture exercised by the macOS SwiftPM CI job.
+
 ## Install with SwiftPM
 
 Install the matching Nitro runtime and this package:
@@ -50,17 +54,16 @@ Convert the iOS project with React Native's experimental command:
 
 ```bash
 cd ios
-npx react-native spm scaffold --yes
-npx react-native spm add --deintegrate --yes
+npx react-native spm scaffold --deintegrate --yes
 ```
 
 The scaffold command prepares other source-based community dependencies in the
 app. This package opts out of source scaffolding and supplies its verified
 binary product through the RN 0.87 autolinking plugin.
 
-After a fresh clone or dependency reset, rerun `spm scaffold --yes` followed by
-`npx react-native spm` before building. There is no `pod install` step on this
-path.
+After a fresh clone or dependency reset, rerun
+`spm scaffold --deintegrate --yes` before building. There is no `pod install`
+step on this path.
 
 During setup, the package downloads the matching GitHub Release artifact,
 verifies its SHA-256 sidecar, and exposes one `NitroGeolocationSPM` product to
