@@ -130,6 +130,7 @@ jobs:
       - name: Run unit tests
         run: |
           yarn test:unit
+          yarn test:release
 
   typecheck:
     name: TypeScript Check

@@ -115,7 +115,7 @@ for (const command of readme.matchAll(
 )) {
   if (
     isReleaseCandidate &&
-    !/react-native-nitro-geolocation@(?:rc|2\.0\.0-rc\.)/.test(command[0])
+    !/react-native-nitro-geolocation@(?:rc|2\.\d+\.\d+-rc\.)/.test(command[0])
   ) {
     throw new Error(
       `The 2.0 RC README install is not pinned to an RC: ${command[0]}`

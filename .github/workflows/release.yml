@@ -54,6 +54,7 @@ jobs:
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           publish-script: yarn release:publish
+          version-script: yarn release:version
 
       - name: Resolve published Geolocation version
         id: release-tag
