@@ -63,20 +63,27 @@ jobs:
         run: |
           android="react-native-nitro-geolocation-${VERSION}-android.aar"
           ios="react-native-nitro-geolocation-${VERSION}-ios.xcframework.zip"
+          spm="react-native-nitro-geolocation-${VERSION}-ios-spm.xcframeworks.zip"
           test -s "$ASSET_DIR/$android"
           test -s "$ASSET_DIR/$android.sha256"
           test -s "$ASSET_DIR/$ios"
           test -s "$ASSET_DIR/$ios.sha256"
+          test -s "$ASSET_DIR/$spm"
+          test -s "$ASSET_DIR/$spm.sha256"
           cd "$ASSET_DIR"
           test "$(wc -l < "$android.sha256" | tr -d ' ')" = "1"
           test "$(awk '{ sub(/^\*/, "", $2); print $2 }' "$android.sha256")" = "$android"
           test "$(wc -l < "$ios.sha256" | tr -d ' ')" = "1"
           test "$(awk '{ sub(/^\*/, "", $2); print $2 }' "$ios.sha256")" = "$ios"
+          test "$(wc -l < "$spm.sha256" | tr -d ' ')" = "1"
+          test "$(awk '{ sub(/^\*/, "", $2); print $2 }' "$spm.sha256")" = "$spm"
           sha256sum --check "$android.sha256"
           sha256sum --check "$ios.sha256"
+          sha256sum --check "$spm.sha256"
 
           android_entries="$(unzip -Z1 "$android")"
           ios_entries="$(unzip -Z1 "$ios")"
+          spm_entries="$(unzip -Z1 "$spm")"
           for abi in armeabi-v7a arm64-v8a x86 x86_64; do
             grep -Fxq "jni/$abi/libnitrogeolocation.so" <<< "$android_entries"
           done
@@ -86,6 +93,18 @@ jobs:
           done
           if grep -Eq '\.swift(interface|module)' <<< "$ios_entries"; then
             echo "The iOS prebuilt unexpectedly contains a textual Swift module." >&2
+            exit 1
+          fi
+          for framework in NitroModules NitroGeolocation; do
+            for slice in ios-arm64 ios-arm64_x86_64-simulator; do
+              grep -Fxq "$framework.xcframework/$slice/$framework.framework/$framework" <<< "$spm_entries"
+            done
+          done
+          for slice in ios-arm64 ios-arm64_x86_64-simulator; do
+            grep -Fxq "NitroGeolocation.xcframework/$slice/NitroGeolocation.framework/PrivacyInfo.xcprivacy" <<< "$spm_entries"
+          done
+          if grep -Eq '\.swift(interface|module)' <<< "$spm_entries"; then
+            echo "The SwiftPM prebuilts unexpectedly contain a Swift module." >&2
             exit 1
           fi
 

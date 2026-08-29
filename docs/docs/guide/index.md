@@ -40,8 +40,9 @@ default, or platform-specific option behaves identically. Review the
   required for native apps.
 - Bare React Native and Expo development/custom native builds are supported.
   Expo Go is not supported.
-- CocoaPods is the supported iOS dependency path. React Native 0.87 SwiftPM-only
-  projects must wait for official Nitro Modules SwiftPM support.
+- CocoaPods is the recommended production iOS dependency path. React Native
+  0.87.x SwiftPM-only projects have an experimental precompiled integration;
+  use the exact compatibility matrix in the Swift Package Manager guide.
 - The Modern and Compatibility foreground APIs support browser builds through
   `navigator.geolocation`. Background Location is native-only.
 - Android and iOS share public contracts but retain documented OS behavior and

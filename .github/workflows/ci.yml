@@ -69,6 +69,27 @@ jobs:
       - name: Verify iOS watch delivery policy
         run: scripts/test-ios-watch-delivery.sh
 
+  ios-swiftpm-consumer:
+    name: RN 0.87 SwiftPM Consumer
+    runs-on: macos-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup mise
+        uses: jdx/mise-action@v3
+        with:
+          install: false
+
+      - name: Trust and install tools via mise
+        run: |
+          mise trust --yes
+          mise install node ruby
+
+      - name: Build and consume the experimental SwiftPM package
+        run: scripts/test-spm-rn087.sh build/prebuilt
+
   build:
     name: Build
     runs-on: ubuntu-latest

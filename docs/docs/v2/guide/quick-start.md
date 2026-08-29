@@ -81,8 +81,9 @@ Use `pod install` directly when the app has no `Gemfile`. For Android:
 yarn android
 ```
 
-React Native 0.87 SwiftPM-only projects are not supported yet. Keep CocoaPods
-and review the [Swift Package Manager guide](./swift-package-manager.md).
+React Native 0.87.x can instead use the experimental precompiled SwiftPM path.
+It requires Nitro Modules 0.37.1 and an app configuration helper; follow the
+[Swift Package Manager guide](./swift-package-manager.md) exactly.
 
 ## 4. Check the native setup
 

@@ -42,7 +42,7 @@ combination is continuously exercised.
 | React Native | 0.75 or newer | New Architecture and Nitro Modules required |
 | React | 18 or newer | Follow the compatible version for the selected React Native release |
 | Expo | SDK 51 or newer as an optional peer | Development/custom native builds only; Expo Go unsupported |
-| iOS dependency manager | CocoaPods | React Native 0.87 SwiftPM-only unsupported until Nitro Modules provides a compatible package |
+| iOS dependency manager | CocoaPods; experimental SwiftPM on RN 0.87.x with Nitro Modules 0.37.1 | SwiftPM uses the matching precompiled release artifact and has no source fallback |
 | Android build | Consumer app's supported Android toolchain | Native permissions and foreground-service rules vary by OS level |
 | Native foreground | iOS and Android | Test permission and provider behavior on target devices |
 | Web foreground | Modern root and `/compat` through `navigator.geolocation` | Secure-context and browser permission rules apply |
@@ -71,7 +71,8 @@ example package and E2E workflow if this page and the installed release differ.
 ## Known limits
 
 - Expo Go cannot load the native Nitro bindings.
-- SwiftPM-only iOS projects are not supported; use CocoaPods.
+- SwiftPM-only iOS is experimental on React Native 0.87.x and requires Nitro
+  Modules 0.37.1 plus the documented app configuration helper.
 - Browser builds support foreground geolocation only. The `/background` web
   entry is import-safe but reports unsupported behavior.
 - Background delivery is best effort. Termination, reboot, iOS suspension,
