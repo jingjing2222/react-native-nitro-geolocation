@@ -50,14 +50,20 @@ Convert the iOS project with React Native's experimental command:
 
 ```bash
 cd ios
+npx react-native spm scaffold --yes
 npx react-native spm add --deintegrate --yes
 ```
 
-After a fresh clone or dependency reset, run `npx react-native spm` once before
-building. There is no `pod install` step on this path.
+The scaffold command prepares other source-based community dependencies in the
+app. This package opts out of source scaffolding and supplies its verified
+binary product through the RN 0.87 autolinking plugin.
+
+After a fresh clone or dependency reset, rerun `spm scaffold --yes` followed by
+`npx react-native spm` before building. There is no `pod install` step on this
+path.
 
 During setup, the package downloads the matching GitHub Release artifact,
-verifies its SHA-256 sidecar, and exposes one `NitroGeolocation` product to
+verifies its SHA-256 sidecar, and exposes one `NitroGeolocationSPM` product to
 React Native's autolinker. The artifact contains device and simulator slices
 for both `NitroModules.xcframework` and `NitroGeolocation.xcframework`.
 

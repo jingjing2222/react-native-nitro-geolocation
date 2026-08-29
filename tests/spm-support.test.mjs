@@ -16,9 +16,6 @@ const { withNitroGeolocationSwiftPM } = require(
 const { expectedChecksum } = require(
   path.join(packageDir, "spm/ensure-artifacts.cjs")
 );
-const { materializeFrameworks } = require(
-  path.join(packageDir, "spm/artifacts.cjs")
-);
 
 test("SwiftPM app config disables only Nitro's separate iOS autolink target", () => {
   const input = {
@@ -97,21 +94,6 @@ test("SwiftPM artifact preparation creates a complete isolated package", async (
       ),
       true
     );
-
-    const materialized = path.join(temporary, "installed-package");
-    materializeFrameworks(prepared, materialized);
-    assert.equal(
-      existsSync(
-        path.join(materialized, "prebuilds/spm/NitroModules.xcframework")
-      ),
-      true
-    );
-    assert.equal(
-      existsSync(
-        path.join(materialized, "prebuilds/spm/NitroGeolocation.xcframework")
-      ),
-      true
-    );
   } finally {
     await rm(temporary, { recursive: true, force: true });
   }
@@ -124,6 +106,6 @@ test("the shipped manifest links both binaries and forces ObjC registration", as
   );
   assert.match(manifest, /NitroModules\.xcframework/);
   assert.match(manifest, /NitroGeolocation\.xcframework/);
-  assert.match(manifest, /name: "NitroGeolocation"/);
+  assert.match(manifest, /name: "NitroGeolocationSPM"/);
   assert.match(manifest, /\.unsafeFlags\(\["-ObjC"\]\)/);
 });

@@ -3,11 +3,11 @@
 import PackageDescription
 
 let package = Package(
-    name: "NitroGeolocation",
+    name: "NitroGeolocationSPM",
     platforms: [.iOS(.v15)],
     products: [
         .library(
-            name: "NitroGeolocation",
+            name: "NitroGeolocationSPM",
             targets: ["NitroGeolocationSPMLinker"]
         ),
     ],

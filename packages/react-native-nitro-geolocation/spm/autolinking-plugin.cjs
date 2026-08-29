@@ -2,7 +2,6 @@ const { readFileSync } = require("node:fs");
 const path = require("node:path");
 const {
   ensurePreparedPackage,
-  materializeFrameworks,
   packageJson,
   packageRoot
 } = require("./artifacts.cjs");
@@ -39,13 +38,23 @@ function assertCompatibleRuntime(context) {
 module.exports = function nitroGeolocationAutolinkingPlugin(context) {
   assertCompatibleRuntime(context);
   const preparedPackage = ensurePreparedPackage(process.env);
-  materializeFrameworks(preparedPackage, packageRoot);
 
   return {
+    packageDependencies: [
+      {
+        name: "NitroGeolocationSPM",
+        path: preparedPackage
+      }
+    ],
+    productDependencies: [
+      {
+        name: "NitroGeolocationSPM",
+        package: "NitroGeolocationSPM"
+      }
+    ],
     watchPaths: [
       path.join(packageRoot, "Package.swift"),
-      path.join(packageRoot, "spm"),
-      path.join(packageRoot, "prebuilds", "spm")
+      path.join(packageRoot, "spm")
     ]
   };
 };
