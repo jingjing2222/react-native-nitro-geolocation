@@ -76,7 +76,7 @@ for (const file of canonicalFiles) {
       }
 
       for (const match of line.matchAll(
-        /react-native-nitro-geolocation@(2\.0\.0(?:-rc\.\d+)?)/g
+        /react-native-nitro-geolocation@(2\.\d+\.\d+(?:-rc\.\d+)?)/g
       )) {
         if (match[1] !== packageVersion) {
           throw new Error(
