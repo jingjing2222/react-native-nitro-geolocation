@@ -131,4 +131,5 @@ test("the checked-in SwiftPM consumer pins the validated RN and Nitro versions",
     "react-native spm scaffold --deintegrate --yes"
   );
   assert.match(config, /withNitroGeolocationSwiftPM/);
+  assert.match(config, /NITRO_GEOLOCATION_EXAMPLE_USE_COCOAPODS/);
 });

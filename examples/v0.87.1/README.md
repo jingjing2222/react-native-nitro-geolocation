@@ -22,6 +22,11 @@ library, source-builds the matching binary artifacts, scaffolds other compatible
 community packages, removes CocoaPods integration, and builds Debug simulator,
 Release simulator, and Release device destinations through SwiftPM.
 
+The clean-room script sets `NITRO_GEOLOCATION_EXAMPLE_USE_COCOAPODS=1` only
+while producing those local XCFrameworks from source. Normal use leaves the
+variable unset, so the app config disables Nitro's separate CocoaPods target and
+lets the geolocation SwiftPM plugin provide both native binaries.
+
 For a published version whose release contains the matching SwiftPM artifact:
 
 ```bash

@@ -41,20 +41,14 @@ package_archive="$({ npm pack "$PACKAGE_DIR" --pack-destination "$PACK_DIR" --js
   ' package.json "$PACK_DIR/$package_archive"
   npm install
   bundle install
-  USE_FRAMEWORKS=static \
+  NITRO_GEOLOCATION_EXAMPLE_USE_COCOAPODS=1 \
+    USE_FRAMEWORKS=static \
     NITRO_GEOLOCATION_USE_PREBUILT=0 \
     bundle exec pod install --project-directory=ios
 )
 
 scripts/build-spm-prebuilt-ios.sh "$APP_DIR" "$OUT_DIR"
 
-node -e '
-  const fs = require("node:fs");
-  const config = require(process.argv[1]);
-  fs.writeFileSync(process.argv[2], config.swiftPMReactNativeConfigSource);
-' \
-  "$APP_DIR/node_modules/react-native-nitro-geolocation/spm/config.cjs" \
-  "$APP_DIR/react-native.config.js"
 (
   cd "$APP_DIR"
   NITRO_GEOLOCATION_SPM_CACHE_DIR="$WORK_DIR/spm-cache" \
