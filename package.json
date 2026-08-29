@@ -26,7 +26,7 @@
     "release:promote-latest": "node scripts/promote-latest.mjs",
     "release:sync-version": "node scripts/sync-release-version.mjs",
     "release:version": "yarn changeset version && yarn release:sync-version && yarn workspace docs build && yarn workspace docs check:versions",
-    "test:release": "node --test tests/release-policy.test.mjs tests/release-version-sync.test.mjs",
+    "test:release": "node --test tests/release-policy.test.mjs tests/release-version-sync.test.mjs tests/release-workflow.test.mjs",
     "test:release-policy": "node --test tests/release-policy.test.mjs",
     "test:unit": "yarn workspace react-native-nitro-geolocation test",
     "test:ios-location-lifecycle": "bash scripts/test-ios-location-lifecycle.sh",
