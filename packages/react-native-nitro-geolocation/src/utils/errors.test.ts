@@ -9,7 +9,7 @@ import {
 } from "./errors";
 
 describe("LocationErrorCodes", () => {
-  it("uses readable, platform-independent Modern API codes", () => {
+  it("uses readable, platform-independent string codes", () => {
     expect(LocationErrorCodes.INTERNAL_ERROR).toBe("internalError");
     expect(LocationErrorCodes.PERMISSION_DENIED).toBe("permissionDenied");
     expect(LocationErrorCodes.POSITION_UNAVAILABLE).toBe("positionUnavailable");

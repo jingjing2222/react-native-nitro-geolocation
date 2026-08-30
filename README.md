@@ -2,14 +2,14 @@
 
 [![NPM](https://img.shields.io/npm/v/react-native-nitro-geolocation)](https://www.npmjs.com/package/react-native-nitro-geolocation)
 
-**Nitro-powered geolocation for modern React Native apps**
+**Nitro-powered geolocation for React Native apps**
 
 A native iOS/Android geolocation module for React Native 0.75+ apps using the
 New Architecture and Nitro Modules. Start by replacing
 [`@react-native-community/geolocation`](https://github.com/michalchudziak/react-native-geolocation)
-with `/compat`, then move to a typed Modern API when you are ready.
-The current release line adds web support for Modern and `/compat` foreground
-geolocation plus a native Background Location API for tracking, geofencing,
+with `/compat`, then move to the typed API when you are ready.
+The current release line adds foreground web support through both the package
+import and `/compat`, plus a native Background Location API for tracking, geofencing,
 storage recovery, Headless JS, and HTTP sync.
 
 - 🎯 **Simple functional API** — Direct function calls, no complex abstractions
@@ -39,10 +39,10 @@ Full documentation available at:
 | New Architecture / Nitro-based app | Recommended |
 | Expo development build or custom native build | Supported with native setup |
 | Expo managed app without native rebuild | Use `expo-location` |
-| Web support required | Use the Modern API root import or `/compat` callback API |
+| Web support required | Use the package import or `/compat` callback API |
 | Full background tracking / geofencing | Use `react-native-nitro-geolocation/background` |
 
-Web support is available for the Modern API root import and the `/compat`
+Web support is available for the package import and the `/compat`
 subpath. Browser builds resolve both entries to implementations backed by
 `navigator.geolocation` and do not load Nitro native bindings. Background
 location remains native-only.
@@ -54,7 +54,7 @@ location remains native-only.
 React Native Nitro Geolocation provides **three public API surfaces** to fit
 your needs:
 
-### 1. Modern API (Recommended)
+### 1. API (Recommended)
 
 **Simple functional API** with direct calls and a single hook for tracking:
 
@@ -82,13 +82,13 @@ if (status === "granted") {
 }
 ```
 
-Modern foreground responses include optional observational metadata for the
+Foreground responses include optional observational metadata for the
 delivery source, age, horizontal-accuracy quality band, and stale reason. This
 metadata never causes the library to reject a stale or low-accuracy position;
 applications can apply their own policy. The `/compat` response shape is
 unchanged.
 
-See the [Modern API guide](https://react-native-nitro-geolocation.pages.dev/guide/modern-api)
+See the [API guide](https://react-native-nitro-geolocation.pages.dev/guide/api)
 for watches, geocoding, heading, cached reads, Android settings, and iOS
 accuracy authorization.
 
@@ -229,7 +229,7 @@ permission set from the Android background setup guide when using
 ### 4. DevTools Plugin
 
 Use the Rozenite DevTools plugin to mock locations during development with an
-interactive map. It works with the Modern API root import.
+interactive map. It works with the package import.
 
 ![DevTools Plugin Demo](https://raw.githubusercontent.com/jingjing2222/react-native-nitro-geolocation/main/devtools.gif)
 
@@ -264,7 +264,7 @@ Use the docs site for the detailed flows:
 
 - [Quick Start](https://react-native-nitro-geolocation.pages.dev/guide/quick-start) - install, set native permissions, and read your first location.
 - [Swift Package Manager](https://react-native-nitro-geolocation.pages.dev/guide/swift-package-manager) - RN 0.87 compatibility and migration gate.
-- [Modern API](https://react-native-nitro-geolocation.pages.dev/guide/modern-api) - accuracy presets, watches, Android settings, cached reads, geocoding, heading, and iOS accuracy authorization.
+- [API](https://react-native-nitro-geolocation.pages.dev/guide/api) - accuracy presets, watches, Android settings, cached reads, geocoding, heading, and iOS accuracy authorization.
 - [Compat API](https://react-native-nitro-geolocation.pages.dev/guide/compat-api) - callback compatibility and web behavior.
 - [Background Location](https://react-native-nitro-geolocation.pages.dev/background/overview) - native background tracking, geofencing, storage recovery, Headless JS, HTTP sync, and delivery diagnosis.
 - [Migration Assistance](https://react-native-nitro-geolocation.pages.dev/guide/migration-assistance) - choose the community or service migration path.
@@ -276,7 +276,7 @@ Use the docs site for the detailed flows:
 - [Introduction](https://react-native-nitro-geolocation.pages.dev/guide/)
 - [Quick Start Guide](https://react-native-nitro-geolocation.pages.dev/guide/quick-start)
 - [Swift Package Manager Guide](https://react-native-nitro-geolocation.pages.dev/guide/swift-package-manager)
-- [Modern API Reference](https://react-native-nitro-geolocation.pages.dev/guide/modern-api)
+- [API Reference](https://react-native-nitro-geolocation.pages.dev/guide/api)
 - [Compat API Reference](https://react-native-nitro-geolocation.pages.dev/guide/compat-api)
 - [Migration Skills](https://react-native-nitro-geolocation.pages.dev/guide/migration-assistance)
 - [Community Migration](https://react-native-nitro-geolocation.pages.dev/guide/community-migration)

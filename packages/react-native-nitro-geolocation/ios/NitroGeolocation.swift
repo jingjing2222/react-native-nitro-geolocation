@@ -3,7 +3,7 @@ import CoreLocation
 import NitroModules
 
 /**
- * Geolocation implementation for the native Modern API contract.
+ * Geolocation implementation for the native API contract.
  *
  * Key features:
  * - Callback-based native permission and getCurrentPosition for structured errors

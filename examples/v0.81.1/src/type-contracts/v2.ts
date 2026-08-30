@@ -1,5 +1,3 @@
-// @ts-expect-error v2 removes the duplicate Modern configuration alias.
-import type { ModernGeolocationConfiguration } from "react-native-nitro-geolocation";
 import type {
   LocationReadiness,
   LocationReadinessRemediation,
@@ -17,15 +15,13 @@ import {
 } from "react-native-nitro-geolocation";
 import type { GeolocationOptions as CompatGeolocationOptions } from "react-native-nitro-geolocation/compat";
 
-void (undefined as unknown as ModernGeolocationConfiguration);
-
-const modernRequest: LocationRequestOptions = {
-  // @ts-expect-error v2 Modern callers choose an explicit accuracy preset.
+const request: LocationRequestOptions = {
+  // @ts-expect-error v2 callers choose an explicit accuracy preset.
   enableHighAccuracy: true
 };
 
-const modernSettings: LocationSettingsOptions = {
-  // @ts-expect-error v2 Modern settings use accuracy.android.
+const settings: LocationSettingsOptions = {
+  // @ts-expect-error v2 settings use accuracy.android.
   enableHighAccuracy: true
 };
 
@@ -58,8 +54,8 @@ selectProvider("high", true, true);
 selectProvider(true, true, true);
 
 void [
-  modernRequest,
-  modernSettings,
+  request,
+  settings,
   settingsResultPromise,
   detailedSettingsResultPromise,
   settingsOutcome,

@@ -6,7 +6,7 @@
   "service-migration",
   "expo-development-build",
   "react-native-directory",
-  "modern-api",
+  "api",
   "compat-api",
   "agent-context-map",
   "devtools",

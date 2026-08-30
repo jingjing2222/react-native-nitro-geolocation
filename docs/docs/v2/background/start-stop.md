@@ -61,7 +61,7 @@ export async function stopTracking() {
 }
 ```
 
-`android.locationProvider` uses the same public values as the root API:
+`android.locationProvider` uses the same public values as foreground configuration:
 `'auto'`, `'playServices'`, or `'android'`. Use `'android'` to force the
 platform `LocationManager`; the Nitro-only `'android_platform'` spelling is not
 part of the public API.

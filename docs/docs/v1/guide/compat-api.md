@@ -3,7 +3,7 @@ title: Compat API (Compatibility)
 ---
 
 > ⚠️ **This is the compat callback-based API for compatibility with @react-native-community/geolocation.**
-> For new projects, we recommend using the [Modern API](./modern-api.md) with functions and the `useWatchPosition` hook.
+> For new projects, we recommend using the [API](./api.md) with functions and the `useWatchPosition` hook.
 
 ## Import Path
 
@@ -23,12 +23,12 @@ import {
 
 This API is drop-in compatible with the core native
 `@react-native-community/geolocation` surface. It preserves the callback-based
-shape for existing iOS and Android apps while the Modern API gives new code a
+shape for existing iOS and Android apps while the package import gives new code a
 Promise/function API.
 
 | Community API | Nitro `/compat` | Notes |
 | --- | ---: | --- |
-| `setRNConfiguration` | Supported | Preserves the legacy config method; Android provider selection is handled by the Modern API root import. |
+| `setRNConfiguration` | Supported | Preserves the legacy config method; Android provider selection is handled by the main package import. |
 | `requestAuthorization` | Supported | iOS authorization follows configured `Info.plist` keys and `authorizationLevel`. |
 | `getCurrentPosition` | Supported | Keeps the legacy callback and error shape. |
 | `watchPosition` | Supported | Returns a numeric watch id. |
@@ -37,7 +37,7 @@ Promise/function API.
 | `navigator.geolocation` polyfill | Not supported | Import `/compat` directly instead of installing a global polyfill. |
 | Web | Supported | Browser builds use `navigator.geolocation` for `getCurrentPosition`, `watchPosition`, `clearWatch`, and `stopObserving`. |
 
-The root Modern API and `/compat` subpath both support web by delegating to the
+The package import and `/compat` subpath both support web by delegating to the
 browser `navigator.geolocation` API. The `/compat` web entry keeps the callback
 shape and legacy error constants, while `setRNConfiguration()` is a no-op and
 `requestAuthorization()` calls the success callback immediately because browsers
@@ -58,7 +58,7 @@ do not expose a standalone geolocation authorization prompt.
 
 Preserves the legacy configuration API. Use it for iOS authorization/background
 settings. Android provider selection and request behavior should be configured
-per call or through the Modern API root import.
+per call or through the main package import.
 
 ```ts
 Geolocation.setRNConfiguration(config: {
@@ -74,7 +74,7 @@ Supported options:
 - `skipPermissionRequests` (boolean) - Required by the public type. Pass `false` for legacy compatibility, or `true` when you request permissions yourself before using Geolocation APIs. For deterministic app flows, request permissions explicitly before calling location APIs.
 - `authorizationLevel` (string, iOS-only) - Either `"whenInUse"`, `"always"`, or `"auto"`. Changes whether the user will be asked to give "always" or "when in use" location services permission. Any other value or `auto` will use the default behaviour, where the permission level is based on the contents of your `Info.plist`.
 - `enableBackgroundLocationUpdates` (boolean, iOS-only) - When using `skipPermissionRequests`, toggles whether to enable Core Location background updates. Defaults to false unless explicitly set.
-- `locationProvider` (string, Android-only) - Either `"playServices"`, `"android"`, or `"auto"`. Preserved for API compatibility on `/compat`; use the Modern API root import when you need Android fused/provider selection.
+- `locationProvider` (string, Android-only) - Either `"playServices"`, `"android"`, or `"auto"`. Preserved for API compatibility on `/compat`; use the main package import when you need Android fused/provider selection.
 
 ### `requestAuthorization()`
 

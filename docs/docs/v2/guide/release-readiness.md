@@ -45,7 +45,7 @@ combination is continuously exercised.
 | iOS dependency manager | CocoaPods; experimental SwiftPM on RN 0.87.x with Nitro Modules 0.37.1 | SwiftPM uses the matching precompiled release artifact and has no source fallback |
 | Android build | Consumer app's supported Android toolchain | Native permissions and foreground-service rules vary by OS level |
 | Native foreground | iOS and Android | Test permission and provider behavior on target devices |
-| Web foreground | Modern root and `/compat` through `navigator.geolocation` | Secure-context and browser permission rules apply |
+| Web foreground | package import and `/compat` through `navigator.geolocation` | Secure-context and browser permission rules apply |
 | Background | iOS and Android through `/background` | Native-only and best effort under OS lifecycle policy |
 | Prebuilts | Matching release assets when compatible | Android requires matching React Native and Nitro major/minor versions; source fallback otherwise |
 

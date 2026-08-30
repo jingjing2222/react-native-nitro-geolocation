@@ -21,7 +21,7 @@ import type {
 
 // Keep the `/background` entry point self-contained: consumers should be able
 // to import every named type referenced by its public options, status, and
-// event contracts without reaching through the package root.
+// event contracts without reaching through the main package entry point.
 export type {
   AccuracyAuthorization,
   AndroidAccuracyPreset,

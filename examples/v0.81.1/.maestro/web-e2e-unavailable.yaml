@@ -1,6 +1,6 @@
 appId: nitrogeolocation.example
 ---
-# Web Modern API provider-disabled contract through react-native-webview.
+# Web provider-disabled contract through react-native-webview.
 # Android runner disables device location before invoking this flow.
 
 - launchApp:

@@ -1,6 +1,6 @@
 appId: nitrogeolocation.example
 ---
-# Modern API error contract: trigger real native errors, display their
+# API error contract: trigger real native errors, display their
 # structured { code, message } shape, then assert the rendered result.
 
 - launchApp:
@@ -46,7 +46,7 @@ appId: nitrogeolocation.example
 - waitForAnimationToEnd
 
 - extendedWaitUntil:
-    visible: "Readable Modern API errors without numeric lookup tables"
+    visible: "Readable API errors without numeric lookup tables"
     timeout: 10000
 
 - tapOn:
@@ -102,7 +102,7 @@ appId: nitrogeolocation.example
 - waitForAnimationToEnd
 
 - extendedWaitUntil:
-    visible: "Readable Modern API errors without numeric lookup tables"
+    visible: "Readable API errors without numeric lookup tables"
     timeout: 10000
 
 - tapOn:

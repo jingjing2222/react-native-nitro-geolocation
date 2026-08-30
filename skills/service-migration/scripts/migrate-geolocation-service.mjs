@@ -553,7 +553,7 @@ function transformOptions(t, optionsNode, { report, file, callName }) {
         report,
         file,
         null,
-        "getCurrentPosition omitted timeout and maximumAge. Legacy service defaults were effectively infinite; Nitro Modern defaults are timeout 600000 and maximumAge 0."
+        "getCurrentPosition omitted timeout and maximumAge. Legacy service defaults were effectively infinite; Nitro defaults are timeout 600000 and maximumAge 0."
       );
     }
     if (callName === "getCurrentPosition" || callName === "watchPosition") {
@@ -642,7 +642,7 @@ function transformOptions(t, optionsNode, { report, file, callName }) {
         report,
         file,
         location(t, property),
-        "forceRequestLocation has no direct Modern option. Preserve the fallback behavior explicitly only after UX/product review."
+        "forceRequestLocation has no direct API option. Preserve the fallback behavior explicitly only after UX/product review."
       );
       continue;
     }
@@ -690,7 +690,7 @@ function transformOptions(t, optionsNode, { report, file, callName }) {
       report,
       file,
       location(t, optionsNode),
-      `getCurrentPosition omitted ${missing}. Legacy service defaults were effectively infinite; Nitro Modern defaults are timeout 600000 and maximumAge 0.`
+      `getCurrentPosition omitted ${missing}. Legacy service defaults were effectively infinite; Nitro defaults are timeout 600000 and maximumAge 0.`
     );
   }
 
@@ -1000,7 +1000,7 @@ function transformSourceFile(
           report,
           rel,
           location(t, path.node),
-          "CommonJS require('react-native-geolocation-service') found. Convert this import manually to named Modern API imports."
+          "CommonJS require('react-native-geolocation-service') found. Convert this import manually to named imports."
         );
       }
     }
@@ -1115,7 +1115,7 @@ function transformSourceFile(
             report,
             rel,
             location(t, path.node),
-            "Legacy requestAuthorization handling references disabled. Modern requestPermission() does not return disabled; use hasServicesEnabled() or getProviderStatus() separately."
+            "Legacy requestAuthorization handling references disabled. requestPermission() does not return disabled; use hasServicesEnabled() or getProviderStatus() separately."
           );
         }
         path.replaceWith(

@@ -1,10 +1,10 @@
 ---
-title: Modern API
+title: API
 ---
 
 > Simple functional API with direct calls and minimal abstractions
 
-The Modern API provides a straightforward approach to geolocation with direct function calls and a single hook for continuous tracking.
+This API provides a straightforward approach to geolocation with direct function calls and a single hook for continuous tracking.
 
 ## Find an API by task
 
@@ -84,7 +84,7 @@ export type GeolocationConfiguration = {
 
 **Web behavior**:
 
-- Browser builds resolve the root import to a web entry that uses
+- Browser builds resolve the main package import to a web entry that uses
   `navigator.geolocation`.
 - `setConfiguration()` is a no-op on web. Browser permission prompts are driven
   by `getCurrentPosition()` / `watchPosition()`, not by a standalone platform
@@ -371,12 +371,12 @@ when the page becomes visible or active. Provider-specific optional fields stay
 - Use `getLastKnownPosition()` for a synchronous read of the module cache. Use
   `getLastKnownPositionAsync()` to query native/provider caches without starting
   a fresh request.
-- Modern API errors include `PLAY_SERVICE_NOT_AVAILABLE`,
+- Errors include `PLAY_SERVICE_NOT_AVAILABLE`,
   `SETTINGS_NOT_SATISFIED`, and `TIMEOUT`.
 
 ### Web Notes
 
-Modern API web support uses the browser standard `navigator.geolocation` API.
+Web support uses the browser standard `navigator.geolocation` API.
 It requires a secure context (`https://`, `localhost`, or another browser-trusted
 origin). Unsupported browsers or unavailable providers reject location requests
 with `POSITION_UNAVAILABLE`.
@@ -477,7 +477,7 @@ function LocationButton() {
   aborted prevents native or browser location work from starting. The promise
   rejects with the exact `signal.reason`; runtimes without a reason receive an
   `AbortError` fallback.
-- `accuracy?: { android?: 'high' | 'balanced' | 'low' | 'passive'; ios?: 'bestForNavigation' | 'best' | 'nearestTenMeters' | 'hundredMeters' | 'kilometer' | 'threeKilometers' | 'reduced' }` - Platform-specific accuracy preset. Modern 2.0 callers use this option; `enableHighAccuracy` remains only on `/compat`.
+- `accuracy?: { android?: 'high' | 'balanced' | 'low' | 'passive'; ios?: 'bestForNavigation' | 'best' | 'nearestTenMeters' | 'hundredMeters' | 'kilometer' | 'threeKilometers' | 'reduced' }` - Platform-specific accuracy preset. 2.0 callers use this option; `enableHighAccuracy` remains only on `/compat`.
 - `granularity?: 'permission' | 'coarse' | 'fine'` - Android-only request granularity, available since `v1.2`. `permission` follows the granted permission level, `coarse` avoids fine GPS-only requests, and `fine` requires fine location permission.
 - `waitForAccurateLocation?: boolean` - Android-only Fused request tuning, available since `v1.2`.
 - `maxUpdateAge?: number` - Android-only maximum age for an initial update in ms, available since `v1.2`.
@@ -596,7 +596,7 @@ interface GeolocationResponse {
 
 ### Mock and provider metadata
 
-`mocked` and `provider` are optional Modern API metadata fields added in v1.2.
+`mocked` and `provider` are optional response metadata fields added in v1.2.
 They describe the source of that particular position sample:
 
 - `mocked` reports whether the sample source identified it as simulated or
@@ -671,12 +671,12 @@ const token = watchPosition(
 unwatch(token);
 ```
 
-Starting in 2.0, Modern API errors use readable string discriminants. Keep
+Starting in 2.0, API errors use readable string discriminants. Keep
 comparisons against the `LocationErrorCodes` members shown below instead of
-copying their values. The expanded modern-only native setup/provider members
+copying their values. The additional native setup/provider members
 (`INTERNAL_ERROR`, `PLAY_SERVICE_NOT_AVAILABLE`, and
 `SETTINGS_NOT_SATISFIED`) were originally added in v1.2; 2.0 keeps those member
-names while replacing every Modern numeric value with a string.
+names while replacing every previous numeric value with a string.
 
 The code is committed by the native layer before a `LocationError` is sent to
 JS. Both `watchPosition` error callbacks and public Promise rejections from
@@ -723,7 +723,7 @@ native/provider cache-only sources using `maximumAge`, `accuracy`,
 options are intentionally excluded, and the call never falls through to a
 fresh request. It resolves `undefined` when no cached location
 satisfies the options, including a native `POSITION_UNAVAILABLE` result. Other
-failures, such as permission denial, reject with the Modern `LocationError`
+failures, such as permission denial, reject with `LocationError`
 contract.
 
 ### Geocoding APIs
@@ -764,7 +764,7 @@ const addresses = await reverseGeocode({
 `reverseGeocode(coords)` rejects with `INTERNAL_ERROR` when latitude or
 longitude is non-finite or outside the valid coordinate range. Platform
 geocoder service failures reject with the same `{ code, message }`
-`LocationError` shape as the rest of the Modern API.
+`LocationError` shape as the rest of the API.
 
 ### Heading APIs
 
@@ -896,7 +896,7 @@ function LiveTracker() {
 **Options**:
 
 - `enabled?: boolean` - Start/stop watching (default: `false`)
-- `accuracy?: { android?: 'high' | 'balanced' | 'low' | 'passive'; ios?: 'bestForNavigation' | 'best' | 'nearestTenMeters' | 'hundredMeters' | 'kilometer' | 'threeKilometers' | 'reduced' }` - Platform-specific accuracy preset. Modern 2.0 callers use this option; `enableHighAccuracy` remains only on `/compat`.
+- `accuracy?: { android?: 'high' | 'balanced' | 'low' | 'passive'; ios?: 'bestForNavigation' | 'best' | 'nearestTenMeters' | 'hundredMeters' | 'kilometer' | 'threeKilometers' | 'reduced' }` - Platform-specific accuracy preset. 2.0 callers use this option; `enableHighAccuracy` remains only on `/compat`.
 - `granularity?: 'permission' | 'coarse' | 'fine'` - Android-only request granularity, available since `v1.2`
 - `waitForAccurateLocation?: boolean` - Android-only high-accuracy initial update tuning, available since `v1.2`
 - `maxUpdateAge?: number` - Android-only maximum age for an initial update, available since `v1.2`
@@ -993,7 +993,7 @@ unwatch(token);
 
 ### getActiveWatches()
 
-Read the active Modern API position and heading subscriptions without starting
+Read the active position and heading subscriptions without starting
 or changing location services:
 
 ```tsx
@@ -1084,7 +1084,7 @@ function BackgroundTracker() {
 
 ## TypeScript Support
 
-All Modern API exports are fully typed:
+All exports are fully typed:
 
 ```typescript
 import type {
@@ -1109,8 +1109,8 @@ import type {
 `NullableDouble` is `number | null`. It is the shared scalar used by
 `GeolocationCoordinates.altitude`, `altitudeAccuracy`, `heading`, and `speed`.
 
-The deprecated `ModernGeolocationConfiguration` alias was removed in 2.0. Use
-`GeolocationConfiguration` for the root Modern API.
+The deprecated 1.x configuration alias was removed in 2.0. Use
+`GeolocationConfiguration`.
 
 ### Type Inference
 
@@ -1130,7 +1130,7 @@ const status = await requestPermission();
 
 ## Comparison with Compat API
 
-| Feature          | Modern API                               | Compat API                               |
+| Feature          | Package import                   | Compat API                               |
 | ---------------- | ---------------------------------------- | ---------------------------------------- |
 | **Import**       | `react-native-nitro-geolocation`         | `react-native-nitro-geolocation/compat`  |
 | **Pattern**      | Functions + Hook                         | Callbacks                                |
@@ -1173,7 +1173,7 @@ function LocationTracker() {
 }
 ```
 
-**After (Modern API)**:
+**After**:
 
 ```tsx
 import { useWatchPosition } from 'react-native-nitro-geolocation';
@@ -1193,4 +1193,4 @@ function LocationTracker() {
 - No watch ID management
 - Automatic cleanup
 - Declarative enable/disable
-- Promise-based control flow and inferred Modern API results
+- Promise-based control flow and inferred results

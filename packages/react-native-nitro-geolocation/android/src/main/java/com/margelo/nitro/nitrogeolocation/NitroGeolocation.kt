@@ -589,7 +589,7 @@ class NitroGeolocation(
     // MARK: - Helper Functions - Permission
 
     private fun getCurrentPermissionStatus(): PermissionStatus {
-        // Legacy Android (< 6.0)
+        // Android < 6.0 uses install-time permission grants.
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
             return PermissionStatus.GRANTED
         }

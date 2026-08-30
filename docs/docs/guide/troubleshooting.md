@@ -58,7 +58,7 @@ guidance/remediation fields in product UI rather than inferring prompt behavior
 from an OS name alone.
 
 Then reproduce one explicit location request and record the structured error
-`code` and `message`. Modern 2.0 codes are strings; `/compat` codes remain
+`code` and `message`. 2.0 API codes are strings; `/compat` codes remain
 numeric. Remove exact coordinates from logs before sharing them.
 
 ## 3. Separate foreground and background failures
@@ -99,7 +99,7 @@ Include:
 - exact Geolocation, Nitro Modules, React Native, React, and Expo versions;
 - iOS/Android/browser version, device or simulator, and CPU architecture;
 - CocoaPods/prebuilt/source-build path and whether a clean native rebuild ran;
-- minimal root, `/compat`, or `/background` import and options;
+- minimal main package, `/compat`, or `/background` import and options;
 - doctor JSON plus permission/readiness or background diagnosis;
 - expected result, actual result, and smallest reproduction steps;
 - whether the problem happens in Debug, Release, and a physical device;

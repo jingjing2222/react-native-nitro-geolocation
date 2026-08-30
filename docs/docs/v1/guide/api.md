@@ -1,10 +1,10 @@
 ---
-title: Modern API (Recommended)
+title: API (Recommended)
 ---
 
 > Simple functional API with direct calls and minimal abstractions
 
-The Modern API provides a straightforward approach to geolocation with direct function calls and a single hook for continuous tracking.
+This API provides a straightforward approach to geolocation with direct function calls and a single hook for continuous tracking.
 
 ## Design Philosophy
 
@@ -59,11 +59,6 @@ export type GeolocationConfiguration = {
   locationProvider?: 'playServices' | 'android' | 'auto';
 };
 
-/**
- * @deprecated Use `GeolocationConfiguration` instead.
- * This alias is kept only for backward compatibility.
- */
-export type ModernGeolocationConfiguration = GeolocationConfiguration;
 ```
 
 **When to call**:
@@ -73,7 +68,7 @@ export type ModernGeolocationConfiguration = GeolocationConfiguration;
 
 **Web behavior**:
 
-- Browser builds resolve the root import to a web entry that uses
+- Browser builds resolve the main package import to a web entry that uses
   `navigator.geolocation`.
 - `setConfiguration()` is a no-op on web. Browser permission prompts are driven
   by `getCurrentPosition()` / `watchPosition()`, not by a standalone platform
@@ -231,12 +226,12 @@ current Core Location service status and does not show a settings dialog.
   Android `granularity`.
 - Use `getLastKnownPosition()` when you want an explicit cached read without
   starting a fresh native request.
-- Modern API errors include `PLAY_SERVICE_NOT_AVAILABLE`,
+- Errors include `PLAY_SERVICE_NOT_AVAILABLE`,
   `SETTINGS_NOT_SATISFIED`, and `TIMEOUT`.
 
 ### Web Notes
 
-Modern API web support uses the browser standard `navigator.geolocation` API.
+Web support uses the browser standard `navigator.geolocation` API.
 It requires a secure context (`https://`, `localhost`, or another browser-trusted
 origin). Unsupported browsers or unavailable providers reject location requests
 with `POSITION_UNAVAILABLE`.
@@ -327,7 +322,7 @@ function LocationButton() {
 
 - `timeout?: number` - Request timeout in ms (default: 600000 / 10 min)
 - `maximumAge?: number` - Max age of cached location in ms (default: 0)
-- `enableHighAccuracy?: boolean` - Deprecated since `v1.2`. Kept for v1 compatibility only; prefer `accuracy`. It is expected to be removed from the Modern API in v2.
+- `enableHighAccuracy?: boolean` - Deprecated since `v1.2`. Kept for v1 compatibility only; prefer `accuracy`. It is expected to be removed from the API in v2.
 - `accuracy?: { android?: 'high' | 'balanced' | 'low' | 'passive'; ios?: 'bestForNavigation' | 'best' | 'nearestTenMeters' | 'hundredMeters' | 'kilometer' | 'threeKilometers' | 'reduced' }` - Platform-specific accuracy preset, available since `v1.2`. When a preset is provided for the current platform, it takes precedence over `enableHighAccuracy`.
 - `granularity?: 'permission' | 'coarse' | 'fine'` - Android-only request granularity, available since `v1.2`. `permission` follows the granted permission level, `coarse` avoids fine GPS-only requests, and `fine` requires fine location permission.
 - `waitForAccurateLocation?: boolean` - Android-only Fused request tuning, available since `v1.2`.
@@ -405,7 +400,7 @@ interface GeolocationResponse {
 }
 ```
 
-`mocked` and `provider` are optional metadata fields added to the Modern API response in v1.2. The `/compat` API keeps the `@react-native-community/geolocation` response shape and does not include these fields.
+`mocked` and `provider` are optional metadata fields added to the API response in v1.2. The `/compat` API keeps the `@react-native-community/geolocation` response shape and does not include these fields.
 
 **Error Handling**:
 
@@ -431,7 +426,7 @@ const token = watchPosition(
 unwatch(token);
 ```
 
-Modern API errors use the following codes. The expanded modern-only native
+API errors use the following codes. The expanded native
 setup/provider codes (`INTERNAL_ERROR`, `PLAY_SERVICE_NOT_AVAILABLE`, and
 `SETTINGS_NOT_SATISFIED`) were added in v1.2; codes 1-3 remain aligned with the
 legacy browser-style contract.
@@ -514,7 +509,7 @@ const addresses = await reverseGeocode({
 `reverseGeocode(coords)` rejects with `INTERNAL_ERROR` when latitude or
 longitude is non-finite or outside the valid coordinate range. Platform
 geocoder service failures reject with the same `{ code, message }`
-`LocationError` shape as the rest of the Modern API.
+`LocationError` shape as the rest of the API.
 
 ### Heading APIs
 
@@ -646,7 +641,7 @@ function LiveTracker() {
 **Options**:
 
 - `enabled?: boolean` - Start/stop watching (default: `false`)
-- `enableHighAccuracy?: boolean` - Deprecated since `v1.2`. Kept for v1 compatibility only; prefer `accuracy`. It is expected to be removed from the Modern API in v2.
+- `enableHighAccuracy?: boolean` - Deprecated since `v1.2`. Kept for v1 compatibility only; prefer `accuracy`. It is expected to be removed from the API in v2.
 - `accuracy?: { android?: 'high' | 'balanced' | 'low' | 'passive'; ios?: 'bestForNavigation' | 'best' | 'nearestTenMeters' | 'hundredMeters' | 'kilometer' | 'threeKilometers' | 'reduced' }` - Platform-specific accuracy preset, available since `v1.2`.
 - `granularity?: 'permission' | 'coarse' | 'fine'` - Android-only request granularity, available since `v1.2`
 - `waitForAccurateLocation?: boolean` - Android-only high-accuracy initial update tuning, available since `v1.2`
@@ -820,7 +815,7 @@ function BackgroundTracker() {
 
 ## TypeScript Support
 
-All Modern API exports are fully typed:
+All exports are fully typed:
 
 ```typescript
 import type {
@@ -835,7 +830,7 @@ import type {
 } from 'react-native-nitro-geolocation';
 ```
 
-`ModernGeolocationConfiguration` is still exported as a deprecated compatibility alias.
+A deprecated configuration alias is also exported for backward compatibility.
 
 ### Type Inference
 
@@ -855,7 +850,7 @@ const status = await requestPermission();
 
 ## Comparison with Compat API
 
-| Feature          | Modern API                               | Compat API                               |
+| Feature          | Package import                   | Compat API                               |
 | ---------------- | ---------------------------------------- | ---------------------------------------- |
 | **Import**       | `react-native-nitro-geolocation`         | `react-native-nitro-geolocation/compat`  |
 | **Pattern**      | Functions + Hook                         | Callbacks                                |
@@ -898,7 +893,7 @@ function LocationTracker() {
 }
 ```
 
-**After (Modern API)**:
+**After**:
 
 ```tsx
 import { useWatchPosition } from 'react-native-nitro-geolocation';

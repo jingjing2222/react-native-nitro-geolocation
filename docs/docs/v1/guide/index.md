@@ -8,11 +8,11 @@ This project — **React Native Nitro Geolocation** — is a native iOS/Android
 module designed for the **Nitro Module** system. It is best positioned as a
 React Native 0.75+ / New Architecture path for replacing the core native
 `@react-native-community/geolocation` API with `/compat`, then gradually moving
-to a typed Modern API.
+to a typed API.
 
-The current release line adds a clearer three-surface story: Modern and
-`/compat` foreground geolocation on web, plus a native Background Location API
-for tracking, geofencing, storage recovery, Headless JS, and HTTP sync.
+The current release line has three surfaces: the package import and `/compat`
+for foreground geolocation on web, plus a native Background Location API for
+tracking, geofencing, storage recovery, Headless JS, and HTTP sync.
 
 ## When should I use this?
 
@@ -23,10 +23,10 @@ for tracking, geofencing, storage recovery, Headless JS, and HTTP sync.
 | New Architecture / Nitro-based app | Recommended |
 | Expo development build or custom native build | Supported with native setup |
 | Expo managed app without native rebuild | Use `expo-location` |
-| Web support required | Use the Modern API root import or `/compat` callback API |
+| Web support required | Use the main package import or `/compat` callback API |
 | Full background tracking / geofencing | Use `react-native-nitro-geolocation/background` |
 
-Web support is available for the Modern API root import and the `/compat`
+Web support is available for the main package import and the `/compat`
 subpath. Browser builds resolve both entries to implementations backed by
 `navigator.geolocation` and do not load Nitro native bindings. Background
 location remains native-only.
@@ -34,7 +34,7 @@ location remains native-only.
 React Native Nitro Geolocation provides **three public API surfaces** to fit
 your needs:
 
-## 1. Modern API (Recommended)
+## 1. Functions and hooks (Recommended)
 
 **Simple functional API** with direct calls and minimal abstractions.
 
@@ -129,9 +129,9 @@ web bundles can still import shared code safely. Start with the
 [Background Location guide](/background/overview) when you need full background
 tracking, geofencing, storage recovery, or native sync.
 
-## Why Modern API?
+## Why functions and hooks?
 
-The Modern API brings simplicity and React hook patterns to geolocation:
+The API brings simplicity and React hook patterns to geolocation:
 
 ### Declarative vs Imperative
 
@@ -201,7 +201,7 @@ We created a geolocation API that:
 
 Instead of complex provider patterns or class-based APIs, we provide:
 
-| Concept | Modern API |
+| Concept | API |
 |---------|------------|
 | **Configuration** | `setConfiguration()` |
 | **Permission** | `checkPermission()`, `requestPermission()` |
@@ -223,27 +223,29 @@ Instead of complex provider patterns or class-based APIs, we provide:
 
 The package has three clear surfaces:
 
-- **Modern API** - typed foreground geolocation, geocoding, watching, cached reads, and Android settings helpers.
+- **Functions and hooks** - typed foreground geolocation, geocoding, watching, cached reads, and Android settings helpers.
 - **Compat API** - a `/compat` path for migrating the core `@react-native-community/geolocation` surface.
 - **Background API** - native tracking, geofencing, storage recovery, Headless JS, and HTTP sync.
 
-Modern and `/compat` foreground APIs also support web through the browser
-`navigator.geolocation` API.
+The package import and `/compat` also support foreground geolocation on web
+through the browser `navigator.geolocation` API.
 
 The benchmark measures cached location reads and the JS-to-native call path. It
 does not make cold GPS acquisition itself 22x faster.
 
-Whether you're upgrading an existing app or building a new one using the latest React Native architecture, **React Native Nitro Geolocation** gives you the Modern API with a migration-friendly compat path.
+Whether you're upgrading an existing app or building a new one using the latest
+React Native architecture, **React Native Nitro Geolocation** provides direct
+functions and hooks with a migration-friendly compat path.
 
 
 ## Next Steps
 
 - [Quick Start Guide](/guide/quick-start) — Get up and running in minutes
 - [Migration Skills](/guide/migration-assistance) — Choose the right agent skill for community or service migrations
-- [Community Migration](/guide/community-migration) — Move from community imports to `/compat` and the Modern API
-- [Service Migration](/guide/service-migration) — Move from `react-native-geolocation-service` directly to the Modern API
+- [Community Migration](/guide/community-migration) — Move from community imports to `/compat`, then direct functions and hooks
+- [Service Migration](/guide/service-migration) — Move from `react-native-geolocation-service` directly to the package import
 - [Expo Development Build Guide](/guide/expo-development-build) — Use the package in Expo custom native builds
-- [Modern API Reference](/guide/modern-api) — Explore functions and hooks
+- [API Reference](/guide/api) — Explore functions and hooks
 - [Compat API Reference](/guide/compat-api) — Compatibility documentation
 - [Why Nitro Module?](/guide/why-nitro-module) — Architecture deep dive
 - [Benchmark Results](/guide/benchmark) — Performance comparison

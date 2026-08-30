@@ -4,9 +4,9 @@ title: 2.0 Error Migration
 
 # 2.0 Error Migration
 
-React Native Nitro Geolocation 2.0 replaces numeric error codes in the Modern
-API with readable string discriminants. This is a Modern API change only. The
-`/compat` entry point keeps the W3C-style numeric `1`, `2`, and `3` contract.
+React Native Nitro Geolocation 2.0 replaces the package's numeric error codes
+with readable string discriminants. This change does not affect `/compat`, which
+keeps the W3C-style numeric `1`, `2`, and `3` contract.
 
 ## Update comparisons
 
@@ -73,7 +73,7 @@ function describeLocationFailure(error: unknown): string {
 
 ## Migrate persisted errors
 
-Do not reinterpret an old number as a new string. If an app stores Modern API
+Do not reinterpret an old number as a new string. If an app stores API
 errors, translate known 1.x values once with the table above, write the 2.x
 string, and discard unknown values. The native Android background status store
 does this migration automatically for errors recorded by this package.
@@ -96,5 +96,5 @@ Geolocation.getCurrentPosition(
 );
 ```
 
-Keeping the two contracts separate prevents a Modern-only provider error from
-leaking into the browser-compatible surface.
+Keeping the two contracts separate prevents the additional provider error codes
+from leaking into the browser-compatible surface.

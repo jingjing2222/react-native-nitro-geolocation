@@ -59,7 +59,7 @@ export default function WatchObservabilityScreen() {
       status: snapshot.length === 0 ? "passed" : "failed",
       message:
         snapshot.length === 0
-          ? "No Modern API watches are active."
+          ? "No watches are active."
           : `Found ${snapshot.length} active watch(es).`
     });
   };
@@ -180,7 +180,7 @@ export default function WatchObservabilityScreen() {
       status: snapshot.length === 0 ? "passed" : "failed",
       message:
         snapshot.length === 0
-          ? "stopObserving removed every Modern API watch."
+          ? "stopObserving removed every API watch."
           : `${snapshot.length} watch(es) remained after stopObserving.`
     });
   };
@@ -194,7 +194,7 @@ export default function WatchObservabilityScreen() {
     <ScenarioScreen
       prefix={PREFIX}
       title="Watch Observability"
-      subtitle="Inspect active Modern API position and heading watches"
+      subtitle="Inspect active position and heading watches"
     >
       <ScenarioSection index={1} title="Snapshot">
         <ScenarioButton

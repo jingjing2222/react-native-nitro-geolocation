@@ -1,6 +1,6 @@
 appId: nitrogeolocation.example
 ---
-# Proves that two natural Modern API consumers keep independent delivery
+# Proves that two API consumers keep independent delivery
 # thresholds and that removing one subscription leaves the other alive.
 
 - launchApp:

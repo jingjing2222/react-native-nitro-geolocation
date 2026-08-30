@@ -1,6 +1,6 @@
 ---
 name: community-migration
-description: Migrate React Native apps from @react-native-community/geolocation to react-native-nitro-geolocation. Use when installing the Nitro packages, running the bundled compat bootstrap codemod, removing @react-native-community/geolocation, then refactoring community-compatible call sites to the Modern API with Promise functions, requestPermission, setConfiguration, useWatchPosition, watchPosition, and unwatch.
+description: Migrate React Native apps from @react-native-community/geolocation to react-native-nitro-geolocation. Use when installing the Nitro packages, running the bundled compat bootstrap codemod, removing @react-native-community/geolocation, then refactoring community-compatible call sites to Promise functions, requestPermission, setConfiguration, useWatchPosition, watchPosition, and unwatch.
 ---
 
 # Community Geolocation Migration
@@ -9,11 +9,11 @@ Use a two-phase migration:
 
 1. Bootstrap safely to `/compat` so the app stops depending on
    `@react-native-community/geolocation`.
-2. Refactor from `/compat` to the Modern API best-practice shape.
+2. Refactor from `/compat` to the recommended API shape.
 
 Do not start by hand-converting every callback call site. First make the
 mechanical package/import migration small and reversible, verify it, then do
-the semantic Modern API refactor.
+the semantic API refactor.
 
 ## Workflow
 
@@ -41,7 +41,7 @@ the semantic Modern API refactor.
    curl -fsSL https://react-native-nitro-geolocation.pages.dev/llms-full.txt
    ```
    Read `llms.txt` first as the docs index. Use `llms-full.txt` only when you
-   need exact API names, option semantics, or examples for the Modern API,
+   need exact API names, option semantics, or examples for the API,
    Compat API, quick start, or platform setup. If the app already pins an older
    `react-native-nitro-geolocation` version, confirm an API exists in
    `node_modules/react-native-nitro-geolocation` or the installed package types
@@ -55,7 +55,7 @@ the semantic Modern API refactor.
 8. Inspect each call site before refactoring. Identify whether it is in a React
    function component, class component, hook, service module, background task, or
    test.
-9. Replace compat imports with named Modern API imports from
+9. Replace compat imports with named imports from
    `react-native-nitro-geolocation`. Remove `Geolocation` default-object usage
    when the migrated file no longer needs it.
 10. Convert one-shot and permission APIs to `async`/`await` or explicit Promise
@@ -71,7 +71,7 @@ the semantic Modern API refactor.
 
 ## Docs Reference
 
-Use these docs endpoints as the source of truth during the Modern refactor:
+Use these docs endpoints as the source of truth during the API refactor:
 
 - `https://react-native-nitro-geolocation.pages.dev/llms.txt` - concise index
   of available docs pages.
@@ -108,7 +108,7 @@ The final migration is not just "no type errors." Prefer this target state:
 - Keep permission, provider/settings, and watch cleanup behavior visible in the
   code. Do not hide prompts or global cleanup in utility functions unless that
   is already the app's architecture.
-- Use typed Modern errors where handling is specific. Match on
+- Use typed errors where handling is specific. Match on
   `LocationErrorCodes` for permission denied, timeout, settings-not-satisfied,
   or provider/setup failures instead of parsing error messages.
 
@@ -127,12 +127,12 @@ Apply these criteria at each call site, in this order:
 5. Prefer battery-aware defaults: only request high accuracy, frequent
    intervals, background updates, or settings dialogs when the old code or app
    feature justifies it.
-6. Prefer type-safe Modern API names at module boundaries: avoid passing a
+6. Prefer type-safe function names at module boundaries: avoid passing a
    `Geolocation` object through app code after refactoring.
 
 Use this API choice table:
 
-| Legacy pattern | Modern target | Choose it when | Avoid it when |
+| Legacy pattern | Target | Choose it when | Avoid it when |
 | --- | --- | --- | --- |
 | `getCurrentPosition(success, error, options)` | `await getCurrentPosition(options)` | A user action or flow needs a fresh position. | The UI can start from cached location only; consider `getLastKnownPosition()`. |
 | Cached/stale startup read via `maximumAge` | `await getLastKnownPosition(options)` | Startup UI, stale-while-refresh, or cache-only flows can tolerate no fresh request. | The feature needs a fresh fix or should prompt provider/settings resolution. |
@@ -140,7 +140,7 @@ Use this API choice table:
 | `setRNConfiguration(config)` | `setConfiguration(config)` | App startup or native bootstrap code sets global location config once. | A screen-level call would repeatedly mutate global config. |
 | `watchPosition` in a function component | `useWatchPosition({ enabled, ...options })` | Position drives React render state and the call can be at hook-safe top level. | The code is a class component, event callback, conditional branch, or service. |
 | `watchPosition` in services/classes/tasks | `watchPosition(...)` + `unwatch(token)` | A non-React lifecycle owns the subscription. | A React function component can express the lifecycle with `enabled`. |
-| `clearWatch(id)` | `unwatch(token)` | Stopping one known Modern watch. | The old code intentionally stopped every watcher; review `stopObserving()`. |
+| `clearWatch(id)` | `unwatch(token)` | Stopping one known watch. | The old code intentionally stopped every watcher; review `stopObserving()`. |
 | `enableHighAccuracy: true` | `accuracy: { android: "high", ios: "best" }` | The feature needs precise location. | Low-power or approximate location is enough. |
 | Android precise flow that can fail due to settings | `getLocationAvailability()` / `requestLocationSettings()` before location request | The UX can ask users to enable provider/settings for navigation or precise location. | Passive/background or approximate flows should not interrupt users. |
 
@@ -158,7 +158,7 @@ to:
 import Geolocation from "react-native-nitro-geolocation/compat";
 ```
 
-After verification, refactor compat imports to named Modern imports:
+After verification, refactor compat imports to named imports:
 
 ```ts
 import {
@@ -235,7 +235,7 @@ setConfiguration({
 });
 ```
 
-Do not migrate `skipPermissionRequests`; Modern API has no equivalent because
+Do not migrate `skipPermissionRequests`; there is no equivalent because
 permission requests must be explicit through `requestPermission()`.
 
 ### watchPosition in React Components
@@ -272,7 +272,7 @@ that reacts to `position` or `error`.
 
 ### watchPosition Outside Hook-Safe Code
 
-Use the low-level Modern watch API outside function component top level:
+Use the low-level watch function outside function component top level:
 
 ```ts
 const token = watchPosition(onPosition, onError, {
@@ -296,7 +296,7 @@ otherwise prefer targeted `unwatch(token)`.
   explicit preset and note the semantic decision.
 - Preserve `timeout`, `maximumAge`, `distanceFilter`, `interval`,
   `fastestInterval`, and `useSignificantChanges` when present.
-- Prefer Modern platform options such as `granularity`,
+- Prefer platform options such as `granularity`,
   `waitForAccurateLocation`, `activityType`, and
   `pausesLocationUpdatesAutomatically` only when the migrated code already has
   an equivalent requirement.

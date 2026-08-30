@@ -4,7 +4,7 @@ appId: nitrogeolocation.example
 #
 # This flow verifies the mocked-location branch only. Maestro setLocation()
 # injects a test-provider location, so Android should expose mocked=true and
-# a native provider through the modern metadata response. Coordinate injection is
+# a native provider through the metadata response. Coordinate injection is
 # part of this true-case fixture.
 
 - launchApp:

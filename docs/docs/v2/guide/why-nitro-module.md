@@ -40,7 +40,7 @@ User callback executed
 - Multiple listeners share one event stream
 - Requires JSON serialization on every update
 
-### Modern API: Direct Callback Architecture (`React Native Nitro Geolocation`)
+### Direct Callback Architecture (`React Native Nitro Geolocation`)
 
 ```
 JavaScript Layer
@@ -69,7 +69,7 @@ React Native Nitro Geolocation now provides a React-friendly layer on top of the
 User Code (React Components)
   ↓ useWatchPosition({ enabled: true })
   ↓ Declarative, auto-cleanup
-Modern API Layer (direct functions + hooks)
+Functions and hooks
   ↓ watchPosition(callback)
 JSI Layer (Nitro Modules)
   ↓ Direct callbacks, no Bridge
@@ -87,7 +87,7 @@ Device GPS/Network
 
 **Architecture Layers**:
 1. **Presentation** (Hooks): `useWatchPosition`
-2. **Modern API** (Functions): `getCurrentPosition`, `watchPosition`, `unwatch`
+2. **Functions and hooks**: `getCurrentPosition`, `watchPosition`, `unwatch`
 3. **JSI Bridge** (Nitro): Direct native communication
 4. **Native** (Platform): iOS/Android location APIs
 
@@ -120,10 +120,10 @@ Nitro Modules use **Nitrogen** code generation to create JSI bindings:
 `React Native Nitro Geolocation` transforms the geolocation API at multiple levels:
 
 1. **Low-level**: Bridge-based events → JSI direct callbacks (Nitro Modules)
-2. **High-level**: Imperative callbacks → Declarative hooks (Modern API)
+2. **High-level**: Imperative callbacks → Declarative hooks
 
 This provides:
 - **Performance**: Native-level speed via JSI
 - **Developer Experience**: React-friendly hooks with TanStack Query patterns
-- **Flexibility**: Choose Modern API (hooks) or Compat API (callbacks)
+- **Flexibility**: Choose direct functions and hooks or Compat callbacks
 - **Compatibility**: Preserves the core callback methods and numeric errors via `/compat`, with documented boundaries

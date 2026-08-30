@@ -147,7 +147,7 @@ class GetCurrentPosition(private val reactContext: ReactApplicationContext) {
     ) {
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.R) {
             // Android 11+ supports getCurrentLocation
-            requestCurrentLocationModern(
+            requestViaGetCurrentLocation(
                     locationManager,
                     provider,
                     options,
@@ -157,7 +157,7 @@ class GetCurrentPosition(private val reactContext: ReactApplicationContext) {
             )
         } else {
             // Fallback to requestLocationUpdates
-            requestCurrentLocationLegacy(
+            requestViaLocationUpdates(
                     locationManager,
                     provider,
                     options,
@@ -169,7 +169,7 @@ class GetCurrentPosition(private val reactContext: ReactApplicationContext) {
     }
 
     @androidx.annotation.RequiresApi(android.os.Build.VERSION_CODES.R)
-    private fun requestCurrentLocationModern(
+    private fun requestViaGetCurrentLocation(
             locationManager: LocationManager,
             provider: String,
             options: ParsedOptions,
@@ -218,7 +218,7 @@ class GetCurrentPosition(private val reactContext: ReactApplicationContext) {
         }
     }
 
-    private fun requestCurrentLocationLegacy(
+    private fun requestViaLocationUpdates(
             locationManager: LocationManager,
             provider: String,
             options: ParsedOptions,

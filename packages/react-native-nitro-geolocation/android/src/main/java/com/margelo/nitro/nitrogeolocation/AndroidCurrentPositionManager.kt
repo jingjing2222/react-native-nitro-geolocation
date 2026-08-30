@@ -71,14 +71,14 @@ internal class AndroidCurrentPositionManager(
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R &&
             effectiveMaximumAge(request.options) > 0.0
         ) {
-            requestCurrentLocationModern(
+            requestViaGetCurrentLocation(
                 provider,
                 requestId,
                 request.handler,
                 remainingTimeoutMillis
             )
         } else {
-            requestCurrentLocationLegacy(
+            requestViaLocationUpdates(
                 provider,
                 requestId,
                 request.handler,
@@ -88,7 +88,7 @@ internal class AndroidCurrentPositionManager(
     }
 
     @androidx.annotation.RequiresApi(Build.VERSION_CODES.R)
-    private fun requestCurrentLocationModern(
+    private fun requestViaGetCurrentLocation(
         provider: String,
         requestId: String,
         handler: Handler,
@@ -111,7 +111,7 @@ internal class AndroidCurrentPositionManager(
                             pendingRequests.remove(requestId)
                             request.resolver(PositionResult.Success(locationToPosition(location)))
                         }
-                        location != null -> retryCurrentLocationLegacyAfterStaleModern(
+                        location != null -> retryViaLocationUpdatesAfterStaleGetCurrentLocation(
                             provider,
                             requestId,
                             handler,
@@ -146,7 +146,7 @@ internal class AndroidCurrentPositionManager(
         }
     }
 
-    private fun retryCurrentLocationLegacyAfterStaleModern(
+    private fun retryViaLocationUpdatesAfterStaleGetCurrentLocation(
         provider: String,
         requestId: String,
         handler: Handler,
@@ -159,10 +159,10 @@ internal class AndroidCurrentPositionManager(
             handlePositionTimeout(requestId)
             return
         }
-        requestCurrentLocationLegacy(provider, requestId, handler, remainingTimeoutMillis)
+        requestViaLocationUpdates(provider, requestId, handler, remainingTimeoutMillis)
     }
 
-    private fun requestCurrentLocationLegacy(
+    private fun requestViaLocationUpdates(
         provider: String,
         requestId: String,
         handler: Handler,

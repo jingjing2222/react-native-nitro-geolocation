@@ -138,10 +138,10 @@ When adding a flow:
 - Tests `geocode(address)` and `reverseGeocode(coords)` through native platform geocoders
 - Uses a specific Seoul address query and validates the returned coordinate candidate is near the Seoul fixture
 - Reverse geocodes deterministic Seoul fixture coordinates and verifies a readable address is returned
-- Verifies invalid inputs reject through the Modern API structured `INTERNAL_ERROR` contract
+- Verifies invalid inputs reject through the structured `INTERNAL_ERROR` contract
 
 ### `accuracy-presets.yaml`
-- Tests `accuracy.android` and `accuracy.ios` through real Modern API native requests
+- Tests `accuracy.android` and `accuracy.ios` through real native requests
 - Uses `setLocation` and the app verifies returned coordinates against the injected fixture, so the assertion is not a static option display
 - Checks preset override behavior with `enableHighAccuracy` set to the opposite boolean
 - Checks invalid preset rejection by crossing the Nitro native boundary with a deliberately unsupported preset
@@ -308,7 +308,7 @@ current simulator runtime; the physical-device false flow must be interpreted
 against the device OS and the returned sample.
 
 ### `api-errors.yaml`
-- Opens the API Errors screen and triggers real native Modern API errors.
+- Opens the API Errors screen and triggers real native API errors.
 - Uses the public screen buttons directly; the flow does not toggle devtools or inject JS-only errors.
 - Starts once with permissions denied and asserts the native `PERMISSION_DENIED` result rendered by the screen.
 - Starts again with permissions allowed, verifies a real position request, then forces a native `TIMEOUT` result and asserts its rendered `{ code, message }` shape.

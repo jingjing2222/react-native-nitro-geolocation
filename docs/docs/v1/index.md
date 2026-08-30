@@ -4,7 +4,7 @@ pageType: home
 hero:
   name: React Native Nitro Geolocation
   text: Nitro-powered native geolocation
-  tagline: Replace community geolocation with /compat, then move to a typed Modern API.
+  tagline: Replace community geolocation with /compat, then move to a typed API.
   actions:
     - theme: brand
       text: Introduction

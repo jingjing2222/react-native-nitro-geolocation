@@ -225,7 +225,7 @@ export default function GeocodingScreen() {
       <ScenarioSection
         index={2}
         title="Negative Scenarios"
-        description="Invalid user input should reject with the Modern API structured error contract instead of rendering a synthetic pass state."
+        description="Invalid user input should reject with the structured API error contract instead of rendering a synthetic pass state."
         divided
       >
         <ScenarioButton

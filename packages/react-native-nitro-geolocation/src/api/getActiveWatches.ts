@@ -4,7 +4,7 @@ import type { ActiveWatch } from "../publicTypes";
 import { readActiveWatches } from "./activeWatchSnapshot";
 
 /**
- * Return a point-in-time snapshot of active Modern API watches.
+ * Return a point-in-time snapshot of active position and heading watches.
  *
  * The snapshot includes both position and heading watches. Pass a returned
  * token to unwatch(), or call stopObserving() to remove every active watch.

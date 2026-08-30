@@ -14,7 +14,7 @@ const coords = {
   speed: null
 };
 
-const modernPosition: GeolocationResponse = {
+const position: GeolocationResponse = {
   coords,
   timestamp: 1779015190000,
   mocked: true,
@@ -31,7 +31,7 @@ const providers: LocationProviderUsed[] = [
 
 const compatPosition: CompatGeolocationResponse = {
   coords,
-  timestamp: modernPosition.timestamp
+  timestamp: position.timestamp
 };
 
 // @ts-expect-error Compat keeps the community response shape.
@@ -39,7 +39,7 @@ void compatPosition.mocked;
 // @ts-expect-error Compat keeps the community response shape.
 void compatPosition.provider;
 
-// @ts-expect-error Modern providers are a closed native-provider union.
+// @ts-expect-error Providers are a closed native-provider union.
 providers.push("bluetooth");
 
-void [modernPosition, providers, compatPosition];
+void [position, providers, compatPosition];

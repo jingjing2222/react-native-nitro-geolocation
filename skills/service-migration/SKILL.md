@@ -1,6 +1,6 @@
 ---
 name: service-migration
-description: Migrate React Native apps directly from react-native-geolocation-service to react-native-nitro-geolocation Modern API without using /compat. Use when replacing react-native-geolocation-service imports, installing Nitro packages, configuring the Android provider, converting callback APIs to Modern Promise/watch APIs, preserving service-specific options such as accuracy and provider metadata, and reporting manual-review sites for settings dialogs, forceRequestLocation, and default option differences.
+description: Migrate React Native apps directly from react-native-geolocation-service to react-native-nitro-geolocation without using /compat. Use when replacing react-native-geolocation-service imports, installing Nitro packages, configuring the Android provider, converting callback APIs to Promise/watch APIs, preserving service-specific options such as accuracy and provider metadata, and reporting manual-review sites for settings dialogs, forceRequestLocation, and default option differences.
 ---
 
 # Geolocation Service Migration
@@ -34,7 +34,7 @@ asks for a compatibility fallback.
    `react-native-geolocation-service` migrations should use
    `locationProvider: "playServices"`. Use `"android"` only when the legacy app
    intentionally used `forceLocationManager: true`.
-7. Rewrite imports directly to named Modern API imports from
+7. Rewrite imports directly to named imports from
    `react-native-nitro-geolocation`.
 8. Convert one-shot location calls to Promise chains first. Use `async`/`await`
    only when the surrounding function is already async or clearly safe to make
@@ -59,7 +59,7 @@ Run inventory first:
 node <skill-dir>/scripts/migrate-geolocation-service.mjs --root <app-root> --inventory-only
 ```
 
-Dry-run the direct Modern transform:
+Dry-run the direct API transform:
 
 ```bash
 node <skill-dir>/scripts/migrate-geolocation-service.mjs --root <app-root> --dry-run
@@ -84,7 +84,7 @@ app.
 
 - Never import from `react-native-nitro-geolocation/compat`.
 - Never rewrite to `/compat` as an intermediate step.
-- Prefer direct named Modern API imports.
+- Prefer direct named imports.
 - Configure `locationProvider: "playServices"` for normal
   `react-native-geolocation-service` migrations.
 - Use `locationProvider: "android"` only when legacy code used
@@ -101,14 +101,14 @@ app.
 - Do not auto-convert `forceRequestLocation`; report it.
 - Do not introduce React hooks unless the file is a function component or
   custom hook and the call is at hook-safe top level.
-- Use low-level `watchPosition` plus `unwatch` as the first safe Modern target.
+- Use low-level `watchPosition` plus `unwatch` as the first safe target.
 - Replace numeric error-code checks with `LocationErrorCodes` where possible.
 - Do not remove `PermissionsAndroid` code unless it is clearly only for
   location permission and replaced by `requestPermission()`.
 
 ## API Mapping
 
-| `react-native-geolocation-service` | Nitro Modern API | Notes |
+| `react-native-geolocation-service` | `react-native-nitro-geolocation` | Notes |
 | --- | --- | --- |
 | `Geolocation.getCurrentPosition(success, error, options)` | `getCurrentPosition(options)` | Convert to Promise chain first. |
 | `Geolocation.watchPosition(success, error, options)` | `watchPosition(...)` or `useWatchPosition(...)` | Start with low-level API. |
@@ -116,13 +116,13 @@ app.
 | `Geolocation.stopObserving()` | `stopObserving()` | Keep only when global cleanup was intended. |
 | `requestAuthorization("whenInUse" | "always")` | `setConfiguration({ authorizationLevel })` plus `requestPermission()` | Return statuses differ. |
 | `accuracy: { android, ios }` | `accuracy: { android, ios }` | Preserve explicit values. |
-| `enableHighAccuracy` | `accuracy` preset | Prefer Modern `accuracy`. |
+| `enableHighAccuracy` | `accuracy` preset | Prefer `accuracy`. |
 | `showLocationDialog` | `requestLocationSettings()` | Convert explicit `true`; report omitted defaults. |
 | `forceLocationManager` | `setConfiguration({ locationProvider: "android" })` | Global setting, not a call option. |
 | default fused provider intent | `setConfiguration({ locationProvider: "playServices" })` | Do this for normal service migrations. |
 | `forceRequestLocation` | no direct option | Report and preserve intent manually. |
-| `position.mocked` | `GeolocationResponse.mocked` | Available in Modern API. |
-| `position.provider` | `GeolocationResponse.provider` | Available in Modern API. |
+| `position.mocked` | `GeolocationResponse.mocked` | Available in the API. |
+| `position.provider` | `GeolocationResponse.provider` | Available in the API. |
 | error codes `-1`, `1`, `2`, `3`, `4`, `5` | `LocationErrorCodes` | Prefer named constant comparisons. |
 
 ## Transform Patterns
@@ -195,13 +195,13 @@ Always report these instead of guessing:
   explicit `requestLocationSettings()` flow if the app wants the Android
   settings dialog.
 - Omitted `timeout` or `maximumAge` on `getCurrentPosition`. Service defaults
-  were effectively infinite; Nitro Modern defaults are `timeout: 600000` and
+  were effectively infinite; Nitro defaults are `timeout: 600000` and
   `maximumAge: 0`.
 - `forceRequestLocation`. Preserve the fallback behavior explicitly only after
   product/UX review.
 - Mixed `forceLocationManager` usage. Nitro `locationProvider` is global.
-- `requestAuthorization` code that handles `disabled`. Modern permission status
-  does not include `disabled`; use `hasServicesEnabled()` or
+- `requestAuthorization` code that handles `disabled`. `requestPermission()`
+  status does not include `disabled`; use `hasServicesEnabled()` or
   `getProviderStatus()` separately.
 - `PermissionsAndroid` usage unless it is clearly redundant after
   `requestPermission()`.

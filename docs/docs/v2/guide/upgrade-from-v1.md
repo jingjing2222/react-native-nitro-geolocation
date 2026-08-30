@@ -13,7 +13,7 @@ a branch and keep the currently deployed 1.x version available for rollback.
 
 1. Record the exact working React Native, Nitro Modules, and Geolocation
    versions from the current lockfile.
-2. Inventory root, `/compat`, and `/background` imports separately.
+2. Inventory main package, `/compat`, and `/background` imports separately.
 3. Create or keep tests for permission denial, a fresh fix, cached reads,
    watches, Android settings resolution, and background event recovery used by
    your product.
@@ -33,17 +33,17 @@ lockfile and native dependency state before attempting API migrations.
 
 | Change | Who is affected | Required action | Verification |
 | --- | --- | --- | --- |
-| String Modern error codes | Root API callers comparing or persisting numeric codes | Compare against `LocationErrorCodes`; migrate persisted values | Denial, timeout, unavailable-provider tests |
-| Removed configuration alias | Type imports of `ModernGeolocationConfiguration` | Use `GeolocationConfiguration` | Typecheck |
-| Watch Manager v2 semantics | Apps with multiple Modern watches or implicit cleanup assumptions | Verify per-watch thresholds and ownership | Two-watch and unmount/stop tests |
+| String error codes | Main package callers comparing or persisting numeric codes | Compare against `LocationErrorCodes`; migrate persisted values | Denial, timeout, unavailable-provider tests |
+| Removed configuration alias | Type imports of the deprecated 1.x configuration alias | Use `GeolocationConfiguration` | Typecheck |
+| Watch Manager v2 semantics | Apps with multiple watches or implicit cleanup assumptions | Verify per-watch thresholds and ownership | Two-watch and unmount/stop tests |
 | Split last-known reads | Callers awaiting or passing options to `getLastKnownPosition()` | Choose synchronous module cache or async platform cache | Empty, fresh, and stale cache tests |
-| Removed Modern `enableHighAccuracy` | Root current/watch/settings options | Use platform `accuracy` presets | Approximate and precise flows |
+| Removed `enableHighAccuracy` | Foreground current/watch/settings options | Use platform `accuracy` presets | Approximate and precise flows |
 | Unified background events | Background provider/lifecycle listeners and persisted event consumers | Handle the unified discriminated stream | Live plus stored-event tests |
 | Deterministic settings result | Code expecting cancel/unavailable to reject | Branch on `result.outcome` | Satisfied, cancelled, unavailable tests |
 
-## 1. Use string Modern error codes
+## 1. Use string error codes
 
-The Modern root API no longer uses numeric codes. `/compat` intentionally keeps
+The package import no longer uses numeric codes. `/compat` intentionally keeps
 the numeric W3C contract.
 
 ```ts
@@ -52,7 +52,7 @@ if (error.code === 1) {
   showPermissionHelp();
 }
 
-// 2.0 Modern API
+// 2.0 API
 import { LocationErrorCodes } from 'react-native-nitro-geolocation';
 
 if (error.code === LocationErrorCodes.PERMISSION_DENIED) {
@@ -71,19 +71,16 @@ numeric codes.
 ## 2. Replace the removed configuration alias
 
 ```ts
-// 1.x
-import type { ModernGeolocationConfiguration } from 'react-native-nitro-geolocation';
-
 // 2.0
 import type { GeolocationConfiguration } from 'react-native-nitro-geolocation';
 ```
 
-This is a type-only rename. **Verify:** search for the old name and run the app's
-full TypeScript check.
+Delete imports of the deprecated 1.x configuration alias and use the type above.
+**Verify:** run the app's full TypeScript check.
 
 ## 3. Verify Watch Manager v2 behavior
 
-Native acquisition can be shared, but each Modern watch now enforces its own
+Native acquisition can be shared, but each watch now enforces its own
 callback thresholds and cleanup lifecycle. Do not assume that stopping one watch
 stops another, or that one watch's distance/interval policy controls all
 subscribers.
@@ -113,13 +110,13 @@ Neither 2.0 function starts a fresh location request. Use
 observing a current/watch position populates the module cache; an expired
 platform cache is filtered by `maximumAge`.
 
-## 5. Replace Modern `enableHighAccuracy`
+## 5. Replace `enableHighAccuracy`
 
 ```ts
-// 1.x Modern API
+// 1.x API
 await getCurrentPosition({ enableHighAccuracy: true });
 
-// 2.0 Modern API
+// 2.0 API
 await getCurrentPosition({
   accuracy: { android: 'high', ios: 'best' },
 });
@@ -176,8 +173,8 @@ actual request failure.
 
 Before merging the upgrade:
 
-- [ ] No `ModernGeolocationConfiguration` root type imports remain.
-- [ ] No Modern root options still use `enableHighAccuracy`.
+- [ ] No imports of the deprecated 1.x configuration alias remain.
+- [ ] No foreground options still use `enableHighAccuracy`.
 - [ ] Numeric error comparisons exist only under `/compat` or in explicit legacy
       data migration code.
 - [ ] Every last-known call deliberately chooses module cache or platform cache.

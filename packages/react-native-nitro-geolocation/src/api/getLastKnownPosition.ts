@@ -13,8 +13,8 @@ import { readLastKnownPosition, rememberPosition } from "./positionCache";
  * Return the latest position observed by this JavaScript module.
  *
  * This synchronous read never calls a native or browser location source.
- * It returns `undefined` until a Modern current, watch, or async cache call
- * observes a position.
+ * It returns `undefined` until `getCurrentPosition()`, `watchPosition()`, or
+ * `getLastKnownPositionAsync()` observes a position.
  */
 export function getLastKnownPosition(): GeolocationResponse | undefined {
   return readLastKnownPosition();

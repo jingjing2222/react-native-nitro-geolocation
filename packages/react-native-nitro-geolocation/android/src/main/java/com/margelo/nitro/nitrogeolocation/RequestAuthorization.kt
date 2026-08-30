@@ -11,7 +11,7 @@ import com.facebook.react.modules.core.PermissionListener
 
 // ===== Data Models =====
 sealed class PermissionState {
-    object LegacyAndroid : PermissionState()
+    object PreRuntimePermissions : PermissionState()
     object AlreadyGranted : PermissionState()
     object NeedsRequest : PermissionState()
     data class Error(val message: String) : PermissionState()
@@ -38,11 +38,11 @@ class RequestAuthorization(
     // ===== State Determination (Pure Functions) =====
     private fun determinePermissionState(): PermissionState =
             when {
-                isLegacyAndroid() -> PermissionState.LegacyAndroid
-                else -> determineModernAndroidState()
+                usesInstallTimePermissions() -> PermissionState.PreRuntimePermissions
+                else -> determineRuntimePermissionState()
             }
 
-    private fun determineModernAndroidState(): PermissionState =
+    private fun determineRuntimePermissionState(): PermissionState =
             when {
                 hasLocationPermission(reactContext) -> PermissionState.AlreadyGranted
                 reactContext.currentActivity == null ->
@@ -50,7 +50,8 @@ class RequestAuthorization(
                 else -> PermissionState.NeedsRequest
             }
 
-    private fun isLegacyAndroid(): Boolean = Build.VERSION.SDK_INT < Build.VERSION_CODES.M
+    private fun usesInstallTimePermissions(): Boolean =
+            Build.VERSION.SDK_INT < Build.VERSION_CODES.M
 
     private fun hasLocationPermission(context: ReactApplicationContext): Boolean =
             LOCATION_PERMISSIONS.any { permission ->
@@ -84,7 +85,7 @@ class RequestAuthorization(
             error: ((error: CompatGeolocationError) -> Unit)?
     ) {
         when (state) {
-            is PermissionState.LegacyAndroid -> success?.invoke()
+            is PermissionState.PreRuntimePermissions -> success?.invoke()
             is PermissionState.AlreadyGranted -> success?.invoke()
             is PermissionState.NeedsRequest -> showPermissionDialog(success, error)
             is PermissionState.Error -> error?.invoke(createPermissionError(state.message))

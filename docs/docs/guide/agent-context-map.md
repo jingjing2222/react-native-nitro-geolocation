@@ -36,7 +36,7 @@ Avoid these until needed:
 
 | Area | Responsibility | Main files |
 | --- | --- | --- |
-| Modern foreground API | Public wrappers for current position, watch, permission, provider, geocoding, heading, settings, and availability APIs. | `src/api/`, `src/NitroGeolocation.nitro.ts` |
+| Foreground API | Public wrappers for current position, watch, permission, provider, geocoding, heading, settings, and availability APIs. | `src/api/`, `src/NitroGeolocation.nitro.ts` |
 | Community compatibility API | `@react-native-community/geolocation`-style callbacks and configuration. | `src/compat/`, `src/NitroGeolocationCompat.nitro.ts` |
 | Background API | Public background exports, listener narrowing, iOS lifecycle subscriptions, storage methods, geofence helpers, activity recognition helpers, HTTP sync helper, and task registration. | `src/background/index.ts`, `src/background/locationLifecycle.ts`, `src/background/task.ts`, `src/background/types.ts`, `src/background/NitroBackgroundLocation.nitro.ts` |
 | Web fallback | Browser geolocation behavior and web E2E support. | `src/web/`, `src/index.web.tsx`, `src/background/index.web.ts` |

@@ -11,7 +11,7 @@ type NitroGeolocationConfiguration = Parameters<
 
 let configuredLocationProvider: LocationProvider | undefined;
 
-/** @internal Current Modern API provider preference for JS-level diagnosis. */
+/** @internal Current provider preference for JS-level diagnosis. */
 export function getConfiguredLocationProvider(): LocationProvider | undefined {
   return configuredLocationProvider;
 }

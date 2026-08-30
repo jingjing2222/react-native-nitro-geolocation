@@ -38,7 +38,7 @@ export const scenarios: Scenario[] = [
   {
     id: "api-availability",
     title: "API availability",
-    detail: "Root browser export exposes Modern API functions.",
+    detail: "The browser export exposes the API functions.",
     status: "idle"
   },
   {
@@ -100,8 +100,7 @@ export const scenarios: Scenario[] = [
   {
     id: "last-known-cold-cache",
     title: "getLastKnownPosition cold cache",
-    detail:
-      "Sync read returns undefined before any Modern position is observed.",
+    detail: "Sync read returns undefined before any position is observed.",
     status: "idle"
   },
   {

@@ -15,7 +15,7 @@ import {
   watchPosition
 } from "react-native-nitro-geolocation";
 import {
-  assertModernApiAvailability,
+  assertApiAvailability,
   expectSatisfiedLocationSettings
 } from "./apiAssertions";
 import {
@@ -34,7 +34,7 @@ import {
 } from "./lastKnownAssertions";
 import {
   type ExpectedLocation,
-  assertModernPosition,
+  assertPositionWithMetadata,
   expectedLocations,
   getErrorCode,
   isNearExpected
@@ -216,7 +216,7 @@ async function getCurrentPositionUntilExpected({
 
 export async function runSuccessSuite() {
   setScenario("api-availability", "running");
-  assertModernApiAvailability();
+  assertApiAvailability();
 
   runCompatApiAvailabilityCheck();
 
@@ -293,7 +293,7 @@ export async function runSuccessSuite() {
         timeoutMs: 30000
       });
     },
-    (result) => assertModernPosition(result.position, "currentPosition")
+    (result) => assertPositionWithMetadata(result.position, "currentPosition")
   );
 
   await runStep(
@@ -309,7 +309,7 @@ export async function runSuccessSuite() {
       expectLatestCachedPosition(
         cached,
         position.position.timestamp,
-        (cached) => assertModernPosition(cached, "moduleCache")
+        (cached) => assertPositionWithMetadata(cached, "moduleCache")
       )
   );
 
@@ -320,7 +320,7 @@ export async function runSuccessSuite() {
       expectValidCachedPosition(
         cached,
         "Async browser module cache did not return a position.",
-        (cached) => assertModernPosition(cached, "moduleCache")
+        (cached) => assertPositionWithMetadata(cached, "moduleCache")
       )
   );
 
@@ -353,7 +353,7 @@ export async function runSuccessSuite() {
         }
       });
     },
-    (result) => assertModernPosition(result.position, "watchPosition")
+    (result) => assertPositionWithMetadata(result.position, "watchPosition")
   );
 
   await runStep(

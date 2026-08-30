@@ -26,7 +26,7 @@
   "v2-error-migration",
   "v2-unified-background-events",
   { "type": "section-header", "label": "Foreground location" },
-  { "type": "file", "name": "modern-api", "label": "Modern API reference" },
+  { "type": "file", "name": "api", "label": "API reference" },
   { "type": "file", "name": "compat-api", "label": "Compatibility API" },
   "watch-observability",
   "gps-offline-recipe",
