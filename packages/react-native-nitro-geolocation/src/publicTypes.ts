@@ -26,7 +26,7 @@ import type {
   ReverseGeocodedAddress as SchemaReverseGeocodedAddress
 } from "./types";
 
-/** API path that delivered a Modern location response. */
+/** API path that delivered a location response. */
 export type LocationResponseSource =
   | "currentPosition"
   | "watchPosition"
@@ -231,8 +231,8 @@ export interface CompatGeolocationConfiguration {
   /**
    * Android location provider compatibility option.
    *
-   * Preserved for the legacy `/compat` configuration surface. Use the Modern
-   * API root import when you need Android fused/provider selection.
+   * Preserved for the `/compat` configuration surface. Use
+   * `setConfiguration()` when you need Android fused/provider selection.
    */
   locationProvider?: LocationProvider;
 }

@@ -1,6 +1,6 @@
 # Watch observability
 
-Use `getActiveWatches()` to inspect the Modern API watches that currently own
+Use `getActiveWatches()` to inspect the watches that currently own
 native position or heading subscriptions:
 
 ```ts
@@ -34,7 +34,7 @@ changes. Entries are sorted by token and contain:
 - `token`: the value accepted by `unwatch()`.
 - `kind`: `position` for `watchPosition()` or `heading` for `watchHeading()`.
 
-The snapshot covers the Modern API root import. It does not include Compat API
+The snapshot covers the main package import. It does not include Compat API
 watches, one-shot position or heading requests, or Background Location.
 Android watches that finish because of `maxUpdates` disappear from the next
 snapshot automatically. Web snapshots include active browser position watches;
@@ -44,7 +44,7 @@ unsupported web heading requests are not reported as active.
 
 - `unwatch(token)` removes a matching position or heading watch. Repeating it,
   or passing an unknown token, is safe and has no effect.
-- `stopObserving()` removes every Modern API position and heading watch,
+- `stopObserving()` removes every position and heading watch,
   including development-tool and browser watches. It does not cancel one-shot
   position requests or Background Location. On iOS it also leaves one-shot
   heading requests running. On Android, the current native heading manager

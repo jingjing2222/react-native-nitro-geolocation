@@ -7,18 +7,18 @@ title: Migration overview
 Use this guide when migrating an existing app from
 `@react-native-community/geolocation`, `navigator.geolocation`,
 `react-native-geolocation-service`, or `react-native-nitro-geolocation/compat`
-toward the Modern API.
+toward direct functions and hooks.
 
 ## Choose a path
 
 For `@react-native-community/geolocation`, first make the mechanical
 dependency/import change and verify the app still builds. Then refactor the
-callback-based compatibility code to Modern API calls. See
+callback-based compatibility code to direct function calls. See
 [Community Migration](/guide/community-migration).
 
-For `react-native-geolocation-service`, migrate directly to named Modern API
-imports. Its Android fused-provider and settings-dialog options map to Modern
-APIs such as `setConfiguration({ locationProvider: 'playServices' })` and
+For `react-native-geolocation-service`, migrate directly to named imports from
+the package. Its Android fused-provider and settings-dialog options map to APIs
+such as `setConfiguration({ locationProvider: 'playServices' })` and
 `requestLocationSettings()`. See [Service Migration](/guide/service-migration).
 
 The final target state should avoid runtime imports from
@@ -42,7 +42,7 @@ Install it with the Vercel Labs `skills` CLI:
 npx skills add jingjing2222/react-native-nitro-geolocation --skill community-migration
 ```
 
-For `react-native-geolocation-service`, migrate directly to the Modern API with:
+For `react-native-geolocation-service`, migrate directly to the package import with:
 
 [`service-migration`](https://github.com/jingjing2222/react-native-nitro-geolocation/tree/main/skills/service-migration).
 
@@ -59,18 +59,19 @@ The community migration skill uses a two-phase workflow:
    `@react-native-community/geolocation` import sources to
    `react-native-nitro-geolocation/compat`, removes the legacy package, and
    prints validation commands for scripts that exist in the target app.
-2. Refactor `/compat` call sites to Modern API best practices using explicit
+2. Refactor `/compat` call sites to recommended API patterns using explicit
    criteria for permission timing, React lifecycle ownership, watch cleanup,
    cache-vs-fresh reads, accuracy, and Android provider/settings handling.
 
-The service migration skill skips `/compat` and targets the Modern API directly.
+The service migration skill skips `/compat` and targets the package import
+directly.
 It preserves service-specific behavior such as `accuracy`, fused-provider
 intent, Android settings-dialog handling, `mocked`/`provider` metadata, and
 provider-related error codes.
 
-## Modern API Targets
+## Migration Targets
 
-| Legacy or compat usage | Modern API target |
+| Legacy or compat usage | Direct target |
 | --- | --- |
 | `getCurrentPosition(success, error, options)` | `await getCurrentPosition(options)` |
 | latest position already observed by this JS module | `getLastKnownPosition()` |

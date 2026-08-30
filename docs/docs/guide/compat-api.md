@@ -6,7 +6,7 @@ title: Compatibility API (/compat)
 > shapes and numeric error contract. It does not install a
 > `navigator.geolocation` global, and documented platform defaults or ignored
 > options can differ. Review the matrix below before calling it drop-in for your
-> application. New code should prefer the [Modern API](./modern-api.md).
+> application. New code should prefer the [API](./api.md).
 
 ## Import Path
 
@@ -47,7 +47,7 @@ import type {
 } from 'react-native-nitro-geolocation/compat';
 ```
 
-No type import from the Modern root is required. TypeScript can resolve this
+No type import from the main package is required. TypeScript can resolve this
 subpath with `node`, `node16`, `nodenext`, and `bundler` module resolution.
 
 ## Compatibility Scope
@@ -55,13 +55,13 @@ subpath with `node`, `node16`, `nodenext`, and `bundler` module resolution.
 This API is compatible with the core native
 `@react-native-community/geolocation` callback shape. It preserves the listed
 methods and numeric error contract for existing iOS and Android apps while the
-Modern API gives new code a Promise/function API. The matrix is the compatibility
+API gives new code a Promise/function API. The matrix is the compatibility
 boundary; options described as ignored/no-op and the missing global polyfill are
 intentional differences.
 
 | Community API | Nitro `/compat` | Notes |
 | --- | ---: | --- |
-| `setRNConfiguration` | Supported | Preserves the legacy config method; Android provider selection is handled by the Modern API root import. |
+| `setRNConfiguration` | Supported | Preserves the legacy config method; Android provider selection is handled by the main package import. |
 | `requestAuthorization` | Supported | iOS authorization follows configured `Info.plist` keys and `authorizationLevel`. |
 | `getCurrentPosition` | Supported | Keeps the legacy callback and error shape. |
 | `watchPosition` | Supported | Returns a numeric watch id. |
@@ -70,7 +70,7 @@ intentional differences.
 | `navigator.geolocation` polyfill | Not supported | Import `/compat` directly instead of installing a global polyfill. |
 | Web | Supported | Browser builds use `navigator.geolocation` for `getCurrentPosition`, `watchPosition`, `clearWatch`, and `stopObserving`. |
 
-The root Modern API and `/compat` subpath both support web by delegating to the
+The package import and `/compat` subpath both support web by delegating to the
 browser `navigator.geolocation` API. The `/compat` web entry keeps the callback
 shape and legacy error constants, while `setRNConfiguration()` is a no-op and
 `requestAuthorization()` calls the success callback immediately because browsers
@@ -92,7 +92,7 @@ do not expose a standalone geolocation authorization prompt.
 
 Preserves the legacy configuration API. Use it for iOS authorization/background
 settings. Android provider selection and request behavior should be configured
-per call or through the Modern API root import.
+per call or through the main package import.
 
 ```ts
 Geolocation.setRNConfiguration(config: {
@@ -108,7 +108,7 @@ Supported options:
 - `skipPermissionRequests` (boolean) - Required by the public type. Pass `false` for legacy compatibility, or `true` when you request permissions yourself before using Geolocation APIs. For deterministic app flows, request permissions explicitly before calling location APIs.
 - `authorizationLevel` (string, iOS-only) - Either `"whenInUse"`, `"always"`, or `"auto"`. Changes whether the user will be asked to give "always" or "when in use" location services permission. Any other value or `auto` will use the default behaviour, where the permission level is based on the contents of your `Info.plist`.
 - `enableBackgroundLocationUpdates` (boolean, iOS-only) - When using `skipPermissionRequests`, toggles whether to enable Core Location background updates. Defaults to false unless explicitly set.
-- `locationProvider` (string, Android-only) - Either `"playServices"`, `"android"`, or `"auto"`. Preserved for API compatibility on `/compat`; use the Modern API root import when you need Android fused/provider selection.
+- `locationProvider` (string, Android-only) - Either `"playServices"`, `"android"`, or `"auto"`. Preserved for API compatibility on `/compat`; use the main package import when you need Android fused/provider selection.
 
 ### `requestAuthorization()`
 

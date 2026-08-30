@@ -6,7 +6,7 @@ import org.junit.Test
 
 class LocationErrorCodePersistenceTest {
     @Test
-    fun `round trips every modern location error code`() {
+    fun `round trips every string location error code`() {
         LocationErrorCode.entries.forEach { code ->
             assertEquals(code, locationErrorCodeFromWireValue(locationErrorCodeToWireValue(code)))
         }

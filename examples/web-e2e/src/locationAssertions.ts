@@ -43,7 +43,7 @@ export function assertLocationMetadata(
 ) {
   const metadata = position.metadata;
   if (!metadata) {
-    throw new Error("Modern position missing location metadata.");
+    throw new Error("Position missing location metadata.");
   }
   if (metadata.source !== expectedSource) {
     throw new Error(
@@ -55,18 +55,16 @@ export function assertLocationMetadata(
     !Number.isFinite(metadata.age) ||
     metadata.age < 0
   ) {
-    throw new Error(`Modern position has invalid age: ${metadata.age}.`);
+    throw new Error(`Position has invalid age: ${metadata.age}.`);
   }
   if (
     !(["high", "medium", "low", "unknown"] as const).includes(metadata.quality)
   ) {
-    throw new Error(
-      `Modern position has invalid quality: ${metadata.quality}.`
-    );
+    throw new Error(`Position has invalid quality: ${metadata.quality}.`);
   }
 }
 
-export function assertModernPosition(
+export function assertPositionWithMetadata(
   position: GeolocationResponse,
   source: NonNullable<GeolocationResponse["metadata"]>["source"]
 ) {

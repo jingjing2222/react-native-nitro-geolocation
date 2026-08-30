@@ -63,7 +63,7 @@ afterEach(() => {
   Reflect.deleteProperty(globalThis, "navigator");
 });
 
-describe("web Modern API", () => {
+describe("web API", () => {
   it("uses a stable availability reason when browser geolocation is unsupported", async () => {
     setNavigator(undefined);
 
@@ -167,7 +167,7 @@ describe("web Modern API", () => {
     });
   });
 
-  it("applies Modern API default browser position options", async () => {
+  it("applies default browser position options", async () => {
     const getCurrentPositionMock = vi.fn((success) => {
       success(createPosition());
     });
@@ -187,7 +187,7 @@ describe("web Modern API", () => {
     });
   });
 
-  it("maps Modern Android accuracy presets to browser accuracy", async () => {
+  it("maps Android accuracy presets to browser accuracy", async () => {
     const getCurrentPositionMock = vi.fn((success) => {
       success(createPosition());
     });
@@ -214,7 +214,7 @@ describe("web Modern API", () => {
     });
   });
 
-  it("maps browser error codes to Modern API LocationError codes", async () => {
+  it("maps browser error codes to LocationError codes", async () => {
     setNavigator({
       geolocation: {
         getCurrentPosition: vi.fn((_success, error) => {

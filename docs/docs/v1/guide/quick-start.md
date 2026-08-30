@@ -107,7 +107,7 @@ async function handleUseMyLocation() {
 
 If Android needs a settings prompt or an explicit cached read, configure the
 provider in your startup `setConfiguration()` call and add the settings helpers
-from the [Modern API reference](/guide/modern-api).
+from the [API reference](/guide/api).
 
 ```tsx
 import {
@@ -128,7 +128,7 @@ const cached = await getLastKnownPosition({
 
 ## Next Steps
 
-- [Modern API Reference](/guide/modern-api) — Complete documentation
+- [API Reference](/guide/api) — Complete documentation
 - [Compat API Reference](/guide/compat-api) — Compatibility methods
 - [Background Location](/background/overview) — Native background tracking, geofencing, and storage recovery
 - [Migration Guides](/guide/migration-assistance) — Move from community/service geolocation packages

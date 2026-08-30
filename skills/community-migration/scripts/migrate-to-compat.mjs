@@ -329,7 +329,7 @@ async function main() {
   }
 
   printNextChecks(manager, packageJson);
-  console.log("Next: refactor compat call sites to the Modern API.");
+  console.log("Next: refactor compat call sites to named API functions.");
 }
 
 main().catch((error) => {

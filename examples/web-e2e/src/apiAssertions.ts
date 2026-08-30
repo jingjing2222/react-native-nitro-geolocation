@@ -14,7 +14,7 @@ import {
 } from "react-native-nitro-geolocation";
 import { setScenario } from "./dom";
 
-export function assertModernApiAvailability() {
+export function assertApiAvailability() {
   const apiShape = {
     checkPermission: typeof checkPermission,
     getPermissionDetails: typeof getPermissionDetails,
@@ -31,7 +31,7 @@ export function assertModernApiAvailability() {
   const apiReady = Object.values(apiShape).every((type) => type === "function");
   setScenario("api-availability", apiReady ? "pass" : "fail", apiShape);
   if (!apiReady) {
-    throw new Error("Modern API browser export is incomplete.");
+    throw new Error("Browser API export is incomplete.");
   }
 }
 

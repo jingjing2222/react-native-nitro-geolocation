@@ -1,6 +1,6 @@
 appId: nitrogeolocation.example
 ---
-# Uses only the public Modern API to prove native watch snapshots and cleanup.
+# Uses only the public API to prove native watch snapshots and cleanup.
 
 - launchApp:
     clearState: true
@@ -29,7 +29,7 @@ appId: nitrogeolocation.example
 - waitForAnimationToEnd
 
 - extendedWaitUntil:
-    visible: "Inspect active Modern API position and heading watches"
+    visible: "Inspect active position and heading watches"
     timeout: 10000
 
 - tapOn:

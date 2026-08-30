@@ -1,8 +1,8 @@
 /**
- * Browser implementation for the Modern API.
+ * Browser implementation for the main package entry point.
  *
  * This entry intentionally avoids Nitro native imports so web bundlers can use
- * the package root without loading native bindings.
+ * the main package entry point without loading native bindings.
  */
 
 export * from "./web";

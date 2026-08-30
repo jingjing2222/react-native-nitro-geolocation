@@ -39,7 +39,7 @@ This page documents a 2.x feature and is not part of the 1.x API snapshot.
 export default defineConfig({
   root: path.join(__dirname, "docs"),
   title: "React Native Nitro Geolocation",
-  description: "Nitro-powered native geolocation for modern React Native apps",
+  description: "Nitro-powered native geolocation for React Native apps",
   icon: "/logo.png",
   logo: "/logo.png",
   logoText: "React Native Nitro Geolocation",
@@ -68,7 +68,7 @@ export default defineConfig({
       "meta",
       {
         property: "og:description",
-        content: "Nitro-powered native geolocation for modern React Native apps"
+        content: "Nitro-powered native geolocation for React Native apps"
       }
     ],
     ["meta", { property: "og:image", content: "/logo.png" }],
@@ -82,7 +82,7 @@ export default defineConfig({
       "meta",
       {
         name: "twitter:description",
-        content: "Nitro-powered native geolocation for modern React Native apps"
+        content: "Nitro-powered native geolocation for React Native apps"
       }
     ],
     ["meta", { name: "twitter:image", content: "/logo.png" }]

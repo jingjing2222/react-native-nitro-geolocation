@@ -6,11 +6,11 @@ import type {
 export type LocationErrorCode = SchemaLocationErrorCode;
 
 /**
- * Readable Modern API error codes.
+ * Readable location error codes.
  *
- * `/compat` keeps the W3C numeric codes. The Modern API uses these string
- * discriminants so logs and serialized errors remain meaningful without a
- * numeric lookup table.
+ * `/compat` keeps the W3C numeric codes. The main package entry point uses
+ * these string discriminants so logs and serialized errors remain meaningful
+ * without a numeric lookup table.
  */
 export const LocationErrorCodes = {
   /** Unexpected module/native failure */
@@ -48,7 +48,7 @@ const locationErrorCodeNames: Record<LocationErrorCode, string> = {
 /**
  * Creates a standardized LocationError object.
  *
- * @param code - A Modern API location error code
+ * @param code - A location error code
  * @param message - A human-readable error message
  * @returns A LocationError object
  *

@@ -175,7 +175,7 @@ export function FirstLocation() {
 
 ## Continue only for your use case
 
-- [Modern API reference](./modern-api.md) for readiness, cached reads, watches,
+- [API reference](./api.md) for readiness, cached reads, watches,
   geocoding, and heading.
 - [Community migration](./community-migration.md) if this replaces the community
   callback package.

@@ -1,6 +1,6 @@
 appId: nitrogeolocation.example
 ---
-# Web Modern API contract through react-native-webview.
+# Web API contract through react-native-webview.
 # Requires examples/web-e2e dev server on port 4173.
 
 - launchApp:

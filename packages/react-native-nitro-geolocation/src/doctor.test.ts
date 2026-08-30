@@ -598,7 +598,7 @@ describe("nitro-geolocation doctor", () => {
     );
   });
 
-  it("does not infer New Architecture from a modern React Native version", () => {
+  it("does not infer New Architecture from a recent React Native version", () => {
     const project = createProject({ newArchitecture: "absent" });
     projects.push(project);
 

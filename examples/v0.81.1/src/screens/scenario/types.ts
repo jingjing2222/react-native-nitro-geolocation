@@ -47,14 +47,14 @@ export type ScenarioResult = {
  * };
  * ```
  *
- * @property {LocationErrorCode} code - Modern API string error code, or
+ * @property {LocationErrorCode} code - API string error code, or
  * `internalError` when a caught value does not expose a known code.
  * @property {string} name - Human-readable name for `code`.
  * @property {string} message - Error message captured from the native
  * exception.
  */
 export type CapturedLocationError = {
-  /** Modern API string `LocationErrorCode`, or `internalError` fallback. */
+  /** API string `LocationErrorCode`, or `internalError` fallback. */
   code: LocationErrorCode;
   /** Human-readable name for `code`. */
   name: string;

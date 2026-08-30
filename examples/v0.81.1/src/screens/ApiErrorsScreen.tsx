@@ -33,7 +33,7 @@ const ERROR_CODE_CONTRACT = [
   {
     code: LocationErrorCodes.INTERNAL_ERROR,
     name: getLocationErrorCodeName(LocationErrorCodes.INTERNAL_ERROR),
-    meaning: "Modern-only internal/native failure"
+    meaning: "Internal/native failure"
   },
   {
     code: LocationErrorCodes.PERMISSION_DENIED,
@@ -55,12 +55,12 @@ const ERROR_CODE_CONTRACT = [
     name: getLocationErrorCodeName(
       LocationErrorCodes.PLAY_SERVICE_NOT_AVAILABLE
     ),
-    meaning: "Modern-only Google Play Services failure"
+    meaning: "Google Play Services failure"
   },
   {
     code: LocationErrorCodes.SETTINGS_NOT_SATISFIED,
     name: getLocationErrorCodeName(LocationErrorCodes.SETTINGS_NOT_SATISFIED),
-    meaning: "Modern-only provider/settings failure"
+    meaning: "Provider/settings failure"
   }
 ] as const;
 
@@ -128,7 +128,7 @@ export default function ApiErrorsScreen() {
     <ScenarioScreen
       prefix="api-errors"
       title="API Errors"
-      subtitle="Readable Modern API errors without numeric lookup tables"
+      subtitle="Readable API errors without numeric lookup tables"
     >
       <ScenarioSection
         index={1}
@@ -166,7 +166,7 @@ export default function ApiErrorsScreen() {
       <ScenarioSection
         index={2}
         title="Position Request"
-        description="Fetch a current position through the native Modern API path."
+        description="Fetch a current position through the native API path."
         divided
       >
         <ScenarioButton
@@ -192,7 +192,7 @@ export default function ApiErrorsScreen() {
       <ScenarioSection
         index={3}
         title="Error Handling"
-        description="Trigger a native timeout edge case and compare its string code with the Modern API contract below."
+        description="Trigger a native timeout edge case and compare its string code with the API contract below."
         divided
       >
         <ScenarioButton

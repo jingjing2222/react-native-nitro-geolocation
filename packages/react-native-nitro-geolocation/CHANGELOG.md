@@ -51,18 +51,18 @@
 
 ### Major Changes
 
-- 8bbd6de: Replace Modern API numeric location error codes with readable string discriminants while preserving numeric W3C codes under `/compat`.
-- cbb4d17: Remove the deprecated `ModernGeolocationConfiguration` alias. Use
-  `GeolocationConfiguration` for the root modern API instead.
+- 8bbd6de: Replace API numeric location error codes with readable string discriminants while preserving numeric W3C codes under `/compat`.
+- cbb4d17: Remove the deprecated duplicate configuration alias. Use
+  `GeolocationConfiguration` instead.
 - 65e100e: Make Watch Manager v2 delivery semantics the default: native acquisition stays
-  shared, while each Modern API watch independently enforces its own callback
+  shared, while each watch independently enforces its own callback
   thresholds and cleanup lifecycle.
 - 189a661: Split last-known position reads into synchronous module-cache and asynchronous
   platform-cache APIs. `getLastKnownPosition()` now returns the module cache
   immediately, while `getLastKnownPositionAsync(options)` queries cache-only native
   sources or filters observed Web and DevTools caches without starting a fresh
   location request.
-- 3a54d84: Remove `enableHighAccuracy` from the Modern API. Modern requests and Android
+- 3a54d84: Remove `enableHighAccuracy` from the API. Requests and Android
   settings now use explicit platform `accuracy` presets, while the `/compat`
   entry point retains `enableHighAccuracy` for drop-in compatibility.
 - c03b5ac: Route provider status and iOS location lifecycle changes through the unified
@@ -81,13 +81,13 @@
 - 7b6f4dc: Add `requestLocationSettingsDetailed()` as the explicit detailed-result API for
   Android settings resolution while preserving the v2 deterministic method.
 - 4c24ecb: Add a read-only `getPermissionDetails()` API for normalized permission scope, accuracy, prompt capability, and settings guidance across native and Web.
-- 0b2ee95: Add request-scoped `AbortSignal` cancellation to the Modern API `getCurrentPosition()` call on Android, iOS, and web.
+- 0b2ee95: Add request-scoped `AbortSignal` cancellation to `getCurrentPosition()` on Android, iOS, and web.
 - a56f54f: Add per-call opt-in mock and provider metadata to the Compat API without changing its default response shape.
-- 292d12b: Add optional Modern response metadata for delivery source, age, horizontal
+- 292d12b: Add optional response metadata for delivery source, age, horizontal
   accuracy quality, and stale reasons without changing location acceptance
   policy.
 - 791353b: Add native background reliability timestamps, run- and config-generation-aware serialized HTTP sync with bounded burst coalescing and automatic batch draining, long-run assertions, and a foreground/background/termination/reboot verification contract.
-- fe9521a: Add active Modern API watch snapshots and document native merge and cleanup semantics.
+- fe9521a: Add active watch snapshots and document native merge and cleanup semantics.
 - 91c342e: Add a read-only `getLocationReadiness()` diagnosis API with permission, provider, services, availability, cache, Play Services state, and remediation codes.
 - 8463f74: Add a cancellable provider status watcher that emits an initial snapshot and distinct readiness changes.
 - 441fb48: Add an iOS Core Location pause and app-triggered resume lifecycle listener.
@@ -168,7 +168,7 @@
 
 - 8216b3d: Add Compat API web support through a browser conditional export backed by `navigator.geolocation`.
 - 104417c: Prefer Google Play Services fused location for Android `auto` and `playServices` provider configuration, with Android platform provider fallback when fused location is unavailable or cannot start. Keep explicit `android` provider configuration on the platform `LocationManager` path.
-- 16681aa: Add Modern API web support through a browser conditional export backed by `navigator.geolocation`.
+- 16681aa: Add web support to the package entry point through a browser conditional export backed by `navigator.geolocation`.
 - b90c38b: Add a dedicated `./background` API with native-storage-backed background location tracking, geofencing, activity recognition events, Headless JS delivery, HTTP sync, documentation, and E2E examples.
 
 ### Patch Changes
@@ -218,24 +218,24 @@
 ### Patch Changes
 
 - 043e788: Clarify that Android `locationProvider: "auto"` currently uses the platform `LocationManager` by default, while `playServices` explicitly opts into Google Play Services fused location.
-- 3842d7a: Add an Agent Skills-compatible Modern API migration playbook with a package-manager-aware compat bootstrap script for migrations from legacy geolocation APIs.
+- 3842d7a: Add an Agent Skills-compatible API migration playbook with a package-manager-aware compat bootstrap script for migrations from legacy geolocation APIs.
 
 ## 1.2.0
 
 ### Minor Changes
 
-- efc25f1: Add platform-specific accuracy presets to the Modern API while preserving `enableHighAccuracy`.
+- efc25f1: Add platform-specific accuracy presets to the API while preserving `enableHighAccuracy`.
   Android now supports `high`, `balanced`, `low`, and `passive` presets, and iOS supports Core Location accuracy presets including `bestForNavigation`, `nearestTenMeters`, and `reduced`.
-  `enableHighAccuracy` is now deprecated for the Modern API in favor of explicit accuracy presets.
-- 93c2ce2: Add Android provider/settings APIs to the Modern API: `hasServicesEnabled()`, `getProviderStatus()`, and `requestLocationSettings(options?)`. Android now checks native provider state and uses Google Play Services `SettingsClient` to show the system settings resolution dialog when high-accuracy location requirements are not satisfied.
-- d54aa44: Add optional `mocked` and `provider` metadata to root location responses with Android and iOS native mappings.
-  Add `GeolocationConfiguration` as the preferred root API configuration type while preserving `ModernGeolocationConfiguration` as a deprecated compatibility alias.
+  `enableHighAccuracy` is now deprecated for the API in favor of explicit accuracy presets.
+- 93c2ce2: Add Android provider/settings APIs: `hasServicesEnabled()`, `getProviderStatus()`, and `requestLocationSettings(options?)`. Android now checks native provider state and uses Google Play Services `SettingsClient` to show the system settings resolution dialog when high-accuracy location requirements are not satisfied.
+- d54aa44: Add optional `mocked` and `provider` metadata to location responses with Android and iOS native mappings.
+  Add `GeolocationConfiguration` as the preferred API configuration type while preserving a deprecated compatibility alias.
   Keep the Compat API response shape unchanged for the drop-in replacement contract.
   Normalize missing native coordinate values to explicit `null` unions and include the same metadata in Rozenite DevTools mock responses.
-- 5bd6b3e: Add `geocode(address)` and `reverseGeocode(coords)` to the Modern API, backed by Android `Geocoder` and iOS `CLGeocoder` in the same package.
+- 5bd6b3e: Add `geocode(address)` and `reverseGeocode(coords)`, backed by Android `Geocoder` and iOS `CLGeocoder` in the same package.
 - cca38f3: Add explicit cached-position access with `getLastKnownPosition(options?)`, iOS location tuning options, and precise/reduced accuracy authorization APIs.
 - 48e70a6: Add `getLocationAvailability()`, heading APIs (`getHeading()` and `watchHeading()`), and selected Android request controls for granularity, accurate initial updates, update age/delay, and maximum watch updates.
-- b5efa00: Extend the Modern API location error contract with `INTERNAL_ERROR`, `PLAY_SERVICE_NOT_AVAILABLE`, and `SETTINGS_NOT_SATISFIED`. Native code now sends structured `{ code, message }` error classification directly to both callbacks and public Promise rejections, while preserving the `/compat` legacy error shape.
+- b5efa00: Extend the location error contract with `INTERNAL_ERROR`, `PLAY_SERVICE_NOT_AVAILABLE`, and `SETTINGS_NOT_SATISFIED`. Native code now sends structured `{ code, message }` error classification directly to both callbacks and public Promise rejections, while preserving the `/compat` callback error shape.
 - a27ca39: Avoid blocking the UI thread when Android resolves provider status after a successful location settings request by checking Google Location Accuracy asynchronously.
 
 ### Patch Changes
@@ -314,7 +314,7 @@
 ### Minor Changes
 
 - 4691c54: feat: version update for nitro-modules (0.29.6 -> 0.32.0)
-- 52ae0d1: feat: modern style API
+- 52ae0d1: feat: functional API
 - f20e92f: docs: update
 - a628093: chore: type alias variant_nulltype_double
 - db27c99: feat: origin method to compat(drop in)

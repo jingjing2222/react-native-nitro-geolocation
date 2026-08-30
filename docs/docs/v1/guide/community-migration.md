@@ -7,10 +7,10 @@ title: Community Migration
 Use this path for apps that import `@react-native-community/geolocation`,
 `navigator.geolocation`, or `react-native-nitro-geolocation/compat`.
 
-The safest migration is two-step: switch community imports to `/compat` first,
-verify the app still behaves the same, then move call sites to the Modern API
-where it improves ownership, permission timing, cache behavior, or Android
-settings handling.
+The safest migration is two-step: switch community imports to `/compat` first
+and verify the app still behaves the same. Then refactor selected call sites
+where direct functions or hooks improve ownership, permission timing, cache
+behavior, or Android settings handling.
 
 ## Agent Skill
 
@@ -30,8 +30,7 @@ The bundled bootstrap script performs the first safe mechanical pass:
 node <skill-dir>/scripts/migrate-to-compat.mjs --root <app-root>
 ```
 
-After the compat bootstrap, use the skill to refactor selected call sites to the
-Modern API.
+After the compat bootstrap, use the skill to refactor selected call sites.
 
 ## Migration Path
 
@@ -88,10 +87,10 @@ Geolocation.getCurrentPosition(
 );
 ```
 
-### Step 3: Modern API
+### Step 3: Direct functions and hooks
 
-After the `/compat` migration is stable, move individual call sites to the
-Modern API:
+After the `/compat` migration is stable, replace individual callback call sites
+with direct functions or hooks:
 
 ```tsx
 import {

@@ -14,9 +14,9 @@ const packageJson = JSON.parse(await readFile(packageJsonPath, "utf8"));
 const isReleaseCandidate = /-rc\.\d+$/.test(packageJson.version);
 const requiredRoutes = [
   "index.html",
-  "guide/modern-api.html",
+  "guide/api.html",
   "v2/index.html",
-  "v2/guide/modern-api.html",
+  "v2/guide/api.html",
   "v2/guide/release-readiness.html",
   "v2/guide/swift-package-manager.html",
   "v2/guide/troubleshooting.html",
@@ -81,21 +81,18 @@ for (const href of requiredDecisionLinks) {
   }
 }
 
-const v2Modern = await readFile(
-  path.join(buildRoot, "v2/guide/modern-api.html"),
-  "utf8"
-);
+const v2Api = await readFile(path.join(buildRoot, "v2/guide/api.html"), "utf8");
 
-if (isReleaseCandidate && !v2Modern.includes(">2.0 RC<")) {
+if (isReleaseCandidate && !v2Api.includes(">2.0 RC<")) {
   throw new Error("A deep v2 page does not expose the persistent RC marker.");
 }
 
-if (!isReleaseCandidate && v2Modern.includes(">2.0 RC<")) {
+if (!isReleaseCandidate && v2Api.includes(">2.0 RC<")) {
   throw new Error("A stable 2.0 page still exposes the RC marker.");
 }
 
 if (
-  !v2Modern.includes('href="https://react-native-nitro-geolocation.pages.dev/"')
+  !v2Api.includes('href="https://react-native-nitro-geolocation.pages.dev/"')
 ) {
   throw new Error("A deep v2 page does not expose the stable 1.x docs link.");
 }

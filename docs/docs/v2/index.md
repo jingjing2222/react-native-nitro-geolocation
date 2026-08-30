@@ -20,7 +20,7 @@ features:
   - title: Start a new integration
     details: 'Check the support boundary, add foreground-only permissions, and render your first coordinates. <a href="/v2/guide/quick-start.html">Install and get a location →</a>'
   - title: Replace community geolocation
-    details: 'Move foreground imports to the /compat surface first, verify the app, then adopt the Modern API at your pace. <a href="/v2/guide/community-migration.html">Open community migration →</a>'
+    details: 'Move foreground imports to the /compat surface first, verify the app, then adopt direct functions and hooks at your pace. <a href="/v2/guide/community-migration.html">Open community migration →</a>'
   - title: Upgrade from 1.x
     details: 'Review every 2.0 breaking change, apply the migration in gates, and keep a tested rollback path. <a href="/v2/guide/upgrade-from-v1.html">Open the upgrade checklist →</a>'
   - title: Add background location

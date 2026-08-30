@@ -12,8 +12,8 @@ pick one path; you do not need to read every guide before starting.
 | --- | --- | --- |
 | Add foreground location to a new app | [Install and get a location](./quick-start.md) | A foreground-only screen that renders coordinates |
 | Upgrade Nitro Geolocation 1.x | [Upgrade from 1.x](./upgrade-from-v1.md) | All seven 2.0 breaking changes reviewed and tested |
-| Replace `@react-native-community/geolocation` | [Community migration](./community-migration.md) | `/compat` first, then an optional Modern API refactor |
-| Replace `react-native-geolocation-service` | [Service migration](./service-migration.md) | A direct Modern API migration |
+| Replace `@react-native-community/geolocation` | [Community migration](./community-migration.md) | `/compat` first, then optionally adopt direct functions and hooks |
+| Replace `react-native-geolocation-service` | [Service migration](./service-migration.md) | Named imports from the package |
 | Use an Expo app | [Expo development builds](./expo-development-build.md) | A custom native build; Expo Go is not supported |
 | Track when the app is not active | [Background Location](../background/overview.md) | Native background tracking with platform-specific setup |
 | Evaluate the RC for release | [Release readiness](./release-readiness.md) | Tested-stack, RC-policy, and ship-checklist review |
@@ -25,7 +25,7 @@ The package has three intentionally separate entry points.
 
 | Surface | Import | Best for | Platform boundary |
 | --- | --- | --- | --- |
-| **Modern API** | `react-native-nitro-geolocation` | New foreground code, Promise APIs, typed readiness, React watches | Native and web foreground |
+| **Functions and hooks** | `react-native-nitro-geolocation` | New foreground code, Promise APIs, typed readiness, React watches | Native and web foreground |
 | **Compatibility API** | `react-native-nitro-geolocation/compat` | A controlled migration from the core community callback API | Native and web foreground |
 | **Background API** | `react-native-nitro-geolocation/background` | Tracking, geofencing, persistence, Headless JS, and native sync | Native only; web imports return unsupported results |
 
@@ -43,7 +43,7 @@ default, or platform-specific option behaves identically. Review the
 - CocoaPods is the recommended production iOS dependency path. React Native
   0.87.x SwiftPM-only projects have an experimental precompiled integration;
   use the exact compatibility matrix in the Swift Package Manager guide.
-- The Modern and Compatibility foreground APIs support browser builds through
+- Both foreground APIs support browser builds through
   `navigator.geolocation`. Background Location is native-only.
 - Android and iOS share public contracts but retain documented OS behavior and
   reliability limits.

@@ -7,9 +7,8 @@ description: Decide when to use native background location, understand platform 
 
 Use the Background API when the product must record location while the app is
 not active, monitor geofences, recover events recorded while JavaScript was
-unavailable, or run native delivery behavior. For an active screen, use the
-Modern foreground `useWatchPosition` API instead; it has a simpler permission
-and lifecycle model.
+unavailable, or run native delivery behavior. For an active screen, use
+`useWatchPosition()` instead; it has a simpler permission and lifecycle model.
 
 ```ts
 import {

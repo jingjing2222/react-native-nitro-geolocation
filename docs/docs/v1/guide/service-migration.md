@@ -4,8 +4,8 @@ title: Service Migration
 
 # Service Migration
 
-Apps that use `react-native-geolocation-service` should migrate directly to the
-Modern API:
+Apps that use `react-native-geolocation-service` should migrate directly to
+named imports from the package:
 
 ```ts
 import {
@@ -24,7 +24,7 @@ import {
 
 Do not migrate through `react-native-nitro-geolocation/compat`. The service
 package exposes Android fused-provider and settings-dialog behavior that maps
-more closely to Nitro Geolocation's Modern Android provider/settings API.
+more closely to Nitro Geolocation's Android provider/settings API.
 
 ## Agent Skill
 
@@ -45,7 +45,7 @@ node <skill-dir>/scripts/migrate-geolocation-service.mjs --root <app-root> --inv
 node <skill-dir>/scripts/migrate-geolocation-service.mjs --root <app-root> --dry-run
 ```
 
-If the app startup file is obvious, the script can also add the Modern startup
+If the app startup file is obvious, the script can also add the startup
 configuration:
 
 ```bash
@@ -74,7 +74,7 @@ Use `locationProvider: 'android'` only when the legacy app intentionally used
 
 ## API Mapping
 
-| `react-native-geolocation-service` | Nitro Modern API |
+| `react-native-geolocation-service` | Nitro Geolocation |
 | --- | --- |
 | `Geolocation.getCurrentPosition(success, error, options)` | `getCurrentPosition(options)` |
 | `Geolocation.watchPosition(success, error, options)` | `watchPosition(...)` or `useWatchPosition(...)` |
@@ -90,7 +90,7 @@ Use `locationProvider: 'android'` only when the legacy app intentionally used
 | `position.provider` | `GeolocationResponse.provider` |
 | error code `-1`, `1`, `2`, `3`, `4`, `5` | `LocationErrorCode` |
 
-`forceRequestLocation` has no direct Modern option. Preserve that fallback
+`forceRequestLocation` has no direct equivalent option. Preserve that fallback
 behavior manually only after reviewing the intended UX.
 
 ## One-Shot Location
@@ -131,11 +131,11 @@ Do not add `requestLocationSettings()` when the legacy call explicitly used
 `showLocationDialog: false`.
 
 When `showLocationDialog` was omitted, review the flow manually. The service
-package default was `true`; Nitro Modern API requires an explicit settings flow.
+package default was `true`; Nitro Geolocation requires an explicit settings flow.
 
 ## Watches
 
-Use the low-level Modern watch API as the first safe target:
+Use the low-level watch API as the first safe target:
 
 ```diff
 - const watchId = Geolocation.watchPosition(onPosition, onError, {
@@ -162,8 +162,8 @@ debouncing.
 
 ## Permission Differences
 
-Legacy `requestAuthorization()` can return `disabled`. Modern
-`requestPermission()` returns permission status only:
+Legacy `requestAuthorization()` can return `disabled`. The
+`requestPermission()` function returns permission status only:
 
 ```ts
 const status = await requestPermission();
@@ -186,7 +186,7 @@ const status = await requestPermission();
 
 Review call sites that omit options:
 
-| Option | Service default | Nitro Modern default |
+| Option | Service default | Nitro default |
 | --- | --- | --- |
 | `getCurrentPosition.timeout` | `Infinity` | `600000` |
 | `getCurrentPosition.maximumAge` | `Infinity` | `0` |
