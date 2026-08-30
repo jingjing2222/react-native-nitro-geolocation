@@ -30,3 +30,24 @@ test("the iOS release consumer builds its JS workspace dependency", async () => 
     /yarn workspace @react-native-nitro-geolocation\/rozenite-plugin build/
   );
 });
+
+test("release asset publication targets the repository explicitly", async () => {
+  const workflow = await readFile(
+    path.join(root, ".github/workflows/prebuilt-binaries.yml"),
+    "utf8"
+  );
+  const publishJob = workflow.slice(workflow.indexOf("  publish:"));
+
+  assert.match(
+    publishJob,
+    /gh release view "\$TAG" --repo "\$GITHUB_REPOSITORY"/
+  );
+  assert.match(
+    publishJob,
+    /gh release create "\$TAG" --repo "\$GITHUB_REPOSITORY"/
+  );
+  assert.match(
+    publishJob,
+    /gh release upload "\$TAG" build\/prebuilt\/\* --repo "\$GITHUB_REPOSITORY" --clobber/
+  );
+});
