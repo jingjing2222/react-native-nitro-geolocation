@@ -4281,7 +4281,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@react-native-nitro-geolocation/rozenite-plugin@workspace: *, @react-native-nitro-geolocation/rozenite-plugin@workspace:packages/rozenite-devtools-plugin":
+"@react-native-nitro-geolocation/rozenite-plugin@workspace:*, @react-native-nitro-geolocation/rozenite-plugin@workspace:packages/rozenite-devtools-plugin":
   version: 0.0.0-use.local
   resolution: "@react-native-nitro-geolocation/rozenite-plugin@workspace:packages/rozenite-devtools-plugin"
   dependencies:
@@ -15602,7 +15602,7 @@ __metadata:
     "@react-native-community/cli-platform-android": "npm:20.0.0"
     "@react-native-community/cli-platform-ios": "npm:20.0.0"
     "@react-native-community/geolocation": "npm:^3.4.0"
-    "@react-native-nitro-geolocation/rozenite-plugin": "workspace: *"
+    "@react-native-nitro-geolocation/rozenite-plugin": "workspace:*"
     "@react-native/babel-preset": "npm:0.81.1"
     "@react-native/metro-config": "npm:0.81.1"
     "@react-native/new-app-screen": "npm:0.81.1"
