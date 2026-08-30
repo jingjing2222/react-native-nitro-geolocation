@@ -20,7 +20,7 @@ a branch and keep the currently deployed 1.x version available for rollback.
 4. Pin the RC rather than following a moving tag:
 
 ```bash
-yarn add react-native-nitro-modules@0.35.10 react-native-nitro-geolocation@2.0.0-rc.3
+yarn add react-native-nitro-modules@0.35.10 react-native-nitro-geolocation@2.0.0-rc.4
 ```
 
 5. Reinstall pods, rebuild both native apps, and run
