@@ -120,6 +120,9 @@ jobs:
             -derivedDataPath "${{ runner.temp }}/prebuilt-consumer" \
             CODE_SIGNING_ALLOWED=NO
 
+      - name: Build and verify the RN 0.87 SwiftPM package
+        run: scripts/test-spm-rn087.sh build/prebuilt
+
       - name: Upload iOS artifact
         uses: actions/upload-artifact@v4
         with:
@@ -127,6 +130,8 @@ jobs:
           path: |
             build/prebuilt/*-ios.xcframework.zip
             build/prebuilt/*-ios.xcframework.zip.sha256
+            build/prebuilt/*-ios-spm.xcframeworks.zip
+            build/prebuilt/*-ios-spm.xcframeworks.zip.sha256
           if-no-files-found: error
 
   publish:

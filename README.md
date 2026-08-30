@@ -151,11 +151,11 @@ cd ios && bundle exec pod install
 ```
 
 Use `pod install` directly when your app does not check in a `Gemfile`.
-React Native 0.87's optional Swift Package Manager path is not yet compatible
-with the required Nitro Modules mixed-language native target. Keep CocoaPods
-for iOS and read the
+React Native 0.87.x can use the experimental precompiled Swift Package Manager
+path with Nitro Modules 0.37.1 and an app configuration helper. CocoaPods
+remains the recommended production path; follow the
 [Swift Package Manager guide](https://react-native-nitro-geolocation.pages.dev/guide/swift-package-manager)
-before migrating an RN 0.87 app.
+exactly before converting an RN 0.87 app.
 
 After configuring the native projects, inspect the installation without
 changing any files:

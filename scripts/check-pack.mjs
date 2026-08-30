@@ -31,6 +31,14 @@ const androidChecksumInstaller = await readFile(
   path.join(packageDir, "android/prebuilt_checksum.gradle"),
   "utf8"
 );
+const swiftPackage = await readFile(
+  path.join(packageDir, "Package.swift"),
+  "utf8"
+);
+const spmInstaller = await readFile(
+  path.join(packageDir, "spm/ensure-artifacts.cjs"),
+  "utf8"
+);
 
 const globChars = /[*?[\]{}]/;
 const missingEntries = (packageJson.files ?? []).filter((entry) => {
@@ -57,7 +65,13 @@ const packedTests = packedFiles.filter((file) =>
 const requiredPrivacyFiles = ["ios/PrivacyInfo.xcprivacy"];
 const requiredPrebuiltFiles = [
   "android/prebuilt_checksum.gradle",
-  "scripts/prebuilt_ios.rb"
+  "scripts/prebuilt_ios.rb",
+  "Package.swift",
+  "react-native.config.js",
+  "spm/autolinking-plugin.cjs",
+  "spm/config.cjs",
+  "spm/ensure-artifacts.cjs",
+  "spm/Sources/NitroGeolocationSPMLinker/Linker.swift"
 ];
 const missingPrivacyFiles = requiredPrivacyFiles.filter(
   (file) => !packedFiles.includes(file)
@@ -90,6 +104,22 @@ if (
   !privacyManifest.includes("CA92.1")
 ) {
   failures.push("iOS privacy manifest must declare UserDefaults reason CA92.1");
+}
+if (
+  !swiftPackage.includes("NitroModules.xcframework") ||
+  !swiftPackage.includes("NitroGeolocation.xcframework") ||
+  !swiftPackage.includes('.unsafeFlags(["-ObjC"])')
+) {
+  failures.push("SwiftPM must link both Nitro binaries with ObjC registration");
+}
+if (
+  !spmInstaller.includes("expectedChecksum") ||
+  !spmInstaller.includes("sha256(archivePath)") ||
+  !spmInstaller.includes("NITRO_GEOLOCATION_SPM_PREBUILT_URL_BASE")
+) {
+  failures.push(
+    "SwiftPM binary installation must verify the published SHA-256"
+  );
 }
 if (
   !privacyManifest.includes("NSPrivacyCollectedDataTypePreciseLocation") ||

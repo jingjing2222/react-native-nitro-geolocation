@@ -27,6 +27,10 @@
       "browser": "./src/background/index.web.ts",
       "react-native": "./src/background/index.ts",
       "default": "./src/background/index.ts"
+    },
+    "./spm": {
+      "require": "./spm/config.cjs",
+      "default": "./spm/config.cjs"
     }
   },
   "typesVersions": {
@@ -85,12 +89,16 @@
     "android/CMakeLists.txt",
     "android/src/**/*",
     "prebuilds/**",
+    "spm/**/*.cjs",
+    "spm/Sources/**/*.swift",
     "ios/**/*.h",
     "ios/**/*.m",
     "ios/**/*.mm",
     "ios/**/*.cpp",
     "ios/**/*.swift",
     "ios/PrivacyInfo.xcprivacy",
+    "Package.swift",
+    "react-native.config.js",
     "!src/**/*.test.ts",
     "!src/**/*.test.tsx",
     "!src/**/*.spec.ts",
@@ -121,6 +129,9 @@
     "expo": {
       "optional": true
     }
+  },
+  "nitroGeolocation": {
+    "spmNitroVersion": "0.37.1"
   },
   "sideEffects": false,
   "create-react-native-library": {

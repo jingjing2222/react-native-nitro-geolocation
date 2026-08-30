@@ -4,75 +4,84 @@ title: Swift Package Manager
 
 # Swift Package Manager
 
-React Native 0.87 introduced a Swift Package Manager (SwiftPM) build path for
-iOS. It is optional: CocoaPods remains the supported iOS installation path for
-`react-native-nitro-geolocation`.
+React Native 0.87 adds an experimental Swift Package Manager (SwiftPM) path for
+iOS. `react-native-nitro-geolocation` supports that experiment through a
+precompiled package containing both Nitro Modules and Nitro Geolocation.
+CocoaPods remains the recommended production path while React Native marks
+SwiftPM experimental.
 
-## Current Compatibility
+## Compatibility
 
-Do not run `npx react-native spm` in an app that installs this package yet.
-The React Native 0.87 SwiftPM autolinker requires every native dependency to
-resolve through a compatible `Package.swift`, either shipped by the library or
-generated from a supported podspec. The required `react-native-nitro-modules`
-peer dependency does not currently ship one.
+| iOS dependency manager | React Native | Nitro Modules | Status |
+| --- | --- | --- | --- |
+| CocoaPods | 0.75 or newer | Compatible installed version | Supported |
+| SwiftPM-only | 0.87.x | 0.37.1 | Experimental |
 
-This package and Nitro Modules also contain a mixed Swift, Objective-C++, and
-C++ target with Swift/C++ interop. React Native's generated SwiftPM scaffold
-cannot safely translate that target. Running `npx react-native spm scaffold`
-does not make this combination supported.
+The exact Nitro version matters because the SwiftPM artifact contains the
+native Nitro runtime. The JavaScript package installed in the app must match
+that binary. The autolinking plugin stops with an actionable error when either
+React Native or Nitro is outside this matrix.
 
-| iOS dependency manager | React Native 0.87 | Status |
-| --- | --- | --- |
-| CocoaPods | Supported | Recommended |
-| SwiftPM-only | Not yet supported | Wait for an official Nitro Modules SwiftPM package |
+The repository's
+[RN 0.87.1 consumer example](https://github.com/jingjing2222/react-native-nitro-geolocation/tree/main/examples/v0.87.1)
+is the same clean fixture exercised by the macOS SwiftPM CI job.
 
-## Supported RN 0.87 Installation
+## Install with SwiftPM
 
-Install both JavaScript packages normally, then keep the CocoaPods integration
-for iOS:
+Install the matching Nitro runtime and this package:
 
 ```bash
-yarn add react-native-nitro-modules react-native-nitro-geolocation@rc
-cd ios
-bundle exec pod install
+yarn add react-native-nitro-modules@0.37.1 react-native-nitro-geolocation@rc
 ```
 
-Use `pod install` instead of `bundle exec pod install` when the app does not
-check in a `Gemfile`. Open the generated `.xcworkspace` and rebuild the native
-app.
+Add the SwiftPM configuration helper to the app's `react-native.config.js`:
 
-Android setup is unchanged. The iOS dependency-manager choice does not affect
-the package's JavaScript API.
+```js
+const {
+  withNitroGeolocationSwiftPM,
+} = require("react-native-nitro-geolocation/spm");
 
-## Avoid Unsupported Workarounds
+module.exports = withNitroGeolocationSwiftPM({});
+```
 
-Do not:
+If the app already exports React Native configuration, pass that object to the
+helper. It preserves the existing configuration and disables only the separate
+iOS autolink target for `react-native-nitro-modules`. The Geolocation SwiftPM
+product already contains that exact native runtime, so linking it again would
+produce duplicate symbols.
 
-- disable iOS autolinking for `react-native-nitro-modules`;
-- add an empty manifest or use a generated scaffold for these mixed-language
-  Nitro targets in `node_modules`;
-- split the generated Nitro target into independent Swift and C++ targets;
-- link the same React or Nitro native symbols through both CocoaPods and
-  SwiftPM.
+Convert the iOS project with React Native's experimental command:
 
-These workarounds can pass package resolution while producing missing native
-registrations, duplicate symbols, or configuration-specific linker failures.
+```bash
+cd ios
+npx react-native spm scaffold --deintegrate --yes
+```
 
-## When SwiftPM Becomes Available
+The scaffold command prepares other source-based community dependencies in the
+app. This package opts out of source scaffolding and supplies its verified
+binary product through the RN 0.87 autolinking plugin.
 
-SwiftPM-only installation can be documented as supported after all of these
-conditions are met:
+After a fresh clone or dependency reset, rerun
+`spm scaffold --deintegrate --yes` before building. There is no `pod install`
+step on this path.
 
-1. `react-native-nitro-modules` publishes an official SwiftPM product.
-2. `react-native-nitro-geolocation` publishes a manifest or binary package that
-   preserves Nitro's Swift/C++ interop settings.
-3. Debug and Release builds pass on both an iOS simulator and a physical-device
-   archive with React Native 0.87.
-4. The app can run Modern, `/compat`, and background registration checks
-   without CocoaPods products in the link graph.
+During setup, the package downloads the matching GitHub Release artifact,
+verifies its SHA-256 sidecar, and exposes one `NitroGeolocationSPM` product to
+React Native's autolinker. The artifact contains device and simulator slices
+for both `NitroModules.xcframework` and `NitroGeolocation.xcframework`.
 
-Until then, choose CocoaPods for apps that use this package. React Native's
-[0.87 changelog](https://github.com/facebook/react-native/blob/v0.87.0/CHANGELOG.md)
-and the upstream
-[Nitro Modules repository](https://github.com/mrousavy/nitro) are the source of
-truth for the two prerequisite implementations.
+## Boundaries
+
+- Do not combine CocoaPods and SwiftPM products in one iOS target.
+- Do not remove the configuration helper; doing so makes React Native attempt
+  to scaffold Nitro's mixed Swift/C++ source target, which SwiftPM rejects.
+- A SwiftPM build has no source fallback. The matching release artifact and
+  checksum must be available.
+- Other Nitro-based libraries need their own compatible SwiftPM integration.
+  Do not link a second copy or a different version of the Nitro native runtime.
+- React Native documents the 0.87 SwiftPM path as experimental and advises
+  against production use. Revalidate Debug, Release, simulator, device, and
+  runtime registration whenever upgrading React Native, Nitro, or Xcode.
+
+To return to CocoaPods, run `npx react-native spm deinit`, remove the helper
+from `react-native.config.js`, then reinstall pods.
