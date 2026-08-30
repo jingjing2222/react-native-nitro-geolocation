@@ -1,4 +1,6 @@
 import assert from "node:assert/strict";
+import { readFile } from "node:fs/promises";
+import path from "node:path";
 import test from "node:test";
 import {
   assertSupportedReleaseVersion,
@@ -6,6 +8,25 @@ import {
   syncPodfileLockVersion,
   syncVersionedDocumentation
 } from "../scripts/release-version-sync.mjs";
+
+const root = path.resolve(import.meta.dirname, "..");
+
+test("example workspace dependencies survive Changesets versioning", async () => {
+  const examplePackage = JSON.parse(
+    await readFile(path.join(root, "examples/v0.81.1/package.json"), "utf8")
+  );
+
+  assert.equal(
+    examplePackage.dependencies["react-native-nitro-geolocation"],
+    "workspace:*"
+  );
+  assert.equal(
+    examplePackage.dependencies[
+      "@react-native-nitro-geolocation/rozenite-plugin"
+    ],
+    "workspace:*"
+  );
+});
 
 test("RC bumps update exact documentation versions without changing the channel", () => {
   const source = [
