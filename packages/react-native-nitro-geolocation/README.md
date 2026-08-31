@@ -256,7 +256,7 @@ function App() {
 }
 ```
 
-The plugin requires Rozenite DevTools in your app. See the
+The plugin requires Rozenite 2.2 or newer in your app. See the
 [DevTools Plugin guide](https://react-native-nitro-geolocation.pages.dev/v2/guide/devtools)
 for setup, presets, troubleshooting, and the demo.
 

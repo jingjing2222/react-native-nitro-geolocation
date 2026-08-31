@@ -1,0 +1,186 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Rozenite geolocation E2E</title>
+  </head>
+  <body>
+    <iframe
+      id="panel"
+      title="Geolocation DevTools"
+      src="/rozenite/plugins/@react-native-nitro-geolocation_rozenite-plugin/devtools/geolocation-devtools.html"
+    ></iframe>
+    <script>
+      const panel = document.getElementById("panel");
+      let messageCursor = 0;
+
+      const delay = (milliseconds) =>
+        new Promise((resolve) => setTimeout(resolve, milliseconds));
+
+      const api = async (path, options) => {
+        const response = await fetch(`/rozenite-e2e${path}`, {
+          headers: { "content-type": "application/json" },
+          ...options
+        });
+        if (!response.ok) {
+          throw new Error(`${path} returned ${response.status}`);
+        }
+        return response.json();
+      };
+
+      const waitFor = async (predicate, label) => {
+        const deadline = Date.now() + 8_000;
+        while (Date.now() < deadline) {
+          const value = await predicate();
+          if (value) return value;
+          await delay(50);
+        }
+        throw new Error(`Timed out waiting for ${label}`);
+      };
+
+      const assert = (condition, message) => {
+        if (!condition) throw new Error(message);
+      };
+
+      const panelDocument = () => panel.contentDocument;
+      const buttonWithText = (text) =>
+        Array.from(panelDocument().querySelectorAll("button")).find(
+          (button) => button.textContent.trim() === text
+        );
+
+      const selectPreset = async (name) => {
+        panelDocument().querySelector("button").click();
+        const option = await waitFor(
+          () => buttonWithText(name),
+          `${name} preset option`
+        );
+        option.click();
+      };
+
+      const setInput = (id, value) => {
+        const input = panelDocument().getElementById(id);
+        const setter = Object.getOwnPropertyDescriptor(
+          HTMLInputElement.prototype,
+          "value"
+        ).set;
+        setter.call(input, String(value));
+        input.dispatchEvent(new Event("input", { bubbles: true }));
+      };
+
+      window.addEventListener("message", (event) => {
+        if (
+          event.source !== panel.contentWindow ||
+          event.data?.type !== "rozenite-message"
+        ) {
+          return;
+        }
+        void api("/from-panel", {
+          method: "POST",
+          body: JSON.stringify(event.data.payload)
+        });
+      });
+
+      const pumpMessages = async () => {
+        while (true) {
+          const result = await api(`/to-panel?after=${messageCursor}`);
+          messageCursor = result.next;
+          for (const message of result.messages) {
+            panel.contentWindow.postMessage(message, "*");
+          }
+          await delay(25);
+        }
+      };
+      void pumpMessages();
+
+      window.runE2E = async () => {
+        await waitFor(
+          () => buttonWithText("Los Angeles, USA"),
+          "initial position handshake"
+        );
+
+        const initial = await api("/current-position");
+        assert(initial.coords.latitude === 34.0522, "initial latitude mismatch");
+        assert(
+          initial.coords.longitude === -118.2437,
+          "initial longitude mismatch"
+        );
+        assert(initial.mocked === true, "initial position is not mocked");
+
+        await selectPreset("Tokyo, Japan");
+        const tokyo = await waitFor(async () => {
+          const current = await api("/current-position");
+          return current.coords.latitude === 35.6762 ? current : null;
+        }, "Tokyo position in the app");
+        assert(tokyo.coords.longitude === 139.6503, "Tokyo longitude mismatch");
+        assert(tokyo.mocked === true, "Tokyo position is not mocked");
+
+        const distanceWatch = await api("/watches", {
+          method: "POST",
+          body: JSON.stringify({
+            platform: "ios",
+            options: { distanceFilter: 1_000 }
+          })
+        });
+        const limitedWatch = await api("/watches", {
+          method: "POST",
+          body: JSON.stringify({
+            platform: "android",
+            options: { distanceFilter: 0, interval: 0, maxUpdates: 2 }
+          })
+        });
+
+        setInput("latitude-input", 35.6772);
+        await waitFor(async () => {
+          const watches = await api("/watches");
+          const limited = watches.records.find(
+            (record) => record.id === limitedWatch.id
+          );
+          return limited?.updates.length === 2 ? watches : null;
+        }, "unfiltered Android watch update");
+
+        const afterSmallMove = await api("/watches");
+        const distanceAfterSmallMove = afterSmallMove.records.find(
+          (record) => record.id === distanceWatch.id
+        );
+        assert(
+          distanceAfterSmallMove.updates.length === 1,
+          "distance-filtered watch received a sub-threshold move"
+        );
+        assert(
+          afterSmallMove.active.length === 1 &&
+            afterSmallMove.active[0].token === distanceWatch.token,
+          "maxUpdates removed the wrong watch"
+        );
+
+        await selectPreset("New York, USA");
+        await waitFor(async () => {
+          const watches = await api("/watches");
+          const distance = watches.records.find(
+            (record) => record.id === distanceWatch.id
+          );
+          return distance?.updates.length === 2 ? watches : null;
+        }, "distance-filtered watch update");
+
+        const finalPosition = await api("/current-position");
+        assert(
+          finalPosition.coords.latitude === 40.7128 &&
+            finalPosition.coords.longitude === -74.006,
+          "New York position did not reach current-position"
+        );
+
+        await api(`/watches/${distanceWatch.id}`, { method: "DELETE" });
+        const cleaned = await api("/watches");
+        assert(cleaned.active.length === 0, "unwatch left an active watch");
+
+        return {
+          initial: "Los Angeles, USA",
+          preset: "Tokyo, Japan",
+          distanceFilter: "passed",
+          maxUpdates: "passed",
+          final: "New York, USA",
+          cleanup: "passed"
+        };
+      };
+    </script>
+  </body>
+</html>

@@ -4,7 +4,7 @@ Mock geolocation data in development with an interactive map interface using the
 
 ## Prerequisites
 
-This plugin requires [Rozenite DevTools](https://github.com/rozenite/rozenite) to be set up in your project. Follow the [Rozenite installation guide](https://rozenite.dev/docs/getting-started) before proceeding.
+This plugin requires Rozenite 2.2 or newer to be set up in your project. Follow the [Rozenite installation guide](https://www.rozenite.dev/) before proceeding.
 
 :::warning API Compatibility
 This DevTools plugin only works with the **package import** (`react-native-nitro-geolocation`). It does **not** support the Compat API (`react-native-nitro-geolocation/compat`).
@@ -138,7 +138,7 @@ The DevTools plugin uses an event-driven architecture:
 1. **Ready Signal**: DevTools UI sends a "ready" signal when mounted
 2. **Initial Position**: App responds with the configured initial position
 3. **Position Updates**: UI sends position changes to the app in real-time
-4. **Global State**: Position data is stored globally and accessible to all geolocation APIs
+4. **Global State**: Position data is stored globally and available to current-position, cache, and position-watch APIs
 
 ```tsx
 // Behind the scenes
@@ -194,6 +194,10 @@ function App() {
 1. Use arrow keys for smooth movement
 2. Verify heading and speed calculations
 3. Test distance-based triggers
+
+Each mock watch preserves its own `distanceFilter`. Android mock watches also
+preserve their own `interval` and `maxUpdates` lifecycle, matching the native
+Watch Manager v2 delivery contract.
 
 ## Important Notes
 

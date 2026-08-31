@@ -31,6 +31,7 @@
     "test:unit": "yarn workspace react-native-nitro-geolocation test",
     "test:ios-location-lifecycle": "bash scripts/test-ios-location-lifecycle.sh",
     "test:e2e:web": "yarn workspace react-native-nitro-geolocation-web-e2e build",
+    "test:e2e:rozenite": "yarn workspace @react-native-nitro-geolocation/rozenite-plugin build && node scripts/test-rozenite-e2e.mjs",
     "test:e2e:web:android": "yarn workspace react-native-nitro-geolocation-example test:e2e:web:android",
     "test:e2e:web:ios": "yarn workspace react-native-nitro-geolocation-example test:e2e:web:ios",
     "test:e2e:android": "yarn workspace react-native-nitro-geolocation-example test:e2e:android",

@@ -1,13 +1,14 @@
 {
   "$schema": "https://unpkg.com/knip@6/schema.json",
-  "entry": ["scripts/check-pack.mjs"],
-  "project": ["scripts/*.mjs"],
+  "entry": ["scripts/check-pack.mjs", "scripts/test-rozenite-e2e.mjs"],
+  "project": ["scripts/*.{cjs,mjs}"],
   "ignore": [
     "**/nitrogen/generated/**",
     "**/dist/**",
     "**/build/**",
     "**/Pods/**",
     "**/node_modules/**",
+    "scripts/rozenite-e2e-electron.cjs",
     "skills/community-migration/scripts/migrate-to-compat.mjs",
     "skills/service-migration/scripts/migrate-geolocation-service.mjs"
   ],
