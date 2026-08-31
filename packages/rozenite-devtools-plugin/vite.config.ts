@@ -1,11 +1,10 @@
 import { rozenitePlugin } from "@rozenite/vite-plugin";
-import tailwindcss from "@tailwindcss/vite";
 /// <reference types='vitest' />
 import { defineConfig } from "vite";
 
 export default defineConfig({
   root: __dirname,
-  plugins: [rozenitePlugin(), tailwindcss()],
+  plugins: [rozenitePlugin()],
   base: "./",
   build: {
     outDir: "./dist",

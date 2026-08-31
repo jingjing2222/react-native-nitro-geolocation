@@ -1,3 +1,4 @@
+import { Platform } from "react-native";
 import { NitroGeolocationHybridObject } from "../NitroGeolocationModule";
 import { isDevtoolsEnabled } from "../devtools";
 import { devtoolsWatchPosition } from "../devtools/watchPosition";
@@ -50,7 +51,12 @@ export function watchPosition(
   };
 
   if (isDevtoolsEnabled()) {
-    return devtoolsWatchPosition(rememberAndNotify, error);
+    return devtoolsWatchPosition(
+      rememberAndNotify,
+      error,
+      options,
+      Platform.OS === "android" ? "android" : "ios"
+    );
   }
   return NitroGeolocationHybridObject.watchPosition(
     rememberAndNotify,

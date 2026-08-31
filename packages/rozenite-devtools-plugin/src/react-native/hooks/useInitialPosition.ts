@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useLayoutEffect } from "react";
 import { withMockMetadata } from "../../shared/position";
 import type { Position } from "../../shared/types";
 
@@ -22,7 +22,7 @@ function getDevtoolsState() {
 }
 
 export function useInitialPosition(initialPosition?: Position) {
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (initialPosition) {
       const position = withMockMetadata(initialPosition);
       const devtools = getDevtoolsState();
