@@ -13,6 +13,7 @@
     <script>
       const panel = document.getElementById("panel");
       let messageCursor = 0;
+      const cases = [];
 
       const delay = (milliseconds) =>
         new Promise((resolve) => setTimeout(resolve, milliseconds));
@@ -41,6 +42,33 @@
       const assert = (condition, message) => {
         if (!condition) throw new Error(message);
       };
+
+      const recordCase = ({ name, input, expected, actual, passed }) => {
+        const result = {
+          name,
+          status: passed ? "PASS" : "FAIL",
+          input,
+          expected,
+          actual
+        };
+        console.log(`[ROZENITE_E2E_CASE]${JSON.stringify(result)}`);
+        assert(
+          passed,
+          `${name} failed\nExpected: ${JSON.stringify(expected)}\nActual: ${JSON.stringify(actual)}`
+        );
+        cases.push(result);
+      };
+
+      const positionValue = (position) => ({
+        latitude: position?.coords?.latitude,
+        longitude: position?.coords?.longitude,
+        mocked: position?.mocked
+      });
+
+      const watchValue = (record) => ({
+        updateCount: record?.updates?.length ?? 0,
+        lastPosition: positionValue(record?.updates?.at(-1))
+      });
 
       const panelDocument = () => panel.contentDocument;
       const buttonWithText = (text) =>
@@ -93,26 +121,55 @@
       void pumpMessages();
 
       window.runE2E = async () => {
-        await waitFor(
+        const initialButton = await waitFor(
           () => buttonWithText("Los Angeles, USA"),
           "initial position handshake"
         );
 
         const initial = await api("/current-position");
-        assert(initial.coords.latitude === 34.0522, "initial latitude mismatch");
-        assert(
-          initial.coords.longitude === -118.2437,
-          "initial longitude mismatch"
-        );
-        assert(initial.mocked === true, "initial position is not mocked");
+        const initialExpected = {
+          panelLabel: "Los Angeles, USA",
+          latitude: 34.0522,
+          longitude: -118.2437,
+          mocked: true
+        };
+        const initialActual = {
+          panelLabel: initialButton.textContent.trim(),
+          ...positionValue(initial)
+        };
+        recordCase({
+          name: "Initial position handshake",
+          input: { configuredPreset: "Los Angeles, USA" },
+          expected: initialExpected,
+          actual: initialActual,
+          passed:
+            initialActual.panelLabel === initialExpected.panelLabel &&
+            initialActual.latitude === initialExpected.latitude &&
+            initialActual.longitude === initialExpected.longitude &&
+            initialActual.mocked === initialExpected.mocked
+        });
 
         await selectPreset("Tokyo, Japan");
         const tokyo = await waitFor(async () => {
           const current = await api("/current-position");
           return current.coords.latitude === 35.6762 ? current : null;
         }, "Tokyo position in the app");
-        assert(tokyo.coords.longitude === 139.6503, "Tokyo longitude mismatch");
-        assert(tokyo.mocked === true, "Tokyo position is not mocked");
+        const tokyoExpected = {
+          latitude: 35.6762,
+          longitude: 139.6503,
+          mocked: true
+        };
+        const tokyoActual = positionValue(tokyo);
+        recordCase({
+          name: "Preset reaches getCurrentPosition",
+          input: { selectedPreset: "Tokyo, Japan" },
+          expected: tokyoExpected,
+          actual: tokyoActual,
+          passed:
+            tokyoActual.latitude === tokyoExpected.latitude &&
+            tokyoActual.longitude === tokyoExpected.longitude &&
+            tokyoActual.mocked === tokyoExpected.mocked
+        });
 
         const distanceWatch = await api("/watches", {
           method: "POST",
@@ -129,6 +186,36 @@
           })
         });
 
+        const registeredWatches = await api("/watches");
+        const registeredActual = {
+          createdWatchIds: [distanceWatch.id, limitedWatch.id],
+          activeTokens: registeredWatches.active.map((watch) => watch.token),
+          initialUpdateCounts: registeredWatches.records.map((record) => ({
+            id: record.id,
+            count: record.updates.length
+          }))
+        };
+        const registeredExpected = {
+          createdWatchIds: ["watch-1", "watch-2"],
+          activeTokens: [distanceWatch.token, limitedWatch.token],
+          initialUpdateCounts: [
+            { id: distanceWatch.id, count: 1 },
+            { id: limitedWatch.id, count: 1 }
+          ]
+        };
+        recordCase({
+          name: "Independent iOS and Android watches",
+          input: {
+            ios: { distanceFilter: 1_000 },
+            android: { distanceFilter: 0, interval: 0, maxUpdates: 2 }
+          },
+          expected: registeredExpected,
+          actual: registeredActual,
+          passed:
+            JSON.stringify(registeredActual) ===
+            JSON.stringify(registeredExpected)
+        });
+
         setInput("latitude-input", 35.6772);
         await waitFor(async () => {
           const watches = await api("/watches");
@@ -142,15 +229,56 @@
         const distanceAfterSmallMove = afterSmallMove.records.find(
           (record) => record.id === distanceWatch.id
         );
-        assert(
-          distanceAfterSmallMove.updates.length === 1,
-          "distance-filtered watch received a sub-threshold move"
+        const limitedAfterSmallMove = afterSmallMove.records.find(
+          (record) => record.id === limitedWatch.id
         );
-        assert(
-          afterSmallMove.active.length === 1 &&
-            afterSmallMove.active[0].token === distanceWatch.token,
-          "maxUpdates removed the wrong watch"
-        );
+        const smallMoveInput = {
+          from: { latitude: 35.6762, longitude: 139.6503 },
+          to: { latitude: 35.6772, longitude: 139.6503 },
+          approximateDistanceMeters: 111
+        };
+        const distanceExpected = {
+          distanceFilterMeters: 1_000,
+          updateCount: 1,
+          lastPosition: tokyoExpected
+        };
+        const distanceActual = {
+          distanceFilterMeters: 1_000,
+          ...watchValue(distanceAfterSmallMove)
+        };
+        recordCase({
+          name: "iOS distanceFilter blocks a 111 m move",
+          input: smallMoveInput,
+          expected: distanceExpected,
+          actual: distanceActual,
+          passed:
+            JSON.stringify(distanceActual) === JSON.stringify(distanceExpected)
+        });
+
+        const maxUpdatesExpected = {
+          maxUpdates: 2,
+          updateCount: 2,
+          lastLatitude: 35.6772,
+          remainingActiveTokens: [distanceWatch.token]
+        };
+        const maxUpdatesActual = {
+          maxUpdates: 2,
+          updateCount: limitedAfterSmallMove.updates.length,
+          lastLatitude:
+            limitedAfterSmallMove.updates.at(-1)?.coords?.latitude,
+          remainingActiveTokens: afterSmallMove.active.map(
+            (watch) => watch.token
+          )
+        };
+        recordCase({
+          name: "Android maxUpdates removes only its own watch",
+          input: smallMoveInput,
+          expected: maxUpdatesExpected,
+          actual: maxUpdatesActual,
+          passed:
+            JSON.stringify(maxUpdatesActual) ===
+            JSON.stringify(maxUpdatesExpected)
+        });
 
         await selectPreset("New York, USA");
         await waitFor(async () => {
@@ -162,23 +290,59 @@
         }, "distance-filtered watch update");
 
         const finalPosition = await api("/current-position");
-        assert(
-          finalPosition.coords.latitude === 40.7128 &&
-            finalPosition.coords.longitude === -74.006,
-          "New York position did not reach current-position"
+        const afterLargeMove = await api("/watches");
+        const distanceAfterLargeMove = afterLargeMove.records.find(
+          (record) => record.id === distanceWatch.id
         );
+        const finalExpected = {
+          currentPosition: {
+            latitude: 40.7128,
+            longitude: -74.006,
+            mocked: true
+          },
+          iosWatchUpdateCount: 2,
+          iosWatchLastPosition: {
+            latitude: 40.7128,
+            longitude: -74.006,
+            mocked: true
+          }
+        };
+        const finalActual = {
+          currentPosition: positionValue(finalPosition),
+          iosWatchUpdateCount: distanceAfterLargeMove.updates.length,
+          iosWatchLastPosition: positionValue(
+            distanceAfterLargeMove.updates.at(-1)
+          )
+        };
+        recordCase({
+          name: "Large preset move reaches current position and iOS watch",
+          input: { selectedPreset: "New York, USA" },
+          expected: finalExpected,
+          actual: finalActual,
+          passed:
+            JSON.stringify(finalActual) === JSON.stringify(finalExpected)
+        });
 
         await api(`/watches/${distanceWatch.id}`, { method: "DELETE" });
         const cleaned = await api("/watches");
-        assert(cleaned.active.length === 0, "unwatch left an active watch");
+        recordCase({
+          name: "unwatch cleans up the final active watch",
+          input: { removedWatchId: distanceWatch.id },
+          expected: { activeWatchCount: 0, activeTokens: [] },
+          actual: {
+            activeWatchCount: cleaned.active.length,
+            activeTokens: cleaned.active.map((watch) => watch.token)
+          },
+          passed: cleaned.active.length === 0
+        });
 
         return {
-          initial: "Los Angeles, USA",
-          preset: "Tokyo, Japan",
-          distanceFilter: "passed",
-          maxUpdates: "passed",
-          final: "New York, USA",
-          cleanup: "passed"
+          cases,
+          summary: {
+            passed: cases.filter((testCase) => testCase.status === "PASS")
+              .length,
+            total: cases.length
+          }
         };
       };
     </script>
