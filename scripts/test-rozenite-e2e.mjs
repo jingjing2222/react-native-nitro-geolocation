@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { spawn } from "node:child_process";
-import { readFileSync } from "node:fs";
+import { appendFileSync, readFileSync } from "node:fs";
 import { createRequire } from "node:module";
 import net from "node:net";
 import path from "node:path";
@@ -10,6 +10,50 @@ const PLUGIN_ID = "@react-native-nitro-geolocation/rozenite-plugin";
 const EXPECTED_RUNTIME_VERSION = "2.2.0";
 const REQUEST_TIMEOUT_MS = 120_000;
 const E2E_TIMEOUT_MS = 30_000;
+
+const printCase = (testCase) => {
+  const icon = testCase.status === "PASS" ? "PASS" : "FAIL";
+  console.log(`\n[${icon}] ${testCase.name}`);
+  console.log(`  INPUT:    ${JSON.stringify(testCase.input)}`);
+  console.log(`  EXPECTED: ${JSON.stringify(testCase.expected)}`);
+  console.log(`  ACTUAL:   ${JSON.stringify(testCase.actual)}`);
+};
+
+const verifyCase = ({ name, input, expected, actual }) => {
+  let error;
+  try {
+    assert.deepEqual(actual, expected);
+  } catch (assertionError) {
+    error = assertionError;
+  }
+  const testCase = {
+    name,
+    status: error ? "FAIL" : "PASS",
+    input,
+    expected,
+    actual
+  };
+  printCase(testCase);
+  if (error) throw error;
+  return testCase;
+};
+
+const writeGitHubSummary = (cases) => {
+  const summaryPath = process.env.GITHUB_STEP_SUMMARY;
+  if (!summaryPath) return;
+  const passed = cases.filter((testCase) => testCase.status === "PASS").length;
+  const cell = (value) => `\`${JSON.stringify(value).replaceAll("|", "\\|")}\``;
+  const rows = cases
+    .map(
+      (testCase) =>
+        `| ${testCase.status} | ${testCase.name} | ${cell(testCase.input)} | ${cell(testCase.expected)} | ${cell(testCase.actual)} |`
+    )
+    .join("\n");
+  appendFileSync(
+    summaryPath,
+    `## Rozenite behavior E2E\n\n| Result | Case | Input | Expected | Actual |\n| --- | --- | --- | --- | --- |\n${rows}\n\n**${passed}/${cases.length} cases passed.**\n`
+  );
+};
 
 const getAvailablePort = () =>
   new Promise((resolve, reject) => {
@@ -43,10 +87,6 @@ const fetchText = async (url, expectedContentType) => {
     `${url} returned an unexpected content type`
   );
   return response.text();
-};
-
-const assertIncludes = (contents, expected, label) => {
-  assert.ok(contents.includes(expected), `${label} is missing ${expected}`);
 };
 
 const sendJson = (response, status, value) => {
@@ -144,6 +184,7 @@ const closeHttpServer = (server) =>
   });
 
 const run = async () => {
+  const cases = [];
   const repositoryRoot = process.cwd();
   const exampleRoot = path.join(repositoryRoot, "examples/v0.81.1");
   const pluginRoot = path.join(
@@ -285,26 +326,73 @@ const run = async () => {
       `${baseUrl}/rozenite/app/config`
     );
     const rozeniteConfig = await configResponse.json();
-    assert.deepEqual(rozeniteConfig.installedPlugins, [PLUGIN_ID]);
-    assert.equal(rozeniteConfig.runtimeVersion, EXPECTED_RUNTIME_VERSION);
+    cases.push(
+      verifyCase({
+        name: "Rozenite host discovers the plugin",
+        input: { endpoint: "/rozenite/app/config" },
+        expected: {
+          installedPlugins: [PLUGIN_ID],
+          runtimeVersion: EXPECTED_RUNTIME_VERSION
+        },
+        actual: {
+          installedPlugins: rozeniteConfig.installedPlugins,
+          runtimeVersion: rozeniteConfig.runtimeVersion
+        }
+      })
+    );
 
     const pluginBaseUrl = `${baseUrl}/rozenite/plugins/${PLUGIN_ID.replace("/", "_")}`;
     const manifestResponse = await fetchResponse(
       `${pluginBaseUrl}/rozenite.json`
     );
     const manifest = await manifestResponse.json();
-    assert.equal(manifest.name, PLUGIN_ID);
     const panelUrl = `${pluginBaseUrl}${manifest.panels[0].source}`;
     const panelHtml = await fetchText(panelUrl, /text\/html/);
-    assertIncludes(panelHtml, "__ROZENITE_PANEL__", "panel HTML");
+    cases.push(
+      verifyCase({
+        name: "Built DevTools panel is served",
+        input: { manifestUrl: `${pluginBaseUrl}/rozenite.json`, panelUrl },
+        expected: {
+          manifestName: PLUGIN_ID,
+          hasPanelSource: true,
+          hasRozenitePanelBootstrap: true
+        },
+        actual: {
+          manifestName: manifest.name,
+          hasPanelSource: Boolean(manifest.panels[0].source),
+          hasRozenitePanelBootstrap: panelHtml.includes("__ROZENITE_PANEL__")
+        }
+      })
+    );
 
+    const bundleResults = {};
     for (const platform of ["android", "ios"]) {
       const bundle = await fetchText(
         `${baseUrl}/index.bundle?platform=${platform}&dev=true&minify=false&modulesOnly=false&runModule=true`,
         /(?:application|text)\/javascript/
       );
-      assertIncludes(bundle, PLUGIN_ID, `${platform} React Native bundle`);
+      bundleResults[platform] = {
+        containsPluginId: bundle.includes(PLUGIN_ID),
+        sizeBytes: Buffer.byteLength(bundle)
+      };
     }
+    cases.push(
+      verifyCase({
+        name: "React Native bundles include the Rozenite bridge",
+        input: { platforms: ["android", "ios"], dev: true },
+        expected: {
+          androidContainsPluginId: true,
+          iosContainsPluginId: true
+        },
+        actual: {
+          androidContainsPluginId: bundleResults.android.containsPluginId,
+          iosContainsPluginId: bundleResults.ios.containsPluginId
+        }
+      })
+    );
+    console.log(
+      `  BUNDLE SIZES: android=${bundleResults.android.sizeBytes} bytes, ios=${bundleResults.ios.sizeBytes} bytes`
+    );
 
     const rozenitePackage = requireFromPlugin.resolve("rozenite/package.json");
     const requireFromRozenite = createRequire(rozenitePackage);
@@ -314,15 +402,16 @@ const run = async () => {
       path.join(repositoryRoot, "scripts/rozenite-e2e-electron.cjs"),
       `${baseUrl}/rozenite-e2e/`
     );
-    assert.deepEqual(behavior, {
-      initial: "Los Angeles, USA",
-      preset: "Tokyo, Japan",
-      distanceFilter: "passed",
-      maxUpdates: "passed",
-      final: "New York, USA",
-      cleanup: "passed"
-    });
-    console.log(`Rozenite behavior E2E passed: ${JSON.stringify(behavior)}`);
+    assert.equal(behavior.summary.passed, behavior.summary.total);
+    assert.equal(behavior.cases.length, 7);
+    for (const testCase of behavior.cases) {
+      printCase(testCase);
+      cases.push(testCase);
+    }
+    writeGitHubSummary(cases);
+    console.log(
+      `\nRozenite behavior E2E passed: ${cases.length}/${cases.length} cases`
+    );
   } finally {
     watchModule.devtoolsStopObserving();
     disconnect();

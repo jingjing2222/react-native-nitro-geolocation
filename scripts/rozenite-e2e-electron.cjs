@@ -13,6 +13,15 @@ const run = async () => {
       contextIsolation: false
     }
   });
+  window.webContents.on("console-message", (_event, ...args) => {
+    const message =
+      typeof args[0] === "object" && args[0] !== null
+        ? args[0].message
+        : args[1];
+    if (message?.startsWith("[ROZENITE_E2E_CASE]")) {
+      process.stdout.write(`${message}\n`);
+    }
+  });
   await window.loadURL(url);
   const result = await window.webContents.executeJavaScript(
     "window.runE2E()",
