@@ -88,6 +88,26 @@ jobs:
             --jq '.id')"
           echo "id=$comment_id" >> "$GITHUB_OUTPUT"
 
+      - name: Create Rozenite E2E progress comment
+        id: rozenite-comment
+        if: steps.command.outputs.matched == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          HEAD_REF: ${{ steps.pr.outputs.head_ref }}
+          HEAD_REPO: ${{ steps.pr.outputs.head_repo }}
+          HEAD_SHA: ${{ steps.pr.outputs.head_sha }}
+          PR_NUMBER: ${{ github.event.issue.number }}
+        run: |
+          body="$(printf '@jingjing2222 Rozenite E2E: queued\n\n- Detail: Waiting for runner\n- Revision: %s@%s\n- SHA: %s\n' \
+            "$HEAD_REPO" \
+            "$HEAD_REF" \
+            "$HEAD_SHA")"
+
+          comment_id="$(gh api "repos/${GITHUB_REPOSITORY}/issues/${PR_NUMBER}/comments" \
+            -f body="$body" \
+            --jq '.id')"
+          echo "id=$comment_id" >> "$GITHUB_OUTPUT"
+
       - name: Dispatch E2E workflow
         if: steps.command.outputs.matched == 'true'
         env:
@@ -105,4 +125,5 @@ jobs:
             -f pr_repository="${HEAD_REPO}" \
             -f ios_comment_id="${{ steps.ios-comment.outputs.id }}" \
             -f android_comment_id="${{ steps.android-comment.outputs.id }}" \
+            -f rozenite_comment_id="${{ steps.rozenite-comment.outputs.id }}" \
             -f requested_by="jingjing2222"
