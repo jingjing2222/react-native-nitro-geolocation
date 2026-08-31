@@ -121,6 +121,37 @@ jobs:
         run: |
           yarn build:all
 
+  rozenite-e2e:
+    name: Rozenite 2 E2E
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup mise
+        uses: jdx/mise-action@v3
+        with:
+          install: false
+
+      - name: Trust and install tools via mise
+        run: |
+          mise trust --yes
+          mise install node
+
+      - name: Enable Corepack
+        run: |
+          corepack enable
+          mise reshim node
+
+      - name: Install dependencies
+        run: |
+          yarn install
+
+      - name: Run Rozenite host E2E
+        run: |
+          yarn test:e2e:rozenite
+
   unit-test:
     name: Unit Tests
     runs-on: ubuntu-latest

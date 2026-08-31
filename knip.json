@@ -1,6 +1,6 @@
 {
   "$schema": "https://unpkg.com/knip@6/schema.json",
-  "entry": ["scripts/check-pack.mjs"],
+  "entry": ["scripts/check-pack.mjs", "scripts/test-rozenite-e2e.mjs"],
   "project": ["scripts/*.mjs"],
   "ignore": [
     "**/nitrogen/generated/**",
