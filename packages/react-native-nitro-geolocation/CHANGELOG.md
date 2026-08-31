@@ -1,5 +1,18 @@
 # react-native-nitro-geolocation
 
+## 2.0.0-rc.5
+
+### Patch Changes
+
+- 95e7509: Require Rozenite 2.2 and upgrade the DevTools package and example host. Mock
+  watches now preserve the v2 per-subscription distance, Android interval,
+  `maxUpdates`, and idempotent cleanup contracts. The default Seoul fixture is
+  available immediately, and DevTools activation is released when the hook
+  unmounts.
+- 5e65d79: Simplify API terminology across package documentation, migration tooling,
+  examples, and internal implementation names while keeping the Compat API
+  unchanged.
+
 ## 2.0.0-rc.4
 
 ### Patch Changes
