@@ -148,7 +148,12 @@ jobs:
         run: |
           yarn install
 
-      - name: Run Rozenite host E2E
+      - name: Install virtual display
+        run: |
+          sudo apt-get update
+          sudo apt-get install --no-install-recommends --yes xvfb
+
+      - name: Run Rozenite behavior E2E
         run: |
           yarn test:e2e:rozenite
 
