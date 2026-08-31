@@ -96,7 +96,7 @@ const runElectron = async (electronPath, driverPath, url) => {
   const command = process.platform === "linux" ? "xvfb-run" : electronPath;
   const args =
     process.platform === "linux"
-      ? ["-a", electronPath, driverPath]
+      ? ["-a", electronPath, "--no-sandbox", driverPath]
       : [driverPath];
   const child = spawn(command, args, {
     env: {
