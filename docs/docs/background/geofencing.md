@@ -35,3 +35,11 @@ place. `removeGeofences()` unregisters the named native regions; call it only
 when the product should stop monitoring them.
 
 `notifyOnDwell` is Android-only. iOS region monitoring supports enter and exit.
+
+On Android, `configureBackgroundLocation({ geofencing: ... })` sets defaults for
+`initialTrigger` and `notificationResponsiveness` (milliseconds). Fields supplied
+in the second argument to `addGeofences(regions, options)` override those defaults
+for that registration; an empty `initialTrigger: []` disables initial triggers.
+Native restoration of persisted regions uses the persisted configuration defaults,
+so put policies that must survive process death/reboot in `geofencing`, not only
+in a per-call override. These two scheduling options are not supported by iOS.

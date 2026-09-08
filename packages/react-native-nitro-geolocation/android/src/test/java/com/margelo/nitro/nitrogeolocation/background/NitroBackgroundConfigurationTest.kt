@@ -54,6 +54,23 @@ class NitroBackgroundConfigurationTest {
     }
 
     @Test
+    fun configuredGeofencingDefaultsSurviveRestartAndAllowPerFieldOverrides() {
+        val context = ApplicationProvider.getApplicationContext<Context>()
+        val prefs = context.getSharedPreferences("config-test", Context.MODE_PRIVATE)
+        val defaults = GeofencingOptions(arrayOf(GeofenceTransition.EXIT), 12000.0)
+        NitroBackgroundConfigStore(prefs).persist(options().copy(geofencing = defaults))
+        val restored = NitroBackgroundConfigStore(prefs).restore()!!.geofencing!!
+        assertArrayEquals(defaults.initialTrigger, restored.initialTrigger)
+        assertEquals(defaults.notificationResponsiveness, restored.notificationResponsiveness)
+        val overridden = resolveGeofencingOptions(restored, GeofencingOptions(emptyArray(), null))!!
+        assertTrue(overridden.initialTrigger!!.isEmpty())
+        assertEquals(12000.0, overridden.notificationResponsiveness)
+        assertNull(resolveGeofencingOptions(null, null))
+        NitroBackgroundConfigStore(prefs).persist(options())
+        assertNull(NitroBackgroundConfigStore(prefs).restore()!!.geofencing)
+    }
+
+    @Test
     fun retryCountsCannotOverflowOrSilentlySkipEveryUpload() {
         assertEquals(4, httpSyncAttemptCount(true, null))
         assertEquals(1, httpSyncAttemptCount(true, 0.0))

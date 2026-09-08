@@ -56,7 +56,8 @@ class NitroBackgroundLocationController private constructor(
             permissions::backgroundPermission,
             { runGeneration },
             ::activeServiceGeneration,
-            ::recordError
+            ::recordError,
+            { getConfigOrNull()?.geofencing }
         )
     }
     private val activityCoordinator by lazy {

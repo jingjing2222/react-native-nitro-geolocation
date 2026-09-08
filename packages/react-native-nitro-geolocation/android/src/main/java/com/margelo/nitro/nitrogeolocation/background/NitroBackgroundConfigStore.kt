@@ -53,6 +53,7 @@ internal class NitroBackgroundConfigStore(private val prefs: SharedPreferences) 
             .putString("notificationIcon", service?.notificationIcon)
             .putString("notificationColor", service?.notificationColor)
             .putString("stopActionTitle", service?.stopActionTitle)
+            .putString("geofencing", options.geofencing?.let(::geofencingOptionsJson))
             .putString("syncUrl", options.sync?.url)
             .putString("syncMethod", options.sync?.method?.name)
             .putString("syncHeaders", options.sync?.headers?.let(::stringMapToJson))
@@ -146,7 +147,7 @@ internal class NitroBackgroundConfigStore(private val prefs: SharedPreferences) 
                 prefs.getBoolean("androidRequestIgnoreBatteryOptimizations", false)
             ),
             null,
-            null,
+            prefs.getString("geofencing", null)?.let(::geofencingOptionsFromJson),
             activityRecognition,
             sync
         )

@@ -101,6 +101,7 @@ export interface BackgroundLocationOptions {
   startOnBoot?: boolean;
   android?: AndroidBackgroundLocationOptions;
   ios?: IOSBackgroundLocationOptions;
+  /** Android defaults for new registrations and persisted-region restoration. */
   geofencing?: GeofencingOptions;
   activityRecognition?: ActivityRecognitionOptions;
   sync?: BackgroundHttpSyncOptions;
@@ -266,7 +267,9 @@ export interface GeofenceRegion {
 }
 
 export interface GeofencingOptions {
+  /** Android-only initial transitions. An empty array disables initial triggers. */
   initialTrigger?: GeofenceTransition[];
+  /** Android-only notification responsiveness in milliseconds. */
   notificationResponsiveness?: number;
 }
 

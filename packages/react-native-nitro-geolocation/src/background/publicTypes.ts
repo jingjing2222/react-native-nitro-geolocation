@@ -113,6 +113,7 @@ export interface BackgroundLocationOptions {
   startOnBoot?: boolean;
   android?: AndroidBackgroundLocationOptions;
   ios?: IOSBackgroundLocationOptions;
+  /** Android defaults for new registrations and persisted-region restoration. */
   geofencing?: GeofencingOptions;
   activityRecognition?: ActivityRecognitionOptions;
   sync?: BackgroundHttpSyncOptions;
