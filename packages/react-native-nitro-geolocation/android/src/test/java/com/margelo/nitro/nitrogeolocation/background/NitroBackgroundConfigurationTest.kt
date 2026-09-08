@@ -31,7 +31,7 @@ class NitroBackgroundConfigurationTest {
     fun storageLimitsAndActivityDefaultsSurviveProcessRestart() {
         val context = ApplicationProvider.getApplicationContext<Context>()
         val prefs = context.getSharedPreferences("config-test", Context.MODE_PRIVATE)
-        for (limit in listOf(null, 0.0, -1.0, 200.0)) {
+        for (limit in listOf(null, 0.0, -1.0, 200.0, 0.25, Double.MIN_VALUE, Double.MAX_VALUE, Double.NaN, Double.POSITIVE_INFINITY)) {
             val original = options(limit)
             NitroBackgroundConfigStore(prefs).persist(original)
             val restored = NitroBackgroundConfigStore(prefs).restore()!!
@@ -42,7 +42,8 @@ class NitroBackgroundConfigurationTest {
             assertEquals(activityTrackingAction(original, still, true), activityTrackingAction(restored, still, true))
         }
         // Preserve the old fallback for pre-2.0 settings without presence metadata.
-        prefs.edit().remove("maxStoredLocationsConfigured").putFloat("maxStoredLocations", 0f).commit()
+        prefs.edit().remove("maxStoredLocationsConfigured").remove("maxStoredLocationsValue")
+            .putFloat("maxStoredLocations", 0f).commit()
         assertNull(NitroBackgroundConfigStore(prefs).restore()!!.maxStoredLocations)
     }
 

@@ -57,7 +57,9 @@ Completed locally during implementation:
 - Baseline: 202 JavaScript tests and 18 release/SwiftPM contract tests.
 - Updated JavaScript, React lifecycle, and browser contracts: 213 tests passing.
 - Release/SwiftPM contracts: 20 tests passing.
-- Android JVM/Robolectric suite: 102 tests passing; arm64 Release APK builds pass.
+- Android JVM/Robolectric suite: final counts are recorded in the PR validation
+  ledger; arm64 Release APK builds pass. Numeric regressions include nonfinite,
+  fractional, subnormal, and huge storage caps with cold-store reconstruction.
 - iOS Swift lifecycle, permission, watch delivery, and numeric contracts: passing.
 - iOS CocoaPods source Release simulator build: passing.
 - Complete workspace typecheck, package build, dead-code checks, package dry-run,

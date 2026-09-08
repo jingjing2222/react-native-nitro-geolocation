@@ -34,6 +34,8 @@ internal class NitroBackgroundConfigStore(private val prefs: SharedPreferences) 
             .putBoolean("persist", options.persist != false)
             .putBoolean("maxStoredLocationsConfigured", options.maxStoredLocations != null)
             .putBoolean("maxStoredEventsConfigured", options.maxStoredEvents != null)
+            .putString("maxStoredLocationsValue", options.maxStoredLocations?.toString())
+            .putString("maxStoredEventsValue", options.maxStoredEvents?.toString())
             .putFloat("maxStoredLocations", (options.maxStoredLocations ?: 0.0).toFloat())
             .putFloat("maxStoredEvents", (options.maxStoredEvents ?: 0.0).toFloat())
             .putBoolean("activityConfigured", options.activityRecognition != null)
@@ -154,6 +156,9 @@ internal class NitroBackgroundConfigStore(private val prefs: SharedPreferences) 
     }
 
     private fun restoreStorageLimit(key: String): Double? {
+        // SharedPreferences floats can underflow a positive limit to the unbounded
+        // sentinel or overflow a large finite limit to infinity across a restart.
+        prefs.getString("${key}Value", null)?.toDoubleOrNull()?.let { return it }
         val value = prefs.getFloat(key, 0f).toDouble()
         // Old releases did not distinguish an omitted cap from explicit zero.
         return if (prefs.contains("${key}Configured")) {

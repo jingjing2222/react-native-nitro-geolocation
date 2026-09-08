@@ -58,7 +58,7 @@ class BackgroundDecisionsTest {
 
     @Test
     fun resolveMaxStoredUsesConfiguredPositiveValue() {
-        assertEquals(500, resolveMaxStored(500, 10_000))
+        assertEquals(500, resolveMaxStored(500.0, 10_000))
     }
 
     @Test
@@ -69,8 +69,18 @@ class BackgroundDecisionsTest {
     @Test
     fun resolveMaxStoredTreatsNonPositiveAsUnbounded() {
         // 0 is the library's explicit unbounded opt-out (pruneRows treats <= 0 as no-prune).
-        assertEquals(0, resolveMaxStored(0, 10_000))
-        assertEquals(0, resolveMaxStored(-5, 10_000))
+        assertEquals(0, resolveMaxStored(0.0, 10_000))
+        assertEquals(0, resolveMaxStored(-5.0, 10_000))
+    }
+
+    @Test
+    fun invalidOrFractionalStorageLimitsCannotDisableTheSafetyCap() {
+        for (invalid in listOf(Double.NaN, Double.POSITIVE_INFINITY, Double.NEGATIVE_INFINITY)) {
+            assertEquals(10_000, resolveMaxStored(invalid, 10_000))
+        }
+        assertEquals(1, resolveMaxStored(0.25, 10_000))
+        assertEquals(1, resolveMaxStored(Double.MIN_VALUE, 10_000))
+        assertEquals(Int.MAX_VALUE, resolveMaxStored(Double.MAX_VALUE, 10_000))
     }
 
     @Test
