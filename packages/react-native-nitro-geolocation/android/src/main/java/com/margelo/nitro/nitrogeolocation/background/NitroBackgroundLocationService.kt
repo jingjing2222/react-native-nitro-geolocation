@@ -17,8 +17,13 @@ class NitroBackgroundLocationService : Service() {
         if (intent?.action == ACTION_STOP_BACKGROUND_LOCATION) {
             // A delayed action from an older notification must not stop a newer run.
             requestedGeneration?.let(controller::stopFromService)
-            if (controller.runningServiceGeneration() == null) stopSelf(startId)
-            return START_NOT_STICKY
+            val stillRunning = controller.runningServiceGeneration() != null
+            if (!stillRunning) stopSelf(startId)
+            // Android uses the result of the latest command for restart policy,
+            // including ignored commands from an obsolete notification.
+            return if (stillRunning && controller.getConfigOrNull()?.stopOnTerminate == false) {
+                START_STICKY
+            } else START_NOT_STICKY
         }
         val foregroundService = intent?.backgroundNotificationOptions()
             ?: persistedBackgroundNotificationOptions(applicationContext)
