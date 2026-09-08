@@ -41,7 +41,7 @@ const position = {
 };
 
 beforeEach(() => {
-  vi.clearAllMocks();
+  vi.resetAllMocks();
   devtools.enabled = false;
   clearLastKnownPositionCache();
 });
@@ -145,5 +145,38 @@ describe("getCurrentPosition cancellation", () => {
     await expect(request).rejects.toBe(reason);
     await Promise.resolve();
     expect(readLastKnownPosition()).toBeUndefined();
+  });
+
+  it("removes abort handling and ignores callbacks after native startup throws", async () => {
+    const controller = new AbortController();
+    const removeListener = vi.spyOn(controller.signal, "removeEventListener");
+    const failure = new Error("native startup failed");
+    let deliver: (value: typeof position) => void = () => {};
+    native.getCurrentPositionCancellable.mockImplementation((_id, success) => {
+      deliver = success;
+      throw failure;
+    });
+
+    await expect(
+      getCurrentPosition({ signal: controller.signal })
+    ).rejects.toBe(failure);
+    expect(removeListener).toHaveBeenCalledWith("abort", expect.any(Function));
+    deliver(position);
+    expect(readLastKnownPosition()).toBeUndefined();
+    controller.abort();
+    expect(native.cancelCurrentPositionRequest).not.toHaveBeenCalled();
+  });
+
+  it("rejects with the abort reason even when native cancellation throws", async () => {
+    const controller = new AbortController();
+    const reason = new Error("user cancelled");
+    native.cancelCurrentPositionRequest.mockImplementation(() => {
+      throw new Error("native teardown failed");
+    });
+    const request = getCurrentPosition({ signal: controller.signal });
+    const rejected = expect(request).rejects.toBe(reason);
+
+    controller.abort(reason);
+    await rejected;
   });
 });

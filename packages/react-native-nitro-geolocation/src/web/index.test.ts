@@ -64,6 +64,47 @@ afterEach(() => {
 });
 
 describe("web API", () => {
+  it("cleans up abort listeners and ignores late callbacks when browser startup throws", async () => {
+    const controller = new AbortController();
+    const removeListener = vi.spyOn(controller.signal, "removeEventListener");
+    const failure = new Error("browser startup failed");
+    let deliver: (position: ReturnType<typeof createPosition>) => void =
+      () => {};
+    setNavigator({
+      geolocation: {
+        getCurrentPosition: vi.fn(),
+        clearWatch: vi.fn(),
+        watchPosition: vi.fn((success) => {
+          deliver = success;
+          throw failure;
+        })
+      }
+    });
+    await expect(
+      getCurrentPosition({ signal: controller.signal })
+    ).rejects.toBe(failure);
+    expect(removeListener).toHaveBeenCalledWith("abort", expect.any(Function));
+    deliver(createPosition());
+    expect(getLastKnownPosition()).toBeUndefined();
+  });
+
+  it("settles cancellation even if clearing the browser watch throws", async () => {
+    const controller = new AbortController();
+    const reason = new Error("cancel");
+    setNavigator({
+      geolocation: {
+        getCurrentPosition: vi.fn(),
+        watchPosition: vi.fn(() => 42),
+        clearWatch: vi.fn(() => {
+          throw new Error("teardown failed");
+        })
+      }
+    });
+    const request = getCurrentPosition({ signal: controller.signal });
+    controller.abort(reason);
+    await expect(request).rejects.toBe(reason);
+  });
+
   it("uses a stable availability reason when browser geolocation is unsupported", async () => {
     setNavigator(undefined);
 
