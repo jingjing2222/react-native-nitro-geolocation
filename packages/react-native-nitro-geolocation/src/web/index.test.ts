@@ -1020,10 +1020,13 @@ describe("web API", () => {
       timeout: 600000,
       maximumAge: 0
     });
-    expect(getActiveWatches()).toEqual([
-      { token: firstToken, kind: "position" },
-      { token: secondToken, kind: "position" }
-    ]);
+    // Tokens are opaque and snapshots are lexically sorted, not insertion-ordered
+    // (for example, web-10 sorts before web-9 under shuffled test execution).
+    expect(getActiveWatches()).toEqual(
+      [firstToken, secondToken]
+        .sort((first, second) => first.localeCompare(second))
+        .map((token) => ({ token, kind: "position" }))
+    );
     unwatch(firstToken);
     expect(clearWatch).toHaveBeenCalledWith(10);
     expect(getActiveWatches()).toEqual([
