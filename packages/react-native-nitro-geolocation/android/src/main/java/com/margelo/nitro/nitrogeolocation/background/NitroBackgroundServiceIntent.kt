@@ -4,6 +4,9 @@ import android.content.Context
 import android.content.Intent
 import com.margelo.nitro.nitrogeolocation.AndroidForegroundServiceOptions
 
+internal const val ACTION_STOP_BACKGROUND_LOCATION =
+    "com.margelo.nitro.nitrogeolocation.background.STOP"
+
 private const val EXTRA_NOTIFICATION_ID = "nitro.background.notificationId"
 private const val EXTRA_NOTIFICATION_TITLE = "nitro.background.notificationTitle"
 private const val EXTRA_NOTIFICATION_TEXT = "nitro.background.notificationText"

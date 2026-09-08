@@ -126,7 +126,9 @@ export interface AndroidForegroundServiceOptions {
   notificationChannelName?: string;
   notificationChannelDescription?: string;
   notificationIcon?: string;
+  /** Android notification accent color, for example `#336699`. Invalid colors are ignored. */
   notificationColor?: string;
+  /** Adds a native action that stops this tracking run. Omit to hide the action. */
   stopActionTitle?: string;
 }
 
