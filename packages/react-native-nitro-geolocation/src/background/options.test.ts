@@ -10,6 +10,21 @@ const foregroundService = {
 };
 
 describe("background option boundary", () => {
+  it("does not expose retired deferred options restored from older native configurations", () => {
+    const native = {
+      ios: {
+        useSignificantChanges: true,
+        deferredUpdatesDistance: 500,
+        deferredUpdatesInterval: 30
+      }
+    };
+    expect(fromNativeBackgroundLocationOptions(native)).toEqual({
+      ios: { useSignificantChanges: true }
+    });
+    expect(toNativeBackgroundLocationOptions(native)).toEqual({
+      ios: { useSignificantChanges: true }
+    });
+  });
   it("maps the public Android provider to the Nitro-safe spelling", () => {
     expect(
       toNativeBackgroundLocationOptions({

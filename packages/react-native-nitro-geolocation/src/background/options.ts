@@ -1,10 +1,23 @@
 import type { BackgroundLocationOptions } from "./publicTypes";
 import type { BackgroundLocationOptions as NativeBackgroundLocationOptions } from "./types";
 
+function publicIOSOptions(ios: NativeBackgroundLocationOptions["ios"]) {
+  if (!ios) return ios;
+  const {
+    deferredUpdatesDistance: _distance,
+    deferredUpdatesInterval: _interval,
+    ...supported
+  } = ios;
+  return supported;
+}
+
 export function toNativeBackgroundLocationOptions(
   options: BackgroundLocationOptions
 ): NativeBackgroundLocationOptions {
-  const { android, ...sharedOptions } = options;
+  const { android, ...rest } = options;
+  const sharedOptions = rest.ios
+    ? { ...rest, ios: publicIOSOptions(rest.ios) }
+    : rest;
   if (!android) {
     return sharedOptions;
   }
@@ -28,7 +41,10 @@ export function fromNativeBackgroundLocationOptions(
     return undefined;
   }
 
-  const { android, ...sharedOptions } = options;
+  const { android, ...rest } = options;
+  const sharedOptions = rest.ios
+    ? { ...rest, ios: publicIOSOptions(rest.ios) }
+    : rest;
   if (!android) {
     return sharedOptions;
   }
