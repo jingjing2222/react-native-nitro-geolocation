@@ -4,6 +4,7 @@ Checked 2026-09-09 with:
 
 ```sh
 yarn npm audit --all --recursive --environment production --json
+yarn npm audit --all --recursive --json
 ```
 
 `--all` matters: the private root has no production dependencies, so auditing
@@ -18,7 +19,13 @@ The initial result contained 117 advisory/deprecation records (2 critical,
 ranges, plus narrowly scoped same-major overrides for Ajv, Lodash, and Minimatch,
 reduced this to 42 records (0 critical, 10 high, 26 moderate, 6 low).
 The lockfile also refreshes the documentation router through its existing 7.x
-range. No React Native, React, Nitro, or Electron major was changed.
+range. A subsequent all-environment sweep (including development-only roots)
+found 62 records, including one additional critical XML-parser advisory.
+Compatible development-tool updates reduce the final all-environment result to
+43 records (0 critical, 10 high, 27 moderate, 6 low). This also updates the pinned
+web E2E Vite server to 8.0.16 and refreshes Babel's SystemJS transform, body-parser,
+fast-xml-parser, Joi, launch-editor, path-to-regexp, and qs. No React Native,
+React, Nitro, or Electron major was changed.
 
 This fixes the reported critical archive-parser and shell-quoting advisories,
 and the reported vulnerable versions of Babel, brace expansion, Browserslist,
@@ -35,13 +42,15 @@ a guarantee against future advisories.
 | image-size 1.2.1 | 2 | Metro asset parser; the latest 2.0.2 is also affected, with no patched release in the advisories. Do not process untrusted image fixtures in build infrastructure. |
 | decode-uri-component 0.2.2 | 1 | Example navigation's `query-string` dependency. The fixed 0.5 line is ESM while this dependency path uses CommonJS; forcing that cross-version change is not a compatible lockfile refresh. |
 | uuid 7.0.3 | 1 | Xcode-project tooling dependency; fixing the advisory requires a newer major and upstream compatibility review. |
+| fast-xml-parser 4.5.7 | 1 | The Android CLI's 4.x parser is updated past its critical advisory. A separate moderate advisory still requires 5.7.0 or later; that major migration needs upstream CLI compatibility review. |
 | boolean, glob, inflight, rimraf | 4 | Registry deprecation/support notices in the toolchain. These are retained in the total rather than hidden as successful checks. |
 
 Primary advisory references: [extract-zip](https://github.com/advisories/GHSA-jmr9-qjv8-65gv),
 [image-size ICNS](https://github.com/advisories/GHSA-w3rx-r6r6-pgpr),
 [image-size JXL/HEIF](https://github.com/advisories/GHSA-5p2g-fcmc-qvqq),
 [decode-uri-component](https://github.com/advisories/GHSA-vcc3-ghjq-m6fr),
-[uuid](https://github.com/advisories/GHSA-w5hq-g745-h8pq).
+[uuid](https://github.com/advisories/GHSA-w5hq-g745-h8pq),
+[remaining XML-parser issue](https://github.com/advisories/GHSA-gh4j-gqv2-49f6).
 
 The published `react-native-nitro-geolocation` manifest has peer dependencies
 but no `dependencies`. These workspace lockfile overrides do not pin or secure

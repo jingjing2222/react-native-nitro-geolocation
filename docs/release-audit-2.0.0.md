@@ -19,7 +19,7 @@ promise that every device, OS policy, or application integration is defect-free.
 | Numeric options | iOS numeric-to-integer conversions could trap; Android retries could overflow into zero attempts | Validate foreground numbers and retry counts, bound storage conversions; Swift/JVM contracts |
 | Public contract | iOS deferred delivery options were stored but never implemented | Remove them from the 2.0 public facade and snapshots, retain internal serialization compatibility, document the RC breaking correction and type-test it |
 | GA documentation | Versioning skipped navigation JSON, left RC prose, and retained 1.x as default | Rehearse a real 2.0 build in an isolated copy; verify current routes, legacy archive, and Cloudflare redirects |
-| Toolchain security | Workspace lockfile contained 117 advisory/deprecation records, including two critical | Compatible refreshes reduce this to 42 / zero critical; [remaining upstream/toolchain risks](./release-audit-dependencies-2.0.0.md) are explicitly not marked fixed |
+| Toolchain security | Production trees contained 117 advisory/deprecation records; an expanded development sweep found another critical XML-parser issue | Compatible refreshes leave 42 production-tree / 43 all-environment records, zero critical; [remaining upstream/toolchain risks](./release-audit-dependencies-2.0.0.md) are explicitly not marked fixed |
 
 ## Roadmap and compatibility review
 
@@ -93,6 +93,6 @@ Completed locally during implementation:
    reduced/approximate permissions, and real heading/provider selection remain
    device acceptance gates. Simulator success does not replace these checks.
 6. Review the separate dependency audit before treating the contributor/CI
-   environment as security-cleared; its remaining 42 records are not suppressed.
+   environment as security-cleared; its remaining 43 records are not suppressed.
 
 No npm publication or `latest` promotion is performed by this audit PR.
