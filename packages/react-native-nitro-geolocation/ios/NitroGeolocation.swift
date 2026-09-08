@@ -19,8 +19,8 @@ class NitroGeolocation: HybridNitroGeolocationSpec {
     private var locationManagerDelegate: LocationManagerDelegate?
     private var lastLocation: CLLocation?
     private var usingSignificantChanges: Bool = false
-    lazy var providerStatusWatcher = IOSProviderStatusWatcher()
-    private var pendingPermissionResolvers: [(PermissionStatus) -> Void] = []
+    let providerStatusWatcher = IOSProviderStatusWatcher()
+    private let pendingPermissionResolvers = IOSPermissionRequestQueue()
 
     // getCurrentPosition promise resolvers with timeout
     internal var pendingPositionRequests: [String: PositionRequest] = [:]
@@ -65,7 +65,9 @@ class NitroGeolocation: HybridNitroGeolocationSpec {
                 return
             }
 
-            self.pendingPermissionResolvers.append(success)
+            self.pendingPermissionResolvers.append { status in
+                success(mapCLAuthorizationStatus(status))
+            }
             self.requestSystemPermission(for: self.determineAuthorizationLevel())
         }
     }
@@ -413,16 +415,11 @@ class NitroGeolocation: HybridNitroGeolocationSpec {
     }
 
     func handleAuthorizationChange(_ manager: CLLocationManager) {
+        dispatchPrecondition(condition: .onQueue(.main))
         let status = getCurrentAuthorizationStatus(from: manager)
-        let mappedStatus = mapCLAuthorizationStatus(status)
-
-        // Snapshot state before invoking JS callbacks because they can re-enter this instance.
-        let resolvers = pendingPermissionResolvers
-        pendingPermissionResolvers.removeAll()
+        pendingPermissionResolvers.resolve(status)
+        // Callbacks can re-enter and stop watches, so inspect ownership after resolving.
         let shouldStartMonitoring = !pendingPositionRequests.isEmpty || !watchSubscriptions.isEmpty
-        for resolver in resolvers {
-            resolver(mappedStatus)
-        }
 
         // If authorized, start monitoring
         if shouldStartMonitoring && (status == .authorizedAlways || status == .authorizedWhenInUse) {
