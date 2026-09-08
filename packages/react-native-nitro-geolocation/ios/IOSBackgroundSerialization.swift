@@ -388,6 +388,13 @@ internal func httpSyncResultDictionary(_ result: BackgroundHttpSyncResult) -> [S
 internal func backgroundOptionsDictionary(_ options: BackgroundLocationOptions) -> [String: Any] {
     var dictionary: [String: Any] = [:]
     dictionary["trackingMode"] = options.trackingMode?.stringValue
+    if let accuracy = options.accuracy {
+        var value: [String: Any] = [:]
+        value["android"] = accuracy.android?.stringValue
+        value["ios"] = accuracy.ios?.stringValue
+        dictionary["accuracy"] = value
+    }
+    dictionary["granularity"] = options.granularity?.stringValue
     dictionary["interval"] = options.interval
     dictionary["fastestInterval"] = options.fastestInterval
     dictionary["distanceFilter"] = options.distanceFilter
@@ -407,8 +414,13 @@ internal func backgroundOptionsDictionary(_ options: BackgroundLocationOptions) 
 internal func makeBackgroundOptions(_ dictionary: [String: Any]) -> BackgroundLocationOptions {
     return BackgroundLocationOptions(
         trackingMode: (dictionary["trackingMode"] as? String).flatMap(BackgroundTrackingMode.init(fromString:)),
-        accuracy: nil,
-        granularity: nil,
+        accuracy: (dictionary["accuracy"] as? [String: Any]).map { value in
+            LocationAccuracyOptions(
+                android: (value["android"] as? String).flatMap(AndroidAccuracyPreset.init(fromString:)),
+                ios: (value["ios"] as? String).flatMap(IOSAccuracyPreset.init(fromString:))
+            )
+        },
+        granularity: (dictionary["granularity"] as? String).flatMap(AndroidGranularity.init(fromString:)),
         interval: dictionary["interval"] as? Double,
         fastestInterval: dictionary["fastestInterval"] as? Double,
         distanceFilter: dictionary["distanceFilter"] as? Double,

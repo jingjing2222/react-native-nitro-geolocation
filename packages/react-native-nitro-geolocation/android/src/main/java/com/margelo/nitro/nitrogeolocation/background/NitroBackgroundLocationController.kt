@@ -13,7 +13,6 @@ import com.google.android.gms.location.Geofence
 import com.google.android.gms.location.ActivityRecognition
 import com.google.android.gms.location.ActivityRecognitionResult
 import com.google.android.gms.location.GeofencingEvent
-import com.google.android.gms.location.LocationRequest
 import com.google.android.gms.location.LocationServices
 import com.margelo.nitro.nitrogeolocation.*
 import java.util.concurrent.CompletableFuture
@@ -378,15 +377,7 @@ class NitroBackgroundLocationController private constructor(
                 return
             }
             NitroGeoLog.d("startNativeLocationUpdates(): FUSED provider, registering broadcast PendingIntent")
-            val request = LocationRequest.Builder(
-                resolvePriority(current),
-                current.interval?.toLong() ?: 10_000L
-            )
-                .setMinUpdateIntervalMillis(current.fastestInterval?.toLong() ?: 5_000L)
-                .setMinUpdateDistanceMeters((current.distanceFilter ?: 0.0).toFloat())
-                .setWaitForAccurateLocation(current.waitForAccurateLocation == true)
-                .setMaxUpdateDelayMillis(current.maxUpdateDelay?.toLong() ?: 0L)
-                .build()
+            val request = buildBackgroundLocationRequest(current)
             val callback = pendingIntents.location(callbackGeneration, registration.generation)
 
             removeLegacyLocationUpdates()

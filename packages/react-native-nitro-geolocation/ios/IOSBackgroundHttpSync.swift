@@ -5,12 +5,16 @@ final class IOSBackgroundHttpSync {
         locations: [StoredBackgroundLocation],
         sync: BackgroundHttpSyncOptions
     ) -> BackgroundHttpSyncResult {
-        if sync.batch == false {
-            return uploadSingleLocationsWithRetry(locations: locations, sync: sync)
+        guard let maxAttempts = iosHttpSyncAttemptCount(retry: sync.retry, maxRetries: sync.maxRetries) else {
+            return BackgroundHttpSyncResult(
+                success: false, statusCode: nil, syncedLocationIds: [],
+                failedLocationIds: locations.map(\.id),
+                error: "maxRetries must be an integer between 0 and 2147483646."
+            )
         }
-        let maxAttempts = sync.retry == true
-            ? Int(sync.maxRetries ?? 3) + 1
-            : 1
+        if sync.batch == false {
+            return uploadSingleLocationsWithRetry(locations: locations, sync: sync, maxAttempts: maxAttempts)
+        }
         var lastResult: BackgroundHttpSyncResult?
         for attempt in 0..<max(maxAttempts, 1) {
             let result = upload(locations: locations, sync: sync)
@@ -33,11 +37,9 @@ final class IOSBackgroundHttpSync {
 
     private func uploadSingleLocationsWithRetry(
         locations: [StoredBackgroundLocation],
-        sync: BackgroundHttpSyncOptions
+        sync: BackgroundHttpSyncOptions,
+        maxAttempts: Int
     ) -> BackgroundHttpSyncResult {
-        let maxAttempts = sync.retry == true
-            ? Int(sync.maxRetries ?? 3) + 1
-            : 1
         var synced: [String] = []
         var failed: [String] = []
         var lastStatusCode: Double?

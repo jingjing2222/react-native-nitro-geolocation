@@ -701,7 +701,9 @@ class NitroBackgroundLocation: HybridNitroBackgroundLocationSpec {
                 options.ios?.pausesLocationUpdatesAutomatically ?? false
             manager.showsBackgroundLocationIndicator =
                 options.ios?.showsBackgroundLocationIndicator ?? false
-            manager.desiredAccuracy = kCLLocationAccuracyBest
+            manager.desiredAccuracy = options.accuracy?.ios.map {
+                ParsedOptions.resolveAccuracy(preset: $0)
+            } ?? kCLLocationAccuracyBest
             manager.distanceFilter = options.distanceFilter ?? kCLDistanceFilterNone
             manager.activityType = mapActivityType(options.ios?.activityType)
             if options.trackingMode == .significantchanges ||
@@ -808,9 +810,7 @@ class NitroBackgroundLocation: HybridNitroBackgroundLocationSpec {
     private static let defaultMaxStoredRows = 10_000
 
     private func resolveMaxStored(_ configured: Double?, default def: Int) -> Int? {
-        guard let configured = configured else { return def }
-        if configured <= 0 { return nil }
-        return Int(configured)
+        return iosStorageLimit(configured, defaultValue: def)
     }
 
     func appendStoredEvent(

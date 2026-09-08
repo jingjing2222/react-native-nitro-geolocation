@@ -192,6 +192,10 @@ class NitroGeolocation: HybridNitroGeolocationSpec {
     ) {
         dispatchPrecondition(condition: .onQueue(.main))
 
+        if let validationError = ParsedOptions.validationError(from: options) {
+            error?(validationError)
+            return
+        }
         // Check permission
         let status = CLLocationManager.authorizationStatus()
         if status == .denied || status == .restricted {
@@ -257,6 +261,10 @@ class NitroGeolocation: HybridNitroGeolocationSpec {
         error: ((LocationError) -> Void)?
     ) throws -> Void {
         let parsedOptions = ParsedOptions.parseLastKnown(from: options)
+        if let validationError = ParsedOptions.validationError(from: options) {
+            error?(validationError)
+            return
+        }
         runLocationOperationOnMain {
             let status = CLLocationManager.authorizationStatus()
             if status == .denied || status == .restricted {
