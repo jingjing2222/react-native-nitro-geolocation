@@ -19,6 +19,7 @@ promise that every device, OS policy, or application integration is defect-free.
 | Numeric options | iOS numeric-to-integer conversions could trap; Android retries could overflow into zero attempts | Validate foreground numbers and retry counts, bound storage conversions; Swift/JVM contracts |
 | Public contract | iOS deferred delivery options were stored but never implemented | Remove them from the 2.0 public facade and snapshots, retain internal serialization compatibility, document the RC breaking correction and type-test it |
 | GA documentation | Versioning skipped navigation JSON, left RC prose, and retained 1.x as default | Rehearse a real 2.0 build in an isolated copy; verify current routes, legacy archive, and Cloudflare redirects |
+| CI decision | Two distinct jobs published the same `Unit Tests` name, allowing summary views to show success while Android was still running | Unique suite names and one compatibility-preserving aggregate gate; regression tests exercise success, failure, cancellation, and skip combinations |
 | Toolchain security | Production trees contained 117 advisory/deprecation records; an expanded development sweep found another critical XML-parser issue | Compatible refreshes leave 42 production-tree / 43 all-environment records, zero critical; [remaining upstream/toolchain risks](./release-audit-dependencies-2.0.0.md) are explicitly not marked fixed |
 
 ## Roadmap and compatibility review
@@ -50,13 +51,25 @@ native contract scripts, and the consumer E2E suites.
   RN 0.81.1 / Nitro 0.35.10 reference stack. RN 0.87 SwiftPM with Nitro 0.37.1
   remains experimental; no broader test coverage is implied.
 
+## Repository-control preflight
+
+Read-only GitHub checks during this audit found no legacy protection on `main`,
+a `main` ruleset with enforcement disabled, and no configured environments.
+The promotion workflow names `npm-latest`, but a YAML environment name alone
+does not supply required reviewers or deployment restrictions. Configure these
+repository controls before relying on automatic merge/approval gates.
+
+The repository has an `NPM_TOKEN` secret name. Its value, validity, scope, and
+expiry were not inspected or verified by publication. No repository protection,
+environment, or secret setting was changed by this PR.
+
 ## Verification ledger
 
 Completed locally during implementation:
 
 - Baseline: 202 JavaScript tests and 18 release/SwiftPM contract tests.
 - Updated JavaScript, React lifecycle, and browser contracts: 213 tests passing.
-- Release/SwiftPM contracts: 20 tests passing.
+- Release/SwiftPM/CI-gate contracts: 21 tests passing.
 - Android JVM/Robolectric suite: final counts are recorded in the PR validation
   ledger; arm64 Release APK builds pass. Numeric regressions include nonfinite,
   fractional, subnormal, and huge storage caps with cold-store reconstruction.
@@ -83,6 +96,8 @@ Completed locally during implementation:
 ## Release gates after merging
 
 1. Complete PR checks and the recorded E2E runs; inspect any failed scenarios.
+   Enable the intended required checks/repository rules and configure protection
+   for the `npm-latest` environment if approval-gated promotion is required.
 2. Exit Changesets prerelease mode and generate the exact `2.0.0` version commit
    with `yarn release:version`. Review the resulting package/docs/lockfile diff.
 3. Publish through the repository release workflow. Stable packages are staged
