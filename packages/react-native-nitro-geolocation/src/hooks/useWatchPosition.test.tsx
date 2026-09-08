@@ -1,5 +1,5 @@
 import { StrictMode } from "react";
-import { act, create, type ReactTestRenderer } from "react-test-renderer";
+import { type ReactTestRenderer, act, create } from "react-test-renderer";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type { GeolocationResponse } from "../publicTypes";
 import type { LocationError } from "../utils/errors";
@@ -11,8 +11,8 @@ const watches = vi.hoisted(() => ({
 }));
 vi.mock("../api", () => watches);
 vi.mock("../web/watch", () => watches);
-import { useWatchPosition as nativeHook } from "./useWatchPosition";
 import { useWatchPosition as webHook } from "../web/useWatchPosition";
+import { useWatchPosition as nativeHook } from "./useWatchPosition";
 
 const position: GeolocationResponse = {
   coords: {
