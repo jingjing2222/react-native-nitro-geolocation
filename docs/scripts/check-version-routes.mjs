@@ -12,6 +12,7 @@ const packageJsonPath = path.resolve(
 );
 const packageJson = JSON.parse(await readFile(packageJsonPath, "utf8"));
 const isReleaseCandidate = /-rc\.\d+$/.test(packageJson.version);
+const currentPrefix = isReleaseCandidate ? "v2/" : "";
 const requiredRoutes = [
   "index.html",
   "guide/api.html",
@@ -35,7 +36,9 @@ const requiredRoutes = [
   "guide/v2-error-migration.html",
   "guide/v2-unified-background-events.html",
   "guide/watch-observability.html"
-];
+].map((route) => (isReleaseCandidate ? route : route.replace(/^v2\//, "")));
+if (!isReleaseCandidate)
+  requiredRoutes.push("v1/index.html", "v1/guide/api.html");
 
 await Promise.all(
   requiredRoutes.map(async (route) => {
@@ -47,12 +50,15 @@ await Promise.all(
   })
 );
 
-const v2Home = await readFile(path.join(buildRoot, "v2/index.html"), "utf8");
+const v2Home = await readFile(
+  path.join(buildRoot, `${currentPrefix}index.html`),
+  "utf8"
+);
 const requiredV2Links = [
   "/v2/guide/quick-start.html",
   "/v2/guide/upgrade-from-v1.html",
   "/v2/background/overview.html"
-];
+].map((href) => (isReleaseCandidate ? href : href.replace("/v2/", "/")));
 
 for (const href of requiredV2Links) {
   if (!v2Home.includes(`href="${href}"`)) {
@@ -61,7 +67,7 @@ for (const href of requiredV2Links) {
 }
 
 const v2Guide = await readFile(
-  path.join(buildRoot, "v2/guide/index.html"),
+  path.join(buildRoot, `${currentPrefix}guide/index.html`),
   "utf8"
 );
 const requiredDecisionLinks = [
@@ -73,7 +79,7 @@ const requiredDecisionLinks = [
   "/v2/background/overview.html",
   "/v2/guide/release-readiness.html",
   "/v2/guide/troubleshooting.html"
-];
+].map((href) => (isReleaseCandidate ? href : href.replace("/v2/", "/")));
 
 for (const href of requiredDecisionLinks) {
   if (!v2Guide.includes(`href="${href}"`)) {
@@ -81,7 +87,10 @@ for (const href of requiredDecisionLinks) {
   }
 }
 
-const v2Api = await readFile(path.join(buildRoot, "v2/guide/api.html"), "utf8");
+const v2Api = await readFile(
+  path.join(buildRoot, `${currentPrefix}guide/api.html`),
+  "utf8"
+);
 
 if (isReleaseCandidate && !v2Api.includes(">2.0 RC<")) {
   throw new Error("A deep v2 page does not expose the persistent RC marker.");
@@ -92,7 +101,9 @@ if (!isReleaseCandidate && v2Api.includes(">2.0 RC<")) {
 }
 
 if (
-  !v2Api.includes('href="https://react-native-nitro-geolocation.pages.dev/"')
+  !v2Api.includes(
+    `href="https://react-native-nitro-geolocation.pages.dev/${isReleaseCandidate ? "" : "v1/"}"`
+  )
 ) {
   throw new Error("A deep v2 page does not expose the stable 1.x docs link.");
 }
@@ -100,6 +111,7 @@ if (
 const readme = await readFile(packageReadme, "utf8");
 
 if (
+  isReleaseCandidate &&
   /react-native-nitro-geolocation\.pages\.dev\/(?:guide|background)\//.test(
     readme
   )
