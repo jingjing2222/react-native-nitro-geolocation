@@ -187,6 +187,7 @@ Before merging the upgrade:
 
 - [ ] No imports of the deprecated 1.x configuration alias remain.
 - [ ] No foreground options still use `enableHighAccuracy`.
+- [ ] No background options still use the inert iOS deferred-delivery fields.
 - [ ] Numeric error comparisons exist only under `/compat` or in explicit legacy
       data migration code.
 - [ ] Every last-known call deliberately chooses module cache or platform cache.

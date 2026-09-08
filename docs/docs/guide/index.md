@@ -11,7 +11,7 @@ pick one path; you do not need to read every guide before starting.
 | I want to… | Start here | Outcome |
 | --- | --- | --- |
 | Add foreground location to a new app | [Install and get a location](./quick-start.md) | A foreground-only screen that renders coordinates |
-| Upgrade Nitro Geolocation 1.x | [Upgrade from 1.x](./upgrade-from-v1.md) | All seven 2.0 breaking changes reviewed and tested |
+| Upgrade Nitro Geolocation 1.x | [Upgrade from 1.x](./upgrade-from-v1.md) | All eight 2.0 breaking changes reviewed and tested |
 | Replace `@react-native-community/geolocation` | [Community migration](./community-migration.md) | `/compat` first, then optionally adopt direct functions and hooks |
 | Replace `react-native-geolocation-service` | [Service migration](./service-migration.md) | Named imports from the package |
 | Use an Expo app | [Expo development builds](./expo-development-build.md) | A custom native build; Expo Go is not supported |
