@@ -12,12 +12,14 @@ promise that every device, OS policy, or application integration is defect-free.
 | iOS provider observation | Lazy watcher initialization could run on JS and main threads | Eager immutable watcher instance |
 | Cancellation | Startup throws left abort listeners active; teardown throws left promises pending | Native/browser regression tests reproduce both failures and verify settlement plus late-result suppression |
 | React and web watch lifecycle | Queued callbacks updated stopped/replaced subscriptions; synchronous StrictMode replay lost a result | Real React renderer lifecycle tests and browser ownership/cleanup tests |
-| Android foreground notification | `notificationColor` and `stopActionTitle` were ignored | Native action with immutable, generation-specific intent; Robolectric verifies color, stale action isolation, and stopping without promotion/restart |
+| Android foreground notification | `notificationColor` and `stopActionTitle` were ignored | Native action with immutable, generation-specific intent; Robolectric verifies color, stale action isolation, preserving a newer run's restart policy, and stopping without promotion/restart |
 | Background acquisition | iOS ignored requested accuracy; Android ignored requested granularity | Honor the configured native acquisition settings; Android request contract tests |
 | Background persistence | Android conflated absent and explicit-zero storage caps, changed default stop-on-still after restart; iOS omitted accuracy when restoring | Preserve policies; Android cold-store reconstruction tests; source Release builds |
+| Geofencing defaults | Android ignored configured geofencing defaults and lost them across restart | Apply defaults with per-field registration overrides, persist them, and use them for native restoration; JVM round-trip/override contract |
 | Numeric options | iOS numeric-to-integer conversions could trap; Android retries could overflow into zero attempts | Validate foreground numbers and retry counts, bound storage conversions; Swift/JVM contracts |
 | Public contract | iOS deferred delivery options were stored but never implemented | Remove them from the 2.0 public facade and snapshots, retain internal serialization compatibility, document the RC breaking correction and type-test it |
 | GA documentation | Versioning skipped navigation JSON, left RC prose, and retained 1.x as default | Rehearse a real 2.0 build in an isolated copy; verify current routes, legacy archive, and Cloudflare redirects |
+| Toolchain security | Workspace lockfile contained 117 advisory/deprecation records, including two critical | Compatible refreshes reduce this to 42 / zero critical; [remaining upstream/toolchain risks](./release-audit-dependencies-2.0.0.md) are explicitly not marked fixed |
 
 ## Roadmap and compatibility review
 
@@ -53,16 +55,28 @@ native contract scripts, and the consumer E2E suites.
 Completed locally during implementation:
 
 - Baseline: 202 JavaScript tests and 18 release/SwiftPM contract tests.
-- Updated JavaScript, React lifecycle, and release contracts: passing (final
-  counts recorded below after the last verification pass).
-- Android JVM/Robolectric suite and arm64 Release APK build: passing.
+- Updated JavaScript, React lifecycle, and browser contracts: 213 tests passing.
+- Release/SwiftPM contracts: 20 tests passing.
+- Android JVM/Robolectric suite: 102 tests passing; arm64 Release APK builds pass.
 - iOS Swift lifecycle, permission, watch delivery, and numeric contracts: passing.
 - iOS CocoaPods source Release simulator build: passing.
 - Complete workspace typecheck, package build, dead-code checks, package dry-run,
   source-size checks, and install doctor: passing during implementation.
 - iOS prebuilt checksum tests: 4 tests / 12 assertions, passing.
 - Isolated 2.0 documentation transition: 42 mirrored sources and 24 routes pass.
-- Native E2E and Rozenite E2E: running; update this ledger before final handoff.
+- Actual Changesets 3 rehearsal in a detached temporary worktree: `pre exit`,
+  `version`, source synchronization, real docs build, source/route checks, and
+  npm package dry-run pass. It produces exactly `2.0.0` (583 package files).
+- Android prebuilt checksums: valid downloads/cache reuse, tampered cache,
+  checksum mismatch, and invalid-checksum fallback tests pass.
+- Rozenite behavior E2E: 10/10 cases passing, including after dependency refresh.
+- Native E2E uses the RN 0.81.1 source Release application on an Android API 34
+  arm64 emulator and an iOS 26.5 simulator. Full native suites, final-build
+  background configuration checks, background long-run/reboot, GPS-offline,
+  web fallback, and no-Headless-JS regression results are tracked in the
+  [PR #208 validation ledger](https://github.com/jingjing2222/react-native-nitro-geolocation/pull/208).
+  The PR ledger and checks are the authority for their final pass/fail state;
+  this document does not mark an unfinished run as passed.
 
 ## Release gates after merging
 
@@ -76,5 +90,7 @@ Completed locally during implementation:
 5. Physical-device background delivery, OEM restrictions, battery behavior,
    reduced/approximate permissions, and real heading/provider selection remain
    device acceptance gates. Simulator success does not replace these checks.
+6. Review the separate dependency audit before treating the contributor/CI
+   environment as security-cleared; its remaining 42 records are not suppressed.
 
 No npm publication or `latest` promotion is performed by this audit PR.
