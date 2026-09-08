@@ -32,12 +32,16 @@ internal class NitroBackgroundConfigStore(private val prefs: SharedPreferences) 
             .putFloat("maxUpdateDelay", (options.maxUpdateDelay ?: 0.0).toFloat())
             .putBoolean("waitForAccurateLocation", options.waitForAccurateLocation == true)
             .putBoolean("persist", options.persist != false)
+            .putBoolean("maxStoredLocationsConfigured", options.maxStoredLocations != null)
+            .putBoolean("maxStoredEventsConfigured", options.maxStoredEvents != null)
+            .putString("maxStoredLocationsValue", options.maxStoredLocations?.toString())
+            .putString("maxStoredEventsValue", options.maxStoredEvents?.toString())
             .putFloat("maxStoredLocations", (options.maxStoredLocations ?: 0.0).toFloat())
             .putFloat("maxStoredEvents", (options.maxStoredEvents ?: 0.0).toFloat())
             .putBoolean("activityConfigured", options.activityRecognition != null)
             .putBoolean("activityEnabled", options.activityRecognition?.enabled == true)
             .putFloat("activityInterval", (options.activityRecognition?.interval ?: 10_000.0).toFloat())
-            .putBoolean("activityStopOnStill", options.activityRecognition?.stopOnStill == true)
+            .putBoolean("activityStopOnStill", options.activityRecognition?.stopOnStill != false)
             .putFloat(
                 "activityMinimumConfidence",
                 (options.activityRecognition?.minimumConfidence ?: 0.0).toFloat()
@@ -51,6 +55,7 @@ internal class NitroBackgroundConfigStore(private val prefs: SharedPreferences) 
             .putString("notificationIcon", service?.notificationIcon)
             .putString("notificationColor", service?.notificationColor)
             .putString("stopActionTitle", service?.stopActionTitle)
+            .putString("geofencing", options.geofencing?.let(::geofencingOptionsJson))
             .putString("syncUrl", options.sync?.url)
             .putString("syncMethod", options.sync?.method?.name)
             .putString("syncHeaders", options.sync?.headers?.let(::stringMapToJson))
@@ -131,8 +136,8 @@ internal class NitroBackgroundConfigStore(private val prefs: SharedPreferences) 
             prefs.getFloat("maxUpdateDelay", 0f).toDouble(),
             prefs.getBoolean("waitForAccurateLocation", false),
             prefs.getBoolean("persist", true),
-            prefs.getFloat("maxStoredLocations", 0f).toDouble().takeIf { it > 0 },
-            prefs.getFloat("maxStoredEvents", 0f).toDouble().takeIf { it > 0 },
+            restoreStorageLimit("maxStoredLocations"),
+            restoreStorageLimit("maxStoredEvents"),
             prefs.getBoolean("stopOnTerminate", true),
             prefs.getBoolean("startOnBoot", false),
             AndroidBackgroundLocationOptions(
@@ -144,9 +149,20 @@ internal class NitroBackgroundConfigStore(private val prefs: SharedPreferences) 
                 prefs.getBoolean("androidRequestIgnoreBatteryOptimizations", false)
             ),
             null,
-            null,
+            prefs.getString("geofencing", null)?.let(::geofencingOptionsFromJson),
             activityRecognition,
             sync
         )
+    }
+
+    private fun restoreStorageLimit(key: String): Double? {
+        // SharedPreferences floats can underflow a positive limit to the unbounded
+        // sentinel or overflow a large finite limit to infinity across a restart.
+        prefs.getString("${key}Value", null)?.toDoubleOrNull()?.let { return it }
+        val value = prefs.getFloat(key, 0f).toDouble()
+        // Old releases did not distinguish an omitted cap from explicit zero.
+        return if (prefs.contains("${key}Configured")) {
+            value.takeIf { prefs.getBoolean("${key}Configured", false) }
+        } else value.takeIf { it > 0 }
     }
 }

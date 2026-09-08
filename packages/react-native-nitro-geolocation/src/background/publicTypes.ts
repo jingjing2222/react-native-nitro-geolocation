@@ -16,7 +16,7 @@ import type {
   DetectedActivity,
   GeofenceEvent,
   GeofencingOptions,
-  IOSBackgroundLocationOptions
+  IOSBackgroundLocationOptions as NativeIOSBackgroundLocationOptions
 } from "./types";
 
 // Keep the `/background` entry point self-contained: consumers should be able
@@ -72,7 +72,6 @@ export type {
   GetStoredBackgroundEventsOptions,
   GetStoredBackgroundLocationsOptions,
   IOSBackgroundActivityType,
-  IOSBackgroundLocationOptions,
   IOSBackgroundLocationStatus,
   LocationLifecycleEvent,
   LocationLifecycleState,
@@ -81,6 +80,12 @@ export type {
 
 /** Android provider selection exposed by the public background API. */
 export type AndroidBackgroundProvider = "auto" | "playServices" | "android";
+
+/** Supported iOS controls; Core Location's retired deferred-update API is excluded. */
+export type IOSBackgroundLocationOptions = Omit<
+  NativeIOSBackgroundLocationOptions,
+  "deferredUpdatesDistance" | "deferredUpdatesInterval"
+>;
 
 export interface AndroidBackgroundLocationOptions {
   locationProvider?: AndroidBackgroundProvider;
@@ -108,6 +113,7 @@ export interface BackgroundLocationOptions {
   startOnBoot?: boolean;
   android?: AndroidBackgroundLocationOptions;
   ios?: IOSBackgroundLocationOptions;
+  /** Android defaults for new registrations and persisted-region restoration. */
   geofencing?: GeofencingOptions;
   activityRecognition?: ActivityRecognitionOptions;
   sync?: BackgroundHttpSyncOptions;

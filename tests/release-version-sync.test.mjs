@@ -6,7 +6,8 @@ import {
   assertSupportedReleaseVersion,
   readPodfileLockVersion,
   syncPodfileLockVersion,
-  syncVersionedDocumentation
+  syncVersionedDocumentation,
+  syncVersionedNavigation
 } from "../scripts/release-version-sync.mjs";
 
 const root = path.resolve(import.meta.dirname, "..");
@@ -92,4 +93,41 @@ test("the scoped 2.x synchronizer rejects unrelated versions", () => {
     () => assertSupportedReleaseVersion("3.0.0"),
     /does not support/
   );
+});
+
+test("stable navigation drops RC markers and links to the versioned 1.x archive", async () => {
+  const source = await readFile(
+    path.join(root, "docs/docs/v2/_nav.json"),
+    "utf8"
+  );
+  assert.equal(syncVersionedNavigation(source, "2.0.0-rc.6"), source);
+  const stable = syncVersionedNavigation(source, "2.0.0");
+  assert.ok(!stable.includes('"RC"'));
+  assert.ok(!stable.includes("2.0 RC"));
+  assert.ok(
+    stable.includes("https://react-native-nitro-geolocation.pages.dev/v1/")
+  );
+  assert.equal(syncVersionedNavigation(stable, "2.0.0"), stable);
+});
+
+test("stable synchronization updates actual readiness policy and package README", async () => {
+  const version = JSON.parse(
+    await readFile(
+      path.join(root, "packages/react-native-nitro-geolocation/package.json"),
+      "utf8"
+    )
+  ).version;
+  for (const file of [
+    "docs/docs/v2/guide/release-readiness.md",
+    "packages/react-native-nitro-geolocation/README.md"
+  ]) {
+    const source = await readFile(path.join(root, file), "utf8");
+    const stable = syncVersionedDocumentation(source, "2.0.0", version);
+    assert.ok(!stable.includes("**release candidate**"));
+    assert.ok(!stable.includes("README documents RC contracts"));
+    assert.ok(!stable.includes("@rc"));
+    assert.ok(!stable.includes("/v2/"));
+    assert.ok(stable.includes("/v1/"));
+    assert.equal(syncVersionedDocumentation(stable, "2.0.0", "2.0.0"), stable);
+  }
 });

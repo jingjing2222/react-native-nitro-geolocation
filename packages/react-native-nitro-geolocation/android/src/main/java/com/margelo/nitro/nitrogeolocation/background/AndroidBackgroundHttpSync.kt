@@ -8,16 +8,24 @@ import java.net.HttpURLConnection
 import java.net.URL
 import kotlin.random.Random
 
+internal fun httpSyncAttemptCount(retry: Boolean?, maxRetries: Double?): Int? {
+    if (retry != true) return 1
+    val retries = maxRetries ?: 3.0
+    if (!retries.isFinite() || retries < 0 || retries >= Int.MAX_VALUE ||
+        retries != kotlin.math.floor(retries)) return null
+    return retries.toInt() + 1
+}
+
 internal class AndroidBackgroundHttpSync {
     fun uploadLocationsWithRetry(
         sync: BackgroundHttpSyncOptions,
         locations: Array<StoredBackgroundLocation>
     ): BackgroundHttpSyncResult {
-        val maxAttempts = if (sync.retry == true) {
-            (sync.maxRetries?.toInt()?.takeIf { it >= 0 } ?: 3) + 1
-        } else {
-            1
-        }
+        val maxAttempts = httpSyncAttemptCount(sync.retry, sync.maxRetries)
+            ?: return BackgroundHttpSyncResult(
+                false, null, emptyArray(), locations.map { it.id }.toTypedArray(),
+                "maxRetries must be an integer between 0 and 2147483646."
+            )
         var lastStatus: Int? = null
         var lastError: String? = null
 

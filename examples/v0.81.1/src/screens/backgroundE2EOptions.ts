@@ -9,12 +9,14 @@ export const backgroundE2EOptions = {
     Platform.OS === "android"
       ? ("activityAware" as const)
       : ("continuous" as const),
+  accuracy: { android: "balanced" as const, ios: "nearestTenMeters" as const },
+  granularity: "permission" as const,
   interval: 10_000,
   fastestInterval: 5_000,
   distanceFilter: 25,
   persist: true,
-  maxStoredLocations: 10_000,
-  maxStoredEvents: 10_000,
+  maxStoredLocations: 0,
+  maxStoredEvents: 0,
   stopOnTerminate: false,
   startOnBoot: true,
   android: {
@@ -22,12 +24,18 @@ export const backgroundE2EOptions = {
       notificationTitle: "Background tracking active",
       notificationText: "Recording location updates for E2E validation",
       notificationChannelId: "nitro-background-location-e2e",
-      notificationChannelName: "Nitro Background Location E2E"
+      notificationChannelName: "Nitro Background Location E2E",
+      notificationColor: "#123456",
+      stopActionTitle: "Stop E2E tracking"
     }
   },
   ios: {
     pausesLocationUpdatesAutomatically: false,
     showsBackgroundLocationIndicator: true
+  },
+  geofencing: {
+    initialTrigger: ["enter" as const],
+    notificationResponsiveness: 2000
   },
   activityRecognition: {
     enabled: Platform.OS === "android",
@@ -46,6 +54,9 @@ export const assertBackgroundE2EConfiguration = async () => {
   const expected = backgroundE2EOptions;
   const commonMatches =
     configuration.trackingMode === expected.trackingMode &&
+    configuration.accuracy?.android === expected.accuracy.android &&
+    configuration.accuracy?.ios === expected.accuracy.ios &&
+    configuration.granularity === expected.granularity &&
     configuration.interval === expected.interval &&
     configuration.fastestInterval === expected.fastestInterval &&
     configuration.distanceFilter === expected.distanceFilter &&
@@ -60,6 +71,12 @@ export const assertBackgroundE2EConfiguration = async () => {
           expected.android.foregroundService.notificationTitle &&
         configuration.android.foregroundService.notificationText ===
           expected.android.foregroundService.notificationText &&
+        configuration.android.foregroundService.notificationColor ===
+          expected.android.foregroundService.notificationColor &&
+        configuration.android.foregroundService.stopActionTitle ===
+          expected.android.foregroundService.stopActionTitle &&
+        configuration.geofencing?.initialTrigger?.join(",") === "enter" &&
+        configuration.geofencing.notificationResponsiveness === 2000 &&
         configuration.activityRecognition?.enabled === true
       : configuration.ios?.pausesLocationUpdatesAutomatically === false &&
         configuration.ios.showsBackgroundLocationIndicator === true;

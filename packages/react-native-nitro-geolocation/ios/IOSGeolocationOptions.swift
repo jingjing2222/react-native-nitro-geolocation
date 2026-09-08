@@ -40,7 +40,16 @@ struct ParsedOptions {
         return parse(from: options, defaultMaximumAge: Double.infinity)
     }
 
-    private static func resolveAccuracy(preset: IOSAccuracyPreset?) -> CLLocationAccuracy {
+    static func validationError(from options: LocationRequestOptions) -> LocationError? {
+        guard let message = validateIOSLocationNumbers(
+            timeout: options.timeout ?? DEFAULT_TIMEOUT,
+            maximumAge: options.maximumAge ?? DEFAULT_MAXIMUM_AGE,
+            distanceFilter: options.distanceFilter ?? 0
+        ) else { return nil }
+        return createLocationError(code: INTERNAL_ERROR, message: message)
+    }
+
+    static func resolveAccuracy(preset: IOSAccuracyPreset?) -> CLLocationAccuracy {
         guard let preset else {
             return kCLLocationAccuracyHundredMeters
         }

@@ -59,19 +59,19 @@ internal fun backoffBaseDelayMs(attempt: Int, baseMs: Long, maxMs: Long): Long {
  *    original code gave for any non-positive value
  *  - explicit > 0 → that cap
  */
-internal fun resolveMaxStored(configured: Int?, default: Int): Int {
+internal fun resolveMaxStored(configured: Double?, default: Int): Int {
     return when {
-        configured == null -> default
+        configured == null || !configured.isFinite() -> default
         configured <= 0 -> 0
-        else -> configured
+        else -> configured.toInt().coerceAtLeast(1)
     }
 }
 
 internal fun maxStoredLocations(options: BackgroundLocationOptions?): Int =
-    resolveMaxStored(options?.maxStoredLocations?.toInt(), DEFAULT_MAX_STORED_LOCATIONS)
+    resolveMaxStored(options?.maxStoredLocations, DEFAULT_MAX_STORED_LOCATIONS)
 
 internal fun maxStoredEvents(options: BackgroundLocationOptions?): Int =
-    resolveMaxStored(options?.maxStoredEvents?.toInt(), DEFAULT_MAX_STORED_EVENTS)
+    resolveMaxStored(options?.maxStoredEvents, DEFAULT_MAX_STORED_EVENTS)
 
 /**
  * Headless JS is the fallback path when no in-process JS listener received the native event. If a

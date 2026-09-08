@@ -24,3 +24,19 @@ xcrun swiftc \
   -o "$test_dir/ios-location-lifecycle-contract"
 
 "$test_dir/ios-location-lifecycle-contract"
+
+xcrun swiftc \
+  -parse-as-library \
+  "$repo_root/packages/react-native-nitro-geolocation/ios/IOSPermissionRequestQueue.swift" \
+  "$repo_root/tests/ios/IOSPermissionRequestQueueContract.swift" \
+  -o "$test_dir/ios-permission-request-contract"
+
+"$test_dir/ios-permission-request-contract"
+
+xcrun swiftc \
+  -parse-as-library \
+  "$repo_root/packages/react-native-nitro-geolocation/ios/IOSNumericOptions.swift" \
+  "$repo_root/tests/ios/IOSNumericOptionsContract.swift" \
+  -o "$test_dir/ios-numeric-options-contract"
+
+"$test_dir/ios-numeric-options-contract"

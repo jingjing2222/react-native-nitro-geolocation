@@ -101,6 +101,7 @@ export interface BackgroundLocationOptions {
   startOnBoot?: boolean;
   android?: AndroidBackgroundLocationOptions;
   ios?: IOSBackgroundLocationOptions;
+  /** Android defaults for new registrations and persisted-region restoration. */
   geofencing?: GeofencingOptions;
   activityRecognition?: ActivityRecognitionOptions;
   sync?: BackgroundHttpSyncOptions;
@@ -126,7 +127,9 @@ export interface AndroidForegroundServiceOptions {
   notificationChannelName?: string;
   notificationChannelDescription?: string;
   notificationIcon?: string;
+  /** Android notification accent color, for example `#336699`. Invalid colors are ignored. */
   notificationColor?: string;
+  /** Adds a native action that stops this tracking run. Omit to hide the action. */
   stopActionTitle?: string;
 }
 
@@ -264,7 +267,9 @@ export interface GeofenceRegion {
 }
 
 export interface GeofencingOptions {
+  /** Android-only initial transitions. An empty array disables initial triggers. */
   initialTrigger?: GeofenceTransition[];
+  /** Android-only notification responsiveness in milliseconds. */
   notificationResponsiveness?: number;
 }
 

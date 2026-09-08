@@ -6,7 +6,7 @@ description: Migrate every React Native Nitro Geolocation 2.0 breaking change wi
 # Upgrade from 1.x to 2.0
 
 Use this guide for an app already running `react-native-nitro-geolocation` 1.x.
-The 2.0 release candidate has **seven** breaking contract changes. Apply them in
+The 2.0 release candidate has **eight** breaking contract changes. Apply them in
 a branch and keep the currently deployed 1.x version available for rollback.
 
 ## Plan the upgrade
@@ -40,6 +40,7 @@ lockfile and native dependency state before attempting API migrations.
 | Removed `enableHighAccuracy` | Foreground current/watch/settings options | Use platform `accuracy` presets | Approximate and precise flows |
 | Unified background events | Background provider/lifecycle listeners and persisted event consumers | Handle the unified discriminated stream | Live plus stored-event tests |
 | Deterministic settings result | Code expecting cancel/unavailable to reject | Branch on `result.outcome` | Satisfied, cancelled, unavailable tests |
+| Removed inert iOS deferred options | Background configuration using `deferredUpdatesDistance` or `deferredUpdatesInterval` | Remove these unused options | Typecheck and configuration snapshots |
 
 ## 1. Use string error codes
 
@@ -169,12 +170,24 @@ reports `satisfied` or `unavailable` without opening an Android-style dialog.
 **Verify:** cover every outcome used by the product and keep a catch path for an
 actual request failure.
 
+## 8. Remove retired iOS deferred-delivery options
+
+Remove `ios.deferredUpdatesDistance` and `ios.deferredUpdatesInterval` from
+background configuration. Earlier versions accepted and stored these values but
+never applied them to Core Location. They are excluded from the 2.0 public types
+and configuration snapshots, including snapshots restored from older versions.
+Apple has deprecated the underlying
+[deferred-update API](https://developer.apple.com/documentation/corelocation/cllocationmanager/allowdeferredlocationupdates(untiltraveled:timeout:)).
+Use `accuracy.ios`, `distanceFilter`, and the documented significant-change
+mode to tune acquisition; none promises a fixed background callback schedule.
+
 ## Release gate
 
 Before merging the upgrade:
 
 - [ ] No imports of the deprecated 1.x configuration alias remain.
 - [ ] No foreground options still use `enableHighAccuracy`.
+- [ ] No background options still use the inert iOS deferred-delivery fields.
 - [ ] Numeric error comparisons exist only under `/compat` or in explicit legacy
       data migration code.
 - [ ] Every last-known call deliberately chooses module cache or platform cache.

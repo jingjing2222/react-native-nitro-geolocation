@@ -3,7 +3,8 @@ import path from "node:path";
 import {
   readPodfileLockVersion,
   syncPodfileLockVersion,
-  syncVersionedDocumentation
+  syncVersionedDocumentation,
+  syncVersionedNavigation
 } from "./release-version-sync.mjs";
 
 const rootDir = path.resolve(import.meta.dirname, "..");
@@ -61,6 +62,16 @@ for (const file of documentationFiles) {
     version,
     previousVersion
   );
+  if (synchronized !== current) {
+    await writeFile(file, synchronized);
+    updatedFiles += 1;
+  }
+}
+
+for (const relativePath of ["_nav.json", "v2/_nav.json"]) {
+  const file = path.join(docsDir, relativePath);
+  const current = await readFile(file, "utf8");
+  const synchronized = syncVersionedNavigation(current, version);
   if (synchronized !== current) {
     await writeFile(file, synchronized);
     updatedFiles += 1;

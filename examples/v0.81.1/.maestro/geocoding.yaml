@@ -5,6 +5,7 @@ appId: nitrogeolocation.example
 
 - launchApp:
     clearState: true
+    stopApp: false # clearState already stops the app; avoid a second asynchronous task removal.
     permissions:
       all: allow
 

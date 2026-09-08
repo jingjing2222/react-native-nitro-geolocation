@@ -328,7 +328,11 @@ export function getCurrentPosition(
         return;
       }
       didClearWatch = true;
-      geolocation.clearWatch(requestWatch.id);
+      try {
+        geolocation.clearWatch(requestWatch.id);
+      } catch {
+        // Browser teardown must not prevent the one-shot request from settling.
+      }
     };
     const finish = (callback: () => void) => {
       if (settled) return;
@@ -340,11 +344,15 @@ export function getCurrentPosition(
     const handleAbort = () => finish(() => reject(getAbortReason(signal)));
 
     signal.addEventListener("abort", handleAbort, { once: true });
-    requestWatch.id = geolocation.watchPosition(
-      (position) => finish(() => resolve(observePosition(position))),
-      (error) => finish(() => reject(observeError(error))),
-      toPositionOptions(options)
-    );
+    try {
+      requestWatch.id = geolocation.watchPosition(
+        (position) => finish(() => resolve(observePosition(position))),
+        (error) => finish(() => reject(observeError(error))),
+        toPositionOptions(options)
+      );
+    } catch (error) {
+      finish(() => reject(error));
+    }
     if (shouldClearWatch) {
       clearRequestWatch();
     }

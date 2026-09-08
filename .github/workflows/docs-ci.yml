@@ -6,6 +6,8 @@ on:
       - main
     paths:
       - "docs/**"
+      - "scripts/*release-version*.mjs"
+      - "scripts/check-stable-docs.mjs"
       - "packages/react-native-nitro-geolocation/package.json"
       - "packages/react-native-nitro-geolocation/README.md"
       - ".github/workflows/docs-ci.yml"
@@ -41,3 +43,6 @@ jobs:
         run: |
           yarn build
           yarn check:versions
+
+      - name: Rehearse the stable 2.0 documentation transition
+        run: node scripts/check-stable-docs.mjs

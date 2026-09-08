@@ -64,6 +64,87 @@ afterEach(() => {
 });
 
 describe("web API", () => {
+  it("ignores queued callbacks after unwatch and clears the original browser provider", () => {
+    const browser = {
+      getCurrentPosition: vi.fn(),
+      watchPosition: vi.fn(() => 7),
+      clearWatch: vi.fn()
+    };
+    setNavigator({ geolocation: browser });
+    const success = vi.fn();
+    const error = vi.fn();
+    const token = watchPosition(success, error);
+    const [deliver, fail] = browser.watchPosition.mock.calls[0] as unknown as [
+      (value: ReturnType<typeof createPosition>) => void,
+      (value: { code: number; message: string }) => void
+    ];
+    setNavigator(undefined);
+    unwatch(token);
+    deliver(createPosition());
+    fail({ code: 1, message: "old denial" });
+    expect(browser.clearWatch).toHaveBeenCalledWith(7);
+    expect(success).not.toHaveBeenCalled();
+    expect(error).not.toHaveBeenCalled();
+    expect(getLastKnownPosition()).toBeUndefined();
+    expect(getActiveWatches()).toEqual([]);
+  });
+
+  it("cleans up when a synchronous initial callback stops every watch", () => {
+    const browser = {
+      getCurrentPosition: vi.fn(),
+      watchPosition: vi.fn((success) => {
+        success(createPosition());
+        return 7;
+      }),
+      clearWatch: vi.fn()
+    };
+    setNavigator({ geolocation: browser });
+    watchPosition(() => stopObserving());
+    expect(browser.clearWatch).toHaveBeenCalledExactlyOnceWith(7);
+    expect(getActiveWatches()).toEqual([]);
+  });
+
+  it("cleans up abort listeners and ignores late callbacks when browser startup throws", async () => {
+    const controller = new AbortController();
+    const removeListener = vi.spyOn(controller.signal, "removeEventListener");
+    const failure = new Error("browser startup failed");
+    let deliver: (position: ReturnType<typeof createPosition>) => void =
+      () => {};
+    setNavigator({
+      geolocation: {
+        getCurrentPosition: vi.fn(),
+        clearWatch: vi.fn(),
+        watchPosition: vi.fn((success) => {
+          deliver = success;
+          throw failure;
+        })
+      }
+    });
+    await expect(
+      getCurrentPosition({ signal: controller.signal })
+    ).rejects.toBe(failure);
+    expect(removeListener).toHaveBeenCalledWith("abort", expect.any(Function));
+    deliver(createPosition());
+    expect(getLastKnownPosition()).toBeUndefined();
+  });
+
+  it("settles cancellation even if clearing the browser watch throws", async () => {
+    const controller = new AbortController();
+    const reason = new Error("cancel");
+    setNavigator({
+      geolocation: {
+        getCurrentPosition: vi.fn(),
+        watchPosition: vi.fn(() => 42),
+        clearWatch: vi.fn(() => {
+          throw new Error("teardown failed");
+        })
+      }
+    });
+    const request = getCurrentPosition({ signal: controller.signal });
+    controller.abort(reason);
+    await expect(request).rejects.toBe(reason);
+  });
+
   it("uses a stable availability reason when browser geolocation is unsupported", async () => {
     setNavigator(undefined);
 
@@ -939,10 +1020,13 @@ describe("web API", () => {
       timeout: 600000,
       maximumAge: 0
     });
-    expect(getActiveWatches()).toEqual([
-      { token: firstToken, kind: "position" },
-      { token: secondToken, kind: "position" }
-    ]);
+    // Tokens are opaque and snapshots are lexically sorted, not insertion-ordered
+    // (for example, web-10 sorts before web-9 under shuffled test execution).
+    expect(getActiveWatches()).toEqual(
+      [firstToken, secondToken]
+        .sort((first, second) => first.localeCompare(second))
+        .map((token) => ({ token, kind: "position" }))
+    );
     unwatch(firstToken);
     expect(clearWatch).toHaveBeenCalledWith(10);
     expect(getActiveWatches()).toEqual([

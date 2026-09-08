@@ -5,6 +5,7 @@ appId: nitrogeolocation.example
 
 - launchApp:
     clearState: true
+    stopApp: false # clearState already stops the app; avoid a second asynchronous task removal.
     permissions:
       all: unset
 - runFlow:
@@ -74,6 +75,7 @@ appId: nitrogeolocation.example
 
 - launchApp:
     clearState: true
+    stopApp: false
     permissions:
       all: allow
 - runFlow:
@@ -117,6 +119,7 @@ appId: nitrogeolocation.example
     commands:
       - launchApp:
           clearState: true
+          stopApp: false
           permissions:
             all: deny
             android.permission.ACCESS_COARSE_LOCATION: allow
@@ -150,6 +153,7 @@ appId: nitrogeolocation.example
 
 - launchApp:
     clearState: true
+    stopApp: false
     permissions:
       all: deny
 - runFlow:

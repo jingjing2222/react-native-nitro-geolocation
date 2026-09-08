@@ -50,6 +50,10 @@ extension NitroGeolocation {
         error: ((LocationError) -> Void)?
     ) -> String {
         let token = UUID().uuidString
+        if let validationError = ParsedOptions.validationError(from: options) {
+            error?(validationError)
+            return token
+        }
         let subscription = WatchSubscription(
             success: success,
             error: error,
@@ -98,6 +102,6 @@ internal func isCachedLocationValid(_ location: CLLocation, options: ParsedOptio
         return true
     }
 
-    let age = Date().timeIntervalSince(location.timestamp) * 1000
+    let age = max(0, Date().timeIntervalSince(location.timestamp) * 1000)
     return age < options.maximumAge
 }

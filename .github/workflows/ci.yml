@@ -6,6 +6,10 @@ on:
     branches:
       - main
 
+concurrency:
+  group: ci-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
 jobs:
   format-check:
     name: Format Check
@@ -122,7 +126,7 @@ jobs:
           yarn build:all
 
   unit-test:
-    name: Unit Tests
+    name: JavaScript / Release Unit Tests
     runs-on: ubuntu-latest
 
     steps:
@@ -186,7 +190,7 @@ jobs:
           yarn typecheck
 
   unit-tests:
-    name: Unit Tests
+    name: Android Unit / Checksum Tests
     runs-on: ubuntu-latest
 
     steps:
@@ -212,10 +216,6 @@ jobs:
         run: |
           yarn install
 
-      - name: Run TypeScript unit tests
-        run: |
-          yarn test:unit
-
       - name: Run Android unit tests
         run: |
           ./examples/v0.81.1/android/gradlew \
@@ -226,6 +226,20 @@ jobs:
 
       - name: Verify Android prebuilt checksums
         run: scripts/test-android-prebuilt-checksum.sh
+
+  unit-test-gate:
+    name: Unit Tests
+    runs-on: ubuntu-latest
+    needs:
+      - unit-test
+      - unit-tests
+    if: ${{ always() }}
+    steps:
+      - name: Require both test suites to succeed
+        env:
+          JS_RESULT: ${{ needs.unit-test.result }}
+          ANDROID_RESULT: ${{ needs.unit-tests.result }}
+        run: test "$JS_RESULT" = success && test "$ANDROID_RESULT" = success
 
   guardrails:
     name: Dead Code / Package Guardrails

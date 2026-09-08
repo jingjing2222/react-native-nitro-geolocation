@@ -267,7 +267,7 @@ for setup, presets, troubleshooting, and the demo.
 Use the docs site for the detailed flows:
 
 - [Quick Start](https://react-native-nitro-geolocation.pages.dev/v2/guide/quick-start) - install with minimum foreground permissions and render coordinates.
-- [Upgrade from 1.x](https://react-native-nitro-geolocation.pages.dev/v2/guide/upgrade-from-v1) - migrate all seven breaking contracts with rollback gates.
+- [Upgrade from 1.x](https://react-native-nitro-geolocation.pages.dev/v2/guide/upgrade-from-v1) - migrate all eight breaking contracts with rollback gates.
 - [Release Readiness](https://react-native-nitro-geolocation.pages.dev/v2/guide/release-readiness) - RC policy, tested reference stack, known limits, and ship checklist.
 - [API](https://react-native-nitro-geolocation.pages.dev/v2/guide/api) - accuracy presets, watches, Android settings, cached reads, geocoding, heading, and iOS accuracy authorization.
 - [Compat API](https://react-native-nitro-geolocation.pages.dev/v2/guide/compat-api) - callback compatibility and documented boundaries.

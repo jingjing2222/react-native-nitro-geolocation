@@ -119,17 +119,25 @@ export function getCurrentPosition(
     };
     const handleAbort = () => {
       finish(() => {
-        NitroGeolocationHybridObject.cancelCurrentPositionRequest(requestId);
+        try {
+          NitroGeolocationHybridObject.cancelCurrentPositionRequest(requestId);
+        } catch {
+          // Cancellation still settles with the caller's reason if native teardown fails.
+        }
         reject(getAbortReason(signal));
       });
     };
 
     signal.addEventListener("abort", handleAbort, { once: true });
-    NitroGeolocationHybridObject.getCurrentPositionCancellable(
-      requestId,
-      (position) => finish(() => resolve(rememberCurrentPosition(position))),
-      nativeOptions,
-      (error) => finish(() => reject(error))
-    );
+    try {
+      NitroGeolocationHybridObject.getCurrentPositionCancellable(
+        requestId,
+        (position) => finish(() => resolve(rememberCurrentPosition(position))),
+        nativeOptions,
+        (error) => finish(() => reject(error))
+      );
+    } catch (error) {
+      finish(() => reject(error));
+    }
   });
 }

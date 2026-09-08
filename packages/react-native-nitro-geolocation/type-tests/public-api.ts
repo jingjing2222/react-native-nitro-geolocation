@@ -43,6 +43,7 @@ import type {
   LocationProviderUsed as BackgroundLocationProviderUsed,
   NullableDouble as BackgroundNullableDouble,
   PermissionStatus as BackgroundPermissionStatus,
+  IOSBackgroundLocationOptions,
   StartActivityRecognitionOptions
 } from "../src/background";
 import type {
@@ -61,6 +62,12 @@ import type {
 } from "../src/compat";
 import type { CompatGeolocationConfiguration } from "../src/publicTypes";
 import type { LocationAvailability as NativeLocationAvailability } from "../src/types";
+
+const unsupportedDeferredOptions: IOSBackgroundLocationOptions = {
+  // @ts-expect-error Deferred delivery was never implemented and is not a 2.0 contract.
+  deferredUpdatesDistance: 100
+};
+void unsupportedDeferredOptions;
 
 // @ts-expect-error Nitro's nullable bridge envelope is not a public API type.
 import type { BackgroundEventEnvelope } from "../src/background";

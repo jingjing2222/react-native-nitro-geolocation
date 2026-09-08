@@ -14,11 +14,29 @@ class NitroBackgroundLocationService : Service() {
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         val requestedGeneration = intent?.backgroundServiceGeneration()
+        if (intent?.action == ACTION_STOP_BACKGROUND_LOCATION) {
+            // A delayed action from an older notification must not stop a newer run.
+            requestedGeneration?.let(controller::stopFromService)
+            val stillRunning = controller.runningServiceGeneration() != null
+            if (!stillRunning) stopSelf(startId)
+            // Android uses the result of the latest command for restart policy,
+            // including ignored commands from an obsolete notification.
+            return if (stillRunning && controller.getConfigOrNull()?.stopOnTerminate == false) {
+                START_STICKY
+            } else START_NOT_STICKY
+        }
         val foregroundService = intent?.backgroundNotificationOptions()
             ?: persistedBackgroundNotificationOptions(applicationContext)
             ?: fallbackBackgroundNotificationOptions()
         try {
-            val notification = NitroBackgroundNotificationFactory.create(this, foregroundService)
+            // Read the durable generation directly before promotion: controller lifecycle
+            // locks can be held by the worker waiting for this service to start.
+            val notificationGeneration = requestedGeneration
+                ?: getSharedPreferences(BACKGROUND_LOCATION_PREFS, MODE_PRIVATE)
+                    .getLong(PREF_SERVICE_GENERATION, 0L)
+            val notification = NitroBackgroundNotificationFactory.create(
+                this, foregroundService, notificationGeneration
+            )
             val notificationId = foregroundService.notificationId?.toInt() ?: 9471
             NitroGeoLog.d("Service.onStartCommand(): startForeground id=$notificationId type=location")
             ServiceCompat.startForeground(

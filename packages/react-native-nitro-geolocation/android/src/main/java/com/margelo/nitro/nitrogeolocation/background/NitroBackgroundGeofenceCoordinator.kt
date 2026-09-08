@@ -21,7 +21,8 @@ internal class NitroBackgroundGeofenceCoordinator(
     private val backgroundPermission: () -> BackgroundPermissionStatus,
     private val currentRunGeneration: () -> Long,
     private val activeServiceGeneration: () -> Long?,
-    private val reportError: (String, Throwable, Long?) -> Unit
+    private val reportError: (String, Throwable, Long?) -> Unit,
+    private val defaultOptions: () -> GeofencingOptions?
 ) {
     private val commandLock = ReentrantLock()
     private val restoreExecutor = Executors.newSingleThreadExecutor()
@@ -31,7 +32,7 @@ internal class NitroBackgroundGeofenceCoordinator(
             throw SecurityException("Background location permission is required to register geofences")
         }
         if (regions.isEmpty()) return
-        register(regions, options, currentRunGeneration())
+        register(regions, resolveGeofencingOptions(defaultOptions(), options), currentRunGeneration())
         store.saveGeofences(regions)
     }
 
@@ -68,7 +69,7 @@ internal class NitroBackgroundGeofenceCoordinator(
                     activeServiceGeneration() == expectedServiceGeneration) {
                     val regions = store.getGeofences()
                     if (regions.isNotEmpty()) {
-                        register(regions, null, currentRunGeneration())
+                        register(regions, defaultOptions(), currentRunGeneration())
                     }
                 }
             } finally {

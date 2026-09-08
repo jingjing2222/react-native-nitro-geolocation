@@ -1,5 +1,17 @@
+import { readFileSync } from "node:fs";
 import * as path from "node:path";
 import { type RspressPlugin, defineConfig } from "@rspress/core";
+
+const packageVersion: string = JSON.parse(
+  readFileSync(
+    path.join(
+      __dirname,
+      "../packages/react-native-nitro-geolocation/package.json"
+    ),
+    "utf8"
+  )
+).version;
+const isReleaseCandidate = packageVersion.includes("-rc.");
 
 const v2OnlyRoutes = [
   "background/location-lifecycle",
@@ -44,13 +56,13 @@ export default defineConfig({
   logo: "/logo.png",
   logoText: "React Native Nitro Geolocation",
   multiVersion: {
-    default: "v1",
+    default: isReleaseCandidate ? "v1" : "v2",
     versions: ["v1", "v2"]
   },
   route: {
     exclude: ["./index.md", "./guide/**", "./background/**"]
   },
-  plugins: [versionFallbacks],
+  plugins: isReleaseCandidate ? [versionFallbacks] : [],
   head: [
     [
       "meta",
