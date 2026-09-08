@@ -27,7 +27,13 @@ import {
   rememberWebPermissionGrant
 } from "./permissionEvidence";
 
-const activeWatches = new Map<string, number>();
+const activeWatches = new Map<
+  string,
+  {
+    id?: number;
+    geolocation: NonNullable<ReturnType<typeof getGeolocation>>;
+  }
+>();
 type ProviderStatusSubscription = {
   success: (status: LocationProviderStatus) => void;
   lastStatus?: LocationProviderStatus;
@@ -136,48 +142,60 @@ export function watchPosition(
   const requestedAt = Date.now();
   const distanceFilter = options?.distanceFilter ?? 0;
   const maximumAge = options?.maximumAge ?? 0;
-  const watchId = geolocation.watchPosition(
-    (position) => {
-      const observedAt = Date.now();
-      rememberWebPermissionGrant(observedAt);
-      rememberWebPermissionDetailsEvidence("granted", observedAt);
-      if (
-        distanceFilter > 0 &&
-        lastEmittedLatitude !== undefined &&
-        lastEmittedLongitude !== undefined &&
-        distanceMeters(
-          lastEmittedLatitude,
-          lastEmittedLongitude,
-          position.coords.latitude,
-          position.coords.longitude
-        ) < distanceFilter
-      ) {
-        return;
-      }
-      const normalizedPosition = normalizePosition(position);
-      normalizedPosition.metadata = buildLocationMetadata(normalizedPosition, {
-        source: "watchPosition",
-        maximumAge,
-        requestedAt,
-        observedAt
-      });
-      lastEmittedLatitude = position.coords.latitude;
-      lastEmittedLongitude = position.coords.longitude;
-      success(rememberPosition(normalizedPosition));
-    },
-    (browserError) => {
-      const mappedError = mapBrowserError(browserError);
-      if (mappedError.code === LocationErrorCodes.PERMISSION_DENIED) {
+  const subscription = { geolocation, id: undefined as number | undefined };
+  activeWatches.set(token, subscription);
+  try {
+    subscription.id = geolocation.watchPosition(
+      (position) => {
+        if (!activeWatches.has(token)) return;
         const observedAt = Date.now();
-        rememberWebPermissionDenial(observedAt);
-        rememberWebPermissionDetailsEvidence("denied", observedAt);
-      }
-      error?.(mappedError);
-    },
-    toPositionOptions(options)
-  );
-
-  activeWatches.set(token, watchId);
+        rememberWebPermissionGrant(observedAt);
+        rememberWebPermissionDetailsEvidence("granted", observedAt);
+        if (
+          distanceFilter > 0 &&
+          lastEmittedLatitude !== undefined &&
+          lastEmittedLongitude !== undefined &&
+          distanceMeters(
+            lastEmittedLatitude,
+            lastEmittedLongitude,
+            position.coords.latitude,
+            position.coords.longitude
+          ) < distanceFilter
+        ) {
+          return;
+        }
+        const normalizedPosition = normalizePosition(position);
+        normalizedPosition.metadata = buildLocationMetadata(
+          normalizedPosition,
+          {
+            source: "watchPosition",
+            maximumAge,
+            requestedAt,
+            observedAt
+          }
+        );
+        lastEmittedLatitude = position.coords.latitude;
+        lastEmittedLongitude = position.coords.longitude;
+        success(rememberPosition(normalizedPosition));
+      },
+      (browserError) => {
+        if (!activeWatches.has(token)) return;
+        const mappedError = mapBrowserError(browserError);
+        if (mappedError.code === LocationErrorCodes.PERMISSION_DENIED) {
+          const observedAt = Date.now();
+          rememberWebPermissionDenial(observedAt);
+          rememberWebPermissionDetailsEvidence("denied", observedAt);
+        }
+        error?.(mappedError);
+      },
+      toPositionOptions(options)
+    );
+    // A synchronous callback can call stopObserving before the browser returns its ID.
+    if (!activeWatches.has(token)) geolocation.clearWatch(subscription.id);
+  } catch (error) {
+    activeWatches.delete(token);
+    throw error;
+  }
   return token;
 }
 
@@ -201,13 +219,15 @@ export function unwatch(token: string): void {
     return;
   }
 
-  const watchId = activeWatches.get(token);
-  if (watchId === undefined) {
+  const subscription = activeWatches.get(token);
+  if (!subscription) {
     return;
   }
 
-  getGeolocation()?.clearWatch(watchId);
   activeWatches.delete(token);
+  if (subscription.id !== undefined) {
+    subscription.geolocation.clearWatch(subscription.id);
+  }
 }
 
 export function getActiveWatches(): ActiveWatch[] {

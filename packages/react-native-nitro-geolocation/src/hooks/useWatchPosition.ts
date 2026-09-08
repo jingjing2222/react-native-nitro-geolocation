@@ -43,8 +43,6 @@ export function useWatchPosition(
   const [isWatching, setIsWatching] = useState(false);
   const [error, setError] = useState<LocationError | null>(null);
 
-  // Track if component is mounted to prevent state updates after unmount
-  const isMountedRef = useRef(true);
   const hasErrorRef = useRef(false);
 
   // Store latest options in ref to avoid unnecessary re-subscriptions
@@ -69,10 +67,11 @@ export function useWatchPosition(
     hasErrorRef.current = false;
     setError(null);
 
+    let active = true;
     const token = watchPosition(
       (result: GeolocationResponse) => {
         // Success callback
-        if (!isMountedRef.current) return;
+        if (!active) return;
         setPosition(result);
         if (hasErrorRef.current) {
           hasErrorRef.current = false;
@@ -81,7 +80,7 @@ export function useWatchPosition(
       },
       (err: LocationError) => {
         // Error callback
-        if (!isMountedRef.current) return;
+        if (!active) return;
         hasErrorRef.current = true;
         setError(err);
       },
@@ -90,17 +89,10 @@ export function useWatchPosition(
 
     // Cleanup function
     return () => {
+      active = false;
       unwatch(token);
     };
   }, [enabled]); // Only re-subscribe when enabled changes
-
-  // Track mount status
-  useEffect(() => {
-    isMountedRef.current = true;
-    return () => {
-      isMountedRef.current = false;
-    };
-  }, []);
 
   return {
     position,

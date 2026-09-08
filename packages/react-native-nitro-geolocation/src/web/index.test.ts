@@ -64,6 +64,46 @@ afterEach(() => {
 });
 
 describe("web API", () => {
+  it("ignores queued callbacks after unwatch and clears the original browser provider", () => {
+    const browser = {
+      getCurrentPosition: vi.fn(),
+      watchPosition: vi.fn(() => 7),
+      clearWatch: vi.fn()
+    };
+    setNavigator({ geolocation: browser });
+    const success = vi.fn();
+    const error = vi.fn();
+    const token = watchPosition(success, error);
+    const [deliver, fail] = browser.watchPosition.mock.calls[0] as unknown as [
+      (value: ReturnType<typeof createPosition>) => void,
+      (value: { code: number; message: string }) => void
+    ];
+    setNavigator(undefined);
+    unwatch(token);
+    deliver(createPosition());
+    fail({ code: 1, message: "old denial" });
+    expect(browser.clearWatch).toHaveBeenCalledWith(7);
+    expect(success).not.toHaveBeenCalled();
+    expect(error).not.toHaveBeenCalled();
+    expect(getLastKnownPosition()).toBeUndefined();
+    expect(getActiveWatches()).toEqual([]);
+  });
+
+  it("cleans up when a synchronous initial callback stops every watch", () => {
+    const browser = {
+      getCurrentPosition: vi.fn(),
+      watchPosition: vi.fn((success) => {
+        success(createPosition());
+        return 7;
+      }),
+      clearWatch: vi.fn()
+    };
+    setNavigator({ geolocation: browser });
+    watchPosition(() => stopObserving());
+    expect(browser.clearWatch).toHaveBeenCalledExactlyOnceWith(7);
+    expect(getActiveWatches()).toEqual([]);
+  });
+
   it("cleans up abort listeners and ignores late callbacks when browser startup throws", async () => {
     const controller = new AbortController();
     const removeListener = vi.spyOn(controller.signal, "removeEventListener");
