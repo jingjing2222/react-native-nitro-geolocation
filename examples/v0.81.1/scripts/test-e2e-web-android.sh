@@ -8,6 +8,7 @@ FLOW_DIR="$EXAMPLE_DIR/.maestro"
 
 ADB_BIN="${ADB:-adb}"
 MAESTRO_BIN="${MAESTRO:-maestro}"
+NODE_BIN="${NODE:-node}"
 WEB_E2E_PORT="${WEB_E2E_PORT:-4173}"
 WEB_SERVER_PID=""
 
@@ -29,22 +30,27 @@ run_web_flow() {
 }
 
 cleanup() {
+  if [[ -n "$WEB_SERVER_PID" ]]; then
+    kill "$WEB_SERVER_PID" >/dev/null 2>&1 || true
+    wait "$WEB_SERVER_PID" >/dev/null 2>&1 || true
+  fi
   "$ADB_BIN" shell cmd location set-location-enabled true >/dev/null 2>&1 || true
   "$ADB_BIN" reverse --remove tcp:8081 >/dev/null 2>&1 || true
   "$ADB_BIN" reverse --remove "tcp:$WEB_E2E_PORT" >/dev/null 2>&1 || true
-  if [[ -n "$WEB_SERVER_PID" ]]; then
-    kill "$WEB_SERVER_PID" >/dev/null 2>&1 || true
-  fi
 }
 
 trap cleanup EXIT
+trap 'exit 130' INT
+trap 'exit 143' TERM
 
 if curl -fsS "http://127.0.0.1:$WEB_E2E_PORT" >/dev/null 2>&1; then
   echo "Port $WEB_E2E_PORT is already in use. Stop the existing web E2E server before running this script." >&2
   exit 1
 fi
 
-(cd "$REPO_DIR" && yarn workspace react-native-nitro-geolocation-web-e2e start --port "$WEB_E2E_PORT" --strictPort) &
+(cd "$REPO_DIR" && exec "$NODE_BIN" "$SCRIPT_DIR/run-owned-process.mjs" \
+  yarn workspace react-native-nitro-geolocation-web-e2e start \
+  --port "$WEB_E2E_PORT" --strictPort) &
 WEB_SERVER_PID="$!"
 
 for _ in {1..60}; do

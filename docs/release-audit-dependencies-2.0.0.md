@@ -1,6 +1,6 @@
 # 2.0.0 dependency audit
 
-Last checked 2026-09-10 with:
+Last checked 2026-09-10 KST (2026-09-09 UTC) with:
 
 ```sh
 yarn npm audit --all --recursive --environment production --json
@@ -33,7 +33,7 @@ Ajv, Lodash, Minimatch, Nano ID, PostCSS, React Router, tar, Vite, ws, YAML, and
 other eligible transitive dependencies. This is a dated registry snapshot, not
 a guarantee against future advisories.
 
-## Final refresh — 2026-09-10
+## Final refresh — 2026-09-10 KST (2026-09-09 UTC)
 
 The next registry check reported 47 all-environment records. This included two
 Vitest package records for the same advisory, one `smol-toml` record, and a second

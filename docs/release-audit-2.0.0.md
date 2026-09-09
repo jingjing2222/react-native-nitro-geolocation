@@ -58,6 +58,9 @@ native contract scripts, and the consumer E2E suites.
 
 ## Final documentation and roadmap review — 2026-09-10
 
+This follow-up's dates use Asia/Seoul (UTC+09:00); its 2026-09-10 checks ran
+on 2026-09-09 UTC. They describe completed checks, not future scheduled work.
+
 The follow-up review integrates `75054a6` (`2.0.0-rc.6`) and includes the
 authorization and notification-action additions above. The validation ledger
 below records the earlier audit; it is not a claim that its device runs were
