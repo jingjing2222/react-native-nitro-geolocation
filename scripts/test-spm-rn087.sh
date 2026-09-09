@@ -51,9 +51,9 @@ scripts/build-spm-prebuilt-ios.sh "$APP_DIR" "$OUT_DIR"
 
 (
   cd "$APP_DIR"
-  NITRO_GEOLOCATION_SPM_CACHE_DIR="$WORK_DIR/spm-cache" \
-    NITRO_GEOLOCATION_SPM_ARTIFACTS_DIR="$ROOT_DIR/build/ios-spm-prebuilt/staging" \
-    bundle exec npx react-native spm scaffold --deintegrate --yes
+  export NITRO_GEOLOCATION_SPM_CACHE_DIR="$WORK_DIR/spm-cache"
+  export NITRO_GEOLOCATION_SPM_ARTIFACTS_DIR="$ROOT_DIR/build/ios-spm-prebuilt/staging"
+  bundle exec npx react-native spm scaffold --deintegrate --yes
 
   xcodebuild build -quiet \
     -project ios/NitroGeolocationSPMExample.xcodeproj \
