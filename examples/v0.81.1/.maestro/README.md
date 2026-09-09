@@ -84,6 +84,12 @@ live provider-selection proof. The wrapper rejects emulators for this proof and
 requires `ANDROID_SERIAL` when multiple Android devices are connected.
 Platform-only flows are selected inside the master flow with `when.platform`.
 
+The Android wrapper also runs `scripts/test-notification-actions-android.sh`.
+It opens the real notification shade with adb, locates the notification and
+buttons from the current UI hierarchy, and checks both custom action payloads
+in live JavaScript and native storage before checking the native Stop button.
+Run that script directly against an installed Release app for focused coverage.
+
 ## Stable Screen Queries
 
 Scenario pages expose a small E2E control plane at the top of the screen before

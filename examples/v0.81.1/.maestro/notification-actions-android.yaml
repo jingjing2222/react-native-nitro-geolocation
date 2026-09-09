@@ -1,0 +1,21 @@
+appId: nitrogeolocation.example
+---
+# Prepare the app; test-notification-actions-android.sh taps the real system
+# notification between this flow and the verification flows.
+- launchApp:
+    clearState: true
+    permissions:
+      all: allow
+- extendedWaitUntil:
+    visible: "Geolocation API"
+    timeout: 15000
+- openLink:
+    link: nitrogeolocation://app/background-e2e
+- extendedWaitUntil:
+    visible: "Background Location E2E"
+    timeout: 10000
+- tapOn:
+    id: "e2e-action-notification-action-prepare"
+- extendedWaitUntil:
+    visible: ".*Notification proof: ready.*"
+    timeout: 20000

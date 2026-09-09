@@ -35,6 +35,15 @@ xcrun swiftc \
 
 xcrun swiftc \
   -parse-as-library \
+  "$repo_root/packages/react-native-nitro-geolocation/ios/IOSLocationState.swift" \
+  "$repo_root/packages/react-native-nitro-geolocation/ios/IOSPermissionRequestQueue.swift" \
+  "$repo_root/tests/ios/IOSLocationStateContract.swift" \
+  -o "$test_dir/ios-location-state-contract"
+
+"$test_dir/ios-location-state-contract"
+
+xcrun swiftc \
+  -parse-as-library \
   "$repo_root/packages/react-native-nitro-geolocation/ios/IOSNumericOptions.swift" \
   "$repo_root/tests/ios/IOSNumericOptionsContract.swift" \
   -o "$test_dir/ios-numeric-options-contract"

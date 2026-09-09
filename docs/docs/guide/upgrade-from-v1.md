@@ -76,7 +76,8 @@ numeric codes.
 import type { GeolocationConfiguration } from 'react-native-nitro-geolocation';
 ```
 
-Delete imports of the deprecated 1.x configuration alias and use the type above.
+Delete imports of `ModernGeolocationConfiguration`, the deprecated 1.x alias,
+and use the type above.
 **Verify:** run the app's full TypeScript check.
 
 ## 3. Verify Watch Manager v2 behavior
@@ -133,16 +134,20 @@ device-location settings on the physical devices your app supports.
 ## 6. Migrate to unified background events
 
 Provider status and iOS location lifecycle changes now use the same background
-event stream and can be retained when persistence is enabled. Update exhaustive
-event switches and stored-event deserialization before enabling 2.0 in
-production. `onLocationLifecycleChange()` remains a convenience filter.
+event stream. Android custom notification buttons also emit `notificationAction`
+events. Update exhaustive event switches and stored-event deserialization before
+enabling 2.0 in production. `onLocationLifecycleChange()` remains a convenience
+filter.
+
+Provider snapshots are live-only. Lifecycle and notification-action events can
+be recovered from storage when persistence is enabled.
 
 Follow [2.0 Unified Background Events](./v2-unified-background-events.md) for the
 new cases and examples.
 
-**Verify:** receive a live provider/lifecycle event, drain a stored copy after JS
-startup, and confirm event IDs are handled idempotently if your product can see
-both delivery paths.
+**Verify:** receive a live provider event and confirm unsubscribe cleanup. For
+lifecycle or notification actions used by your app, recover a stored event after
+JS startup and handle its ID idempotently when both delivery paths are possible.
 
 ## 7. Handle settings outcomes as data
 

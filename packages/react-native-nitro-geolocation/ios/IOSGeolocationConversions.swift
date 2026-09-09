@@ -23,30 +23,6 @@ func mapCLAuthorizationStatus(_ status: CLAuthorizationStatus) -> PermissionStat
     }
 }
 
-func currentAccuracyAuthorization(from locationManager: CLLocationManager?) -> AccuracyAuthorization {
-    guard #available(iOS 14.0, *) else { return .unknown }
-    let manager = locationManager ?? CLLocationManager()
-    switch manager.accuracyAuthorization {
-    case .fullAccuracy:
-        return .full
-    case .reducedAccuracy:
-        return .reduced
-    @unknown default:
-        return .unknown
-    }
-}
-
-func currentAccuracyAuthorizationOnMain(
-    from locationManager: CLLocationManager?
-) -> AccuracyAuthorization {
-    if Thread.isMainThread {
-        return currentAccuracyAuthorization(from: locationManager)
-    }
-    return DispatchQueue.main.sync {
-        currentAccuracyAuthorization(from: locationManager)
-    }
-}
-
 func determineAuthorizationLevelFromInfoPlist() -> AuthorizationLevel {
     let hasAlwaysKey = Bundle.main.object(
         forInfoDictionaryKey: "NSLocationAlwaysAndWhenInUseUsageDescription"

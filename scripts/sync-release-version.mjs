@@ -51,6 +51,7 @@ const listMarkdownFiles = async (directory, relativeDirectory = "") => {
 
 const documentationFiles = [
   ...(await listMarkdownFiles(docsDir)),
+  path.join(rootDir, "README.md"),
   path.join(packageDir, "README.md")
 ];
 let updatedFiles = 0;

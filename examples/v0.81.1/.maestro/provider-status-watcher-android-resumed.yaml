@@ -14,3 +14,4 @@ appId: nitrogeolocation.example
     timeout: 10000
 - assertVisible: "Listener: listening"
 - assertVisible: "Services: enabled"
+- assertVisible: "Authorization: always"

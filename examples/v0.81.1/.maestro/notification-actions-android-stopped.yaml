@@ -1,0 +1,7 @@
+appId: nitrogeolocation.example
+---
+- tapOn:
+    id: "e2e-action-notification-action-verify-stop"
+- extendedWaitUntil:
+    visible: ".*Native notification stop: passed.*"
+    timeout: 10000

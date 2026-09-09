@@ -90,6 +90,11 @@ export default function ProviderStatusWatcherScreen() {
               testID: "provider-status-watcher-background"
             },
             {
+              label: "Authorization",
+              value: status?.authorizationStatus ?? "unknown",
+              testID: "provider-status-watcher-authorization"
+            },
+            {
               label: "GPS",
               value: formatBoolean(status?.gpsAvailable),
               testID: "provider-status-watcher-gps"

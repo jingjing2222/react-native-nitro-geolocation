@@ -133,3 +133,73 @@ test("the checked-in SwiftPM consumer pins the validated RN and Nitro versions",
   assert.match(config, /withNitroGeolocationSwiftPM/);
   assert.match(config, /NITRO_GEOLOCATION_EXAMPLE_USE_COCOAPODS/);
 });
+
+test(
+  "SwiftPM scaffold and build syncs share local artifacts without leaking environment",
+  {
+    skip: process.platform === "win32"
+  },
+  async () => {
+    const script = await readFile(
+      path.join(root, "scripts/test-spm-rn087.sh"),
+      "utf8"
+    );
+    const consumer = script.slice(
+      script.lastIndexOf("\n(\n"),
+      script.lastIndexOf("\necho ")
+    );
+    const work = path.join(os.tmpdir(), "nitro spm env test");
+    const output = execFileSync(
+      "bash",
+      [
+        "-eu",
+        "-c",
+        `
+    report() {
+      "$SPM_TEST_NODE" -e 'console.log(JSON.stringify({
+        command: process.argv[1],
+        cache: process.env.NITRO_GEOLOCATION_SPM_CACHE_DIR,
+        artifacts: process.env.NITRO_GEOLOCATION_SPM_ARTIFACTS_DIR,
+        unrelated: process.env.SPM_TEST_UNRELATED
+      }))' "$1"
+    }
+    bundle() { report scaffold; }
+    xcodebuild() { report build; }
+    ${consumer}
+    report parent
+  `
+      ],
+      {
+        encoding: "utf8",
+        env: {
+          ...process.env,
+          APP_DIR: root,
+          ROOT_DIR: root,
+          WORK_DIR: work,
+          SPM_TEST_NODE: process.execPath,
+          SPM_TEST_UNRELATED: "preserved",
+          NITRO_GEOLOCATION_SPM_CACHE_DIR: "original cache",
+          NITRO_GEOLOCATION_SPM_ARTIFACTS_DIR: "original artifacts"
+        }
+      }
+    );
+    const observations = output
+      .trim()
+      .split("\n")
+      .map((line) => JSON.parse(line));
+    assert.deepEqual(observations, [
+      ...["scaffold", "build", "build", "build"].map((command) => ({
+        command,
+        cache: path.join(work, "spm-cache"),
+        artifacts: path.join(root, "build/ios-spm-prebuilt/staging"),
+        unrelated: "preserved"
+      })),
+      {
+        command: "parent",
+        cache: "original cache",
+        artifacts: "original artifacts",
+        unrelated: "preserved"
+      }
+    ]);
+  }
+);

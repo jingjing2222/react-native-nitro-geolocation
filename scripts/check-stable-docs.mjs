@@ -40,6 +40,7 @@ try {
     path.join(root, packagePath, "README.md"),
     path.join(fixture, packagePath, "README.md")
   );
+  await cp(path.join(root, "README.md"), path.join(fixture, "README.md"));
   await mkdir(path.join(fixture, "examples/v0.81.1/ios"), { recursive: true });
   await cp(
     path.join(root, "examples/v0.81.1/ios/Podfile.lock"),

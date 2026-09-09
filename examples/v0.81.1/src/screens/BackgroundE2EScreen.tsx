@@ -14,6 +14,7 @@ import {
   stopBackgroundLocation,
   syncStoredLocations
 } from "react-native-nitro-geolocation/background";
+import NotificationActionE2EScenario from "./NotificationActionE2EScenario";
 import {
   MISSING_NOTIFICATION_ERROR,
   assertBackgroundE2EConfiguration,
@@ -475,6 +476,7 @@ export default function BackgroundE2EScreen() {
           ]}
         />
       </ScenarioSection>
+      {Platform.OS === "android" && <NotificationActionE2EScenario />}
     </ScenarioScreen>
   );
 }

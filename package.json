@@ -12,7 +12,8 @@
     "ajv@npm:~8.13.0": "npm:8.18.0",
     "lodash@npm:~4.17.15": "npm:4.18.1",
     "minimatch@npm:10.0.3": "npm:10.2.6",
-    "brace-expansion@npm:5.0.8": "npm:5.0.9"
+    "brace-expansion@npm:5.0.8": "npm:5.0.9",
+    "smol-toml@npm:1.6.1": "npm:1.7.1"
   },
   "homepage": "react-native-nitro-geolocation.pages.dev",
   "scripts": {
@@ -30,7 +31,7 @@
     "release:promote-latest": "node scripts/promote-latest.mjs",
     "release:sync-version": "node scripts/sync-release-version.mjs",
     "release:version": "yarn changeset version && yarn release:sync-version && yarn workspace docs build && yarn workspace docs check:versions",
-    "test:release": "node --test tests/release-policy.test.mjs tests/release-version-sync.test.mjs tests/release-workflow.test.mjs tests/spm-support.test.mjs",
+    "test:release": "node --test tests/release-policy.test.mjs tests/release-version-sync.test.mjs tests/release-workflow.test.mjs tests/spm-support.test.mjs tests/web-e2e-process.test.mjs",
     "test:release-policy": "node --test tests/release-policy.test.mjs",
     "test:unit": "yarn workspace react-native-nitro-geolocation test",
     "test:ios-location-lifecycle": "bash scripts/test-ios-location-lifecycle.sh",
