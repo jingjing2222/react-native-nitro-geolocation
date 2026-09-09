@@ -10,6 +10,8 @@
 #include <fbjni/fbjni.h>
 #include "LocationProviderStatus.hpp"
 
+#include "JLocationAuthorizationStatus.hpp"
+#include "LocationAuthorizationStatus.hpp"
 #include <optional>
 
 namespace margelo::nitro::nitrogeolocation {
@@ -31,6 +33,8 @@ namespace margelo::nitro::nitrogeolocation {
     [[nodiscard]]
     LocationProviderStatus toCpp() const {
       static const auto clazz = javaClassStatic();
+      static const auto fieldAuthorizationStatus = clazz->getField<JLocationAuthorizationStatus>("authorizationStatus");
+      jni::local_ref<JLocationAuthorizationStatus> authorizationStatus = this->getFieldValue(fieldAuthorizationStatus);
       static const auto fieldLocationServicesEnabled = clazz->getField<jboolean>("locationServicesEnabled");
       jboolean locationServicesEnabled = this->getFieldValue(fieldLocationServicesEnabled);
       static const auto fieldBackgroundModeEnabled = clazz->getField<jboolean>("backgroundModeEnabled");
@@ -46,6 +50,7 @@ namespace margelo::nitro::nitrogeolocation {
       static const auto fieldGoogleLocationAccuracyEnabled = clazz->getField<jni::JBoolean>("googleLocationAccuracyEnabled");
       jni::local_ref<jni::JBoolean> googleLocationAccuracyEnabled = this->getFieldValue(fieldGoogleLocationAccuracyEnabled);
       return LocationProviderStatus(
+        authorizationStatus != nullptr ? std::make_optional(authorizationStatus->toCpp()) : std::nullopt,
         static_cast<bool>(locationServicesEnabled),
         static_cast<bool>(backgroundModeEnabled),
         gpsAvailable != nullptr ? std::make_optional(static_cast<bool>(gpsAvailable->value())) : std::nullopt,
@@ -62,11 +67,12 @@ namespace margelo::nitro::nitrogeolocation {
      */
     [[maybe_unused]]
     static jni::local_ref<JLocationProviderStatus::javaobject> fromCpp(const LocationProviderStatus& value) {
-      using JSignature = JLocationProviderStatus(jboolean, jboolean, jni::alias_ref<jni::JBoolean>, jni::alias_ref<jni::JBoolean>, jni::alias_ref<jni::JBoolean>, jni::alias_ref<jni::JBoolean>, jni::alias_ref<jni::JBoolean>);
+      using JSignature = JLocationProviderStatus(jni::alias_ref<JLocationAuthorizationStatus>, jboolean, jboolean, jni::alias_ref<jni::JBoolean>, jni::alias_ref<jni::JBoolean>, jni::alias_ref<jni::JBoolean>, jni::alias_ref<jni::JBoolean>, jni::alias_ref<jni::JBoolean>);
       static const auto clazz = javaClassStatic();
       static const auto create = clazz->getStaticMethod<JSignature>("fromCpp");
       return create(
         clazz,
+        value.authorizationStatus.has_value() ? JLocationAuthorizationStatus::fromCpp(value.authorizationStatus.value()) : nullptr,
         value.locationServicesEnabled,
         value.backgroundModeEnabled,
         value.gpsAvailable.has_value() ? jni::JBoolean::valueOf(value.gpsAvailable.value()) : nullptr,

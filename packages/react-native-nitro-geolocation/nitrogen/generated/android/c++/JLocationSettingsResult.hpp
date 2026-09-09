@@ -10,8 +10,10 @@
 #include <fbjni/fbjni.h>
 #include "LocationSettingsResult.hpp"
 
+#include "JLocationAuthorizationStatus.hpp"
 #include "JLocationProviderStatus.hpp"
 #include "JLocationSettingsOutcome.hpp"
+#include "LocationAuthorizationStatus.hpp"
 #include "LocationProviderStatus.hpp"
 #include "LocationSettingsOutcome.hpp"
 #include <optional>

@@ -18,6 +18,10 @@ The current release line adds foreground web support through both the package
 import and `/compat`, plus a native Background Location API for tracking, geofencing,
 storage recovery, Headless JS, and HTTP sync.
 
+In 2.0, `watchProviderStatus(callback)` also reports native authorization changes
+through `status.authorizationStatus` (`always`, `whenInUse`, `denied`,
+`restricted`, or `undetermined`). Clean up with `unwatch(token)`.
+
 - 🎯 **Simple functional API** — Direct function calls, no complex abstractions
 - ⚡ **Low-overhead native calls** — Avoids Bridge serialization on supported native paths
 - 🔁 **Compat API** — Preserves core callback methods and numeric errors; documented boundaries apply

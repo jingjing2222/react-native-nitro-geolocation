@@ -352,12 +352,35 @@ function ProviderStatusObserver() {
 Both settings methods are Android-focused. On iOS they resolve with the current
 Core Location service status and do not show a settings dialog.
 
-`watchProviderStatus()` only observes readiness: it does not request permission,
-open settings, or start position updates. Android reacts to system provider and
-location-mode broadcasts. iOS rechecks after authorization changes and when the
+`watchProviderStatus()` observes authorization and readiness without requesting
+permission, opening settings, or starting position updates. Android reacts to
+location app-op changes, provider/mode broadcasts, and app resume. iOS rechecks after authorization changes and when the
 app becomes active, which covers returning from Settings. Browser builds recheck
 when the page becomes visible or active. Provider-specific optional fields stay
 `undefined` on platforms that cannot report them.
+
+Native snapshots include `authorizationStatus`: `always`, `whenInUse`,
+`denied`, `restricted`, or `undetermined`. An iOS Always → While Using the
+App change emits an event even if all provider settings remain unchanged.
+Android maps foreground access to `whenInUse` and background access to
+`always`; before Android 10, a foreground grant also permits background access.
+Android reports `denied` for a missing foreground grant, including before the
+first request. `restricted` and `undetermined` are iOS states. This field is
+`undefined` on Web and in older stored events.
+
+```tsx
+const token = watchProviderStatus(({ authorizationStatus, locationServicesEnabled }) => {
+  console.log('Authorization:', authorizationStatus);
+  console.log('Device location enabled:', locationServicesEnabled);
+});
+// Cleanup on unmount; stopObserving() also removes these subscriptions.
+unwatch(token);
+```
+
+Android can terminate the app when permission is revoked. Register again on
+launch to receive the current initial snapshot. On iOS,
+`backgroundModeEnabled` still describes the app's background-mode configuration;
+use `authorizationStatus` to distinguish Always from WhenInUse.
 
 ### Android Reliability Notes
 

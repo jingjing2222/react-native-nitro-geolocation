@@ -11,6 +11,8 @@
 namespace margelo::nitro::nitrogeolocation { enum class PermissionStatus; }
 // Forward declaration of `LocationProviderStatus` to properly resolve imports.
 namespace margelo::nitro::nitrogeolocation { struct LocationProviderStatus; }
+// Forward declaration of `LocationAuthorizationStatus` to properly resolve imports.
+namespace margelo::nitro::nitrogeolocation { enum class LocationAuthorizationStatus; }
 // Forward declaration of `LocationAvailability` to properly resolve imports.
 namespace margelo::nitro::nitrogeolocation { struct LocationAvailability; }
 // Forward declaration of `AccuracyAuthorization` to properly resolve imports.
@@ -70,7 +72,9 @@ namespace margelo::nitro::nitrogeolocation { struct HeadingOptions; }
 #include "JPermissionStatus.hpp"
 #include "LocationProviderStatus.hpp"
 #include "JLocationProviderStatus.hpp"
+#include "LocationAuthorizationStatus.hpp"
 #include <optional>
+#include "JLocationAuthorizationStatus.hpp"
 #include <string>
 #include "LocationAvailability.hpp"
 #include "JLocationAvailability.hpp"

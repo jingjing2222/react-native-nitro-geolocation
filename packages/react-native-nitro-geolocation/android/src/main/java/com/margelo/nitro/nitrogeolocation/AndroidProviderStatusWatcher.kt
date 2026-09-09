@@ -1,5 +1,6 @@
 package com.margelo.nitro.nitrogeolocation
 
+import android.app.AppOpsManager
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
@@ -19,9 +20,12 @@ internal interface AndroidProviderObservationContext {
     fun removeLifecycleListener(listener: LifecycleEventListener)
 }
 
-private class ReactProviderObservationContext(
+internal class ReactProviderObservationContext(
     private val reactContext: ReactApplicationContext
 ) : AndroidProviderObservationContext {
+    private var permissionListener: AppOpsManager.OnOpChangedListener? = null
+    private val appOps = reactContext.getSystemService(Context.APP_OPS_SERVICE) as AppOpsManager
+
     override fun registerProviderReceiver(receiver: BroadcastReceiver, filter: IntentFilter) {
         ContextCompat.registerReceiver(
             reactContext,
@@ -37,9 +41,23 @@ private class ReactProviderObservationContext(
 
     override fun addLifecycleListener(listener: LifecycleEventListener) {
         reactContext.addLifecycleEventListener(listener)
+        val observer = AppOpsManager.OnOpChangedListener { _, packageName ->
+            if (packageName == reactContext.packageName) listener.onHostResume()
+        }
+        try {
+            appOps.startWatchingMode(AppOpsManager.OPSTR_FINE_LOCATION, reactContext.packageName, observer)
+            appOps.startWatchingMode(AppOpsManager.OPSTR_COARSE_LOCATION, reactContext.packageName, observer)
+            permissionListener = observer
+        } catch (error: Throwable) {
+            appOps.stopWatchingMode(observer)
+            reactContext.removeLifecycleEventListener(listener)
+            throw error
+        }
     }
 
     override fun removeLifecycleListener(listener: LifecycleEventListener) {
+        permissionListener?.let { appOps.stopWatchingMode(it) }
+        permissionListener = null
         reactContext.removeLifecycleEventListener(listener)
     }
 }

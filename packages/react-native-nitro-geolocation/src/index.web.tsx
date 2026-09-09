@@ -14,6 +14,7 @@ export type {
   GeolocationResponse,
   GeolocationCoordinates,
   LocationProviderStatus,
+  LocationAuthorizationStatus,
   LocationReadiness,
   LocationCacheReadiness,
   LocationReadinessRemediation,

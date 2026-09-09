@@ -89,6 +89,7 @@ export type {
   GeolocationResponse,
   GeolocationCoordinates,
   LocationProviderStatus,
+  LocationAuthorizationStatus,
   LocationSettingsOutcome,
   LocationSettingsResult,
   NullableDouble,
