@@ -67,6 +67,9 @@ jobs:
         run: |
           scripts/test-ios-location-lifecycle.sh
 
+      - name: Verify stable iOS race backport
+        run: bash scripts/test-ios-143-backport.sh
+
       - name: Verify iOS prebuilt checksums
         run: ruby tests/ruby/prebuilt_ios_checksum_test.rb
 

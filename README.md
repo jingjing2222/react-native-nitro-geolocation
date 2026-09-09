@@ -25,6 +25,9 @@ storage recovery, Headless JS, and HTTP sync.
 
 ## 📘 Documentation
 
+Apps pinned to 1.4.3 and affected by the iOS first-launch crash in #206 can use
+the [1.4.3 main-thread backport](patches/README.md).
+
 Full documentation available at:
 👉 [https://react-native-nitro-geolocation.pages.dev](https://react-native-nitro-geolocation.pages.dev)
 

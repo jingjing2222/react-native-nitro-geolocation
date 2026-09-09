@@ -37,13 +37,10 @@ func currentAccuracyAuthorization(from locationManager: CLLocationManager?) -> A
 }
 
 func currentAccuracyAuthorizationOnMain(
-    from locationManager: CLLocationManager?
+    from locationManager: @autoclosure () -> CLLocationManager?
 ) -> AccuracyAuthorization {
-    if Thread.isMainThread {
-        return currentAccuracyAuthorization(from: locationManager)
-    }
-    return DispatchQueue.main.sync {
-        currentAccuracyAuthorization(from: locationManager)
+    return withLocationStateOnMain {
+        currentAccuracyAuthorization(from: locationManager())
     }
 }
 

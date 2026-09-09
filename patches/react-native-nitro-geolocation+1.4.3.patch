@@ -1,0 +1,458 @@
+diff --git a/node_modules/react-native-nitro-geolocation/ios/NitroGeolocation.swift b/node_modules/react-native-nitro-geolocation/ios/NitroGeolocation.swift
+index 814da31..242a01f 100644
+--- a/node_modules/react-native-nitro-geolocation/ios/NitroGeolocation.swift
++++ b/node_modules/react-native-nitro-geolocation/ios/NitroGeolocation.swift
+@@ -37,7 +37,9 @@ class NitroGeolocation: HybridNitroGeolocationSpec {
+     // MARK: - Configuration
+ 
+     func setConfiguration(config: GeolocationConfiguration) {
+-        self.configuration = config
++        DispatchQueue.main.async {
++            self.configuration = config
++        }
+     }
+ 
+     // MARK: - Permission API
+@@ -53,23 +55,25 @@ class NitroGeolocation: HybridNitroGeolocationSpec {
+         success: @escaping (PermissionStatus) -> Void,
+         error: ((LocationError) -> Void)?
+     ) throws -> Void {
+-        self.initializeLocationManagerIfNeeded()
++        DispatchQueue.main.async {
++            self.initializeLocationManagerIfNeeded()
+ 
+-        let currentStatus = CLLocationManager.authorizationStatus()
++            let currentStatus = CLLocationManager.authorizationStatus()
+ 
+-        // Already determined
+-        if currentStatus != .notDetermined {
+-            let status = self.mapCLAuthorizationStatus(currentStatus)
+-            success(status)
+-            return
+-        }
++            // Already determined
++            if currentStatus != .notDetermined {
++                let status = self.mapCLAuthorizationStatus(currentStatus)
++                success(status)
++                return
++            }
+ 
+-        // Queue resolver
+-        self.pendingPermissionResolvers.append(success)
++            // Queue resolver
++            self.pendingPermissionResolvers.append(success)
+ 
+-        // Request permission
+-        let authLevel = self.determineAuthorizationLevel()
+-        self.requestSystemPermission(for: authLevel)
++            // Request permission
++            let authLevel = self.determineAuthorizationLevel()
++            self.requestSystemPermission(for: authLevel)
++        }
+     }
+ 
+     // MARK: - Provider/Settings API
+@@ -151,9 +155,8 @@ class NitroGeolocation: HybridNitroGeolocationSpec {
+             return
+         }
+ 
+-        initializeLocationManagerIfNeeded()
+-
+         DispatchQueue.main.async {
++            self.initializeLocationManagerIfNeeded()
+             guard #available(iOS 14.0, *), let manager = self.locationManager else {
+                 success(.unknown)
+                 return
+@@ -175,7 +178,9 @@ class NitroGeolocation: HybridNitroGeolocationSpec {
+                     return
+                 }
+ 
+-                success(self.getCurrentAccuracyAuthorization())
++                DispatchQueue.main.async {
++                    success(self.getCurrentAccuracyAuthorization())
++                }
+             }
+         }
+     }
+@@ -187,64 +192,66 @@ class NitroGeolocation: HybridNitroGeolocationSpec {
+         options: LocationRequestOptions,
+         error: ((LocationError) -> Void)?
+     ) throws -> Void {
+-        // Check permission
+-        let status = CLLocationManager.authorizationStatus()
+-        if status == .denied || status == .restricted {
+-            let message = status == .restricted
+-                ? "This application is not authorized to use location services"
+-                : "User denied access to location services."
+-            error?(createLocationError(
+-                code: PERMISSION_DENIED,
+-                message: message
+-            ))
+-            return
+-        }
++        DispatchQueue.main.async {
++            // Check permission
++            let status = CLLocationManager.authorizationStatus()
++            if status == .denied || status == .restricted {
++                let message = status == .restricted
++                    ? "This application is not authorized to use location services"
++                    : "User denied access to location services."
++                error?(createLocationError(
++                    code: PERMISSION_DENIED,
++                    message: message
++                ))
++                return
++            }
+ 
+-        if !CLLocationManager.locationServicesEnabled() {
+-            error?(createLocationError(
+-                code: SETTINGS_NOT_SATISFIED,
+-                message: "Location services disabled."
+-            ))
+-            return
+-        }
++            if !CLLocationManager.locationServicesEnabled() {
++                error?(createLocationError(
++                    code: SETTINGS_NOT_SATISFIED,
++                    message: "Location services disabled."
++                ))
++                return
++            }
+ 
+-        self.initializeLocationManagerIfNeeded()
++            self.initializeLocationManagerIfNeeded()
+ 
+-        let parsedOptions = ParsedOptions.parse(from: options)
++            let parsedOptions = ParsedOptions.parse(from: options)
+ 
+-        // Check cached location
+-        if let cached = self.getBestCachedLocation(options: parsedOptions) {
+-            self.lastLocation = cached
+-            let position = self.locationToPosition(cached)
+-            success(position)
+-            return
+-        }
++            // Check cached location
++            if let cached = self.getBestCachedLocation(options: parsedOptions) {
++                self.lastLocation = cached
++                let position = self.locationToPosition(cached)
++                success(position)
++                return
++            }
+ 
+-        // Create position request
+-        let id = UUID()
+-        var request = PositionRequest(
+-            success: success,
+-            error: { locationError in
+-                error?(locationError)
+-            },
+-            options: parsedOptions,
+-            timer: nil
+-        )
++            // Create position request
++            let id = UUID()
++            var request = PositionRequest(
++                success: success,
++                error: { locationError in
++                    error?(locationError)
++                },
++                options: parsedOptions,
++                timer: nil
++            )
+ 
+-        // Setup timeout
+-        let timer = DispatchSource.makeTimerSource(queue: .main)
+-        timer.schedule(deadline: .now() + parsedOptions.timeout / 1000.0)
+-        timer.setEventHandler { [weak self] in
+-            self?.handlePositionTimeout(requestId: id)
+-        }
+-        timer.resume()
+-        request.timer = timer
++            // Setup timeout
++            let timer = DispatchSource.makeTimerSource(queue: .main)
++            timer.schedule(deadline: .now() + parsedOptions.timeout / 1000.0)
++            timer.setEventHandler { [weak self] in
++                self?.handlePositionTimeout(requestId: id)
++            }
++            timer.resume()
++            request.timer = timer
+ 
+-        self.pendingPositionRequests[id] = request
++            self.pendingPositionRequests[id] = request
+ 
+-        // Update configuration and start monitoring
+-        self.updateLocationManagerConfiguration()
+-        self.startMonitoring()
++            // Update configuration and start monitoring
++            self.updateLocationManagerConfiguration()
++            self.startMonitoring()
++        }
+     }
+ 
+     func getLastKnownPosition(
+@@ -252,29 +259,31 @@ class NitroGeolocation: HybridNitroGeolocationSpec {
+         options: LocationRequestOptions,
+         error: ((LocationError) -> Void)?
+     ) throws -> Void {
+-        let status = CLLocationManager.authorizationStatus()
+-        if status == .denied || status == .restricted {
+-            let message = status == .restricted
+-                ? "This application is not authorized to use location services"
+-                : "User denied access to location services."
+-            error?(createLocationError(
+-                code: PERMISSION_DENIED,
+-                message: message
+-            ))
+-            return
+-        }
++        DispatchQueue.main.async {
++            let status = CLLocationManager.authorizationStatus()
++            if status == .denied || status == .restricted {
++                let message = status == .restricted
++                    ? "This application is not authorized to use location services"
++                    : "User denied access to location services."
++                error?(createLocationError(
++                    code: PERMISSION_DENIED,
++                    message: message
++                ))
++                return
++            }
+ 
+-        let parsedOptions = ParsedOptions.parseLastKnown(from: options)
+-        guard let cached = self.getBestCachedLocation(options: parsedOptions) else {
+-            error?(createLocationError(
+-                code: POSITION_UNAVAILABLE,
+-                message: "No cached location available."
+-            ))
+-            return
+-        }
++            let parsedOptions = ParsedOptions.parseLastKnown(from: options)
++            guard let cached = self.getBestCachedLocation(options: parsedOptions) else {
++                error?(createLocationError(
++                    code: POSITION_UNAVAILABLE,
++                    message: "No cached location available."
++                ))
++                return
++            }
+ 
+-        self.lastLocation = cached
+-        success(self.locationToPosition(cached))
++            self.lastLocation = cached
++            success(self.locationToPosition(cached))
++        }
+     }
+ 
+     // MARK: - Geocoding
+@@ -380,30 +389,32 @@ class NitroGeolocation: HybridNitroGeolocationSpec {
+         success: @escaping (Heading) -> Void,
+         error: ((LocationError) -> Void)?
+     ) throws -> Void {
+-        guard validateHeadingAvailability(error: error) else { return }
++        DispatchQueue.main.async {
++            guard self.validateHeadingAvailability(error: error) else { return }
+ 
+-        initializeLocationManagerIfNeeded()
++            self.initializeLocationManagerIfNeeded()
+ 
+-        let id = UUID()
+-        var request = HeadingRequest(
+-            success: success,
+-            error: { headingError in
+-                error?(headingError)
+-            },
+-            timer: nil
+-        )
++            let id = UUID()
++            var request = HeadingRequest(
++                success: success,
++                error: { headingError in
++                    error?(headingError)
++                },
++                timer: nil
++            )
+ 
+-        let timer = DispatchSource.makeTimerSource(queue: .main)
+-        timer.schedule(deadline: .now() + DEFAULT_HEADING_TIMEOUT_MS / 1000.0)
+-        timer.setEventHandler { [weak self] in
+-            self?.handleHeadingTimeout(requestId: id)
+-        }
+-        timer.resume()
+-        request.timer = timer
++            let timer = DispatchSource.makeTimerSource(queue: .main)
++            timer.schedule(deadline: .now() + DEFAULT_HEADING_TIMEOUT_MS / 1000.0)
++            timer.setEventHandler { [weak self] in
++                self?.handleHeadingTimeout(requestId: id)
++            }
++            timer.resume()
++            request.timer = timer
+ 
+-        pendingHeadingRequests[id] = request
+-        updateHeadingConfiguration()
+-        startHeadingMonitoring()
++            self.pendingHeadingRequests[id] = request
++            self.updateHeadingConfiguration()
++            self.startHeadingMonitoring()
++        }
+     }
+ 
+     func watchHeading(
+@@ -433,11 +444,13 @@ class NitroGeolocation: HybridNitroGeolocationSpec {
+             lastDeliveredHeading: nil
+         )
+ 
+-        headingSubscriptions[token] = subscription
++        DispatchQueue.main.async {
++            self.headingSubscriptions[token] = subscription
+ 
+-        initializeLocationManagerIfNeeded()
+-        updateHeadingConfiguration()
+-        startHeadingMonitoring()
++            self.initializeLocationManagerIfNeeded()
++            self.updateHeadingConfiguration()
++            self.startHeadingMonitoring()
++        }
+ 
+         return token
+     }
+@@ -458,55 +471,64 @@ class NitroGeolocation: HybridNitroGeolocationSpec {
+             options: parsedOptions
+         )
+ 
+-        watchSubscriptions[token] = subscription
++        DispatchQueue.main.async {
++            self.watchSubscriptions[token] = subscription
+ 
+-        initializeLocationManagerIfNeeded()
+-        updateLocationManagerConfiguration()
+-        startMonitoring()
++            self.initializeLocationManagerIfNeeded()
++            self.updateLocationManagerConfiguration()
++            self.startMonitoring()
++        }
+ 
+         return token
+     }
+ 
+     func unwatch(token: String) {
+-        watchSubscriptions.removeValue(forKey: token)
+-        headingSubscriptions.removeValue(forKey: token)
++        DispatchQueue.main.async {
++            self.watchSubscriptions.removeValue(forKey: token)
++            self.headingSubscriptions.removeValue(forKey: token)
+ 
+-        // Stop monitoring if no more subscriptions or pending requests
+-        if watchSubscriptions.isEmpty && pendingPositionRequests.isEmpty {
+-            stopMonitoring()
+-        } else {
+-            updateLocationManagerConfiguration()
+-        }
++            // Stop monitoring if no more subscriptions or pending requests
++            if self.watchSubscriptions.isEmpty && self.pendingPositionRequests.isEmpty {
++                self.stopMonitoring()
++            } else {
++                self.updateLocationManagerConfiguration()
++            }
+ 
+-        if headingSubscriptions.isEmpty && pendingHeadingRequests.isEmpty {
+-            stopHeadingMonitoring()
+-        } else {
+-            updateHeadingConfiguration()
++            if self.headingSubscriptions.isEmpty && self.pendingHeadingRequests.isEmpty {
++                self.stopHeadingMonitoring()
++            } else {
++                self.updateHeadingConfiguration()
++            }
+         }
+     }
+ 
+     func stopObserving() {
+-        watchSubscriptions.removeAll()
+-        headingSubscriptions.removeAll()
++        DispatchQueue.main.async {
++            self.watchSubscriptions.removeAll()
++            self.headingSubscriptions.removeAll()
+ 
+-        // Stop monitoring if no pending requests
+-        if pendingPositionRequests.isEmpty {
+-            stopMonitoring()
+-        } else {
+-            updateLocationManagerConfiguration()
+-        }
++            // Stop monitoring if no pending requests
++            if self.pendingPositionRequests.isEmpty {
++                self.stopMonitoring()
++            } else {
++                self.updateLocationManagerConfiguration()
++            }
+ 
+-        if pendingHeadingRequests.isEmpty {
+-            stopHeadingMonitoring()
+-        } else {
+-            updateHeadingConfiguration()
++            if self.pendingHeadingRequests.isEmpty {
++                self.stopHeadingMonitoring()
++            } else {
++                self.updateHeadingConfiguration()
++            }
+         }
+     }
+ 
+     // MARK: - Location Manager Callbacks
+ 
+     func handleAuthorizationChange(_ manager: CLLocationManager) {
++        dispatchPrecondition(condition: .onQueue(.main))
+         let status = getCurrentAuthorizationStatus(from: manager)
++        // The initial delegate notification is not a permission decision.
++        guard status != .notDetermined else { return }
+         let mappedStatus = mapCLAuthorizationStatus(status)
+ 
+         // Snapshot state before invoking JS callbacks because they can re-enter this instance.
+@@ -524,6 +546,7 @@ class NitroGeolocation: HybridNitroGeolocationSpec {
+     }
+ 
+     func handleLocationUpdate(_ locations: [CLLocation]) {
++        dispatchPrecondition(condition: .onQueue(.main))
+         guard let location = locations.last else { return }
+ 
+         lastLocation = location
+@@ -550,6 +573,7 @@ class NitroGeolocation: HybridNitroGeolocationSpec {
+     }
+ 
+     func handleLocationError(_ error: Error) {
++        dispatchPrecondition(condition: .onQueue(.main))
+         let locationError: LocationError
+ 
+         if let clError = error as? CLError {
+@@ -592,6 +616,7 @@ class NitroGeolocation: HybridNitroGeolocationSpec {
+     }
+ 
+     func handleHeadingUpdate(_ clHeading: CLHeading) {
++        dispatchPrecondition(condition: .onQueue(.main))
+         let heading = headingToResponse(clHeading)
+ 
+         for (id, request) in Array(pendingHeadingRequests) {
+@@ -629,19 +654,11 @@ class NitroGeolocation: HybridNitroGeolocationSpec {
+     // MARK: - Helper Functions
+ 
+     private func initializeLocationManagerIfNeeded() {
++        dispatchPrecondition(condition: .onQueue(.main))
+         guard locationManager == nil else { return }
+-
+-        if Thread.isMainThread {
+-            locationManager = CLLocationManager()
+-            locationManagerDelegate = LocationManagerDelegate(geolocation: self)
+-            locationManager?.delegate = locationManagerDelegate
+-        } else {
+-            DispatchQueue.main.sync {
+-                locationManager = CLLocationManager()
+-                locationManagerDelegate = LocationManagerDelegate(geolocation: self)
+-                locationManager?.delegate = locationManagerDelegate
+-            }
+-        }
++        locationManager = CLLocationManager()
++        locationManagerDelegate = LocationManagerDelegate(geolocation: self)
++        locationManager?.delegate = locationManagerDelegate
+     }
+ 
+     private func validateHeadingAvailability(
