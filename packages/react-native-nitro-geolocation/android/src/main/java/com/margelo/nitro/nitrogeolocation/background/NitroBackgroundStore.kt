@@ -6,6 +6,7 @@ import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteOpenHelper
 import com.margelo.nitro.nitrogeolocation.BackgroundEventEnvelope
 import com.margelo.nitro.nitrogeolocation.BackgroundEventType
+import com.margelo.nitro.nitrogeolocation.LocationAuthorizationStatus
 import com.margelo.nitro.nitrogeolocation.BackgroundHttpSyncResult
 import com.margelo.nitro.nitrogeolocation.BackgroundLocation
 import com.margelo.nitro.nitrogeolocation.BackgroundLocationSource
@@ -688,6 +689,9 @@ class NitroBackgroundStore(context: Context) :
         return runCatching {
             val json = JSONObject(payload)
             LocationProviderStatus(
+                authorizationStatus = json.optString("authorizationStatus").takeIf { it.isNotEmpty() }?.let {
+                    runCatching { LocationAuthorizationStatus.valueOf(it.uppercase()) }.getOrNull()
+                },
                 locationServicesEnabled = json.getBoolean("locationServicesEnabled"),
                 backgroundModeEnabled = json.getBoolean("backgroundModeEnabled"),
                 gpsAvailable = json.optBooleanOrNull("gpsAvailable"),

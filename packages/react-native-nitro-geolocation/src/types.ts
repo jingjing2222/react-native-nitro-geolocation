@@ -157,16 +157,27 @@ export interface ReverseGeocodedAddress {
   formattedAddress?: string;
 }
 
+/** App location authorization scope reported by iOS and Android. */
+export type LocationAuthorizationStatus =
+  | "undetermined"
+  | "denied"
+  | "restricted"
+  | "whenInUse"
+  | "always";
+
 /**
- * Native provider/settings status.
+ * Native authorization and provider/settings status.
  *
  * Android includes device-level location services, provider availability, and
  * Google Location Accuracy when Google Play Services exposes it.
  *
- * iOS includes only Core Location service availability and app background
- * location mode. Android-specific provider fields are `undefined` on iOS.
+ * iOS includes authorization scope, Core Location service availability, and app
+ * background location mode. Android-specific provider fields are `undefined` on iOS.
  */
 export interface LocationProviderStatus {
+  /** App authorization scope reported by the OS. Native only. */
+  authorizationStatus?: LocationAuthorizationStatus;
+
   /** Android system location switch, or iOS Core Location services state. */
   locationServicesEnabled: boolean;
 

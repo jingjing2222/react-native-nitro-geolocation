@@ -46,6 +46,8 @@
 #include "JGeofenceTransition.hpp"
 #include "LocationProviderStatus.hpp"
 #include "JLocationProviderStatus.hpp"
+#include "LocationAuthorizationStatus.hpp"
+#include "JLocationAuthorizationStatus.hpp"
 #include "LocationLifecycleEvent.hpp"
 #include "JLocationLifecycleEvent.hpp"
 #include "LocationLifecycleState.hpp"

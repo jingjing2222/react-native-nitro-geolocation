@@ -26,6 +26,7 @@ func createLocationProviderStatus(
     locationServicesEnabled: Bool
 ) -> LocationProviderStatus {
     return LocationProviderStatus(
+        authorizationStatus: mapLocationAuthorizationStatus(CLLocationManager.authorizationStatus()),
         locationServicesEnabled: locationServicesEnabled,
         backgroundModeEnabled: isLocationBackgroundModeEnabled(),
         gpsAvailable: nil,
@@ -34,6 +35,17 @@ func createLocationProviderStatus(
         googlePlayServicesAvailable: nil,
         googleLocationAccuracyEnabled: nil
     )
+}
+
+func mapLocationAuthorizationStatus(_ status: CLAuthorizationStatus) -> LocationAuthorizationStatus {
+    switch status {
+    case .authorizedAlways: return .always
+    case .authorizedWhenInUse: return .wheninuse
+    case .denied: return .denied
+    case .restricted: return .restricted
+    case .notDetermined: return .undetermined
+    @unknown default: return .undetermined
+    }
 }
 
 func createLocationSettingsResult() -> LocationSettingsResult {

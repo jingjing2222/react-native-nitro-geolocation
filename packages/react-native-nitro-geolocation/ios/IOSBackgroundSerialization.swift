@@ -130,6 +130,7 @@ internal func makeProviderStatus(_ dictionary: [String: Any]) -> LocationProvide
         return nil
     }
     return LocationProviderStatus(
+        authorizationStatus: (dictionary["authorizationStatus"] as? String).flatMap(LocationAuthorizationStatus.init(fromString:)),
         locationServicesEnabled: locationServicesEnabled,
         backgroundModeEnabled: backgroundModeEnabled,
         gpsAvailable: dictionary["gpsAvailable"] as? Bool,
@@ -355,6 +356,7 @@ internal func providerStatusDictionary(_ status: LocationProviderStatus) -> [Str
         "backgroundModeEnabled": status.backgroundModeEnabled
     ]
     dictionary["gpsAvailable"] = status.gpsAvailable
+    dictionary["authorizationStatus"] = status.authorizationStatus?.stringValue
     dictionary["networkAvailable"] = status.networkAvailable
     dictionary["passiveAvailable"] = status.passiveAvailable
     dictionary["googlePlayServicesAvailable"] = status.googlePlayServicesAvailable

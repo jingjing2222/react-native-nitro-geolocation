@@ -29,6 +29,7 @@ export type {
   AndroidGranularity,
   IOSAccuracyPreset,
   LocationAccuracyOptions,
+  LocationAuthorizationStatus,
   LocationProviderStatus,
   LocationProviderUsed,
   PermissionStatus

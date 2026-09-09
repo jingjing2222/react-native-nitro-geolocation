@@ -18,8 +18,14 @@ public extension LocationProviderStatus {
   /**
    * Create a new instance of `LocationProviderStatus`.
    */
-  init(locationServicesEnabled: Bool, backgroundModeEnabled: Bool, gpsAvailable: Bool?, networkAvailable: Bool?, passiveAvailable: Bool?, googlePlayServicesAvailable: Bool?, googleLocationAccuracyEnabled: Bool?) {
-    self.init(locationServicesEnabled, backgroundModeEnabled, { () -> bridge.std__optional_bool_ in
+  init(authorizationStatus: LocationAuthorizationStatus?, locationServicesEnabled: Bool, backgroundModeEnabled: Bool, gpsAvailable: Bool?, networkAvailable: Bool?, passiveAvailable: Bool?, googlePlayServicesAvailable: Bool?, googleLocationAccuracyEnabled: Bool?) {
+    self.init({ () -> bridge.std__optional_LocationAuthorizationStatus_ in
+      if let __unwrappedValue = authorizationStatus {
+        return bridge.create_std__optional_LocationAuthorizationStatus_(__unwrappedValue)
+      } else {
+        return .init()
+      }
+    }(), locationServicesEnabled, backgroundModeEnabled, { () -> bridge.std__optional_bool_ in
       if let __unwrappedValue = gpsAvailable {
         return bridge.create_std__optional_bool_(__unwrappedValue)
       } else {
@@ -50,6 +56,11 @@ public extension LocationProviderStatus {
         return .init()
       }
     }())
+  }
+
+  @inline(__always)
+  var authorizationStatus: LocationAuthorizationStatus? {
+    return self.__authorizationStatus.value
   }
 
   @inline(__always)

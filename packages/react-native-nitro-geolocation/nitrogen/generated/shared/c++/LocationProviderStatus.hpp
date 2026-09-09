@@ -28,8 +28,10 @@
 #error NitroModules cannot be found! Are you sure you installed NitroModules properly?
 #endif
 
+// Forward declaration of `LocationAuthorizationStatus` to properly resolve imports.
+namespace margelo::nitro::nitrogeolocation { enum class LocationAuthorizationStatus; }
 
-
+#include "LocationAuthorizationStatus.hpp"
 #include <optional>
 
 namespace margelo::nitro::nitrogeolocation {
@@ -39,6 +41,7 @@ namespace margelo::nitro::nitrogeolocation {
    */
   struct LocationProviderStatus final {
   public:
+    std::optional<LocationAuthorizationStatus> authorizationStatus     SWIFT_PRIVATE;
     bool locationServicesEnabled     SWIFT_PRIVATE;
     bool backgroundModeEnabled     SWIFT_PRIVATE;
     std::optional<bool> gpsAvailable     SWIFT_PRIVATE;
@@ -49,7 +52,7 @@ namespace margelo::nitro::nitrogeolocation {
 
   public:
     LocationProviderStatus() = default;
-    explicit LocationProviderStatus(bool locationServicesEnabled, bool backgroundModeEnabled, std::optional<bool> gpsAvailable, std::optional<bool> networkAvailable, std::optional<bool> passiveAvailable, std::optional<bool> googlePlayServicesAvailable, std::optional<bool> googleLocationAccuracyEnabled): locationServicesEnabled(locationServicesEnabled), backgroundModeEnabled(backgroundModeEnabled), gpsAvailable(gpsAvailable), networkAvailable(networkAvailable), passiveAvailable(passiveAvailable), googlePlayServicesAvailable(googlePlayServicesAvailable), googleLocationAccuracyEnabled(googleLocationAccuracyEnabled) {}
+    explicit LocationProviderStatus(std::optional<LocationAuthorizationStatus> authorizationStatus, bool locationServicesEnabled, bool backgroundModeEnabled, std::optional<bool> gpsAvailable, std::optional<bool> networkAvailable, std::optional<bool> passiveAvailable, std::optional<bool> googlePlayServicesAvailable, std::optional<bool> googleLocationAccuracyEnabled): authorizationStatus(authorizationStatus), locationServicesEnabled(locationServicesEnabled), backgroundModeEnabled(backgroundModeEnabled), gpsAvailable(gpsAvailable), networkAvailable(networkAvailable), passiveAvailable(passiveAvailable), googlePlayServicesAvailable(googlePlayServicesAvailable), googleLocationAccuracyEnabled(googleLocationAccuracyEnabled) {}
 
   public:
     friend bool operator==(const LocationProviderStatus& lhs, const LocationProviderStatus& rhs) = default;
@@ -65,6 +68,7 @@ namespace margelo::nitro {
     static inline margelo::nitro::nitrogeolocation::LocationProviderStatus fromJSI(jsi::Runtime& runtime, const jsi::Value& arg) {
       jsi::Object obj = arg.asObject(runtime);
       return margelo::nitro::nitrogeolocation::LocationProviderStatus(
+        JSIConverter<std::optional<margelo::nitro::nitrogeolocation::LocationAuthorizationStatus>>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "authorizationStatus"))),
         JSIConverter<bool>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "locationServicesEnabled"))),
         JSIConverter<bool>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "backgroundModeEnabled"))),
         JSIConverter<std::optional<bool>>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "gpsAvailable"))),
@@ -76,6 +80,7 @@ namespace margelo::nitro {
     }
     static inline jsi::Value toJSI(jsi::Runtime& runtime, const margelo::nitro::nitrogeolocation::LocationProviderStatus& arg) {
       jsi::Object obj(runtime);
+      obj.setProperty(runtime, PropNameIDCache::get(runtime, "authorizationStatus"), JSIConverter<std::optional<margelo::nitro::nitrogeolocation::LocationAuthorizationStatus>>::toJSI(runtime, arg.authorizationStatus));
       obj.setProperty(runtime, PropNameIDCache::get(runtime, "locationServicesEnabled"), JSIConverter<bool>::toJSI(runtime, arg.locationServicesEnabled));
       obj.setProperty(runtime, PropNameIDCache::get(runtime, "backgroundModeEnabled"), JSIConverter<bool>::toJSI(runtime, arg.backgroundModeEnabled));
       obj.setProperty(runtime, PropNameIDCache::get(runtime, "gpsAvailable"), JSIConverter<std::optional<bool>>::toJSI(runtime, arg.gpsAvailable));
@@ -93,6 +98,7 @@ namespace margelo::nitro {
       if (!nitro::isPlainObject(runtime, obj)) {
         return false;
       }
+      if (!JSIConverter<std::optional<margelo::nitro::nitrogeolocation::LocationAuthorizationStatus>>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "authorizationStatus")))) return false;
       if (!JSIConverter<bool>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "locationServicesEnabled")))) return false;
       if (!JSIConverter<bool>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "backgroundModeEnabled")))) return false;
       if (!JSIConverter<std::optional<bool>>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "gpsAvailable")))) return false;

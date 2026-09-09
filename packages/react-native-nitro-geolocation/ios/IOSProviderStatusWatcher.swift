@@ -108,6 +108,7 @@ final class IOSProviderStatusWatcher: NSObject, CLLocationManagerDelegate {
         _ second: LocationProviderStatus
     ) -> Bool {
         return first?.locationServicesEnabled == second.locationServicesEnabled
+            && first?.authorizationStatus == second.authorizationStatus
             && first?.backgroundModeEnabled == second.backgroundModeEnabled
             && first?.gpsAvailable == second.gpsAvailable
             && first?.networkAvailable == second.networkAvailable

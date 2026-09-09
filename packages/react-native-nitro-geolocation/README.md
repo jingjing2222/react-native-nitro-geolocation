@@ -22,6 +22,10 @@ In 2.0, Android foreground notifications accept custom `actions: [{ id, title }]
 Handle taps with `onBackgroundEvent()` or your Headless JS task using the
 `notificationAction` event and its `notificationAction.actionId` payload.
 
+In 2.0, `watchProviderStatus(callback)` also reports native authorization changes
+through `status.authorizationStatus` (`always`, `whenInUse`, `denied`,
+`restricted`, or `undetermined`). Clean up with `unwatch(token)`.
+
 - 🎯 **Simple functional API** — Direct function calls, no complex abstractions
 - ⚡ **Low-overhead native calls** — Avoids Bridge serialization on supported native paths
 - 🔁 **Compat API** — Preserves core callback methods and numeric errors; documented boundaries apply

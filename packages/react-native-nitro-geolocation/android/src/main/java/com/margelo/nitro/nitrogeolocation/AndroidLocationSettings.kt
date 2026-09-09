@@ -151,6 +151,7 @@ internal class AndroidLocationSettings(
         val googlePlayServicesAvailable = isGooglePlayServicesAvailable()
 
         return LocationProviderStatus(
+            authorizationStatus = currentLocationAuthorizationStatus(),
             locationServicesEnabled = hasServicesEnabled(),
             backgroundModeEnabled = hasBackgroundLocationPermission(),
             gpsAvailable = isProviderEnabled(AndroidLocationManager.GPS_PROVIDER),
@@ -363,6 +364,18 @@ internal class AndroidLocationSettings(
             reactContext,
             Manifest.permission.ACCESS_BACKGROUND_LOCATION
         ) == PackageManager.PERMISSION_GRANTED
+    }
+
+    private fun currentLocationAuthorizationStatus(): LocationAuthorizationStatus {
+        val foregroundGranted = listOf(
+            Manifest.permission.ACCESS_FINE_LOCATION,
+            Manifest.permission.ACCESS_COARSE_LOCATION
+        ).any { ContextCompat.checkSelfPermission(reactContext, it) == PackageManager.PERMISSION_GRANTED }
+        return when {
+            !foregroundGranted -> LocationAuthorizationStatus.DENIED
+            hasBackgroundLocationPermission() -> LocationAuthorizationStatus.ALWAYS
+            else -> LocationAuthorizationStatus.WHENINUSE
+        }
     }
 
     private fun getGoogleLocationAccuracyEnabled(success: (Boolean?) -> Unit) {
