@@ -126,6 +126,75 @@ test("Linux group observations fail closed unless all remaining members are obse
   );
 });
 
+test("Linux snapshots follow owned growth without waiting for unrelated PID churn", () => {
+  function observe(records, snapshots) {
+    let calls = 0;
+    const alive = hasLiveLinuxGroupMembers(40, {
+      ...procFixture(records),
+      list: () => {
+        const snapshot = snapshots[calls++];
+        assert.ok(snapshot, "Unexpected additional snapshot");
+        return snapshot;
+      }
+    });
+    return { alive, calls };
+  }
+  const zombie = processStat(40, "Z", 40);
+  assert.deepEqual(
+    observe(
+      {
+        40: zombie,
+        50: processStat(50, "S", 50)
+      },
+      [["40"], ["40", "50"]]
+    ),
+    { alive: false, calls: 2 }
+  );
+  assert.deepEqual(
+    observe(
+      {
+        40: zombie,
+        41: processStat(41, "S", 40)
+      },
+      [["40"], ["40", "41"]]
+    ),
+    { alive: true, calls: 2 }
+  );
+  assert.deepEqual(
+    observe(
+      {
+        40: zombie,
+        41: processStat(41, "Z", 40),
+        42: processStat(42, "S", 40)
+      },
+      [["40"], ["40", "41"], ["40", "41", "42"]]
+    ),
+    { alive: true, calls: 3 }
+  );
+  assert.deepEqual(
+    observe(
+      {
+        40: zombie,
+        41: processStat(41, "Z", 40),
+        50: processStat(50, "S", 50)
+      },
+      [["40"], ["40", "41"], ["40", "41", "50"]]
+    ),
+    { alive: false, calls: 3 }
+  );
+  assert.deepEqual(
+    observe(
+      {
+        40: zombie,
+        41: processStat(41, "Z", 40),
+        42: processStat(42, "Z", 40)
+      },
+      [["40"], ["40", "41"], ["40", "41", "42"]]
+    ),
+    { alive: true, calls: 3 }
+  );
+});
+
 for (const ignoreTermination of [false, true]) {
   test(
     `owned server descendants stop (ignore TERM: ${ignoreTermination})`,

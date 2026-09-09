@@ -36,30 +36,33 @@ export function hasLiveLinuxGroupMembers(
   // kill(group, 0) includes unreaped zombies. Only a complete /proc observation
   // can override that result; unavailable or ambiguous observations fail closed.
   try {
-    const pids = new Set(list("/proc").filter((entry) => /^\d+$/.test(entry)));
+    const observedPids = new Set();
     let observedGroup = false;
-    for (const pid of pids) {
-      let stat;
-      try {
-        stat = parseLinuxProcessStat(read(`/proc/${pid}/stat`, "utf8"));
-      } catch (error) {
-        if (error.code === "ENOENT" || error.code === "ESRCH") continue;
-        return true;
+    // Rescan only while owned members appear: unrelated host churn must not
+    // delay cleanup. Bound successive owned forks; the caller can retry later.
+    for (let snapshot = 0; snapshot < 3; snapshot++) {
+      let ownedGrowth = false;
+      for (const pid of list("/proc")) {
+        if (!/^\d+$/.test(pid) || observedPids.has(pid)) continue;
+        observedPids.add(pid);
+        let stat;
+        try {
+          stat = parseLinuxProcessStat(read(`/proc/${pid}/stat`, "utf8"));
+        } catch (error) {
+          if (error.code === "ENOENT" || error.code === "ESRCH") continue;
+          return true;
+        }
+        if (!stat || stat.pid !== Number(pid)) return true;
+        if (stat.group !== group) continue;
+        observedGroup = true;
+        ownedGrowth = true;
+        // A zombie leader can still have live sibling threads.
+        if (!["Z", "X", "x"].includes(stat.state) || stat.threads > 1)
+          return true;
       }
-      if (!stat || stat.pid !== Number(pid)) return true;
-      if (stat.group !== group) continue;
-      observedGroup = true;
-      // A zombie leader can still have live sibling threads.
-      if (!["Z", "X", "x"].includes(stat.state) || stat.threads > 1)
-        return true;
+      if (!ownedGrowth) return !observedGroup;
     }
-    // A descendant forked during the snapshot must not escape observation.
-    if (
-      list("/proc").some((entry) => /^\d+$/.test(entry) && !pids.has(entry))
-    ) {
-      return true;
-    }
-    return !observedGroup;
+    return true;
   } catch {
     return true;
   }
