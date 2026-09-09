@@ -20,7 +20,11 @@ export const syncVersionedDocumentation = (text, version, previousVersion) => {
     synchronized = synchronized
       .replaceAll(
         "react-native-nitro-geolocation@rc",
-        "react-native-nitro-geolocation"
+        `react-native-nitro-geolocation@${version}`
+      )
+      .replace(
+        /(^[ \t]*(?:npm install|yarn add|npx expo install)\b[^\n]*?)\breact-native-nitro-geolocation(?=[ \t]|$)/gm,
+        `$1react-native-nitro-geolocation@${version}`
       )
       .replaceAll("2.0 RC", "2.0")
       .replace(

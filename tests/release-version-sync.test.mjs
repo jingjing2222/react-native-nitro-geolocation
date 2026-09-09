@@ -48,20 +48,34 @@ test("RC bumps update exact documentation versions without changing the channel"
   );
 });
 
-test("stable 2.0 synchronization removes RC install tags and labels", () => {
+test("stable installs select the released version before latest promotion", () => {
   const source = [
     "Nitro Geolocation 2.0 RC",
     "npm install react-native-nitro-geolocation@rc",
-    "npm install react-native-nitro-geolocation@2.0.0-rc.3"
+    "npm install react-native-nitro-geolocation@2.0.0-rc.3",
+    "yarn add react-native-nitro-modules react-native-nitro-geolocation",
+    "npx expo install react-native-nitro-geolocation react-native-nitro-modules",
+    "import { getCurrentPosition } from 'react-native-nitro-geolocation';"
   ].join("\n");
 
   assert.equal(
     syncVersionedDocumentation(source, "2.0.0", "2.0.0-rc.3"),
     [
       "Nitro Geolocation 2.0",
-      "npm install react-native-nitro-geolocation",
-      "npm install react-native-nitro-geolocation@2.0.0"
+      "npm install react-native-nitro-geolocation@2.0.0",
+      "npm install react-native-nitro-geolocation@2.0.0",
+      "yarn add react-native-nitro-modules react-native-nitro-geolocation@2.0.0",
+      "npx expo install react-native-nitro-geolocation@2.0.0 react-native-nitro-modules",
+      "import { getCurrentPosition } from 'react-native-nitro-geolocation';"
     ].join("\n")
+  );
+  assert.equal(
+    syncVersionedDocumentation(
+      "npm install react-native-nitro-geolocation@2.0.0",
+      "2.0.1",
+      "2.0.0"
+    ),
+    "npm install react-native-nitro-geolocation@2.0.1"
   );
 });
 
@@ -180,6 +194,6 @@ test("stable onboarding describes the stable channel without changing RC sources
   assert.match(quickStart, /Install the stable release from npm:/);
   assert.match(
     quickStart,
-    /npm install react-native-nitro-modules react-native-nitro-geolocation\n/
+    /npm install react-native-nitro-modules react-native-nitro-geolocation@2\.0\.0\n/
   );
 });

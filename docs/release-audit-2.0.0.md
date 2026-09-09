@@ -106,8 +106,10 @@ exhaustive event handling and stored recovery. Provider snapshots remain
 live-only; migration instructions must not tell consumers to drain a stored
 provider event. Stable-version synchronization now updates onboarding policy
 and installation prose as well as commands, while leaving RC documentation
-unchanged until versioning exits prerelease mode. The 1.x archive remains
-untouched.
+unchanged until versioning exits prerelease mode. Stable install commands pin
+the exact release in both READMEs and current documentation, so a staged
+`ga-candidate` release cannot accidentally install the older `latest` version.
+Subsequent stable releases update those pins. The 1.x archive remains untouched.
 
 ## Repository-control preflight
 
