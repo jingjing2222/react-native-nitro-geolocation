@@ -1,35 +1,26 @@
 ---
 title: Release readiness
-description: Understand the 2.0 RC policy, declared support, tested reference stack, known limits, and ship checklist.
+description: Understand the 2.0 policy, declared support, tested reference stack, known limits, and ship checklist.
 ---
 
 # Release readiness
 
-React Native Nitro Geolocation 2.0 is currently a **release candidate**. Use it
-to integrate and validate 2.0 contracts, but treat production approval as your
-application team's decision after testing the exact devices and features you
-ship. The project does not provide an SLA or guarantee that an RC is free of
-contract corrections before 2.0 stable.
+React Native Nitro Geolocation 2.0 is the stable release line. Validate the
+exact devices, native dependencies, and features your application ships.
 
-## RC policy
+## Release policy
 
-- `@rc` is a moving npm tag for evaluation. Pin an exact RC in a lockfile used
-  for QA or release approval.
-- A later RC can include breaking corrections when they are required to make the
-  stable 2.0 contract coherent. Review the package changelog before updating.
-- Stable 1.x documentation remains at the unversioned site. 2.0 RC documentation
-  is under `/v2/`.
-- Keep a known-good 1.x release branch and lockfile until the 2.0 upgrade and
-  release gates pass in your application.
-- There is no date-based GA promise. The project will mark 2.0 stable after the
-  public contracts are frozen, release builds and consumer contracts pass on
-  both native platforms, versioned docs match the package, and release prebuilts
-  are validated.
+- Stable 2.x releases preserve the documented public contracts; incompatible
+  changes require a new major version.
+- Pin exact dependency versions and retain your application's release evidence.
+- The default site documents 2.x. The 1.x snapshot remains under `/v1/`.
+- A stable package is staged under `ga-candidate` until matching native release
+  artifacts pass verification and the release is promoted to `latest`.
 
 Pin the repository's current reference combination:
 
 ```bash
-yarn add react-native-nitro-modules@0.35.10 react-native-nitro-geolocation@2.0.0-rc.7
+yarn add react-native-nitro-modules@0.35.10 react-native-nitro-geolocation@2.0.0
 ```
 
 ## Declared support
@@ -51,7 +42,7 @@ combination is continuously exercised.
 
 ## Tested reference stack
 
-The 2.0.0-rc.7 repository currently builds and runs its consumer contracts with
+The 2.0.0 repository currently builds and runs its consumer contracts with
 this reference stack. This is evidence of the continuously exercised path, not
 the full peer range.
 
@@ -65,7 +56,7 @@ the full peer range.
 | JavaScript toolchain | Node 24.18.0, Yarn 4.9.4 | CI and E2E bootstrap |
 | Expo config plugin | Expo 57 development dependency | Plugin/type tests; validate a real development build for the SDK used by your app |
 
-Reference last reviewed for `2.0.0-rc.7` on **2026-09-10**. Consult the current
+Reference last reviewed for `2.0.0` on **2026-09-10**. Consult the current
 example package and E2E workflow if this page and the installed release differ.
 
 ## Known limits
@@ -86,7 +77,7 @@ example package and E2E workflow if this page and the installed release differ.
   distance filters, accuracy, retention, and disclosure against the product use
   case and target devices.
 
-Track newly reported release-candidate issues in
+Track newly reported release issues in
 [GitHub Issues](https://github.com/jingjing2222/react-native-nitro-geolocation/issues).
 
 ## Ship checklist

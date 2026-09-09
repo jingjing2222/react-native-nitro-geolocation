@@ -146,10 +146,10 @@ background status into actionable issues when delivery is silent.
 
 ```bash
 # Install Nitro core and Geolocation module
-yarn add react-native-nitro-modules react-native-nitro-geolocation
+yarn add react-native-nitro-modules react-native-nitro-geolocation@2.0.0
 
 # or using npm
-npm install react-native-nitro-modules react-native-nitro-geolocation
+npm install react-native-nitro-modules react-native-nitro-geolocation@2.0.0
 ```
 
 Rebuild your native app:

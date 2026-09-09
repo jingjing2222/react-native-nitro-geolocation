@@ -5,7 +5,7 @@ description: Pick the shortest React Native Nitro Geolocation 2.0 path for a new
 
 # Choose your path
 
-You are reading the **2.0 release-candidate** documentation. Use this page to
+You are reading the **2.0** documentation. Use this page to
 pick one path; you do not need to read every guide before starting.
 
 | I want to… | Start here | Outcome |
@@ -16,7 +16,7 @@ pick one path; you do not need to read every guide before starting.
 | Replace `react-native-geolocation-service` | [Service migration](./service-migration.md) | Named imports from the package |
 | Use an Expo app | [Expo development builds](./expo-development-build.md) | A custom native build; Expo Go is not supported |
 | Track when the app is not active | [Background Location](../background/overview.md) | Native background tracking with platform-specific setup |
-| Evaluate the RC for release | [Release readiness](./release-readiness.md) | Tested-stack, RC-policy, and ship-checklist review |
+| Evaluate release readiness | [Release readiness](./release-readiness.md) | Tested-stack, release-policy, and ship-checklist review |
 | Diagnose an existing integration | [Troubleshooting](./troubleshooting.md) | A readiness snapshot and a useful issue report |
 
 ## Choose an API surface
@@ -52,17 +52,16 @@ The peer range describes where installation is allowed; it is broader than the
 single reference combination continuously exercised by this repository. See
 [Release readiness](./release-readiness.md) for the declared and tested scopes.
 
-## RC expectations
+## Release expectations
 
-Install an exact RC when reproducing or approving behavior:
+Install an exact version when reproducing or approving behavior:
 
 ```bash
-yarn add react-native-nitro-modules@0.35.10 react-native-nitro-geolocation@2.0.0-rc.7
+yarn add react-native-nitro-modules@0.35.10 react-native-nitro-geolocation@2.0.0
 ```
 
-Release candidates may still receive contract fixes before 2.0 stable. Do not
-silently follow the moving `@rc` tag in a production lockfile. Keep a tested
-1.x rollback branch until the [upgrade checklist](./upgrade-from-v1.md) and
+Stable 2.x releases preserve the documented public contracts. Pin exact
+versions in a production lockfile. Keep a tested 1.x rollback branch until the [upgrade checklist](./upgrade-from-v1.md) and
 [release checklist](./release-readiness.md#ship-checklist) pass in your app.
 
 ## Next action

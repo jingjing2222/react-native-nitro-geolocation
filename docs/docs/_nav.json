@@ -40,14 +40,13 @@
     "activeMatch": "/background/"
   },
   {
-    "text": "2.0 RC",
+    "text": "2.0",
     "link": "/guide/release-readiness",
-    "position": "right",
-    "tag": "RC"
+    "position": "right"
   },
   {
-    "text": "1.x stable",
-    "link": "https://react-native-nitro-geolocation.pages.dev/",
+    "text": "1.x archive",
+    "link": "https://react-native-nitro-geolocation.pages.dev/v1/",
     "position": "right"
   }
 ]
