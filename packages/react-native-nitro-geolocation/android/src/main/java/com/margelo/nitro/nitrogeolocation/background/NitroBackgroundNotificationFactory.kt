@@ -18,6 +18,7 @@ object NitroBackgroundNotificationFactory {
         options: AndroidForegroundServiceOptions,
         serviceGeneration: Long
     ): Notification {
+        validateNotificationActions(options)
         val channelId = options.notificationChannelId ?: "nitro-background-location"
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val manager = context.getSystemService(NotificationManager::class.java)
@@ -55,6 +56,18 @@ object NitroBackgroundNotificationFactory {
                 PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
             )
             builder.addAction(android.R.drawable.ic_menu_close_clear_cancel, title, stopAction)
+        }
+        options.actions?.forEach { action ->
+            val actionIntent = Intent(context, NitroBackgroundLocationService::class.java)
+                .setAction(ACTION_NOTIFICATION_ACTION)
+                .setData(Uri.parse(pendingIntentIdentityUri("action/${Uri.encode(action.id)}", serviceGeneration)))
+                .putExtra(EXTRA_SERVICE_GENERATION, serviceGeneration)
+                .putExtra(EXTRA_NOTIFICATION_ACTION_ID, action.id)
+            val pendingIntent = PendingIntent.getService(
+                context, 1005, actionIntent,
+                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+            )
+            builder.addAction(0, action.title, pendingIntent)
         }
         return builder.build()
     }

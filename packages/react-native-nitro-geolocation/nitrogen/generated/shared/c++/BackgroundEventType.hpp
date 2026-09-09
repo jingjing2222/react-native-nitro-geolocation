@@ -36,6 +36,7 @@ namespace margelo::nitro::nitrogeolocation {
     PROVIDERCHANGE      SWIFT_NAME(providerchange) = 4,
     LIFECYCLE      SWIFT_NAME(lifecycle) = 5,
     HTTPSYNC      SWIFT_NAME(httpsync) = 6,
+    NOTIFICATIONACTION      SWIFT_NAME(notificationaction) = 7,
   } CLOSED_ENUM;
 
 } // namespace margelo::nitro::nitrogeolocation
@@ -55,6 +56,7 @@ namespace margelo::nitro {
         case hashString("providerChange"): return margelo::nitro::nitrogeolocation::BackgroundEventType::PROVIDERCHANGE;
         case hashString("lifecycle"): return margelo::nitro::nitrogeolocation::BackgroundEventType::LIFECYCLE;
         case hashString("httpSync"): return margelo::nitro::nitrogeolocation::BackgroundEventType::HTTPSYNC;
+        case hashString("notificationAction"): return margelo::nitro::nitrogeolocation::BackgroundEventType::NOTIFICATIONACTION;
         default: [[unlikely]]
           throw std::invalid_argument("Cannot convert \"" + unionValue + "\" to enum BackgroundEventType - invalid value!");
       }
@@ -68,6 +70,7 @@ namespace margelo::nitro {
         case margelo::nitro::nitrogeolocation::BackgroundEventType::PROVIDERCHANGE: return JSIConverter<std::string>::toJSI(runtime, "providerChange");
         case margelo::nitro::nitrogeolocation::BackgroundEventType::LIFECYCLE: return JSIConverter<std::string>::toJSI(runtime, "lifecycle");
         case margelo::nitro::nitrogeolocation::BackgroundEventType::HTTPSYNC: return JSIConverter<std::string>::toJSI(runtime, "httpSync");
+        case margelo::nitro::nitrogeolocation::BackgroundEventType::NOTIFICATIONACTION: return JSIConverter<std::string>::toJSI(runtime, "notificationAction");
         default: [[unlikely]]
           throw std::invalid_argument("Cannot convert BackgroundEventType to JS - invalid value: "
                                     + std::to_string(static_cast<int>(arg)) + "!");
@@ -86,6 +89,7 @@ namespace margelo::nitro {
         case hashString("providerChange"):
         case hashString("lifecycle"):
         case hashString("httpSync"):
+        case hashString("notificationAction"):
           return true;
         default:
           return false;

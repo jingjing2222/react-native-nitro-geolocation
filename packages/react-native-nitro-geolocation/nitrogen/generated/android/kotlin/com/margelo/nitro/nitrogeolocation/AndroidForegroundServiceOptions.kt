@@ -44,7 +44,10 @@ data class AndroidForegroundServiceOptions(
   val notificationColor: String?,
   @DoNotStrip
   @Keep
-  val stopActionTitle: String?
+  val stopActionTitle: String?,
+  @DoNotStrip
+  @Keep
+  val actions: Array<AndroidNotificationAction>?
 ) {
   /* primary constructor */
 
@@ -60,6 +63,7 @@ data class AndroidForegroundServiceOptions(
       && Objects.deepEquals(this.notificationIcon, other.notificationIcon)
       && Objects.deepEquals(this.notificationColor, other.notificationColor)
       && Objects.deepEquals(this.stopActionTitle, other.stopActionTitle)
+      && Objects.deepEquals(this.actions, other.actions)
   }
 
   override fun hashCode(): Int {
@@ -72,7 +76,8 @@ data class AndroidForegroundServiceOptions(
       notificationChannelDescription,
       notificationIcon,
       notificationColor,
-      stopActionTitle
+      stopActionTitle,
+      actions
     ).contentDeepHashCode()
   }
 
@@ -84,8 +89,8 @@ data class AndroidForegroundServiceOptions(
     @Keep
     @Suppress("unused")
     @JvmStatic
-    private fun fromCpp(notificationId: Double?, notificationTitle: String, notificationText: String, notificationChannelId: String?, notificationChannelName: String?, notificationChannelDescription: String?, notificationIcon: String?, notificationColor: String?, stopActionTitle: String?): AndroidForegroundServiceOptions {
-      return AndroidForegroundServiceOptions(notificationId, notificationTitle, notificationText, notificationChannelId, notificationChannelName, notificationChannelDescription, notificationIcon, notificationColor, stopActionTitle)
+    private fun fromCpp(notificationId: Double?, notificationTitle: String, notificationText: String, notificationChannelId: String?, notificationChannelName: String?, notificationChannelDescription: String?, notificationIcon: String?, notificationColor: String?, stopActionTitle: String?, actions: Array<AndroidNotificationAction>?): AndroidForegroundServiceOptions {
+      return AndroidForegroundServiceOptions(notificationId, notificationTitle, notificationText, notificationChannelId, notificationChannelName, notificationChannelDescription, notificationIcon, notificationColor, stopActionTitle, actions)
     }
   }
 }

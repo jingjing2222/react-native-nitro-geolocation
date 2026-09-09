@@ -10,6 +10,7 @@ internal fun createProviderChangeBackgroundEvent(
     id: String = UUID.randomUUID().toString(),
     timestamp: Double = System.currentTimeMillis().toDouble()
 ): BackgroundEventEnvelope = BackgroundEventEnvelope(
+    notificationAction = null,
     location = null,
     geofence = null,
     activity = null,

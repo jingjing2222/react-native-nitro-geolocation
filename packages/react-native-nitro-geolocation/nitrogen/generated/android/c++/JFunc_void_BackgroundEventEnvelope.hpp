@@ -14,10 +14,12 @@
 #include <functional>
 #include <NitroModules/JNICallable.hpp>
 #include "JBackgroundEventEnvelope.hpp"
-#include "BackgroundLocation.hpp"
+#include "NotificationActionEvent.hpp"
 #include <optional>
-#include "JBackgroundLocation.hpp"
+#include "JNotificationActionEvent.hpp"
 #include <string>
+#include "BackgroundLocation.hpp"
+#include "JBackgroundLocation.hpp"
 #include "BackgroundLocationSource.hpp"
 #include "JBackgroundLocationSource.hpp"
 #include "LocationProviderUsed.hpp"

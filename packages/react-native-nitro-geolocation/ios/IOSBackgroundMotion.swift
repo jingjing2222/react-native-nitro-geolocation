@@ -153,6 +153,7 @@ extension NitroBackgroundLocation {
         )
         let timestamp = Date().timeIntervalSince1970 * 1000
         let event = BackgroundEventEnvelope(
+            notificationAction: nil,
             location: nil,
             geofence: nil,
             activity: detected,

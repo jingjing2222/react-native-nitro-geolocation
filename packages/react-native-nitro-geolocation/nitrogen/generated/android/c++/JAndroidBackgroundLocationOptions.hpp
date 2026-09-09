@@ -12,10 +12,13 @@
 
 #include "AndroidBackgroundProvider.hpp"
 #include "AndroidForegroundServiceOptions.hpp"
+#include "AndroidNotificationAction.hpp"
 #include "JAndroidBackgroundProvider.hpp"
 #include "JAndroidForegroundServiceOptions.hpp"
+#include "JAndroidNotificationAction.hpp"
 #include <optional>
 #include <string>
+#include <vector>
 
 namespace margelo::nitro::nitrogeolocation {
 

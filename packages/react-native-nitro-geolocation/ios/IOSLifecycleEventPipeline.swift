@@ -26,6 +26,7 @@ internal func makeIOSLifecycleEventDeliveryPlan(
 ) -> IOSLifecycleEventDeliveryPlan {
     let lifecycle = LocationLifecycleEvent(state: state, timestamp: timestamp)
     let event = BackgroundEventEnvelope(
+        notificationAction: nil,
         location: nil,
         geofence: nil,
         activity: nil,

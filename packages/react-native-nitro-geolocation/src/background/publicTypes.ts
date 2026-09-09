@@ -11,6 +11,7 @@ import type {
   BackgroundHttpSyncOptions,
   BackgroundLifecycleEvent,
   BackgroundLocationEvent,
+  BackgroundNotificationActionEvent,
   BackgroundProviderChangeEvent,
   BackgroundTrackingMode,
   DetectedActivity,
@@ -41,6 +42,9 @@ export type { LocationError, LocationErrorCode } from "../utils/errors";
 
 export type {
   ActivityRecognitionOptions,
+  AndroidNotificationAction,
+  BackgroundNotificationActionEvent,
+  NotificationActionEvent,
   AndroidBackgroundLocationStatus,
   AndroidForegroundServiceOptions,
   BackgroundErrorEvent,
@@ -138,6 +142,7 @@ export interface BackgroundActivityEvent extends BackgroundEventBase {
 
 /** Discriminated event delivered by background listeners and tasks. */
 export type BackgroundEvent =
+  | BackgroundNotificationActionEvent
   | BackgroundLocationEvent
   | BackgroundGeofenceEvent
   | BackgroundActivityEvent

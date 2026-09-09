@@ -18,8 +18,14 @@ public extension BackgroundEventEnvelope {
   /**
    * Create a new instance of `BackgroundEventEnvelope`.
    */
-  init(location: BackgroundLocation?, geofence: GeofenceEvent?, activity: DetectedActivity?, providerStatus: LocationProviderStatus?, lifecycle: LocationLifecycleEvent?, result: BackgroundHttpSyncResult?, error: LocationError?, id: String, type: BackgroundEventType, timestamp: Double, deliveredToJS: Bool) {
-    self.init({ () -> bridge.std__optional_BackgroundLocation_ in
+  init(notificationAction: NotificationActionEvent?, location: BackgroundLocation?, geofence: GeofenceEvent?, activity: DetectedActivity?, providerStatus: LocationProviderStatus?, lifecycle: LocationLifecycleEvent?, result: BackgroundHttpSyncResult?, error: LocationError?, id: String, type: BackgroundEventType, timestamp: Double, deliveredToJS: Bool) {
+    self.init({ () -> bridge.std__optional_NotificationActionEvent_ in
+      if let __unwrappedValue = notificationAction {
+        return bridge.create_std__optional_NotificationActionEvent_(__unwrappedValue)
+      } else {
+        return .init()
+      }
+    }(), { () -> bridge.std__optional_BackgroundLocation_ in
       if let __unwrappedValue = location {
         return bridge.create_std__optional_BackgroundLocation_(__unwrappedValue)
       } else {
@@ -62,6 +68,11 @@ public extension BackgroundEventEnvelope {
         return .init()
       }
     }(), std.string(id), type, timestamp, deliveredToJS)
+  }
+
+  @inline(__always)
+  var notificationAction: NotificationActionEvent? {
+    return self.__notificationAction.value
   }
 
   @inline(__always)

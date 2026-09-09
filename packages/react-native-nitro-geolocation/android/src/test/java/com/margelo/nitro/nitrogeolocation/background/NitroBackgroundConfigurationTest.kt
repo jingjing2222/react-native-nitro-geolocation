@@ -21,7 +21,7 @@ class NitroBackgroundConfigurationTest {
         maxStoredLocations = limit, maxStoredEvents = limit,
         stopOnTerminate = null, startOnBoot = null,
         android = AndroidBackgroundLocationOptions(null,
-            AndroidForegroundServiceOptions(null, "Tracking", "Active", null, null, null, null, null, null),
+            AndroidForegroundServiceOptions(null, "Tracking", "Active", null, null, null, null, null, null, null),
             null, null),
         ios = null, geofencing = null,
         activityRecognition = ActivityRecognitionOptions(true, null, null, null), sync = null

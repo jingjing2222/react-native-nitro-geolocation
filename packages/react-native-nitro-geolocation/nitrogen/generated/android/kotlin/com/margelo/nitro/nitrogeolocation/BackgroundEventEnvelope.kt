@@ -20,6 +20,9 @@ import java.util.Objects
 data class BackgroundEventEnvelope(
   @DoNotStrip
   @Keep
+  val notificationAction: NotificationActionEvent?,
+  @DoNotStrip
+  @Keep
   val location: BackgroundLocation?,
   @DoNotStrip
   @Keep
@@ -57,7 +60,8 @@ data class BackgroundEventEnvelope(
   override fun equals(other: Any?): Boolean {
     if (this === other) return true
     if (other !is BackgroundEventEnvelope) return false
-    return Objects.deepEquals(this.location, other.location)
+    return Objects.deepEquals(this.notificationAction, other.notificationAction)
+      && Objects.deepEquals(this.location, other.location)
       && Objects.deepEquals(this.geofence, other.geofence)
       && Objects.deepEquals(this.activity, other.activity)
       && Objects.deepEquals(this.providerStatus, other.providerStatus)
@@ -72,6 +76,7 @@ data class BackgroundEventEnvelope(
 
   override fun hashCode(): Int {
     return arrayOf<Any?>(
+      notificationAction,
       location,
       geofence,
       activity,
@@ -94,8 +99,8 @@ data class BackgroundEventEnvelope(
     @Keep
     @Suppress("unused")
     @JvmStatic
-    private fun fromCpp(location: BackgroundLocation?, geofence: GeofenceEvent?, activity: DetectedActivity?, providerStatus: LocationProviderStatus?, lifecycle: LocationLifecycleEvent?, result: BackgroundHttpSyncResult?, error: LocationError?, id: String, type: BackgroundEventType, timestamp: Double, deliveredToJS: Boolean): BackgroundEventEnvelope {
-      return BackgroundEventEnvelope(location, geofence, activity, providerStatus, lifecycle, result, error, id, type, timestamp, deliveredToJS)
+    private fun fromCpp(notificationAction: NotificationActionEvent?, location: BackgroundLocation?, geofence: GeofenceEvent?, activity: DetectedActivity?, providerStatus: LocationProviderStatus?, lifecycle: LocationLifecycleEvent?, result: BackgroundHttpSyncResult?, error: LocationError?, id: String, type: BackgroundEventType, timestamp: Double, deliveredToJS: Boolean): BackgroundEventEnvelope {
+      return BackgroundEventEnvelope(notificationAction, location, geofence, activity, providerStatus, lifecycle, result, error, id, type, timestamp, deliveredToJS)
     }
   }
 }

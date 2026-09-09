@@ -486,6 +486,7 @@ class NitroBackgroundLocationController private constructor(
             location.time.toDouble()
         )
         val event = BackgroundEventEnvelope(
+            notificationAction = null,
             backgroundLocation,
             null,
             null,
@@ -531,6 +532,7 @@ class NitroBackgroundLocationController private constructor(
             val region = regions[trigger.requestId] ?: continue
             val now = System.currentTimeMillis().toDouble()
             val event = BackgroundEventEnvelope(
+                notificationAction = null,
                 null,
                 GeofenceEvent(region, transition, null, now),
                 null,
@@ -612,6 +614,7 @@ class NitroBackgroundLocationController private constructor(
             System.currentTimeMillis().toDouble()
         )
         val event = BackgroundEventEnvelope(
+            notificationAction = null,
             null,
             null,
             detected,
@@ -678,6 +681,7 @@ class NitroBackgroundLocationController private constructor(
             serviceGeneration,
             onResult = { result ->
                 val event = BackgroundEventEnvelope(
+                    notificationAction = null,
                     null,
                     null,
                     null,
@@ -847,6 +851,18 @@ class NitroBackgroundLocationController private constructor(
             (options?.interval ?: 10_000.0).toLong(),
             expectedGeneration
         )
+    }
+
+    internal fun handleNotificationAction(actionId: String, serviceGeneration: Long) {
+        val accepted = synchronized(lifecycleLock) {
+            if (activeServiceGeneration() != serviceGeneration) return
+            val actions = getConfigOrNull()?.android?.foregroundService?.actions ?: return
+            if (actions.none { it.id == actionId }) return
+            val event = notificationActionEvent(actionId)
+            persistEventIfNeeded(event, runGeneration)
+            runGeneration to event
+        }
+        dispatchEvent(accepted.second, accepted.first, serviceGeneration)
     }
 
     private fun dispatchEvent(

@@ -27,6 +27,7 @@ extension NitroBackgroundLocation {
         to eventToken: String
     ) {
         let event = BackgroundEventEnvelope(
+            notificationAction: nil,
             location: nil,
             geofence: nil,
             activity: nil,

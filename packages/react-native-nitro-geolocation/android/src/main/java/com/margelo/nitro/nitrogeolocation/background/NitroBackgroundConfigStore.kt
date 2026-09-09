@@ -8,6 +8,7 @@ internal const val BACKGROUND_LOCATION_PREFS = "nitro_background_location"
 internal class NitroBackgroundConfigStore(private val prefs: SharedPreferences) {
     fun persist(options: BackgroundLocationOptions) {
         val service = options.android?.foregroundService
+        service?.let(::validateNotificationActions)
         prefs.edit()
             .putBoolean("configured", true)
             .putBoolean("running", prefs.getBoolean("running", false))
@@ -55,6 +56,7 @@ internal class NitroBackgroundConfigStore(private val prefs: SharedPreferences) 
             .putString("notificationIcon", service?.notificationIcon)
             .putString("notificationColor", service?.notificationColor)
             .putString("stopActionTitle", service?.stopActionTitle)
+            .putString("notificationActions", notificationActionsJson(service?.actions))
             .putString("geofencing", options.geofencing?.let(::geofencingOptionsJson))
             .putString("syncUrl", options.sync?.url)
             .putString("syncMethod", options.sync?.method?.name)
@@ -84,7 +86,8 @@ internal class NitroBackgroundConfigStore(private val prefs: SharedPreferences) 
             prefs.getString("notificationChannelDescription", null),
             prefs.getString("notificationIcon", null),
             prefs.getString("notificationColor", null),
-            prefs.getString("stopActionTitle", null)
+            prefs.getString("stopActionTitle", null),
+            notificationActionsFromJson(prefs.getString("notificationActions", null))
         )
         val sync = prefs.getString("syncUrl", null)?.let { url ->
             BackgroundHttpSyncOptions(

@@ -131,6 +131,19 @@ export interface AndroidForegroundServiceOptions {
   notificationColor?: string;
   /** Adds a native action that stops this tracking run. Omit to hide the action. */
   stopActionTitle?: string;
+  /** Custom Android notification buttons. At most 3 buttons including the stop action. */
+  actions?: AndroidNotificationAction[];
+}
+
+export interface AndroidNotificationAction {
+  /** Stable, non-empty identifier returned in notificationAction events. */
+  id: string;
+  /** Non-empty label displayed by Android. */
+  title: string;
+}
+
+export interface NotificationActionEvent {
+  actionId: string;
 }
 
 export type IOSBackgroundActivityType =
@@ -188,7 +201,8 @@ export type BackgroundEventType =
   | "providerChange"
   | "lifecycle"
   | "httpSync"
-  | "error";
+  | "error"
+  | "notificationAction";
 
 export interface BackgroundEventBase {
   id: string;
@@ -233,6 +247,7 @@ export interface BackgroundErrorEvent extends BackgroundEventBase {
 }
 
 export interface BackgroundEventEnvelope extends BackgroundEventBase {
+  notificationAction?: NotificationActionEvent;
   location?: BackgroundLocation;
   geofence?: GeofenceEvent;
   activity?: DetectedActivity;
@@ -243,6 +258,7 @@ export interface BackgroundEventEnvelope extends BackgroundEventBase {
 }
 
 export type BackgroundEvent =
+  | BackgroundNotificationActionEvent
   | BackgroundLocationEvent
   | BackgroundGeofenceEventEnvelope
   | BackgroundActivityEventEnvelope
@@ -250,6 +266,11 @@ export type BackgroundEvent =
   | BackgroundLifecycleEvent
   | BackgroundHttpSyncEvent
   | BackgroundErrorEvent;
+
+export interface BackgroundNotificationActionEvent extends BackgroundEventBase {
+  type: "notificationAction";
+  notificationAction: NotificationActionEvent;
+}
 
 export type GeofenceTransition = "enter" | "exit" | "dwell";
 

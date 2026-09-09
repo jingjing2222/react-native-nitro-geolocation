@@ -18,7 +18,7 @@ public extension AndroidForegroundServiceOptions {
   /**
    * Create a new instance of `AndroidForegroundServiceOptions`.
    */
-  init(notificationId: Double?, notificationTitle: String, notificationText: String, notificationChannelId: String?, notificationChannelName: String?, notificationChannelDescription: String?, notificationIcon: String?, notificationColor: String?, stopActionTitle: String?) {
+  init(notificationId: Double?, notificationTitle: String, notificationText: String, notificationChannelId: String?, notificationChannelName: String?, notificationChannelDescription: String?, notificationIcon: String?, notificationColor: String?, stopActionTitle: String?, actions: [AndroidNotificationAction]?) {
     self.init({ () -> bridge.std__optional_double_ in
       if let __unwrappedValue = notificationId {
         return bridge.create_std__optional_double_(__unwrappedValue)
@@ -61,6 +61,18 @@ public extension AndroidForegroundServiceOptions {
       } else {
         return .init()
       }
+    }(), { () -> bridge.std__optional_std__vector_AndroidNotificationAction__ in
+      if let __unwrappedValue = actions {
+        return bridge.create_std__optional_std__vector_AndroidNotificationAction__({ () -> bridge.std__vector_AndroidNotificationAction_ in
+          var __vector = bridge.create_std__vector_AndroidNotificationAction_(__unwrappedValue.count)
+          for __item in __unwrappedValue {
+            __vector.push_back(__item)
+          }
+          return __vector
+        }())
+      } else {
+        return .init()
+      }
     }())
   }
 
@@ -75,17 +87,17 @@ public extension AndroidForegroundServiceOptions {
       }
     }()
   }
-  
+
   @inline(__always)
   var notificationTitle: String {
     return String(self.__notificationTitle)
   }
-  
+
   @inline(__always)
   var notificationText: String {
     return String(self.__notificationText)
   }
-  
+
   @inline(__always)
   var notificationChannelId: String? {
     return { () -> String? in
@@ -97,7 +109,7 @@ public extension AndroidForegroundServiceOptions {
       }
     }()
   }
-  
+
   @inline(__always)
   var notificationChannelName: String? {
     return { () -> String? in
@@ -109,7 +121,7 @@ public extension AndroidForegroundServiceOptions {
       }
     }()
   }
-  
+
   @inline(__always)
   var notificationChannelDescription: String? {
     return { () -> String? in
@@ -121,7 +133,7 @@ public extension AndroidForegroundServiceOptions {
       }
     }()
   }
-  
+
   @inline(__always)
   var notificationIcon: String? {
     return { () -> String? in
@@ -133,7 +145,7 @@ public extension AndroidForegroundServiceOptions {
       }
     }()
   }
-  
+
   @inline(__always)
   var notificationColor: String? {
     return { () -> String? in
@@ -145,13 +157,25 @@ public extension AndroidForegroundServiceOptions {
       }
     }()
   }
-  
+
   @inline(__always)
   var stopActionTitle: String? {
     return { () -> String? in
       if bridge.has_value_std__optional_std__string_(self.__stopActionTitle) {
         let __unwrapped = bridge.get_std__optional_std__string_(self.__stopActionTitle)
         return String(__unwrapped)
+      } else {
+        return nil
+      }
+    }()
+  }
+
+  @inline(__always)
+  var actions: [AndroidNotificationAction]? {
+    return { () -> [AndroidNotificationAction]? in
+      if bridge.has_value_std__optional_std__vector_AndroidNotificationAction__(self.__actions) {
+        let __unwrapped = bridge.get_std__optional_std__vector_AndroidNotificationAction__(self.__actions)
+        return __unwrapped.map({ __item in __item })
       } else {
         return nil
       }

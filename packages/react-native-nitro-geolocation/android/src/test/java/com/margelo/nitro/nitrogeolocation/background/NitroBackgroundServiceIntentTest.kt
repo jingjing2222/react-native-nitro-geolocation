@@ -31,7 +31,8 @@ class NitroBackgroundServiceIntentTest {
             "Description",
             "location_icon",
             "#123456",
-            "Stop"
+            "Stop",
+            arrayOf(com.margelo.nitro.nitrogeolocation.AndroidNotificationAction("pause", "Pause"))
         )
 
         val intent = backgroundServiceIntent(context, 9L, options)

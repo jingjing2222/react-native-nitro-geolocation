@@ -10,8 +10,11 @@
 #include <fbjni/fbjni.h>
 #include "AndroidForegroundServiceOptions.hpp"
 
+#include "AndroidNotificationAction.hpp"
+#include "JAndroidNotificationAction.hpp"
 #include <optional>
 #include <string>
+#include <vector>
 
 namespace margelo::nitro::nitrogeolocation {
 
@@ -50,6 +53,8 @@ namespace margelo::nitro::nitrogeolocation {
       jni::local_ref<jni::JString> notificationColor = this->getFieldValue(fieldNotificationColor);
       static const auto fieldStopActionTitle = clazz->getField<jni::JString>("stopActionTitle");
       jni::local_ref<jni::JString> stopActionTitle = this->getFieldValue(fieldStopActionTitle);
+      static const auto fieldActions = clazz->getField<jni::JArrayClass<JAndroidNotificationAction>>("actions");
+      jni::local_ref<jni::JArrayClass<JAndroidNotificationAction>> actions = this->getFieldValue(fieldActions);
       return AndroidForegroundServiceOptions(
         notificationId != nullptr ? std::make_optional(notificationId->value()) : std::nullopt,
         notificationTitle->toStdString(),
@@ -59,7 +64,17 @@ namespace margelo::nitro::nitrogeolocation {
         notificationChannelDescription != nullptr ? std::make_optional(notificationChannelDescription->toStdString()) : std::nullopt,
         notificationIcon != nullptr ? std::make_optional(notificationIcon->toStdString()) : std::nullopt,
         notificationColor != nullptr ? std::make_optional(notificationColor->toStdString()) : std::nullopt,
-        stopActionTitle != nullptr ? std::make_optional(stopActionTitle->toStdString()) : std::nullopt
+        stopActionTitle != nullptr ? std::make_optional(stopActionTitle->toStdString()) : std::nullopt,
+        actions != nullptr ? std::make_optional([&](auto&& __input) {
+          size_t __size = __input->size();
+          std::vector<AndroidNotificationAction> __vector;
+          __vector.reserve(__size);
+          for (size_t __i = 0; __i < __size; __i++) {
+            auto __element = __input->getElement(__i);
+            __vector.push_back(__element->toCpp());
+          }
+          return __vector;
+        }(actions)) : std::nullopt
       );
     }
 
@@ -69,7 +84,7 @@ namespace margelo::nitro::nitrogeolocation {
      */
     [[maybe_unused]]
     static jni::local_ref<JAndroidForegroundServiceOptions::javaobject> fromCpp(const AndroidForegroundServiceOptions& value) {
-      using JSignature = JAndroidForegroundServiceOptions(jni::alias_ref<jni::JDouble>, jni::alias_ref<jni::JString>, jni::alias_ref<jni::JString>, jni::alias_ref<jni::JString>, jni::alias_ref<jni::JString>, jni::alias_ref<jni::JString>, jni::alias_ref<jni::JString>, jni::alias_ref<jni::JString>, jni::alias_ref<jni::JString>);
+      using JSignature = JAndroidForegroundServiceOptions(jni::alias_ref<jni::JDouble>, jni::alias_ref<jni::JString>, jni::alias_ref<jni::JString>, jni::alias_ref<jni::JString>, jni::alias_ref<jni::JString>, jni::alias_ref<jni::JString>, jni::alias_ref<jni::JString>, jni::alias_ref<jni::JString>, jni::alias_ref<jni::JString>, jni::alias_ref<jni::JArrayClass<JAndroidNotificationAction>>);
       static const auto clazz = javaClassStatic();
       static const auto create = clazz->getStaticMethod<JSignature>("fromCpp");
       return create(
@@ -82,7 +97,17 @@ namespace margelo::nitro::nitrogeolocation {
         value.notificationChannelDescription.has_value() ? jni::make_jstring(value.notificationChannelDescription.value()) : nullptr,
         value.notificationIcon.has_value() ? jni::make_jstring(value.notificationIcon.value()) : nullptr,
         value.notificationColor.has_value() ? jni::make_jstring(value.notificationColor.value()) : nullptr,
-        value.stopActionTitle.has_value() ? jni::make_jstring(value.stopActionTitle.value()) : nullptr
+        value.stopActionTitle.has_value() ? jni::make_jstring(value.stopActionTitle.value()) : nullptr,
+        value.actions.has_value() ? [&](auto&& __input) {
+          size_t __size = __input.size();
+          jni::local_ref<jni::JArrayClass<JAndroidNotificationAction>> __array = jni::JArrayClass<JAndroidNotificationAction>::newArray(__size);
+          for (size_t __i = 0; __i < __size; __i++) {
+            const auto& __element = __input[__i];
+            auto __elementJni = JAndroidNotificationAction::fromCpp(__element);
+            __array->setElement(__i, *__elementJni);
+          }
+          return __array;
+        }(value.actions.value()) : nullptr
       );
     }
   };

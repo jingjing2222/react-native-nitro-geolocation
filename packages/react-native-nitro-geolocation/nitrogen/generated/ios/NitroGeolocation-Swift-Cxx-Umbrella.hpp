@@ -28,6 +28,8 @@ namespace margelo::nitro::nitrogeolocation { enum class AndroidBackgroundProvide
 namespace margelo::nitro::nitrogeolocation { struct AndroidForegroundServiceOptions; }
 // Forward declaration of `AndroidGranularity` to properly resolve imports.
 namespace margelo::nitro::nitrogeolocation { enum class AndroidGranularity; }
+// Forward declaration of `AndroidNotificationAction` to properly resolve imports.
+namespace margelo::nitro::nitrogeolocation { struct AndroidNotificationAction; }
 // Forward declaration of `AuthorizationLevelInternal` to properly resolve imports.
 namespace margelo::nitro::nitrogeolocation { enum class AuthorizationLevelInternal; }
 // Forward declaration of `AuthorizationLevel` to properly resolve imports.
@@ -144,6 +146,8 @@ namespace margelo::nitro::nitrogeolocation { struct LocationSettingsOptions; }
 namespace margelo::nitro::nitrogeolocation { enum class LocationSettingsOutcome; }
 // Forward declaration of `LocationSettingsResult` to properly resolve imports.
 namespace margelo::nitro::nitrogeolocation { struct LocationSettingsResult; }
+// Forward declaration of `NotificationActionEvent` to properly resolve imports.
+namespace margelo::nitro::nitrogeolocation { struct NotificationActionEvent; }
 // Forward declaration of `PermissionStatus` to properly resolve imports.
 namespace margelo::nitro::nitrogeolocation { enum class PermissionStatus; }
 // Forward declaration of `ReverseGeocodedAddress` to properly resolve imports.
@@ -164,6 +168,7 @@ namespace margelo::nitro::nitrogeolocation { struct StoredBackgroundLocation; }
 #include "AndroidBackgroundProvider.hpp"
 #include "AndroidForegroundServiceOptions.hpp"
 #include "AndroidGranularity.hpp"
+#include "AndroidNotificationAction.hpp"
 #include "AuthorizationLevel.hpp"
 #include "AuthorizationLevelInternal.hpp"
 #include "BackgroundEventEnvelope.hpp"
@@ -222,6 +227,7 @@ namespace margelo::nitro::nitrogeolocation { struct StoredBackgroundLocation; }
 #include "LocationSettingsOptions.hpp"
 #include "LocationSettingsOutcome.hpp"
 #include "LocationSettingsResult.hpp"
+#include "NotificationActionEvent.hpp"
 #include "PermissionStatus.hpp"
 #include "ReverseGeocodedAddress.hpp"
 #include "StoredBackgroundEventEnvelope.hpp"

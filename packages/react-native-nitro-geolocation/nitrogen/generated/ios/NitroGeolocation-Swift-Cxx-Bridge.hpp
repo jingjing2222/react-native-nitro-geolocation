@@ -28,6 +28,8 @@ namespace margelo::nitro::nitrogeolocation { enum class AndroidBackgroundProvide
 namespace margelo::nitro::nitrogeolocation { struct AndroidForegroundServiceOptions; }
 // Forward declaration of `AndroidGranularity` to properly resolve imports.
 namespace margelo::nitro::nitrogeolocation { enum class AndroidGranularity; }
+// Forward declaration of `AndroidNotificationAction` to properly resolve imports.
+namespace margelo::nitro::nitrogeolocation { struct AndroidNotificationAction; }
 // Forward declaration of `AuthorizationLevelInternal` to properly resolve imports.
 namespace margelo::nitro::nitrogeolocation { enum class AuthorizationLevelInternal; }
 // Forward declaration of `AuthorizationLevel` to properly resolve imports.
@@ -130,6 +132,8 @@ namespace margelo::nitro::nitrogeolocation { enum class LocationProvider; }
 namespace margelo::nitro::nitrogeolocation { enum class LocationSettingsOutcome; }
 // Forward declaration of `LocationSettingsResult` to properly resolve imports.
 namespace margelo::nitro::nitrogeolocation { struct LocationSettingsResult; }
+// Forward declaration of `NotificationActionEvent` to properly resolve imports.
+namespace margelo::nitro::nitrogeolocation { struct NotificationActionEvent; }
 // Forward declaration of `PermissionStatus` to properly resolve imports.
 namespace margelo::nitro::nitrogeolocation { enum class PermissionStatus; }
 // Forward declaration of `ReverseGeocodedAddress` to properly resolve imports.
@@ -158,6 +162,7 @@ namespace NitroGeolocation { class HybridNitroGeolocationSpec_cxx; }
 #include "AndroidBackgroundProvider.hpp"
 #include "AndroidForegroundServiceOptions.hpp"
 #include "AndroidGranularity.hpp"
+#include "AndroidNotificationAction.hpp"
 #include "AuthorizationLevel.hpp"
 #include "AuthorizationLevelInternal.hpp"
 #include "BackgroundEventEnvelope.hpp"
@@ -209,6 +214,7 @@ namespace NitroGeolocation { class HybridNitroGeolocationSpec_cxx; }
 #include "LocationProviderUsed.hpp"
 #include "LocationSettingsOutcome.hpp"
 #include "LocationSettingsResult.hpp"
+#include "NotificationActionEvent.hpp"
 #include "PermissionStatus.hpp"
 #include "ReverseGeocodedAddress.hpp"
 #include "StoredBackgroundEventEnvelope.hpp"
@@ -1022,6 +1028,7 @@ namespace margelo::nitro::nitrogeolocation::bridge::swift {
   inline Func_void_CompatGeolocationResponse_Wrapper wrap_Func_void_CompatGeolocationResponse(Func_void_CompatGeolocationResponse value) noexcept {
     return Func_void_CompatGeolocationResponse_Wrapper(std::move(value));
   }
+
   // pragma MARK: std::function<void(const CompatGeolocationResponseWithMetadataInternal& /* position */)>
   /**
    * Specialized version of `std::function<void(const CompatGeolocationResponseWithMetadataInternal&)>`.
@@ -1153,6 +1160,32 @@ namespace margelo::nitro::nitrogeolocation::bridge::swift {
     return optional.has_value();
   }
   inline AndroidBackgroundProvider get_std__optional_AndroidBackgroundProvider_(const std::optional<AndroidBackgroundProvider>& optional) noexcept {
+    return optional.value();
+  }
+
+  // pragma MARK: std::vector<AndroidNotificationAction>
+  /**
+   * Specialized version of `std::vector<AndroidNotificationAction>`.
+   */
+  using std__vector_AndroidNotificationAction_ = std::vector<AndroidNotificationAction>;
+  inline std::vector<AndroidNotificationAction> create_std__vector_AndroidNotificationAction_(size_t size) noexcept {
+    std::vector<AndroidNotificationAction> vector;
+    vector.reserve(size);
+    return vector;
+  }
+
+  // pragma MARK: std::optional<std::vector<AndroidNotificationAction>>
+  /**
+   * Specialized version of `std::optional<std::vector<AndroidNotificationAction>>`.
+   */
+  using std__optional_std__vector_AndroidNotificationAction__ = std::optional<std::vector<AndroidNotificationAction>>;
+  inline std::optional<std::vector<AndroidNotificationAction>> create_std__optional_std__vector_AndroidNotificationAction__(const std::vector<AndroidNotificationAction>& value) noexcept {
+    return std::optional<std::vector<AndroidNotificationAction>>(value);
+  }
+  inline bool has_value_std__optional_std__vector_AndroidNotificationAction__(const std::optional<std::vector<AndroidNotificationAction>>& optional) noexcept {
+    return optional.has_value();
+  }
+  inline std::vector<AndroidNotificationAction> get_std__optional_std__vector_AndroidNotificationAction__(const std::optional<std::vector<AndroidNotificationAction>>& optional) noexcept {
     return optional.value();
   }
 
@@ -1564,6 +1597,21 @@ namespace margelo::nitro::nitrogeolocation::bridge::swift {
   Func_void_BackgroundLocationStatus create_Func_void_BackgroundLocationStatus(void* NON_NULL swiftClosureWrapper) noexcept;
   inline Func_void_BackgroundLocationStatus_Wrapper wrap_Func_void_BackgroundLocationStatus(Func_void_BackgroundLocationStatus value) noexcept {
     return Func_void_BackgroundLocationStatus_Wrapper(std::move(value));
+  }
+
+  // pragma MARK: std::optional<NotificationActionEvent>
+  /**
+   * Specialized version of `std::optional<NotificationActionEvent>`.
+   */
+  using std__optional_NotificationActionEvent_ = std::optional<NotificationActionEvent>;
+  inline std::optional<NotificationActionEvent> create_std__optional_NotificationActionEvent_(const NotificationActionEvent& value) noexcept {
+    return std::optional<NotificationActionEvent>(value);
+  }
+  inline bool has_value_std__optional_NotificationActionEvent_(const std::optional<NotificationActionEvent>& optional) noexcept {
+    return optional.has_value();
+  }
+  inline NotificationActionEvent get_std__optional_NotificationActionEvent_(const std::optional<NotificationActionEvent>& optional) noexcept {
+    return optional.value();
   }
 
   // pragma MARK: std::optional<DetectedActivity>

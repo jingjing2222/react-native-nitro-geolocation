@@ -40,6 +40,7 @@ extension NitroBackgroundLocation {
             let result = self.performSyncBatch(batch, runGeneration: runGeneration)
             let timestamp = Date().timeIntervalSince1970 * 1000
             let event = BackgroundEventEnvelope(
+                notificationAction: nil,
                 location: nil,
                 geofence: nil,
                 activity: nil,
