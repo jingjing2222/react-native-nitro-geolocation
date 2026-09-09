@@ -199,6 +199,7 @@ status=0
 
 set_location_enabled true
 run_maestro_flows "android location-enabled" "${ANDROID_FLOWS[@]}" || status=1
+"$SCRIPT_DIR/test-notification-actions-android.sh" || status=1
 run_maestro_flows \
   "android GPS stale-readiness setup" \
   gps-only-recipe-stale-readiness-prepare.yaml || status=1

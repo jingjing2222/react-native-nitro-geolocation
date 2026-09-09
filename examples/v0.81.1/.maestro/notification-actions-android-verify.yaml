@@ -1,0 +1,10 @@
+appId: nitrogeolocation.example
+---
+- extendedWaitUntil:
+    visible: ".*Live actions: checkpoint,pause.*"
+    timeout: 10000
+- tapOn:
+    id: "e2e-action-notification-action-verify"
+- extendedWaitUntil:
+    visible: ".*Notification proof: passed: live and stored payloads match; tracking remains active.*"
+    timeout: 10000

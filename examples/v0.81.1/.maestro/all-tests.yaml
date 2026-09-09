@@ -100,10 +100,6 @@ appId: nitrogeolocation.example
 - runFlow:
     when:
       platform: Android
-    file: notification-actions-android.yaml
-- runFlow:
-    when:
-      platform: Android
     file: mocked-metadata-android-true.yaml
 - runFlow:
     when:

@@ -1,8 +1,7 @@
 appId: nitrogeolocation.example
 ---
-# Real Android notification taps must preserve action identity through live JS
-# delivery and storage without stopping tracking. The native Stop button must
-# then stop the same service without a JavaScript stop call.
+# Prepare the app; test-notification-actions-android.sh taps the real system
+# notification between this flow and the verification flows.
 - launchApp:
     clearState: true
     permissions:
@@ -18,39 +17,5 @@ appId: nitrogeolocation.example
 - tapOn:
     id: "e2e-action-notification-action-prepare"
 - extendedWaitUntil:
-    visible: "Notification proof: ready"
+    visible: ".*Notification proof: ready.*"
     timeout: 20000
-- swipe:
-    start: "50%,0%"
-    end: "50%,80%"
-    duration: 500
-- tapOn: "Mark E2E checkpoint"
-- pressKey: Back
-- extendedWaitUntil:
-    visible: "Live actions: checkpoint"
-    timeout: 10000
-- swipe:
-    start: "50%,0%"
-    end: "50%,80%"
-    duration: 500
-- tapOn: "Pause E2E action"
-- pressKey: Back
-- extendedWaitUntil:
-    visible: "Live actions: checkpoint,pause"
-    timeout: 10000
-- tapOn:
-    id: "e2e-action-notification-action-verify"
-- extendedWaitUntil:
-    visible: "Notification proof: passed: live and stored payloads match; tracking remains active"
-    timeout: 10000
-- swipe:
-    start: "50%,0%"
-    end: "50%,80%"
-    duration: 500
-- tapOn: "Stop E2E tracking"
-- pressKey: Back
-- tapOn:
-    id: "e2e-action-notification-action-verify-stop"
-- extendedWaitUntil:
-    visible: "Native notification stop: passed"
-    timeout: 10000
