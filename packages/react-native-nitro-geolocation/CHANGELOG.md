@@ -1,5 +1,12 @@
 # react-native-nitro-geolocation
 
+## 2.0.0-rc.7
+
+### Minor Changes
+
+- 75054a6: Allow custom foreground service notification actions on Android. Actions survive service restoration and emit typed notificationAction events through onBackgroundEvent, stored event recovery, and Headless JS. Obsolete notifications cannot dispatch actions into a newer tracking run.
+- e44352e: Include app authorization scope in native provider status snapshots and events. `watchProviderStatus()` now reports permission-only changes, including iOS Always/WhenInUse transitions and Android location app-op changes, with existing token-based cleanup.
+
 ## 2.0.0-rc.6
 
 ### Patch Changes
