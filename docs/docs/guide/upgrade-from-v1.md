@@ -6,7 +6,7 @@ description: Migrate every React Native Nitro Geolocation 2.0 breaking change wi
 # Upgrade from 1.x to 2.0
 
 Use this guide for an app already running `react-native-nitro-geolocation` 1.x.
-The 2.0 release candidate has **eight** breaking contract changes. Apply them in
+The 2.0 release has **eight** breaking contract changes. Apply them in
 a branch and keep the currently deployed 1.x version available for rollback.
 
 ## Plan the upgrade
@@ -17,10 +17,10 @@ a branch and keep the currently deployed 1.x version available for rollback.
 3. Create or keep tests for permission denial, a fresh fix, cached reads,
    watches, Android settings resolution, and background event recovery used by
    your product.
-4. Pin the RC rather than following a moving tag:
+4. Pin an exact version rather than following a moving tag:
 
 ```bash
-yarn add react-native-nitro-modules@0.35.10 react-native-nitro-geolocation@2.0.0-rc.7
+yarn add react-native-nitro-modules@0.35.10 react-native-nitro-geolocation@2.0.0
 ```
 
 5. Reinstall pods, rebuild both native apps, and run

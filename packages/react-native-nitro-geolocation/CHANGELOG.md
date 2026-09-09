@@ -1,5 +1,114 @@
 # react-native-nitro-geolocation
 
+## 2.0.0
+
+### Major Changes
+
+- 8bbd6de: Replace API numeric location error codes with readable string discriminants while preserving numeric W3C codes under `/compat`.
+- cbb4d17: Remove the deprecated duplicate configuration alias. Use
+  `GeolocationConfiguration` instead.
+- 65e100e: Make Watch Manager v2 delivery semantics the default: native acquisition stays
+  shared, while each watch independently enforces its own callback
+  thresholds and cleanup lifecycle.
+- 189a661: Split last-known position reads into synchronous module-cache and asynchronous
+  platform-cache APIs. `getLastKnownPosition()` now returns the module cache
+  immediately, while `getLastKnownPositionAsync(options)` queries cache-only native
+  sources or filters observed Web and DevTools caches without starting a fresh
+  location request.
+- 3a54d84: Remove `enableHighAccuracy` from the API. Requests and Android
+  settings now use explicit platform `accuracy` presets, while the `/compat`
+  entry point retains `enableHighAccuracy` for drop-in compatibility.
+- c03b5ac: Route provider status and iOS location lifecycle changes through the unified
+  background event stream, retain lifecycle events when persistence is enabled,
+  and keep `onLocationLifecycleChange()` as a convenience filter.
+- 7587f42: Return a deterministic result from `requestLocationSettings()` with a
+  `satisfied`, `cancelled`, `unavailable`, or `activityMissing` outcome and the
+  latest provider status. Expected Android resolution outcomes no longer reject.
+
+### Minor Changes
+
+- 75054a6: Allow custom foreground service notification actions on Android. Actions survive service restoration and emit typed notificationAction events through onBackgroundEvent, stored event recovery, and Headless JS. Obsolete notifications cannot dispatch actions into a newer tracking run.
+- e44352e: Include app authorization scope in native provider status snapshots and events. `watchProviderStatus()` now reports permission-only changes, including iOS Always/WhenInUse transitions and Android location app-op changes, with existing token-based cleanup.
+- 03ea183: Add a copyable consumer E2E contract page and Maestro happy-path and
+  permission-denied flows, with guidance for release-build CI verification.
+- 374e40c: Add the read-only `nitro-geolocation doctor` command for checking React Native,
+  Nitro, Android permission, iOS usage-description, and New Architecture setup.
+- 7b6f4dc: Add `requestLocationSettingsDetailed()` as the explicit detailed-result API for
+  Android settings resolution while preserving the v2 deterministic method.
+- 4c24ecb: Add a read-only `getPermissionDetails()` API for normalized permission scope, accuracy, prompt capability, and settings guidance across native and Web.
+- 0b2ee95: Add request-scoped `AbortSignal` cancellation to `getCurrentPosition()` on Android, iOS, and web.
+- a56f54f: Add per-call opt-in mock and provider metadata to the Compat API without changing its default response shape.
+- 292d12b: Add optional response metadata for delivery source, age, horizontal
+  accuracy quality, and stale reasons without changing location acceptance
+  policy.
+- 791353b: Add native background reliability timestamps, run- and config-generation-aware serialized HTTP sync with bounded burst coalescing and automatic batch draining, long-run assertions, and a foreground/background/termination/reboot verification contract.
+- fe9521a: Add active watch snapshots and document native merge and cleanup semantics.
+- 91c342e: Add a read-only `getLocationReadiness()` diagnosis API with permission, provider, services, availability, cache, Play Services state, and remediation codes.
+- 8463f74: Add a cancellable provider status watcher that emits an initial snapshot and distinct readiness changes.
+- 441fb48: Add an iOS Core Location pause and app-triggered resume lifecycle listener.
+- 0e73c37: Add an opt-in Expo config plugin for foreground permissions and explicitly
+  enabled background location configuration.
+
+### Patch Changes
+
+- 301c4cc: Finish the 2.0 contract audit: evaluate iOS accuracy state on the main thread,
+  verify Android authorization scope changes against real permission snapshots,
+  document notification-action recovery and live-only provider events, and remove
+  remaining RC onboarding prose when the documentation switches to stable.
+  Refresh the Vitest and TOML-parser development dependencies to patched versions
+  and retain the separately documented upstream security findings.
+- f44252a: Add experimental React Native 0.87 Swift Package Manager support through a
+  checksum-verified binary package containing matching Nitro Modules and Nitro
+  Geolocation XCFrameworks, an autolinking plugin, and a consumer configuration
+  helper. Release validation now builds the package and links Debug and Release
+  RN 0.87 consumers before the artifact can gate a `latest` promotion.
+- 8aaca3b: Align the native and browser public API surfaces, export a named
+  `UseWatchPositionResult`, and keep background function declarations expressed
+  in public types instead of inferred Nitro spec signatures. Background provider
+  configuration now uses the same public `"android"` spelling as the root and
+  compat APIs while retaining `"android_platform"` only inside the Nitro bridge.
+  The `LocationErrorCode` type and `LocationErrorCodes` runtime constants now
+  have distinct names so type-only and value imports are unambiguous.
+- 782c0a2: Restructure the 2.0 release-candidate documentation around installation,
+  upgrade, background setup, release readiness, and support journeys without
+  changing package runtime behavior.
+- f81c255: Reduce location, heading, and background-processing hot-path work across
+  Android, iOS, and Web. Response conversion and metadata allocation are deferred
+  until delivery, sensor buffers and shared polling are reused, unchanged native
+  configuration and persistence writes are skipped, and batched background work
+  avoids repeated serialization, sync admission, and unindexed queue scans.
+- 95e7509: Require Rozenite 2.2 and upgrade the DevTools package and example host. Mock
+  watches now preserve the v2 per-subscription distance, Android interval,
+  `maxUpdates`, and idempotent cleanup contracts. The default Seoul fixture is
+  available immediately, and DevTools activation is released when the hook
+  unmounts.
+- d7c7825: Harden the 2.0 release candidate before freezing its stable contract:
+
+  - Keep iOS permission requests pending until a user decision and remove concurrent lazy watcher initialization.
+  - Settle cancelled requests even if native or browser startup/teardown throws; ignore results from stopped browser watches and prior React hook subscriptions.
+  - Implement Android foreground notification color and an optional native stop action scoped to its tracking run.
+  - Apply background accuracy/granularity, preserve storage and activity policies across Android restarts, and retain iOS accuracy in persisted configuration.
+  - Apply and restore Android geofencing defaults, and preserve a newer run's restart policy when an obsolete notification stop action arrives.
+  - Reject unsafe native numeric options and HTTP retry counts without integer-conversion crashes or retry overflow.
+  - RC contract correction: remove the never-implemented iOS deferred-delivery options from the public types and returned configuration. See the eighth item in the 2.0 migration guide.
+  - Fix stable documentation promotion, including RC navigation markers, the default 2.x routes, the 1.x archive, and redirects for existing /v2/ links.
+- ee6cd92: Fix prebuilt packaging and portable checksums, and stage stable releases behind a validated, commit-matched manual `latest` promotion.
+- f721c84: Ship the iOS SDK privacy manifest and document runtime data flows, retention,
+  permission ownership, dependency disclosure, SBOM generation, and license and
+  vulnerability review.
+- 5e65d79: Simplify API terminology across package documentation, migration tooling,
+  examples, and internal implementation names while keeping the Compat API
+  unchanged.
+- de8fc5c: Restore the combined 2.0 roadmap contracts after independent feature
+  integration, including web readiness and metadata behavior, native background
+  and location settings, and regenerated Nitro bindings.
+- 8a300af: Harden the v2 public type boundary by moving shared schemas out of Nitro
+  codegen declarations, keeping bridge envelopes internal, narrowing
+  operation-specific options, and exposing stable location availability reason
+  codes. The root, `/compat`, and `/background` entry points now export every
+  named supporting type referenced by their public contracts, while legacy
+  TypeScript `node` module resolution can resolve both public subpaths.
+
 ## 2.0.0-rc.7
 
 ### Minor Changes

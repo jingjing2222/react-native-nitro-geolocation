@@ -1,6 +1,6 @@
 ---
 title: Install and get a location
-description: Install the 2.0 RC with foreground-only permissions and render the first coordinates in a React Native app.
+description: Install the 2.0 with foreground-only permissions and render the first coordinates in a React Native app.
 ---
 
 # Install and get a location
@@ -15,18 +15,18 @@ active.
 Your native app must use React Native 0.75 or newer, New Architecture, and Nitro
 Modules. Expo apps need a development/custom native build; Expo Go is not
 supported. iOS uses CocoaPods. See [Release readiness](./release-readiness.md)
-before adopting the RC in a release branch.
+before adopting 2.0 in a release branch.
 
-## 1. Install an RC
+## 1. Install the stable release
 
-Use `@rc` to evaluate the latest release candidate:
+Install the stable release from npm:
 
 ```bash
-yarn add react-native-nitro-modules react-native-nitro-geolocation@rc
+yarn add react-native-nitro-modules react-native-nitro-geolocation@2.0.0
 ```
 
 ```bash
-npm install react-native-nitro-modules react-native-nitro-geolocation@rc
+npm install react-native-nitro-modules react-native-nitro-geolocation@2.0.0
 ```
 
 For reproducible testing and release approval, replace the moving tags with the
