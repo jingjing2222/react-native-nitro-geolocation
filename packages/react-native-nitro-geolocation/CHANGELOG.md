@@ -1,5 +1,16 @@
 # react-native-nitro-geolocation
 
+## 2.0.0-rc.8
+
+### Patch Changes
+
+- 301c4cc: Finish the 2.0 contract audit: evaluate iOS accuracy state on the main thread,
+  verify Android authorization scope changes against real permission snapshots,
+  document notification-action recovery and live-only provider events, and remove
+  remaining RC onboarding prose when the documentation switches to stable.
+  Refresh the Vitest and TOML-parser development dependencies to patched versions
+  and retain the separately documented upstream security findings.
+
 ## 2.0.0-rc.7
 
 ### Minor Changes
