@@ -89,11 +89,7 @@ extension NitroGeolocation {
     }
 
     internal func runLocationOperationOnMainSync(_ operation: () -> Void) {
-        if Thread.isMainThread {
-            operation()
-        } else {
-            DispatchQueue.main.sync(execute: operation)
-        }
+        withLocationStateOnMain(operation)
     }
 }
 

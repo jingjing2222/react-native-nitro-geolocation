@@ -131,3 +131,55 @@ test("stable synchronization updates actual readiness policy and package README"
     assert.equal(syncVersionedDocumentation(stable, "2.0.0", "2.0.0"), stable);
   }
 });
+
+test("stable onboarding describes the stable channel without changing RC sources", async () => {
+  const version = JSON.parse(
+    await readFile(
+      path.join(root, "packages/react-native-nitro-geolocation/package.json"),
+      "utf8"
+    )
+  ).version;
+
+  for (const file of [
+    "docs/docs/v2/index.md",
+    "docs/docs/v2/guide/index.md",
+    "docs/docs/v2/guide/quick-start.md",
+    "docs/docs/v2/guide/upgrade-from-v1.md"
+  ]) {
+    const source = await readFile(path.join(root, file), "utf8");
+    const stable = syncVersionedDocumentation(source, "2.0.0", version);
+    assert.doesNotMatch(stable, /\bRC\b|release[ -]candidates?|@rc/i, file);
+    assert.doesNotMatch(stable, /\/v2\//, file);
+    assert.equal(syncVersionedDocumentation(stable, "2.0.0", "2.0.0"), stable);
+    if (version.includes("-rc.")) {
+      assert.equal(
+        syncVersionedDocumentation(source, version, version),
+        source
+      );
+    }
+  }
+
+  const guide = syncVersionedDocumentation(
+    await readFile(path.join(root, "docs/docs/v2/guide/index.md"), "utf8"),
+    "2.0.0",
+    version
+  );
+  assert.match(
+    guide,
+    /Stable 2\.x releases preserve the documented public contracts/
+  );
+  assert.match(guide, /tested 1\.x rollback branch/);
+  const quickStart = syncVersionedDocumentation(
+    await readFile(
+      path.join(root, "docs/docs/v2/guide/quick-start.md"),
+      "utf8"
+    ),
+    "2.0.0",
+    version
+  );
+  assert.match(quickStart, /Install the stable release from npm:/);
+  assert.match(
+    quickStart,
+    /npm install react-native-nitro-modules react-native-nitro-geolocation\n/
+  );
+});

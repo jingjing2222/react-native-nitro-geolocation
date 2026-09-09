@@ -32,6 +32,7 @@ export const syncVersionedDocumentation = (text, version, previousVersion) => {
         "> **2.0:** this README documents the stable 2.x contracts. Use the\n> [2.x documentation](https://react-native-nitro-geolocation.pages.dev/) or\n> the [1.x archive](https://react-native-nitro-geolocation.pages.dev/v1/)."
       )
       .replaceAll("2.0 release candidate", "2.0 release")
+      .replaceAll("2.0 release-candidate", "2.0")
       .replaceAll(
         "release-candidate documentation; pin the RC before evaluating it",
         "2.x documentation; pin exact versions when validating your application"
@@ -43,6 +44,16 @@ export const syncVersionedDocumentation = (text, version, previousVersion) => {
       .replaceAll("Evaluate the RC for release", "Evaluate release readiness")
       .replaceAll("RC expectations", "Release expectations")
       .replaceAll("Install an exact RC", "Install an exact version")
+      .replaceAll("before adopting the RC", "before adopting 2.0")
+      .replaceAll("Install an RC", "Install the stable release")
+      .replaceAll(
+        "Use `@rc` to evaluate the latest release candidate:",
+        "Install the stable release from npm:"
+      )
+      .replace(
+        /Release candidates may still receive contract fixes before 2\.0 stable\. Do not\nsilently follow the moving `@rc` tag in a production lockfile\. Keep a tested\n1\.x rollback branch until the/,
+        "Stable 2.x releases preserve the documented public contracts. Pin exact\nversions in a production lockfile. Keep a tested 1.x rollback branch until the"
+      )
       .replaceAll(
         "Pin the RC rather than following a moving tag",
         "Pin an exact version rather than following a moving tag"

@@ -16,3 +16,4 @@ appId: nitrogeolocation.example
 - assertVisible: "Listener: listening"
 - assertVisible: "Services: enabled"
 - assertVisible: "Background: disabled"
+- assertVisible: "Authorization: whenInUse"

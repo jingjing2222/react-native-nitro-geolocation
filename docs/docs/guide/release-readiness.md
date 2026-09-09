@@ -65,7 +65,7 @@ the full peer range.
 | JavaScript toolchain | Node 24.18.0, Yarn 4.9.4 | CI and E2E bootstrap |
 | Expo config plugin | Expo 57 development dependency | Plugin/type tests; validate a real development build for the SDK used by your app |
 
-Reference last reviewed for `2.0.0-rc.6` on **2026-08-27**. Consult the current
+Reference last reviewed for `2.0.0-rc.6` on **2026-09-10**. Consult the current
 example package and E2E workflow if this page and the installed release differ.
 
 ## Known limits

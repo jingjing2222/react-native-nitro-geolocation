@@ -20,7 +20,7 @@ promise that every device, OS policy, or application integration is defect-free.
 | Public contract | iOS deferred delivery options were stored but never implemented | Remove them from the 2.0 public facade and snapshots, retain internal serialization compatibility, document the RC breaking correction and type-test it |
 | GA documentation | Versioning skipped navigation JSON, left RC prose, and retained 1.x as default | Rehearse a real 2.0 build in an isolated copy; verify current routes, legacy archive, and Cloudflare redirects |
 | CI decision | Two distinct jobs published the same `Unit Tests` name, allowing summary views to show success while Android was still running | Unique suite names and one compatibility-preserving aggregate gate; regression tests exercise success, failure, cancellation, and skip combinations |
-| Toolchain security | Production trees contained 117 advisory/deprecation records; an expanded development sweep found another critical XML-parser issue | Compatible refreshes leave 42 production-tree / 43 all-environment records, zero critical; [remaining upstream/toolchain risks](./release-audit-dependencies-2.0.0.md) are explicitly not marked fixed |
+| Toolchain security | Production trees contained 117 advisory/deprecation records; an expanded development sweep found another critical XML-parser issue | Earlier refreshes left 42 production-tree / 43 all-environment records. The 2026-09-10 registry recheck and Vitest/TOML fixes leave 43 / 44 records, zero critical; [remaining upstream/toolchain risks](./release-audit-dependencies-2.0.0.md), including another unpatched extract-zip advisory, are explicitly not marked fixed |
 
 ## Roadmap and compatibility review
 
@@ -41,15 +41,73 @@ native contract scripts, and the consumer E2E suites.
   main; this PR additionally fixes first-decision handling and watcher creation.
   A separate 1.x backport is not part of this 2.0 PR.
 - [#195](https://github.com/jingjing2222/react-native-nitro-geolocation/issues/195)
-  requests authorization change events. `watchProviderStatus` observes provider
-  readiness, not detailed permission scope. An explicit permission subscription
-  can be added compatibly in 2.x; it is not an implemented roadmap guarantee.
+  is implemented by [#211](https://github.com/jingjing2222/react-native-nitro-geolocation/pull/211):
+  native `watchProviderStatus` snapshots include optional `authorizationStatus`
+  and deliver permission-only changes. Web and older stored snapshots omit this
+  field. Android can terminate the app on revocation, so applications must
+  subscribe again on launch; no uninterrupted revocation callback is promised.
 - [#207](https://github.com/jingjing2222/react-native-nitro-geolocation/issues/207)
-  requests arbitrary notification actions. This PR fixes the existing stop action;
-  arbitrary actions and JS dispatch remain a separate additive feature.
+  is implemented by [#212](https://github.com/jingjing2222/react-native-nitro-geolocation/pull/212):
+  Android notification actions emit `notificationAction` events through live
+  listeners, persisted recovery when enabled, and Headless JS. Applications
+  decide each action's behavior. The total is limited to three buttons including
+  the native stop action; iOS and web do not provide this feature.
 - Native peer ranges declare more combinations than the continuously tested
   RN 0.81.1 / Nitro 0.35.10 reference stack. RN 0.87 SwiftPM with Nitro 0.37.1
   remains experimental; no broader test coverage is implied.
+
+## Final documentation and roadmap review — 2026-09-10
+
+The follow-up review integrates `75054a6` (`2.0.0-rc.6`) and includes the
+authorization and notification-action additions above. The validation ledger
+below records the earlier audit; it is not a claim that its device runs were
+repeated after every follow-up change. Final merged-code checks belong in the
+follow-up PR and release PR.
+
+The remaining iOS accuracy lookup evaluated `self.locationManager` on the
+Promise worker before its helper dispatched to main. The follow-up defers the
+property evaluation itself. Its native regression calls the production helper
+from worker threads, checks the property getter and Core Location read execute
+on main, and exercises 2,000 concurrent state/permission operations and
+reentrant callbacks. The focused contract also passes Thread Sanitizer.
+
+Android authorization regression coverage now reads production provider
+snapshots from denied, approximate-only foreground, and background permission
+states. It drives `MODE_FOREGROUND`/`MODE_ALLOWED` changes on the existing
+location AppOp and verifies `whenInUse` → `always` → `whenInUse` delivery without
+a provider broadcast, plus the pre-Android-10 mapping. The suggested separate
+`OPSTR_BACKGROUND_LOCATION` does not exist in the
+[Android AppOps API](https://developer.android.com/reference/android/app/AppOpsManager);
+no unsupported operation constant was added.
+
+| Roadmap #98 scope | Implementation and review evidence |
+| --- | --- |
+| Readiness, detailed permissions, Android settings | Public `getLocationReadiness`, `getPermissionDetails`, and `requestLocationSettingsDetailed`; API tests and documented result/remediation types |
+| Cancellation, provider observation, watch introspection | `CurrentPositionOptions.signal`, `watchProviderStatus`, and `getActiveWatches`; cancellation/lifecycle tests, native watcher contracts, and watch-observability guide |
+| Background reliability and iOS lifecycle | Reliability contract and long-run matrix; `onLocationLifecycleChange` filters the unified stream; lifecycle persistence and delegate contracts |
+| Quality and integrity metadata | `LocationMetadata` and opt-in compat metadata; metadata tests and consumer type contracts preserve the default compat shape |
+| Offline recipes and consumer verification | GPS/offline recipe, consumer E2E contract kit, and compatibility matrix document the supported boundaries |
+| Install doctor and Expo opt-in plugin | Packaged doctor executable, `app.plugin.js`, doctor/plugin tests, and Expo development-build guide; no postinstall mutation |
+| Privacy and compliance | Privacy guide, native privacy manifest, dependency disclosure, and separate dependency audit with unresolved findings |
+| Selected 2.0 breaking changes | Main errors, removed configuration alias, explicit accuracy, split last-known reads, deterministic settings, per-watch semantics, and unified events are represented in public APIs, migration docs, and type/native contracts |
+| Release preparation | Versioned 1.x archive and mirrored 2.x sources, experimental SwiftPM guide, and RC publication history; stable publication and prebuilt verification remain separate release steps |
+
+[Roadmap #92](https://github.com/jingjing2222/react-native-nitro-geolocation/issues/92)
+contains historical claims that should not be used as the 2.0 contract. Its
+unchecked Expo guidance is now covered by the development-build guide and
+opt-in plugin. Its initial exclusion of `/compat` web support was superseded by
+the browser fallback. Its completed deferred-updates item was inaccurate:
+those options never reached Core Location and were removed from the 2.0 public
+facade, as documented in the eighth migration item. No selected #98 feature was
+found missing in this source and documentation review.
+
+The final documentation correction also covers `notificationAction` in
+exhaustive event handling and stored recovery. Provider snapshots remain
+live-only; migration instructions must not tell consumers to drain a stored
+provider event. Stable-version synchronization now updates onboarding policy
+and installation prose as well as commands, while leaving RC documentation
+unchanged until versioning exits prerelease mode. The 1.x archive remains
+untouched.
 
 ## Repository-control preflight
 
@@ -108,6 +166,6 @@ Completed locally during implementation:
    reduced/approximate permissions, and real heading/provider selection remain
    device acceptance gates. Simulator success does not replace these checks.
 6. Review the separate dependency audit before treating the contributor/CI
-   environment as security-cleared; its remaining 43 records are not suppressed.
+   environment as security-cleared; its remaining 44 records are not suppressed.
 
 No npm publication or `latest` promotion is performed by this audit PR.
