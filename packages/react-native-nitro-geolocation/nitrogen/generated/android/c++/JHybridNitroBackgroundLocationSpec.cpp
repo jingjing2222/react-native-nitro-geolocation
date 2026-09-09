@@ -53,6 +53,8 @@ namespace margelo::nitro::nitrogeolocation { struct BackgroundLocationStatus; }
 namespace margelo::nitro::nitrogeolocation { enum class BackgroundLocationState; }
 // Forward declaration of `LocationProviderStatus` to properly resolve imports.
 namespace margelo::nitro::nitrogeolocation { struct LocationProviderStatus; }
+// Forward declaration of `LocationAuthorizationStatus` to properly resolve imports.
+namespace margelo::nitro::nitrogeolocation { enum class LocationAuthorizationStatus; }
 // Forward declaration of `AndroidBackgroundLocationStatus` to properly resolve imports.
 namespace margelo::nitro::nitrogeolocation { struct AndroidBackgroundLocationStatus; }
 // Forward declaration of `IOSBackgroundLocationStatus` to properly resolve imports.
@@ -155,6 +157,8 @@ namespace margelo::nitro::nitrogeolocation { struct GetStoredBackgroundEventsOpt
 #include "JBackgroundLocationState.hpp"
 #include "LocationProviderStatus.hpp"
 #include "JLocationProviderStatus.hpp"
+#include "LocationAuthorizationStatus.hpp"
+#include "JLocationAuthorizationStatus.hpp"
 #include "AndroidBackgroundLocationStatus.hpp"
 #include "JAndroidBackgroundLocationStatus.hpp"
 #include "IOSBackgroundLocationStatus.hpp"

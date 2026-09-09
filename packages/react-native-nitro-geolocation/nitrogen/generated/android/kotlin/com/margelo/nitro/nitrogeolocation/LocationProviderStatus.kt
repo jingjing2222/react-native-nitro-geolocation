@@ -20,6 +20,9 @@ import java.util.Objects
 data class LocationProviderStatus(
   @DoNotStrip
   @Keep
+  val authorizationStatus: LocationAuthorizationStatus?,
+  @DoNotStrip
+  @Keep
   val locationServicesEnabled: Boolean,
   @DoNotStrip
   @Keep
@@ -45,7 +48,8 @@ data class LocationProviderStatus(
   override fun equals(other: Any?): Boolean {
     if (this === other) return true
     if (other !is LocationProviderStatus) return false
-    return Objects.deepEquals(this.locationServicesEnabled, other.locationServicesEnabled)
+    return Objects.deepEquals(this.authorizationStatus, other.authorizationStatus)
+      && Objects.deepEquals(this.locationServicesEnabled, other.locationServicesEnabled)
       && Objects.deepEquals(this.backgroundModeEnabled, other.backgroundModeEnabled)
       && Objects.deepEquals(this.gpsAvailable, other.gpsAvailable)
       && Objects.deepEquals(this.networkAvailable, other.networkAvailable)
@@ -56,6 +60,7 @@ data class LocationProviderStatus(
 
   override fun hashCode(): Int {
     return arrayOf<Any?>(
+      authorizationStatus,
       locationServicesEnabled,
       backgroundModeEnabled,
       gpsAvailable,
@@ -74,8 +79,8 @@ data class LocationProviderStatus(
     @Keep
     @Suppress("unused")
     @JvmStatic
-    private fun fromCpp(locationServicesEnabled: Boolean, backgroundModeEnabled: Boolean, gpsAvailable: Boolean?, networkAvailable: Boolean?, passiveAvailable: Boolean?, googlePlayServicesAvailable: Boolean?, googleLocationAccuracyEnabled: Boolean?): LocationProviderStatus {
-      return LocationProviderStatus(locationServicesEnabled, backgroundModeEnabled, gpsAvailable, networkAvailable, passiveAvailable, googlePlayServicesAvailable, googleLocationAccuracyEnabled)
+    private fun fromCpp(authorizationStatus: LocationAuthorizationStatus?, locationServicesEnabled: Boolean, backgroundModeEnabled: Boolean, gpsAvailable: Boolean?, networkAvailable: Boolean?, passiveAvailable: Boolean?, googlePlayServicesAvailable: Boolean?, googleLocationAccuracyEnabled: Boolean?): LocationProviderStatus {
+      return LocationProviderStatus(authorizationStatus, locationServicesEnabled, backgroundModeEnabled, gpsAvailable, networkAvailable, passiveAvailable, googlePlayServicesAvailable, googleLocationAccuracyEnabled)
     }
   }
 }

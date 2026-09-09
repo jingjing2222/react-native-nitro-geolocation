@@ -37,6 +37,7 @@ class UnifiedBackgroundEventsTest {
     @Test
     fun `provider status becomes a typed unified event`() {
         val status = LocationProviderStatus(
+            authorizationStatus = com.margelo.nitro.nitrogeolocation.LocationAuthorizationStatus.ALWAYS,
             locationServicesEnabled = true,
             backgroundModeEnabled = false,
             gpsAvailable = true,
@@ -280,6 +281,7 @@ class UnifiedBackgroundEventsTest {
     @Test
     fun `failed refresh cannot discard a snapshot completed during startup`() {
         val initialStatus = LocationProviderStatus(
+            authorizationStatus = null,
             locationServicesEnabled = true,
             backgroundModeEnabled = false,
             gpsAvailable = true,
@@ -346,6 +348,7 @@ class UnifiedBackgroundEventsTest {
     @Test
     fun `concurrent failed refreshes cannot leave a phantom generation`() {
         val initialStatus = LocationProviderStatus(
+            authorizationStatus = null,
             locationServicesEnabled = true,
             backgroundModeEnabled = false,
             gpsAvailable = true,

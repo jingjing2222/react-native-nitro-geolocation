@@ -15,6 +15,7 @@ import type {
   IOSAccuracyPreset as SchemaIOSAccuracyPreset,
   IOSActivityType as SchemaIOSActivityType,
   LocationAccuracyOptions as SchemaLocationAccuracyOptions,
+  LocationAuthorizationStatus as SchemaLocationAuthorizationStatus,
   LocationProviderStatus as SchemaLocationProviderStatus,
   LocationProviderUsed as SchemaLocationProviderUsed,
   LocationRequestOptions as SchemaLocationRequestOptions,
@@ -58,6 +59,7 @@ export type GeolocationResponse = SchemaGeolocationResponse & {
   metadata?: LocationMetadata;
 };
 export type LocationProviderStatus = SchemaLocationProviderStatus;
+export type LocationAuthorizationStatus = SchemaLocationAuthorizationStatus;
 export type LocationSettingsOutcome = SchemaLocationSettingsOutcome;
 export type LocationSettingsResult = SchemaLocationSettingsResult;
 export type NullableDouble = SchemaNullableDouble;

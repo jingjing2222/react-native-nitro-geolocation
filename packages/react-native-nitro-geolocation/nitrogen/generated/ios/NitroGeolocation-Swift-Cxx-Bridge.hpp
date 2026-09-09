@@ -108,6 +108,8 @@ namespace margelo::nitro::nitrogeolocation { struct IOSBackgroundLocationOptions
 namespace margelo::nitro::nitrogeolocation { struct IOSBackgroundLocationStatus; }
 // Forward declaration of `LocationAccuracyOptions` to properly resolve imports.
 namespace margelo::nitro::nitrogeolocation { struct LocationAccuracyOptions; }
+// Forward declaration of `LocationAuthorizationStatus` to properly resolve imports.
+namespace margelo::nitro::nitrogeolocation { enum class LocationAuthorizationStatus; }
 // Forward declaration of `LocationAvailability` to properly resolve imports.
 namespace margelo::nitro::nitrogeolocation { struct LocationAvailability; }
 // Forward declaration of `LocationErrorCode` to properly resolve imports.
@@ -198,6 +200,7 @@ namespace NitroGeolocation { class HybridNitroGeolocationSpec_cxx; }
 #include "IOSBackgroundLocationOptions.hpp"
 #include "IOSBackgroundLocationStatus.hpp"
 #include "LocationAccuracyOptions.hpp"
+#include "LocationAuthorizationStatus.hpp"
 #include "LocationAvailability.hpp"
 #include "LocationError.hpp"
 #include "LocationErrorCode.hpp"
@@ -402,6 +405,21 @@ namespace margelo::nitro::nitrogeolocation::bridge::swift {
   Func_void_bool create_Func_void_bool(void* NON_NULL swiftClosureWrapper) noexcept;
   inline Func_void_bool_Wrapper wrap_Func_void_bool(Func_void_bool value) noexcept {
     return Func_void_bool_Wrapper(std::move(value));
+  }
+
+  // pragma MARK: std::optional<LocationAuthorizationStatus>
+  /**
+   * Specialized version of `std::optional<LocationAuthorizationStatus>`.
+   */
+  using std__optional_LocationAuthorizationStatus_ = std::optional<LocationAuthorizationStatus>;
+  inline std::optional<LocationAuthorizationStatus> create_std__optional_LocationAuthorizationStatus_(const LocationAuthorizationStatus& value) noexcept {
+    return std::optional<LocationAuthorizationStatus>(value);
+  }
+  inline bool has_value_std__optional_LocationAuthorizationStatus_(const std::optional<LocationAuthorizationStatus>& optional) noexcept {
+    return optional.has_value();
+  }
+  inline LocationAuthorizationStatus get_std__optional_LocationAuthorizationStatus_(const std::optional<LocationAuthorizationStatus>& optional) noexcept {
+    return optional.value();
   }
 
   // pragma MARK: std::shared_ptr<Promise<LocationProviderStatus>>
@@ -1022,6 +1040,7 @@ namespace margelo::nitro::nitrogeolocation::bridge::swift {
   inline Func_void_CompatGeolocationResponse_Wrapper wrap_Func_void_CompatGeolocationResponse(Func_void_CompatGeolocationResponse value) noexcept {
     return Func_void_CompatGeolocationResponse_Wrapper(std::move(value));
   }
+
   // pragma MARK: std::function<void(const CompatGeolocationResponseWithMetadataInternal& /* position */)>
   /**
    * Specialized version of `std::function<void(const CompatGeolocationResponseWithMetadataInternal&)>`.

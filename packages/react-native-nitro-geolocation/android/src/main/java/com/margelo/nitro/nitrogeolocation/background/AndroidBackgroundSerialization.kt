@@ -44,6 +44,12 @@ internal fun LocationProviderStatus.toJson(): JSONObject {
         .put("passiveAvailable", passiveAvailable)
         .put("googlePlayServicesAvailable", googlePlayServicesAvailable)
         .put("googleLocationAccuracyEnabled", googleLocationAccuracyEnabled)
+        .put("authorizationStatus", authorizationStatus?.let {
+            when (it) {
+                LocationAuthorizationStatus.WHENINUSE -> "whenInUse"
+                else -> it.name.lowercase()
+            }
+        })
 }
 
 internal fun LocationLifecycleEvent.toJson(): JSONObject {

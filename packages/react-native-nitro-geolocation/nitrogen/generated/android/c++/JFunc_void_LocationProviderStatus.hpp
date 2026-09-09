@@ -14,7 +14,9 @@
 #include <functional>
 #include <NitroModules/JNICallable.hpp>
 #include "JLocationProviderStatus.hpp"
+#include "LocationAuthorizationStatus.hpp"
 #include <optional>
+#include "JLocationAuthorizationStatus.hpp"
 
 namespace margelo::nitro::nitrogeolocation {
 
