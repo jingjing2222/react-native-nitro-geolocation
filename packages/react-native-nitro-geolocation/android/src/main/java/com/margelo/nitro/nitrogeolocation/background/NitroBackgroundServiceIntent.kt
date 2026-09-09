@@ -16,6 +16,7 @@ private const val EXTRA_NOTIFICATION_CHANNEL_DESCRIPTION = "nitro.background.not
 private const val EXTRA_NOTIFICATION_ICON = "nitro.background.notificationIcon"
 private const val EXTRA_NOTIFICATION_COLOR = "nitro.background.notificationColor"
 private const val EXTRA_STOP_ACTION_TITLE = "nitro.background.stopActionTitle"
+private const val EXTRA_NOTIFICATION_ACTIONS = "nitro.background.actions"
 
 internal fun backgroundServiceIntent(
     context: Context,
@@ -33,6 +34,7 @@ internal fun backgroundServiceIntent(
         putExtra(EXTRA_NOTIFICATION_ICON, options.notificationIcon)
         putExtra(EXTRA_NOTIFICATION_COLOR, options.notificationColor)
         putExtra(EXTRA_STOP_ACTION_TITLE, options.stopActionTitle)
+        putExtra(EXTRA_NOTIFICATION_ACTIONS, notificationActionsJson(options.actions))
     }
 
 internal fun Intent.backgroundServiceGeneration(): Long? = takeIf {
@@ -56,7 +58,8 @@ internal fun Intent.backgroundNotificationOptions(): AndroidForegroundServiceOpt
         getStringExtra(EXTRA_NOTIFICATION_CHANNEL_DESCRIPTION),
         getStringExtra(EXTRA_NOTIFICATION_ICON),
         getStringExtra(EXTRA_NOTIFICATION_COLOR),
-        getStringExtra(EXTRA_STOP_ACTION_TITLE)
+        getStringExtra(EXTRA_STOP_ACTION_TITLE),
+        notificationActionsFromJson(getStringExtra(EXTRA_NOTIFICATION_ACTIONS))
     )
 }
 
@@ -71,6 +74,7 @@ internal fun fallbackBackgroundNotificationOptions() = AndroidForegroundServiceO
     "Location tracking is active",
     "nitro-background-location",
     "Background Location",
+    null,
     null,
     null,
     null,

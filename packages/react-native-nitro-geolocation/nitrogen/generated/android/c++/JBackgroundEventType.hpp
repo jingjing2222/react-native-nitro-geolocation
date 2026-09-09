@@ -63,6 +63,9 @@ namespace margelo::nitro::nitrogeolocation {
         case BackgroundEventType::HTTPSYNC:
           static const auto fieldHTTPSYNC = clazz->getStaticField<JBackgroundEventType>("HTTPSYNC");
           return clazz->getStaticFieldValue(fieldHTTPSYNC);
+        case BackgroundEventType::NOTIFICATIONACTION:
+          static const auto fieldNOTIFICATIONACTION = clazz->getStaticField<JBackgroundEventType>("NOTIFICATIONACTION");
+          return clazz->getStaticFieldValue(fieldNOTIFICATIONACTION);
         default:
           std::string stringValue = std::to_string(static_cast<int>(value));
           throw std::invalid_argument("Invalid enum value (" + stringValue + "!");

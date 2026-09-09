@@ -113,6 +113,7 @@ class NitroBackgroundStoreTest {
     )
 
     private fun event(id: String, location: BackgroundLocation) = BackgroundEventEnvelope(
+        notificationAction = null,
         location,
         null,
         null,

@@ -18,6 +18,10 @@ The current release line adds foreground web support through both the package
 import and `/compat`, plus a native Background Location API for tracking, geofencing,
 storage recovery, Headless JS, and HTTP sync.
 
+In 2.0, Android foreground notifications accept custom `actions: [{ id, title }]`.
+Handle taps with `onBackgroundEvent()` or your Headless JS task using the
+`notificationAction` event and its `notificationAction.actionId` payload.
+
 In 2.0, `watchProviderStatus(callback)` also reports native authorization changes
 through `status.authorizationStatus` (`always`, `whenInUse`, `denied`,
 `restricted`, or `undetermined`). Clean up with `unwatch(token)`.

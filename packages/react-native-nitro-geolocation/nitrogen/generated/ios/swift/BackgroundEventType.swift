@@ -31,6 +31,8 @@ public extension BackgroundEventType {
         self = .lifecycle
       case "httpSync":
         self = .httpsync
+      case "notificationAction":
+        self = .notificationaction
       default:
         return nil
     }
@@ -55,6 +57,8 @@ public extension BackgroundEventType {
         return "lifecycle"
       case .httpsync:
         return "httpSync"
+      case .notificationaction:
+        return "notificationAction"
     }
   }
 }

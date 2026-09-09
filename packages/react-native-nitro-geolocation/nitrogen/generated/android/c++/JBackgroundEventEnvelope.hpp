@@ -39,6 +39,7 @@
 #include "JLocationLifecycleState.hpp"
 #include "JLocationProviderStatus.hpp"
 #include "JLocationProviderUsed.hpp"
+#include "JNotificationActionEvent.hpp"
 #include "JNullableDouble.hpp"
 #include "JVariant_NullType_Boolean_String_Double.hpp"
 #include "LocationAuthorizationStatus.hpp"
@@ -48,6 +49,7 @@
 #include "LocationLifecycleState.hpp"
 #include "LocationProviderStatus.hpp"
 #include "LocationProviderUsed.hpp"
+#include "NotificationActionEvent.hpp"
 #include <NitroModules/JNull.hpp>
 #include <NitroModules/Null.hpp>
 #include <optional>
@@ -75,6 +77,8 @@ namespace margelo::nitro::nitrogeolocation {
     [[nodiscard]]
     BackgroundEventEnvelope toCpp() const {
       static const auto clazz = javaClassStatic();
+      static const auto fieldNotificationAction = clazz->getField<JNotificationActionEvent>("notificationAction");
+      jni::local_ref<JNotificationActionEvent> notificationAction = this->getFieldValue(fieldNotificationAction);
       static const auto fieldLocation = clazz->getField<JBackgroundLocation>("location");
       jni::local_ref<JBackgroundLocation> location = this->getFieldValue(fieldLocation);
       static const auto fieldGeofence = clazz->getField<JGeofenceEvent>("geofence");
@@ -98,6 +102,7 @@ namespace margelo::nitro::nitrogeolocation {
       static const auto fieldDeliveredToJS = clazz->getField<jboolean>("deliveredToJS");
       jboolean deliveredToJS = this->getFieldValue(fieldDeliveredToJS);
       return BackgroundEventEnvelope(
+        notificationAction != nullptr ? std::make_optional(notificationAction->toCpp()) : std::nullopt,
         location != nullptr ? std::make_optional(location->toCpp()) : std::nullopt,
         geofence != nullptr ? std::make_optional(geofence->toCpp()) : std::nullopt,
         activity != nullptr ? std::make_optional(activity->toCpp()) : std::nullopt,
@@ -118,11 +123,12 @@ namespace margelo::nitro::nitrogeolocation {
      */
     [[maybe_unused]]
     static jni::local_ref<JBackgroundEventEnvelope::javaobject> fromCpp(const BackgroundEventEnvelope& value) {
-      using JSignature = JBackgroundEventEnvelope(jni::alias_ref<JBackgroundLocation>, jni::alias_ref<JGeofenceEvent>, jni::alias_ref<JDetectedActivity>, jni::alias_ref<JLocationProviderStatus>, jni::alias_ref<JLocationLifecycleEvent>, jni::alias_ref<JBackgroundHttpSyncResult>, jni::alias_ref<JLocationError>, jni::alias_ref<jni::JString>, jni::alias_ref<JBackgroundEventType>, double, jboolean);
+      using JSignature = JBackgroundEventEnvelope(jni::alias_ref<JNotificationActionEvent>, jni::alias_ref<JBackgroundLocation>, jni::alias_ref<JGeofenceEvent>, jni::alias_ref<JDetectedActivity>, jni::alias_ref<JLocationProviderStatus>, jni::alias_ref<JLocationLifecycleEvent>, jni::alias_ref<JBackgroundHttpSyncResult>, jni::alias_ref<JLocationError>, jni::alias_ref<jni::JString>, jni::alias_ref<JBackgroundEventType>, double, jboolean);
       static const auto clazz = javaClassStatic();
       static const auto create = clazz->getStaticMethod<JSignature>("fromCpp");
       return create(
         clazz,
+        value.notificationAction.has_value() ? JNotificationActionEvent::fromCpp(value.notificationAction.value()) : nullptr,
         value.location.has_value() ? JBackgroundLocation::fromCpp(value.location.value()) : nullptr,
         value.geofence.has_value() ? JGeofenceEvent::fromCpp(value.geofence.value()) : nullptr,
         value.activity.has_value() ? JDetectedActivity::fromCpp(value.activity.value()) : nullptr,

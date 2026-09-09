@@ -28,10 +28,13 @@
 #error NitroModules cannot be found! Are you sure you installed NitroModules properly?
 #endif
 
-
+// Forward declaration of `AndroidNotificationAction` to properly resolve imports.
+namespace margelo::nitro::nitrogeolocation { struct AndroidNotificationAction; }
 
 #include <optional>
 #include <string>
+#include "AndroidNotificationAction.hpp"
+#include <vector>
 
 namespace margelo::nitro::nitrogeolocation {
 
@@ -49,10 +52,11 @@ namespace margelo::nitro::nitrogeolocation {
     std::optional<std::string> notificationIcon     SWIFT_PRIVATE;
     std::optional<std::string> notificationColor     SWIFT_PRIVATE;
     std::optional<std::string> stopActionTitle     SWIFT_PRIVATE;
+    std::optional<std::vector<AndroidNotificationAction>> actions     SWIFT_PRIVATE;
 
   public:
     AndroidForegroundServiceOptions() = default;
-    explicit AndroidForegroundServiceOptions(std::optional<double> notificationId, std::string notificationTitle, std::string notificationText, std::optional<std::string> notificationChannelId, std::optional<std::string> notificationChannelName, std::optional<std::string> notificationChannelDescription, std::optional<std::string> notificationIcon, std::optional<std::string> notificationColor, std::optional<std::string> stopActionTitle): notificationId(notificationId), notificationTitle(notificationTitle), notificationText(notificationText), notificationChannelId(notificationChannelId), notificationChannelName(notificationChannelName), notificationChannelDescription(notificationChannelDescription), notificationIcon(notificationIcon), notificationColor(notificationColor), stopActionTitle(stopActionTitle) {}
+    explicit AndroidForegroundServiceOptions(std::optional<double> notificationId, std::string notificationTitle, std::string notificationText, std::optional<std::string> notificationChannelId, std::optional<std::string> notificationChannelName, std::optional<std::string> notificationChannelDescription, std::optional<std::string> notificationIcon, std::optional<std::string> notificationColor, std::optional<std::string> stopActionTitle, std::optional<std::vector<AndroidNotificationAction>> actions): notificationId(notificationId), notificationTitle(notificationTitle), notificationText(notificationText), notificationChannelId(notificationChannelId), notificationChannelName(notificationChannelName), notificationChannelDescription(notificationChannelDescription), notificationIcon(notificationIcon), notificationColor(notificationColor), stopActionTitle(stopActionTitle), actions(actions) {}
 
   public:
     friend bool operator==(const AndroidForegroundServiceOptions& lhs, const AndroidForegroundServiceOptions& rhs) = default;
@@ -76,7 +80,8 @@ namespace margelo::nitro {
         JSIConverter<std::optional<std::string>>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "notificationChannelDescription"))),
         JSIConverter<std::optional<std::string>>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "notificationIcon"))),
         JSIConverter<std::optional<std::string>>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "notificationColor"))),
-        JSIConverter<std::optional<std::string>>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "stopActionTitle")))
+        JSIConverter<std::optional<std::string>>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "stopActionTitle"))),
+        JSIConverter<std::optional<std::vector<margelo::nitro::nitrogeolocation::AndroidNotificationAction>>>::fromJSI(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "actions")))
       );
     }
     static inline jsi::Value toJSI(jsi::Runtime& runtime, const margelo::nitro::nitrogeolocation::AndroidForegroundServiceOptions& arg) {
@@ -90,6 +95,7 @@ namespace margelo::nitro {
       obj.setProperty(runtime, PropNameIDCache::get(runtime, "notificationIcon"), JSIConverter<std::optional<std::string>>::toJSI(runtime, arg.notificationIcon));
       obj.setProperty(runtime, PropNameIDCache::get(runtime, "notificationColor"), JSIConverter<std::optional<std::string>>::toJSI(runtime, arg.notificationColor));
       obj.setProperty(runtime, PropNameIDCache::get(runtime, "stopActionTitle"), JSIConverter<std::optional<std::string>>::toJSI(runtime, arg.stopActionTitle));
+      obj.setProperty(runtime, PropNameIDCache::get(runtime, "actions"), JSIConverter<std::optional<std::vector<margelo::nitro::nitrogeolocation::AndroidNotificationAction>>>::toJSI(runtime, arg.actions));
       return obj;
     }
     static inline bool canConvert(jsi::Runtime& runtime, const jsi::Value& value) {
@@ -109,6 +115,7 @@ namespace margelo::nitro {
       if (!JSIConverter<std::optional<std::string>>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "notificationIcon")))) return false;
       if (!JSIConverter<std::optional<std::string>>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "notificationColor")))) return false;
       if (!JSIConverter<std::optional<std::string>>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "stopActionTitle")))) return false;
+      if (!JSIConverter<std::optional<std::vector<margelo::nitro::nitrogeolocation::AndroidNotificationAction>>>::canConvert(runtime, obj.getProperty(runtime, PropNameIDCache::get(runtime, "actions")))) return false;
       return true;
     }
   };

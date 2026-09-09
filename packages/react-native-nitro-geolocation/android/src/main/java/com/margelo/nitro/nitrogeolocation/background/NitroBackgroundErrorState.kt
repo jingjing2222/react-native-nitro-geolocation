@@ -27,6 +27,7 @@ internal class NitroBackgroundErrorState(
             .putLong("lastErrorAt", System.currentTimeMillis())
             .apply()
         return BackgroundEventEnvelope(
+            notificationAction = null,
             null, null, null, null, null, null, error,
             UUID.randomUUID().toString(), BackgroundEventType.ERROR,
             System.currentTimeMillis().toDouble(), false

@@ -67,6 +67,7 @@ class UnifiedBackgroundEventsTest {
         store.clearEvents(null)
         store.insertEvent(
             BackgroundEventEnvelope(
+                notificationAction = null,
                 location = null,
                 geofence = null,
                 activity = null,

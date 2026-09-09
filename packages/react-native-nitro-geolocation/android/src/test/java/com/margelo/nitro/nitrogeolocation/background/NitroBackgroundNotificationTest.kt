@@ -20,7 +20,7 @@ class NitroBackgroundNotificationTest {
     private val context = ApplicationProvider.getApplicationContext<Context>()
 
     private fun options(color: String? = null, stop: String? = null) =
-        AndroidForegroundServiceOptions(null, "Tracking", "Active", null, null, null, null, color, stop)
+        AndroidForegroundServiceOptions(null, "Tracking", "Active", null, null, null, null, color, stop, null)
 
     @Test
     fun notificationAppliesColorAndGenerationScopedImmutableStopAction() {

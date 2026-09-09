@@ -38,6 +38,8 @@ namespace margelo::nitro::nitrogeolocation { struct AndroidBackgroundLocationOpt
 namespace margelo::nitro::nitrogeolocation { enum class AndroidBackgroundProvider; }
 // Forward declaration of `AndroidForegroundServiceOptions` to properly resolve imports.
 namespace margelo::nitro::nitrogeolocation { struct AndroidForegroundServiceOptions; }
+// Forward declaration of `AndroidNotificationAction` to properly resolve imports.
+namespace margelo::nitro::nitrogeolocation { struct AndroidNotificationAction; }
 // Forward declaration of `IOSBackgroundLocationOptions` to properly resolve imports.
 namespace margelo::nitro::nitrogeolocation { struct IOSBackgroundLocationOptions; }
 // Forward declaration of `IOSBackgroundActivityType` to properly resolve imports.
@@ -70,6 +72,8 @@ namespace margelo::nitro::nitrogeolocation { struct LocationError; }
 namespace margelo::nitro::nitrogeolocation { enum class LocationErrorCode; }
 // Forward declaration of `BackgroundEventEnvelope` to properly resolve imports.
 namespace margelo::nitro::nitrogeolocation { struct BackgroundEventEnvelope; }
+// Forward declaration of `NotificationActionEvent` to properly resolve imports.
+namespace margelo::nitro::nitrogeolocation { struct NotificationActionEvent; }
 // Forward declaration of `BackgroundLocation` to properly resolve imports.
 namespace margelo::nitro::nitrogeolocation { struct BackgroundLocation; }
 // Forward declaration of `BackgroundLocationSource` to properly resolve imports.
@@ -121,11 +125,12 @@ namespace margelo::nitro::nitrogeolocation { struct GetStoredBackgroundEventsOpt
 #include "AndroidBackgroundProvider.hpp"
 #include "AndroidForegroundServiceOptions.hpp"
 #include <string>
+#include "AndroidNotificationAction.hpp"
+#include <vector>
 #include "IOSBackgroundLocationOptions.hpp"
 #include "IOSBackgroundActivityType.hpp"
 #include "GeofencingOptions.hpp"
 #include "GeofenceTransition.hpp"
-#include <vector>
 #include "ActivityRecognitionOptions.hpp"
 #include "BackgroundHttpSyncOptions.hpp"
 #include "BackgroundHttpMethod.hpp"
@@ -142,6 +147,7 @@ namespace margelo::nitro::nitrogeolocation { struct GetStoredBackgroundEventsOpt
 #include "LocationErrorCode.hpp"
 #include "BackgroundEventEnvelope.hpp"
 #include <functional>
+#include "NotificationActionEvent.hpp"
 #include "BackgroundLocation.hpp"
 #include "BackgroundLocationSource.hpp"
 #include "LocationProviderUsed.hpp"

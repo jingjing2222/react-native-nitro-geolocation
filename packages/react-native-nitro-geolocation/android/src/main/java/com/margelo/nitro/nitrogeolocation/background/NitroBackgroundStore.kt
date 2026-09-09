@@ -191,6 +191,7 @@ class NitroBackgroundStore(context: Context) :
                 put(
                     "payload",
                     event.location?.let(::locationPayload)
+                        ?: event.notificationAction?.let { JSONObject().put("actionId", it.actionId).toString() }
                         ?: event.geofence?.let(::geofencePayload)
                         ?: event.activity?.let(::activityPayload)
                         ?: event.providerStatus?.let(::providerStatusPayload)
@@ -334,6 +335,11 @@ class NitroBackgroundStore(context: Context) :
                     locationId?.let(::getLocationById)?.toBackgroundLocation()
                 }
                 val event = BackgroundEventEnvelope(
+                    notificationAction = if (type == BackgroundEventType.NOTIFICATIONACTION) {
+                        payload?.let { body -> runCatching {
+                            com.margelo.nitro.nitrogeolocation.NotificationActionEvent(JSONObject(body).getString("actionId"))
+                        }.getOrNull() }
+                    } else null,
                     location = location,
                     geofence = geofence,
                     activity = activity,

@@ -26,6 +26,7 @@ internal fun BackgroundEventEnvelope.toJson(): JSONObject {
         .put("timestamp", timestamp)
         .put("deliveredToJS", deliveredToJS)
         .apply {
+            notificationAction?.let { put("notificationAction", JSONObject().put("actionId", it.actionId)) }
             location?.let { put("location", it.toJson()) }
             geofence?.let { put("geofence", it.toJson()) }
             activity?.let { put("activity", it.toJson()) }
@@ -219,6 +220,7 @@ internal fun BackgroundEventType.jsValue(): String {
         BackgroundEventType.LIFECYCLE -> "lifecycle"
         BackgroundEventType.HTTPSYNC -> "httpSync"
         BackgroundEventType.ERROR -> "error"
+        BackgroundEventType.NOTIFICATIONACTION -> "notificationAction"
     }
 }
 

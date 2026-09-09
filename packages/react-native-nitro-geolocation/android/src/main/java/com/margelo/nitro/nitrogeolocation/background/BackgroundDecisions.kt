@@ -115,6 +115,7 @@ internal fun requiresActivityRecognition(options: BackgroundLocationOptions): Bo
         options.activityRecognition?.enabled == true
 
 internal fun validateAndroidBackgroundOptions(options: BackgroundLocationOptions) {
+    options.android?.foregroundService?.let(::validateNotificationActions)
     if (options.android?.foregroundService == null) {
         throw IllegalArgumentException(
             "Android background tracking requires android.foregroundService notification options"

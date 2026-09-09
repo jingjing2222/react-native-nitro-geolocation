@@ -33,6 +33,8 @@ namespace margelo::nitro::nitrogeolocation { struct AndroidBackgroundLocationOpt
 namespace margelo::nitro::nitrogeolocation { enum class AndroidBackgroundProvider; }
 // Forward declaration of `AndroidForegroundServiceOptions` to properly resolve imports.
 namespace margelo::nitro::nitrogeolocation { struct AndroidForegroundServiceOptions; }
+// Forward declaration of `AndroidNotificationAction` to properly resolve imports.
+namespace margelo::nitro::nitrogeolocation { struct AndroidNotificationAction; }
 // Forward declaration of `IOSBackgroundLocationOptions` to properly resolve imports.
 namespace margelo::nitro::nitrogeolocation { struct IOSBackgroundLocationOptions; }
 // Forward declaration of `IOSBackgroundActivityType` to properly resolve imports.
@@ -81,6 +83,8 @@ namespace margelo::nitro::nitrogeolocation { struct GeolocationCoordinates; }
 namespace margelo::nitro::nitrogeolocation { struct StoredBackgroundEventEnvelope; }
 // Forward declaration of `BackgroundEventEnvelope` to properly resolve imports.
 namespace margelo::nitro::nitrogeolocation { struct BackgroundEventEnvelope; }
+// Forward declaration of `NotificationActionEvent` to properly resolve imports.
+namespace margelo::nitro::nitrogeolocation { struct NotificationActionEvent; }
 // Forward declaration of `BackgroundLocation` to properly resolve imports.
 namespace margelo::nitro::nitrogeolocation { struct BackgroundLocation; }
 // Forward declaration of `GeofenceEvent` to properly resolve imports.
@@ -131,6 +135,9 @@ namespace margelo::nitro::nitrogeolocation { struct GetStoredBackgroundEventsOpt
 #include "AndroidForegroundServiceOptions.hpp"
 #include "JAndroidForegroundServiceOptions.hpp"
 #include <string>
+#include "AndroidNotificationAction.hpp"
+#include <vector>
+#include "JAndroidNotificationAction.hpp"
 #include "IOSBackgroundLocationOptions.hpp"
 #include "JIOSBackgroundLocationOptions.hpp"
 #include "IOSBackgroundActivityType.hpp"
@@ -138,7 +145,6 @@ namespace margelo::nitro::nitrogeolocation { struct GetStoredBackgroundEventsOpt
 #include "GeofencingOptions.hpp"
 #include "JGeofencingOptions.hpp"
 #include "GeofenceTransition.hpp"
-#include <vector>
 #include "JGeofenceTransition.hpp"
 #include "ActivityRecognitionOptions.hpp"
 #include "JActivityRecognitionOptions.hpp"
@@ -186,6 +192,8 @@ namespace margelo::nitro::nitrogeolocation { struct GetStoredBackgroundEventsOpt
 #include "JStoredBackgroundEventEnvelope.hpp"
 #include "BackgroundEventEnvelope.hpp"
 #include "JBackgroundEventEnvelope.hpp"
+#include "NotificationActionEvent.hpp"
+#include "JNotificationActionEvent.hpp"
 #include "BackgroundLocation.hpp"
 #include "JBackgroundLocation.hpp"
 #include "GeofenceEvent.hpp"

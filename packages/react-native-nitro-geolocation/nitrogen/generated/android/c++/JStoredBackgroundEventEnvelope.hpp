@@ -41,6 +41,7 @@
 #include "JLocationLifecycleState.hpp"
 #include "JLocationProviderStatus.hpp"
 #include "JLocationProviderUsed.hpp"
+#include "JNotificationActionEvent.hpp"
 #include "JNullableDouble.hpp"
 #include "JVariant_NullType_Boolean_String_Double.hpp"
 #include "LocationAuthorizationStatus.hpp"
@@ -50,6 +51,7 @@
 #include "LocationLifecycleState.hpp"
 #include "LocationProviderStatus.hpp"
 #include "LocationProviderUsed.hpp"
+#include "NotificationActionEvent.hpp"
 #include <NitroModules/JNull.hpp>
 #include <NitroModules/Null.hpp>
 #include <optional>

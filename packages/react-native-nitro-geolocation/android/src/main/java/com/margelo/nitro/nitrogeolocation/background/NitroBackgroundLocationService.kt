@@ -14,9 +14,16 @@ class NitroBackgroundLocationService : Service() {
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         val requestedGeneration = intent?.backgroundServiceGeneration()
-        if (intent?.action == ACTION_STOP_BACKGROUND_LOCATION) {
+        if (intent?.action == ACTION_STOP_BACKGROUND_LOCATION || intent?.action == ACTION_NOTIFICATION_ACTION) {
             // A delayed action from an older notification must not stop a newer run.
-            requestedGeneration?.let(controller::stopFromService)
+            if (intent.action == ACTION_STOP_BACKGROUND_LOCATION) {
+                requestedGeneration?.let(controller::stopFromService)
+            } else {
+                val actionId = intent.getStringExtra(EXTRA_NOTIFICATION_ACTION_ID)
+                if (requestedGeneration != null && actionId != null) {
+                    controller.handleNotificationAction(actionId, requestedGeneration)
+                }
+            }
             val stillRunning = controller.runningServiceGeneration() != null
             if (!stillRunning) stopSelf(startId)
             // Android uses the result of the latest command for restart policy,

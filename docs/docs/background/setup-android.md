@@ -80,3 +80,60 @@ capabilities are removed. Then test foreground grant, background grant, denied,
 notification-denied, swipe-away, and reboot behavior on the Android versions and
 OEMs you ship. The [reliability contract](./reliability-contract.md) defines what
 the library can and cannot guarantee.
+
+## Custom notification actions (2.0)
+
+Add serializable `{ id, title }` buttons through `foregroundService.actions`.
+Android supports at most three buttons in total, including `stopActionTitle`.
+IDs must be unique and both fields must be non-empty.
+
+```tsx
+import {
+  configureBackgroundLocation,
+  onBackgroundEvent,
+  registerBackgroundTask,
+  type BackgroundEvent
+} from 'react-native-nitro-geolocation/background';
+
+function handleEvent(event: BackgroundEvent) {
+  if (event.type === 'notificationAction') {
+    console.log('Notification action:', event.notificationAction.actionId);
+    // Apply your app's pause/resume, checkpoint, or other action here.
+  }
+}
+
+// Register these before starting tracking.
+const subscription = onBackgroundEvent(handleEvent);
+registerBackgroundTask(handleEvent);
+
+await configureBackgroundLocation({
+  android: {
+    foregroundService: {
+      notificationTitle: 'Tracking your trip',
+      notificationText: 'Location recording is active',
+      stopActionTitle: 'Stop',
+      actions: [
+        { id: 'pause', title: 'Pause' },
+        { id: 'checkpoint', title: 'Mark checkpoint' }
+      ]
+    }
+  }
+});
+
+// Remove the live listener when its owner unmounts.
+subscription.remove();
+```
+
+Custom buttons emit `notificationAction` events; your handler decides what
+they do. The existing `stopActionTitle` button stops tracking natively, even
+without JavaScript. Custom buttons do not implicitly stop or restart tracking.
+
+Action configuration survives service restoration. Taps from an older tracking
+run or for an ID absent from the current configuration are ignored. When
+persistence is enabled, action events are also available through
+`getStoredBackgroundEvents({ types: ['notificationAction'] })`; acknowledge
+recovered events as usual. If no live listener handles the event, Android uses
+the registered Headless JS task. Register the task at your app entry point.
+
+This is Android-only. iOS does not expose a customizable foreground-service
+notification, and Web does not support the background API.

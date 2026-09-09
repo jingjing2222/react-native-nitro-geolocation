@@ -22,6 +22,25 @@ export function toNativeBackgroundLocationOptions(
     return sharedOptions;
   }
 
+  const { actions, stopActionTitle } = android.foregroundService;
+  if (actions) {
+    const buttonCount = actions.length + (stopActionTitle?.trim() ? 1 : 0);
+    if (buttonCount > 3) {
+      throw new Error(
+        "foregroundService supports at most 3 notification actions including stopActionTitle."
+      );
+    }
+    const ids = new Set<string>();
+    for (const action of actions) {
+      if (!action.id.trim() || !action.title.trim() || ids.has(action.id)) {
+        throw new Error(
+          "Notification actions require unique non-empty ids and non-empty titles."
+        );
+      }
+      ids.add(action.id);
+    }
+  }
+
   return {
     ...sharedOptions,
     android: {

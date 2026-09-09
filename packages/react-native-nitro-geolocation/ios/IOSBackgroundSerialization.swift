@@ -61,6 +61,7 @@ internal func makeStoredEvent(
     let lifecycle = (dictionary["lifecycle"] as? [String: Any])
         .flatMap(makeLifecycleEvent)
     let event = BackgroundEventEnvelope(
+        notificationAction: nil,
         location: location,
         geofence: geofence,
         activity: activity,

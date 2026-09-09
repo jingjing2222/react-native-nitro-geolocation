@@ -554,6 +554,7 @@ class NitroBackgroundLocation: HybridNitroBackgroundLocationSpec {
                 timestamp: location.timestamp.timeIntervalSince1970 * 1000
             )
             let event = BackgroundEventEnvelope(
+                notificationAction: nil,
                 location: backgroundLocation,
                 geofence: nil,
                 activity: nil,
@@ -647,6 +648,7 @@ class NitroBackgroundLocation: HybridNitroBackgroundLocationSpec {
         }
         let timestamp = Date().timeIntervalSince1970 * 1000
         let event = BackgroundEventEnvelope(
+            notificationAction: nil,
             location: nil,
             geofence: GeofenceEvent(
                 region: geofence,

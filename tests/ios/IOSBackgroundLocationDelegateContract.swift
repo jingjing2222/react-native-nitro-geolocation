@@ -37,6 +37,7 @@ struct BackgroundEventEnvelope: Equatable {
     let timestamp: Double
 
     init(
+        notificationAction: Any?,
         location: Any?,
         geofence: Any?,
         activity: Any?,

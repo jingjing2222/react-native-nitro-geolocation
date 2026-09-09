@@ -58,6 +58,7 @@ class NitroBackgroundEventHubTest {
     }
 
     private fun event() = BackgroundEventEnvelope(
+        notificationAction = null,
         null,
         null,
         null,
