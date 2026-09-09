@@ -60,6 +60,13 @@ its latest version and both advisories list no patched release.
 Only Vitest's development dependency tree and the transitive TOML parser change
 in this refresh; React Native, React, Nitro, and Electron versions are unchanged.
 
+Validation after this refresh: 215 geolocation JavaScript tests, 3 Rozenite unit
+tests, the Rozenite plugin build, and 10/10 Rozenite behavior E2E cases pass.
+The behavior suite passed in a new process after an initial Metro bundle request
+returned HTTP 500; that first response did not include a diagnostic body in the
+test output. The Nx-resolved TOML parser also accepts valid input and promptly
+rejects the advisory's malformed input instead of hanging.
+
 ## Remaining records and exposure boundary
 
 | Package | Records | Why it remains / boundary |
