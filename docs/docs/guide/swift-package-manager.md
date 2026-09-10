@@ -31,7 +31,7 @@ is the same clean fixture exercised by the macOS SwiftPM CI job.
 Install the matching Nitro runtime and this package:
 
 ```bash
-yarn add react-native-nitro-modules@0.37.1 react-native-nitro-geolocation@2.0.0
+yarn add react-native-nitro-modules@0.37.1 react-native-nitro-geolocation@2.0.1
 ```
 
 Add the SwiftPM configuration helper to the app's `react-native.config.js`:

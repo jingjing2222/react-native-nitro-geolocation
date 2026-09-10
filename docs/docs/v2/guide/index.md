@@ -57,7 +57,7 @@ single reference combination continuously exercised by this repository. See
 Install an exact version when reproducing or approving behavior:
 
 ```bash
-yarn add react-native-nitro-modules@0.35.10 react-native-nitro-geolocation@2.0.0
+yarn add react-native-nitro-modules@0.35.10 react-native-nitro-geolocation@2.0.1
 ```
 
 Stable 2.x releases preserve the documented public contracts. Pin exact

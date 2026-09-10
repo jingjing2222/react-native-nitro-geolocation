@@ -151,10 +151,10 @@ background status into actionable issues when delivery is silent.
 
 ```bash
 # Install Nitro core and Geolocation module
-yarn add react-native-nitro-modules react-native-nitro-geolocation@2.0.0
+yarn add react-native-nitro-modules react-native-nitro-geolocation@2.0.1
 
 # or using npm
-npm install react-native-nitro-modules react-native-nitro-geolocation@2.0.0
+npm install react-native-nitro-modules react-native-nitro-geolocation@2.0.1
 ```
 
 This quick start is foreground-only. Add one product-specific iOS When In Use

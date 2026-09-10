@@ -59,7 +59,7 @@ Geolocation.getCurrentPosition(
 First install the Nitro packages:
 
 ```bash
-yarn add react-native-nitro-modules react-native-nitro-geolocation@2.0.0
+yarn add react-native-nitro-modules react-native-nitro-geolocation@2.0.1
 ```
 
 Then change only the import path:
