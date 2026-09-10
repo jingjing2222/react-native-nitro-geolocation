@@ -20,7 +20,7 @@ exact devices, native dependencies, and features your application ships.
 Pin the repository's current reference combination:
 
 ```bash
-yarn add react-native-nitro-modules@0.35.10 react-native-nitro-geolocation@2.0.0
+yarn add react-native-nitro-modules@0.35.10 react-native-nitro-geolocation@2.0.1
 ```
 
 ## Declared support
@@ -42,7 +42,7 @@ combination is continuously exercised.
 
 ## Tested reference stack
 
-The 2.0.0 repository currently builds and runs its consumer contracts with
+The 2.0.1 repository currently builds and runs its consumer contracts with
 this reference stack. This is evidence of the continuously exercised path, not
 the full peer range.
 
@@ -56,7 +56,7 @@ the full peer range.
 | JavaScript toolchain | Node 24.18.0, Yarn 4.9.4 | CI and E2E bootstrap |
 | Expo config plugin | Expo 57 development dependency | Plugin/type tests; validate a real development build for the SDK used by your app |
 
-Reference last reviewed for `2.0.0` on **2026-09-10**. Consult the current
+Reference last reviewed for `2.0.1` on **2026-09-10**. Consult the current
 example package and E2E workflow if this page and the installed release differ.
 
 ## Known limits

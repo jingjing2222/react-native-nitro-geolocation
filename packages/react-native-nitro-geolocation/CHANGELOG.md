@@ -1,5 +1,11 @@
 # react-native-nitro-geolocation
 
+## 2.0.1
+
+### Patch Changes
+
+- fb2d3e7: Align the Android NDK version with the root project to prevent libc++ runtime mismatches.
+
 ## 2.0.0
 
 ### Major Changes
