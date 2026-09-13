@@ -8,15 +8,17 @@ import {
   resolvePublishTag
 } from "../scripts/release-policy.mjs";
 
-test("stable releases are staged instead of publishing to latest", () => {
-  assert.equal(
-    resolvePublishTag({
-      name: "react-native-nitro-geolocation",
-      version: "2.0.0",
-      tag: "latest"
-    }),
-    "ga-candidate"
-  );
+test("stable 2.x releases publish directly to latest", () => {
+  for (const version of ["2.0.0", "2.0.2", "2.1.0", "2.10.3"]) {
+    assert.equal(
+      resolvePublishTag({
+        name: "react-native-nitro-geolocation",
+        version,
+        tag: "latest"
+      }),
+      "latest"
+    );
+  }
 });
 
 test("prerelease tags are preserved", () => {
@@ -41,19 +43,20 @@ test("unrelated workspace release tags are preserved", () => {
   );
 });
 
-test("candidate tag cannot bypass the latest guard", () => {
+test("prereleases cannot publish to latest", () => {
   assert.throws(
     () =>
-      resolvePublishTag(
-        {
-          name: "react-native-nitro-geolocation",
-          version: "2.0.0",
-          tag: "latest"
-        },
-        "latest"
-      ),
-    /must never be latest/
+      resolvePublishTag({
+        name: "react-native-nitro-geolocation",
+        version: "2.1.0-rc.0",
+        tag: "latest"
+      }),
+    /Only stable/
   );
+});
+
+test("manual promotion candidate tags remain valid", () => {
+  assert.throws(() => assertCandidateTag("latest"), /must never be latest/);
   assert.throws(() => assertCandidateTag(""), /non-empty npm tag/);
   assert.throws(() => assertCandidateTag("ga candidate"), /non-empty npm tag/);
 });

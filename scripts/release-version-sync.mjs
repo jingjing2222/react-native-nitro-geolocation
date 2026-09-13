@@ -29,7 +29,7 @@ export const syncVersionedDocumentation = (text, version, previousVersion) => {
       .replaceAll("2.0 RC", "2.0")
       .replace(
         /React Native Nitro Geolocation 2\.0 is currently a \*\*release candidate\*\*\.[\s\S]*?(?=Pin the repository)/,
-        "React Native Nitro Geolocation 2.0 is the stable release line. Validate the\nexact devices, native dependencies, and features your application ships.\n\n## Release policy\n\n- Stable 2.x releases preserve the documented public contracts; incompatible\n  changes require a new major version.\n- Pin exact dependency versions and retain your application's release evidence.\n- The default site documents 2.x. The 1.x snapshot remains under `/v1/`.\n- A stable package is staged under `ga-candidate` until matching native release\n  artifacts pass verification and the release is promoted to `latest`.\n\n"
+        "React Native Nitro Geolocation 2.0 is the stable release line. Validate the\nexact devices, native dependencies, and features your application ships.\n\n## Release policy\n\n- Stable 2.x releases preserve the documented public contracts; incompatible\n  changes require a new major version.\n- Pin exact dependency versions and retain your application's release evidence.\n- The default site documents 2.x. The 1.x snapshot remains under `/v1/`.\n- Stable packages publish directly to `latest`; release candidates use `rc`.\n  Matching native release artifacts are built and uploaded after publication.\n\n"
       )
       .replace(
         /> \*\*2\.0 release candidate:\*\*[\s\S]*?\[unversioned documentation\]\(https:\/\/react-native-nitro-geolocation\.pages\.dev\/\)\./,

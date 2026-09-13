@@ -63,8 +63,8 @@ Before opening a PR:
 - The repo uses a single Changesets-driven workflow in `.github/workflows/release.yml` for every published package.
 - On `main`, that workflow either updates the version PR or publishes the packages that were versioned by a merged Changesets PR.
 - The custom Changesets version command synchronizes the 2.0 documentation and example Pod lock to the generated package version, then builds and validates the versioned routes before a version PR can be created.
-- Stable `react-native-nitro-geolocation` releases are first published under the `ga-candidate` npm tag. The release workflow then builds and uploads both platform prebuilts; it never assigns `latest` directly.
-- After the prebuilt workflow and release evidence pass, an authorized maintainer can run **Promote validated GA to latest** with the exact stable version. The protected `npm-latest` environment should require reviewer approval.
+- Stable `react-native-nitro-geolocation` releases publish directly under the `latest` npm tag using the release workflow's npm trusted publisher. Release candidates retain the `rc` tag and cannot publish to `latest`.
+- The release workflow then builds and uploads the native prebuilts. No separate promotion or `NPM_TOKEN` is required for new stable releases. **Promote validated GA to latest** remains available to recover older releases staged under `ga-candidate`; that manual workflow requires a valid `NPM_TOKEN`.
 - Git tags and GitHub Releases follow the package-version format that Changesets generates, such as `react-native-nitro-geolocation@1.2.0` and `@react-native-nitro-geolocation/rozenite-plugin@1.0.2`.
 - Keep package release notes in each package's `CHANGELOG.md`; Changesets uses the matching version section when it creates GitHub Releases.
 

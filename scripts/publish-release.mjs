@@ -52,12 +52,6 @@ try {
     }
 
     const publishTag = resolvePublishTag(release);
-    if (publishTag !== release.tag) {
-      console.log(
-        `Publishing ${release.name}@${release.version} under the protected candidate tag ${publishTag}; latest requires manual promotion after prebuilt validation.`
-      );
-    }
-
     const args = [
       "publish",
       path.resolve(workspaceLocation),
