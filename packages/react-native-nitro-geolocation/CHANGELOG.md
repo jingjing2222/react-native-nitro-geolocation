@@ -1,5 +1,11 @@
 # react-native-nitro-geolocation
 
+## 2.0.2
+
+### Patch Changes
+
+- 4070937: Disable incompatible iOS prebuilt binaries when the consumer React Native or NitroModules version does not match the prebuilt target, falling back to a source build.
+
 ## 2.0.1
 
 ### Patch Changes
