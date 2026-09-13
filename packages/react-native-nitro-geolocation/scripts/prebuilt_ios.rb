@@ -28,11 +28,68 @@ module NitroGeolocationPrebuiltIOS
     false
   end
 
+  def parse_major_minor(version)
+    match = version.to_s.match(/^[^0-9]*(\d+)\.(\d+)/)
+    match ? "#{match[1]}.#{match[2]}" : nil
+  end
+
+  def find_node_module_package_json(package_dir, module_name)
+    current_dir = File.expand_path(package_dir)
+
+    loop do
+      candidate = File.join(current_dir, "node_modules", module_name, "package.json")
+      return candidate if File.file?(candidate)
+
+      parent_dir = File.dirname(current_dir)
+      break if parent_dir == current_dir
+
+      current_dir = parent_dir
+    end
+
+    nil
+  end
+
+  def read_node_module_version(package_dir, module_name)
+    package_json_path = find_node_module_package_json(package_dir, module_name)
+    return nil unless package_json_path
+
+    JSON.parse(File.read(package_json_path))["version"]
+  rescue StandardError
+    nil
+  end
+
+  def prebuilt_abi_compatible?(package_dir)
+    package = JSON.parse(File.read(File.join(package_dir, "package.json")))
+
+    bundled_react_native_version = package.dig("devDependencies", "react-native")
+    bundled_nitro_modules_version = package.dig("devDependencies", "react-native-nitro-modules")
+
+    consumer_react_native_version = read_node_module_version(package_dir, "react-native")
+    consumer_nitro_modules_version = read_node_module_version(package_dir, "react-native-nitro-modules")
+
+    compatible =
+      parse_major_minor(consumer_react_native_version) == parse_major_minor(bundled_react_native_version) &&
+      parse_major_minor(consumer_nitro_modules_version) == parse_major_minor(bundled_nitro_modules_version)
+
+    unless compatible
+      Pod::UI.puts(
+        "[NitroGeolocation] iOS prebuilt disabled for React Native #{consumer_react_native_version || 'unknown'} " \
+        "and NitroModules #{consumer_nitro_modules_version || 'unknown'}; " \
+        "assets target React Native #{bundled_react_native_version} and NitroModules #{bundled_nitro_modules_version}."
+      )
+    end
+
+    compatible
+  rescue StandardError
+    false
+  end
+
   def use_prebuilt?(package_dir)
     value = ENV[env_name("usePrebuilt")]
-    return !false_like?(value) unless value.nil?
+    should_attempt_prebuilt = value.nil? ? !source_checkout?(package_dir) : !false_like?(value)
+    return false unless should_attempt_prebuilt
 
-    !source_checkout?(package_dir)
+    prebuilt_abi_compatible?(package_dir)
   end
 
   def string_config(name, default_value)
