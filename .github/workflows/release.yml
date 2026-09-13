@@ -48,7 +48,7 @@ jobs:
           yarn workspace docs build
           yarn workspace docs check:versions
 
-      - name: Create release PR or publish packages to a safe candidate tag
+      - name: Create release PR or publish stable packages to latest
         id: changesets
         uses: changesets/action@v2
         with:

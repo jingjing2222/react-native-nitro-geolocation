@@ -4,6 +4,7 @@
 
 ### Patch Changes
 
+- Publish stable releases directly to the npm `latest` tag instead of staging them under `ga-candidate`. Release candidates continue to use `rc` and cannot publish to `latest`.
 - 4070937: Disable incompatible iOS prebuilt binaries when the consumer React Native or NitroModules version does not match the prebuilt target, falling back to a source build.
 
 ## 2.0.1

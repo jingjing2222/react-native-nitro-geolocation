@@ -14,8 +14,8 @@ exact devices, native dependencies, and features your application ships.
   changes require a new major version.
 - Pin exact dependency versions and retain your application's release evidence.
 - The default site documents 2.x. The 1.x snapshot remains under `/v1/`.
-- A stable package is staged under `ga-candidate` until matching native release
-  artifacts pass verification and the release is promoted to `latest`.
+- Stable packages publish directly to `latest`; release candidates use `rc`.
+  Matching native release artifacts are built and uploaded after publication.
 
 Pin the repository's current reference combination:
 

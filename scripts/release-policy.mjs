@@ -18,19 +18,13 @@ export const assertCandidateTag = (candidateTag) => {
   }
 };
 
-export const resolvePublishTag = (
-  release,
-  candidateTag = process.env.NITRO_GEOLOCATION_GA_CANDIDATE_TAG ??
-    defaultCandidateTag
-) => {
-  assertCandidateTag(candidateTag);
-
+export const resolvePublishTag = (release) => {
   if (
     release.name === protectedPackageName &&
     release.tag === "latest" &&
-    isStableVersion(release.version)
+    !isStableVersion(release.version)
   ) {
-    return candidateTag;
+    throw new Error("Only stable Geolocation releases can publish to latest");
   }
 
   return release.tag;

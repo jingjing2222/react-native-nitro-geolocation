@@ -48,7 +48,7 @@ test("RC bumps update exact documentation versions without changing the channel"
   );
 });
 
-test("stable installs select the released version before latest promotion", () => {
+test("stable installs pin the released version", () => {
   const source = [
     "Nitro Geolocation 2.0 RC",
     "npm install react-native-nitro-geolocation@rc",
