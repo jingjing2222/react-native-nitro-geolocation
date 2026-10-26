@@ -1,0 +1,92 @@
+name: Android Boot E2E
+
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/android-boot-e2e.yml'
+      - 'packages/react-native-nitro-geolocation/android/**'
+      - 'packages/react-native-nitro-geolocation/nitrogen/generated/android/**'
+      - 'examples/v0.81.1/android/**'
+      - 'tests/android/boot-consumer/**'
+      - 'scripts/*android-boot*'
+      - 'mise.toml'
+      - 'yarn.lock'
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/android-boot-e2e.yml'
+      - 'packages/react-native-nitro-geolocation/android/**'
+      - 'packages/react-native-nitro-geolocation/nitrogen/generated/android/**'
+      - 'examples/v0.81.1/android/**'
+      - 'tests/android/boot-consumer/**'
+      - 'scripts/*android-boot*'
+      - 'mise.toml'
+      - 'yarn.lock'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: boot-e2e-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  boot:
+    name: Boot receiver API ${{ matrix.api }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - api: 27
+            arch: x86
+            red: '1'
+          - api: 34
+            arch: x86_64
+            red: '0'
+    env:
+      BUILD_RED: ${{ matrix.red }}
+      REACT_NATIVE_ARCHITECTURES: ${{ matrix.arch }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          fetch-depth: 0
+      - uses: jdx/mise-action@v3
+        with:
+          install: false
+      - name: Install pinned tools
+        run: |
+          mise trust --yes
+          mise install java node
+          echo "JAVA_HOME=$(mise where java)" >> "$GITHUB_ENV"
+          echo "$(mise where java)/bin" >> "$GITHUB_PATH"
+          corepack enable
+          mise reshim node
+      - run: yarn install --immutable
+      - name: Build real native consumer APKs
+        run: bash scripts/build-android-boot-e2e.sh
+      - name: Enable KVM
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+      - name: Verify actual emulator reboots
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: ${{ matrix.api }}
+          target: google_apis
+          arch: ${{ matrix.arch }}
+          disable-animations: true
+          emulator-options: -no-window -no-snapshot -noaudio -no-boot-anim -gpu swiftshader_indirect -camera-back none
+          script: bash scripts/test-android-boot-red-green.sh
+      - name: Upload red and green evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: android-boot-api-${{ matrix.api }}
+          path: build/boot-e2e
+          if-no-files-found: error
+          retention-days: 30
