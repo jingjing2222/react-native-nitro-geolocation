@@ -39,7 +39,24 @@ internal data class NitroBackgroundStoreSnapshot(
 )
 
 class NitroBackgroundStore(context: Context) :
-    SQLiteOpenHelper(context, "nitro_background_location.db", null, 4) {
+    SQLiteOpenHelper(context, DATABASE_NAME, null, 4) {
+
+    companion object {
+        private const val DATABASE_NAME = "nitro_background_location.db"
+
+        internal fun hasPersistedGeofences(context: Context): Boolean {
+            // Foreground-only apps must not create background storage just because the device booted.
+            if (!context.getDatabasePath(DATABASE_NAME).exists()) return false
+            val store = NitroBackgroundStore(context)
+            try {
+                return store.readableDatabase.rawQuery("SELECT 1 FROM geofences LIMIT 1", null).use {
+                    it.moveToFirst()
+                }
+            } finally {
+                store.close()
+            }
+        }
+    }
 
     init {
         // WAL lets the broadcast-receiver writer and concurrent readers (JS Promise threads and the

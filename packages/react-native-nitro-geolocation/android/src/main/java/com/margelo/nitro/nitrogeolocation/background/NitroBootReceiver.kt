@@ -13,20 +13,24 @@ class NitroBootReceiver : BroadcastReceiver() {
             return
         }
 
-        if (!NitroBootRestoreJobService.schedule(context.applicationContext)) {
-            NitroGeoLog.e("Failed to schedule background restoration after boot")
-        }
-        val prefs = context.getSharedPreferences(
-            BACKGROUND_LOCATION_PREFS,
-            Context.MODE_PRIVATE
-        )
-        if (prefs.getBoolean("startOnBoot", false)) {
-            runCatching {
-                NitroBackgroundLocationController.getInstance(context.applicationContext)
-                    .startFromBoot()
-            }.onFailure { error ->
-                NitroGeoLog.e("Failed to request background tracking after boot", error)
+        val appContext = context.applicationContext
+        runCatching {
+            if (NitroBackgroundStore.hasPersistedGeofences(appContext) &&
+                !NitroBootRestoreJobService.schedule(appContext)) {
+                NitroGeoLog.e("Failed to schedule background restoration after boot")
             }
+        }.onFailure { error ->
+            NitroGeoLog.e("Failed to schedule background restoration after boot", error)
+        }
+
+        runCatching {
+            val prefs = appContext.getSharedPreferences(BACKGROUND_LOCATION_PREFS, Context.MODE_PRIVATE)
+            if (prefs.getBoolean("startOnBoot", false)) {
+                NitroBackgroundLocationController.getInstance(appContext)
+                    .startFromBoot()
+            }
+        }.onFailure { error ->
+            NitroGeoLog.e("Failed to request background tracking after boot", error)
         }
     }
 }

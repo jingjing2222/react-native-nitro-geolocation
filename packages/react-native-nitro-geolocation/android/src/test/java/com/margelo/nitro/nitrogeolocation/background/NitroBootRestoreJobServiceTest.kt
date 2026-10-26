@@ -17,6 +17,7 @@ import org.robolectric.annotation.Config
 @Config(sdk = [34])
 class NitroBootRestoreJobServiceTest {
     @Test
+    @Config(sdk = [24, 27, 34])
     fun bootRestoreIsDelegatedToTheJobScheduler() {
         val context = ApplicationProvider.getApplicationContext<android.content.Context>()
         val scheduler = context.getSystemService(JobScheduler::class.java)

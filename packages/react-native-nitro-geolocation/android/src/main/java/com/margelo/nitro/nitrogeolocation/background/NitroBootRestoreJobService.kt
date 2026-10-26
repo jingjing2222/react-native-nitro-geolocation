@@ -82,6 +82,8 @@ class NitroBootRestoreJobService : JobService() {
                 JOB_ID,
                 ComponentName(context, NitroBootRestoreJobService::class.java)
             )
+                // Android 8.1 and earlier reject jobs with no execution constraints.
+                .setMinimumLatency(0L)
                 .setBackoffCriteria(30_000L, JobInfo.BACKOFF_POLICY_EXPONENTIAL)
                 .build()
             return scheduler.schedule(job) == JobScheduler.RESULT_SUCCESS
