@@ -1,9 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import {
-  assertCandidateTag,
-  assertPromotableVersion,
-  compareStableVersions,
   isStableVersion,
   resolvePublishTag
 } from "../scripts/release-policy.mjs";
@@ -55,22 +52,8 @@ test("prereleases cannot publish to latest", () => {
   );
 });
 
-test("manual promotion candidate tags remain valid", () => {
-  assert.throws(() => assertCandidateTag("latest"), /must never be latest/);
-  assert.throws(() => assertCandidateTag(""), /non-empty npm tag/);
-  assert.throws(() => assertCandidateTag("ga candidate"), /non-empty npm tag/);
-});
-
-test("only exact stable versions are promotable", () => {
+test("only exact stable versions are recognized", () => {
   assert.equal(isStableVersion("2.0.0"), true);
   assert.equal(isStableVersion("02.0.0"), false);
   assert.equal(isStableVersion("2.0.0-rc.3"), false);
-  assert.doesNotThrow(() => assertPromotableVersion("2.0.0"));
-  assert.throws(() => assertPromotableVersion("2.0.0-rc.3"), /Only an exact/);
-});
-
-test("stable version comparison prevents latest rollbacks", () => {
-  assert.equal(compareStableVersions("2.0.0", "1.99.99"), 1);
-  assert.equal(compareStableVersions("2.0.0", "2.0.0"), 0);
-  assert.equal(compareStableVersions("1.99.99", "2.0.0"), -1);
 });

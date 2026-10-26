@@ -158,6 +158,11 @@ Completed locally during implementation:
 
 ## Release gates after merging
 
+Historical note: the candidate/promotion steps below describe the 2.0.0 audit.
+Since 2.0.2, stable releases publish directly to `latest` through Release Packages,
+which then builds and uploads the matching prebuilts. The obsolete manual
+promotion workflow and its npm token requirement have been removed.
+
 1. Complete PR checks and the recorded E2E runs; inspect any failed scenarios.
    Enable the intended required checks/repository rules and configure protection
    for the `npm-latest` environment if approval-gated promotion is required.

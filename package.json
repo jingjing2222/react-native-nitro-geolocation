@@ -28,7 +28,6 @@
     "lint": "biome ci --formatter-enabled=false --linter-enabled=true .",
     "lint:fix": "biome check --write .",
     "release:publish": "node scripts/publish-release.mjs",
-    "release:promote-latest": "node scripts/promote-latest.mjs",
     "release:sync-version": "node scripts/sync-release-version.mjs",
     "release:version": "yarn changeset version && yarn release:sync-version && yarn workspace docs build && yarn workspace docs check:versions",
     "test:release": "node --test tests/release-policy.test.mjs tests/release-version-sync.test.mjs tests/release-workflow.test.mjs tests/spm-support.test.mjs tests/web-e2e-process.test.mjs",
