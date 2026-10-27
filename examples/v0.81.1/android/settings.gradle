@@ -3,4 +3,8 @@ plugins { id("com.facebook.react.settings") }
 extensions.configure(com.facebook.react.ReactSettingsExtension){ ex -> ex.autolinkLibrariesFromCommand() }
 rootProject.name = 'nitrogeolocation.example'
 include ':app'
+if (providers.gradleProperty('nitroBootE2e').isPresent()) {
+    include ':boot-consumer'
+    project(':boot-consumer').projectDir = file('../../../tests/android/boot-consumer')
+}
 includeBuild('../node_modules/@react-native/gradle-plugin')

@@ -43,6 +43,8 @@ jobs:
         run: |
           mise trust --yes
           mise install java node
+          echo "JAVA_HOME=$(mise where java)" >> "$GITHUB_ENV"
+          echo "$(mise where java)/bin" >> "$GITHUB_PATH"
 
       - name: Enable Corepack
         run: |

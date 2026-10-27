@@ -1,0 +1,19 @@
+apply plugin: 'com.android.application'
+
+android {
+    namespace 'com.nitrogeolocation.boote2e'
+    compileSdk rootProject.ext.compileSdkVersion
+    buildToolsVersion rootProject.ext.buildToolsVersion
+
+    defaultConfig {
+        applicationId 'com.nitrogeolocation.boote2e'
+        minSdk rootProject.ext.minSdkVersion
+        targetSdk rootProject.ext.targetSdkVersion
+        versionCode 1
+        versionName '1.0'
+    }
+}
+
+dependencies {
+    implementation project(':react-native-nitro-geolocation')
+}
