@@ -22,11 +22,11 @@ before adopting 2.0 in a release branch.
 Install the stable release from npm:
 
 ```bash
-yarn add react-native-nitro-modules react-native-nitro-geolocation@2.0.2
+yarn add react-native-nitro-modules react-native-nitro-geolocation@2.0.3
 ```
 
 ```bash
-npm install react-native-nitro-modules react-native-nitro-geolocation@2.0.2
+npm install react-native-nitro-modules react-native-nitro-geolocation@2.0.3
 ```
 
 For reproducible testing and release approval, replace the moving tags with the
