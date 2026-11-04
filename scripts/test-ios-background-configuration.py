@@ -1,8 +1,7 @@
 #!/usr/bin/env python3
-"""Compile the production configuration/permission methods in a small Swift harness.
+"""Run fast host unit tests on production methods using CoreLocation doubles.
 
-macOS uses CoreLocation test doubles; --emit writes the same harness for an iOS
-simulator app, where it uses the real CLLocationManager and app Info.plist.
+Actual app delivery is tested by examples/v0.81.1/scripts/test-issue-224-ios.mjs.
 """
 import argparse
 import os
@@ -13,7 +12,6 @@ import tempfile
 ROOT = Path(__file__).resolve().parent.parent
 parser = argparse.ArgumentParser(description=__doc__)
 parser.add_argument('--source', type=Path, default=ROOT / 'packages/react-native-nitro-geolocation/ios/NitroGeolocation.swift')
-parser.add_argument('--emit', type=Path)
 args = parser.parse_args()
 
 
@@ -35,14 +33,11 @@ names = ['setConfiguration', 'requestPermission', 'initializeLocationManagerIfNe
 methods = '\n\n'.join(method(source, name) for name in names)
 methods += '\n' + method((ROOT / 'packages/react-native-nitro-geolocation/ios/NitroGeolocation+CurrentPosition.swift').read_text(), 'runLocationOperationOnMain')
 harness = (ROOT / 'tests/ios/IOSBackgroundConfigurationContract.swift').read_text().replace('// PRODUCTION_METHODS', methods)
-if args.emit:
-    args.emit.write_text(harness)
-else:
-    env = dict(os.environ)
-    env.setdefault('DEVELOPER_DIR', '/Applications/Xcode.app/Contents/Developer')
-    with tempfile.TemporaryDirectory(prefix='nitro-background-') as directory:
-        swift = Path(directory) / 'Contract.swift'
-        binary = Path(directory) / 'contract'
-        swift.write_text(harness)
-        subprocess.run(['xcrun', 'swiftc', '-parse-as-library', str(swift), '-o', str(binary)], env=env, check=True)
-        raise SystemExit(subprocess.run([str(binary)], env=env).returncode)
+env = dict(os.environ)
+env.setdefault('DEVELOPER_DIR', '/Applications/Xcode.app/Contents/Developer')
+with tempfile.TemporaryDirectory(prefix='nitro-background-') as directory:
+    swift = Path(directory) / 'Contract.swift'
+    binary = Path(directory) / 'contract'
+    swift.write_text(harness)
+    subprocess.run(['xcrun', 'swiftc', '-parse-as-library', str(swift), '-o', str(binary)], env=env, check=True)
+    raise SystemExit(subprocess.run([str(binary)], env=env).returncode)

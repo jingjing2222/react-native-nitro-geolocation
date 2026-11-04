@@ -1,9 +1,5 @@
 import Foundation
-#if os(iOS)
-import UIKit
-import CoreLocation
-#else
-// Only the host contract uses doubles. The simulator harness uses CoreLocation.
+// Fast host unit contract. App-level delivery is covered by test-issue-224-ios.mjs.
 enum CLAuthorizationStatus { case notDetermined, authorizedAlways, authorizedWhenInUse, denied, restricted }
 final class CLLocationManager {
     static var status = CLAuthorizationStatus.authorizedAlways
@@ -20,7 +16,6 @@ final class TestBundle {
     var modes: [String]? = ["location"]
     func object(forInfoDictionaryKey key: String) -> Any? { modes }
 }
-#endif
 
 var permissionPrompts = 0
 enum AuthorizationLevel { case always, wheninuse, auto }
@@ -38,9 +33,6 @@ final class PermissionQueue {
 final class LocationManagerDelegate: NSObject {
     init(geolocation: NitroGeolocation) {}
 }
-#if os(iOS)
-extension LocationManagerDelegate: CLLocationManagerDelegate {}
-#endif
 final class NitroGeolocation {
     private var configuration: GeolocationConfiguration?
     private var locationManager: CLLocationManager?
@@ -90,7 +82,6 @@ func runContract() -> [String] {
         authorizationLevel: .wheninuse, enableBackgroundLocationUpdates: true))
     whenInUse.initializeLocationManagerIfNeeded()
     expect("Independent of requested authorization level", whenInUse.backgroundEnabled)
-#if !os(iOS)
     expect("Already granted never prompts", permissionPrompts == 0)
     for modes: [String]? in [nil, [], ["audio"]] {
         Bundle.main.modes = modes
@@ -115,48 +106,13 @@ func runContract() -> [String] {
     try! fresh.requestPermission(success: { _ in }, error: nil)
     expect("Fresh installation still requests permission", permissionPrompts == 1)
     expect("Fresh installation applies background configuration", fresh.backgroundEnabled)
-#endif
     print("\(results.filter { $0.hasPrefix("PASS") }.count)/\(results.count) passed")
     return results
 }
 
-#if os(iOS)
-@main
-final class AppDelegate: UIResponder, UIApplicationDelegate {
-    var window: UIWindow?
-    func application(_ application: UIApplication, didFinishLaunchingWithOptions options: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
-        let window = UIWindow(frame: UIScreen.main.bounds)
-        let controller = UIViewController()
-        controller.view.backgroundColor = UIColor(red: 0.04, green: 0.06, blue: 0.1, alpha: 1)
-        let text = UITextView(frame: .zero)
-        text.translatesAutoresizingMaskIntoConstraints = false
-        text.backgroundColor = .clear
-        text.textColor = .white
-        text.font = .monospacedSystemFont(ofSize: 15, weight: .medium)
-        text.isEditable = false
-        controller.view.addSubview(text)
-        NSLayoutConstraint.activate([
-            text.topAnchor.constraint(equalTo: controller.view.safeAreaLayoutGuide.topAnchor, constant: 20),
-            text.bottomAnchor.constraint(equalTo: controller.view.safeAreaLayoutGuide.bottomAnchor),
-            text.leadingAnchor.constraint(equalTo: controller.view.leadingAnchor, constant: 18),
-            text.trailingAnchor.constraint(equalTo: controller.view.trailingAnchor, constant: -18)
-        ])
-        window.rootViewController = controller
-        window.makeKeyAndVisible()
-        self.window = window
-        let results = runContract()
-        let failed = results.filter { $0.hasPrefix("FAIL") }.count
-        let phase = Bundle.main.object(forInfoDictionaryKey: "EvidencePhase") as? String ?? "TEST"
-        text.text = "ISSUE #224 — \(phase)\n\niOS native configuration regression\nReal CLLocationManager\nAlways permission pre-granted\nUIBackgroundModes: location\n\n" + results.joined(separator: "\n\n") + "\n\n\(results.count - failed)/\(results.count) passed\n\nTests production method bodies.\nNot a background delivery E2E."
-        text.textColor = failed == 0 ? .systemGreen : .systemRed
-        return true
-    }
-}
-#else
 @main
 struct Contract {
     static func main() {
         exit(runContract().contains { $0.hasPrefix("FAIL") } ? 1 : 0)
     }
 }
-#endif
