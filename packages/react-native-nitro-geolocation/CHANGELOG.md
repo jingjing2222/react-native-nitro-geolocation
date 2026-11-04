@@ -1,5 +1,11 @@
 # react-native-nitro-geolocation
 
+## 2.0.4
+
+### Patch Changes
+
+- 9190ba7: Apply iOS background location configuration when the location manager is created or configuration changes, including when permission was granted previously or by another library. Explicitly disabling or omitting the option restores foreground-only updates, and the location background mode remains required.
+
 ## 2.0.3
 
 ### Patch Changes
