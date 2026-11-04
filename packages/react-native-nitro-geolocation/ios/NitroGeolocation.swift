@@ -40,6 +40,7 @@ class NitroGeolocation: HybridNitroGeolocationSpec {
     func setConfiguration(config: GeolocationConfiguration) {
         runLocationOperationOnMain {
             self.configuration = config
+            self.enableBackgroundLocationUpdatesIfNeeded()
         }
     }
 
@@ -561,6 +562,7 @@ class NitroGeolocation: HybridNitroGeolocationSpec {
         manager.delegate = delegate
         locationManagerDelegate = delegate
         locationManager = manager
+        enableBackgroundLocationUpdatesIfNeeded()
     }
 
     private func validateHeadingAvailability(
@@ -872,9 +874,6 @@ class NitroGeolocation: HybridNitroGeolocationSpec {
         switch type {
         case .always:
             locationManager?.requestAlwaysAuthorization()
-            if configuration?.enableBackgroundLocationUpdates == true {
-                enableBackgroundLocationUpdatesIfNeeded()
-            }
         case .wheninuse:
             locationManager?.requestWhenInUseAuthorization()
         case .auto:
@@ -884,11 +883,13 @@ class NitroGeolocation: HybridNitroGeolocationSpec {
     }
 
     private func enableBackgroundLocationUpdatesIfNeeded() {
-        guard let backgroundModes = Bundle.main.object(forInfoDictionaryKey: "UIBackgroundModes") as? [String],
-              backgroundModes.contains("location") else {
-            return
-        }
-        locationManager?.allowsBackgroundLocationUpdates = true
+        guard let manager = locationManager else { return }
+        let backgroundModes = Bundle.main.object(forInfoDictionaryKey: "UIBackgroundModes") as? [String]
+        // Apply configuration independently of prompting, including pre-granted permissions.
+        // Never enable this without the location background mode: CoreLocation would assert.
+        manager.allowsBackgroundLocationUpdates =
+            configuration?.enableBackgroundLocationUpdates == true &&
+            backgroundModes?.contains("location") == true
     }
 
     private func locationToPosition(_ location: CLLocation) -> GeolocationResponse {
