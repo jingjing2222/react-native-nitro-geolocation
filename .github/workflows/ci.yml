@@ -70,6 +70,9 @@ jobs:
       - name: Verify iOS prebuilt checksums
         run: ruby tests/ruby/prebuilt_ios_checksum_test.rb
 
+      - name: Verify iOS background configuration
+        run: python3 scripts/test-ios-background-configuration.py
+
       - name: Verify iOS watch delivery policy
         run: scripts/test-ios-watch-delivery.sh
 

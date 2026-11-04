@@ -1,0 +1,20 @@
+appId: nitrogeolocation.example
+---
+# openLink resumes the existing process. The collector verdict is already frozen.
+- openLink:
+    link: nitrogeolocation://app/issue-224/${COLLECTOR_PORT}
+- runFlow:
+    when:
+      visible: "Cancel|취소"
+    commands:
+      - tapOn: "Open|열기"
+- extendedWaitUntil:
+    visible: "Issue 224: Background Watch"
+    timeout: 15000
+- tapOn:
+    id: "e2e-action-issue-224-validate"
+- extendedWaitUntil:
+    visible: 'Background delivery: (passed|failed).*'
+    timeout: 10000
+- assertVisible: 'Background delivery: passed.*'
+- assertVisible: 'Error: none'

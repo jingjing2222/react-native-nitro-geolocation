@@ -1,0 +1,24 @@
+appId: nitrogeolocation.example
+---
+# The runner grants Always before this cold launch; do not clear permissions.
+- stopApp
+- openLink:
+    link: nitrogeolocation://app/issue-224/${COLLECTOR_PORT}
+- runFlow:
+    when:
+      visible: "Cancel|취소"
+    commands:
+      - tapOn: "Open|열기"
+- extendedWaitUntil:
+    visible: "Issue 224: Background Watch"
+    timeout: 30000
+- tapOn:
+    id: "e2e-action-issue-224-start"
+- extendedWaitUntil:
+    visible: 'Permission: granted \(pre-granted Always\)'
+    timeout: 15000
+- extendedWaitUntil:
+    visible: 'Foreground callbacks: [1-9][0-9]*'
+    timeout: 30000
+- assertVisible: 'Error: none'
+- pressKey: Home

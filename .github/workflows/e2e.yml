@@ -200,6 +200,13 @@ jobs:
           ../../scripts/ci/update-e2e-comment.sh "${{ inputs.ios_comment_id }}" "iOS" "running" "Installing iOS release app"
           xcrun simctl install "$SIMULATOR_UDID" ios/build/Build/Products/Release-iphonesimulator/NitroGeolocationExample.app
 
+      - name: Verify modern iOS watch delivery with pre-granted Always
+        env:
+          IOS_UDID: ${{ env.SIMULATOR_UDID }}
+          IOS_APP_PATH: ${{ github.workspace }}/examples/v0.81.1/ios/build/Build/Products/Release-iphonesimulator/NitroGeolocationExample.app
+          EVIDENCE_DIR: ${{ github.workspace }}/evidence/issue-224-e2e
+        run: yarn workspace react-native-nitro-geolocation-example test:e2e:issue-224:ios
+
       - name: Run iOS background long-run E2E
         env:
           GH_TOKEN: ${{ github.token }}
@@ -235,6 +242,7 @@ jobs:
           if-no-files-found: ignore
           path: |
             ~/.maestro/tests
+            evidence/issue-224-e2e
 
       - name: Update iOS E2E result
         if: always()
